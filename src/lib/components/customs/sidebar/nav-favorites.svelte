@@ -1,15 +1,15 @@
 <script lang="ts">
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
-	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-	import { useSidebar } from "$lib/components/ui/sidebar/index.js";
-	import ArrowUpRight from "lucide-svelte/icons/arrow-up-right";
-	import Ellipsis from "lucide-svelte/icons/ellipsis";
-	import Link from "lucide-svelte/icons/link";
-	import StarOff from "lucide-svelte/icons/star-off";
-	import Trash2 from "lucide-svelte/icons/trash-2";
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
+	import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
+	import Ellipsis from 'lucide-svelte/icons/ellipsis';
+	import Link from 'lucide-svelte/icons/link';
+	import StarOff from 'lucide-svelte/icons/star-off';
+	import Trash2 from 'lucide-svelte/icons/trash-2';
 
 	let {
-		favorites,
+		favorites
 	}: {
 		favorites: {
 			name: string;
@@ -45,8 +45,8 @@
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content
 						class="w-56 rounded-lg"
-						side={sidebar.isMobile ? "bottom" : "right"}
-						align={sidebar.isMobile ? "end" : "start"}
+						side={sidebar.isMobile ? 'bottom' : 'right'}
+						align={sidebar.isMobile ? 'end' : 'start'}
 					>
 						<DropdownMenu.Item>
 							<StarOff class="text-muted-foreground" />

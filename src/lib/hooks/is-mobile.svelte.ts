@@ -1,4 +1,4 @@
-import { untrack } from "svelte";
+import { untrack } from 'svelte';
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -12,10 +12,10 @@ export class IsMobile {
 				const onChange = () => {
 					this.#current = window.innerWidth < MOBILE_BREAKPOINT;
 				};
-				mql.addEventListener("change", onChange);
+				mql.addEventListener('change', onChange);
 				onChange();
 				return () => {
-					mql.removeEventListener("change", onChange);
+					mql.removeEventListener('change', onChange);
 				};
 			});
 		});
