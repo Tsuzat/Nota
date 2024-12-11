@@ -1,0 +1,137 @@
+.tiptap :where(p):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+}
+
+.tiptap code:not(pre code) {
+	/* Remove the before and after pseudo elements */
+	@apply rounded border bg-muted/50 p-1 before:content-[''] after:content-[''];
+}
+
+.tiptap blockquote p {
+	@apply before:content-[''] after:content-[''];
+}
+
+.tiptap a {
+	@apply text-blue-600 underline;
+}
+
+.tiptap ul li p,
+.tiptap ol li p {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+}
+
+.tiptap ul[data-type='taskList'] {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.tiptap ul[data-type='taskList'] li {
+	align-items: flex-start;
+	display: flex;
+}
+
+.tiptap ul[data-type='taskList'] li > label {
+	flex: 0 0 auto;
+	margin-right: 0.5rem;
+	margin-top: 0.25rem;
+	user-select: none;
+}
+
+.tiptap ul[data-type='taskList'] li > div {
+	flex: 1 1 auto;
+}
+
+.tiptap ul[data-type='taskList'] input[type='checkbox'] {
+	cursor: pointer;
+}
+
+.tiptap ul[data-type='taskList'] ul[data-type='taskList'] {
+	margin: 0;
+}
+
+ul[data-type='taskList'] li[data-checked='true'] div {
+	@apply text-muted-foreground line-through;
+}
+
+input[type='checkbox'] {
+	@apply size-4 cursor-pointer !important;
+}
+
+/* Color swatches */
+.color {
+	@apply whitespace-nowrap;
+}
+
+.color::before {
+	@apply mb-[0.15rem] mr-[0.1rem] inline-block size-[1rem] rounded border border-muted align-middle;
+	background-color: var(--color);
+	content: ' ';
+}
+
+/* Table-specific styling */
+.tiptap table {
+	border-collapse: collapse;
+	margin: 0;
+	overflow: hidden;
+	table-layout: fixed;
+	width: 100%;
+}
+
+.tiptap table td,
+.tiptap table th {
+	@apply border border-muted;
+	box-sizing: border-box;
+	min-width: 1em;
+	padding: 6px 8px;
+	position: relative;
+	vertical-align: top;
+}
+
+.tiptap table td > *,
+.tiptap table th > * {
+	margin-bottom: 0;
+}
+
+.tiptap table th {
+	@apply bg-muted/50 text-left font-bold;
+}
+
+.tiptap table .selectedCell:after {
+	@apply pointer-events-none absolute bottom-0 left-0 right-0 top-0 border-[2px] border-muted-foreground;
+	content: '';
+	z-index: 2;
+}
+
+.tiptap table .column-resize-handle {
+	@apply pointer-events-none absolute -bottom-[2px] -right-[2px] top-0 w-1 bg-muted;
+}
+
+.tiptap .tableWrapper {
+	margin: 1.5rem 0;
+	overflow-x: auto;
+}
+
+.tiptap.resize-cursor {
+	cursor: ew-resize;
+	cursor: col-resize;
+}
+
+/* Tiptap code block */
+.tiptap pre {
+	@apply m-0 flex h-fit overflow-auto !rounded-none bg-transparent p-0;
+}
+
+.tiptap pre code {
+	@apply flex-1 !rounded-none bg-transparent p-0 text-inherit;
+}
+
+.tiptap .search-result {
+	background-color: yellow;
+}
+
+.tiptap .search-result-current {
+	background-color: orange;
+}
