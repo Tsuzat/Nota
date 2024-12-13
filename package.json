@@ -18,7 +18,14 @@
 		"@fontsource-variable/dm-sans": "^5.1.0",
 		"@tailwindcss/typography": "^0.5.15",
 		"@tauri-apps/api": "^2",
-		"@tauri-apps/plugin-shell": "^2"
+		"@tauri-apps/plugin-clipboard-manager": "^2.2.0",
+		"@tauri-apps/plugin-dialog": "~2",
+		"@tauri-apps/plugin-fs": "~2",
+		"@tauri-apps/plugin-log": "~2",
+		"@tauri-apps/plugin-shell": "^2",
+		"@tauri-apps/plugin-sql": "~2",
+		"@tauri-apps/plugin-store": "~2",
+		"@tauri-apps/plugin-window-state": "~2"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.5",

@@ -3,5 +3,24 @@
 	"identifier": "default",
 	"description": "Capability for the main window",
 	"windows": ["main"],
-	"permissions": ["core:default", "shell:allow-open"]
+	"permissions": [
+		"core:default",
+		"shell:allow-open",
+		"window-state:default",
+		"dialog:allow-message",
+		"dialog:default",
+		"dialog:allow-confirm",
+		"dialog:allow-open",
+		"dialog:allow-save",
+		"dialog:allow-ask",
+		"log:allow-log",
+		"log:default",
+		"sql:default",
+		"sql:allow-execute",
+		"sql:allow-load",
+		"sql:allow-select",
+		"sql:allow-close",
+		"clipboard-manager:default",
+		"store:default"
+	]
 }
