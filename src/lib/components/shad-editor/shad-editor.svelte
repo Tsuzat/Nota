@@ -133,8 +133,7 @@
 				 */
 				editor = undefined;
 				editor = transaction.editor;
-				console.log(editor.isActive('bold'));
-				content = editor.getHTML();
+				content = editor.getJSON();
 			}
 		});
 	});
@@ -144,7 +143,7 @@
 	});
 </script>
 
-<div class={cn('flex flex-col rounded border', className)}>
+<div class={className}>
 	{#if editor && showToolbar}
 		<EditorToolbar {editor} />
 	{/if}
