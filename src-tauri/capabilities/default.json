@@ -21,6 +21,8 @@
 		"sql:allow-select",
 		"sql:allow-close",
 		"clipboard-manager:default",
-		"store:default"
+		"store:default",
+		"os:default",
+		"fs:allow-mkdir"
 	]
 }
