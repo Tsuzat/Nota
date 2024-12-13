@@ -4,4 +4,7 @@ pnpm-lock.yaml
 yarn.lock
 .svelte-kit
 node_modules
-src-tauri
+src-tauri/target
+src-tauri/src
+src-tauri/icons
+src-tauri/gen
