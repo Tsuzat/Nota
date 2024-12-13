@@ -77,7 +77,9 @@
 						HTMLAttributes: {
 							class: 'tiptap-heading'
 						}
-					}
+					},
+					codeBlock: false,
+					text: false
 				}),
 				Typography,
 				Text,
