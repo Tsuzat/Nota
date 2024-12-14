@@ -23,6 +23,16 @@
 		"clipboard-manager:default",
 		"store:default",
 		"os:default",
-		"fs:allow-mkdir"
+		"fs:allow-mkdir",
+		"fs:allow-create",
+		"fs:allow-write",
+		{
+			"identifier": "fs:allow-mkdir",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		}
 	]
 }
