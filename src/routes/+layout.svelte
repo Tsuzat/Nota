@@ -5,15 +5,19 @@
 	import SidebarPage from '$lib/components/customs/sidebar/sidebar-page.svelte';
 	import { onMount } from 'svelte';
 	import { initializeApplication } from '$lib/utils';
+	import NewWorkSpace from '$lib/components/customs/dialogs/NewWorkSpace.svelte';
+	import Sonner from '$lib/components/ui/sonner/sonner.svelte';
 	let { children } = $props();
 
 	onMount(async () => {
 		// load the data
-		initializeApplication();
 	});
 </script>
 
 <ModeWatcher />
+<Sonner richColors />
+
+<NewWorkSpace />
 
 <SidebarPage>
 	{@render children()}
