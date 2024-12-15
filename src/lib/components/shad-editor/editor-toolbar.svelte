@@ -25,6 +25,11 @@
 	import Image from './icons/image.svelte';
 	import Text from './icons/text.svelte';
 	import SearchReplace from './icons/search-replace.svelte';
+	import Undo from './icons/undo.svelte';
+	import Redo from './icons/redo.svelte';
+	import BlockQuote from './icons/block-quote.svelte';
+	import Textcolor from './icons/textcolor.svelte';
+	import Highlighter from './icons/highlighter.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -32,39 +37,35 @@
 
 	let { editor }: Props = $props();
 
-	const tippyOptions = {};
-	const pluginKey = 'SvelteTiptapBubbleMenu';
-	const shouldShow = null;
-	const updateDelay = 100;
+	// const tippyOptions = {};
+	// const pluginKey = 'SvelteTiptapBubbleMenu';
+	// const shouldShow = null;
+	// const updateDelay = 100;
 
-	let element: HTMLElement;
+	// let element: HTMLElement;
 
-	onMount(() => {
-		const plugin = BubbleMenuPlugin({
-			pluginKey,
-			editor,
-			element,
-			tippyOptions,
-			shouldShow,
-			updateDelay
-		});
+	// onMount(() => {
+	// 	const plugin = BubbleMenuPlugin({
+	// 		pluginKey,
+	// 		editor,
+	// 		element,
+	// 		tippyOptions,
+	// 		shouldShow,
+	// 		updateDelay
+	// 	});
 
-		editor.registerPlugin(plugin);
+	// 	editor.registerPlugin(plugin);
 
-		return () => editor.unregisterPlugin(pluginKey);
-	});
+	// 	return () => editor.unregisterPlugin(pluginKey);
+	// });
 </script>
 
-<div
-	bind:this={element}
-	class="flex w-fit items-center overflow-auto border bg-card rounded *:mx-1"
-	style="visibility: hidden;"
->
+<div class="flex overflow-auto">
 	<!-- <Undo {editor} />
 	<Redo {editor} /> -->
 	<Text {editor} />
-	<Bold {editor} />
-	<Italic {editor} />
+	<!-- <Bold {editor} />
+	<Italic {editor} /> -->
 	<Underline {editor} />
 	<Strikethrough {editor} />
 	<Align {editor} />
@@ -78,8 +79,8 @@
 	<TaskList {editor} />
 	<Image {editor} />
 	<Table {editor} />
-	<!-- <Textcolor {editor} /> -->
-	<!-- <Highlighter {editor} /> -->
+	<!-- <Textcolor {editor} />
+	<Highlighter {editor} /> -->
 	<Quickcolor {editor} />
 	<SearchReplace {editor} />
 </div>

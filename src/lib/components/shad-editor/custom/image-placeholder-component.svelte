@@ -6,6 +6,21 @@
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	const { node, editor, selected, deleteNode, updateAttributes }: NodeViewProps = $props();
+	import { open } from '@tauri-apps/plugin-dialog';
+	import { pictureDir } from '@tauri-apps/api/path';
+	import { convertFileSrc } from '@tauri-apps/api/core';
+
+	async function handleLocalFile() {
+		const image = await open({
+			multiple: false,
+			defaultPath: await pictureDir(),
+			title: 'Choose an image',
+			filters: [{ name: 'Images', extensions: ['jpg', 'png', 'gif', 'svg'] }]
+		});
+		if (image === null) return;
+		const src = convertFileSrc(image);
+		editor.chain().focus().setImage({ src }).run();
+	}
 </script>
 
 <NodeViewWrapper class="w-full">
@@ -13,11 +28,13 @@
 		<Popover.Trigger
 			class={buttonVariants({
 				variant: 'outline',
-				class: 'w-full items-center justify-start bg-muted/50 py-6'
+				class: 'h-fit w-full bg-muted/50 p-0'
 			})}
 		>
-			<ImageIcon />
-			<span>Add an Image</span>
+			<div contenteditable="false" class="flex w-full items-center justify-start p-4">
+				<ImageIcon class="mr-2" />
+				<span>Add an Image</span>
+			</div>
 		</Popover.Trigger>
 		<Popover.Content class="bg-popover shadow-lg *:my-2">
 			<div class="flex items-center justify-between">
@@ -40,7 +57,7 @@
 			/>
 			<p class="font-bold">OR</p>
 			<p>Pick an Image</p>
-			<Input
+			<!-- <Input
 				id="picture"
 				type="file"
 				accept="image/*"
@@ -61,7 +78,12 @@
 						});
 					}
 				}}
-			/>
+			/> -->
+			<Button variant="ghost" class="h-fit w-full bg-muted/50 p-0" onclick={handleLocalFile}>
+				<div class="flex w-full items-center justify-start p-4">
+					<span>Choose from your device</span>
+				</div>
+			</Button>
 		</Popover.Content>
 	</Popover.Root>
 </NodeViewWrapper>

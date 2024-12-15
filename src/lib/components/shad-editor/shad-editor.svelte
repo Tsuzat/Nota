@@ -57,7 +57,7 @@
 			editorProps: {
 				attributes: {
 					class:
-						'm-auto p-2 focus:outline-none flex-1 prose text-foreground min-w-full max-h-full overflow-auto dark:prose-invert *:my-2'
+						'm-auto p-2 focus:outline-none flex-1 prose text-foreground min-w-full max-h-full dark:prose-invert *:my-2'
 				}
 			},
 			extensions: [
@@ -149,5 +149,5 @@
 	{#if editor && showToolbar}
 		<EditorToolbar {editor} />
 	{/if}
-	<div bind:this={element} spellcheck="false" class="h-full w-full flex-1 overflow-auto"></div>
+	<div bind:this={element} spellcheck="false" class="h-full w-full flex-1"></div>
 </div>

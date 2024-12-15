@@ -16,10 +16,6 @@
 
 	let defaultLanguage = $state(node.attrs.language);
 
-	onMount(() => {
-		console.log(node);
-	});
-
 	function copyCode() {
 		isCopying = true;
 		navigator.clipboard.writeText(preRef.innerText);
@@ -45,7 +41,7 @@
 			>{defaultLanguage}
 			<ChevronDown class="!size-3" />
 		</DropdownMenu.Trigger>
-		<DropdownMenu.Content class="h-60 w-40 overflow-auto" contenteditable="false">
+		<DropdownMenu.Content class="max-h-80 w-40 overflow-auto" contenteditable="false">
 			{#each languages as language}
 				<DropdownMenu.Item
 					contenteditable="false"
