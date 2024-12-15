@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schema.tauri.app/config/2",
-	"productName": "nota",
+	"productName": "Nota",
 	"version": "0.1.0",
 	"identifier": "com.tsuzat.nota",
 	"build": {
@@ -20,7 +20,11 @@
 			}
 		],
 		"security": {
-			"csp": null
+			"csp": "asset: http://asset.localhost",
+			"assetProtocol": {
+				"enable": true,
+				"scope": ["**"]
+			}
 		}
 	},
 	"bundle": {

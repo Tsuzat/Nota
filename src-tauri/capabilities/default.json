@@ -26,6 +26,7 @@
 		"fs:allow-mkdir",
 		"fs:allow-create",
 		"fs:allow-write",
+		"core:window:allow-set-title",
 		{
 			"identifier": "fs:allow-mkdir",
 			"allow": [
