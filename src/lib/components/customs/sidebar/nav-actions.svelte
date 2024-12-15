@@ -85,6 +85,12 @@
 	import Star from 'lucide-svelte/icons/star';
 
 	let open = $state(false);
+
+	interface Props {
+		lastEdited: string;
+	}
+
+	let { lastEdited = '' }: Props = $props();
 </script>
 
 <div class="flex items-center gap-2 text-sm">
