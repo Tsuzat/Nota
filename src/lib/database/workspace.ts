@@ -94,7 +94,9 @@ export async function insertIntoWorkSpaces(workspace: WorkSpaceDB) {
 		workspace.path
 	])
 		.then(() => {
-			WORKSPACES.update((workspaces) => [...workspaces, workspace]);
+			WORKSPACES.update((workspaces) => {
+				return workspaces.set(workspace, []);
+			});
 			console.log('Workspace inserted successfully', workspace);
 			info(`Workspace inserted successfully, ${workspace}`);
 		})
@@ -109,10 +111,10 @@ export async function insertIntoWorkSpaces(workspace: WorkSpaceDB) {
  * @param limit 5
  * @returns Promise<WorkSpaceDB[]>
  */
-export async function getWorkSpaces(limit: number = 5): Promise<WorkSpaceDB[]> {
+export async function getWorkSpaces(): Promise<WorkSpaceDB[]> {
 	let res: WorkSpaceDB[] = [];
 	try {
-		res = await DB.select<WorkSpaceDB[]>('SELECT * FROM workspaces LIMIT $1', [limit]);
+		res = await DB.select<WorkSpaceDB[]>('SELECT * FROM workspaces');
 	} catch (e) {
 		//@ts-ignore
 		error(e.toString());
