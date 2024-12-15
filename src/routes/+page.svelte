@@ -22,7 +22,7 @@
 			</Breadcrumb.Root>
 		</div>
 		<div class="ml-auto px-3">
-			<NavActions />
+			<NavActions lastEdited="" />
 		</div>
 	</header>
 	<div class="flex flex-1 flex-col gap-4 p-2">
