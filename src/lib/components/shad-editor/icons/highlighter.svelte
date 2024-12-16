@@ -9,6 +9,7 @@
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { mode } from 'mode-watcher';
 	import ColorPicker from 'svelte-awesome-color-picker';
+	import { OS } from '$lib/contants';
 
 	interface Props {
 		editor: Editor;
@@ -18,7 +19,7 @@
 	let { editor, color = $bindable('') }: Props = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<Popover.Root>
@@ -68,8 +69,15 @@
 				</Popover.Content>
 			</Popover.Root>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Highlighter (⌘⇧H)</p>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
+			<p>
+				Highlighter
+				{#if OS === 'macos'}
+					(⌘ ⇧ H)
+				{:else}
+					(Ctrl+Shift+H)
+				{/if}
+			</p>
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>

@@ -8,7 +8,7 @@
 	let { editor }: { editor: Editor } = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<DropdownMenu.Root>
@@ -104,8 +104,8 @@
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Table</p>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
+			<p>Tables</p>
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>

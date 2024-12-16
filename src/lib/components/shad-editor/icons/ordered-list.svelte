@@ -8,7 +8,7 @@
 	let { editor }: { editor: Editor } = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<Button
@@ -19,7 +19,7 @@
 				<ListOrdered />
 			</Button>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
 			<p>Ordered List</p>
 		</Tooltip.Content>
 	</Tooltip.Root>

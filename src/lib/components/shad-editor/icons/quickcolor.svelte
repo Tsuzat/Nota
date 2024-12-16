@@ -23,7 +23,7 @@
 	const currentColor = $derived(editor.getAttributes('textStyle').color);
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<DropdownMenu.Root>
@@ -88,7 +88,7 @@
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
 			<p>Quick Colors</p>
 		</Tooltip.Content>
 	</Tooltip.Root>

@@ -4,11 +4,12 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { cn } from '$lib/utils.js';
+	import { OS } from '$lib/contants';
 
 	let { editor }: { editor: Editor } = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<Button
@@ -19,8 +20,15 @@
 				<Bold />
 			</Button>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Bold (⌘B)</p>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
+			<p>
+				Bold
+				{#if OS === 'macos'}
+					(⌘ B)
+				{:else}
+					(Ctrl+B)
+				{/if}
+			</p>
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>

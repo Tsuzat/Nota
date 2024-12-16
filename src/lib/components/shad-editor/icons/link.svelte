@@ -20,7 +20,7 @@
 	}
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<Popover.Root>
@@ -65,8 +65,8 @@
 				</Popover.Content>
 			</Popover.Root>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Add Or Remove Link</p>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
+			<p>Add or Remove Link</p>
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>

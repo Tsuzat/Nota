@@ -15,7 +15,7 @@
 	let { editor }: { editor: Editor } = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<DropdownMenu.Root>
@@ -35,7 +35,7 @@
 						<ChevronDown class="!size-3 text-muted-foreground" />
 					</Button>
 				</DropdownMenu.Trigger>
-				<DropdownMenu.Content class="w-56">
+				<DropdownMenu.Content class="w-44">
 					<DropdownMenu.Item
 						onclick={() => editor.chain().focus().setTextAlign('left').run()}
 						closeOnSelect={false}
@@ -75,7 +75,7 @@
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
 			<p>Text Alignment</p>
 		</Tooltip.Content>
 	</Tooltip.Root>

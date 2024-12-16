@@ -12,7 +12,7 @@
 	let { editor }: { editor: Editor } = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<Button
@@ -23,7 +23,7 @@
 				<Image />
 			</Button>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
 			<p>Add Image</p>
 		</Tooltip.Content>
 	</Tooltip.Root>

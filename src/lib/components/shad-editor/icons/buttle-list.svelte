@@ -4,11 +4,12 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { cn } from '$lib/utils.js';
+	import { OS } from '$lib/contants';
 
 	let { editor }: { editor: Editor } = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<Button
@@ -20,8 +21,15 @@
 				<List />
 			</Button>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Bullet List (⌘⇧8)</p>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
+			<p>
+				Bullet List
+				{#if OS === 'macos'}
+					(⌘ ⇧ 8)
+				{:else}
+					(Ctrl+Shift+8)
+				{/if}
+			</p>
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>

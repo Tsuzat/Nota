@@ -65,7 +65,7 @@
 	const replaceAll = () => editor.commands.replaceAll();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<Popover.Root
@@ -139,8 +139,8 @@
 				</Popover.Content>
 			</Popover.Root>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Search And Replace Text</p>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
+			<p>Search And Replace</p>
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>

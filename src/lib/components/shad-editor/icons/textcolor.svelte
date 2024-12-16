@@ -18,7 +18,7 @@
 	let { editor, color = $bindable('') }: Props = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<Popover.Root>
@@ -68,7 +68,7 @@
 				</Popover.Content>
 			</Popover.Root>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
 			<p>Text Color</p>
 		</Tooltip.Content>
 	</Tooltip.Root>

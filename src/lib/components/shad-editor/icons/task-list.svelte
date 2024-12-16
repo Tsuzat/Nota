@@ -4,11 +4,12 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { cn } from '$lib/utils.js';
+	import { OS } from '$lib/contants';
 
 	let { editor }: { editor: Editor } = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider delayDuration={100}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			<Button
@@ -19,8 +20,15 @@
 				<CheckSquare />
 			</Button>
 		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Tasks List (⌘⇧9)</p>
+		<Tooltip.Content avoidCollisions class="bg-background text-foreground border font-medium p-2">
+			<p>
+				Task List
+				{#if OS === 'macos'}
+					(⌘ ⇧ 9)
+				{:else}
+					(Ctrl+Shift+9)
+				{/if}
+			</p>
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>
