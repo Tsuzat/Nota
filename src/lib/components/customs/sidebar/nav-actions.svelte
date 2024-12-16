@@ -16,6 +16,10 @@
 	const data = [
 		[
 			{
+				label: 'Show Toolbar',
+				icon: PenBox
+			},
+			{
 				label: 'Customize Page',
 				icon: Settings2
 			},
@@ -83,20 +87,56 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Star from 'lucide-svelte/icons/star';
+	import { onDestroy, onMount } from 'svelte';
+	import { render as timeAgoRender, cancel } from 'timeago.js';
+	import { PenBox } from 'lucide-svelte';
 
 	let open = $state(false);
 
 	interface Props {
 		lastEdited: string;
+		favorite: boolean;
 	}
 
-	let { lastEdited = '' }: Props = $props();
+	let timeAgoHTML: HTMLDivElement;
+
+	onMount(() => {
+		timeAgoRender(timeAgoHTML, undefined, {
+			minInterval: 10
+		});
+		return () => {
+			cancel(timeAgoHTML);
+		};
+	});
+
+	onDestroy(() => {
+		cancel(timeAgoHTML);
+	});
+
+	let { lastEdited = $bindable(''), favorite = $bindable(false) }: Props = $props();
 </script>
 
 <div class="flex items-center gap-2 text-sm">
-	<div class="text-muted-foreground hidden font-medium md:inline-block">Edit Oct 08</div>
-	<Button variant="ghost" size="icon" class="h-7 w-7">
-		<Star />
+	<div
+		bind:this={timeAgoHTML}
+		class="text-muted-foreground hidden font-medium md:inline-block"
+		datetime={lastEdited}
+	>
+		<!-- Edit Oct 08 -->
+	</div>
+	<Button
+		variant="ghost"
+		size="icon"
+		class="size-7"
+		onclick={() => {
+			favorite = !favorite;
+			console.log('favorite', favorite);
+		}}
+	>
+		<Star
+			data-favorite={favorite}
+			class="data-[favorite=true]:text-yellow-400 data-[favorite=true]:fill-yellow-400"
+		/>
 	</Button>
 	<Popover.Root bind:open>
 		<Popover.Trigger>

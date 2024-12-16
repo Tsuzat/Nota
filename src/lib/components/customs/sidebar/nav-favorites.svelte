@@ -62,7 +62,9 @@
 							<span>Open in New Tab</span>
 						</DropdownMenu.Item>
 						<DropdownMenu.Separator />
-						<DropdownMenu.Item class="text-destructive hover:bg-destructive/10 hover:text-muted-foreground">
+						<DropdownMenu.Item
+							class="text-destructive hover:bg-destructive/10 hover:text-muted-foreground"
+						>
 							<Trash2 />
 							<span>Delete</span>
 						</DropdownMenu.Item>

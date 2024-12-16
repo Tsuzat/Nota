@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { OPEN_NEW_WORKSPACE_DIALOG, WORKSPACES } from '$lib/contants';
 	import { createNote, getNotesByWorkspace, type NotesDB } from '$lib/database/notes';
 	import { getWorkSpaces, type WorkSpaceDB } from '$lib/database/workspace';
-	import { redirect } from '@sveltejs/kit';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Plus from 'lucide-svelte/icons/plus';
 	import { onMount } from 'svelte';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { Copy, Pen, Star, Trash2 } from 'lucide-svelte';
 
 	onMount(async () => {
 		const workspaces = await getWorkSpaces();
@@ -82,7 +83,9 @@
 							<Sidebar.MenuSub>
 								{@const notes = $WORKSPACES.get(workspace) ?? []}
 								{#each notes as note (note.id)}
-									<Sidebar.MenuSubItem>
+									<Sidebar.MenuSubItem
+										class="cursor-pointer flex w-full items-center justify-between"
+									>
 										<Sidebar.MenuSubButton onclick={() => goto(`/${note.id}`)}>
 											{#snippet child({ props })}
 												<span {...props}>
@@ -91,6 +94,40 @@
 												</span>
 											{/snippet}
 										</Sidebar.MenuSubButton>
+										<DropdownMenu.Root>
+											<DropdownMenu.Trigger
+												class={buttonVariants({
+													variant: 'ghost',
+													size: 'sm',
+													class: 'size-4 p-2.5 rounded-sm'
+												})}
+											>
+												<Ellipsis />
+											</DropdownMenu.Trigger>
+											<DropdownMenu.Content>
+												<DropdownMenu.Group>
+													<DropdownMenu.Item onclick={() => (note.favorite = !note.favorite)}>
+														<Star
+															data-favorite={note.favorite}
+															class="data-[favorite=true]:fill-yellow-400 fill-none mr-2"
+														/>
+														<span>Add to favorites</span>
+													</DropdownMenu.Item>
+													<DropdownMenu.Item>
+														<Pen class="mr-2" />
+														<span>Rename or Edit</span>
+													</DropdownMenu.Item>
+													<DropdownMenu.Item>
+														<Copy class="mr-2" />
+														<span>Duplicate</span>
+													</DropdownMenu.Item>
+													<DropdownMenu.Item class="data-[highlighted]:text-red-600 ">
+														<Trash2 class="mr-2" />
+														<span>Move to trash</span>
+													</DropdownMenu.Item>
+												</DropdownMenu.Group>
+											</DropdownMenu.Content>
+										</DropdownMenu.Root>
 									</Sidebar.MenuSubItem>
 								{/each}
 							</Sidebar.MenuSub>
