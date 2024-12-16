@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
-	import type { PageData } from './$types';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { Separator } from '$lib/components/ui/separator';
 	import NavActions from '$lib/components/customs/sidebar/nav-actions.svelte';
 	import ShadEditor from '$lib/components/shad-editor/shad-editor.svelte';
-	import { getNotesById, type Notes } from '$lib/database/notes';
-	import { onMount } from 'svelte';
+	import { getNotesById, type NotesDB, type Notes } from '$lib/database/notes';
 	import { load, type Store } from '@tauri-apps/plugin-store';
 	import type { Content } from '@tiptap/core';
 	import { error } from '@tauri-apps/plugin-log';
@@ -15,7 +13,11 @@
 	import { Loader2 } from 'lucide-svelte';
 	import { page } from '$app/stores';
 
+	// Popins for notes
+	import '@fontsource-variable/inter';
+
 	const notes = writable<Notes | null>(null);
+	const notesDB = writable<NotesDB | null>(null);
 	let store: Store | undefined = undefined;
 
 	let notesId = $derived.by(() => {
@@ -28,9 +30,11 @@
 
 	async function loadNotes() {
 		notes.set(null);
+		notesDB.set(null);
 		store = undefined;
-		const notesDB = await getNotesById(notesId);
-		if (notesDB === null) {
+		const tmpNotesDB = await getNotesById(notesId);
+		notesDB.set(tmpNotesDB);
+		if ($notesDB === null) {
 			toast.warning('Note not found', {
 				description: `Note with id ${notesId} not found`,
 				action: {
@@ -42,8 +46,8 @@
 		}
 
 		// Get the path of the notes
-		const notePath = notesDB.path;
-		store = await load(notePath, { autoSave: true });
+		const notePath = $notesDB.path;
+		store = await load(notePath, { autoSave: 100 });
 
 		// Load all the notes data
 		const id = await store.get<string>('id');
@@ -80,7 +84,7 @@
 				updatedAt
 			);
 			toast.error('Note data not found', {
-				description: `Note with id ${notesDB.id} not found or corrupted. You'll be redirected to home page`,
+				description: `Note with id ${$notesDB.id} not found or corrupted. You'll be redirected to home page`,
 				action: {
 					label: 'Ok',
 					onClick: () => {}
@@ -100,19 +104,27 @@
 		});
 	}
 
-	notes.subscribe((note) => {
-		if (store === undefined || note === null) return;
-		store.set('name', note.name);
-		store.set('icon', note.icon);
-		store.set('cover', note.cover);
-		store.set('description', note.description);
-		store.set('updatedAt', new Date().toISOString());
-		store.set('content', note.content);
+	notes.subscribe((note) => console.log('Notes', note));
+
+	notesDB.subscribe((noteDB) => {
+		console.log('notesDB', noteDB);
 	});
+
+	function updateContent(content: Content) {
+		notes.update((note) => {
+			if (note === null) return note;
+			note.content = content;
+			note.updatedAt = new Date().toISOString();
+			return note;
+		});
+		if (!store) return;
+		store.set('updatedAt', new Date().toISOString());
+		store.set('content', content);
+	}
 </script>
 
 {#key notesId}
-	{#if $notes === null}
+	{#if $notes === null || $notesDB === null}
 		<div class="flex h-full w-full items-center justify-center">
 			<div class="text-center flex items-center">
 				<span class="text-xl mr-4"> <Loader2 class="animate-spin" /> </span>
@@ -120,7 +132,7 @@
 			</div>
 		</div>
 	{:else}
-		<main class="flex flex-col w-full h-screen">
+		<main class="flex flex-col w-full h-full">
 			<header class="flex h-14 shrink-0 items-center gap-2">
 				<div class="flex flex-1 items-center gap-2 px-3">
 					<Sidebar.Trigger />
@@ -131,13 +143,15 @@
 					</div>
 				</div>
 				<div class="ml-auto px-3">
-					<NavActions lastEdited={$notes.updatedAt} />
+					<NavActions bind:lastEdited={$notes.updatedAt} bind:favorite={$notesDB.favorite} />
 				</div>
 			</header>
-			<div class="flex-1 overflow-y-auto">
-				<div class="mx-auto max-w-3xl p-2">
-					<ShadEditor bind:content={$notes.content} />
-				</div>
+			<div class="flex-grow max-h-[calc(100vh-3.5rem)]">
+				<ShadEditor
+					class="flex flex-col h-full w-full"
+					content={$notes.content}
+					onChange={updateContent}
+				/>
 			</div>
 		</main>
 	{/if}
