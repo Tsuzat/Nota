@@ -21,14 +21,9 @@
 				</Breadcrumb.List>
 			</Breadcrumb.Root>
 		</div>
-		<div class="ml-auto px-3">
-			<NavActions lastEdited="" />
-		</div>
 	</header>
 	<div class="flex flex-1 flex-col gap-4 p-2">
 		<div class="bg-muted/50 mx-auto h-24 w-full max-w-3xl rounded-xl"></div>
-		<div class="mx-auto h-full w-full max-w-3xl">
-			<ShadEditor />
-		</div>
+		<div class="mx-auto h-full w-full max-w-3xl bg-muted/50 rounded-xl"></div>
 	</div>
 </main>
