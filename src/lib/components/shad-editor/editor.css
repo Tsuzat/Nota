@@ -1,3 +1,7 @@
+.tiptap {
+	font-family: 'Inter Variable', sans-serif;
+}
+
 .tiptap :where(p):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
@@ -31,6 +35,7 @@
 .tiptap ul[data-type='taskList'] li {
 	align-items: flex-start;
 	display: flex;
+	margin: 0 !important;
 }
 
 .tiptap ul[data-type='taskList'] li > label {
@@ -125,6 +130,8 @@ input[type='checkbox'] {
 }
 
 .tiptap pre code {
+	font-family: 'Fira Code Variable', monospace;
+	font-variant-ligatures: normal;
 	@apply flex-1 !rounded-none bg-transparent p-0 text-inherit;
 }
 

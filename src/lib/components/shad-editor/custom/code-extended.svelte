@@ -2,7 +2,6 @@
 	import { NodeViewWrapper, NodeViewContent } from 'svelte-tiptap';
 	import type { NodeViewProps } from '@tiptap/core';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-	import { onMount } from 'svelte';
 	const { node, editor, selected, deleteNode, updateAttributes, extension }: NodeViewProps =
 		$props();
 	import { Copy, Check, ChevronDown } from 'lucide-svelte';
@@ -36,7 +35,7 @@
 				variant: 'ghost',
 				size: 'sm',
 				class:
-					'absolute left-2 top-2 h-4 rounded px-1 py-2 text-xs capitalize text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100'
+					'absolute left-2 top-2 h-4 rounded px-1 py-2 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100'
 			})}
 			>{defaultLanguage}
 			<ChevronDown class="!size-3" />

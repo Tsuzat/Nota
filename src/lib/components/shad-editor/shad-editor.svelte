@@ -5,7 +5,6 @@
 	import StarterKit from '@tiptap/starter-kit';
 	import { onDestroy, onMount } from 'svelte';
 	import EditorToolbar from './editor-toolbar.svelte';
-	import { cn } from '$lib/utils.js';
 
 	import { Subscript } from '@tiptap/extension-subscript';
 	import { Superscript } from '@tiptap/extension-superscript';
@@ -32,6 +31,7 @@
 
 	// Lowlight
 	import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+	import '@fontsource-variable/fira-code';
 	import { all, createLowlight } from 'lowlight';
 	import './onedark.css';
 	import SearchAndReplace from './custom/Extentions/SearchAndReplace.js';
@@ -43,9 +43,15 @@
 		class?: string;
 		content?: Content;
 		showToolbar?: boolean;
+		onChange: (content: Content) => void;
 	}
 
-	let { class: className = '', content = $bindable(''), showToolbar = true }: Props = $props();
+	let {
+		class: className = '',
+		content = $bindable(''),
+		showToolbar = true,
+		onChange
+	}: Props = $props();
 
 	let editor = $state<Editor>();
 	let element = $state<HTMLElement>();
@@ -57,7 +63,7 @@
 			editorProps: {
 				attributes: {
 					class:
-						'm-auto p-2 focus:outline-none flex-1 prose text-foreground min-w-full max-h-full dark:prose-invert *:my-2'
+						'm-auto p-2 focus:outline-none flex-1 prose text-foreground mx-auto max-w-3xl dark:prose-invert *:my-2'
 				}
 			},
 			extensions: [
@@ -126,6 +132,10 @@
 				ImagePlaceholder
 			],
 			autofocus: true,
+			onUpdate: ({ editor }) => {
+				content = editor.getJSON();
+				onChange(content);
+			},
 			onTransaction: (transaction) => {
 				/**
 				 * Weird behavior of editor.
@@ -149,5 +159,5 @@
 	{#if editor && showToolbar}
 		<EditorToolbar {editor} />
 	{/if}
-	<div bind:this={element} spellcheck="false" class="h-full w-full flex-1"></div>
+	<div bind:this={element} spellcheck="false" class="h-full overflow-y-auto flex-1"></div>
 </div>
