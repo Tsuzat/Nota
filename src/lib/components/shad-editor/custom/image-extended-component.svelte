@@ -178,7 +178,7 @@
 			</div>
 			<div
 				class={cn(
-					'absolute right-4 top-2 flex items-center gap-1 rounded border bg-background p-1 opacity-0 transition-opacity',
+					'absolute right-4 top-2 flex items-center gap-1 rounded bg-background/50 p-1 opacity-0 transition-opacity',
 					!resizing && 'group-hover:opacity-100',
 					openedMore && 'opacity-100'
 				)}
