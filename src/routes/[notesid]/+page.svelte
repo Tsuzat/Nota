@@ -108,6 +108,7 @@
 	notesDB.subscribe((noteDB) => {
 		if (noteDB === null) return;
 		if (noteDB.favorite) {
+			if ($FAVORITE_NOTES.find((note) => note.id === noteDB.id)) return;
 			FAVORITE_NOTES.update((notes) => [...notes, noteDB]);
 		} else {
 			FAVORITE_NOTES.update((notes) => notes.filter((note) => note.id !== noteDB.id));

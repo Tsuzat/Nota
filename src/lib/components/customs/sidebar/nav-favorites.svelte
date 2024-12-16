@@ -3,17 +3,11 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
 	import { FAVORITE_NOTES } from '$lib/contants';
-	import { getFavoriteNotes } from '$lib/database/notes';
 	import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Link from 'lucide-svelte/icons/link';
 	import StarOff from 'lucide-svelte/icons/star-off';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
-	import { onMount } from 'svelte';
-
-	onMount(async () => {
-		FAVORITE_NOTES.set(await getFavoriteNotes());
-	});
 
 	const sidebar = useSidebar();
 </script>

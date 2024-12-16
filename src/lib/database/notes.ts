@@ -201,7 +201,7 @@ export async function updateNotesDB(notesDB: NotesDB) {
 export async function getFavoriteNotes(): Promise<NotesDB[]> {
 	let res: NotesDB[] = [];
 	try {
-		res = await DB.select<NotesDB[]>('SELECT * FROM notes WHERE favorite = true');
+		res = await DB.select<NotesDB[]>(`SELECT * FROM notes WHERE favorite = 'true'`);
 		// Convert string to boolean
 		res = res.map((note) => ({
 			...note,

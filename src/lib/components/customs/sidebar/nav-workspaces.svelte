@@ -13,18 +13,6 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Copy, Pen, Star, Trash2 } from 'lucide-svelte';
 
-	onMount(async () => {
-		const workspaces = await getWorkSpaces();
-
-		for (const workspace of workspaces) {
-			const notes = await getNotesByWorkspace(workspace.id);
-			WORKSPACES.update((workspaces) => {
-				return workspaces.set(workspace, notes);
-			});
-		}
-		// Get all notes by workspace
-	});
-
 	async function createNewNotes(workspace: WorkSpaceDB) {
 		const notes = await createNote('📃', 'My Document', workspace);
 		if (notes === null) return;

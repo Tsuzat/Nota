@@ -1,8 +1,11 @@
 <script lang="ts">
+	import Button from '$lib/components/ui/button/button.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { MoonStar, Sun } from 'lucide-svelte';
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import Plus from 'lucide-svelte/icons/plus';
+	import { mode, toggleMode } from 'mode-watcher';
 
 	let {
 		teams
@@ -20,7 +23,7 @@
 </script>
 
 <Sidebar.Menu>
-	<Sidebar.MenuItem>
+	<Sidebar.MenuItem class="flex items-center justify-between">
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
 				{#snippet child({ props })}
@@ -55,5 +58,13 @@
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
+		<Button variant="ghost" class="size-6 p-2" onclick={() => toggleMode()}>
+			{#if $mode === 'dark'}
+				<MoonStar />
+			{:else}
+				<Sun />
+			{/if}
+			<span class="sr-only">Toggle theme</span>
+		</Button>
 	</Sidebar.MenuItem>
 </Sidebar.Menu>
