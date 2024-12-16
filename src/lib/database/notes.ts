@@ -197,3 +197,24 @@ export async function updateNotesDB(notesDB: NotesDB) {
 	}
 	return !res ? false : res.rowsAffected === 1;
 }
+
+export async function getFavoriteNotes(): Promise<NotesDB[]> {
+	let res: NotesDB[] = [];
+	try {
+		res = await DB.select<NotesDB[]>('SELECT * FROM notes WHERE favorite = true');
+		// Convert string to boolean
+		res = res.map((note) => ({
+			...note,
+			//@ts-ignore
+			favorite: note.favorite === 'true' || note.favorite === '1',
+			//@ts-ignore
+			trashed: note.trashed === 'true' || note.trashed === '1'
+		}));
+	} catch (e) {
+		//@ts-ignore
+		error(e.toString());
+		toast.error('Something went wrong when getting the notes');
+		console.error(e);
+	}
+	return res;
+}

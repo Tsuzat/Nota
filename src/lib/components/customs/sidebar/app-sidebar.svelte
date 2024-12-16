@@ -58,41 +58,6 @@
 				url: '#',
 				icon: MessageCircleQuestion
 			}
-		],
-		favorites: [
-			{
-				name: 'Project Management & Task Tracking',
-				url: '#',
-				emoji: '📊'
-			},
-			{
-				name: 'Daily Habit Tracker & Goal Setting',
-				url: '#',
-				emoji: '✅'
-			}
-		],
-		workspaces: [
-			{
-				name: 'Personal Life Management',
-				emoji: '🏠',
-				pages: [
-					{
-						name: 'Daily Journal & Reflection',
-						url: '#',
-						emoji: '📔'
-					},
-					{
-						name: 'Health & Wellness Tracker',
-						url: '#',
-						emoji: '🍏'
-					},
-					{
-						name: 'Personal Growth & Learning Goals',
-						url: '#',
-						emoji: '🌟'
-					}
-				]
-			}
 		]
 	};
 </script>
@@ -116,7 +81,7 @@
 		<NavMain items={data.navMain} />
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<NavFavorites favorites={data.favorites} />
+		<NavFavorites />
 		<NavWorkspaces />
 		<NavSecondary items={data.navSecondary} class="mt-auto" />
 	</Sidebar.Content>

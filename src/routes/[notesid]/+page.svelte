@@ -4,7 +4,7 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import NavActions from '$lib/components/customs/sidebar/nav-actions.svelte';
 	import ShadEditor from '$lib/components/shad-editor/shad-editor.svelte';
-	import { getNotesById, type NotesDB, type Notes } from '$lib/database/notes';
+	import { getNotesById, type NotesDB, type Notes, updateNotesDB } from '$lib/database/notes';
 	import { load, type Store } from '@tauri-apps/plugin-store';
 	import type { Content } from '@tiptap/core';
 	import { error } from '@tauri-apps/plugin-log';
@@ -15,6 +15,7 @@
 
 	// Popins for notes
 	import '@fontsource-variable/inter';
+	import { FAVORITE_NOTES } from '$lib/contants';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -104,10 +105,14 @@
 		});
 	}
 
-	notes.subscribe((note) => console.log('Notes', note));
-
 	notesDB.subscribe((noteDB) => {
-		console.log('notesDB', noteDB);
+		if (noteDB === null) return;
+		if (noteDB.favorite) {
+			FAVORITE_NOTES.update((notes) => [...notes, noteDB]);
+		} else {
+			FAVORITE_NOTES.update((notes) => notes.filter((note) => note.id !== noteDB.id));
+		}
+		updateNotesDB(noteDB);
 	});
 
 	function updateContent(content: Content) {

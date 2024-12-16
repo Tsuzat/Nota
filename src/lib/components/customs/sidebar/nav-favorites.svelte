@@ -2,21 +2,18 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
+	import { FAVORITE_NOTES } from '$lib/contants';
+	import { getFavoriteNotes } from '$lib/database/notes';
 	import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Link from 'lucide-svelte/icons/link';
 	import StarOff from 'lucide-svelte/icons/star-off';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
+	import { onMount } from 'svelte';
 
-	let {
-		favorites
-	}: {
-		favorites: {
-			name: string;
-			url: string;
-			emoji: string;
-		}[];
-	} = $props();
+	onMount(async () => {
+		FAVORITE_NOTES.set(await getFavoriteNotes());
+	});
 
 	const sidebar = useSidebar();
 </script>
@@ -24,13 +21,13 @@
 <Sidebar.Group class="group-data-[collapsible=icon]:hidden">
 	<Sidebar.GroupLabel>Favorites</Sidebar.GroupLabel>
 	<Sidebar.Menu>
-		{#each favorites as item (item.name)}
+		{#each $FAVORITE_NOTES as favorite (favorite.id)}
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton>
 					{#snippet child({ props })}
-						<a href={item.url} title={item.name} {...props}>
-							<span>{item.emoji}</span>
-							<span>{item.name}</span>
+						<a href="/{favorite.id}" title={favorite.name} {...props}>
+							<span>{favorite.icon}</span>
+							<span>{favorite.name}</span>
 						</a>
 					{/snippet}
 				</Sidebar.MenuButton>

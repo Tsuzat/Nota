@@ -121,16 +121,13 @@
 		bind:this={timeAgoHTML}
 		class="text-muted-foreground hidden font-medium md:inline-block"
 		datetime={lastEdited}
-	>
-		<!-- Edit Oct 08 -->
-	</div>
+	></div>
 	<Button
 		variant="ghost"
 		size="icon"
 		class="size-7"
 		onclick={() => {
 			favorite = !favorite;
-			console.log('favorite', favorite);
 		}}
 	>
 		<Star
