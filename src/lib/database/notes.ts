@@ -7,6 +7,7 @@ import { toast } from 'svelte-sonner';
 import { error, info } from '@tauri-apps/plugin-log';
 import { DB } from './sqldb';
 import { remove } from '@tauri-apps/plugin-fs';
+import type { QueryResult } from '@tauri-apps/plugin-sql';
 
 /**
  * Notes interface has the data of a note with
@@ -142,10 +143,23 @@ export async function getNotesByWorkspace(workspaceId: string): Promise<NotesDB[
 	return res;
 }
 
+/**
+ * Find the notes from the database by id
+ * @param id - Note id
+ * @returns NotesDB or null
+ */
 export async function getNotesById(id: string): Promise<NotesDB | null> {
 	let res: NotesDB[] = [];
 	try {
 		res = await DB.select<NotesDB[]>('SELECT * FROM notes WHERE id = $1', [id]);
+		// Convert string to boolean
+		res = res.map((note) => ({
+			...note,
+			//@ts-ignore
+			favorite: note.favorite === 'true' || note.favorite === '1',
+			//@ts-ignore
+			trashed: note.trashed === 'true' || note.trashed === '1'
+		}));
 	} catch (e) {
 		//@ts-ignore
 		error(e.toString());
@@ -153,4 +167,33 @@ export async function getNotesById(id: string): Promise<NotesDB | null> {
 		console.error(e);
 	}
 	return res.length > 0 ? res[0] : null;
+}
+
+/**
+ * Function to update the note in the database
+ * @param notesDB - NoteDB object to be updated
+ * @returns boolean - true if the note is updated successfully
+ */
+export async function updateNotesDB(notesDB: NotesDB) {
+	let res: QueryResult | undefined = undefined;
+	try {
+		res = await DB.execute(
+			`UPDATE notes SET name = $1, icon = $2, path = $3, workspace = $4, favorite = $5, trashed = $6 WHERE id = $7`,
+			[
+				notesDB.name,
+				notesDB.icon,
+				notesDB.path,
+				notesDB.workspace,
+				notesDB.favorite,
+				notesDB.trashed,
+				notesDB.id
+			]
+		);
+	} catch (e) {
+		//@ts-ignore
+		error(e.toString());
+		toast.error('Something went wrong when updating the note');
+		console.error(e);
+	}
+	return !res ? false : res.rowsAffected === 1;
 }
