@@ -59,14 +59,6 @@
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
-		<!-- <Button variant="ghost" class="size-6 p-2" onclick={() => toggleMode()}>
-			{#if $mode === 'dark'}
-				<MoonStar />
-			{:else}
-				<Sun />
-			{/if}
-			<span class="sr-only">Toggle theme</span>
-		</Button> -->
 		<Themetoggler />
 	</Sidebar.MenuItem>
 </Sidebar.Menu>

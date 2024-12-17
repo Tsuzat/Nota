@@ -84,13 +84,6 @@ export async function createNote(
 
 		let notesInserted = await insertIntoNotes(notesDB);
 		if (notesInserted) {
-			toast.success('Note created successfully', {
-				description: `Note created at ${notesPath}`,
-				action: {
-					label: 'Ok',
-					onClick: () => {}
-				}
-			});
 			return notesDB;
 		} else {
 			await remove(notesPath);
@@ -105,7 +98,7 @@ export async function createNote(
 	}
 }
 
-export async function insertIntoNotes(notes: NotesDB) {
+async function insertIntoNotes(notes: NotesDB) {
 	let insertedSuccessfully = false;
 	try {
 		const res = await DB.execute(
@@ -122,6 +115,45 @@ export async function insertIntoNotes(notes: NotesDB) {
 		error(err.toString());
 	}
 	return insertedSuccessfully;
+}
+
+/**
+ * Function to delete a notes from the database and disk
+ * @param notes NotesDB - Note to be deleted
+ * @param workspaceDB WorkSpaceDB - Workspace of the note to be deleted
+ * @returns Promise<boolean> - true if the note is deleted successfully
+ */
+export async function deleteNotes(notes: NotesDB): Promise<boolean> {
+	const deleted = deleteNotesFromDB(notes.id);
+	if (!deleted) {
+		return false;
+	}
+	// notes path
+	const notesPath = await resolve(notes.path);
+	try {
+		await remove(notesPath);
+		return true;
+	} catch (err) {
+		//@ts-ignore
+		error(err.toString());
+		console.error(err);
+		return false;
+	}
+}
+
+async function deleteNotesFromDB(notesId: string) {
+	let deletedSuccessfully = false;
+	try {
+		const res = await DB.execute('DELETE FROM notes WHERE id = $1', [notesId]);
+		deletedSuccessfully = res.rowsAffected === 1;
+		console.log('Note deleted successfully');
+		info('Note deleted successfully');
+	} catch (err) {
+		console.error(err);
+		//@ts-ignore
+		error(err.toString());
+	}
+	return deletedSuccessfully;
 }
 
 /**
@@ -198,6 +230,10 @@ export async function updateNotesDB(notesDB: NotesDB) {
 	return !res ? false : res.rowsAffected === 1;
 }
 
+/**
+ * Function to fetch all the favorite notes from the database
+ * @returns Promise<NotesDB[]>
+ */
 export async function getFavoriteNotes(): Promise<NotesDB[]> {
 	let res: NotesDB[] = [];
 	try {
