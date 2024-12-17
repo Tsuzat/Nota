@@ -4,25 +4,69 @@
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { OPEN_NEW_WORKSPACE_DIALOG, WORKSPACES } from '$lib/contants';
-	import { createNote, getNotesByWorkspace, type NotesDB } from '$lib/database/notes';
-	import { getWorkSpaces, type WorkSpaceDB } from '$lib/database/workspace';
+	import { deleteNotes, updateNotesDB, type NotesDB } from '$lib/database/notes';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Plus from 'lucide-svelte/icons/plus';
-	import { onMount } from 'svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, Pen, Star, Trash2 } from 'lucide-svelte';
+	import { Copy, FileX, Pen, Star, Trash, Trash2 } from 'lucide-svelte';
+	import { confirm } from '@tauri-apps/plugin-dialog';
+	import NewNotes from '../dialogs/NewNotes.svelte';
+	import type { WorkSpaceDB } from '$lib/database/workspace';
+	import { toast } from 'svelte-sonner';
+	import { page } from '$app/stores';
 
-	async function createNewNotes(workspace: WorkSpaceDB) {
-		const notes = await createNote('📃', 'My Document', workspace);
-		if (notes === null) return;
-		WORKSPACES.update((workspaces) => {
-			// Workspaces notes
-			const workSpaceNotes = workspaces.get(workspace);
-			if (workSpaceNotes === undefined) return workspaces;
-			workSpaceNotes.push(notes);
-			return workspaces.set(workspace, workSpaceNotes);
-		});
+	let open: boolean = $state(false);
+
+	//! TODO: Need to test this function when impleted the trash
+	async function moveToTrash(note: NotesDB, workspace: WorkSpaceDB) {
+		const shouldDelete = await confirm(
+			`Are you sure you want to move notes "${note.name}" to trash?`,
+			{
+				kind: 'info',
+				title: `Move to trash?`,
+				okLabel: 'Move to Trash'
+			}
+		);
+		if (!shouldDelete) return;
+		// note.trashed = true;
+		// let isUpdated = await updateNotesDB(note);
+		// if (isUpdated) {
+		// 	toast.success('Note moved to trash', {
+		// 		description: `Note with title ${note.name} moved to trash`
+		// 	});
+		// } else {
+		// 	toast.error('Error on moving the note to trash');
+		// }
+	}
+
+	async function permanentlyDelete(note: NotesDB, workspace: WorkSpaceDB) {
+		const shouldDelete = await confirm(
+			`Are you sure you want to delete this note "${note.name}"?`,
+			{
+				kind: 'warning',
+				title: 'Delete Notes?',
+				okLabel: 'Delete'
+			}
+		);
+		if (!shouldDelete) return;
+		if ($page.url.pathname === `/${note.id}`) goto('/');
+		const isDeleted = await deleteNotes(note);
+		if (isDeleted) {
+			WORKSPACES.update((workspaces) => {
+				let workspaceNotes = workspaces.get(workspace);
+				if (!workspaceNotes) return workspaces;
+				// remove note from workspaceNotes
+				workspaceNotes = workspaceNotes.filter((n) => n.id !== note.id);
+				workspaces.set(workspace, workspaceNotes);
+				return workspaces;
+			});
+			toast.success('Note deleted', {
+				description: `Note with title ${note.name} deleted`
+			});
+		} else {
+			toast.error('Error on deleting the note');
+		}
 	}
 </script>
 
@@ -64,13 +108,13 @@
 								</Sidebar.MenuAction>
 							{/snippet}
 						</Collapsible.Trigger>
-						<Sidebar.MenuAction showOnHover onclick={() => createNewNotes(workspace)}>
+						<Sidebar.MenuAction showOnHover onclick={() => (open = true)}>
+							<NewNotes bind:open {workspace} />
 							<Plus />
 						</Sidebar.MenuAction>
 						<Collapsible.Content>
 							<Sidebar.MenuSub>
-								{@const notes = $WORKSPACES.get(workspace) ?? []}
-								{#each notes as note (note.id)}
+								{#each $WORKSPACES.get(workspace) ?? [] as note (note.id)}
 									<Sidebar.MenuSubItem
 										class="cursor-pointer flex w-full items-center justify-between"
 									>
@@ -97,7 +141,7 @@
 													<DropdownMenu.Item onclick={() => (note.favorite = !note.favorite)}>
 														<Star
 															data-favorite={note.favorite}
-															class="data-[favorite=true]:fill-yellow-400 fill-none mr-2"
+															class="data-[favorite=true]:fill-yellow-400 data-[favorite=true]:text-yellow-400 fill-none mr-2"
 														/>
 														<span>Add to favorites</span>
 													</DropdownMenu.Item>
@@ -109,9 +153,20 @@
 														<Copy class="mr-2" />
 														<span>Duplicate</span>
 													</DropdownMenu.Item>
-													<DropdownMenu.Item class="data-[highlighted]:text-red-600 ">
+													<DropdownMenu.Separator />
+													<DropdownMenu.Item
+														class="data-[highlighted]:text-red-600 text-red-600"
+														onclick={() => moveToTrash(note, workspace)}
+													>
 														<Trash2 class="mr-2" />
 														<span>Move to trash</span>
+													</DropdownMenu.Item>
+													<DropdownMenu.Item
+														class="data-[highlighted]:text-red-600 text-red-600"
+														onclick={() => permanentlyDelete(note, workspace)}
+													>
+														<FileX class="mr-2" />
+														<span>Permanently delete</span>
 													</DropdownMenu.Item>
 												</DropdownMenu.Group>
 											</DropdownMenu.Content>
