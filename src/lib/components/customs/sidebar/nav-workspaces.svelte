@@ -116,9 +116,10 @@
 							<Sidebar.MenuSub>
 								{#each $WORKSPACES.get(workspace) ?? [] as note (note.id)}
 									<Sidebar.MenuSubItem
-										class="cursor-pointer flex w-full items-center justify-between"
+										data-active={$page.url.pathname === `/${note.id}`}
+										class="cursor-pointer flex w-full hover:bg-muted/50 data-[active]:bg-muted/70 rounded-lg items-center justify-between"
 									>
-										<Sidebar.MenuSubButton onclick={() => goto(`/${note.id}`)}>
+										<Sidebar.MenuSubButton class="flex-grow" onclick={() => goto(`/${note.id}`)}>
 											{#snippet child({ props })}
 												<span {...props}>
 													<span>{note.icon}</span>
@@ -131,7 +132,7 @@
 												class={buttonVariants({
 													variant: 'ghost',
 													size: 'sm',
-													class: 'size-4 p-2.5 rounded-sm'
+													class: 'size-7 rounded-lg'
 												})}
 											>
 												<Ellipsis />
@@ -155,18 +156,18 @@
 													</DropdownMenu.Item>
 													<DropdownMenu.Separator />
 													<DropdownMenu.Item
-														class="data-[highlighted]:text-red-600 text-red-600"
+														class="data-[highlighted]:text-red-600 "
 														onclick={() => moveToTrash(note, workspace)}
 													>
 														<Trash2 class="mr-2" />
 														<span>Move to trash</span>
 													</DropdownMenu.Item>
 													<DropdownMenu.Item
-														class="data-[highlighted]:text-red-600 text-red-600"
+														class="data-[highlighted]:text-red-600 "
 														onclick={() => permanentlyDelete(note, workspace)}
 													>
 														<FileX class="mr-2" />
-														<span>Permanently delete</span>
+														<span>Delete</span>
 													</DropdownMenu.Item>
 												</DropdownMenu.Group>
 											</DropdownMenu.Content>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
@@ -16,7 +17,10 @@
 	<Sidebar.GroupLabel>Favorites</Sidebar.GroupLabel>
 	<Sidebar.Menu>
 		{#each $FAVORITE_NOTES as favorite (favorite.id)}
-			<Sidebar.MenuItem>
+			<Sidebar.MenuItem
+				data-active={$page.url.pathname === `/${favorite.id}`}
+				class="data-[active]:bg-muted/70 rounded"
+			>
 				<Sidebar.MenuButton>
 					{#snippet child({ props })}
 						<a href="/{favorite.id}" title={favorite.name} {...props}>
@@ -66,7 +70,7 @@
 		<Sidebar.MenuItem>
 			<Sidebar.MenuButton class="text-sidebar-foreground/70">
 				<Ellipsis />
-				<span>More</span>
+				<span class="text-xs">More</span>
 			</Sidebar.MenuButton>
 		</Sidebar.MenuItem>
 	</Sidebar.Menu>
