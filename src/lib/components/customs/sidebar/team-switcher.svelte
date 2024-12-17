@@ -6,6 +6,7 @@
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import Plus from 'lucide-svelte/icons/plus';
 	import { mode, toggleMode } from 'mode-watcher';
+	import Themetoggler from '../themetoggler.svelte';
 
 	let {
 		teams
@@ -58,13 +59,14 @@
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
-		<Button variant="ghost" class="size-6 p-2" onclick={() => toggleMode()}>
+		<!-- <Button variant="ghost" class="size-6 p-2" onclick={() => toggleMode()}>
 			{#if $mode === 'dark'}
 				<MoonStar />
 			{:else}
 				<Sun />
 			{/if}
 			<span class="sr-only">Toggle theme</span>
-		</Button>
+		</Button> -->
+		<Themetoggler />
 	</Sidebar.MenuItem>
 </Sidebar.Menu>
