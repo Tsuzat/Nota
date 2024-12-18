@@ -13,10 +13,11 @@
 	import emojisRaw from '$lib/assets/jsons/emojis.json';
 	import Tooltip from '../customs/tooltip.svelte';
 	import * as Tabs from '$lib/components/ui/tabs';
+	import { Button } from '../ui/button';
 
 	interface Props {
 		searchTerm?: string;
-		onSelect?: (emoji: string) => void;
+		onSelect: (emoji: string) => void;
 	}
 
 	let emojis: Emojis = $state(emojisRaw);
@@ -52,7 +53,16 @@
 			<div class="flex flex-wrap gap-1">
 				{#each emojis[catergory] as emoji}
 					<Tooltip text={emoji.name}>
-						<span class="text-xl">{emoji.emoji}</span>
+						<Button
+							variant="ghost"
+							class="text-xl p-0"
+							onclick={() => {
+								console.log('Selected emoji', emoji.emoji);
+								onSelect(emoji.emoji);
+							}}
+						>
+							{emoji.emoji}
+						</Button>
 					</Tooltip>
 				{/each}
 			</div>

@@ -117,7 +117,7 @@
 								{#each $WORKSPACES.get(workspace) ?? [] as note (note.id)}
 									<Sidebar.MenuSubItem
 										data-active={$page.url.pathname === `/${note.id}`}
-										class="cursor-pointer flex w-full hover:bg-muted/50 data-[active=true]:bg-red-950 rounded-lg items-center justify-between"
+										class="cursor-pointer flex w-full hover:bg-muted/50 data-[active=true]:bg-muted/70 rounded-lg items-center justify-between"
 									>
 										<Sidebar.MenuSubButton class="flex-grow" onclick={() => goto(`/${note.id}`)}>
 											{#snippet child({ props })}

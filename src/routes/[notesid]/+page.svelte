@@ -10,7 +10,7 @@
 	import { error } from '@tauri-apps/plugin-log';
 	import { toast } from 'svelte-sonner';
 	import { redirect } from '@sveltejs/kit';
-	import { Loader2 } from 'lucide-svelte';
+	import { icons, Loader2 } from 'lucide-svelte';
 	import { page } from '$app/stores';
 
 	// Popins for notes
@@ -106,15 +106,15 @@
 		});
 	}
 
-	notesDB.subscribe((noteDB) => {
-		if (noteDB === null) return;
-		if (noteDB.favorite) {
-			if ($FAVORITE_NOTES.find((note) => note.id === noteDB.id)) return;
-			FAVORITE_NOTES.update((notes) => [...notes, noteDB]);
+	notesDB.subscribe((notes) => {
+		if (notes === null) return;
+		if (notes.favorite) {
+			if ($FAVORITE_NOTES.find((note) => note.id === notes.id)) return;
+			FAVORITE_NOTES.update((note) => [...note, notes]);
 		} else {
-			FAVORITE_NOTES.update((notes) => notes.filter((note) => note.id !== noteDB.id));
+			FAVORITE_NOTES.update((notes1) => notes1.filter((note) => note.id !== notes.id));
 		}
-		updateNotesDB(noteDB);
+		updateNotesDB(notes);
 	});
 
 	function updateContent(content: Content) {
@@ -127,6 +127,23 @@
 		if (!store) return;
 		store.set('updatedAt', new Date().toISOString());
 		store.set('content', content);
+	}
+
+	function onIconChange(icon: string) {
+		notes.update((note) => {
+			if (note === null) return note;
+			note.icon = icon;
+			note.updatedAt = new Date().toISOString();
+			return note;
+		});
+		if (!store) return;
+		store.set('updatedAt', new Date().toISOString());
+		store.set('icon', icon);
+
+		if ($notesDB === null) return;
+		$notesDB.icon = icon;
+		notesDB.set($notesDB);
+		updateNotesDB($notesDB);
 	}
 </script>
 
@@ -145,7 +162,7 @@
 					<Sidebar.Trigger />
 					<Separator orientation="vertical" class="mr-2 h-4" />
 					<div class="line-clamp-1 flex items-center gap-2 text-xl font-bold">
-						<Iconpicker>
+						<Iconpicker onSelect={onIconChange}>
 							<span class="text-2xl">{$notes.icon}</span>
 						</Iconpicker>
 						<span>{$notes.name}</span>

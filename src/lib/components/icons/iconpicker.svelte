@@ -5,7 +5,7 @@
 	import Emojipicker from './emojipicker.svelte';
 
 	interface Props {
-		onSelect?: (icon: string) => void;
+		onSelect: (icon: string) => void;
 		children: any;
 	}
 
@@ -17,6 +17,6 @@
 		{@render children()}
 	</Popover.Trigger>
 	<Popover.Content class="size-fit max-w-96 p-0">
-		<Emojipicker />
+		<Emojipicker {onSelect} />
 	</Popover.Content>
 </Popover.Root>
