@@ -63,7 +63,7 @@
 		"@tiptap/pm": "^2.10.3",
 		"@tiptap/starter-kit": "^2.10.3",
 		"autoprefixer": "^10.4.20",
-		"bits-ui": "1.0.0-next.72",
+		"bits-ui": "1.0.0-next.73",
 		"clsx": "^2.1.1",
 		"lowlight": "^3.2.0",
 		"lucide-svelte": "^0.468.0",
