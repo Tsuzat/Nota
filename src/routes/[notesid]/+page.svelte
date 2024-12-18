@@ -16,6 +16,7 @@
 	// Popins for notes
 	import '@fontsource-variable/inter';
 	import { FAVORITE_NOTES } from '$lib/contants';
+	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -144,7 +145,9 @@
 					<Sidebar.Trigger />
 					<Separator orientation="vertical" class="mr-2 h-4" />
 					<div class="line-clamp-1 flex items-center gap-2 text-xl font-bold">
-						<span>{$notes.icon}</span>
+						<Iconpicker>
+							<span class="text-2xl">{$notes.icon}</span>
+						</Iconpicker>
 						<span>{$notes.name}</span>
 					</div>
 				</div>
