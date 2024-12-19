@@ -33,7 +33,10 @@
 			{
 				title: 'Search',
 				url: '#',
-				icon: Search
+				icon: Search,
+				onClick: () => {
+					OPEN_COMMAND_BAR.set(true);
+				}
 			},
 			{
 				title: 'Home',
@@ -71,6 +74,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
 	import { page } from '$app/stores';
+	import { OPEN_COMMAND_BAR } from '$lib/contants';
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 </script>

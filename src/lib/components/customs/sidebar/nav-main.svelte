@@ -12,6 +12,7 @@
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			icon: any;
 			isActive?: boolean;
+			onClick?: () => void;
 		}[];
 	} = $props();
 </script>
@@ -19,7 +20,14 @@
 <Sidebar.Menu>
 	{#each items as item (item.title)}
 		<Sidebar.MenuItem>
-			<Sidebar.MenuButton isActive={$page.url.pathname === item.url}>
+			<Sidebar.MenuButton
+				isActive={$page.url.pathname === item.url}
+				onclick={() => {
+					if (item.onClick) {
+						item.onClick();
+					}
+				}}
+			>
 				{#snippet child({ props })}
 					<a href={item.url} {...props}>
 						<item.icon />
