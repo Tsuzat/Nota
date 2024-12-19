@@ -4,12 +4,13 @@
 
 	interface Props {
 		text: string;
+		delayDuration?: number;
 		children: any;
 	}
-	let { text, children }: Props = $props();
+	let { text, delayDuration = 300, children }: Props = $props();
 </script>
 
-<Tooltip.Root delayDuration={0}>
+<Tooltip.Root {delayDuration}>
 	<Tooltip.Trigger>
 		{@render children()}
 	</Tooltip.Trigger>
