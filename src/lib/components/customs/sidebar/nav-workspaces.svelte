@@ -15,6 +15,7 @@
 	import type { WorkSpaceDB } from '$lib/database/workspace';
 	import { toast } from 'svelte-sonner';
 	import { page } from '$app/stores';
+	import { addOrRemoveFromFavorite } from '$lib/utils';
 
 	let open: boolean = $state(false);
 
@@ -67,6 +68,11 @@
 		} else {
 			toast.error('Error on deleting the note');
 		}
+	}
+
+	function toggleFavorite(note: NotesDB) {
+		note.favorite = !note.favorite;
+		addOrRemoveFromFavorite(note);
 	}
 </script>
 
@@ -139,7 +145,7 @@
 											</DropdownMenu.Trigger>
 											<DropdownMenu.Content>
 												<DropdownMenu.Group>
-													<DropdownMenu.Item onclick={() => (note.favorite = !note.favorite)}>
+													<DropdownMenu.Item onclick={() => toggleFavorite(note)}>
 														<Star
 															data-favorite={note.favorite}
 															class="data-[favorite=true]:fill-yellow-400 data-[favorite=true]:text-yellow-400 fill-none mr-2"

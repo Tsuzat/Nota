@@ -16,7 +16,7 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import { Button, buttonVariants } from '../ui/button';
 	import Input from '../ui/input/input.svelte';
-	import { Search, Shuffle, X } from 'lucide-svelte';
+	import { Shuffle, X } from 'lucide-svelte';
 	//@ts-ignore
 	import { debounce } from 'lodash-es';
 
@@ -130,11 +130,11 @@
 <Tabs.Root bind:value={selectedCatergory} class="w-96 flex flex-col-reverse">
 	<Tabs.List class="w-96 flex items-center justify-evenly rounded-sm">
 		{#each categories as catergory}
-			<Tooltip text={catergory}>
-				<Tabs.Trigger value={catergory} class="text-[1.25rem] p-1">
+			<Tabs.Trigger value={catergory} class="text-[1.25rem] p-1">
+				<Tooltip text={catergory}>
 					{categoriesEmojis[catergory]}
-				</Tabs.Trigger>
-			</Tooltip>
+				</Tooltip>
+			</Tabs.Trigger>
 		{/each}
 	</Tabs.List>
 	<Tabs.Content value={selectedCatergory} class="h-96 w-96 overflow-auto">

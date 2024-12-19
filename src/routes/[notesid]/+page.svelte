@@ -10,12 +10,11 @@
 	import { error } from '@tauri-apps/plugin-log';
 	import { toast } from 'svelte-sonner';
 	import { redirect } from '@sveltejs/kit';
-	import { icons, Loader2 } from 'lucide-svelte';
+	import { Loader2 } from 'lucide-svelte';
 	import { page } from '$app/stores';
 
-	// Popins for notes
 	import '@fontsource-variable/inter';
-	import { FAVORITE_NOTES } from '$lib/contants';
+	import { APPWINDOW } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { addOrRemoveFromFavorite, updateFavoriteNote, updateWorkspaces } from '$lib/utils';
 
@@ -105,14 +104,13 @@
 			updatedAt,
 			content
 		});
+		// Set the APP Window as notes name
+		APPWINDOW.setTitle(`Nota - ${name}`);
 	}
 
 	notesDB.subscribe((notes) => {
 		if (notes === null) return;
-		console.log('Update Notes');
-
 		addOrRemoveFromFavorite(notes);
-
 		updateNotesDB(notes);
 		updateWorkspaces(notes);
 		updateFavoriteNote(notes);

@@ -2,7 +2,6 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { initializeDatabase } from './database/sqldb';
 import { FAVORITE_NOTES, WORKSPACES } from './contants';
-import type { WorkSpaceDB } from './database/workspace';
 import type { NotesDB } from './database/notes';
 
 export function cn(...inputs: ClassValue[]) {

@@ -2,6 +2,7 @@ import { writable } from 'svelte/store';
 import type { WorkSpaceDB } from './database/workspace';
 import type { NotesDB } from './database/notes';
 import { platform } from '@tauri-apps/plugin-os';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 /** Global Variables For showing new work space dialog */
 export const OPEN_NEW_WORKSPACE_DIALOG = writable(false);
@@ -17,3 +18,6 @@ export const OS = platform();
 
 /** Global Variable for Opening commandbar */
 export const OPEN_COMMAND_BAR = writable(false);
+
+/** Global Variable for controlling Application Window  */
+export const APPWINDOW = getCurrentWindow();
