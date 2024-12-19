@@ -6,6 +6,7 @@
 	import { onMount } from 'svelte';
 	import NewWorkSpace from '$lib/components/customs/dialogs/NewWorkSpace.svelte';
 	import Sonner from '$lib/components/ui/sonner/sonner.svelte';
+	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
 	let { children } = $props();
 
 	onMount(async () => {
@@ -16,6 +17,7 @@
 <ModeWatcher />
 <Sonner richColors />
 
+<Commandbar />
 <NewWorkSpace />
 
 <SidebarPage>

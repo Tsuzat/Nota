@@ -17,6 +17,7 @@
 	import '@fontsource-variable/inter';
 	import { FAVORITE_NOTES } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
+	import { addOrRemoveFromFavorite, updateFavoriteNote, updateWorkspaces } from '$lib/utils';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -108,13 +109,13 @@
 
 	notesDB.subscribe((notes) => {
 		if (notes === null) return;
-		if (notes.favorite) {
-			if ($FAVORITE_NOTES.find((note) => note.id === notes.id)) return;
-			FAVORITE_NOTES.update((note) => [...note, notes]);
-		} else {
-			FAVORITE_NOTES.update((notes1) => notes1.filter((note) => note.id !== notes.id));
-		}
+		console.log('Update Notes');
+
+		addOrRemoveFromFavorite(notes);
+
 		updateNotesDB(notes);
+		updateWorkspaces(notes);
+		updateFavoriteNote(notes);
 	});
 
 	function updateContent(content: Content) {
@@ -142,8 +143,6 @@
 
 		if ($notesDB === null) return;
 		$notesDB.icon = icon;
-		notesDB.set($notesDB);
-		updateNotesDB($notesDB);
 	}
 </script>
 
