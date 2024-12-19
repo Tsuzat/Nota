@@ -1,9 +1,15 @@
 <script lang="ts">
-	import NavActions from '$lib/components/customs/sidebar/nav-actions.svelte';
-	import ShadEditor from '$lib/components/shad-editor/shad-editor.svelte';
+	import Emojipicker from '$lib/components/icons/emojipicker.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
+	import { APPWINDOW } from '$lib/contants';
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		// Set the APP Window as notes name
+		APPWINDOW.setTitle('Nota - Home');
+	});
 </script>
 
 <main>

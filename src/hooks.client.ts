@@ -3,7 +3,6 @@ import { FAVORITE_NOTES, WORKSPACES } from '$lib/contants';
 import { getFavoriteNotes, getNotesByWorkspace } from '$lib/database/notes';
 import { initializeDatabase } from '$lib/database/sqldb';
 import { getWorkSpaces } from '$lib/database/workspace';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { error } from '@tauri-apps/plugin-log';
 import { toast } from 'svelte-sonner';
 
@@ -28,11 +27,4 @@ import { toast } from 'svelte-sonner';
 			toast.error('Error on initializing the database');
 			error(err.toString());
 		});
-
-	// Show URL on appwindow title
-	page.subscribe((page) => {
-		if (!page.url || !page.url.pathname) return;
-		const window = getCurrentWindow();
-		window.setTitle(`Nota - ${page.url.pathname}`);
-	});
 })();
