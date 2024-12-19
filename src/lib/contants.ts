@@ -14,3 +14,6 @@ export const FAVORITE_NOTES = writable<NotesDB[]>([]);
 
 /** Global variable for keep track of current os */
 export const OS = platform();
+
+/** Global Variable for Opening commandbar */
+export const OPEN_COMMAND_BAR = writable(false);
