@@ -1,7 +1,6 @@
 <script lang="ts">
 	import * as Popover from '$lib/components/ui/popover';
 	import { buttonVariants } from '../ui/button';
-	import { Content } from '../ui/dropdown-menu';
 	import Emojipicker from './emojipicker.svelte';
 
 	interface Props {
@@ -10,6 +9,8 @@
 	}
 
 	let { onSelect, children }: Props = $props();
+
+	async function search(name: string) {}
 </script>
 
 <Popover.Root>
