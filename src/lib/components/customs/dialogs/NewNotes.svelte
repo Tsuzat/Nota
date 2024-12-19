@@ -9,8 +9,10 @@
 	import * as Select from '$lib/components/ui/select';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
+	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 
 	let title: string | undefined = $state<string>();
+	let icon: string = $state('📃');
 
 	interface Props {
 		workspace?: WorkSpaceDB;
@@ -67,6 +69,12 @@
 					placeholder="Enter Workspace Name..."
 					class="col-span-3"
 				/>
+			</div>
+			<div class="flex items-center gap-4">
+				<Label for="name" class="text-right">Icon</Label>
+				<Iconpicker onSelect={(icon_) => (icon = icon_)} side="right">
+					<span class="text-xl border rounded">{icon}</span>
+				</Iconpicker>
 			</div>
 			<div class="flex items-center gap-4">
 				<Label for="name" class="text-right">Workspace</Label>
