@@ -9713,48 +9713,6 @@
 		{
 			"name": "footprints",
 			"emoji": "👣"
-		},
-		{
-			"name": "fingerprint",
-			"emoji": "🫆"
-		}
-	],
-	"Component": [
-		{
-			"name": "red hair",
-			"emoji": "🦰"
-		},
-		{
-			"name": "curly hair",
-			"emoji": "🦱"
-		},
-		{
-			"name": "white hair",
-			"emoji": "🦳"
-		},
-		{
-			"name": "bald",
-			"emoji": "🦲"
-		},
-		{
-			"name": "light skin tone",
-			"emoji": "🏻"
-		},
-		{
-			"name": "medium-light skin tone",
-			"emoji": "🏼"
-		},
-		{
-			"name": "medium skin tone",
-			"emoji": "🏽"
-		},
-		{
-			"name": "medium-dark skin tone",
-			"emoji": "🏾"
-		},
-		{
-			"name": "dark skin tone",
-			"emoji": "🏿"
 		}
 	],
 	"Animals & Nature": [
