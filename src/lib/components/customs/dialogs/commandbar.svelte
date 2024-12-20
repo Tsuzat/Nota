@@ -6,7 +6,7 @@
 	import Smile from 'lucide-svelte/icons/smile';
 	import User from 'lucide-svelte/icons/user';
 	import * as Command from '$lib/components/ui/command/index.js';
-	import { FAVORITE_NOTES, OPEN_COMMAND_BAR } from '$lib/contants';
+	import { NOTES, OPEN_COMMAND_BAR } from '$lib/contants';
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -24,7 +24,7 @@
 		<Command.Empty>No results found.</Command.Empty>
 
 		<Command.Group heading="Favorites Notes">
-			{#each $FAVORITE_NOTES as notes}
+			{#each $NOTES.filter((notes) => notes.favorite) as notes}
 				<Command.Item>
 					<span class="mr-2">{notes.icon}</span>
 					<span>{notes.name}</span>

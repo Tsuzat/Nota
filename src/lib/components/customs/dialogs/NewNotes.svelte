@@ -5,7 +5,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { type WorkSpaceDB } from '$lib/database/workspace';
 	import { createNote, type NotesDB } from '$lib/database/notes';
-	import { WORKSPACES } from '$lib/contants';
+	import { NOTES, WORKSPACES } from '$lib/contants';
 	import * as Select from '$lib/components/ui/select';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
@@ -21,31 +21,21 @@
 
 	let { workspace = undefined, open = $bindable(false) }: Props = $props();
 
-	const workspaces = $WORKSPACES.keys().toArray();
+	const workspaces = $WORKSPACES;
 
 	let defaultWorkspace: WorkSpaceDB = $state(workspace ?? workspaces[0]);
 
 	async function handleSubmit() {
 		if (!title) return;
-		const notes = await createNote('😉', title, defaultWorkspace);
+		const notes = await createNote(icon, title, defaultWorkspace);
 		if (notes === null) {
 			toast.warning('Could not create note', {
 				description: `Notes with title ${title} can not be created`
 			});
 			return;
 		}
-		WORKSPACES.update((workspaces) => {
-			const currentWorkspaces = workspaces
-				.keys()
-				.toArray()
-				.find((workspace) => workspace.id === defaultWorkspace.id);
-			if (!currentWorkspaces) return workspaces;
-			const workspaceNotes = workspaces.get(currentWorkspaces);
-			if (!workspaceNotes) return workspaces;
-			workspaceNotes.push(notes);
-			workspaces.set(currentWorkspaces, workspaceNotes);
-			return workspaces;
-		});
+		NOTES.update((notes_) => [...notes_, notes]);
+
 		toast.success('Note created', {
 			description: `Note with title ${title} created successfully`
 		});

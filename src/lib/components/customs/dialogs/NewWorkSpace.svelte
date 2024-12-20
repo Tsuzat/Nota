@@ -8,9 +8,11 @@
 	import { open } from '@tauri-apps/plugin-dialog';
 	import { Ellipsis } from 'lucide-svelte';
 	import { createWorkspace } from '$lib/database/workspace';
+	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 
 	let dir: string | undefined = $state<string>();
 	let name: string | undefined = $state<string>();
+	let icon: string = $state('📂');
 	let defaultPath: string | undefined = $state<string>();
 
 	let workspacePath = $derived.by(() => {
@@ -34,7 +36,7 @@
 
 	async function handleSubmit() {
 		if (!dir || !name) return;
-		createWorkspace(dir, name);
+		createWorkspace(dir, name, icon);
 		OPEN_NEW_WORKSPACE_DIALOG.set(false);
 	}
 </script>
@@ -56,6 +58,12 @@
 					placeholder="Enter Workspace Name..."
 					class="col-span-3"
 				/>
+			</div>
+			<div class="flex items-center gap-4">
+				<Label for="name" class="text-right">Icon</Label>
+				<Iconpicker onSelect={(icon_) => (icon = icon_)} side="right">
+					<span class="text-xl border rounded">{icon}</span>
+				</Iconpicker>
 			</div>
 			<div class="flex items-center gap-4">
 				<Label for="workspace" class="text-right">Path</Label>
