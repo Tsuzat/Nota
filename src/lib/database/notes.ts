@@ -157,25 +157,6 @@ async function deleteNotesFromDB(notesId: string) {
 }
 
 /**
- * Function to get the notes from the database by workspace id
- * @param workspaceId
- * @param limit 5
- * @returns Promise<NotesDB[]>
- */
-export async function getNotesByWorkspace(workspaceId: string): Promise<NotesDB[]> {
-	let res: NotesDB[] = [];
-	try {
-		res = await DB.select<NotesDB[]>('SELECT * FROM notes WHERE workspace = $1', [workspaceId]);
-	} catch (e) {
-		//@ts-ignore
-		error(e.toString());
-		toast.error('Something went wrong when getting the notes');
-		console.error(e);
-	}
-	return res;
-}
-
-/**
  * Find the notes from the database by id
  * @param id - Note id
  * @returns NotesDB or null
@@ -231,21 +212,13 @@ export async function updateNotesDB(notesDB: NotesDB) {
 }
 
 /**
- * Function to fetch all the favorite notes from the database
- * @returns Promise<NotesDB[]>
+ * Function to get all the notes from the database
+ * @returns NotesDB[] - Array of notes
  */
-export async function getFavoriteNotes(): Promise<NotesDB[]> {
+export async function getAllNotes(): Promise<NotesDB[]> {
 	let res: NotesDB[] = [];
 	try {
-		res = await DB.select<NotesDB[]>(`SELECT * FROM notes WHERE favorite = 'true'`);
-		// Convert string to boolean
-		res = res.map((note) => ({
-			...note,
-			//@ts-ignore
-			favorite: note.favorite === 'true' || note.favorite === '1',
-			//@ts-ignore
-			trashed: note.trashed === 'true' || note.trashed === '1'
-		}));
+		res = await DB.select<NotesDB[]>('SELECT * FROM notes');
 	} catch (e) {
 		//@ts-ignore
 		error(e.toString());

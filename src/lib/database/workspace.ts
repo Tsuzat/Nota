@@ -34,7 +34,7 @@ export interface WorkSpace {
 	content: Content;
 }
 
-export async function createWorkspace(path: string, name: string, icon: string = '😍') {
+export async function createWorkspace(path: string, name: string, icon: string) {
 	// create the workspace folder
 	const workspaceLocation = await resolve(path, name);
 	mkdir(workspaceLocation)
@@ -95,7 +95,7 @@ export async function insertIntoWorkSpaces(workspace: WorkSpaceDB) {
 	])
 		.then(() => {
 			WORKSPACES.update((workspaces) => {
-				return workspaces.set(workspace, []);
+				return [...workspaces, workspace];
 			});
 			console.log('Workspace inserted successfully', workspace);
 			info(`Workspace inserted successfully, ${workspace}`);
@@ -108,7 +108,6 @@ export async function insertIntoWorkSpaces(workspace: WorkSpaceDB) {
 
 /**
  * Function to get the workspaces from the database
- * @param limit 5
  * @returns Promise<WorkSpaceDB[]>
  */
 export async function getWorkSpaces(): Promise<WorkSpaceDB[]> {
