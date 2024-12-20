@@ -14,9 +14,9 @@
 	import { page } from '$app/stores';
 
 	import '@fontsource-variable/inter';
-	import { APPWINDOW } from '$lib/contants';
+	import { APPWINDOW, NOTES } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
-	import { addOrRemoveFromFavorite, updateFavoriteNote, updateWorkspaces } from '$lib/utils';
+	import { updateNOTES } from '$lib/utils';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -27,10 +27,15 @@
 	});
 
 	$effect(() => {
-		loadNotes();
+		loadNotes(notesId);
 	});
 
-	async function loadNotes() {
+	NOTES.subscribe((notes) => {
+		if ($notesDB === null) return;
+		const newNote = notes.find((note) => note.id === $notesDB.id);
+	});
+
+	async function loadNotes(notesId: string) {
 		notes.set(null);
 		notesDB.set(null);
 		store = undefined;
@@ -110,10 +115,8 @@
 
 	notesDB.subscribe((notes) => {
 		if (notes === null) return;
-		addOrRemoveFromFavorite(notes);
 		updateNotesDB(notes);
-		updateWorkspaces(notes);
-		updateFavoriteNote(notes);
+		updateNOTES(notes);
 	});
 
 	function updateContent(content: Content) {
@@ -166,7 +169,7 @@
 					</div>
 				</div>
 				<div class="ml-auto px-3">
-					<NavActions bind:lastEdited={$notes.updatedAt} bind:favorite={$notesDB.favorite} />
+					<NavActions bind:lastEdited={$notes.updatedAt} favorite={$notesDB.favorite} />
 				</div>
 			</header>
 			<div class="flex-grow max-h-[calc(100vh-3.5rem)]">

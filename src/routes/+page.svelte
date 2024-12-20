@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Emojipicker from '$lib/components/icons/emojipicker.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
