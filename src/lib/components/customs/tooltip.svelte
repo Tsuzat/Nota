@@ -10,11 +10,13 @@
 	let { text, delayDuration = 300, children }: Props = $props();
 </script>
 
-<Tooltip.Root {delayDuration}>
-	<Tooltip.Trigger>
-		{@render children()}
-	</Tooltip.Trigger>
-	<Tooltip.Content class="bg-background text-foreground text-sm rounded p-1 border">
-		<p>{text}</p>
-	</Tooltip.Content>
-</Tooltip.Root>
+<Tooltip.Provider>
+	<Tooltip.Root {delayDuration}>
+		<Tooltip.Trigger>
+			{@render children()}
+		</Tooltip.Trigger>
+		<Tooltip.Content class="bg-background text-foreground text-sm rounded p-1 border">
+			<p>{text}</p>
+		</Tooltip.Content>
+	</Tooltip.Root>
+</Tooltip.Provider>
