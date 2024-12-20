@@ -3,7 +3,7 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { OPEN_NEW_WORKSPACE_DIALOG, WORKSPACES } from '$lib/contants';
+	import { NOTES, OPEN_NEW_WORKSPACE_DIALOG, WORKSPACES } from '$lib/contants';
 	import { deleteNotes, updateNotesDB, type NotesDB } from '$lib/database/notes';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
@@ -15,7 +15,7 @@
 	import type { WorkSpaceDB } from '$lib/database/workspace';
 	import { toast } from 'svelte-sonner';
 	import { page } from '$app/stores';
-	import { addOrRemoveFromFavorite } from '$lib/utils';
+	import { updateNOTES } from '$lib/utils';
 
 	let open: boolean = $state(false);
 
@@ -41,7 +41,7 @@
 		// }
 	}
 
-	async function permanentlyDelete(note: NotesDB, workspace: WorkSpaceDB) {
+	async function permanentlyDelete(note: NotesDB) {
 		const shouldDelete = await confirm(
 			`Are you sure you want to delete this note "${note.name}"?`,
 			{
@@ -54,13 +54,9 @@
 		if ($page.url.pathname === `/${note.id}`) goto('/');
 		const isDeleted = await deleteNotes(note);
 		if (isDeleted) {
-			WORKSPACES.update((workspaces) => {
-				let workspaceNotes = workspaces.get(workspace);
-				if (!workspaceNotes) return workspaces;
-				// remove note from workspaceNotes
-				workspaceNotes = workspaceNotes.filter((n) => n.id !== note.id);
-				workspaces.set(workspace, workspaceNotes);
-				return workspaces;
+			// remove notes from NOTES
+			NOTES.update((notes) => {
+				return notes.filter((note) => note.id !== note.id);
 			});
 			toast.success('Note deleted', {
 				description: `Note with title ${note.name} deleted`
@@ -72,7 +68,8 @@
 
 	function toggleFavorite(note: NotesDB) {
 		note.favorite = !note.favorite;
-		addOrRemoveFromFavorite(note);
+		updateNotesDB(note);
+		updateNOTES(note);
 	}
 </script>
 
@@ -92,7 +89,7 @@
 	</Sidebar.GroupLabel>
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
-			{#each $WORKSPACES.keys() as workspace (workspace.name)}
+			{#each $WORKSPACES as workspace (workspace.name)}
 				<Collapsible.Root>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
@@ -120,7 +117,7 @@
 						</Sidebar.MenuAction>
 						<Collapsible.Content>
 							<Sidebar.MenuSub>
-								{#each $WORKSPACES.get(workspace) ?? [] as note (note.id)}
+								{#each $NOTES.filter((note) => note.workspace === workspace.id) as note (note.id)}
 									<Sidebar.MenuSubItem
 										data-active={$page.url.pathname === `/${note.id}`}
 										class="cursor-pointer flex w-full hover:bg-muted/50 data-[active=true]:bg-muted/70 rounded-lg items-center justify-between"
@@ -170,7 +167,7 @@
 													</DropdownMenu.Item>
 													<DropdownMenu.Item
 														class="data-[highlighted]:text-red-600 "
-														onclick={() => permanentlyDelete(note, workspace)}
+														onclick={() => permanentlyDelete(note)}
 													>
 														<FileX class="mr-2" />
 														<span>Delete</span>
@@ -186,7 +183,7 @@
 				</Collapsible.Root>
 			{/each}
 			<Sidebar.MenuItem>
-				{#if $WORKSPACES.size === 0}
+				{#if $WORKSPACES.length === 0}
 					<div class="text-sidebar-foreground/70 text-xs ml-2">No Workspaces Found</div>
 				{:else}
 					<Sidebar.MenuButton class="text-sidebar-foreground/70">

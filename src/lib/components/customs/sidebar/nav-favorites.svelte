@@ -3,7 +3,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
-	import { FAVORITE_NOTES } from '$lib/contants';
+	import { NOTES } from '$lib/contants';
 	import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Link from 'lucide-svelte/icons/link';
@@ -16,7 +16,7 @@
 <Sidebar.Group class="group-data-[collapsible=icon]:hidden">
 	<Sidebar.GroupLabel>Favorites</Sidebar.GroupLabel>
 	<Sidebar.Menu>
-		{#each $FAVORITE_NOTES as favorite (favorite.id)}
+		{#each $NOTES.filter((notes) => notes.favorite) as favorite (favorite.id)}
 			<Sidebar.MenuItem
 				data-active={$page.url.pathname === `/${favorite.id}`}
 				class="data-[active=true]:bg-muted/70 rounded"
