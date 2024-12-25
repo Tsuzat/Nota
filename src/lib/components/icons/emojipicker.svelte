@@ -125,6 +125,12 @@
 			keysToDelete.forEach((key) => filteredEmojiCache.delete(key));
 		}
 	}
+
+	function getRandom(): string {
+		const allEmojis = Object.values(emojis).flat();
+		const randomIndex = Math.floor(Math.random() * allEmojis.length);
+		return allEmojis[randomIndex].emoji;
+	}
 </script>
 
 <Tabs.Root bind:value={selectedCatergory} class="w-96 flex flex-col-reverse">
@@ -155,6 +161,7 @@
 		</div>
 	</Tabs.Content>
 	<div class="flex items-center gap-2 p-1">
+		<div></div>
 		<div class="flex items-center relative w-full">
 			<Input bind:value={searchTerm} placeholder="Search Emojies..." />
 			<span class="flex absolute right-0">
@@ -163,7 +170,7 @@
 				</Button>
 			</span>
 		</div>
-		<Button variant="outline" class="size-9 text-xl p-2">
+		<Button variant="outline" class="size-9 text-xl p-2" onclick={() => onSelect(getRandom())}>
 			<Tooltip text="Select Random">
 				<Shuffle />
 			</Tooltip>
