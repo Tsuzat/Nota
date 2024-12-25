@@ -219,6 +219,13 @@ export async function getAllNotes(): Promise<NotesDB[]> {
 	let res: NotesDB[] = [];
 	try {
 		res = await DB.select<NotesDB[]>('SELECT * FROM notes');
+		res = res.map((note) => ({
+			...note,
+			//@ts-ignore
+			favorite: note.favorite === 'true' || note.favorite === '1',
+			//@ts-ignore
+			trashed: note.trashed === 'true' || note.trashed === '1'
+		}));
 	} catch (e) {
 		//@ts-ignore
 		error(e.toString());
