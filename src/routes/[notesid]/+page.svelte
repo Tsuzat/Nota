@@ -11,7 +11,7 @@
 	import { toast } from 'svelte-sonner';
 	import { redirect } from '@sveltejs/kit';
 	import { Loader2 } from 'lucide-svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
 	import { APPWINDOW, NOTES } from '$lib/contants';
@@ -23,18 +23,14 @@
 	let store: Store | undefined = undefined;
 
 	let notesId = $derived.by(() => {
-		return $page.url.pathname.split('/')[1];
+		return page.url.pathname.split('/')[1];
 	});
 
 	$effect(() => {
 		loadNotes(notesId);
 	});
 
-	NOTES.subscribe((notes) => {
-		if ($notesDB === null) return;
-		const newNote = notes.find((note) => note.id === $notesDB.id);
-	});
-
+	// Loads the Notes fro Database and also the store
 	async function loadNotes(notesId: string) {
 		notes.set(null);
 		notesDB.set(null);
@@ -113,6 +109,7 @@
 		APPWINDOW.setTitle(`Nota - ${name}`);
 	}
 
+	// On notesDB changes, uodate DB and gloabal variable
 	notesDB.subscribe((notes) => {
 		if (notes === null) return;
 		updateNotesDB(notes);
@@ -169,7 +166,7 @@
 					</div>
 				</div>
 				<div class="ml-auto px-3">
-					<NavActions bind:lastEdited={$notes.updatedAt} favorite={$notesDB.favorite} />
+					<NavActions bind:lastEdited={$notes.updatedAt} bind:favorite={$notesDB.favorite} />
 				</div>
 			</header>
 			<div class="flex-grow max-h-[calc(100vh-3.5rem)]">
