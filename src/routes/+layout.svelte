@@ -8,10 +8,6 @@
 	import Sonner from '$lib/components/ui/sonner/sonner.svelte';
 	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
 	let { children } = $props();
-
-	onMount(async () => {
-		// load the data
-	});
 </script>
 
 <ModeWatcher />

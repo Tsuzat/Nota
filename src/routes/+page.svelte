@@ -5,9 +5,8 @@
 	import { APPWINDOW } from '$lib/contants';
 	import { onMount } from 'svelte';
 
-	onMount(() => {
-		// Set the APP Window as notes name
-		APPWINDOW.setTitle('Nota - Home');
+	onMount(async () => {
+		await APPWINDOW.setTitle('Nota - Home');
 	});
 </script>
 
