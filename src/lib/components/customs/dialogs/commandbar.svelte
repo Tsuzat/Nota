@@ -24,7 +24,7 @@
 		<Command.Empty>No results found.</Command.Empty>
 		<Command.Group heading="All Notes">
 			{#each $NOTES as notes (notes.id)}
-				<Command.Item>
+				<Command.Item value={notes.id}>
 					<div>{notes.icon}</div>
 					<span>{notes.name}</span>
 				</Command.Item>
