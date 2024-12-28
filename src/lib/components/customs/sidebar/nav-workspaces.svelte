@@ -36,6 +36,7 @@
 		if (!shouldDelete) return;
 		note.trashed = true;
 		let isUpdated = await updateNotesDB(note);
+		updateNOTES(note);
 		if (isUpdated) {
 			toast.success('Note moved to trash', {
 				description: `Notes "${note.name}" moved to trash`
@@ -96,7 +97,7 @@
 						</Sidebar.MenuAction>
 						<Collapsible.Content>
 							<Sidebar.MenuSub>
-								{#each $NOTES.filter((note) => note.workspace === workspace.id) as note (note.id)}
+								{#each $NOTES.filter((note) => note.workspace === workspace.id && !note.trashed) as note (note.id)}
 									<Sidebar.MenuSubItem
 										data-active={page.url.pathname === `/${note.id}`}
 										class="cursor-pointer flex w-full hover:bg-muted/50 data-[active=true]:bg-muted/70 rounded-lg items-center justify-between"

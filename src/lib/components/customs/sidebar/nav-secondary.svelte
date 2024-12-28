@@ -1,28 +1,68 @@
 <script lang="ts">
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import type { ComponentProps } from 'svelte';
+	import * as Sidebar from '$lib/components/ui/sidebar';
+	import { MessageCircleQuestion, Settings2, Trash2 } from 'lucide-svelte';
+	import * as Popover from '$lib/components/ui/popover';
+	import Input from '$lib/components/ui/input/input.svelte';
+	import { NOTES } from '$lib/contants';
+	import TrashedNotes from '../tiles/trashed-notes.svelte';
+	import type { NotesDB } from '$lib/database/notes';
 
-	let {
-		ref = $bindable(null),
-		items,
-		...restProps
-	}: ComponentProps<typeof Sidebar.Group> & {
-		items: {
-			title: string;
-			url: string;
-			// This should be `Component` after lucide-svelte updates types
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			icon: any;
-			badge?: string;
-		}[];
-	} = $props();
+	let search: string = $state('');
+
+	let trashNotes: NotesDB[] = $derived.by(() => {
+		return $NOTES.filter(
+			(note) => note.trashed && note.name.toLowerCase().includes(search.trim().toLowerCase())
+		);
+	});
+
+	interface Items {
+		title: string;
+		url: string;
+		icon: any;
+		badge?: string;
+		onclick?: () => void;
+	}
+
+	let { ...restProps } = $props();
+
+	const items: Items[] = [
+		{
+			title: 'Settings',
+			url: '#',
+			icon: Settings2
+		},
+		{
+			title: 'Help',
+			url: '#',
+			icon: MessageCircleQuestion
+		}
+	];
 </script>
 
-<Sidebar.Group bind:ref {...restProps}>
+<Sidebar.Group {...restProps}>
+	<Popover.Root>
+		<Popover.Trigger>
+			<Sidebar.MenuButton>
+				<Trash2 />
+				<span>Trash</span>
+			</Sidebar.MenuButton>
+		</Popover.Trigger>
+		<Popover.Content side="right" class="p-2 max-h-60">
+			<Input placeholder="Search Notes" bind:value={search} class="mb-4" />
+			<div class="overflow-y-auto max-h-full">
+				{#if trashNotes.length === 0}
+					<div class="text-center text-muted-foreground font-bold">No notes found</div>
+				{/if}
+				{#each trashNotes as notes}
+					<TrashedNotes {notes} />
+				{/each}
+			</div>
+		</Popover.Content>
+	</Popover.Root>
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
 			{#each items as item (item.title)}
-				<Sidebar.MenuItem>
+				<Sidebar.MenuItem onclick={item.onclick}>
 					<Sidebar.MenuButton>
 						{#snippet child({ props })}
 							<a href={item.url} {...props}>
