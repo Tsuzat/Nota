@@ -8,6 +8,10 @@ import { error, info } from '@tauri-apps/plugin-log';
 import { DB } from './sqldb';
 import { remove } from '@tauri-apps/plugin-fs';
 import type { QueryResult } from '@tauri-apps/plugin-sql';
+import { confirm } from '@tauri-apps/plugin-dialog';
+import { page } from '$app/state';
+import { goto } from '$app/navigation';
+import { NOTES } from '$lib/contants';
 
 /**
  * Notes interface has the data of a note with
@@ -118,12 +122,38 @@ async function insertIntoNotes(notes: NotesDB) {
 }
 
 /**
+ * Function to delete a notes from the database and disk permanently with confirmation and redirect
+ * @param notes NotesDB - Note to be deleted
+ * @returns Promise<void> - void
+ */
+export async function permanentlyDeleteNotes(note: NotesDB) {
+	const shouldDelete = await confirm(`Are you sure you want to delete this note "${note.name}"?`, {
+		kind: 'warning',
+		title: 'Delete Notes?',
+		okLabel: 'Delete'
+	});
+	if (!shouldDelete) return;
+	if (page.url.pathname === `/${note.id}`) goto('/');
+	const isDeleted = await deleteNotes(note);
+	if (isDeleted) {
+		// remove notes from NOTES
+		NOTES.update((notes) => {
+			return notes.filter((lNote) => lNote.id !== note.id);
+		});
+		toast.success('Note deleted', {
+			description: `Note with title ${note.name} deleted`
+		});
+	} else {
+		toast.error('Error on deleting the note');
+	}
+}
+
+/**
  * Function to delete a notes from the database and disk
  * @param notes NotesDB - Note to be deleted
- * @param workspaceDB WorkSpaceDB - Workspace of the note to be deleted
  * @returns Promise<boolean> - true if the note is deleted successfully
  */
-export async function deleteNotes(notes: NotesDB): Promise<boolean> {
+async function deleteNotes(notes: NotesDB): Promise<boolean> {
 	const deleted = deleteNotesFromDB(notes.id);
 	if (!deleted) {
 		return false;
@@ -233,4 +263,32 @@ export async function getAllNotes(): Promise<NotesDB[]> {
 		console.error(e);
 	}
 	return res;
+}
+
+/**
+ * Function to duplicate a note and add it to the database and disk with toast notification
+ * @param note NoteDB - Note to be duplicated
+ * @param workspace WorkSpaceDB - Workspace where the note is to be duplicated
+ * @returns Promise<void> - void
+ */
+export async function duplicateNote(note: NotesDB, workspace: WorkSpaceDB) {
+	const newNote = await createNote(note.icon, `${note.name} - Copy`, workspace);
+	if (newNote === null) {
+		toast.error('Error on duplicating the note');
+		return;
+	}
+	// get the note location
+	const noteStore = await load(note.path);
+	const newNoteStore = await load(newNote.path);
+	newNoteStore.set('content', await noteStore.get('content'));
+	NOTES.update((notes) => {
+		return [...notes, newNote];
+	});
+	toast.success('Note duplicated', {
+		description: `Note with title ${note.name} duplicated`,
+		action: {
+			label: 'Open',
+			onClick: () => goto(`/${newNote.id}`)
+		}
+	});
 }
