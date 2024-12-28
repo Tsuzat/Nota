@@ -36,8 +36,9 @@
 		if (!shouldDelete) return;
 		note.trashed = true;
 		let isUpdated = await updateNotesDB(note);
-		updateNOTES(note);
 		if (isUpdated) {
+			updateNOTES(note);
+			goto('/');
 			toast.success('Note moved to trash', {
 				description: `Notes "${note.name}" moved to trash`
 			});
