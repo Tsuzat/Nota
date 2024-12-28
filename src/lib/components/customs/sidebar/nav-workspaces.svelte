@@ -4,7 +4,7 @@
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { NOTES, OPEN_NEW_WORKSPACE_DIALOG, WORKSPACES } from '$lib/contants';
-	import { deleteNotes, updateNotesDB, type NotesDB } from '$lib/database/notes';
+	import { createNote, deleteNotes, updateNotesDB, type NotesDB } from '$lib/database/notes';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Plus from 'lucide-svelte/icons/plus';
@@ -14,13 +14,14 @@
 	import NewNotes from '../dialogs/NewNotes.svelte';
 	import type { WorkSpaceDB } from '$lib/database/workspace';
 	import { toast } from 'svelte-sonner';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { updateNOTES } from '$lib/utils';
+	import { load } from '@tauri-apps/plugin-store';
 
 	let open: boolean = $state(false);
 
 	//! TODO: Need to test this function when impleted the trash
-	async function moveToTrash(note: NotesDB, workspace: WorkSpaceDB) {
+	async function moveToTrash(note: NotesDB) {
 		const shouldDelete = await confirm(
 			`Are you sure you want to move notes "${note.name}" to trash?`,
 			{
@@ -30,15 +31,15 @@
 			}
 		);
 		if (!shouldDelete) return;
-		// note.trashed = true;
-		// let isUpdated = await updateNotesDB(note);
-		// if (isUpdated) {
-		// 	toast.success('Note moved to trash', {
-		// 		description: `Note with title ${note.name} moved to trash`
-		// 	});
-		// } else {
-		// 	toast.error('Error on moving the note to trash');
-		// }
+		note.trashed = true;
+		let isUpdated = await updateNotesDB(note);
+		if (isUpdated) {
+			toast.success('Note moved to trash', {
+				description: `Note with title ${note.name} moved to trash`
+			});
+		} else {
+			toast.error('Error on moving the note to trash');
+		}
 	}
 
 	async function permanentlyDelete(note: NotesDB) {
@@ -51,12 +52,12 @@
 			}
 		);
 		if (!shouldDelete) return;
-		if ($page.url.pathname === `/${note.id}`) goto('/');
+		if (page.url.pathname === `/${note.id}`) goto('/');
 		const isDeleted = await deleteNotes(note);
 		if (isDeleted) {
 			// remove notes from NOTES
 			NOTES.update((notes) => {
-				return notes.filter((note) => note.id !== note.id);
+				return notes.filter((lNote) => lNote.id !== note.id);
 			});
 			toast.success('Note deleted', {
 				description: `Note with title ${note.name} deleted`
@@ -70,6 +71,28 @@
 		note.favorite = !note.favorite;
 		updateNotesDB(note);
 		updateNOTES(note);
+	}
+
+	async function duplicateNote(note: NotesDB, workspace: WorkSpaceDB) {
+		const newNote = await createNote(note.icon, `${note.name} - Copy`, workspace);
+		if (newNote === null) {
+			toast.error('Error on duplicating the note');
+			return;
+		}
+		// get the note location
+		const noteStore = await load(note.path);
+		const newNoteStore = await load(newNote.path);
+		newNoteStore.set('content', await noteStore.get('content'));
+		NOTES.update((notes) => {
+			return [...notes, newNote];
+		});
+		toast.success('Note duplicated', {
+			description: `Note with title ${note.name} duplicated`,
+			action: {
+				label: 'Open',
+				onClick: () => goto(`/${newNote.id}`)
+			}
+		});
 	}
 </script>
 
@@ -119,14 +142,19 @@
 							<Sidebar.MenuSub>
 								{#each $NOTES.filter((note) => note.workspace === workspace.id) as note (note.id)}
 									<Sidebar.MenuSubItem
-										data-active={$page.url.pathname === `/${note.id}`}
+										data-active={page.url.pathname === `/${note.id}`}
 										class="cursor-pointer flex w-full hover:bg-muted/50 data-[active=true]:bg-muted/70 rounded-lg items-center justify-between"
 									>
 										<Sidebar.MenuSubButton class="flex-grow" onclick={() => goto(`/${note.id}`)}>
 											{#snippet child({ props })}
 												<span {...props}>
 													<span>{note.icon}</span>
-													<span>{note.name}</span>
+													<span
+														data-trashed={note.trashed}
+														class="data-[trashed=true]:line-through"
+													>
+														{note.name}
+													</span>
 												</span>
 											{/snippet}
 										</Sidebar.MenuSubButton>
@@ -153,14 +181,14 @@
 														<Pen class="mr-2" />
 														<span>Rename or Edit</span>
 													</DropdownMenu.Item>
-													<DropdownMenu.Item>
+													<DropdownMenu.Item onclick={() => duplicateNote(note, workspace)}>
 														<Copy class="mr-2" />
 														<span>Duplicate</span>
 													</DropdownMenu.Item>
 													<DropdownMenu.Separator />
 													<DropdownMenu.Item
 														class="data-[highlighted]:text-red-600 "
-														onclick={() => moveToTrash(note, workspace)}
+														onclick={() => moveToTrash(note)}
 													>
 														<Trash2 class="mr-2" />
 														<span>Move to trash</span>

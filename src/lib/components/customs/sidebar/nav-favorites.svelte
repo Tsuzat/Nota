@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
@@ -18,7 +18,7 @@
 	<Sidebar.Menu>
 		{#each $NOTES.filter((notes) => notes.favorite) as favorite (favorite.id)}
 			<Sidebar.MenuItem
-				data-active={$page.url.pathname === `/${favorite.id}`}
+				data-active={page.url.pathname === `/${favorite.id}`}
 				class="data-[active=true]:bg-muted/70 rounded"
 			>
 				<Sidebar.MenuButton>
