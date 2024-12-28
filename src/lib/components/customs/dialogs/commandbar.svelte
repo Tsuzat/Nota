@@ -5,7 +5,7 @@
 	import Settings from 'lucide-svelte/icons/settings';
 	import Smile from 'lucide-svelte/icons/smile';
 	import User from 'lucide-svelte/icons/user';
-	import * as Command from '$lib/components/ui/command/index.js';
+	import * as Command from '$lib/components/ui/command';
 	import { NOTES, OPEN_COMMAND_BAR } from '$lib/contants';
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -22,16 +22,15 @@
 	<Command.Input placeholder="Type a command or search..." />
 	<Command.List>
 		<Command.Empty>No results found.</Command.Empty>
-
-		<Command.Group heading="Favorites Notes">
-			{#each $NOTES.filter((notes) => notes.favorite) as notes}
+		<Command.Group heading="All Notes">
+			{#each $NOTES as notes (notes.id)}
 				<Command.Item>
-					<span class="mr-2">{notes.icon}</span>
+					<div>{notes.icon}</div>
 					<span>{notes.name}</span>
 				</Command.Item>
 			{/each}
 		</Command.Group>
-
+		<Command.Separator />
 		<Command.Group heading="Suggestions">
 			<Command.Item>
 				<Calendar class="mr-2 size-4" />
