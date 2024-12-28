@@ -44,23 +44,6 @@
 				icon: House,
 				isActive: false
 			}
-		],
-		navSecondary: [
-			{
-				title: 'Settings',
-				url: '#',
-				icon: Settings2
-			},
-			{
-				title: 'Trash',
-				url: '#',
-				icon: Trash2
-			},
-			{
-				title: 'Help',
-				url: '#',
-				icon: MessageCircleQuestion
-			}
 		]
 	};
 </script>
@@ -87,7 +70,7 @@
 	<Sidebar.Content>
 		<NavFavorites />
 		<NavWorkspaces />
-		<NavSecondary items={data.navSecondary} class="mt-auto" />
+		<NavSecondary class="mt-auto" />
 	</Sidebar.Content>
 	<Sidebar.Rail />
 </Sidebar.Root>

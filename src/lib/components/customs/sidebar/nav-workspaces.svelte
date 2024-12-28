@@ -4,7 +4,12 @@
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { NOTES, OPEN_NEW_WORKSPACE_DIALOG, WORKSPACES } from '$lib/contants';
-	import { createNote, deleteNotes, updateNotesDB, type NotesDB } from '$lib/database/notes';
+	import {
+		duplicateNote,
+		permanentlyDeleteNotes,
+		updateNotesDB,
+		type NotesDB
+	} from '$lib/database/notes';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Plus from 'lucide-svelte/icons/plus';
@@ -12,11 +17,9 @@
 	import { Copy, FileX, Pen, Star, Trash, Trash2 } from 'lucide-svelte';
 	import { confirm } from '@tauri-apps/plugin-dialog';
 	import NewNotes from '../dialogs/NewNotes.svelte';
-	import type { WorkSpaceDB } from '$lib/database/workspace';
 	import { toast } from 'svelte-sonner';
 	import { page } from '$app/state';
 	import { updateNOTES } from '$lib/utils';
-	import { load } from '@tauri-apps/plugin-store';
 
 	let open: boolean = $state(false);
 
@@ -35,35 +38,10 @@
 		let isUpdated = await updateNotesDB(note);
 		if (isUpdated) {
 			toast.success('Note moved to trash', {
-				description: `Note with title ${note.name} moved to trash`
+				description: `Notes "${note.name}" moved to trash`
 			});
 		} else {
 			toast.error('Error on moving the note to trash');
-		}
-	}
-
-	async function permanentlyDelete(note: NotesDB) {
-		const shouldDelete = await confirm(
-			`Are you sure you want to delete this note "${note.name}"?`,
-			{
-				kind: 'warning',
-				title: 'Delete Notes?',
-				okLabel: 'Delete'
-			}
-		);
-		if (!shouldDelete) return;
-		if (page.url.pathname === `/${note.id}`) goto('/');
-		const isDeleted = await deleteNotes(note);
-		if (isDeleted) {
-			// remove notes from NOTES
-			NOTES.update((notes) => {
-				return notes.filter((lNote) => lNote.id !== note.id);
-			});
-			toast.success('Note deleted', {
-				description: `Note with title ${note.name} deleted`
-			});
-		} else {
-			toast.error('Error on deleting the note');
 		}
 	}
 
@@ -71,28 +49,6 @@
 		note.favorite = !note.favorite;
 		updateNotesDB(note);
 		updateNOTES(note);
-	}
-
-	async function duplicateNote(note: NotesDB, workspace: WorkSpaceDB) {
-		const newNote = await createNote(note.icon, `${note.name} - Copy`, workspace);
-		if (newNote === null) {
-			toast.error('Error on duplicating the note');
-			return;
-		}
-		// get the note location
-		const noteStore = await load(note.path);
-		const newNoteStore = await load(newNote.path);
-		newNoteStore.set('content', await noteStore.get('content'));
-		NOTES.update((notes) => {
-			return [...notes, newNote];
-		});
-		toast.success('Note duplicated', {
-			description: `Note with title ${note.name} duplicated`,
-			action: {
-				label: 'Open',
-				onClick: () => goto(`/${newNote.id}`)
-			}
-		});
 	}
 </script>
 
@@ -195,7 +151,7 @@
 													</DropdownMenu.Item>
 													<DropdownMenu.Item
 														class="data-[highlighted]:text-red-600 "
-														onclick={() => permanentlyDelete(note)}
+														onclick={() => permanentlyDeleteNotes(note)}
 													>
 														<FileX class="mr-2" />
 														<span>Delete</span>
