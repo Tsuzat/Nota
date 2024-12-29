@@ -31,7 +31,7 @@
 				class: 'h-fit w-full bg-muted/50 p-0'
 			})}
 		>
-			<div contenteditable="false" class="flex w-full items-center justify-start p-4">
+			<div contenteditable="true" class="flex w-full items-center justify-start p-4">
 				<ImageIcon class="mr-2" />
 				<span>Add an Image</span>
 			</div>
@@ -57,28 +57,6 @@
 			/>
 			<p class="font-bold">OR</p>
 			<p>Pick an Image</p>
-			<!-- <Input
-				id="picture"
-				type="file"
-				accept="image/*"
-				multiple={false}
-				onchange={(e: Event) => {
-					//@ts-ignore
-					if (e.target && e.target.files) {
-						//@ts-ignore
-						const files = Array.from(e.target.files || []);
-						files.map((file) => {
-							const reader = new FileReader();
-							reader.onload = () => {
-								const src = reader.result as string;
-								editor.chain().focus().setImage({ src }).run();
-							};
-							//@ts-ignore
-							reader.readAsDataURL(file);
-						});
-					}
-				}}
-			/> -->
 			<Button variant="ghost" class="h-fit w-full bg-muted/50 p-0" onclick={handleLocalFile}>
 				<div class="flex w-full items-center justify-start p-4">
 					<span>Choose from your device</span>
