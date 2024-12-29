@@ -142,3 +142,8 @@ input[type='checkbox'] {
 .tiptap .search-result-current {
 	@apply bg-orange-600 text-black;
 }
+
+.tiptap p.is-empty::before {
+	@apply text-muted-foreground float-left h-0 pointer-events-none;
+	content: attr(data-placeholder);
+}

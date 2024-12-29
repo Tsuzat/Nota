@@ -18,6 +18,7 @@
 	import Text from '@tiptap/extension-text';
 	import Typography from '@tiptap/extension-typography';
 	import TextAlign from '@tiptap/extension-text-align';
+	import Placeholder from '@tiptap/extension-placeholder';
 
 	import { SmilieReplacer } from './custom/Extentions/SmilieReplacer.js';
 	import { ColorHighlighter } from './custom/Extentions/ColorHighlighter.js';
@@ -92,7 +93,18 @@
 					codeBlock: false,
 					text: false
 				}),
+				Placeholder.configure({
+					// Use a placeholder:
+					placeholder: 'Write something …'
+					// Use different placeholders depending on the node type:
+					// placeholder: ({ node }) => {
+					//   if (node.type.name === 'heading') {
+					//     return 'What’s the title?'
+					//   }
 
+					//   return 'Can you add some further context?'
+					// },
+				}),
 				Typography,
 				Text,
 				TextStyle,
@@ -134,9 +146,7 @@
 				TableRow,
 				TableHeader,
 				TableCell,
-				ImageExtension.configure({
-					inline: true
-				}),
+				ImageExtension,
 				ImagePlaceholder
 			],
 			autofocus: true,
