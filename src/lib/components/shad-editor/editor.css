@@ -142,3 +142,8 @@ input[type='checkbox'] {
 .tiptap .search-result-current {
 	background-color: orange;
 }
+
+
+#drag-handle::after {
+	content: ":::";
+}

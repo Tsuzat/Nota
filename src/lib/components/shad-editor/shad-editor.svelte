@@ -36,6 +36,7 @@
 	import './onedark.css';
 	import SearchAndReplace from './custom/Extentions/SearchAndReplace.js';
 	import { ImagePlaceholder } from './custom/Extentions/ImagePlaceHolder.js';
+	import DragHandle from '@tiptap-pro/extension-drag-handle';
 
 	const lowlight = createLowlight(all);
 
@@ -63,7 +64,7 @@
 			editorProps: {
 				attributes: {
 					class:
-						'm-auto p-2 focus:outline-none flex-1 prose text-foreground mx-auto max-w-3xl dark:prose-invert *:my-2'
+						'm-auto p-2 pl-4 focus:outline-none flex-1 prose text-foreground mx-auto max-w-3xl dark:prose-invert *:my-2'
 				}
 			},
 			extensions: [
@@ -86,6 +87,13 @@
 					},
 					codeBlock: false,
 					text: false
+				}),
+				DragHandle.configure({
+					render: () => {
+						const element = document.createElement('div');
+						element.id = 'drag-handle';
+						return element;
+					}
 				}),
 				Typography,
 				Text,
