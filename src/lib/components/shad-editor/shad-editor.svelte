@@ -37,8 +37,9 @@
 	import './onedark.css';
 	import SearchAndReplace from './custom/Extentions/SearchAndReplace.js';
 	import { ImagePlaceholder } from './custom/Extentions/ImagePlaceHolder.js';
-	import DragHandle from './drag-handle.svelte';
 	import SearchReplace from './icons/search-replace.svelte';
+	import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
+	import AutoJoiner from 'tiptap-extension-auto-joiner';
 
 	const lowlight = createLowlight(all);
 
@@ -105,6 +106,11 @@
 					//   return 'Can you add some further context?'
 					// },
 				}),
+				GlobalDragHandle.configure({
+					scrollTreshold: 100,
+					dragHandleSelector: '#drag-handle'
+				}),
+				AutoJoiner,
 				Typography,
 				Text,
 				TextStyle,
@@ -179,7 +185,6 @@
 <div class={className}>
 	{#if editor}
 		<SearchReplace {editor} bind:open={searchReplaceOpen} />
-		<DragHandle {editor} />
 		{#if showToolbar}
 			<EditorToolbar {editor} />
 		{/if}
