@@ -37,6 +37,7 @@
 	import SearchAndReplace from './custom/Extentions/SearchAndReplace.js';
 	import { ImagePlaceholder } from './custom/Extentions/ImagePlaceHolder.js';
 	import DragHandle from './drag-handle.svelte';
+	import SearchReplace from './icons/search-replace.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -56,6 +57,9 @@
 
 	let editor = $state<Editor>();
 	let element = $state<HTMLElement>();
+
+	// Open Popovers
+	let searchReplaceOpen = $state(false);
 
 	onMount(() => {
 		editor = new Editor({
@@ -141,12 +145,6 @@
 				onChange(content);
 			},
 			onTransaction: (transaction) => {
-				/**
-				 * Weird behavior of editor.
-				 * If we do not make it undefined, then it looses it's reactivity
-				 * this is because assigning editor directly to `transaction.editor`
-				 * the original object is not mutated.
-				 */
 				editor = undefined;
 				editor = transaction.editor;
 				content = editor.getJSON();
@@ -157,12 +155,24 @@
 	onDestroy(() => {
 		if (editor) editor.destroy();
 	});
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'f' && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			searchReplaceOpen = true;
+		}
+	}
 </script>
 
+<svelte:document onkeydown={handleKeydown} />
+
 <div class={className}>
-	{#if editor && showToolbar}
-		<EditorToolbar {editor} />
+	{#if editor}
+		<SearchReplace {editor} bind:open={searchReplaceOpen} />
 		<DragHandle {editor} />
+		{#if showToolbar}
+			<EditorToolbar {editor} />
+		{/if}
 	{/if}
 	<div bind:this={element} spellcheck="false" class="h-full overflow-y-auto flex-1"></div>
 </div>
