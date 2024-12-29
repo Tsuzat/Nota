@@ -55,9 +55,9 @@
 	// });
 </script>
 
-<div class="flex max-w-fit mx-auto bg-muted/30 mb-1 p-0.5 rounded">
-	<Undo {editor} />
-	<Redo {editor} />
+<div class="flex max-w-fit mx-auto mb-1 p-0.5 rounded">
+	<!-- <Undo {editor} />
+	<Redo {editor} /> -->
 	<Text {editor} />
 	<Bold {editor} />
 	<Italic {editor} />
@@ -77,5 +77,4 @@
 	<Textcolor {editor} />
 	<Highlighter {editor} />
 	<Quickcolor {editor} />
-	<SearchReplace {editor} />
 </div>
