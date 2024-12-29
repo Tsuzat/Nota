@@ -136,14 +136,9 @@ input[type='checkbox'] {
 }
 
 .tiptap .search-result {
-	background-color: yellow;
+	@apply bg-yellow-500 text-gray-600;
 }
 
 .tiptap .search-result-current {
-	background-color: orange;
-}
-
-
-#drag-handle::after {
-	content: ":::";
+	@apply bg-orange-600 text-black;
 }
