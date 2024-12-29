@@ -45,13 +45,16 @@
 				<DropdownMenu.Item
 					contenteditable="false"
 					data-current={defaultLanguage === language}
-					class="capitalize data-[current=true]:bg-muted"
+					class="data-[current=true]:bg-muted"
 					onclick={() => {
 						defaultLanguage = language;
 						updateAttributes({ language: defaultLanguage });
 					}}
 				>
 					<span>{language}</span>
+					{#if defaultLanguage === language}
+						<Check class="size-3 ml-auto" />
+					{/if}
 				</DropdownMenu.Item>
 			{/each}
 		</DropdownMenu.Content>
