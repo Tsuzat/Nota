@@ -36,7 +36,7 @@
 	import './onedark.css';
 	import SearchAndReplace from './custom/Extentions/SearchAndReplace.js';
 	import { ImagePlaceholder } from './custom/Extentions/ImagePlaceHolder.js';
-	import DragHandle from '@tiptap-pro/extension-drag-handle';
+	import DragHandle from './drag-handle.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -88,13 +88,7 @@
 					codeBlock: false,
 					text: false
 				}),
-				DragHandle.configure({
-					render: () => {
-						const element = document.createElement('div');
-						element.id = 'drag-handle';
-						return element;
-					}
-				}),
+
 				Typography,
 				Text,
 				TextStyle,
@@ -136,7 +130,9 @@
 				TableRow,
 				TableHeader,
 				TableCell,
-				ImageExtension,
+				ImageExtension.configure({
+					inline: true
+				}),
 				ImagePlaceholder
 			],
 			autofocus: true,
@@ -166,6 +162,7 @@
 <div class={className}>
 	{#if editor && showToolbar}
 		<EditorToolbar {editor} />
+		<DragHandle {editor} />
 	{/if}
 	<div bind:this={element} spellcheck="false" class="h-full overflow-y-auto flex-1"></div>
 </div>
