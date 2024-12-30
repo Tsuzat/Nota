@@ -1,12 +1,14 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { CheckCheck, MessageCircleQuestion, Settings2, Trash2 } from 'lucide-svelte';
+	import { MessageCircleQuestion, RefreshCw, Settings2, Trash2 } from 'lucide-svelte';
 	import * as Popover from '$lib/components/ui/popover';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { NOTES } from '$lib/contants';
 	import TrashedNotes from '../tiles/trashed-notes.svelte';
 	import type { NotesDB } from '$lib/database/notes';
-	import { checkUpdate } from '$lib/updater';
+	import { toast } from 'svelte-sonner';
+	import { check } from '@tauri-apps/plugin-updater';
+	import { downloadAndInstall } from '$lib/updater';
 
 	let search: string = $state('');
 
@@ -15,6 +17,31 @@
 			(note) => note.trashed && note.name.toLowerCase().includes(search.trim().toLowerCase())
 		);
 	});
+
+	let checkingUpdate = $state(false);
+
+	async function checkUpdate() {
+		if (checkingUpdate) return;
+		checkingUpdate = true;
+		const id = toast.loading('Checking for updates...');
+		const update = await check();
+		if (update) {
+			toast.success('Update available', {
+				id,
+				description: `New version ${update.version} is available.`,
+				action: {
+					label: 'Download',
+					onClick: async () => {
+						checkingUpdate = false;
+						await downloadAndInstall(update);
+					}
+				}
+			});
+		} else {
+			toast.success('No updates available', { id });
+		}
+		checkingUpdate = false;
+	}
 
 	interface Items {
 		title: string;
@@ -36,14 +63,6 @@
 			title: 'Help',
 			url: '#',
 			icon: MessageCircleQuestion
-		},
-		{
-			title: 'Check Updates',
-			url: '#',
-			icon: CheckCheck,
-			onclick: async () => {
-				await checkUpdate();
-			}
 		}
 	];
 </script>
@@ -85,6 +104,12 @@
 					{/if}
 				</Sidebar.MenuItem>
 			{/each}
+			<Sidebar.MenuItem>
+				<Sidebar.MenuButton onclick={checkUpdate}>
+					<RefreshCw data-spin={checkingUpdate} class="data-[spin=true]:animate-spin" />
+					<span>Check Update</span>
+				</Sidebar.MenuButton>
+			</Sidebar.MenuItem>
 		</Sidebar.Menu>
 	</Sidebar.GroupContent>
 </Sidebar.Group>
