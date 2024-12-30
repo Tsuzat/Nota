@@ -1,6 +1,10 @@
 {
 	"name": "nota",
-	"version": "0.1.0",
+	"version": "0.1.1",
+	"author": {
+		"name": "Alok 'Tsuzat' Singh",
+		"email": "contact@tsuzat.com"
+	},
 	"description": "",
 	"type": "module",
 	"scripts": {
