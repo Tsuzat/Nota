@@ -9,7 +9,7 @@
 	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import { check } from '@tauri-apps/plugin-updater';
-	import downloadAndInstall from '$lib/updater';
+	import { downloadAndInstall } from '$lib/updater';
 	let { children } = $props();
 
 	onMount(async () => {

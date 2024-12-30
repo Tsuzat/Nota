@@ -1,8 +1,24 @@
-import { Update } from '@tauri-apps/plugin-updater';
+import { check, Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'svelte-sonner';
+import { message } from '@tauri-apps/plugin-dialog';
 
-async function downloadAndInstall(update: Update) {
+export async function checkUpdate() {
+	const update = await check();
+	if (update) {
+		message(`found update ${update.version} from ${update.date} with notes ${update.body}`, {
+			title: 'Update Available',
+			kind: 'info'
+		});
+	} else {
+		message('Could not find any new update for the application', {
+			title: 'No Update Available',
+			kind: 'warning'
+		});
+	}
+}
+
+export async function downloadAndInstall(update: Update) {
 	console.log(`found update ${update.version} from ${update.date} with notes ${update.body}`);
 	const id = toast.info(`Update ${update.version} is available. Downloading...`, {
 		description: `Found update ${update.version} from ${update.date} with notes ${update.body}`
@@ -45,5 +61,3 @@ async function downloadAndInstall(update: Update) {
 	});
 	await relaunch();
 }
-
-export default downloadAndInstall;
