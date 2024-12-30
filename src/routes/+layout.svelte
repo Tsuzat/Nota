@@ -7,7 +7,28 @@
 	import NewWorkSpace from '$lib/components/customs/dialogs/NewWorkSpace.svelte';
 	import Sonner from '$lib/components/ui/sonner/sonner.svelte';
 	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
+	import { ask } from '@tauri-apps/plugin-dialog';
+	import { check } from '@tauri-apps/plugin-updater';
+	import downloadAndInstall from '$lib/updater';
 	let { children } = $props();
+
+	onMount(async () => {
+		// check for updates
+		const update = await check();
+		if (update) {
+			const shouldUpdate = await ask(
+				`New version ${update.version} is available for application. Do you want to update the application?`,
+				{
+					kind: 'info',
+					title: 'Update Available',
+					okLabel: 'Update'
+				}
+			);
+			if (shouldUpdate) {
+				downloadAndInstall(update);
+			}
+		}
+	});
 </script>
 
 <ModeWatcher />
