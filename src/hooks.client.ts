@@ -1,3 +1,4 @@
+import initializeAppMenu from '$lib/app_menu';
 import { NOTES, WORKSPACES } from '$lib/contants';
 import { getAllNotes } from '$lib/database/notes';
 import { initializeDatabase } from '$lib/database/sqldb';
@@ -21,4 +22,5 @@ import { toast } from 'svelte-sonner';
 			toast.error('Error on initializing the database');
 			error(err.toString());
 		});
+	await initializeAppMenu();
 })();
