@@ -43,9 +43,7 @@
 	"plugins": {
 		"updater": {
 			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU0NUVCNTc5N0IyNURGNEMKUldSTTN5VjdlYlZlNUNreUsxY0NVaGNTbFp5c1lualgxZmJCUFc0bWhSYnFLaVRkSnpQcmdtQlIK",
-			"endpoints": [
-				"https://github.com/Tsuzat/Nota/releases/download/release-v{{current_version}}/latest.json"
-			]
+			"endpoints": ["https://github.com/Tsuzat/Nota/releases/latest/download/latest.json"]
 		}
 	}
 }
