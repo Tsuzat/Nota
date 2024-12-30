@@ -2,7 +2,6 @@ import { check, Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'svelte-sonner';
 import { message } from '@tauri-apps/plugin-dialog';
-import { VERSION } from 'svelte/compiler';
 import { getVersion } from '@tauri-apps/api/app';
 
 export async function checkUpdate() {
@@ -31,15 +30,14 @@ export async function downloadAndInstall(update: Update) {
 	});
 	let downloaded = 0;
 	let contentLength = 0;
-	// alternatively we could also call update.download() and update.install() separately
 	await update.downloadAndInstall((event) => {
 		switch (event.event) {
 			case 'Started':
-				contentLength = event.data.contentLength ?? 0;
+				contentLength = (event.data.contentLength ?? 0) / 1e6;
 				console.log(`started downloading ${event.data.contentLength} bytes`);
 				toast.info(`Downloading update ${update.version}...`, {
 					id,
-					description: `Started downloading ${event.data.contentLength} bytes`
+					description: `Started downloading ${contentLength} MB`
 				});
 				break;
 			case 'Progress':
@@ -47,7 +45,7 @@ export async function downloadAndInstall(update: Update) {
 				console.log(`downloaded ${downloaded} from ${contentLength}`);
 				toast.info(`Downloading update ${update.version}...`, {
 					id,
-					description: `Downloaded ${downloaded} / ${contentLength} bytes`
+					description: `Downloaded ${downloaded / 1e6} / ${contentLength} MB`
 				});
 				break;
 			case 'Finished':
@@ -59,8 +57,6 @@ export async function downloadAndInstall(update: Update) {
 				break;
 		}
 	});
-
-	console.log('update installed');
 	toast.success(`Update ${update.version} installed. Relaunching...`, {
 		id,
 		description: 'Update installed'
