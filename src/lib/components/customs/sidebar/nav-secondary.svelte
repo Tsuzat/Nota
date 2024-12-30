@@ -1,11 +1,12 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { MessageCircleQuestion, Settings2, Trash2 } from 'lucide-svelte';
+	import { CheckCheck, MessageCircleQuestion, Settings2, Trash2 } from 'lucide-svelte';
 	import * as Popover from '$lib/components/ui/popover';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { NOTES } from '$lib/contants';
 	import TrashedNotes from '../tiles/trashed-notes.svelte';
 	import type { NotesDB } from '$lib/database/notes';
+	import { checkUpdate } from '$lib/updater';
 
 	let search: string = $state('');
 
@@ -35,6 +36,14 @@
 			title: 'Help',
 			url: '#',
 			icon: MessageCircleQuestion
+		},
+		{
+			title: 'Check Updates',
+			url: '#',
+			icon: CheckCheck,
+			onclick: async () => {
+				await checkUpdate();
+			}
 		}
 	];
 </script>

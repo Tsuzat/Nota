@@ -2,6 +2,8 @@ import { check, Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'svelte-sonner';
 import { message } from '@tauri-apps/plugin-dialog';
+import { VERSION } from 'svelte/compiler';
+import { getVersion } from '@tauri-apps/api/app';
 
 export async function checkUpdate() {
 	const update = await check();
@@ -11,10 +13,14 @@ export async function checkUpdate() {
 			kind: 'info'
 		});
 	} else {
-		message('Could not find any new update for the application', {
-			title: 'No Update Available',
-			kind: 'warning'
-		});
+		const currentVersion = await getVersion();
+		message(
+			`Could not find any new update for the application. Current Version: ${currentVersion}`,
+			{
+				title: 'No Update Available',
+				kind: 'warning'
+			}
+		);
 	}
 }
 
