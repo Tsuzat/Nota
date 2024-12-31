@@ -40,6 +40,9 @@
 	import SearchReplace from './icons/search-replace.svelte';
 	import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 	import AutoJoiner from 'tiptap-extension-auto-joiner';
+	import Button from '../ui/button/button.svelte';
+	import { ArrowUp } from 'lucide-svelte';
+	import Tooltip from '../customs/tooltip.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -190,4 +193,18 @@
 		{/if}
 	{/if}
 	<div bind:this={element} spellcheck="false" class="h-full overflow-y-auto flex-1"></div>
+	<div class="fixed right-4 bottom-4">
+		<Tooltip text="Scroll to Top" side="left">
+			<Button
+				variant="outline"
+				size="icon"
+				class="rounded-full"
+				onclick={() => {
+					element?.scrollTo({ top: 0, behavior: 'smooth' });
+				}}
+			>
+				<ArrowUp />
+			</Button>
+		</Tooltip>
+	</div>
 </div>
