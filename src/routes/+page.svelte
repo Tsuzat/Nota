@@ -28,6 +28,6 @@
 	</header>
 	<div class="flex flex-1 flex-col gap-4 p-2">
 		<div class="bg-muted/50 mx-auto h-24 w-full max-w-3xl rounded-xl"></div>
-		<div class="mx-auto h-full w-full max-w-3xl bg-muted/50 rounded-xl"></div>
+		<div class="mx-auto h-56 w-full max-w-3xl bg-muted/50 rounded-xl"></div>
 	</div>
 </main>
