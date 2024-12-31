@@ -10,9 +10,11 @@
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { downloadAndInstall } from '$lib/updater';
+	import { APPWINDOW } from '$lib/contants';
 	let { children } = $props();
 
 	onMount(async () => {
+		await APPWINDOW.show();
 		// check for updates
 		const update = await check();
 		if (update) {
