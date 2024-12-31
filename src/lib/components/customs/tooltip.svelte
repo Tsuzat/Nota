@@ -6,8 +6,9 @@
 		text: string;
 		delayDuration?: number;
 		children: any;
+		side?: 'top' | 'bottom' | 'left' | 'right';
 	}
-	let { text, delayDuration = 300, children }: Props = $props();
+	let { text, delayDuration = 300, side = 'top', children }: Props = $props();
 </script>
 
 <Tooltip.Provider>
@@ -15,7 +16,7 @@
 		<Tooltip.Trigger>
 			{@render children()}
 		</Tooltip.Trigger>
-		<Tooltip.Content class="bg-background text-foreground text-sm rounded p-1 border">
+		<Tooltip.Content class="bg-background text-foreground text-sm rounded p-1 border" {side}>
 			<p>{text}</p>
 		</Tooltip.Content>
 	</Tooltip.Root>
