@@ -88,6 +88,15 @@
 	* {
 		@apply border-border;
 	}
+
+	::-webkit-scrollbar {
+		@apply size-2;
+	}
+
+	::-webkit-scrollbar-thumb {
+		@apply bg-muted size-2 rounded-full;
+	}
+
 	body {
 		@apply bg-background text-foreground;
 	}
