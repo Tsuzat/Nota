@@ -13,7 +13,7 @@
 		<Tooltip.Trigger>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
-					<Button variant="ghost" size="sm" class="h-8">
+					<Button variant="ghost" size="sm" class="h-8 w-fit px-2">
 						<Table />
 						<ChevronDown class="!size-3" />
 					</Button>
