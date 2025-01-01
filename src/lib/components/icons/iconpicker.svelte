@@ -14,7 +14,7 @@
 	<Popover.Trigger class={buttonVariants({ variant: 'ghost', class: 'size-8 p-2' })}>
 		{@render children()}
 	</Popover.Trigger>
-	<Popover.Content class="size-fit max-w-96 p-0" {side}>
+	<Popover.Content class="size-fit p-0 shadow-2xl" {side}>
 		<Emojipicker {onSelect} />
 	</Popover.Content>
 </Popover.Root>
