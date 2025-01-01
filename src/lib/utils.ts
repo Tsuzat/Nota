@@ -20,3 +20,15 @@ export function updateNOTES(notes: NotesDB) {
 		});
 	});
 }
+
+/**
+ * Function which validates a URL if the URL is valid
+ * @param url string - URL to validate
+ * @returns boolean - true if URL is valid, false otherwise
+ */
+export function validateURL(url: string): boolean {
+	const urlRegex = new RegExp(
+		/^((http|https):\/\/)?(www\.)?([a-zA-Z0-9]+)\.([a-zA-Z]{2,})((\/[a-zA-Z0-9#]+\/?)+)?(\?[a-zA-Z0-9=&]+)?$/
+	);
+	return urlRegex.test(url);
+}
