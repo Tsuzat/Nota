@@ -20,6 +20,7 @@
 	import { toast } from 'svelte-sonner';
 	import { page } from '$app/state';
 	import { updateNOTES } from '$lib/utils';
+	import Tooltip from '../tooltip.svelte';
 
 	let open: boolean = $state(false);
 
@@ -57,16 +58,18 @@
 <Sidebar.Group>
 	<Sidebar.GroupLabel class="flex items-center justify-between">
 		<span>Workspaces</span>
-		<Button
-			variant="ghost"
-			size="sm"
-			class="size-4 p-2.5 rounded-sm"
-			onclick={() => {
-				OPEN_NEW_WORKSPACE_DIALOG.set(true);
-			}}
-		>
-			<Plus />
-		</Button>
+		<Tooltip text="Create New Workspace">
+			<Button
+				variant="ghost"
+				size="sm"
+				class="size-4 p-2.5 rounded-sm"
+				onclick={() => {
+					OPEN_NEW_WORKSPACE_DIALOG.set(true);
+				}}
+			>
+				<Plus />
+			</Button>
+		</Tooltip>
 	</Sidebar.GroupLabel>
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
