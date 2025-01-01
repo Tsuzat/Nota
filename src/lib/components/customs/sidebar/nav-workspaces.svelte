@@ -58,7 +58,7 @@
 <Sidebar.Group>
 	<Sidebar.GroupLabel class="flex items-center justify-between">
 		<span>Workspaces</span>
-		<Tooltip text="Create New Workspace">
+		<Tooltip text="Create a Workspace">
 			<Button
 				variant="ghost"
 				size="sm"
