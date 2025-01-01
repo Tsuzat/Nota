@@ -77,7 +77,7 @@
 							<div>
 								<div class="*:my-2">
 									<Label for="image">Image Link</Label>
-									<div class="relative flex">
+									<div class="relative flex items-center">
 										<Input
 											bind:value={imageUrl}
 											placeholder="Image URL https://example.com/image.jpg"
@@ -85,7 +85,7 @@
 										<Button
 											variant="ghost"
 											onclick={() => (imageUrl = undefined)}
-											class="size-4 p-0 absolute right-2 top-2.5"
+											class="size-4 p-0 absolute right-2"
 										>
 											<X class="size-3" />
 										</Button>
