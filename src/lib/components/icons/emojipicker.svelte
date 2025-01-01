@@ -164,10 +164,12 @@
 		<div></div>
 		<div class="flex items-center relative w-full">
 			<Input bind:value={searchTerm} placeholder="Search Emojies..." />
-			<span class="flex absolute right-0">
-				<Button variant="ghost" class="size-9" onclick={() => (searchTerm = '')}>
-					<X />
-				</Button>
+			<span class="flex absolute right-2">
+				<Tooltip text="Clear Search">
+					<Button variant="ghost" class="size-4 p-0" onclick={() => (searchTerm = '')}>
+						<X />
+					</Button>
+				</Tooltip>
 			</span>
 		</div>
 		<Button variant="outline" class="size-9 text-xl p-2" onclick={() => onSelect(getRandom())}>
