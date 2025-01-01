@@ -36,7 +36,6 @@
 	import { all, createLowlight } from 'lowlight';
 	import './onedark.css';
 	import SearchAndReplace from './custom/Extentions/SearchAndReplace.js';
-	import { ImagePlaceholder } from './custom/Extentions/ImagePlaceHolder.js';
 	import SearchReplace from './icons/search-replace.svelte';
 	import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 	import AutoJoiner from 'tiptap-extension-auto-joiner';
@@ -155,8 +154,7 @@
 				TableRow,
 				TableHeader,
 				TableCell,
-				ImageExtension,
-				ImagePlaceholder
+				ImageExtension
 			],
 			autofocus: true,
 			onUpdate: ({ editor }) => {
