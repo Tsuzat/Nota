@@ -3,7 +3,7 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { buttonVariants } from '../ui/button';
 	import Emojipicker from './emojipicker.svelte';
-	import LucideIcon from './lucide-icon.svelte';
+	import LucideIcon from './lucide-icons.svelte';
 	interface Props {
 		onSelect: (icon: string) => void;
 		side?: 'bottom' | 'top' | 'left' | 'right';
