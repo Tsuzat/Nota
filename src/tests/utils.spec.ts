@@ -1,4 +1,4 @@
-import { validateURL } from '../lib/utils';
+import { getIconType, validateURL } from '$lib/utils';
 import { describe, expect, it, test, vi } from 'vitest';
 
 // Mock platform detection
@@ -45,6 +45,21 @@ describe('Utils Unit Tests for validate URL', () => {
 	invalidUrls.forEach((url) => {
 		test(`should invalidate ${url}`, () => {
 			expect(validateURL(url)).toBe(false);
+		});
+	});
+});
+
+describe('Utils Unit Tests for getIconType', () => {
+	const icons = [
+		{ icon: '😂', type: 'emoji' },
+		{ icon: '❤️', type: 'emoji' },
+		{ icon: 'FolderIcon', type: 'lucide' },
+		{ icon: 'https://placehold.co/800x400/6A00F5/white', type: 'url' }
+	];
+
+	icons.forEach((icon) => {
+		test(`should return icon type for ${icon}`, () => {
+			expect(getIconType(icon.icon)).toBe(icon.type);
 		});
 	});
 });
