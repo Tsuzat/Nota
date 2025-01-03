@@ -27,12 +27,22 @@ export function updateNOTES(notes: NotesDB) {
  * @returns boolean - true if URL is valid, false otherwise
  */
 export function validateURL(url: string): boolean {
-	try {
-		new URL(url);
-		return true;
-	} catch (error) {
-		return false;
-	}
+	// try {
+	// 	new URL(url);
+	// 	return true;
+	// } catch (error) {
+	// 	return false;
+	// }
+	const urlPattern = new RegExp(
+		'^(https?:\\/\\/)?' + // protocol (optional)
+			'((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|' + // domain name and extension
+			'((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+			'(\\:\\d+)?(\\/[-a-zA-Z\\d%_.~+]*)*' + // port and path
+			'(\\?[;&a-zA-Z\\d%_.~+=-]*)?' + // query string
+			'(\\#[-a-zA-Z\\d_]*)?$', // fragment locator
+		'i'
+	);
+	return urlPattern.test(url);
 }
 
 /**
