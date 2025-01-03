@@ -6,26 +6,38 @@
 	import Tooltip from '../customs/tooltip.svelte';
 	import { onDestroy } from 'svelte';
 
-	let iconsName = Object.keys(icons).filter((icon) => icon.includes('Icon') && icon !== 'Icon');
-	let loadedIcons = $state(iconsName.slice(0, 200));
+	// Load all lucide icons
+	let allLucideIcons = Object.keys(icons).filter(
+		(icon) => icon.includes('Icon') && icon !== 'Icon'
+	);
+	// Loads the currently loaded icons
+	let iconsName = $state(allLucideIcons);
+	let loadedIcons: string[] = $state([]);
 	let bufferSize = 100;
 	let search = $state('');
 
-	let { name }: { name?: string } = $props();
+	// Search related effects
+	$effect(() => {
+		if (search.trim() === '') iconsName = allLucideIcons;
+		else
+			iconsName = allLucideIcons.filter((icon) =>
+				icon.toLocaleLowerCase().includes(search.toLowerCase())
+			);
+	});
 
-	if (name === undefined) name = iconsName[0];
+	// When iconsName changes, update the loadedIcons
+	$effect(() => {
+		loadedIcons = iconsName.slice(0, 200);
+	});
+
+	let { name = $bindable('Folder') }: { name?: string } = $props();
 
 	function loadMoreIcons() {
-		if (search.trim() !== '') return;
 		loadedIcons = iconsName.slice(0, loadedIcons.length + bufferSize);
 	}
 
-	function searchIcon() {
-		if (search.trim() === '') {
-			loadedIcons = iconsName.slice(0, 200);
-			return;
-		}
-		loadedIcons = iconsName.filter((icon) => icon.toLowerCase().includes(search.toLowerCase()));
+	function shuffle() {
+		name = iconsName[Math.floor(Math.random() * iconsName.length)];
 	}
 
 	onDestroy(() => {
@@ -37,33 +49,33 @@
 	<div class="flex items-center justify-around gap-2 p-2">
 		<Tooltip text={name ?? ''}>
 			{@const Icon = icons[name]}
-			<Icon class="size-9 p-2 border rounded-md" />
+			<Icon class="size-9 p-2 border rounded-md" title="Selected Icon" />
 		</Tooltip>
 		<span class="flex relative items-center w-80">
-			<Input type="text" placeholder="Search icon" class="pr-12" bind:value={search} />
-			<Button variant="ghost" class="size-4 p-1 absolute right-1" onclick={() => (search = '')}>
+			<Input type="text" placeholder="Search icons..." class="pr-12" bind:value={search} />
+			<Button
+				variant="ghost"
+				class="size-4 p-1 absolute right-1"
+				title="Clear Search"
+				onclick={() => (search = '')}
+			>
 				<Tooltip text="Clear Search">
 					<X />
 				</Tooltip>
 			</Button>
-			<Button variant="ghost" class="size-4 p-1 absolute right-8" onclick={searchIcon}>
-				<Tooltip text="Search Icon">
-					<Search />
-				</Tooltip>
-			</Button>
 		</span>
-		<Tooltip text="Random Icon">
-			<Button variant="outline" class="size-9 text-xl p-2">
+		<Tooltip text="Choose Random Icon">
+			<Button variant="outline" class="size-9 text-xl p-2" title="Shuffle Icons" onclick={shuffle}>
 				<Shuffle />
 			</Button>
 		</Tooltip>
 	</div>
-	{#if loadedIcons.length === 0}
+	{#if iconsName.length === 0}
 		<div class="h-20 text-center w-full inline-flex justify-center items-center">
 			<p class="text-lg text-muted-foreground text-center">No icons found</p>
 		</div>
 	{/if}
-	<div class="flex flex-wrap gap-1 max-h-96 min-h-40 overflow-auto" onscrollend={loadMoreIcons}>
+	<div class="flex flex-wrap gap-1 max-h-96 overflow-auto" onscrollend={loadMoreIcons}>
 		{#each loadedIcons as icon}
 			{@const Icon = icons[icon]}
 			<Tooltip text={icon}>
@@ -72,5 +84,8 @@
 				</Button>
 			</Tooltip>
 		{/each}
+	</div>
+	<div class="text-xs text-muted-foreground text-center w-full mt-2 p-1 border-t">
+		<span>Loaded {loadedIcons.length}/{iconsName.length} icons. Scroll to load more.</span>
 	</div>
 </div>
