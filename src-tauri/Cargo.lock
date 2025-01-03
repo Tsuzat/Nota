@@ -2553,7 +2553,7 @@ dependencies = [
 
 [[package]]
 name = "nota"
-version = "0.1.41"
+version = "0.1.42"
 dependencies = [
  "serde",
  "serde_json",
