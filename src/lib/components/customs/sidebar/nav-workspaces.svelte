@@ -21,6 +21,7 @@
 	import { page } from '$app/state';
 	import { updateNOTES } from '$lib/utils';
 	import Tooltip from '../tooltip.svelte';
+	import IconRender from '$lib/components/icons/icon-render.svelte';
 
 	let open: boolean = $state(false);
 
@@ -79,7 +80,7 @@
 						<Sidebar.MenuButton>
 							{#snippet child({ props })}
 								<a href="##" {...props}>
-									<span>{workspace.icon}</span>
+									<IconRender icon={workspace.icon} />
 									<span>{workspace.name}</span>
 								</a>
 							{/snippet}
@@ -109,7 +110,7 @@
 										<Sidebar.MenuSubButton class="flex-grow" onclick={() => goto(`/${note.id}`)}>
 											{#snippet child({ props })}
 												<span {...props}>
-													<span>{note.icon}</span>
+													<IconRender icon={note.icon} />
 													<span
 														data-trashed={note.trashed}
 														class="data-[trashed=true]:line-through"

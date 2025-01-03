@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import IconRender from '$lib/components/icons/icon-render.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
@@ -24,7 +25,7 @@
 				<Sidebar.MenuButton>
 					{#snippet child({ props })}
 						<a href="/{favorite.id}" title={favorite.name} {...props}>
-							<span>{favorite.icon}</span>
+							<IconRender icon={favorite.icon} />
 							<span>{favorite.name}</span>
 						</a>
 					{/snippet}

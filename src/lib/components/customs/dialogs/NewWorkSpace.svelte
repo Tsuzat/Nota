@@ -9,6 +9,7 @@
 	import { Ellipsis } from 'lucide-svelte';
 	import { createWorkspace } from '$lib/database/workspace';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
+	import IconRender from '$lib/components/icons/icon-render.svelte';
 
 	let dir: string | undefined = $state<string>();
 	let name: string | undefined = $state<string>();
@@ -62,7 +63,7 @@
 			<div class="flex items-center gap-4">
 				<Label for="name" class="text-right">Icon</Label>
 				<Iconpicker onSelect={(icon_) => (icon = icon_)} side="right">
-					<span class="text-xl border rounded">{icon}</span>
+					<IconRender {icon} class="size-fit" />
 				</Iconpicker>
 			</div>
 			<div class="flex items-center gap-4">
