@@ -27,8 +27,21 @@ export function updateNOTES(notes: NotesDB) {
  * @returns boolean - true if URL is valid, false otherwise
  */
 export function validateURL(url: string): boolean {
-	const urlRegex = new RegExp(
-		/^((http|https):\/\/)?(www\.)?([a-zA-Z0-9]+)\.([a-zA-Z]{2,})((\/[a-zA-Z0-9#]+\/?)+)?(\?[a-zA-Z0-9=&]+)?$/
-	);
-	return urlRegex.test(url);
+	try {
+		new URL(url);
+		return true;
+	} catch (error) {
+		return false;
+	}
+}
+
+/**
+ * Function which return the icon type based on the icon name
+ * @param email string - icon to validate
+ * @returns iconType - `emoji` | `lucide` | `url`
+ */
+export function getIconType(icon: string): 'emoji' | 'lucide' | 'url' {
+	if (validateURL(icon)) return 'url';
+	else if (icon.endsWith('Icon')) return 'lucide';
+	else return 'emoji';
 }
