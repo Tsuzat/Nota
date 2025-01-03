@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { getIconType } from '$lib/utils';
-	import { icons } from 'lucide-svelte';
 	import LucideIconRender from './lucide-icon-render.svelte';
 
 	interface Props {
@@ -9,13 +8,15 @@
 	}
 	let { icon, class: className = '' }: Props = $props();
 
-	const iconType = getIconType(icon);
+	// let iconType = $derived.by(() => getIconType(icon));
 </script>
 
-{#if iconType === 'emoji'}
+<span class={className}>{icon}</span>
+
+<!-- {#if iconType === 'emoji'}
 	<span class={className}>{icon}</span>
 {:else if iconType === 'lucide'}
 	<LucideIconRender {icon} class={className} />
 {:else}
 	<img src={icon} alt="Icon" srcset="" />
-{/if}
+{/if} -->

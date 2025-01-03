@@ -3,7 +3,7 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { buttonVariants } from '../ui/button';
 	import Emojipicker from './emojipicker.svelte';
-	import LucideIcon from './lucide-icons.svelte';
+	import LucideIcons from './lucide-icons.svelte';
 	interface Props {
 		onSelect: (icon: string) => void;
 		side?: 'bottom' | 'top' | 'left' | 'right';
@@ -19,16 +19,16 @@
 	<Popover.Content class="size-fit p-0 shadow-2xl" {side}>
 		<Tabs.Root value="emojis" class="w-fit">
 			<Tabs.List class="bg-transparent">
-				<Tabs.Trigger value="icons" class="data-[state=active]:underline font-bold"
+				<!-- <Tabs.Trigger value="icons" class="data-[state=active]:underline font-bold"
 					>Icons</Tabs.Trigger
-				>
+				> -->
 				<Tabs.Trigger value="emojis" class="data-[state=active]:underline font-bold"
 					>Emojis</Tabs.Trigger
 				>
 			</Tabs.List>
-			<Tabs.Content value="icons">
-				<LucideIcon />
-			</Tabs.Content>
+			<!-- <Tabs.Content value="icons">
+				<LucideIcons name={'FolderIcon'} {onSelect} />
+			</Tabs.Content> -->
 			<Tabs.Content value="emojis">
 				<Emojipicker {onSelect} />
 			</Tabs.Content>

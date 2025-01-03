@@ -5,7 +5,15 @@
 	import { Button } from '$lib/components/ui/button';
 	import Tooltip from '../customs/tooltip.svelte';
 	import { onDestroy } from 'svelte';
-	import LucideIconRender from './lucide-icon-render.svelte';
+
+	$effect(() => {
+		loadedIcons = iconsName.slice(0, 200);
+	});
+
+	interface Props {
+		name: string;
+		onSelect: (icon: string) => void;
+	}
 
 	// Load all lucide icons
 	let allLucideIcons = Object.keys(icons).filter(
@@ -26,12 +34,12 @@
 			);
 	});
 
-	// When iconsName changes, update the loadedIcons
-	$effect(() => {
-		loadedIcons = iconsName.slice(0, 200);
-	});
+	let { name = $bindable('FolderIcon'), onSelect }: Props = $props();
 
-	let { name = $bindable('FolderIcon') }: { name?: string } = $props();
+	function onselect(icon: string) {
+		name = icon;
+		onSelect(icon);
+	}
 
 	function loadMoreIcons() {
 		loadedIcons = iconsName.slice(0, loadedIcons.length + bufferSize);
@@ -49,7 +57,9 @@
 <div class="w-96 h-full">
 	<div class="flex items-center justify-around gap-2 p-2">
 		<Tooltip text={name ?? ''}>
-			<LucideIconRender icon={name ?? ''} class="size-9 p-2 border rounded-md" />
+			{@const Icon = icons[name ?? '']}
+			<Icon class="size-9 p-2 border rounded-md" />
+			<!-- <LucideIconRender icon={name ?? ''} class="size-9 p-2 border rounded-md" /> -->
 		</Tooltip>
 		<span class="flex relative items-center w-80">
 			<Input type="text" placeholder="Search icons..." class="pr-12" bind:value={search} />
@@ -79,8 +89,10 @@
 		{#each loadedIcons as icon}
 			<!-- {@const Icon = icons[icon]} -->
 			<Tooltip text={icon}>
-				<Button variant="ghost" class="size-8 text-xl p-1" onclick={() => (name = icon)}>
-					<LucideIconRender {icon} />
+				<Button variant="ghost" class="size-8 text-xl p-1" onclick={() => onselect(icon)}>
+					{@const Icon = icons[icon]}
+					<Icon />
+					<!-- <LucideIconRender {icon} /> -->
 				</Button>
 			</Tooltip>
 		{/each}
