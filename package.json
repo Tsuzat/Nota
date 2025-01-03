@@ -17,7 +17,9 @@
 		"tauri:dev": "tauri dev",
 		"tauri:build": "tauri build",
 		"format": "prettier --write .",
-		"lint": "prettier --check ."
+		"lint": "prettier --check .",
+		"test:unit": "vitest",
+		"test": "npm run test:unit -- --run"
 	},
 	"license": "MIT",
 	"dependencies": {
@@ -92,6 +94,7 @@
 		"tailwindcss-animate": "^1.0.7",
 		"tslib": "^2.8.1",
 		"typescript": "^5.7.2",
-		"vite": "^5.4.11"
+		"vite": "^5.4.11",
+		"vitest": "^2.1.8"
 	}
 }
