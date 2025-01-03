@@ -17,6 +17,7 @@
 	import { APPWINDOW } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { updateNOTES } from '$lib/utils';
+	import IconRender from '$lib/components/icons/icon-render.svelte';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -160,7 +161,7 @@
 					<Separator orientation="vertical" class="mr-2 h-4" />
 					<div class="line-clamp-1 flex items-center gap-2 text-xl font-bold">
 						<Iconpicker onSelect={onIconChange}>
-							<span class="text-2xl">{$notes.icon}</span>
+							<IconRender icon={$notes.icon} class="text-xl" />
 						</Iconpicker>
 						<span>{$notes.name}</span>
 					</div>
