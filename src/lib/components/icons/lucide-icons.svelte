@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import * as icons from 'lucide-svelte';
-	import { X, Shuffle, Search } from 'lucide-svelte';
+	import { X, Shuffle } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Tooltip from '../customs/tooltip.svelte';
 	import { onDestroy } from 'svelte';
+	import LucideIconRender from './lucide-icon-render.svelte';
 
 	// Load all lucide icons
 	let allLucideIcons = Object.keys(icons).filter(
@@ -48,8 +49,7 @@
 <div class="w-96 h-full">
 	<div class="flex items-center justify-around gap-2 p-2">
 		<Tooltip text={name ?? ''}>
-			{@const Icon = icons[name]}
-			<Icon class="size-9 p-2 border rounded-md" title="Selected Icon" />
+			<LucideIconRender icon={name ?? ''} class="size-9 p-2 border rounded-md" />
 		</Tooltip>
 		<span class="flex relative items-center w-80">
 			<Input type="text" placeholder="Search icons..." class="pr-12" bind:value={search} />
@@ -77,10 +77,10 @@
 	{/if}
 	<div class="flex flex-wrap gap-1 max-h-96 overflow-auto" onscrollend={loadMoreIcons}>
 		{#each loadedIcons as icon}
-			{@const Icon = icons[icon]}
+			<!-- {@const Icon = icons[icon]} -->
 			<Tooltip text={icon}>
 				<Button variant="ghost" class="size-8 text-xl p-1" onclick={() => (name = icon)}>
-					<Icon />
+					<LucideIconRender {icon} />
 				</Button>
 			</Tooltip>
 		{/each}
