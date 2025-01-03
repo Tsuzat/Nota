@@ -30,7 +30,7 @@
 		loadedIcons = iconsName.slice(0, 200);
 	});
 
-	let { name = $bindable('Folder') }: { name?: string } = $props();
+	let { name = $bindable('FolderIcon') }: { name?: string } = $props();
 
 	function loadMoreIcons() {
 		loadedIcons = iconsName.slice(0, loadedIcons.length + bufferSize);
