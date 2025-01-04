@@ -59,6 +59,12 @@ importers:
       '@tauri-apps/plugin-window-state':
         specifier: ~2.2.0
         version: 2.2.0
+      '@tiptap-pro/extension-mathematics':
+        specifier: ^2.17.1
+        version: 2.17.1(@tiptap/core@2.10.4(@tiptap/pm@2.10.4))(@tiptap/pm@2.10.4)(katex@0.16.19)
+      katex:
+        specifier: ^0.16.19
+        version: 0.16.19
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -675,6 +681,13 @@ packages:
   '@tauri-apps/plugin-window-state@2.2.0':
     resolution: {integrity: sha512-PFZ/vkZ6UPaRyuggEn8jWc/xwpiEw3Id8i6bin54zUR3vHY0MOK+ovvpvp6SEHKryCJbZMigYJz0OUT2eZ4YmQ==}
 
+  '@tiptap-pro/extension-mathematics@2.17.1':
+    resolution: {integrity: sha512-HIfiWLegrLOba2EI1Of2ojiqhmWyTdMtqIIxB4ENDyGO5Hlg5HId9JTfwhqwaM1tEBoEnInHWjUqZQmkE9obeA==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0
+      '@tiptap/pm': ^2.0.0
+      katex: ^0.16.4
+
   '@tiptap/core@2.10.4':
     resolution: {integrity: sha512-fExFRTRgb6MSpg2VvR5qO2dPTQAZWuUoU4UsBCurIVcPWcyVv4FG1YzgMyoLDKy44rebFtwUGJbfU9NzX7Q/bA==}
     peerDependencies:
@@ -1092,6 +1105,10 @@ packages:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
     engines: {node: '>= 6'}
 
+  commander@8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
+    engines: {node: '>= 12'}
+
   cookie@0.6.0:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
     engines: {node: '>= 0.6'}
@@ -1341,6 +1358,10 @@ packages:
     peerDependenciesMeta:
       canvas:
         optional: true
+
+  katex@0.16.19:
+    resolution: {integrity: sha512-3IA6DYVhxhBabjSLTNO9S4+OliA3Qvb8pBQXMfC4WxXJgLwZgnfDl0BmB4z6nBMdznBsZ+CGM8DrGZ5hcguDZg==}
+    hasBin: true
 
   kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
@@ -2394,6 +2415,12 @@ snapshots:
     dependencies:
       '@tauri-apps/api': 2.1.1
 
+  '@tiptap-pro/extension-mathematics@2.17.1(@tiptap/core@2.10.4(@tiptap/pm@2.10.4))(@tiptap/pm@2.10.4)(katex@0.16.19)':
+    dependencies:
+      '@tiptap/core': 2.10.4(@tiptap/pm@2.10.4)
+      '@tiptap/pm': 2.10.4
+      katex: 0.16.19
+
   '@tiptap/core@2.10.4(@tiptap/pm@2.10.4)':
     dependencies:
       '@tiptap/pm': 2.10.4
@@ -2818,6 +2845,8 @@ snapshots:
 
   commander@4.1.1: {}
 
+  commander@8.3.0: {}
+
   cookie@0.6.0: {}
 
   crelt@1.0.6: {}
@@ -3086,6 +3115,10 @@ snapshots:
       - supports-color
       - utf-8-validate
     optional: true
+
+  katex@0.16.19:
+    dependencies:
+      commander: 8.3.0
 
   kleur@4.1.5: {}
 
