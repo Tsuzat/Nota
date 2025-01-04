@@ -30,6 +30,10 @@
 	import { SvelteNodeViewRenderer } from 'svelte-tiptap';
 	import CodeExtended from './custom/code-extended.svelte';
 
+	// Katex Support
+	import 'katex/dist/katex.min.css';
+	import { Mathematics } from '@tiptap-pro/extension-mathematics';
+
 	// Lowlight
 	import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
 	import '@fontsource-variable/fira-code';
@@ -154,7 +158,8 @@
 				TableRow,
 				TableHeader,
 				TableCell,
-				ImageExtension
+				ImageExtension,
+				Mathematics
 			],
 			autofocus: true,
 			onUpdate: ({ editor }) => {

@@ -171,3 +171,24 @@ input[type='checkbox'] {
 	@apply text-muted-foreground;
 	content: '⠿';
 }
+
+/* Mathematics extension styles */
+.Tiptap-mathematics-editor {
+	@apply bg-muted;
+}
+
+.Tiptap-mathematics-render {
+	@apply px-1;
+}
+
+.Tiptap-mathematics-render--editable {
+	@apply cursor-pointer transition-all;
+}
+.Tiptap-mathematics-render--editable:hover {
+	@apply bg-muted;
+}
+
+.Tiptap-mathematics-editor,
+.Tiptap-mathematics-render {
+	@apply inline-block rounded;
+}
