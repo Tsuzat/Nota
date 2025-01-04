@@ -172,16 +172,6 @@
 					</Sidebar.MenuItem>
 				</Collapsible.Root>
 			{/each}
-			<Sidebar.MenuItem>
-				{#if $WORKSPACES.length === 0}
-					<div class="text-sidebar-foreground/70 text-xs ml-2">No Workspaces Found</div>
-				{:else}
-					<Sidebar.MenuButton class="text-sidebar-foreground/70">
-						<Ellipsis />
-						<span class="text-xs">More</span>
-					</Sidebar.MenuButton>
-				{/if}
-			</Sidebar.MenuItem>
 		</Sidebar.Menu>
 	</Sidebar.GroupContent>
 </Sidebar.Group>
