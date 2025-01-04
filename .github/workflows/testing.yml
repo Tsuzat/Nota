@@ -17,6 +17,8 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          TIPTAP_PRO_TOKEN: ${{secrets.TIPTAP_PRO_TOKEN}}
 
       - name: Run Tests
         run: pnpm test
