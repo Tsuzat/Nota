@@ -51,7 +51,7 @@
 
 		// Get the path of the notes
 		const notePath = $notesDB.path;
-		store = await load(notePath, { autoSave: 100 });
+		store = await load(notePath, { autoSave: false });
 
 		// Load all the notes data
 		const id = await store.get<string>('id');
