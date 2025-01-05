@@ -14,12 +14,12 @@
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Plus from 'lucide-svelte/icons/plus';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, FileX, Pen, Star, Trash, Trash2 } from 'lucide-svelte';
+	import { Copy, File, FileX, FolderOpen, Pen, Star, Trash, Trash2 } from 'lucide-svelte';
 	import { confirm } from '@tauri-apps/plugin-dialog';
 	import NewNotes from '../dialogs/NewNotes.svelte';
 	import { toast } from 'svelte-sonner';
 	import { page } from '$app/state';
-	import { updateNOTES } from '$lib/utils';
+	import { openInFileSystem, updateNOTES } from '$lib/utils';
 	import Tooltip from '../tooltip.svelte';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
 
@@ -75,6 +75,7 @@
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
 			{#each $WORKSPACES as workspace (workspace.name)}
+				<NewNotes bind:open {workspace} />
 				<Collapsible.Root>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
@@ -96,10 +97,33 @@
 								</Sidebar.MenuAction>
 							{/snippet}
 						</Collapsible.Trigger>
-						<Sidebar.MenuAction showOnHover onclick={() => (open = true)}>
-							<NewNotes bind:open {workspace} />
-							<Plus />
-						</Sidebar.MenuAction>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger>
+								{#snippet child({ props })}
+									<Sidebar.MenuAction showOnHover {...props}>
+										<Ellipsis />
+									</Sidebar.MenuAction>
+								{/snippet}
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content side="right" align="start">
+								<DropdownMenu.Item onclick={() => (open = true)}>
+									<Plus />
+									<span>Add New Note</span>
+								</DropdownMenu.Item>
+								<DropdownMenu.Item
+									onclick={() => {
+										openInFileSystem(workspace.path);
+									}}
+								>
+									<FolderOpen />
+									<span>Open Path</span>
+								</DropdownMenu.Item>
+								<DropdownMenu.Item onclick={() => {}} class="data-[highlighted]:text-red-600">
+									<Trash2 />
+									<span>Delete Workspace</span>
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
 						<Collapsible.Content>
 							<Sidebar.MenuSub>
 								{#each $NOTES.filter((note) => note.workspace === workspace.id && !note.trashed) as note (note.id)}
@@ -142,6 +166,22 @@
 													<DropdownMenu.Item>
 														<Pen class="mr-2" />
 														<span>Rename or Edit</span>
+													</DropdownMenu.Item>
+													<DropdownMenu.Item
+														onclick={() => {
+															openInFileSystem(note.path);
+														}}
+													>
+														<FolderOpen />
+														<span>Open Path</span>
+													</DropdownMenu.Item>
+													<DropdownMenu.Item
+														onclick={() => {
+															openInFileSystem(note.path, true);
+														}}
+													>
+														<File />
+														<span>Open File</span>
 													</DropdownMenu.Item>
 													<DropdownMenu.Item onclick={() => duplicateNote(note, workspace)}>
 														<Copy class="mr-2" />
