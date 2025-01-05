@@ -63,7 +63,7 @@
 			<div class="flex items-center gap-4">
 				<Label for="name" class="text-right">Icon</Label>
 				<Iconpicker onSelect={(icon_) => (icon = icon_)} side="right">
-					<IconRender {icon} class="size-fit" />
+					<IconRender {icon} class="text-xl border rounded" />
 				</Iconpicker>
 			</div>
 			<div class="flex items-center gap-4">
