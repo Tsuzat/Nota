@@ -2,7 +2,9 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { initializeDatabase } from './database/sqldb';
 import type { NotesDB } from './database/notes';
-import { NOTES } from './contants';
+import { NOTES, OS } from './contants';
+import { open } from '@tauri-apps/plugin-shell';
+import { invoke } from '@tauri-apps/api/core';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -27,12 +29,6 @@ export function updateNOTES(notes: NotesDB) {
  * @returns boolean - true if URL is valid, false otherwise
  */
 export function validateURL(url: string): boolean {
-	// try {
-	// 	new URL(url);
-	// 	return true;
-	// } catch (error) {
-	// 	return false;
-	// }
 	const urlPattern = new RegExp(
 		'^(https?:\\/\\/)?' + // protocol (optional)
 			'((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|' + // domain name and extension
@@ -51,7 +47,26 @@ export function validateURL(url: string): boolean {
  * @returns iconType - `emoji` | `lucide` | `url`
  */
 export function getIconType(icon: string): 'emoji' | 'lucide' | 'url' {
+	if (icon.trim() === '') throw new Error('Icon cannot be empty');
 	if (validateURL(icon)) return 'url';
 	else if (icon.endsWith('Icon')) return 'lucide';
 	else return 'emoji';
+}
+
+/**
+ * Function to open a path in the file system using rust invoke
+ * @param path string - path to open
+ * @param openFile boolean - true if the file should be opened, false otherwise
+ * @returns void
+ */
+export async function openInFileSystem(path: string, openFile: boolean = false): Promise<void> {
+	// check if the path is a file or a directory
+	const isDirectory = await invoke('is_dir', { path });
+	if (isDirectory || (!isDirectory && openFile)) {
+		await open(path);
+		return;
+	}
+	// get the folder path from the path (considering it's a file)
+	const folderPath = path.substring(0, path.lastIndexOf(OS === 'windows' ? '\\' : '/'));
+	await open(folderPath);
 }
