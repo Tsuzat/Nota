@@ -188,6 +188,18 @@ async function deleteNotesFromDB(notesId: string) {
 	return deletedSuccessfully;
 }
 
+export async function deleteNotesByWorkSpace(workspaceId: string) {
+	try {
+		const res = await DB.execute('DELETE FROM notes WHERE workspace = $1', [workspaceId]);
+		console.log('Note deleted successfully');
+		info('Note deleted successfully');
+	} catch (err) {
+		console.error(err);
+		//@ts-ignore
+		error(err.toString());
+	}
+}
+
 /**
  * Find the notes from the database by id
  * @param id - Note id
