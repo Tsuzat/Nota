@@ -18,6 +18,7 @@
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
+	import { onDestroy } from 'svelte';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -143,6 +144,9 @@
 		if ($notesDB === null) return;
 		$notesDB.icon = icon;
 	}
+	onDestroy(async () => {
+		if (store) await store.close();
+	});
 </script>
 
 {#key notesId}
