@@ -56,7 +56,7 @@ export async function createNote(
 		//! TODO: Need to check if the noteid already exists
 		const notesId = uuidv4();
 		const notesPath = await resolve(workspace.path, `${notesId}.nota`);
-		const store = await load(notesPath, { autoSave: true });
+		const store = await load(notesPath, { autoSave: false });
 		const notes: Notes = {
 			id: notesId,
 			name,
@@ -75,6 +75,8 @@ export async function createNote(
 		store.set('createdAt', notes.createdAt);
 		store.set('updatedAt', notes.updatedAt);
 		store.set('content', notes.content);
+		await store.save();
+		await store.close();
 
 		const notesDB: NotesDB = {
 			id: notes.id,
@@ -278,9 +280,12 @@ export async function duplicateNote(note: NotesDB, workspace: WorkSpaceDB) {
 		return;
 	}
 	// get the note location
-	const noteStore = await load(note.path);
-	const newNoteStore = await load(newNote.path);
+	const noteStore = await load(note.path, { autoSave: false });
+	const newNoteStore = await load(newNote.path, { autoSave: false });
 	newNoteStore.set('content', await noteStore.get('content'));
+	await newNoteStore.save();
+	await newNoteStore.close();
+	await noteStore.close();
 	NOTES.update((notes) => {
 		return [...notes, newNote];
 	});
