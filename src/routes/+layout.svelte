@@ -11,24 +11,25 @@
 	import { check } from '@tauri-apps/plugin-updater';
 	import { downloadAndInstall } from '$lib/updater';
 	import { APPWINDOW } from '$lib/contants';
+	import { toast } from 'svelte-sonner';
 	let { children } = $props();
 
 	onMount(async () => {
 		await APPWINDOW.show();
 		// check for updates
+		const id = toast.loading('Checking for updates...');
 		const update = await check();
-		if (update) {
-			const shouldUpdate = await ask(
-				`New version ${update.version} is available for application. Do you want to update the application?`,
-				{
-					kind: 'info',
-					title: 'Update Available',
-					okLabel: 'Update'
+
+		if (update !== null) {
+			toast.info(`New version ${update.version} is available.`, {
+				id,
+				action: {
+					label: 'Update',
+					onClick: () => {
+						downloadAndInstall(update);
+					}
 				}
-			);
-			if (shouldUpdate) {
-				downloadAndInstall(update);
-			}
+			});
 		}
 	});
 </script>

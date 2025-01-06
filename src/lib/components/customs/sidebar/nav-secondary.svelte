@@ -38,7 +38,7 @@
 				}
 			});
 		} else {
-			toast.success('No updates available', { id });
+			toast.success('You are upto date', { id });
 		}
 		checkingUpdate = false;
 	}
