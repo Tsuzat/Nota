@@ -1,4 +1,4 @@
-import { mkdir } from '@tauri-apps/plugin-fs';
+import { mkdir, remove } from '@tauri-apps/plugin-fs';
 import { resolve } from '@tauri-apps/api/path';
 import { toast } from 'svelte-sonner';
 import { error, info } from '@tauri-apps/plugin-log';
@@ -6,7 +6,8 @@ import { load } from '@tauri-apps/plugin-store';
 import { v4 as uuidv4 } from 'uuid';
 import { DB } from './sqldb';
 import type { Content } from '@tiptap/core';
-import { WORKSPACES } from '$lib/contants';
+import { NOTES, WORKSPACES } from '$lib/contants';
+import { deleteNotesByWorkSpace } from './notes';
 
 /**
  * WorkSpaceDB interface has the information about the location of workspace with it's metadata
@@ -121,4 +122,48 @@ export async function getWorkSpaces(): Promise<WorkSpaceDB[]> {
 		console.error(e);
 	}
 	return res;
+}
+
+async function deleteWorkSpaceDB(workspaceID: string): Promise<boolean> {
+	let isDeleted = false;
+	try {
+		const res = await DB.execute(`DELETE FROM workspaces WHERE id = $1`, [workspaceID]);
+		isDeleted = res.rowsAffected === 1;
+	} catch (e) {
+		toast.error('Error on deleting the workspace');
+		//@ts-ignore
+		error(e.toString());
+		console.error(e);
+	}
+	return isDeleted;
+}
+
+/**
+ * Function to delete a workspace from the database and disk
+ * @param workspace WorkSpaceDB - Workspace to be deleted
+ * @returns Promise<boolean> - true if the workspace is deleted, false otherwise
+ */
+export async function deleteWorkSpacePermanently(workspace: WorkSpaceDB): Promise<boolean> {
+	// delete the workspace from the database
+	await deleteNotesByWorkSpace(workspace.id);
+	const isDeleted = await deleteWorkSpaceDB(workspace.id);
+	if (!isDeleted) return false;
+	WORKSPACES.update((workspaces) => {
+		return workspaces.filter((lWorkspace) => lWorkspace.id !== workspace.id);
+	});
+	NOTES.update((notes) => {
+		return notes.filter((lNote) => lNote.workspace !== workspace.id);
+	});
+	// delete the workspace from the disk
+	const workspacePath = await resolve(workspace.path);
+	try {
+		await remove(workspacePath, { recursive: true });
+		return true;
+	} catch (e) {
+		toast.error('Error on deleting the workspace');
+		//@ts-ignore
+		error(e.toString());
+		console.error(e);
+		return false;
+	}
 }
