@@ -20,5 +20,5 @@ jobs:
         env:
           TIPTAP_PRO_TOKEN: ${{secrets.TIPTAP_PRO_TOKEN}}
 
-      - name: Run Tests
+      - name: Run Lint
         run: pnpm lint
