@@ -80,7 +80,12 @@
 						<Select.Group>
 							<Select.GroupHeading>Workspaces</Select.GroupHeading>
 							{#each workspaces as workspace (workspace.id)}
-								<Select.Item class="flex items-center" value={workspace.id} label={workspace.name}>
+								<Select.Item
+									class="flex items-center"
+									value={workspace.id}
+									label={workspace.name}
+									onclick={() => (defaultWorkspace = workspace)}
+								>
 									<span class="mr-2">
 										{workspace.icon}
 									</span>
