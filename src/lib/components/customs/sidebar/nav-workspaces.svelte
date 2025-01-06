@@ -22,6 +22,9 @@
 	import { openInFileSystem, updateNOTES } from '$lib/utils';
 	import Tooltip from '../tooltip.svelte';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
+	import { deleteWorkSpacePermanently, type WorkSpaceDB } from '$lib/database/workspace';
+	import { size } from '@tauri-apps/plugin-fs';
+	import { resolve } from '@tauri-apps/api/path';
 
 	let open: boolean = $state(false);
 
@@ -53,6 +56,46 @@
 		note.favorite = !note.favorite;
 		updateNotesDB(note);
 		updateNOTES(note);
+	}
+
+	async function handleDeleteWorkspace(workspace: WorkSpaceDB) {
+		// if the url is opened in notes from workspace, redirect to home page
+		if (
+			$NOTES.find(
+				(notes) => notes.workspace === workspace.id && page.url.pathname.split('/')[1] === notes.id
+			)
+		)
+			goto('/');
+		// Get the no of notes and total size of the path
+		let sizeType: string = 'KB';
+		let status = await size(await resolve(workspace.path));
+		// convert the status to KB
+		status = status / 1024;
+		if (status > 1024) {
+			sizeType = 'MB';
+			status = status / 1024;
+		}
+		if (status > 1024) {
+			sizeType = 'GB';
+			status = status / 1024;
+		}
+		status = parseFloat(status.toFixed(2));
+		const notesCount = $NOTES.filter((note) => note.workspace === workspace.id).length;
+		const shouldDelete = await confirm(
+			`Are you sure you want to delete workspace "${workspace.name}"? This will delete "${notesCount} notes" and "${status} ${sizeType}" of the workspace folder.`,
+			{
+				kind: 'warning',
+				title: 'Delete Workspace?',
+				okLabel: 'Delete'
+			}
+		);
+		if (!shouldDelete) return;
+		const isDeleted = await deleteWorkSpacePermanently(workspace);
+		if (isDeleted) {
+			toast.success('Workspace deleted successfully');
+		} else {
+			toast.error('Error on deleting the workspace');
+		}
 	}
 </script>
 
@@ -118,7 +161,12 @@
 									<FolderOpen />
 									<span>Open Path</span>
 								</DropdownMenu.Item>
-								<DropdownMenu.Item onclick={() => {}} class="data-[highlighted]:text-red-600">
+								<DropdownMenu.Item
+									onclick={() => {
+										handleDeleteWorkspace(workspace);
+									}}
+									class="data-[highlighted]:text-red-600"
+								>
 									<Trash2 />
 									<span>Delete Workspace</span>
 								</DropdownMenu.Item>
