@@ -44,6 +44,14 @@
 					"path": "**"
 				}
 			]
+		},
+		{
+			"identifier": "fs:allow-size",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
 		}
 	]
 }
