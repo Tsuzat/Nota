@@ -7,7 +7,6 @@
 	import NewWorkSpace from '$lib/components/customs/dialogs/NewWorkSpace.svelte';
 	import Sonner from '$lib/components/ui/sonner/sonner.svelte';
 	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
-	import { ask } from '@tauri-apps/plugin-dialog';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { downloadAndInstall } from '$lib/updater';
 	import { APPWINDOW } from '$lib/contants';
@@ -16,13 +15,9 @@
 
 	onMount(async () => {
 		await APPWINDOW.show();
-		// check for updates
-		const id = toast.loading('Checking for updates...');
 		const update = await check();
-
 		if (update !== null) {
 			toast.info(`New version ${update.version} is available.`, {
-				id,
 				action: {
 					label: 'Update',
 					onClick: () => {
