@@ -24,11 +24,11 @@
 		"clipboard-manager:default",
 		"store:default",
 		"os:default",
-		"fs:allow-mkdir",
 		"fs:allow-create",
 		"fs:allow-write",
-		"fs:allow-remove",
 		"core:window:allow-set-title",
+		"process:default",
+		"process:allow-exit",
 		{
 			"identifier": "fs:allow-mkdir",
 			"allow": [
