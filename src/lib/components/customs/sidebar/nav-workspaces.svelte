@@ -211,16 +211,12 @@
 														/>
 														<span>Add to favorites</span>
 													</DropdownMenu.Item>
-													<DropdownMenu.Item>
-														<Pen class="mr-2" />
-														<span>Rename or Edit</span>
-													</DropdownMenu.Item>
 													<DropdownMenu.Item
 														onclick={() => {
 															openInFileSystem(note.path);
 														}}
 													>
-														<FolderOpen />
+														<FolderOpen class="mr-2" />
 														<span>Open Path</span>
 													</DropdownMenu.Item>
 													<DropdownMenu.Item
@@ -228,7 +224,7 @@
 															openInFileSystem(note.path, true);
 														}}
 													>
-														<File />
+														<File class="mr-2" />
 														<span>Open File</span>
 													</DropdownMenu.Item>
 													<DropdownMenu.Item onclick={() => duplicateNote(note, workspace)}>
