@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { MessageCircleQuestion, RefreshCw, Settings2, Trash2 } from 'lucide-svelte';
+	import { RefreshCw, Settings, Trash2 } from 'lucide-svelte';
 	import * as Popover from '$lib/components/ui/popover';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { NOTES } from '$lib/contants';
@@ -52,19 +52,6 @@
 	}
 
 	let { ...restProps } = $props();
-
-	const items: Items[] = [
-		{
-			title: 'Settings',
-			url: '#',
-			icon: Settings2
-		},
-		{
-			title: 'Help',
-			url: '#',
-			icon: MessageCircleQuestion
-		}
-	];
 </script>
 
 <Sidebar.Group {...restProps}>
@@ -89,21 +76,14 @@
 	</Popover.Root>
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
-			{#each items as item (item.title)}
-				<Sidebar.MenuItem onclick={item.onclick}>
-					<Sidebar.MenuButton>
-						{#snippet child({ props })}
-							<a href={item.url} {...props}>
-								<item.icon />
-								<span>{item.title}</span>
-							</a>
-						{/snippet}
-					</Sidebar.MenuButton>
-					{#if item.badge}
-						<Sidebar.MenuBadge>{item.badge}</Sidebar.MenuBadge>
-					{/if}
-				</Sidebar.MenuItem>
-			{/each}
+			<Sidebar.MenuItem>
+				<Sidebar.MenuButton class="group/settings">
+					<Settings
+						class="group-hover/settings:rotate-90 rotate-0 transition-transform duration-300"
+					/>
+					<span>Settings</span>
+				</Sidebar.MenuButton>
+			</Sidebar.MenuItem>
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton onclick={checkUpdate}>
 					<RefreshCw data-spin={checkingUpdate} class="data-[spin=true]:animate-spin" />
