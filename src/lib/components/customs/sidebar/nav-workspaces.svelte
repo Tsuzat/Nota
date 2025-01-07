@@ -59,13 +59,6 @@
 	}
 
 	async function handleDeleteWorkspace(workspace: WorkSpaceDB) {
-		// if the url is opened in notes from workspace, redirect to home page
-		if (
-			$NOTES.find(
-				(notes) => notes.workspace === workspace.id && page.url.pathname.split('/')[1] === notes.id
-			)
-		)
-			goto('/');
 		// Get the no of notes and total size of the path
 		let sizeType: string = 'KB';
 		let status = await size(await resolve(workspace.path));
@@ -90,6 +83,13 @@
 			}
 		);
 		if (!shouldDelete) return;
+		// if the url is opened in notes from workspace, redirect to home page
+		if (
+			$NOTES.find(
+				(notes) => notes.workspace === workspace.id && page.url.pathname.split('/')[1] === notes.id
+			)
+		)
+			goto('/');
 		const isDeleted = await deleteWorkSpacePermanently(workspace);
 		if (isDeleted) {
 			toast.success('Workspace deleted successfully');
