@@ -1,5 +1,5 @@
 import { getIconType, validateURL } from '$lib/utils';
-import { describe, expect, it, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 // Mock platform detection
 vi.mock('@tauri-apps/plugin-os', () => ({
