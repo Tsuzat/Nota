@@ -46,6 +46,7 @@
 					contenteditable="false"
 					data-current={defaultLanguage === language}
 					class="data-[current=true]:bg-muted"
+					textValue={language}
 					onclick={() => {
 						defaultLanguage = language;
 						updateAttributes({ language: defaultLanguage });
