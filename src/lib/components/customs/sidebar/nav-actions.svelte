@@ -98,9 +98,10 @@
 		favorite: boolean;
 	}
 
-	let timeAgoHTML: HTMLDivElement;
+	let timeAgoHTML: HTMLDivElement | undefined = $state(undefined);
 
 	onMount(() => {
+		if (!timeAgoHTML) return;
 		timeAgoRender(timeAgoHTML, undefined, {
 			minInterval: 10
 		});
