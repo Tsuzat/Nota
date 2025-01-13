@@ -10,15 +10,16 @@
 	import { error } from '@tauri-apps/plugin-log';
 	import { toast } from 'svelte-sonner';
 	import { redirect } from '@sveltejs/kit';
-	import { Loader2 } from 'lucide-svelte';
+	import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-svelte';
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
-	import { APPWINDOW } from '$lib/contants';
+	import { APPWINDOW, OS } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
 	import { onDestroy } from 'svelte';
+	import Navigation from '$lib/components/customs/navigation.svelte';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -163,6 +164,7 @@
 				<div class="flex flex-1 items-center gap-2 px-3">
 					<Sidebar.Trigger />
 					<Separator orientation="vertical" class="mr-2 h-4" />
+					<Navigation />
 					<div class="line-clamp-1 flex items-center gap-2 text-xl font-bold">
 						<Iconpicker onSelect={onIconChange}>
 							<IconRender icon={$notes.icon} class="text-xl" />
@@ -171,6 +173,7 @@
 					</div>
 				</div>
 				<div class="ml-auto px-3">
+					<!-- !FIXME: Need to add reactivity for favorite button (may be a callback??) -->
 					<NavActions bind:lastEdited={$notes.updatedAt} bind:favorite={$notesDB.favorite} />
 				</div>
 			</header>
