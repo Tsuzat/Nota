@@ -10,7 +10,7 @@
 	import { error } from '@tauri-apps/plugin-log';
 	import { toast } from 'svelte-sonner';
 	import { redirect } from '@sveltejs/kit';
-	import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-svelte';
+	import { Loader2 } from 'lucide-svelte';
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
@@ -20,6 +20,7 @@
 	import IconRender from '$lib/components/icons/icon-render.svelte';
 	import { onDestroy } from 'svelte';
 	import Navigation from '$lib/components/customs/navigation.svelte';
+	import { addNoteToRecents } from '$lib/recents';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -110,6 +111,7 @@
 		});
 		// Set the APP Window as notes name
 		APPWINDOW.setTitle(`Nota - ${name}`);
+		if (notesDB !== null) addNoteToRecents($notesDB);
 	}
 
 	// On notesDB changes, uodate DB and gloabal variable
