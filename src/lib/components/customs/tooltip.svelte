@@ -1,14 +1,14 @@
 <script lang="ts">
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { Content } from '../ui/dropdown-menu';
 
 	interface Props {
 		text: string;
+		key?: string;
 		delayDuration?: number;
 		children: any;
 		side?: 'top' | 'bottom' | 'left' | 'right';
 	}
-	let { text, delayDuration = 300, side = 'top', children }: Props = $props();
+	let { text, key = '', delayDuration = 300, side = 'top', children }: Props = $props();
 </script>
 
 <Tooltip.Provider>
@@ -17,7 +17,8 @@
 			{@render children()}
 		</Tooltip.Trigger>
 		<Tooltip.Content class="bg-background text-foreground text-sm rounded p-1 border" {side}>
-			<p>{text}</p>
+			<span class="font-bold">{text}</span>
+			<span class="text-muted-foreground">{key}</span>
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>
