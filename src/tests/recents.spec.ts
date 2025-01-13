@@ -1,11 +1,16 @@
 import type { NotesDB } from '$lib/database/notes';
-import Recents from '$lib/recents.js';
 import { describe, expect, test } from 'vitest';
 import { v4 as uuidv4 } from 'uuid';
+import {
+	addNoteToRecents,
+	clearRecents,
+	getRecentNotesSize,
+	RECENT_NOTES,
+	removeNoteFromRecents
+} from '$lib/recents';
 
 describe('Unit tests for recents', () => {
 	const notes: NotesDB[] = [];
-	const recents = new Recents();
 
 	// Push 10 notes to the notes array
 	for (let i = 0; i < 10; i++) {
@@ -20,18 +25,18 @@ describe('Unit tests for recents', () => {
 		});
 	}
 
-	recents.setNotes = notes;
+	RECENT_NOTES.set(notes);
 
 	test('Should add 10 notes to notes', () => {
 		expect(notes.length).toBe(10);
 	});
 
 	test('Should add 10 notes to recents', () => {
-		expect(recents.getNotes.length).toBe(10);
+		expect(getRecentNotesSize()).toBe(10);
 	});
 
 	test('Should add a note to recents with size to still be 10', () => {
-		recents.add({
+		addNoteToRecents({
 			id: uuidv4(),
 			name: 'New Notes',
 			icon: 'NewNoteIcon',
@@ -40,12 +45,12 @@ describe('Unit tests for recents', () => {
 			trashed: false,
 			workspace: uuidv4()
 		});
-		expect(recents.getNotes.length).toBe(10);
+		expect(getRecentNotesSize()).toBe(10);
 	});
 
 	test('Tring to add 5 new notes and size to be still be 10', () => {
 		for (let i = 0; i < 5; i++) {
-			recents.add({
+			addNoteToRecents({
 				id: uuidv4(),
 				name: `New Note ${i}`,
 				icon: 'NewNoteIcon',
@@ -55,22 +60,26 @@ describe('Unit tests for recents', () => {
 				workspace: uuidv4()
 			});
 		}
-		expect(recents.getNotes.length).toBe(10);
+		expect(getRecentNotesSize()).toBe(10);
 	});
 
 	test('Trying to remove 1 notes from recents and the size to be 9', () => {
-		const note = Array.from(recents.getNotes)[0];
-		recents.remove(note);
-		expect(recents.getNotes.length).toBe(9);
+		let note: NotesDB | null = null;
+		RECENT_NOTES.update((notes) => {
+			note = notes[0];
+			return notes;
+		});
+		if (note !== null) removeNoteFromRecents(note);
+		expect(getRecentNotesSize()).toBe(9);
 	});
 
 	test('Try to clear all the recents and size to be 0', () => {
-		recents.clear();
-		expect(recents.getNotes.length).toBe(0);
+		clearRecents();
+		expect(getRecentNotesSize()).toBe(0);
 	});
 
 	test('Try to add duplicate note', () => {
-		recents.add({
+		addNoteToRecents({
 			id: '123456',
 			name: `New Note`,
 			icon: 'NewNoteIcon',
@@ -79,7 +88,7 @@ describe('Unit tests for recents', () => {
 			trashed: false,
 			workspace: uuidv4()
 		});
-		recents.add({
+		addNoteToRecents({
 			id: '123456',
 			name: `New Note`,
 			icon: 'NewNoteIcon',
@@ -88,6 +97,6 @@ describe('Unit tests for recents', () => {
 			trashed: false,
 			workspace: uuidv4()
 		});
-		expect(recents.getNotes.length).toBe(1);
+		expect(getRecentNotesSize()).toBe(1);
 	});
 });
