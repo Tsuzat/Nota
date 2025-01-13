@@ -5,7 +5,8 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { APPWINDOW, RECENT_NOTES } from '$lib/contants';
+	import { APPWINDOW } from '$lib/contants';
+	import { getRecentNotesSize, RECENT_NOTES, removeNoteFromRecents } from '$lib/recents';
 	import { X } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
@@ -30,27 +31,37 @@
 			</div>
 			<div class="font-medium">Welcome to Nota - Your Note Taking App</div>
 		</div>
+
 		<div class="mx-auto w-full max-w-3xl rounded-xl p-4">
 			<div class="text-sm text-muted-foreground">
 				RECENT NOTES
-				<span class="text-sm text-foreground font-medium">{$RECENT_NOTES.size}</span>
+				<span class="text-sm text-foreground font-medium">{getRecentNotesSize()}</span>
 			</div>
 			<div class="flex items-center gap-2 p-2 rounded-xl flex-wrap">
 				{#each $RECENT_NOTES as note}
-					<Button
-						variant="outline"
-						size="lg"
-						class="flex items-center"
-						onclick={() => {
-							goto(`/${note.id}`);
-						}}
-					>
-						<span class="text-xl">{note.name}</span>
-						<span>{note.name}</span>
-						<Button variant="ghost" size="icon" class="size-6 ml-auto">
+					<div class="relative flex items-center">
+						<Button
+							variant="outline"
+							class="flex items-center justify-between w-60"
+							onclick={() => {
+								goto(`/${note.id}`);
+							}}
+						>
+							<div>
+								<span class="text-xl">{note.icon}</span>
+								<span class="text-ellipsis">{note.name}</span>
+							</div>
+						</Button>
+						<Button
+							variant="ghost"
+							class="size-6 p-2 absolute right-0"
+							onclick={() => {
+								removeNoteFromRecents(note);
+							}}
+						>
 							<X />
 						</Button>
-					</Button>
+					</div>
 				{/each}
 			</div>
 		</div>
