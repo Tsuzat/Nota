@@ -21,3 +21,6 @@ export const OPEN_COMMAND_BAR = writable(false);
 
 /** Global Variable for controlling Application Window  */
 export const APPWINDOW = getCurrentWindow();
+
+/** Global Variable for storing 10 recent notes */
+export const RECENT_NOTES = writable<Set<NotesDB>>(new Set());
