@@ -35,7 +35,7 @@
 		<div class="mx-auto w-full max-w-3xl rounded-xl p-4">
 			<div class="text-sm text-muted-foreground">
 				RECENT NOTES
-				<span class="text-sm text-foreground font-medium">{getRecentNotesSize()}</span>
+				<span class="text-sm text-foreground font-medium">{$RECENT_NOTES.length}</span>
 			</div>
 			<div class="flex items-center gap-2 p-2 rounded-xl flex-wrap">
 				{#each $RECENT_NOTES as note}
