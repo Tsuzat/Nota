@@ -14,7 +14,7 @@
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
-	import { APPWINDOW, OS } from '$lib/contants';
+	import { APPWINDOW, OS, WORKSPACES } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
@@ -24,6 +24,7 @@
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
+	const path = writable<string>('');
 	let store: Store | undefined = undefined;
 
 	let notesId = $derived.by(() => {
@@ -109,6 +110,10 @@
 			updatedAt,
 			content
 		});
+
+		const workspace = $WORKSPACES.find((workspace) => workspace.id === $notesDB.workspace);
+		if (workspace === undefined) return;
+		path.set(workspace.path);
 		// Set the APP Window as notes name
 		APPWINDOW.setTitle(`Nota - ${name}`);
 		if (notesDB !== null) addNoteToRecents($notesDB);
@@ -182,6 +187,7 @@
 			<div class="flex-grow max-h-[calc(100vh-3.5rem)]">
 				<ShadEditor
 					class="flex flex-col h-full w-full"
+					path={$path}
 					content={$notes.content}
 					onChange={updateContent}
 				/>
