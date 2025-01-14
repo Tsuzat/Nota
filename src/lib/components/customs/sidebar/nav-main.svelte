@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
 	let {
@@ -21,7 +21,7 @@
 	{#each items as item (item.title)}
 		<Sidebar.MenuItem>
 			<Sidebar.MenuButton
-				isActive={$page.url.pathname === item.url}
+				isActive={page.url.pathname === item.url}
 				onclick={() => {
 					if (item.onClick) {
 						item.onClick();

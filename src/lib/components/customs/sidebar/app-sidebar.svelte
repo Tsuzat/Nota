@@ -1,16 +1,8 @@
 <script lang="ts" module>
 	import AudioWaveform from 'lucide-svelte/icons/audio-waveform';
-	import Blocks from 'lucide-svelte/icons/blocks';
-	import Calendar from 'lucide-svelte/icons/calendar';
 	import Command from 'lucide-svelte/icons/command';
 	import House from 'lucide-svelte/icons/house';
-	import Inbox from 'lucide-svelte/icons/inbox';
-	import MessageCircleQuestion from 'lucide-svelte/icons/message-circle-question';
 	import Search from 'lucide-svelte/icons/search';
-	import Settings2 from 'lucide-svelte/icons/settings-2';
-	import Sparkles from 'lucide-svelte/icons/sparkles';
-	import Trash2 from 'lucide-svelte/icons/trash-2';
-	// This is sample data.
 	const data = {
 		teams: [
 			{
@@ -31,18 +23,18 @@
 		],
 		navMain: [
 			{
+				title: 'Home',
+				url: '/',
+				icon: House,
+				isActive: false
+			},
+			{
 				title: 'Search',
 				url: '#',
 				icon: Search,
 				onClick: () => {
 					OPEN_COMMAND_BAR.set(true);
 				}
-			},
-			{
-				title: 'Home',
-				url: '/',
-				icon: House,
-				isActive: false
 			}
 		]
 	};
@@ -56,7 +48,6 @@
 	import TeamSwitcher from '$lib/components/customs/sidebar/team-switcher.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
-	import { page } from '$app/stores';
 	import { OPEN_COMMAND_BAR } from '$lib/contants';
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();

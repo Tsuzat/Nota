@@ -1,11 +1,8 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/button/button.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { MoonStar, Sun } from 'lucide-svelte';
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import Plus from 'lucide-svelte/icons/plus';
-	import { mode, toggleMode } from 'mode-watcher';
 	import Themetoggler from '../themetoggler.svelte';
 
 	let {
