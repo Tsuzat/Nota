@@ -15,6 +15,13 @@
 
 	let defaultLanguage = $state(node.attrs.language);
 
+	$effect(() => {
+		if (!defaultLanguage) {
+			defaultLanguage = 'plaintext';
+			updateAttributes({ language: defaultLanguage });
+		}
+	});
+
 	function copyCode() {
 		isCopying = true;
 		navigator.clipboard.writeText(preRef.innerText);
