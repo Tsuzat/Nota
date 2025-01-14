@@ -40,7 +40,21 @@
 		createWorkspace(dir, name, icon);
 		OPEN_NEW_WORKSPACE_DIALOG.set(false);
 	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' && e.metaKey) {
+			e.preventDefault();
+			handleSubmit();
+		}
+
+		if (e.key === 'n' && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			OPEN_NEW_WORKSPACE_DIALOG.set(true);
+		}
+	}
 </script>
+
+<svelte:document onkeydown={handleKeydown} />
 
 <Dialog.Root bind:open={$OPEN_NEW_WORKSPACE_DIALOG}>
 	<Dialog.Content class="sm:max-w-[425px]">
