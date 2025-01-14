@@ -19,6 +19,7 @@
 	import Typography from '@tiptap/extension-typography';
 	import TextAlign from '@tiptap/extension-text-align';
 	import Placeholder from '@tiptap/extension-placeholder';
+	import FileHandler from '@tiptap-pro/extension-file-handler';
 
 	import { SmilieReplacer } from './custom/Extentions/SmilieReplacer.js';
 	import { ColorHighlighter } from './custom/Extentions/ColorHighlighter.js';
@@ -46,12 +47,17 @@
 	import Button from '../ui/button/button.svelte';
 	import { ArrowUp } from 'lucide-svelte';
 	import Tooltip from '../customs/tooltip.svelte';
+	import { writeFile } from '@tauri-apps/plugin-fs';
+	import { resolve } from '@tauri-apps/api/path';
+	import { OS } from '$lib/contants';
+	import { handleRawImage } from './utils';
 
 	const lowlight = createLowlight(all);
 
 	interface Props {
 		class?: string;
 		content?: Content;
+		path: string;
 		showToolbar?: boolean;
 		onChange: (content: Content) => void;
 	}
@@ -59,6 +65,7 @@
 	let {
 		class: className = '',
 		content = $bindable(''),
+		path,
 		showToolbar = true,
 		onChange
 	}: Props = $props();
@@ -111,6 +118,45 @@
 
 					//   return 'Can you add some further context?'
 					// },
+				}),
+				FileHandler.configure({
+					allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
+					onDrop: (currentEditor, files, pos) => {
+						files.forEach(async (file) => {
+							const filePath = await handleRawImage(file, path);
+							currentEditor
+								.chain()
+								.insertContentAt(pos, {
+									type: 'image',
+									attrs: {
+										src: filePath
+									}
+								})
+								.focus()
+								.run();
+						});
+					},
+					onPaste: (currentEditor, files, htmlContent) => {
+						files.forEach(async (file) => {
+							if (htmlContent) {
+								// if there is htmlContent, stop manual insertion & let other extensions handle insertion via inputRule
+								// you could extract the pasted file from this url string and upload it to a server for example
+								console.log(htmlContent); // eslint-disable-line no-console
+								return false;
+							}
+							const filePath = await handleRawImage(file, path);
+							currentEditor
+								.chain()
+								.insertContentAt(currentEditor.state.selection.anchor, {
+									type: 'image',
+									attrs: {
+										src: filePath
+									}
+								})
+								.focus()
+								.run();
+						});
+					}
 				}),
 				GlobalDragHandle.configure({
 					scrollTreshold: 100,
