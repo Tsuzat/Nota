@@ -17,7 +17,7 @@
 		await APPWINDOW.show();
 		const update = await check();
 		if (update !== null) {
-			toast.info(`New version ${update.version} is available.`, {
+			toast.success(`New version ${update.version} is available.`, {
 				action: {
 					label: 'Update',
 					onClick: () => {
