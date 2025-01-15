@@ -6,7 +6,7 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { APPWINDOW } from '$lib/contants';
-	import { getRecentNotesSize, RECENT_NOTES, removeNoteFromRecents } from '$lib/recents';
+	import { RECENT_NOTES, removeNoteFromRecents } from '$lib/recents';
 	import { X } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
