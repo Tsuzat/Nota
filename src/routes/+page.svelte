@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import src from '$lib/assets/static/icon.png';
 	import Navigation from '$lib/components/customs/navigation.svelte';
+	import RecentNotes from '$lib/components/customs/tiles/recent-notes.svelte';
+	import Tooltip from '$lib/components/customs/tooltip.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { APPWINDOW } from '$lib/contants';
-	import { RECENT_NOTES, removeNoteFromRecents } from '$lib/recents';
-	import { X } from 'lucide-svelte';
+	import { clearRecents, RECENT_NOTES } from '$lib/recents';
 	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
 
 	onMount(async () => {
 		await APPWINDOW.setTitle('Nota - Home');
@@ -33,37 +34,27 @@
 		</div>
 
 		<div class="mx-auto w-full max-w-3xl rounded-xl p-4">
-			<div class="text-sm text-muted-foreground">
-				RECENT NOTES
-				<span class="text-sm text-foreground font-medium">{$RECENT_NOTES.length}</span>
-			</div>
-			<div class="flex items-center gap-2 p-2 rounded-xl flex-wrap">
-				{#each $RECENT_NOTES as note}
-					<div class="relative flex items-center">
-						<Button
-							variant="outline"
-							class="flex items-center justify-between w-60"
-							onclick={() => {
-								goto(`/${note.id}`);
-							}}
-						>
-							<div>
-								<span class="text-xl">{note.icon}</span>
-								<span class="text-ellipsis">{note.name}</span>
-							</div>
-						</Button>
-						<Button
-							variant="ghost"
-							class="size-6 p-2 absolute right-0"
-							onclick={() => {
-								removeNoteFromRecents(note);
-							}}
-						>
-							<X />
-						</Button>
-					</div>
-				{/each}
-			</div>
+			{#if $RECENT_NOTES}
+				<div
+					transition:fly={{ duration: 300 }}
+					class="text-sm text-muted-foreground inline-flex items-center w-full"
+				>
+					<span> RECENT NOTES </span>
+					<span class="text-sm text-foreground font-medium mx-2">{$RECENT_NOTES.length}</span>
+					<span class="ml-auto">
+						<Tooltip text="Clear all recent notes" delayDuration={100}>
+							<Button variant="outline" size="sm" onclick={clearRecents}>Clear All</Button>
+						</Tooltip>
+					</span>
+				</div>
+				<div class="flex items-center gap-2 p-2 rounded-xl flex-wrap">
+					{#each $RECENT_NOTES as note}
+						<div class="relative flex items-center">
+							<RecentNotes {note} />
+						</div>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	</div>
 </main>
