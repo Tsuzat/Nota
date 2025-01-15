@@ -11,6 +11,7 @@
 	import { downloadAndInstall } from '$lib/updater';
 	import { APPWINDOW } from '$lib/contants';
 	import { toast } from 'svelte-sonner';
+	import { loadRecents } from '$lib/recents';
 	let { children } = $props();
 
 	onMount(async () => {
@@ -26,6 +27,7 @@
 				}
 			});
 		}
+		loadRecents();
 	});
 </script>
 
