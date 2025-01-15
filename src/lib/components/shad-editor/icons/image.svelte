@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown, Image, Link, Upload, X } from 'lucide-svelte';
+	import { ChevronDown, FileImage, Image, Link, Loader, Upload, X } from 'lucide-svelte';
 	import { type Editor } from '@tiptap/core';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
@@ -8,13 +8,17 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { convertFileSrc } from '@tauri-apps/api/core';
-	import { pictureDir } from '@tauri-apps/api/path';
+	import { pictureDir, resolve } from '@tauri-apps/api/path';
 	import { open } from '@tauri-apps/plugin-dialog';
 	import { Label } from '$lib/components/ui/label';
 	import { slide } from 'svelte/transition';
 	import { quartIn } from 'svelte/easing';
+	import { OS } from '$lib/contants';
+	import { copyFile, readDir } from '@tauri-apps/plugin-fs';
+	import { toast } from 'svelte-sonner';
+	import { checkIfImage } from '../utils';
 
-	let { editor }: { editor: Editor } = $props();
+	let { editor, path }: { editor: Editor; path: string } = $props();
 
 	let imageUrl: string | undefined = $state(undefined);
 	let open_ = $state(false);
@@ -27,8 +31,18 @@
 			filters: [{ name: 'Images', extensions: ['jpg', 'png', 'gif', 'svg'] }]
 		});
 		if (image === null) return;
-		const src = convertFileSrc(image);
+		// Copy the file to the assets folder
+		const id = toast.loading('Copying image to assets...');
+		const imageName = image.split(`${OS === 'windows' ? '\\' : '/'}`)[1];
+		const assetsPath = await resolve(
+			path +
+				`${OS === 'windows' ? '\\' : '/'}assets` +
+				`${OS === 'windows' ? '\\' : '/'}${imageName}`
+		);
+		await copyFile(image, assetsPath);
+		const src = convertFileSrc(assetsPath);
 		editor.chain().focus().setImage({ src }).run();
+		toast.success('Image copied successfully!', { id });
 		handleClose(false);
 	}
 
@@ -37,6 +51,19 @@
 			open_ = false;
 			imageUrl = undefined;
 		}
+	}
+
+	async function assetsFiles(): Promise<string[]> {
+		const assetsPath = await resolve(path + `${OS === 'windows' ? '\\' : '/'}assets`);
+		const files = await readDir(assetsPath);
+		const imagesPath: string[] = [];
+		for (const file of files) {
+			if (file.isFile && checkIfImage(file.name)) {
+				const imgPath = await resolve(assetsPath + `${OS === 'windows' ? '\\' : '/'}${file.name}`);
+				imagesPath.push(convertFileSrc(imgPath));
+			}
+		}
+		return imagesPath;
 	}
 </script>
 
@@ -66,11 +93,15 @@
 						<Tabs.List>
 							<Tabs.Trigger value="link">
 								<Link class="size-4 mr-2" />
-								<span>Image Link</span>
+								<span>Url</span>
 							</Tabs.Trigger>
 							<Tabs.Trigger value="local">
 								<Upload class="size-4 mr-2" />
-								<span>Local Image</span>
+								<span>System</span>
+							</Tabs.Trigger>
+							<Tabs.Trigger value="assets">
+								<FileImage class="size-4 mr-2" />
+								<span>Assets</span>
 							</Tabs.Trigger>
 						</Tabs.List>
 						<Tabs.Content value="link">
@@ -110,10 +141,32 @@
 							</div>
 						</Tabs.Content>
 						<Tabs.Content value="local">
-							<Button variant="outline" class="w-full h-32 mt-4" onclick={handleLocalFile}>
+							<span class="font-medium">Select images from your system</span>
+							<Button variant="outline" class="w-full h-12 mt-4" onclick={handleLocalFile}>
 								<Upload class="size-4 mr-2" />
-								<span>Drag and Drop or Select Files</span>
+								<span>Pick System Files</span>
 							</Button>
+						</Tabs.Content>
+						<Tabs.Content value="assets" class="max-h-80 overflow-auto">
+							<span class="text-sm">Select Images from Assets Or Drag and Drop Images</span>
+							{#await assetsFiles()}
+								<span class="inline-flex items-center">
+									<Loader class="animate-spin mr-2" />
+									Loading...
+								</span>
+							{:then paths}
+								<div class="flex flex-col gap-2 p-2">
+									{#each paths as path}
+										{@const fileName = path.split('%5C')}
+										<img
+											src={path}
+											alt="Assets"
+											class="w-full h-fit"
+											title={fileName[fileName.length - 1]}
+										/>
+									{/each}
+								</div>
+							{/await}
 						</Tabs.Content>
 					</Tabs.Root>
 				</Popover.Content>
