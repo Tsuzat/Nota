@@ -14,7 +14,7 @@
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
-	import { APPWINDOW, OS, WORKSPACES } from '$lib/contants';
+	import { APPWINDOW, WORKSPACES } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
