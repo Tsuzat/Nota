@@ -239,7 +239,7 @@
 	{#if editor}
 		<SearchReplace {editor} bind:open={searchReplaceOpen} />
 		{#if showToolbar}
-			<EditorToolbar {editor} />
+			<EditorToolbar {editor} {path} />
 		{/if}
 	{/if}
 	<div bind:this={element} spellcheck="false" class="h-full overflow-y-auto flex-1"></div>

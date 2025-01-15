@@ -19,7 +19,6 @@
 	import Table from './icons/table.svelte';
 	import Image from './icons/image.svelte';
 	import Text from './icons/text.svelte';
-	import SearchReplace from './icons/search-replace.svelte';
 	import Undo from './icons/undo.svelte';
 	import Redo from './icons/redo.svelte';
 	import BlockQuote from './icons/block-quote.svelte';
@@ -28,9 +27,10 @@
 
 	interface Props {
 		editor: Editor;
+		path: string;
 	}
 
-	let { editor }: Props = $props();
+	let { editor, path }: Props = $props();
 
 	// const tippyOptions = {};
 	// const pluginKey = 'SvelteTiptapBubbleMenu';
@@ -72,7 +72,7 @@
 	<ButtleList {editor} />
 	<OrderedList {editor} />
 	<TaskList {editor} />
-	<Image {editor} />
+	<Image {editor} {path} />
 	<Table {editor} />
 	<Textcolor {editor} />
 	<Highlighter {editor} />
