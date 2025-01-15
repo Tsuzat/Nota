@@ -3,7 +3,7 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { NOTES, OPEN_NEW_WORKSPACE_DIALOG, WORKSPACES } from '$lib/contants';
+	import { NOTES, OPEN_NEW_WORKSPACE_DIALOG, OS, WORKSPACES } from '$lib/contants';
 	import {
 		duplicateNote,
 		permanentlyDeleteNotes,
@@ -102,7 +102,7 @@
 <Sidebar.Group>
 	<Sidebar.GroupLabel class="flex items-center justify-between">
 		<span>Workspaces</span>
-		<Tooltip text="Create a Workspace">
+		<Tooltip text="Create a Workspace" key={OS === 'macos' ? '⌘ N' : 'Ctrl N'}>
 			<Button
 				variant="ghost"
 				size="sm"
