@@ -1,6 +1,5 @@
 import { writable, type Writable } from 'svelte/store';
 import type { NotesDB } from './database/notes';
-import { load } from '@tauri-apps/plugin-store';
 import { NOTES } from './contants';
 
 export const RECENT_NOTES: Writable<NotesDB[]> = writable();
