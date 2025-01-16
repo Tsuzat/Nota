@@ -27,7 +27,7 @@
 		<Button
 			variant="link"
 			class="absolute right-1 top-0 p-0 size-4"
-			onclick={() => removeNoteFromRecents(note)}
+			onclick={() => removeNoteFromRecents(note.id)}
 		>
 			<Tooltip text="Remove from recents" delayDuration={100}>
 				<X />
