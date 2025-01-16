@@ -29,4 +29,3 @@ updates:
     groups:
       rust-updates:
         update-types: [minor, patch]
-
