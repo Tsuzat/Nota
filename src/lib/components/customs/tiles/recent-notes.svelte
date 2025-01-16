@@ -8,7 +8,6 @@
 	import { ExternalLink, Star, Trash2, X } from 'lucide-svelte';
 	import Tooltip from '../tooltip.svelte';
 	import { cn } from '$lib/utils';
-	import { text } from '@sveltejs/kit';
 
 	interface Props {
 		note: NotesDB;
