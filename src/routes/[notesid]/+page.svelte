@@ -14,13 +14,14 @@
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
-	import { APPWINDOW, WORKSPACES } from '$lib/contants';
+	import { APPWINDOW, OS, WORKSPACES } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
 	import { onDestroy } from 'svelte';
 	import Navigation from '$lib/components/customs/navigation.svelte';
 	import { addNoteToRecents } from '$lib/recents';
+	import Tooltip from '$lib/components/customs/tooltip.svelte';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -169,7 +170,9 @@
 		<main class="flex flex-col w-full h-full">
 			<header class="flex h-14 shrink-0 items-center gap-2">
 				<div class="flex flex-1 items-center gap-2 px-3">
-					<Sidebar.Trigger />
+					<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
+						<Sidebar.Trigger />
+					</Tooltip>
 					<Separator orientation="vertical" class="mr-2 h-4" />
 					<Navigation />
 					<div class="line-clamp-1 flex items-center gap-2 text-xl font-bold">

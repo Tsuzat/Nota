@@ -6,7 +6,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { APPWINDOW, NOTES } from '$lib/contants';
+	import { APPWINDOW, NOTES, OS } from '$lib/contants';
 	import { clearRecents, RECENT_NOTES } from '$lib/recents';
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
@@ -19,7 +19,9 @@
 <main>
 	<header class="flex h-14 shrink-0 items-center gap-2">
 		<div class="flex flex-1 items-center gap-2 px-3">
-			<Sidebar.Trigger />
+			<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
+				<Sidebar.Trigger />
+			</Tooltip>
 			<Separator orientation="vertical" class="mr-2 h-4" />
 			<Navigation />
 		</div>
