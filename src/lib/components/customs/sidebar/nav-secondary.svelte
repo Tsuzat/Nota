@@ -43,22 +43,14 @@
 		checkingUpdate = false;
 	}
 
-	interface Items {
-		title: string;
-		url: string;
-		icon: any;
-		badge?: string;
-		onclick?: () => void;
-	}
-
 	let { ...restProps } = $props();
 </script>
 
 <Sidebar.Group {...restProps}>
 	<Popover.Root>
 		<Popover.Trigger>
-			<Sidebar.MenuButton>
-				<Trash2 />
+			<Sidebar.MenuButton class="group/trash">
+				<Trash2 class="group-hover/trash:animate-wiggle" />
 				<span>Trash</span>
 			</Sidebar.MenuButton>
 		</Popover.Trigger>
@@ -79,14 +71,17 @@
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton class="group/settings">
 					<Settings
-						class="group-hover/settings:rotate-90 rotate-0 transition-transform duration-300"
+						class="group-hover/settings:rotate-90 rotate-0 transition-transform duration-500"
 					/>
 					<span>Settings</span>
 				</Sidebar.MenuButton>
 			</Sidebar.MenuItem>
-			<Sidebar.MenuItem>
+			<Sidebar.MenuItem class="group/update">
 				<Sidebar.MenuButton onclick={checkUpdate}>
-					<RefreshCw data-spin={checkingUpdate} class="data-[spin=true]:animate-spin" />
+					<RefreshCw
+						data-spin={checkingUpdate}
+						class="data-[spin=true]:animate-spin group-hover/update:rotate-45 rotate-0 transition-transform duration-500"
+					/>
 					<span>Check Update</span>
 				</Sidebar.MenuButton>
 			</Sidebar.MenuItem>
