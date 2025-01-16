@@ -5,8 +5,10 @@
 	import { WORKSPACES } from '$lib/contants';
 	import type { NotesDB } from '$lib/database/notes';
 	import { removeNoteFromRecents } from '$lib/recents';
-	import { ExternalLink, X } from 'lucide-svelte';
+	import { ExternalLink, Star, Trash2, X } from 'lucide-svelte';
 	import Tooltip from '../tooltip.svelte';
+	import { cn } from '$lib/utils';
+	import { text } from '@sveltejs/kit';
 
 	interface Props {
 		note: NotesDB;
@@ -17,7 +19,7 @@
 	const workspace = $WORKSPACES.find((w) => w.id === note.workspace);
 </script>
 
-<Card.Root class="bg-muted/40 hover:bg-muted/60 transition-all cursor-pointer max-w-60">
+<Card.Root class="bg-muted/40 relative hover:bg-muted/60 transition-all cursor-pointer max-w-60">
 	<Card.Header class="relative">
 		<Card.Title class="text-5xl font-bold">{note.icon}</Card.Title>
 		<Card.Description class="text-foreground text-xl font-medium text-ellipsis"
@@ -46,4 +48,12 @@
 	<Card.Content class="text-sm text-muted-foreground" title={note.path}>
 		<span class="text-ellipsis">{workspace?.icon} {workspace?.name}</span>
 	</Card.Content>
+	<div class="inline-flex items-center absolute right-1 bottom-1 gap-2">
+		<Tooltip text="Trashed Notes" delayDuration={100}>
+			<Trash2 class={cn('size-4 text-muted-foreground', !note.trashed && 'hidden')} />
+		</Tooltip>
+		<Tooltip text="Favorite Notes" delayDuration={100}>
+			<Star class={cn('size-4 fill-yellow-500 text-yellow-500', !note.favorite && 'hidden')} />
+		</Tooltip>
+	</div>
 </Card.Root>
