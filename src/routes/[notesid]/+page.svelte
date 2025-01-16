@@ -116,7 +116,7 @@
 		path.set(workspace.path);
 		// Set the APP Window as notes name
 		APPWINDOW.setTitle(`Nota - ${name}`);
-		if (notesDB !== null) addNoteToRecents($notesDB);
+		if (notesDB !== null) addNoteToRecents($notesDB.id);
 	}
 
 	// On notesDB changes, uodate DB and gloabal variable

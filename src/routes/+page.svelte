@@ -6,7 +6,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { APPWINDOW } from '$lib/contants';
+	import { APPWINDOW, NOTES } from '$lib/contants';
 	import { clearRecents, RECENT_NOTES } from '$lib/recents';
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
@@ -47,11 +47,9 @@
 						</Tooltip>
 					</span>
 				</div>
-				<div class="flex items-center gap-2 p-2 rounded-xl flex-wrap">
-					{#each $RECENT_NOTES as note}
-						<div class="relative flex items-center">
-							<RecentNotes {note} />
-						</div>
+				<div class="flex gap-2 p-2 rounded-xl flex-wrap">
+					{#each $NOTES.filter((n) => $RECENT_NOTES.includes(n.id)) as note}
+						<RecentNotes {note} />
 					{/each}
 				</div>
 			{/if}
