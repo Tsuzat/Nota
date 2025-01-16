@@ -3,7 +3,6 @@
 	import { permanentlyDeleteNotes, updateNotesDB, type NotesDB } from '$lib/database/notes';
 	import { Trash2, Undo2 } from 'lucide-svelte';
 	import Tooltip from '../tooltip.svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { updateNOTES } from '$lib/utils';
 
 	interface Props {
