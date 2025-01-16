@@ -17,7 +17,7 @@
 			{@render children()}
 		</Tooltip.Trigger>
 		<Tooltip.Content class="bg-background text-foreground text-sm rounded p-1 border" {side}>
-			<span class="font-bold">{text}</span>
+			<span class="font-medium">{text}</span>
 			<span class="text-muted-foreground">{key}</span>
 		</Tooltip.Content>
 	</Tooltip.Root>
