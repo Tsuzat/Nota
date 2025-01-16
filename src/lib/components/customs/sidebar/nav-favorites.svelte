@@ -32,7 +32,7 @@
 							</a>
 						{/snippet}
 					</Sidebar.MenuButton>
-					<DropdownMenu.Root>
+					<!-- <DropdownMenu.Root>
 						<DropdownMenu.Trigger>
 							{#snippet child({ props })}
 								<Sidebar.MenuAction showOnHover {...props}>
@@ -67,7 +67,7 @@
 								<span>Delete</span>
 							</DropdownMenu.Item>
 						</DropdownMenu.Content>
-					</DropdownMenu.Root>
+					</DropdownMenu.Root> -->
 				</Sidebar.MenuItem>
 			{/each}
 		</Sidebar.Menu>
