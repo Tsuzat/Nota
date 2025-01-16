@@ -15,6 +15,9 @@
 	let { children } = $props();
 
 	onMount(async () => {
+		// load recents
+		loadRecents();
+
 		await APPWINDOW.show();
 		const update = await check();
 		if (update !== null) {
@@ -27,7 +30,6 @@
 				}
 			});
 		}
-		loadRecents();
 	});
 </script>
 
