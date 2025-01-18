@@ -1,4 +1,35 @@
 <script lang="ts" module>
+</script>
+
+<script lang="ts">
+	import { Button } from '$lib/components/ui/button/index.js';
+	import * as Popover from '$lib/components/ui/popover/index.js';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import Ellipsis from 'lucide-svelte/icons/ellipsis';
+	import Star from 'lucide-svelte/icons/star';
+	import { onDestroy, onMount } from 'svelte';
+	import { render as timeAgoRender, cancel } from 'timeago.js';
+	import {
+		ArrowDown,
+		ArrowUp,
+		Copy,
+		CornerUpRight,
+		PenBox,
+		Redo,
+		Settings2,
+		Trash2,
+		Undo
+	} from 'lucide-svelte';
+
+	let open = $state(false);
+
+	interface Props {
+		lastEdited: string;
+		favorite: boolean;
+		onDuplicate: () => void;
+	}
+	let { lastEdited = $bindable(''), favorite = $bindable(false), onDuplicate }: Props = $props();
+
 	const data = [
 		[
 			{
@@ -16,7 +47,7 @@
 			{
 				label: 'Duplicate',
 				icon: Copy,
-				onclick: () => {}
+				onclick: onDuplicate
 			},
 			{
 				label: 'Move to',
@@ -54,34 +85,6 @@
 			}
 		]
 	];
-</script>
-
-<script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import Ellipsis from 'lucide-svelte/icons/ellipsis';
-	import Star from 'lucide-svelte/icons/star';
-	import { onDestroy, onMount } from 'svelte';
-	import { render as timeAgoRender, cancel } from 'timeago.js';
-	import {
-		ArrowDown,
-		ArrowUp,
-		Copy,
-		CornerUpRight,
-		PenBox,
-		Redo,
-		Settings2,
-		Trash2,
-		Undo
-	} from 'lucide-svelte';
-
-	let open = $state(false);
-
-	interface Props {
-		lastEdited: string;
-		favorite: boolean;
-	}
 
 	let timeAgoHTML: HTMLDivElement | undefined = $state(undefined);
 
@@ -98,8 +101,6 @@
 	onDestroy(() => {
 		cancel(timeAgoHTML);
 	});
-
-	let { lastEdited = $bindable(''), favorite = $bindable(false) }: Props = $props();
 </script>
 
 <div class="flex items-center gap-2 text-sm">
@@ -138,7 +139,7 @@
 								<Sidebar.Menu>
 									{#each group as item, index (index)}
 										<Sidebar.MenuItem>
-											<Sidebar.MenuButton>
+											<Sidebar.MenuButton onclick={item.onclick}>
 												<item.icon /> <span>{item.label}</span>
 											</Sidebar.MenuButton>
 										</Sidebar.MenuItem>
