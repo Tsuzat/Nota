@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { type Editor } from '@tiptap/core';
-	import { onMount } from 'svelte';
-	import { BubbleMenuPlugin, type BubbleMenuPluginProps } from '@tiptap/extension-bubble-menu';
 
 	import Bold from './icons/bold.svelte';
 	import Italic from './icons/italic.svelte';
@@ -19,8 +17,6 @@
 	import Table from './icons/table.svelte';
 	import Image from './icons/image.svelte';
 	import Text from './icons/text.svelte';
-	import Undo from './icons/undo.svelte';
-	import Redo from './icons/redo.svelte';
 	import BlockQuote from './icons/block-quote.svelte';
 	import Textcolor from './icons/textcolor.svelte';
 	import Highlighter from './icons/highlighter.svelte';
@@ -31,33 +27,9 @@
 	}
 
 	let { editor, path }: Props = $props();
-
-	// const tippyOptions = {};
-	// const pluginKey = 'SvelteTiptapBubbleMenu';
-	// const shouldShow = null;
-	// const updateDelay = 100;
-
-	// let element: HTMLElement;
-
-	// onMount(() => {
-	// 	const plugin = BubbleMenuPlugin({
-	// 		pluginKey,
-	// 		editor,
-	// 		element,
-	// 		tippyOptions,
-	// 		shouldShow,
-	// 		updateDelay
-	// 	});
-
-	// 	editor.registerPlugin(plugin);
-
-	// 	return () => editor.unregisterPlugin(pluginKey);
-	// });
 </script>
 
-<div class="flex max-w-fit mx-auto mb-1 p-0.5 rounded">
-	<!-- <Undo {editor} />
-	<Redo {editor} /> -->
+<div class="flex max-w-fit mx-auto mb-1">
 	<Text {editor} />
 	<Bold {editor} />
 	<Italic {editor} />
