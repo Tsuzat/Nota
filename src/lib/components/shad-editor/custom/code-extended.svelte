@@ -33,7 +33,7 @@
 
 <NodeViewWrapper
 	class="code-wrapper group relative rounded bg-muted p-6 dark:bg-muted/20"
-	draggable
+	draggable="false"
 >
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger
