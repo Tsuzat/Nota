@@ -1,81 +1,56 @@
 <script lang="ts" module>
-	import ArrowDown from 'lucide-svelte/icons/arrow-down';
-	import ArrowUp from 'lucide-svelte/icons/arrow-up';
-	import Bell from 'lucide-svelte/icons/bell';
-	import ChartLine from 'lucide-svelte/icons/chart-line';
-	import Copy from 'lucide-svelte/icons/copy';
-	import CornerUpLeft from 'lucide-svelte/icons/corner-up-left';
-	import CornerUpRight from 'lucide-svelte/icons/corner-up-right';
-	import FileText from 'lucide-svelte/icons/file-text';
-	import GalleryVerticalEnd from 'lucide-svelte/icons/gallery-vertical-end';
-	import Link from 'lucide-svelte/icons/link';
-	import Settings2 from 'lucide-svelte/icons/settings-2';
-	import Trash from 'lucide-svelte/icons/trash';
-	import Trash2 from 'lucide-svelte/icons/trash-2';
-
 	const data = [
 		[
 			{
 				label: 'Show Toolbar',
-				icon: PenBox
+				icon: PenBox,
+				onclick: () => {}
 			},
 			{
 				label: 'Customize Page',
-				icon: Settings2
-			},
-			{
-				label: 'Turn into wiki',
-				icon: FileText
+				icon: Settings2,
+				onclick: () => {}
 			}
 		],
 		[
 			{
-				label: 'Copy Link',
-				icon: Link
-			},
-			{
 				label: 'Duplicate',
-				icon: Copy
+				icon: Copy,
+				onclick: () => {}
 			},
 			{
 				label: 'Move to',
-				icon: CornerUpRight
+				icon: CornerUpRight,
+				onclick: () => {}
 			},
 			{
 				label: 'Move to Trash',
-				icon: Trash2
+				icon: Trash2,
+				onclick: () => {}
 			}
 		],
 		[
 			{
 				label: 'Undo',
-				icon: CornerUpLeft
+				icon: Undo,
+				onclick: () => {}
 			},
 			{
-				label: 'View analytics',
-				icon: ChartLine
-			},
-			{
-				label: 'Version History',
-				icon: GalleryVerticalEnd
-			},
-			{
-				label: 'Show delete pages',
-				icon: Trash
-			},
-			{
-				label: 'Notifications',
-				icon: Bell
+				label: 'Redo',
+				icon: Redo,
+				onclick: () => {}
 			}
 		],
 		[
 			{
 				label: 'Import',
-				icon: ArrowUp
+				icon: ArrowUp,
+				onclick: () => {}
 			},
 			{
 				label: 'Export',
-				icon: ArrowDown
+				icon: ArrowDown,
+				onclick: () => {}
 			}
 		]
 	];
@@ -89,7 +64,17 @@
 	import Star from 'lucide-svelte/icons/star';
 	import { onDestroy, onMount } from 'svelte';
 	import { render as timeAgoRender, cancel } from 'timeago.js';
-	import { PenBox } from 'lucide-svelte';
+	import {
+		ArrowDown,
+		ArrowUp,
+		Copy,
+		CornerUpRight,
+		PenBox,
+		Redo,
+		Settings2,
+		Trash2,
+		Undo
+	} from 'lucide-svelte';
 
 	let open = $state(false);
 
@@ -144,7 +129,7 @@
 				</Button>
 			{/snippet}
 		</Popover.Trigger>
-		<Popover.Content class="w-56 overflow-hidden rounded-lg p-0" align="end">
+		<Popover.Content class="w-56 max-h-[85vh] overflow-auto rounded-lg p-0" align="end">
 			<Sidebar.Root collapsible="none" class="bg-transparent">
 				<Sidebar.Content>
 					{#each data as group, index (index)}
