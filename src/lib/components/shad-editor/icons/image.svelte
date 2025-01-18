@@ -148,7 +148,7 @@
 							</Button>
 						</Tabs.Content>
 						<Tabs.Content value="assets" class="max-h-80 overflow-auto">
-							<span class="text-sm">Select Images from Assets Or Drag and Drop Images</span>
+							<span class="text-sm">Drag and Drop Assets Images</span>
 							{#await assetsFiles()}
 								<span class="inline-flex items-center">
 									<Loader class="animate-spin mr-2" />
