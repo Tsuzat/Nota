@@ -4,7 +4,13 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import NavActions from '$lib/components/customs/sidebar/nav-actions.svelte';
 	import ShadEditor from '$lib/components/shad-editor/shad-editor.svelte';
-	import { getNotesById, type NotesDB, type Notes, updateNotesDB } from '$lib/database/notes';
+	import {
+		getNotesById,
+		type NotesDB,
+		type Notes,
+		updateNotesDB,
+		duplicateNote
+	} from '$lib/database/notes';
 	import { load, type Store } from '@tauri-apps/plugin-store';
 	import type { Content } from '@tiptap/core';
 	import { error } from '@tauri-apps/plugin-log';
@@ -147,12 +153,27 @@
 			return note;
 		});
 		if (!store) return;
-		store.set('updatedAt', new Date().toISOString());
+		// store.set('updatedAt', new Date().toISOString());
 		store.set('icon', icon);
 
 		if ($notesDB === null) return;
 		$notesDB.icon = icon;
 	}
+
+	function onTitleChange(title: string) {
+		notes.update((note) => {
+			if (note === null) return note;
+			note.name = title;
+			note.updatedAt = new Date().toISOString();
+			return note;
+		});
+		if (!store) return;
+		// store.set('updatedAt', new Date().toISOString());
+		store.set('name', title);
+		if ($notesDB === null) return;
+		$notesDB.name = title;
+	}
+
 	onDestroy(async () => {
 		if (store) await store.close();
 	});
@@ -179,22 +200,40 @@
 						<Iconpicker onSelect={onIconChange}>
 							<IconRender icon={$notes.icon} class="text-xl" />
 						</Iconpicker>
-						<span>{$notes.name}</span>
+						<!-- <span>{$notes.name}</span> -->
+						<input
+							type="text"
+							class="w-full text-ellipsis bg-transparent focus:outline-none hover:bg-muted/50 p-0.5 rounded"
+							bind:value={$notes.name}
+							oninput={(e) => {
+								//@ts-ignore
+								if (e.target && e.target.value) onTitleChange(e.target.value);
+							}}
+						/>
 					</div>
 				</div>
 				<div class="ml-auto px-3">
 					<!-- !FIXME: Need to add reactivity for favorite button (may be a callback??) -->
-					<NavActions bind:lastEdited={$notes.updatedAt} bind:favorite={$notesDB.favorite} />
+					<NavActions
+						bind:lastEdited={$notes.updatedAt}
+						bind:favorite={$notesDB.favorite}
+						onDuplicate={() => {
+							if ($notesDB === null) return;
+							const workspace = $WORKSPACES.find(
+								(workspace) => workspace.id === $notesDB.workspace
+							);
+							if (workspace === undefined) return;
+							duplicateNote($notesDB, workspace);
+						}}
+					/>
 				</div>
 			</header>
-			<div class="flex-grow max-h-[calc(100vh-3.5rem)]">
-				<ShadEditor
-					class="flex flex-col h-full w-full"
-					path={$path}
-					content={$notes.content}
-					onChange={updateContent}
-				/>
-			</div>
+			<ShadEditor
+				class="flex-grow max-h-[calc(100vh-3.5rem)] flex flex-col h-full w-full"
+				path={$path}
+				content={$notes.content}
+				onChange={updateContent}
+			/>
 		</main>
 	{/if}
 {/key}
