@@ -47,9 +47,6 @@
 	import Button from '../ui/button/button.svelte';
 	import { ArrowUp } from 'lucide-svelte';
 	import Tooltip from '../customs/tooltip.svelte';
-	import { writeFile } from '@tauri-apps/plugin-fs';
-	import { resolve } from '@tauri-apps/api/path';
-	import { OS } from '$lib/contants';
 	import { handleRawImage } from './utils';
 
 	const lowlight = createLowlight(all);
