@@ -33,7 +33,7 @@
 		if (image === null) return;
 		// Copy the file to the assets folder
 		const id = toast.loading('Copying image to assets...');
-		const imageName = image.split(`${OS === 'windows' ? '\\' : '/'}`)[1];
+		const imageName = image.split(`${OS === 'windows' ? '\\' : '/'}`).pop();
 		const assetsPath = await resolve(
 			path +
 				`${OS === 'windows' ? '\\' : '/'}assets` +
@@ -158,12 +158,7 @@
 								<div class="flex flex-col gap-2 p-2">
 									{#each paths as path}
 										{@const fileName = path.split('%5C')}
-										<img
-											src={path}
-											alt="Assets"
-											class="w-full h-fit"
-											title={fileName[fileName.length - 1]}
-										/>
+										<img src={path} alt="Assets" class="w-full h-fit" title={fileName.pop()} />
 									{/each}
 								</div>
 							{/await}
