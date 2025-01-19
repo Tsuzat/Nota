@@ -20,6 +20,7 @@
 		Trash2,
 		Undo
 	} from 'lucide-svelte';
+	import type { NotesDB } from '$lib/database/notes';
 
 	let open = $state(false);
 
@@ -27,8 +28,14 @@
 		lastEdited: string;
 		favorite: boolean;
 		onDuplicate: () => void;
+		onTrash: () => void;
 	}
-	let { lastEdited = $bindable(''), favorite = $bindable(false), onDuplicate }: Props = $props();
+	let {
+		lastEdited = $bindable(''),
+		favorite = $bindable(false),
+		onDuplicate,
+		onTrash
+	}: Props = $props();
 
 	const data = [
 		[
@@ -57,7 +64,7 @@
 			{
 				label: 'Move to Trash',
 				icon: Trash2,
-				onclick: () => {}
+				onclick: onTrash
 			}
 		],
 		[

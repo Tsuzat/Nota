@@ -9,7 +9,8 @@
 		type NotesDB,
 		type Notes,
 		updateNotesDB,
-		duplicateNote
+		duplicateNote,
+		moveToTrash
 	} from '$lib/database/notes';
 	import { load, type Store } from '@tauri-apps/plugin-store';
 	import type { Content } from '@tiptap/core';
@@ -218,12 +219,14 @@
 						bind:lastEdited={$notes.updatedAt}
 						bind:favorite={$notesDB.favorite}
 						onDuplicate={() => {
-							if ($notesDB === null) return;
 							const workspace = $WORKSPACES.find(
 								(workspace) => workspace.id === $notesDB.workspace
 							);
 							if (workspace === undefined) return;
 							duplicateNote($notesDB, workspace);
+						}}
+						onTrash={() => {
+							moveToTrash($notesDB);
 						}}
 					/>
 				</div>
