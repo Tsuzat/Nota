@@ -12,6 +12,7 @@ import { confirm } from '@tauri-apps/plugin-dialog';
 import { page } from '$app/state';
 import { goto } from '$app/navigation';
 import { NOTES } from '$lib/contants';
+import { updateNOTES } from '$lib/utils';
 
 /**
  * Notes interface has the data of a note with
@@ -308,4 +309,32 @@ export async function duplicateNote(note: NotesDB, workspace: WorkSpaceDB) {
 			onClick: () => goto(`/${newNote.id}`)
 		}
 	});
+}
+
+/**
+ * Function to move a note to trash and redirect to home page
+ * @param note NotesDB - Note to be moved to trash
+ * @returns Promise<void> - void
+ */
+export async function moveToTrash(note: NotesDB) {
+	const shouldDelete = await confirm(
+		`Are you sure you want to move notes "${note.name}" to trash?`,
+		{
+			kind: 'info',
+			title: `Move to trash?`,
+			okLabel: 'Move to Trash'
+		}
+	);
+	if (!shouldDelete) return;
+	note.trashed = true;
+	let isUpdated = await updateNotesDB(note);
+	if (isUpdated) {
+		updateNOTES(note);
+		goto('/');
+		toast.success('Note moved to trash', {
+			description: `Notes "${note.name}" moved to trash`
+		});
+	} else {
+		toast.error('Error on moving the note to trash');
+	}
 }

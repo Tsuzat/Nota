@@ -6,6 +6,7 @@
 	import { NOTES, OPEN_NEW_WORKSPACE_DIALOG, OS, WORKSPACES } from '$lib/contants';
 	import {
 		duplicateNote,
+		moveToTrash,
 		permanentlyDeleteNotes,
 		updateNotesDB,
 		type NotesDB
@@ -27,30 +28,6 @@
 	import { resolve } from '@tauri-apps/api/path';
 
 	let open: boolean = $state(false);
-
-	//! TODO: Need to test this function when impleted the trash
-	async function moveToTrash(note: NotesDB) {
-		const shouldDelete = await confirm(
-			`Are you sure you want to move notes "${note.name}" to trash?`,
-			{
-				kind: 'info',
-				title: `Move to trash?`,
-				okLabel: 'Move to Trash'
-			}
-		);
-		if (!shouldDelete) return;
-		note.trashed = true;
-		let isUpdated = await updateNotesDB(note);
-		if (isUpdated) {
-			updateNOTES(note);
-			goto('/');
-			toast.success('Note moved to trash', {
-				description: `Notes "${note.name}" moved to trash`
-			});
-		} else {
-			toast.error('Error on moving the note to trash');
-		}
-	}
 
 	function toggleFavorite(note: NotesDB) {
 		note.favorite = !note.favorite;
