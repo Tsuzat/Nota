@@ -1,15 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
 	import { NOTES } from '$lib/contants';
-	import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
-	import Ellipsis from 'lucide-svelte/icons/ellipsis';
-	import Link from 'lucide-svelte/icons/link';
-	import StarOff from 'lucide-svelte/icons/star-off';
-	import Trash2 from 'lucide-svelte/icons/trash-2';
 
 	const sidebar = useSidebar();
 </script>
