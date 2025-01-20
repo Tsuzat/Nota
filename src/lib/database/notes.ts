@@ -287,15 +287,19 @@ export async function getAllNotes(): Promise<NotesDB[]> {
  * @returns Promise<void> - void
  */
 export async function duplicateNote(note: NotesDB, workspace: WorkSpaceDB) {
-	const newNote = await createNote(note.icon, `${note.name} - Copy`, workspace);
+	const id = toast.loading('Duplicating the note...');
+	const newNote = await createNote(note.icon, `${note.name}(Copy)`, workspace);
 	if (newNote === null) {
-		toast.error('Error on duplicating the note');
+		toast.error('Error on duplicating the note', { id });
 		return;
 	}
+	toast.success('Note added to Database', { id });
+	toast.info('Adding notes to the disk...', { id });
 	// get the note location
 	const noteStore = await load(note.path, { autoSave: false });
 	const newNoteStore = await load(newNote.path, { autoSave: false });
-	newNoteStore.set('content', await noteStore.get('content'));
+	const content = await noteStore.get<Content>('content');
+	await newNoteStore.set('content', content);
 	await newNoteStore.save();
 	await newNoteStore.close();
 	await noteStore.close();
@@ -303,6 +307,7 @@ export async function duplicateNote(note: NotesDB, workspace: WorkSpaceDB) {
 		return [...notes, newNote];
 	});
 	toast.success('Note duplicated', {
+		id,
 		description: `Note with title ${note.name} duplicated`,
 		action: {
 			label: 'Open',
