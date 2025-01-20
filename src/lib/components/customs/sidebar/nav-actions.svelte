@@ -27,15 +27,11 @@
 	interface Props {
 		lastEdited: string;
 		favorite: boolean;
+		onFavorite: () => void;
 		onDuplicate: () => void;
 		onTrash: () => void;
 	}
-	let {
-		lastEdited = $bindable(''),
-		favorite = $bindable(false),
-		onDuplicate,
-		onTrash
-	}: Props = $props();
+	let { lastEdited = $bindable(''), favorite, onFavorite, onDuplicate, onTrash }: Props = $props();
 
 	const data = [
 		[
@@ -116,14 +112,7 @@
 		class="text-muted-foreground hidden font-medium md:inline-block"
 		datetime={lastEdited}
 	></div>
-	<Button
-		variant="ghost"
-		size="icon"
-		class="size-7"
-		onclick={() => {
-			favorite = !favorite;
-		}}
-	>
+	<Button variant="ghost" size="icon" class="size-7" onclick={onFavorite}>
 		<Star
 			data-favorite={favorite}
 			class="data-[favorite=true]:text-yellow-400 data-[favorite=true]:fill-yellow-400"
