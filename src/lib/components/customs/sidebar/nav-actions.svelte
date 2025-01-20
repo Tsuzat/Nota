@@ -52,27 +52,15 @@
 				icon: Copy,
 				onclick: onDuplicate
 			},
-			{
-				label: 'Move to',
-				icon: CornerUpRight,
-				onclick: () => {}
-			},
+			// {
+			// 	label: 'Move to',
+			// 	icon: CornerUpRight,
+			// 	onclick: () => {}
+			// },
 			{
 				label: 'Move to Trash',
 				icon: Trash2,
 				onclick: onTrash
-			}
-		],
-		[
-			{
-				label: 'Undo',
-				icon: Undo,
-				onclick: () => {}
-			},
-			{
-				label: 'Redo',
-				icon: Redo,
-				onclick: () => {}
 			}
 		],
 		[
