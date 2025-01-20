@@ -19,14 +19,12 @@
 	}
 </script>
 
-<div
-	class="p-1 flex items-center text-sm justify-between cursor-pointer hover:bg-muted/50 hover:rounded"
->
-	<span>
-		<span>{notes.icon}</span>
-		<span>{notes.name}</span>
-	</span>
-	<span>
+<div class="p-1 flex items-center text-sm cursor-pointer hover:bg-muted/50 hover:rounded">
+	<span>{notes.icon}</span>
+	<span class="text-ellipsis overflow-hidden whitespace-nowrap mr-2" title={notes.name}
+		>{notes.name}</span
+	>
+	<span class="ml-auto flex items-center">
 		<Tooltip text="Restore">
 			<Button variant="ghost" class="size-6 p-0 rounded" onclick={restore}>
 				<Undo2 />
