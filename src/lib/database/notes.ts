@@ -337,7 +337,15 @@ export async function moveToTrash(note: NotesDB) {
 		updateNOTES(note);
 		goto('/');
 		toast.success('Note moved to trash', {
-			description: `Notes "${note.name}" moved to trash`
+			description: `Notes "${note.name}" moved to trash`,
+			action: {
+				label: 'Undo',
+				onClick: async () => {
+					note.trashed = false;
+					await updateNotesDB(note);
+					updateNOTES(note);
+				}
+			}
 		});
 	} else {
 		toast.error('Error on moving the note to trash');
