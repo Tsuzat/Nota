@@ -158,7 +158,7 @@
 									>
 										<Sidebar.MenuSubButton class="flex-grow" onclick={() => goto(`/${note.id}`)}>
 											{#snippet child({ props })}
-												<span {...props}>
+												<a href="/{note.id}" title={note.name} {...props}>
 													<IconRender icon={note.icon} />
 													<span
 														data-trashed={note.trashed}
@@ -166,7 +166,7 @@
 													>
 														{note.name}
 													</span>
-												</span>
+												</a>
 											{/snippet}
 										</Sidebar.MenuSubButton>
 										<DropdownMenu.Root>
