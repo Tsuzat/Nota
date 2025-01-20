@@ -9,14 +9,18 @@
 	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { downloadAndInstall } from '$lib/updater';
-	import { APPWINDOW } from '$lib/contants';
+	import { APPWINDOW, NOTES } from '$lib/contants';
 	import { toast } from 'svelte-sonner';
-	import { loadRecents } from '$lib/recents';
+	import { RECENT_NOTES } from '$lib/recents';
 	let { children } = $props();
 
 	onMount(async () => {
 		// load recents
-		loadRecents();
+		const rawData = localStorage.getItem('recent-notes') || '[]';
+		const notesIds: string[] = JSON.parse(rawData);
+		// remove the redundant notes from recents
+		if (notesIds.length > 0) notesIds.filter((noteId) => $NOTES.find((note) => note.id === noteId));
+		RECENT_NOTES.set(notesIds);
 
 		await APPWINDOW.show();
 		const update = await check();

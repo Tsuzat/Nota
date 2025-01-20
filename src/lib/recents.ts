@@ -10,20 +10,6 @@ RECENT_NOTES.subscribe(async (notes) => {
 	localStorage.setItem('recent-notes', JSON.stringify(notes));
 });
 
-/**
- * Function to load recent notes from local storage
- */
-export function loadRecents() {
-	try {
-		const rawData = localStorage.getItem('recent-notes') || '[]';
-		const notesIds: string[] = JSON.parse(rawData);
-		RECENT_NOTES.set(notesIds);
-	} catch (error) {
-		console.error(error);
-		RECENT_NOTES.set([]);
-	}
-}
-
 export function addNoteToRecents(noteId: string) {
 	RECENT_NOTES.update((notes) => {
 		if (notes.find((n) => n === noteId)) return notes;
