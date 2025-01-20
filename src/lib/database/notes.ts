@@ -68,14 +68,14 @@ export async function createNote(
 			updatedAt: new Date().toISOString(),
 			content: null
 		};
-		store.set('id', notes.id);
-		store.set('name', notes.name);
-		store.set('icon', notes.icon);
-		store.set('cover', notes.cover);
-		store.set('description', notes.description);
-		store.set('createdAt', notes.createdAt);
-		store.set('updatedAt', notes.updatedAt);
-		store.set('content', notes.content);
+		await store.set('id', notes.id);
+		await store.set('name', notes.name);
+		await store.set('icon', notes.icon);
+		await store.set('cover', notes.cover);
+		await store.set('description', notes.description);
+		await store.set('createdAt', notes.createdAt);
+		await store.set('updatedAt', notes.updatedAt);
+		await store.set('content', notes.content);
 		await store.save();
 		await store.close();
 
