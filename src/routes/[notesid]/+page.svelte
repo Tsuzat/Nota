@@ -21,7 +21,7 @@
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
-	import { APPWINDOW, OS, WORKSPACES } from '$lib/contants';
+	import { APPWINDOW, NOTES, OS, WORKSPACES } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
@@ -34,6 +34,10 @@
 	const notesDB = writable<NotesDB | null>(null);
 	const path = writable<string>('');
 	let store: Store | undefined = undefined;
+	let isAFavorite = $derived.by(() => {
+		if ($notesDB === null) return false;
+		return $NOTES.find((note) => note.id === $notesDB.id)?.favorite ?? false;
+	});
 
 	let notesId = $derived.by(() => {
 		return page.url.pathname.split('/')[1];
@@ -217,7 +221,10 @@
 					<!-- !FIXME: Need to add reactivity for favorite button (may be a callback??) -->
 					<NavActions
 						bind:lastEdited={$notes.updatedAt}
-						bind:favorite={$notesDB.favorite}
+						favorite={isAFavorite}
+						onFavorite={() => {
+							$notesDB.favorite = !isAFavorite;
+						}}
 						onDuplicate={() => {
 							const workspace = $WORKSPACES.find(
 								(workspace) => workspace.id === $notesDB.workspace
