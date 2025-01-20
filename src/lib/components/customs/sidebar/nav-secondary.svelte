@@ -54,9 +54,9 @@
 				<span>Trash</span>
 			</Sidebar.MenuButton>
 		</Popover.Trigger>
-		<Popover.Content side="right" class="p-2 max-h-60">
+		<Popover.Content side="right" class="flex flex-col p-2 max-h-60">
 			<Input placeholder="Search Notes" bind:value={search} class="mb-4" />
-			<div class="overflow-y-auto max-h-full">
+			<div class="flex-grow overflow-y-auto">
 				{#if trashNotes.length === 0}
 					<div class="text-center text-muted-foreground font-bold">No notes found</div>
 				{/if}
