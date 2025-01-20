@@ -1,6 +1,4 @@
 import { writable, type Writable } from 'svelte/store';
-import type { NotesDB } from './database/notes';
-import { NOTES } from './contants';
 
 export const RECENT_NOTES: Writable<string[]> = writable();
 export const RECENT_NOTES_SIZE = 10;
@@ -29,13 +27,4 @@ export function removeNoteFromRecents(noteId: string) {
 
 export function clearRecents() {
 	RECENT_NOTES.set([]);
-}
-
-export function getRecentNotesSize() {
-	let size = 0;
-	RECENT_NOTES.update((notes) => {
-		size = notes.length;
-		return notes;
-	});
-	return size;
 }
