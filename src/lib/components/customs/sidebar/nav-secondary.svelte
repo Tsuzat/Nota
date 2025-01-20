@@ -79,8 +79,7 @@
 			<Sidebar.MenuItem class="group/update">
 				<Sidebar.MenuButton onclick={checkUpdate}>
 					<RefreshCw
-						data-spin={checkingUpdate}
-						class="data-[spin=true]:animate-spin group-hover/update:rotate-45 rotate-0 transition-transform duration-500"
+						class="group-hover/update:rotate-45 rotate-0 transition-transform duration-500"
 					/>
 					<span>Check Update</span>
 				</Sidebar.MenuButton>

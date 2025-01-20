@@ -3,7 +3,7 @@ import { writable, type Writable } from 'svelte/store';
 export const RECENT_NOTES: Writable<string[]> = writable();
 export const RECENT_NOTES_SIZE = 10;
 
-RECENT_NOTES.subscribe(async (notes) => {
+RECENT_NOTES.subscribe((notes) => {
 	if (!notes) return;
 	localStorage.setItem('recent-notes', JSON.stringify(notes));
 });

@@ -209,7 +209,6 @@
 						<Iconpicker onSelect={onIconChange}>
 							<IconRender icon={$notes.icon} class="text-xl" />
 						</Iconpicker>
-						<!-- <span>{$notes.name}</span> -->
 						<input
 							type="text"
 							class="w-full text-ellipsis bg-transparent focus:outline-none hover:bg-muted/50 p-0.5 rounded"
