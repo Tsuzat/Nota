@@ -1,13 +1,7 @@
 import type { NotesDB } from '$lib/database/notes';
 import { describe, expect, test, vi } from 'vitest';
 import { v4 as uuidv4 } from 'uuid';
-import {
-	addNoteToRecents,
-	clearRecents,
-	getRecentNotesSize,
-	RECENT_NOTES,
-	removeNoteFromRecents
-} from '$lib/recents';
+import { addNoteToRecents, clearRecents, RECENT_NOTES, removeNoteFromRecents } from '$lib/recents';
 
 // Mock platform detection
 vi.mock('@tauri-apps/plugin-os', () => ({
@@ -22,6 +16,15 @@ vi.mock('@tauri-apps/api/window', () => ({
 		hide: () => Promise.resolve()
 	})
 }));
+
+function getRecentNotesSize() {
+	let size = 0;
+	RECENT_NOTES.update((notes) => {
+		size = notes.length;
+		return notes;
+	});
+	return size;
+}
 
 describe('Unit tests for recents', () => {
 	const notes: NotesDB[] = [];
