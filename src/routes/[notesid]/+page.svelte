@@ -25,7 +25,7 @@
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import Navigation from '$lib/components/customs/navigation.svelte';
 	import { addNoteToRecents } from '$lib/recents';
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
@@ -67,7 +67,7 @@
 
 		// Get the path of the notes
 		const notePath = $notesDB.path;
-		store = await load(notePath, { autoSave: true });
+		store = await load(notePath, { autoSave: false });
 
 		// Load all the notes data
 		const id = await store.get<string>('id');
@@ -138,7 +138,7 @@
 		updateNOTES(notes);
 	});
 
-	function updateContent(content: Content) {
+	async function updateContent(content: Content) {
 		notes.update((note) => {
 			if (note === null) return note;
 			note.content = content;
@@ -146,11 +146,12 @@
 			return note;
 		});
 		if (!store) return;
-		store.set('updatedAt', new Date().toISOString());
-		store.set('content', content);
+		await store.set('updatedAt', new Date().toISOString());
+		await store.set('content', content);
+		await store.save();
 	}
 
-	function onIconChange(icon: string) {
+	async function onIconChange(icon: string) {
 		notes.update((note) => {
 			if (note === null) return note;
 			note.icon = icon;
@@ -158,14 +159,14 @@
 			return note;
 		});
 		if (!store) return;
-		// store.set('updatedAt', new Date().toISOString());
-		store.set('icon', icon);
+		await store.set('icon', icon);
+		await store.save();
 
 		if ($notesDB === null) return;
 		$notesDB.icon = icon;
 	}
 
-	function onTitleChange(title: string) {
+	async function onTitleChange(title: string) {
 		notes.update((note) => {
 			if (note === null) return note;
 			note.name = title;
@@ -174,13 +175,16 @@
 		});
 		if (!store) return;
 		// store.set('updatedAt', new Date().toISOString());
-		store.set('name', title);
+		await store.set('name', title);
+		await store.save();
 		if ($notesDB === null) return;
 		$notesDB.name = title;
 	}
 
-	onDestroy(async () => {
-		if (store) await store.close();
+	onMount(() => {
+		return async () => {
+			if (store) await store.close();
+		};
 	});
 </script>
 
@@ -218,7 +222,6 @@
 					</div>
 				</div>
 				<div class="ml-auto px-3">
-					<!-- !FIXME: Need to add reactivity for favorite button (may be a callback??) -->
 					<NavActions
 						bind:lastEdited={$notes.updatedAt}
 						favorite={isAFavorite}
