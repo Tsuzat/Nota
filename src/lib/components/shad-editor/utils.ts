@@ -2,6 +2,7 @@ import { OS } from '$lib/contants';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { resolve } from '@tauri-apps/api/path';
 import { writeFile } from '@tauri-apps/plugin-fs';
+import Printd from 'printd';
 import { toast } from 'svelte-sonner';
 
 /**
@@ -57,4 +58,22 @@ export function checkIfImage(path: string): boolean {
 		path.endsWith('.webp') ||
 		path.endsWith('.bmp')
 	);
+}
+
+export function exportPDF(element: HTMLElement, title: string) {
+	// Get the current page's styles (including TailwindCSS)
+	const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+		.map((style) => style.outerHTML)
+		.join('');
+
+	const editor = `
+	.tiptap pre code {
+		--tw-text-opacity: 1;
+		color: rgb(56 58 66 / var(--tw-text-opacity, 1));
+	}
+	`;
+	console.log(styles);
+
+	const p = new Printd();
+	p.print(element, [styles, editor]);
 }

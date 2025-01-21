@@ -47,7 +47,7 @@
 	import Button from '../ui/button/button.svelte';
 	import { ArrowUp } from 'lucide-svelte';
 	import Tooltip from '../customs/tooltip.svelte';
-	import { handleRawImage } from './utils';
+	import { exportPDF, handleRawImage } from './utils';
 
 	const lowlight = createLowlight(all);
 
@@ -225,6 +225,10 @@
 		if (e.key === 'f' && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
 			searchReplaceOpen = true;
+		}
+		if (e.key === 'o' && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			if (element) exportPDF(element, 'demo');
 		}
 	}
 </script>
