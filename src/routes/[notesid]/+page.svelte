@@ -198,7 +198,7 @@
 		</div>
 	{:else}
 		<main class="flex flex-col w-full h-full">
-			<header class="flex h-14 shrink-0 items-center gap-2">
+			<header class="flex h-12 shrink-0 items-center gap-2">
 				<div class="flex flex-1 items-center gap-2 px-3">
 					<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
 						<Sidebar.Trigger />
@@ -241,7 +241,7 @@
 				</div>
 			</header>
 			<ShadEditor
-				class="flex-grow max-h-[calc(100vh-3.5rem)] flex flex-col h-full w-full"
+				class="flex-grow max-h-[calc(100vh-3rem)] flex flex-col h-full w-full printable"
 				path={$path}
 				content={$notes.content}
 				onChange={updateContent}
