@@ -94,7 +94,7 @@
 	}
 
 	::-webkit-scrollbar-thumb {
-		@apply bg-muted size-2 rounded-full;
+		@apply bg-muted-foreground dark:bg-muted size-2 rounded-full;
 	}
 
 	body {
