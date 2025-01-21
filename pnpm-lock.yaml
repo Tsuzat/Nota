@@ -71,6 +71,9 @@ importers:
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
+      printd:
+        specifier: ^1.6.0
+        version: 1.6.0
       timeago.js:
         specifier: ^4.0.2
         version: 4.0.2
@@ -1599,6 +1602,10 @@ packages:
     resolution: {integrity: sha512-e9MewbtFo+Fevyuxn/4rrcDAaq0IYxPGLvObpQjiZBMAzB9IGmzlnG9RZy3FFas+eBMu2vA0CszMeduow5dIuQ==}
     engines: {node: '>=14'}
     hasBin: true
+
+  printd@1.6.0:
+    resolution: {integrity: sha512-/w99P870SbE4MjVXJbWBvrK/HtVOcTEcmzUXcPYzfIaxgyPUGw8lmbhM3JHYbiZ18BCj+qwVEVshf2MLRoAh0Q==}
+    engines: {node: '>= 4'}
 
   prosemirror-changeset@2.2.1:
     resolution: {integrity: sha512-J7msc6wbxB4ekDFj+n9gTW/jav/p53kdlivvuppHsrZXCaQdVgRghoZbSS3kwrRyAstRVQ4/+u5k7YfLgkkQvQ==}
@@ -3323,6 +3330,8 @@ snapshots:
       svelte: 5.16.1
 
   prettier@3.4.2: {}
+
+  printd@1.6.0: {}
 
   prosemirror-changeset@2.2.1:
     dependencies:

@@ -44,6 +44,7 @@
 		"@tiptap-pro/extension-mathematics": "^2.17.1",
 		"katex": "^0.16.19",
 		"lodash-es": "^4.17.21",
+		"printd": "^1.6.0",
 		"timeago.js": "^4.0.2",
 		"tiptap-extension-auto-joiner": "^0.1.3",
 		"tiptap-extension-global-drag-handle": "^0.1.16",
