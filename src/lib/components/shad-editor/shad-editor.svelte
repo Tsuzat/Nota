@@ -47,7 +47,9 @@
 	import Button from '../ui/button/button.svelte';
 	import { ArrowUp } from 'lucide-svelte';
 	import Tooltip from '../customs/tooltip.svelte';
-	import { exportPDF, handleRawImage } from './utils';
+	import { handleRawImage } from './utils';
+	import { printAsPDF } from '$lib/utils';
+	import { slide } from 'svelte/transition';
 
 	const lowlight = createLowlight(all);
 
@@ -56,6 +58,7 @@
 		content?: Content;
 		path: string;
 		showToolbar?: boolean;
+		editable: boolean;
 		onChange: (content: Content) => void;
 	}
 
@@ -64,8 +67,14 @@
 		content = $bindable(''),
 		path,
 		showToolbar = true,
+		editable = true,
 		onChange
 	}: Props = $props();
+
+	$effect(() => {
+		if (!editor) return;
+		editor.setEditable(editable);
+	});
 
 	let editor = $state<Editor>();
 	let element = $state<HTMLElement>();
@@ -77,6 +86,7 @@
 		editor = new Editor({
 			element,
 			content,
+			editable,
 			editorProps: {
 				attributes: {
 					class:
@@ -228,7 +238,7 @@
 		}
 		if (e.key === 'p' && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
-			if (element) exportPDF(element, 'demo');
+			if (element) printAsPDF(element);
 		}
 	}
 </script>
@@ -239,7 +249,9 @@
 	{#if editor}
 		<SearchReplace {editor} bind:open={searchReplaceOpen} />
 		{#if showToolbar}
-			<EditorToolbar {editor} {path} />
+			<span transition:slide={{ duration: 300 }}>
+				<EditorToolbar {editor} {path} />
+			</span>
 		{/if}
 	{/if}
 	<div bind:this={element} spellcheck="false" class="h-full overflow-y-auto flex-1"></div>
