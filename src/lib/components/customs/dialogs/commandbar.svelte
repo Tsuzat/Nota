@@ -17,7 +17,7 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'p' && (e.metaKey || e.ctrlKey)) {
+		if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
 			OPEN_COMMAND_BAR.update((v) => !v);
 		}
@@ -54,16 +54,16 @@
 			{/each}
 		</Command.Group>
 	</Command.List>
-	<div class="text-sm border-t py-1 text-center inline-flex justify-between">
-		<span class="text-muted-foreground"> <span class="key">↵</span> to select</span>
-		<span class="text-muted-foreground">
-			<span class="key">↑</span> and <span class="key">↓</span> to navigate</span
-		>
+	<div class="text-xs border-t py-1 text-center inline-flex justify-between">
+		<span class="text-muted-foreground"> <span class="key">
+			
+		</span> select</span>
+		<span class="text-muted-foreground"> <span class="key">↑↓</span> navigate</span>
 	</div>
 </Command.Dialog>
 
 <style>
 	.key {
-		@apply bg-muted rounded-sm py-0.5 px-1;
+		@apply bg-muted/50 rounded-sm p-0.5;
 	}
 </style>

@@ -226,7 +226,7 @@
 			e.preventDefault();
 			searchReplaceOpen = true;
 		}
-		if (e.key === 'o' && (e.metaKey || e.ctrlKey)) {
+		if (e.key === 'p' && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
 			if (element) exportPDF(element, 'demo');
 		}
