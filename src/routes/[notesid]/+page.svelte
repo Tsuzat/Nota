@@ -17,7 +17,7 @@
 	import { error } from '@tauri-apps/plugin-log';
 	import { toast } from 'svelte-sonner';
 	import { redirect } from '@sveltejs/kit';
-	import { Loader2 } from 'lucide-svelte';
+	import { Loader2, LockKeyhole } from 'lucide-svelte';
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
@@ -29,6 +29,7 @@
 	import Navigation from '$lib/components/customs/navigation.svelte';
 	import { addNoteToRecents } from '$lib/recents';
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
+	import { fade } from 'svelte/transition';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -42,6 +43,9 @@
 	let notesId = $derived.by(() => {
 		return page.url.pathname.split('/')[1];
 	});
+
+	// Page Related settings
+	let isLocked = $state(false);
 
 	$effect(() => {
 		loadNotes(notesId);
@@ -186,7 +190,16 @@
 			if (store) await store.close();
 		};
 	});
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'l' && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			isLocked = !isLocked;
+		}
+	}
 </script>
+
+<svelte:document onkeydown={handleKeydown} />
 
 {#key notesId}
 	{#if $notes === null || $notesDB === null}
@@ -197,7 +210,7 @@
 			</div>
 		</div>
 	{:else}
-		<main class="flex flex-col w-full h-full">
+		<main transition:fade={{ duration: 100 }} class="flex flex-col w-full h-full">
 			<header class="flex h-12 shrink-0 items-center gap-2">
 				<div class="flex flex-1 items-center gap-2 px-3">
 					<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
@@ -205,13 +218,13 @@
 					</Tooltip>
 					<Separator orientation="vertical" class="mr-2 h-4" />
 					<Navigation />
-					<div class="line-clamp-1 flex items-center gap-2 text-xl font-bold">
+					<div class="flex items-center gap-2 text-xl font-bold">
 						<Iconpicker onSelect={onIconChange}>
 							<IconRender icon={$notes.icon} class="text-xl" />
 						</Iconpicker>
 						<input
 							type="text"
-							class="w-full text-ellipsis bg-transparent focus:outline-none hover:bg-muted/50 p-0.5 rounded"
+							class="text-ellipsis max-w-60 w-fit bg-transparent focus:outline-none hover:bg-muted/50 p-0.5 rounded"
 							bind:value={$notes.name}
 							oninput={(e) => {
 								//@ts-ignore
@@ -223,6 +236,7 @@
 				<div class="ml-auto px-3">
 					<NavActions
 						bind:lastEdited={$notes.updatedAt}
+						bind:isLocked
 						favorite={isAFavorite}
 						onFavorite={() => {
 							$notesDB.favorite = !isAFavorite;
@@ -241,6 +255,8 @@
 				</div>
 			</header>
 			<ShadEditor
+				showToolbar={!isLocked}
+				editable={!isLocked}
 				class="flex-grow max-h-[calc(100vh-3rem)] flex flex-col h-full w-full printable"
 				path={$path}
 				content={$notes.content}
