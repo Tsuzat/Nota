@@ -5,6 +5,7 @@ import type { NotesDB } from './database/notes';
 import { NOTES, OS } from './contants';
 import { open } from '@tauri-apps/plugin-shell';
 import { invoke } from '@tauri-apps/api/core';
+import Printd from 'printd';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -69,4 +70,24 @@ export async function openInFileSystem(path: string, openFile: boolean = false):
 	// get the folder path from the path (considering it's a file)
 	const folderPath = path.substring(0, path.lastIndexOf(OS === 'windows' ? '\\' : '/'));
 	await open(folderPath);
+}
+
+/**
+ * Function to print a PDF from a HTML element
+ * @param element HTMLElement - element to export as PDF
+ */
+export function printAsPDF(element: HTMLElement) {
+	// Get the current page's styles (including TailwindCSS)
+	const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+		.map((style) => style.outerHTML)
+		.join('');
+
+	const editor = `
+	.tiptap pre code {
+		--tw-text-opacity: 1;
+		color: rgb(56 58 66 / var(--tw-text-opacity, 1));
+	}
+	`;
+	const p = new Printd();
+	p.print(element, [styles, editor]);
 }
