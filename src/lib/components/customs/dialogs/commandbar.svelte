@@ -55,9 +55,7 @@
 		</Command.Group>
 	</Command.List>
 	<div class="text-xs border-t py-1 text-center inline-flex justify-between">
-		<span class="text-muted-foreground"> <span class="key">
-			
-		</span> select</span>
+		<span class="text-muted-foreground"> <span class="key"> </span> select</span>
 		<span class="text-muted-foreground"> <span class="key">↑↓</span> navigate</span>
 	</div>
 </Command.Dialog>
