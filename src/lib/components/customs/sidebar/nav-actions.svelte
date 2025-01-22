@@ -1,6 +1,3 @@
-<script lang="ts" module>
-</script>
-
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
@@ -14,24 +11,36 @@
 		ArrowUp,
 		Copy,
 		CornerUpRight,
+		LockKeyhole,
 		PenBox,
 		Redo,
 		Settings2,
 		Trash2,
 		Undo
 	} from 'lucide-svelte';
-	import type { NotesDB } from '$lib/database/notes';
+	import { Switch } from '$lib/components/ui/switch';
+	import { fade } from 'svelte/transition';
+	import Tooltip from '../tooltip.svelte';
+	import { OS } from '$lib/contants';
 
 	let open = $state(false);
 
 	interface Props {
 		lastEdited: string;
+		isLocked: boolean;
 		favorite: boolean;
 		onFavorite: () => void;
 		onDuplicate: () => void;
 		onTrash: () => void;
 	}
-	let { lastEdited = $bindable(''), favorite, onFavorite, onDuplicate, onTrash }: Props = $props();
+	let {
+		lastEdited = $bindable(''),
+		isLocked = $bindable(false),
+		favorite,
+		onFavorite,
+		onDuplicate,
+		onTrash
+	}: Props = $props();
 
 	const data = [
 		[
@@ -95,6 +104,13 @@
 </script>
 
 <div class="flex items-center gap-2 text-sm">
+	{#if isLocked}
+		<span transition:fade={{ duration: 200 }}>
+			<Tooltip text="Toggle page lock" side="left" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} L`}>
+				<LockKeyhole class="size-4" />
+			</Tooltip>
+		</span>
+	{/if}
 	<div
 		bind:this={timeAgoHTML}
 		class="text-muted-foreground hidden font-medium md:inline-block"
@@ -117,6 +133,16 @@
 		<Popover.Content class="w-56 max-h-[85vh] overflow-auto rounded-lg p-0" align="end">
 			<Sidebar.Root collapsible="none" class="bg-transparent">
 				<Sidebar.Content>
+					<Sidebar.Group class="border-b last:border-none">
+						<Sidebar.GroupContent class="gap-0">
+							<Sidebar.Menu>
+								<Sidebar.MenuItem class="flex gap-2 w-full items-center mx-1.5">
+									<LockKeyhole class="size-4" /> <span>Lock Page</span>
+									<Switch bind:checked={isLocked} class="ml-auto mr-4" />
+								</Sidebar.MenuItem>
+							</Sidebar.Menu>
+						</Sidebar.GroupContent>
+					</Sidebar.Group>
 					{#each data as group, index (index)}
 						<Sidebar.Group class="border-b last:border-none">
 							<Sidebar.GroupContent class="gap-0">
