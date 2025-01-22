@@ -28,6 +28,7 @@
 	interface Props {
 		lastEdited: string;
 		isLocked: boolean;
+		showToolbar: boolean;
 		favorite: boolean;
 		onFavorite: () => void;
 		onDuplicate: () => void;
@@ -36,6 +37,7 @@
 	let {
 		lastEdited = $bindable(''),
 		isLocked = $bindable(false),
+		showToolbar = $bindable(true),
 		favorite,
 		onFavorite,
 		onDuplicate,
@@ -45,17 +47,10 @@
 	const data = [
 		[
 			{
-				label: 'Show Toolbar',
-				icon: PenBox,
-				onclick: () => {}
-			},
-			{
 				label: 'Customize Page',
 				icon: Settings2,
 				onclick: () => {}
-			}
-		],
-		[
+			},
 			{
 				label: 'Duplicate',
 				icon: Copy,
@@ -135,10 +130,14 @@
 				<Sidebar.Content>
 					<Sidebar.Group class="border-b last:border-none">
 						<Sidebar.GroupContent class="gap-0">
-							<Sidebar.Menu>
+							<Sidebar.Menu class="gap-4">
 								<Sidebar.MenuItem class="flex gap-2 w-full items-center mx-1.5">
 									<LockKeyhole class="size-4" /> <span>Lock Page</span>
 									<Switch bind:checked={isLocked} class="ml-auto mr-4" />
+								</Sidebar.MenuItem>
+								<Sidebar.MenuItem class="flex gap-2 w-full items-center mx-1.5">
+									<PenBox class="size-4" /> <span>Show Toolbar</span>
+									<Switch bind:checked={showToolbar} class="ml-auto mr-4" />
 								</Sidebar.MenuItem>
 							</Sidebar.Menu>
 						</Sidebar.GroupContent>

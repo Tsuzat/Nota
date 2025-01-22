@@ -46,6 +46,7 @@
 
 	// Page Related settings
 	let isLocked = $state(false);
+	let showToolbar = $state(true);
 
 	$effect(() => {
 		loadNotes(notesId);
@@ -237,6 +238,7 @@
 					<NavActions
 						bind:lastEdited={$notes.updatedAt}
 						bind:isLocked
+						bind:showToolbar
 						favorite={isAFavorite}
 						onFavorite={() => {
 							$notesDB.favorite = !isAFavorite;
@@ -255,7 +257,7 @@
 				</div>
 			</header>
 			<ShadEditor
-				showToolbar={!isLocked}
+				showToolbar={!isLocked && showToolbar}
 				editable={!isLocked}
 				class="flex-grow max-h-[calc(100vh-3rem)] flex flex-col h-full w-full printable"
 				path={$path}
