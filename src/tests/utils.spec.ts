@@ -12,7 +12,8 @@ vi.mock('@tauri-apps/api/window', () => ({
 		label: 'main',
 		isVisible: () => true,
 		show: () => Promise.resolve(),
-		hide: () => Promise.resolve()
+		hide: () => Promise.resolve(),
+		listen: () => Promise.resolve()
 	})
 }));
 
