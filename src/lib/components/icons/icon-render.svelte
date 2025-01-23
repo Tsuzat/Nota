@@ -17,7 +17,7 @@
 		{iconType.icon}
 	</span>
 {:else if iconType.type === 'svg'}
-	<SvgIcon body={iconType.icon} class={cn(className, 'size-6')} />
+	<SvgIcon body={iconType.icon} class={cn('size-6', className)} />
 {:else}
 	<img src={iconType.icon} alt="icon" class={className} />
 {/if}
