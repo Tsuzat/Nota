@@ -64,7 +64,18 @@ describe('Utils Unit Tests for getIconType', () => {
 	const icons = [
 		{ icon: '😂', type: 'emoji' },
 		{ icon: '❤️', type: 'emoji' },
-		{ icon: 'FolderIcon', type: 'lucide' },
+		{
+			icon: '<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 6v12M8 6L5 9m7 3c0-4.5.583-6 3.5-6S19 7.5 19 12s-.583 6-3.5 6s-3.5-1.5-3.5-6m1-5l5 10\"/>',
+			type: 'svg'
+		},
+		{
+			icon: '<defs><mask id=\"letsIconsAddRingDuotoneLine0\"><g fill=\"none\" stroke-width=\"1.2\"><circle cx=\"12\" cy=\"12\" r=\"8.4\" stroke=\"silver\" stroke-opacity=\".25\"/><path stroke=\"#fff\" stroke-linecap=\"square\" d=\"M12 15V9m3 3H9\"/></g></mask></defs><path fill=\"currentColor\" d=\"M0 0h24v24H0z\" mask=\"url(#letsIconsAddRingDuotoneLine0)\"/>',
+			type: 'svg'
+		},
+		{
+			icon: '<g fill=\"none\" stroke=\"currentColor\"><path d=\"M9.15 7.831a2.976 2.976 0 1 1 5.701 0l-1.564 5.211c-.07.234-.105.351-.159.447a1 1 0 0 1-.654.487C12.366 14 12.244 14 12 14s-.366 0-.474-.024a1 1 0 0 1-.654-.487c-.054-.096-.09-.213-.16-.447z\"/><circle cx=\"12\" cy=\"19\" r=\"2\"/></g>',
+			type: 'svg'
+		},
 		{ icon: 'https://placehold.co/800x400/6A00F5/white', type: 'url' }
 	];
 
