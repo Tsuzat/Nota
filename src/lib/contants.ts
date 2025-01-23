@@ -21,3 +21,9 @@ export const OPEN_COMMAND_BAR = writable(false);
 
 /** Global Variable for controlling Application Window  */
 export const APPWINDOW = getCurrentWindow();
+
+export const IS_MAXIMUM = writable(false);
+
+APPWINDOW.listen('tauri://resize', async () => {
+	IS_MAXIMUM.set(await APPWINDOW.isMaximized());
+});
