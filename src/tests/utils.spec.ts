@@ -1,4 +1,5 @@
-import { getIconType, validateURL } from '$lib/utils';
+import { getIconTypeAndData } from '$lib/components/icons/utils';
+import { validateURL } from '$lib/utils';
 import { describe, expect, test, vi } from 'vitest';
 
 // Mock platform detection
@@ -61,44 +62,58 @@ describe('Utils Unit Tests for validate URL', () => {
 });
 
 describe('Utils Unit Tests for getIconType', () => {
-	const icons = [
-		{ icon: '😂', type: 'emoji' },
-		{ icon: '❤️', type: 'emoji' },
+	const goodCases = [
+		// URL test cases
 		{
-			icon: '<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 6v12M8 6L5 9m7 3c0-4.5.583-6 3.5-6S19 7.5 19 12s-.583 6-3.5 6s-3.5-1.5-3.5-6m1-5l5 10\"/>',
-			type: 'svg'
+			input: 'url:https://example.com/image.png',
+			expectedType: 'url',
+			expectedIcon: 'https://example.com/image.png'
 		},
 		{
-			icon: '<defs><mask id=\"letsIconsAddRingDuotoneLine0\"><g fill=\"none\" stroke-width=\"1.2\"><circle cx=\"12\" cy=\"12\" r=\"8.4\" stroke=\"silver\" stroke-opacity=\".25\"/><path stroke=\"#fff\" stroke-linecap=\"square\" d=\"M12 15V9m3 3H9\"/></g></mask></defs><path fill=\"currentColor\" d=\"M0 0h24v24H0z\" mask=\"url(#letsIconsAddRingDuotoneLine0)\"/>',
-			type: 'svg'
+			input: 'url:https://cdn.site.org/logo.jpg',
+			expectedType: 'url',
+			expectedIcon: 'https://cdn.site.org/logo.jpg'
 		},
 		{
-			icon: '<g fill=\"none\" stroke=\"currentColor\"><path d=\"M9.15 7.831a2.976 2.976 0 1 1 5.701 0l-1.564 5.211c-.07.234-.105.351-.159.447a1 1 0 0 1-.654.487C12.366 14 12.244 14 12 14s-.366 0-.474-.024a1 1 0 0 1-.654-.487c-.054-.096-.09-.213-.16-.447z\"/><circle cx=\"12\" cy=\"19\" r=\"2\"/></g>',
-			type: 'svg'
+			input: 'url:http://subdomain.website.net/icon.gif',
+			expectedType: 'url',
+			expectedIcon: 'http://subdomain.website.net/icon.gif'
 		},
-		{ icon: 'https://placehold.co/800x400/6A00F5/white', type: 'url' }
+		{
+			input: 'url:https://s3.amazonaws.com/bucket/file.webp',
+			expectedType: 'url',
+			expectedIcon: 'https://s3.amazonaws.com/bucket/file.webp'
+		},
+
+		// SVG test cases
+		{ input: 'svg:<path d="M12 12"/>', expectedType: 'svg', expectedIcon: '<path d="M12 12"/>' },
+		{
+			input: 'svg:<g fill="red"><circle cx="10" cy="10" r="5"/></g>',
+			expectedType: 'svg',
+			expectedIcon: '<g fill="red"><circle cx="10" cy="10" r="5"/></g>'
+		},
+		{
+			input: 'svg:<rect x="0" y="0" width="100" height="100"/>',
+			expectedType: 'svg',
+			expectedIcon: '<rect x="0" y="0" width="100" height="100"/>'
+		},
+		{
+			input: 'svg:<polygon points="200,10 250,190 160,210"/>',
+			expectedType: 'svg',
+			expectedIcon: '<polygon points="200,10 250,190 160,210"/>'
+		},
+
+		// Emoji test cases
+		{ input: 'emoji:❤️', expectedType: 'emoji', expectedIcon: '❤️' },
+		{ input: 'emoji:😂', expectedType: 'emoji', expectedIcon: '😂' },
+		{ input: 'emoji:🚀', expectedType: 'emoji', expectedIcon: '🚀' },
+		{ input: 'emoji:🤔', expectedType: 'emoji', expectedIcon: '🤔' }
 	];
 
-	const errorIcons = [
-		{ icon: '', type: undefined }, // Empty string
-		{ icon: null, type: undefined }, // Null
-		{ icon: undefined, type: undefined }, // Undefined
-		{ icon: 123, type: undefined }, // Number
-		{ icon: true, type: undefined }, // Boolean
-		{ icon: { a: 1 }, type: undefined }, // Object
-		{ icon: [1, 2], type: undefined } // Array
-	];
-
-	icons.forEach((icon) => {
-		test(`should return icon type "${icon.type}" for "${icon.icon}`, () => {
-			expect(getIconType(icon.icon)).toBe(icon.type);
-		});
-	});
-
-	errorIcons.forEach((icon) => {
-		test(`should throw an error for ${JSON.stringify(icon)}`, () => {
-			//@ts-ignore
-			expect(() => getIconType(icon.icon)).toThrowError();
+	goodCases.forEach((gCase) => {
+		test(`should return icon type "${gCase.expectedType}" for "${gCase.input}"`, () => {
+			const { input, expectedType, expectedIcon } = gCase;
+			expect(getIconTypeAndData(input)).toEqual({ type: expectedType, icon: expectedIcon });
 		});
 	});
 });
