@@ -45,13 +45,22 @@ export function validateURL(url: string): boolean {
 /**
  * Function which return the icon type based on the icon name
  * @param email string - icon to validate
- * @returns iconType - `emoji` | `lucide` | `url`
+ * @returns iconType - `emoji` | `svg` | `url`
  */
-export function getIconType(icon: string): 'emoji' | 'lucide' | 'url' {
+export function getIconType(icon: string): 'emoji' | 'svg' | 'url' {
 	if (icon.trim() === '') throw new Error('Icon cannot be empty');
 	if (validateURL(icon)) return 'url';
-	else if (icon.endsWith('Icon')) return 'lucide';
-	else return 'emoji';
+
+	const svgBodyRegex =
+		/^<(path|g|circle|rect|polygon|polyline|line|ellipse)(\s+[^>]*)?\/?>.*<\/(path|g|circle|rect|polygon|polyline|line|ellipse)>?$/;
+	if (svgBodyRegex.test(icon.trim())) {
+		return 'svg';
+	}
+	const emojiRegex = /^[\p{Emoji}\u{FE0F}\u{FE0E}]+$/u;
+	if (emojiRegex.test(icon)) {
+		return 'emoji';
+	}
+	return 'emoji';
 }
 
 /**
