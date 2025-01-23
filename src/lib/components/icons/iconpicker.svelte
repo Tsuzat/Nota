@@ -14,7 +14,9 @@
 </script>
 
 <Popover.Root>
-	<Popover.Trigger class={buttonVariants({ variant: 'ghost', class: 'size-8 p-2' })}>
+	<Popover.Trigger
+		class={buttonVariants({ variant: 'ghost', class: 'size-8 p-2 [&_svg]:size-6 text-center' })}
+	>
 		{@render children()}
 	</Popover.Trigger>
 	<Popover.Content class="size-fit p-0 shadow-2xl" {side}>
@@ -28,7 +30,7 @@
 				>
 			</Tabs.List>
 			<Tabs.Content value="icons">
-				<SvgIconPicker />
+				<SvgIconPicker {onSelect} />
 			</Tabs.Content>
 			<Tabs.Content value="emojis">
 				<Emojipicker {onSelect} />
