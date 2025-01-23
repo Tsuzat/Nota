@@ -143,7 +143,7 @@
 			</Tabs.Trigger>
 		{/each}
 	</Tabs.List>
-	<Tabs.Content value={selectedCatergory} class="h-96 w-96 overflow-auto">
+	<Tabs.Content value={selectedCatergory} class="h-96 w-96 overflow-auto p-2">
 		<div class="flex flex-wrap gap-1">
 			{#each applyFilters(emojis[selectedCatergory], debouncedSearchTerm, selectedCatergory === 'People & Body' || searchTerm.trim() !== '' ? skinTone : 'default') as emoji}
 				<Tooltip text={emoji.name}>
@@ -160,17 +160,15 @@
 			{/each}
 		</div>
 	</Tabs.Content>
-	<div class="flex items-center gap-2 p-1">
+	<div class="flex items-center gap-2 px-1">
 		<div></div>
 		<div class="flex items-center relative w-full">
-			<Input bind:value={searchTerm} placeholder="Search Emojies..." />
-			<span class="flex absolute right-2">
+			<Input bind:value={searchTerm} placeholder="Search Emojies..." class="pr-6" />
+			<Button variant="ghost" class="size-4 p-0 absolute right-2" onclick={() => (searchTerm = '')}>
 				<Tooltip text="Clear Search">
-					<Button variant="ghost" class="size-4 p-0" onclick={() => (searchTerm = '')}>
-						<X />
-					</Button>
+					<X />
 				</Tooltip>
-			</span>
+			</Button>
 		</div>
 		<Button variant="outline" class="size-9 text-xl p-2" onclick={() => onSelect(getRandom())}>
 			<Tooltip text="Select Random">
