@@ -151,7 +151,7 @@
 						variant="ghost"
 						class="size-8 text-xl p-1"
 						onclick={() => {
-							onSelect(emoji.emoji);
+							onSelect('emoji:' + emoji.emoji);
 						}}
 					>
 						{emoji.emoji}
@@ -170,7 +170,11 @@
 				</Tooltip>
 			</Button>
 		</div>
-		<Button variant="outline" class="size-9 text-xl p-2" onclick={() => onSelect(getRandom())}>
+		<Button
+			variant="outline"
+			class="size-9 text-xl p-2"
+			onclick={() => onSelect('emoji:' + getRandom())}
+		>
 			<Tooltip text="Select Random">
 				<Shuffle />
 			</Tooltip>
