@@ -24,6 +24,8 @@
 
 	let searchCache = new Map();
 
+	let { onSelect }: { onSelect: (icon: string) => void } = $props();
+
 	// Debounce the search term updates
 	const updateDebouncedSearch = debounce((value: string) => {
 		// if the search term is empty, reset the loaded icons
@@ -72,7 +74,13 @@
 		<div class="flex flex-wrap gap-1 p-2">
 			{#each loadedIconsName as icon}
 				{@const iconData = allIcons[icon]}
-				<Button variant="ghost" class="m-0 p-0 size-8 [&_svg]:size-6" onclick={() => {}}>
+				<Button
+					variant="ghost"
+					class="m-0 p-0 size-8 [&_svg]:size-6"
+					onclick={() => {
+						onSelect('svg:' + iconData.body);
+					}}
+				>
 					<Tooltip text={icon} delayDuration={100}>
 						<SvgIcon body={iconData.body} />
 					</Tooltip>
