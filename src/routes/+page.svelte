@@ -4,7 +4,6 @@
 	import RecentNotes from '$lib/components/customs/tiles/recent-notes.svelte';
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { APPWINDOW, NOTES, OS } from '$lib/contants';
 	import { clearRecents, RECENT_NOTES } from '$lib/recents';
@@ -17,12 +16,14 @@
 </script>
 
 <main>
-	<header class="flex h-12 shrink-0 items-center gap-2">
-		<div class="flex flex-1 items-center gap-2 px-3">
+	<header
+		data-tauri-drag-region={OS === 'windows'}
+		class="flex h-12 w-full shrink-0 items-center justify-between gap-2 mr-36"
+	>
+		<div class="flex items-center gap-2 px-3">
 			<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
 				<Sidebar.Trigger />
 			</Tooltip>
-			<Separator orientation="vertical" class="mr-2 h-4" />
 			<Navigation />
 		</div>
 	</header>

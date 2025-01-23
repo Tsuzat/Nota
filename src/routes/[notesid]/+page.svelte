@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { Separator } from '$lib/components/ui/separator';
 	import NavActions from '$lib/components/customs/sidebar/nav-actions.svelte';
 	import ShadEditor from '$lib/components/shad-editor/shad-editor.svelte';
 	import {
@@ -205,12 +204,14 @@
 
 {#key notesId}
 	<main transition:fade={{ duration: 100 }} class="flex flex-col w-full h-full">
-		<header class="flex h-12 shrink-0 items-center gap-2">
-			<div class="flex flex-1 items-center gap-2 px-3">
+		<header
+			data-tauri-drag-region={OS === 'windows'}
+			class="flex h-12 shrink-0 items-center gap-2 mr-36"
+		>
+			<div class="flex items-center gap-2 px-3">
 				<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
 					<Sidebar.Trigger />
 				</Tooltip>
-				<Separator orientation="vertical" class="mr-2 h-4" />
 				<Navigation />
 				<div class="flex items-center gap-2 text-xl font-bold">
 					{#if $notes !== null}
