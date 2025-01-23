@@ -7,7 +7,7 @@
 </script>
 
 <script lang="ts">
-	import iconRaw from '$lib/assets/jsons/lets-icons.json';
+	import iconRaw from '$lib/assets/jsons/icons.json';
 	import { X } from 'lucide-svelte';
 	import Tooltip from '../customs/tooltip.svelte';
 	import Button from '../ui/button/button.svelte';
