@@ -8,6 +8,7 @@
 	import { ExternalLink, Star, Trash2, X } from 'lucide-svelte';
 	import Tooltip from '../tooltip.svelte';
 	import { cn } from '$lib/utils';
+	import IconRender from '$lib/components/icons/icon-render.svelte';
 
 	interface Props {
 		note: NotesDB;
@@ -20,7 +21,9 @@
 
 <Card.Root class="bg-muted/40 relative hover:bg-muted/60 transition-all cursor-pointer max-w-60">
 	<Card.Header class="relative">
-		<Card.Title class="text-5xl font-bold">{note.icon}</Card.Title>
+		<Card.Title class="text-5xl font-bold">
+			<IconRender icon={note.icon} class="size-12" />
+		</Card.Title>
 		<Card.Description class="text-foreground text-xl font-medium text-ellipsis"
 			>{note.name}</Card.Description
 		>
