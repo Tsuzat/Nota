@@ -48,7 +48,12 @@
 		</Button>
 	</Card.Header>
 	<Card.Content class="text-sm text-muted-foreground" title={note.path}>
-		<span class="text-ellipsis">{workspace?.icon} {workspace?.name}</span>
+		{#if workspace}
+			<span class="text-ellipsis">
+				<IconRender icon={workspace.icon} />
+				{workspace.name}
+			</span>
+		{/if}
 	</Card.Content>
 	<div class="inline-flex items-center absolute right-1 bottom-1 gap-2">
 		<Tooltip text="Trashed Notes" delayDuration={100}>

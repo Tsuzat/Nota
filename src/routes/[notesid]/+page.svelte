@@ -30,6 +30,7 @@
 	import { addNoteToRecents } from '$lib/recents';
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
 	import { fade } from 'svelte/transition';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -56,6 +57,10 @@
 	async function loadNotes(notesId: string) {
 		notes.set(null);
 		notesDB.set(null);
+		// wait for 5 seconds to avoid race condition
+		setTimeout(() => {
+			console.log('loading notes');
+		}, 5000);
 		store = undefined;
 		const tmpNotesDB = await getNotesById(notesId);
 		notesDB.set(tmpNotesDB);
@@ -203,23 +208,24 @@
 <svelte:document onkeydown={handleKeydown} />
 
 {#key notesId}
-	{#if $notes === null || $notesDB === null}
+	<!-- {#if $notes === null || $notesDB === null}
 		<div class="flex h-full w-full items-center justify-center">
 			<div class="text-center flex items-center">
 				<span class="text-xl mr-4"> <Loader2 class="animate-spin" /> </span>
 				<span class="text-xl font-bold">Loading...</span>
 			</div>
 		</div>
-	{:else}
-		<main transition:fade={{ duration: 100 }} class="flex flex-col w-full h-full">
-			<header class="flex h-12 shrink-0 items-center gap-2">
-				<div class="flex flex-1 items-center gap-2 px-3">
-					<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
-						<Sidebar.Trigger />
-					</Tooltip>
-					<Separator orientation="vertical" class="mr-2 h-4" />
-					<Navigation />
-					<div class="flex items-center gap-2 text-xl font-bold">
+	{:else} -->
+	<main transition:fade={{ duration: 100 }} class="flex flex-col w-full h-full">
+		<header class="flex h-12 shrink-0 items-center gap-2">
+			<div class="flex flex-1 items-center gap-2 px-3">
+				<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
+					<Sidebar.Trigger />
+				</Tooltip>
+				<Separator orientation="vertical" class="mr-2 h-4" />
+				<Navigation />
+				<div class="flex items-center gap-2 text-xl font-bold">
+					{#if $notes !== null}
 						<Iconpicker onSelect={onIconChange}>
 							<IconRender icon={$notes.icon} class="text-xl" />
 						</Iconpicker>
@@ -232,8 +238,12 @@
 								if (e.target && e.target.value) onTitleChange(e.target.value);
 							}}
 						/>
-					</div>
+					{:else}
+						<Skeleton class="size-fit rounded" />
+					{/if}
 				</div>
+			</div>
+			{#if $notes !== null && $notesDB !== null}
 				<div class="ml-auto px-3">
 					<NavActions
 						bind:lastEdited={$notes.updatedAt}
@@ -255,15 +265,19 @@
 						}}
 					/>
 				</div>
-			</header>
+			{/if}
+		</header>
+		{#if $notes !== null}
 			<ShadEditor
 				showToolbar={!isLocked && showToolbar}
 				editable={!isLocked}
-				class="flex-grow max-h-[calc(100vh-3rem)] flex flex-col h-full w-full printable"
+				class="flex-grow max-h-[calc(100vh-3rem)] flex flex-col h-full w-full"
 				path={$path}
 				content={$notes.content}
 				onChange={updateContent}
 			/>
-		</main>
-	{/if}
+		{:else}
+			<Skeleton class="flex-grow max-h-[calc(100vh-3rem)] rounded" />
+		{/if}
+	</main>
 {/key}

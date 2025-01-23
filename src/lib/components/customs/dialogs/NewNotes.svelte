@@ -13,7 +13,7 @@
 	import IconRender from '$lib/components/icons/icon-render.svelte';
 
 	let title: string | undefined = $state<string>();
-	let icon: string = $state('📃');
+	let icon: string = $state('emoji:📃');
 
 	interface Props {
 		workspace?: WorkSpaceDB;
@@ -71,27 +71,23 @@
 				<Label for="name" class="text-right">Workspace</Label>
 				<Select.Root type="single">
 					<Select.Trigger class="flex items-center">
-						<span class="mr-2">
-							{defaultWorkspace.icon}
+						<div class="flex items-center gap-2">
+							<IconRender icon={defaultWorkspace.icon} />
 							{defaultWorkspace.name}
-						</span>
+						</div>
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Group>
 							<Select.GroupHeading>Workspaces</Select.GroupHeading>
 							{#each workspaces as workspace (workspace.id)}
 								<Select.Item
-									class="flex items-center"
+									class="flex items-center gap-2"
 									value={workspace.id}
 									label={workspace.name}
 									onclick={() => (defaultWorkspace = workspace)}
 								>
-									<span class="mr-2">
-										{workspace.icon}
-									</span>
-									<span>
-										{workspace.name}
-									</span>
+									<IconRender icon={workspace.icon} />
+									{workspace.name}
 								</Select.Item>
 							{/each}
 						</Select.Group>

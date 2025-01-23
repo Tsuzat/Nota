@@ -13,7 +13,7 @@
 
 	let dir: string | undefined = $state<string>();
 	let name: string | undefined = $state<string>();
-	let icon: string = $state('📂');
+	let icon: string = $state('emoji:📂');
 	let defaultPath: string | undefined = $state<string>();
 
 	let workspacePath = $derived.by(() => {
