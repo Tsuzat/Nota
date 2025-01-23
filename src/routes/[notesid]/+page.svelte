@@ -17,7 +17,6 @@
 	import { error } from '@tauri-apps/plugin-log';
 	import { toast } from 'svelte-sonner';
 	import { redirect } from '@sveltejs/kit';
-	import { Loader2, LockKeyhole } from 'lucide-svelte';
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
@@ -58,9 +57,6 @@
 		notes.set(null);
 		notesDB.set(null);
 		// wait for 5 seconds to avoid race condition
-		setTimeout(() => {
-			console.log('loading notes');
-		}, 5000);
 		store = undefined;
 		const tmpNotesDB = await getNotesById(notesId);
 		notesDB.set(tmpNotesDB);
@@ -208,14 +204,6 @@
 <svelte:document onkeydown={handleKeydown} />
 
 {#key notesId}
-	<!-- {#if $notes === null || $notesDB === null}
-		<div class="flex h-full w-full items-center justify-center">
-			<div class="text-center flex items-center">
-				<span class="text-xl mr-4"> <Loader2 class="animate-spin" /> </span>
-				<span class="text-xl font-bold">Loading...</span>
-			</div>
-		</div>
-	{:else} -->
 	<main transition:fade={{ duration: 100 }} class="flex flex-col w-full h-full">
 		<header class="flex h-12 shrink-0 items-center gap-2">
 			<div class="flex flex-1 items-center gap-2 px-3">
@@ -239,7 +227,10 @@
 							}}
 						/>
 					{:else}
-						<Skeleton class="size-fit rounded" />
+						<div class="flex items-center gap-2">
+							<Skeleton class="size-8 rounded" />
+							<Skeleton class="h-8 w-60 rounded" />
+						</div>
 					{/if}
 				</div>
 			</div>
@@ -277,7 +268,9 @@
 				onChange={updateContent}
 			/>
 		{:else}
-			<Skeleton class="flex-grow max-h-[calc(100vh-3rem)] rounded" />
+			<div class="flex-grow max-h-[calc(90vh)] w-full rounded">
+				<Skeleton class="size-full max-w-3xl m-auto" />
+			</div>
 		{/if}
 	</main>
 {/key}

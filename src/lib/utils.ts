@@ -79,3 +79,10 @@ export function printAsPDF(element: HTMLElement) {
 	const p = new Printd();
 	p.print(element, [styles, editor]);
 }
+
+/**
+ * Function to delay the execution for given time in miliseconds
+ * @param ms number - milliseconds to delay
+ * @returns unknown
+ */
+export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
