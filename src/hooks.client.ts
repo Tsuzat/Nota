@@ -1,5 +1,5 @@
 import initializeAppMenu from '$lib/app_menu';
-import { NOTES, WORKSPACES } from '$lib/contants';
+import { APPWINDOW, NOTES, OS, WORKSPACES } from '$lib/contants';
 import { getAllNotes } from '$lib/database/notes';
 import { initializeDatabase } from '$lib/database/sqldb';
 import { getWorkSpaces } from '$lib/database/workspace';
@@ -23,4 +23,6 @@ import { toast } from 'svelte-sonner';
 			error(err.toString());
 		});
 	await initializeAppMenu();
+
+	if (OS === 'windows') await APPWINDOW.setDecorations(false);
 })();
