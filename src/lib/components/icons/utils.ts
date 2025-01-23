@@ -4,10 +4,9 @@
  * @returns iconType - `emoji` | `svg` | `url`
  */
 export function getIconTypeAndData(iconWithPrefix: string) {
-	const [prefix, icon] = iconWithPrefix.split(':');
-
+	const [prefix, ...restParts] = iconWithPrefix.split(':');
+	const icon = restParts.join(':');
 	let iconType = '';
-
 	switch (prefix) {
 		case 'url':
 			iconType = 'url';
