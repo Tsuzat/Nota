@@ -52,12 +52,12 @@
 <svelte:document onkeydown={handleKeydown} />
 
 <Tooltip text="Go Back" key={prevKey}>
-	<Button variant="ghost" size="icon" disabled={!canGoPrev} onclick={goPrev}>
+	<Button variant="ghost" class="size-7 p-0" disabled={!canGoPrev} onclick={goPrev}>
 		<ArrowLeft />
 	</Button>
 </Tooltip>
 <Tooltip text="Go Next" key={nextKey}>
-	<Button variant="ghost" size="icon" disabled={!canGoNext} onclick={goNext}>
+	<Button variant="ghost" class="size-7 p-0" disabled={!canGoNext} onclick={goNext}>
 		<ArrowRight />
 	</Button>
 </Tooltip>
