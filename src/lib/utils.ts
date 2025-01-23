@@ -43,27 +43,6 @@ export function validateURL(url: string): boolean {
 }
 
 /**
- * Function which return the icon type based on the icon name
- * @param email string - icon to validate
- * @returns iconType - `emoji` | `svg` | `url`
- */
-export function getIconType(icon: string): 'emoji' | 'svg' | 'url' {
-	if (icon.trim() === '') throw new Error('Icon cannot be empty');
-	if (validateURL(icon)) return 'url';
-
-	const svgBodyRegex =
-		/^<(path|g|circle|rect|polygon|polyline|line|ellipse)(\s+[^>]*)?\/?>.*<\/(path|g|circle|rect|polygon|polyline|line|ellipse)>?$/;
-	if (svgBodyRegex.test(icon.trim())) {
-		return 'svg';
-	}
-	const emojiRegex = /^[\p{Emoji}\u{FE0F}\u{FE0E}]+$/u;
-	if (emojiRegex.test(icon)) {
-		return 'emoji';
-	}
-	return 'emoji';
-}
-
-/**
  * Function to open a path in the file system using rust invoke
  * @param path string - path to open
  * @param openFile boolean - true if the file should be opened, false otherwise
