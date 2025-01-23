@@ -4,6 +4,7 @@
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Themetoggler from '../themetoggler.svelte';
+	import { OS } from '$lib/contants';
 
 	let {
 		teams
@@ -21,7 +22,10 @@
 </script>
 
 <Sidebar.Menu>
-	<Sidebar.MenuItem class="flex items-center justify-between">
+	<Sidebar.MenuItem
+		data-tauri-drag-region={OS === 'windows'}
+		class="flex items-center justify-between "
+	>
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
 				{#snippet child({ props })}
