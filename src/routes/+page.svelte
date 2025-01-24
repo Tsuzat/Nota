@@ -5,8 +5,9 @@
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { APPWINDOW, NOTES, OS } from '$lib/contants';
+	import { APPWINDOW, NOTES, OS, SHOW_DECORATION } from '$lib/contants';
 	import { clearRecents, RECENT_NOTES } from '$lib/recents';
+	import { cn } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 
@@ -17,8 +18,11 @@
 
 <main>
 	<header
-		data-tauri-drag-region={OS === 'windows'}
-		class="flex h-12 w-full shrink-0 items-center justify-between gap-2 mr-36"
+		{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
+		class={cn(
+			'flex h-12 w-full shrink-0 items-center justify-between gap-2',
+			$SHOW_DECORATION === false && 'mr-36'
+		)}
 	>
 		<div class="flex items-center gap-2 px-3">
 			<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>

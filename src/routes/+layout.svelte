@@ -9,7 +9,7 @@
 	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
 	import { check } from '@tauri-apps/plugin-updater';
 	import { downloadAndInstall } from '$lib/updater';
-	import { APPWINDOW, NOTES, OS } from '$lib/contants';
+	import { APPWINDOW, NOTES, SHOW_DECORATION } from '$lib/contants';
 	import { toast } from 'svelte-sonner';
 	import { RECENT_NOTES } from '$lib/recents';
 	import WindowButtons from '$lib/components/customs/window-buttons.svelte';
@@ -46,7 +46,7 @@
 <NewWorkSpace />
 
 <SidebarPage>
-	{#if OS === 'windows'}
+	{#if $SHOW_DECORATION === false}
 		<WindowButtons />
 	{/if}
 	{@render children()}

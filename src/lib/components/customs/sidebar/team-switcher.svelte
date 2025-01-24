@@ -4,7 +4,7 @@
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Themetoggler from '../themetoggler.svelte';
-	import { OS } from '$lib/contants';
+	import { SHOW_DECORATION } from '$lib/contants';
 
 	let {
 		teams
@@ -23,7 +23,7 @@
 
 <Sidebar.Menu>
 	<Sidebar.MenuItem
-		data-tauri-drag-region={OS === 'windows'}
+		{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
 		class="flex items-center justify-between "
 	>
 		<DropdownMenu.Root>

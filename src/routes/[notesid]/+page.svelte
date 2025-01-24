@@ -19,9 +19,9 @@
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
-	import { APPWINDOW, NOTES, OS, WORKSPACES } from '$lib/contants';
+	import { APPWINDOW, NOTES, OS, SHOW_DECORATION, WORKSPACES } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
-	import { updateNOTES } from '$lib/utils';
+	import { cn, updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
 	import { onMount } from 'svelte';
 	import Navigation from '$lib/components/customs/navigation.svelte';
@@ -205,8 +205,11 @@
 {#key notesId}
 	<main transition:fade={{ duration: 100 }} class="flex flex-col w-full h-full">
 		<header
-			data-tauri-drag-region={OS === 'windows'}
-			class="flex h-12 shrink-0 items-center gap-2 mr-36"
+			{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
+			class={cn(
+				'flex h-12 shrink-0 items-center gap-2 transition-all',
+				$SHOW_DECORATION === false && 'mr-36'
+			)}
 		>
 			<div class="flex items-center gap-2 px-3">
 				<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
