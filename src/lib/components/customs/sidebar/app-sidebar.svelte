@@ -54,7 +54,7 @@
 </script>
 
 <Sidebar.Root bind:ref class="border-r-0" {...restProps}>
-	<Sidebar.Header data-tauri-drag-region>
+	<Sidebar.Header>
 		<TeamSwitcher teams={data.teams} />
 		<NavMain items={data.navMain} />
 	</Sidebar.Header>
