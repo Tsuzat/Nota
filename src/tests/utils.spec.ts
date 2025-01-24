@@ -13,7 +13,8 @@ vi.mock('@tauri-apps/api/window', () => ({
 		isVisible: () => true,
 		show: () => Promise.resolve(),
 		hide: () => Promise.resolve(),
-		listen: () => Promise.resolve()
+		listen: () => Promise.resolve(),
+		setDecorations: () => Promise.resolve()
 	})
 }));
 
