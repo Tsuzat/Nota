@@ -22,8 +22,20 @@ export const OPEN_COMMAND_BAR = writable(false);
 /** Global Variable for controlling Application Window  */
 export const APPWINDOW = getCurrentWindow();
 
+/** Global Variable for check the current window is maximized or not */
 export const IS_MAXIMUM = writable(false);
 
 APPWINDOW.listen('tauri://resize', async () => {
 	IS_MAXIMUM.set(await APPWINDOW.isMaximized());
+});
+
+/**
+ * Global Variable for toggling window decoration
+ * Platform specific - Supports Windows only
+ * */
+export const SHOW_DECORATION = writable(true);
+
+SHOW_DECORATION.subscribe(async (value) => {
+	if (OS !== 'windows') return;
+	await APPWINDOW.setDecorations(value);
 });

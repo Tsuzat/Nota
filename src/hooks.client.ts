@@ -1,5 +1,5 @@
 import initializeAppMenu from '$lib/app_menu';
-import { APPWINDOW, NOTES, OS, WORKSPACES } from '$lib/contants';
+import { APPWINDOW, NOTES, OS, SHOW_DECORATION, WORKSPACES } from '$lib/contants';
 import { getAllNotes } from '$lib/database/notes';
 import { initializeDatabase } from '$lib/database/sqldb';
 import { getWorkSpaces } from '$lib/database/workspace';
@@ -24,5 +24,6 @@ import { toast } from 'svelte-sonner';
 		});
 	await initializeAppMenu();
 
-	if (OS === 'windows') await APPWINDOW.setDecorations(false);
+	//! TODO: Better Approach would be to load the setting
+	SHOW_DECORATION.set(false);
 })();
