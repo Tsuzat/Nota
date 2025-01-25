@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import IconRender from '$lib/components/icons/icon-render.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Command from '$lib/components/ui/command';
 	import { NOTES, OPEN_COMMAND_BAR, WORKSPACES } from '$lib/contants';
 	import type { NotesDB } from '$lib/database/notes';
 	import type { WorkSpaceDB } from '$lib/database/workspace';
-	import { Home } from 'lucide-svelte';
+	import { CornerDownLeft, Home } from 'lucide-svelte';
 
 	function getWorkSpace(note: NotesDB): WorkSpaceDB | undefined {
 		return $WORKSPACES.find((w) => w.id === note.workspace);
@@ -39,14 +40,19 @@
 				{@const workspace = getWorkSpace(notes)}
 				<Command.Item
 					value={notes.id}
-					class="flex items-center w-full"
+					class="flex items-center w-full justify-between"
 					keywords={[notes.name, workspace?.name || '']}
 					onclick={() => handleGoto(`/${notes.id}`)}
 				>
-					<div class="text-ellipsis w-[50%]">{notes.icon} {notes.name}</div>
+					<div class="text-ellipsis w-[50%] flex items-center gap-2">
+						<IconRender icon={notes.icon} />
+						<span>
+							{notes.name}
+						</span>
+					</div>
 					{#if workspace}
 						<div class="text-xs text-muted-foreground text-ellipsis">
-							{workspace.icon}
+							<IconRender icon={workspace.icon} />
 							{workspace.name}
 						</div>
 					{/if}
@@ -55,7 +61,10 @@
 		</Command.Group>
 	</Command.List>
 	<div class="text-xs border-t py-1 text-center inline-flex justify-between">
-		<span class="text-muted-foreground"> <span class="key"> </span> select</span>
+		<span class="text-muted-foreground flex items-center gap-2">
+			<CornerDownLeft class="size-4 bg-muted/50 rounded-sm p-0.5" />
+			<span>Select</span>
+		</span>
 		<span class="text-muted-foreground"> <span class="key">↑↓</span> navigate</span>
 	</div>
 </Command.Dialog>
