@@ -40,7 +40,7 @@
 		variant="ghost"
 		size="default"
 		class="h-12 rounded-none"
-		title="Maximize"
+		title={$IS_MAXIMUM ? 'Restore' : 'Maximize'}
 		onclick={toggleMaximize}
 	>
 		{#if $IS_MAXIMUM}
