@@ -58,3 +58,17 @@ export function checkIfImage(path: string): boolean {
 		path.endsWith('.bmp')
 	);
 }
+
+/**
+ * Function to check if the file with given path is a video or not
+ * @param path string - Path of the file
+ * @returns boolean - Returns true if the file is a video
+ */
+export function checkIfVideo(path: string): boolean {
+	return (
+		path.endsWith('.mp4') ||
+		path.endsWith('.webm') ||
+		path.endsWith('.ogg') ||
+		path.endsWith('.mkv')
+	);
+}
