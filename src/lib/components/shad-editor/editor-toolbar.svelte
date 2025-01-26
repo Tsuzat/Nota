@@ -20,6 +20,7 @@
 	import BlockQuote from './icons/block-quote.svelte';
 	import Textcolor from './icons/textcolor.svelte';
 	import Highlighter from './icons/highlighter.svelte';
+	import Video from './icons/video.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -45,6 +46,7 @@
 	<OrderedList {editor} />
 	<TaskList {editor} />
 	<Image {editor} {path} />
+	<Video {editor} {path} />
 	<Table {editor} />
 	<Textcolor {editor} />
 	<Highlighter {editor} />
