@@ -50,6 +50,7 @@
 	import { handleRawImage } from './utils';
 	import { printAsPDF } from '$lib/utils';
 	import { slide } from 'svelte/transition';
+	import { VideoExtention } from './custom/Extentions/VideoExtended';
 
 	const lowlight = createLowlight(all);
 
@@ -212,7 +213,8 @@
 				TableHeader,
 				TableCell,
 				ImageExtension,
-				Mathematics
+				Mathematics,
+				VideoExtention
 			],
 			autofocus: true,
 			onUpdate: ({ editor }) => {
