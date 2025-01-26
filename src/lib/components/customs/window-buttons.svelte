@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Minus, Square, X } from 'lucide-svelte';
 	import { Button } from '../ui/button';
 	import { APPWINDOW, IS_MAXIMUM } from '$lib/contants';
 
