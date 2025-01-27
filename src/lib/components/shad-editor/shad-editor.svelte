@@ -60,6 +60,7 @@
 		path: string;
 		showToolbar?: boolean;
 		editable: boolean;
+		spellCheck: boolean;
 		onChange: (content: Content) => void;
 	}
 
@@ -69,6 +70,7 @@
 		path,
 		showToolbar = true,
 		editable = true,
+		spellCheck = false,
 		onChange
 	}: Props = $props();
 
@@ -256,7 +258,7 @@
 			</span>
 		{/if}
 	{/if}
-	<div bind:this={element} spellcheck="false" class="h-full overflow-y-auto flex-1"></div>
+	<div bind:this={element} spellcheck={spellCheck} class="h-full overflow-y-auto flex-1"></div>
 	<div class="fixed right-4 bottom-4">
 		<Tooltip text="Scroll to Top" side="left">
 			<Button

@@ -46,6 +46,7 @@
 	// Page Related settings
 	let isLocked = $state(false);
 	let showToolbar = $state(true);
+	let spellCheck = $state(false);
 
 	$effect(() => {
 		loadNotes(notesId);
@@ -244,6 +245,7 @@
 						bind:lastEdited={$notes.updatedAt}
 						bind:isLocked
 						bind:showToolbar
+						bind:spellCheck
 						favorite={isAFavorite}
 						onFavorite={() => {
 							$notesDB.favorite = !isAFavorite;
@@ -266,6 +268,7 @@
 			<ShadEditor
 				showToolbar={!isLocked && showToolbar}
 				editable={!isLocked}
+				{spellCheck}
 				class="flex-grow max-h-[calc(100vh-3rem)] flex flex-col h-full w-full"
 				path={$path}
 				content={$notes.content}

@@ -10,13 +10,11 @@
 		ArrowDown,
 		ArrowUp,
 		Copy,
-		CornerUpRight,
 		LockKeyhole,
 		PenBox,
-		Redo,
 		Settings2,
-		Trash2,
-		Undo
+		SpellCheck,
+		Trash2
 	} from 'lucide-svelte';
 	import { Switch } from '$lib/components/ui/switch';
 	import { fade } from 'svelte/transition';
@@ -29,6 +27,7 @@
 		lastEdited: string;
 		isLocked: boolean;
 		showToolbar: boolean;
+		spellCheck: boolean;
 		favorite: boolean;
 		onFavorite: () => void;
 		onDuplicate: () => void;
@@ -38,6 +37,7 @@
 		lastEdited = $bindable(''),
 		isLocked = $bindable(false),
 		showToolbar = $bindable(true),
+		spellCheck = $bindable(false),
 		favorite,
 		onFavorite,
 		onDuplicate,
@@ -138,6 +138,10 @@
 								<Sidebar.MenuItem class="flex gap-2 w-full items-center mx-1.5">
 									<PenBox class="size-4" /> <span>Show Toolbar</span>
 									<Switch bind:checked={showToolbar} class="ml-auto mr-4" />
+								</Sidebar.MenuItem>
+								<Sidebar.MenuItem class="flex gap-2 w-full items-center mx-1.5">
+									<SpellCheck class="size-4" /> <span>Spelling Check</span>
+									<Switch bind:checked={spellCheck} class="ml-auto mr-4" />
 								</Sidebar.MenuItem>
 							</Sidebar.Menu>
 						</Sidebar.GroupContent>
