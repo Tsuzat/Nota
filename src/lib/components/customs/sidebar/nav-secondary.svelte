@@ -6,9 +6,7 @@
 	import { NOTES } from '$lib/contants';
 	import TrashedNotes from '../tiles/trashed-notes.svelte';
 	import type { NotesDB } from '$lib/database/notes';
-	import { toast } from 'svelte-sonner';
-	import { check } from '@tauri-apps/plugin-updater';
-	import { downloadAndInstall } from '$lib/updater';
+	import { checkUpdate } from '$lib/updater';
 
 	let search: string = $state('');
 
@@ -17,31 +15,6 @@
 			(note) => note.trashed && note.name.toLowerCase().includes(search.trim().toLowerCase())
 		);
 	});
-
-	let checkingUpdate = $state(false);
-
-	async function checkUpdate() {
-		if (checkingUpdate) return;
-		checkingUpdate = true;
-		const id = toast.loading('Checking for updates...');
-		const update = await check();
-		if (update) {
-			toast.success('Update available', {
-				id,
-				description: `New version ${update.version} is available.`,
-				action: {
-					label: 'Download',
-					onClick: async () => {
-						checkingUpdate = false;
-						await downloadAndInstall(update);
-					}
-				}
-			});
-		} else {
-			toast.success('You are upto date', { id });
-		}
-		checkingUpdate = false;
-	}
 
 	let { ...restProps } = $props();
 </script>

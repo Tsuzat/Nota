@@ -7,10 +7,8 @@
 	import NewWorkSpace from '$lib/components/customs/dialogs/NewWorkSpace.svelte';
 	import Sonner from '$lib/components/ui/sonner/sonner.svelte';
 	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
-	import { check } from '@tauri-apps/plugin-updater';
-	import { downloadAndInstall } from '$lib/updater';
+	import { checkUpdate } from '$lib/updater';
 	import { APPWINDOW, NOTES, SHOW_DECORATION } from '$lib/contants';
-	import { toast } from 'svelte-sonner';
 	import { RECENT_NOTES } from '$lib/recents';
 	import WindowButtons from '$lib/components/customs/window-buttons.svelte';
 	let { children } = $props();
@@ -25,17 +23,9 @@
 		RECENT_NOTES.set(notesIds);
 
 		await APPWINDOW.show();
-		const update = await check();
-		if (update !== null) {
-			toast.success(`New version ${update.version} is available.`, {
-				action: {
-					label: 'Update',
-					onClick: () => {
-						downloadAndInstall(update);
-					}
-				}
-			});
-		}
+
+		// check for updates
+		await checkUpdate();
 	});
 </script>
 

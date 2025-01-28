@@ -1,25 +1,33 @@
 import { check, Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'svelte-sonner';
-import { message } from '@tauri-apps/plugin-dialog';
 import { getVersion } from '@tauri-apps/api/app';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 export async function checkUpdate() {
+	const id = toast.loading('Checking for updates...');
 	const update = await check();
-	if (update) {
-		message(`found update ${update.version} from ${update.date} with notes ${update.body}`, {
-			title: 'Update Available',
-			kind: 'info'
+	if (update !== null) {
+		toast.info(`New version ${update.version} is available.`, {
+			id,
+			cancel: {
+				label: 'Ignore'
+			},
+			action: {
+				label: 'Update',
+				onClick: () => {
+					downloadAndInstall(update);
+				}
+			}
 		});
 	} else {
-		const currentVersion = await getVersion();
-		message(
-			`Could not find any new update for the application. Current Version: ${currentVersion}`,
-			{
-				title: 'No Update Available',
-				kind: 'warning'
+		toast.success('No updates available', {
+			id,
+			description: `You are using the latest version ${await getVersion()}`,
+			cancel: {
+				label: 'Ok'
 			}
-		);
+		});
 	}
 }
 
@@ -27,6 +35,7 @@ export async function downloadAndInstall(update: Update) {
 	const id = toast.info(`Update ${update.version} is available. Downloading...`);
 	let downloaded = 0;
 	let contentLength = 0;
+	let appWindow = getCurrentWebviewWindow();
 	await update.downloadAndInstall((event) => {
 		switch (event.event) {
 			case 'Started':
