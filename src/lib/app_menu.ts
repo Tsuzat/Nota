@@ -1,8 +1,10 @@
 import { Menu } from '@tauri-apps/api/menu';
 
+export let APP_MENU: Menu;
+
 async function initializeAppMenu() {
-	// let menu = await Menu.default();
-	// menu.setAsAppMenu();
+	APP_MENU = await Menu.default();
+	APP_MENU.setAsAppMenu();
 }
 
 export default initializeAppMenu;
