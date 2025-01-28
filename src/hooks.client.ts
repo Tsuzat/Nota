@@ -25,5 +25,5 @@ import { toast } from 'svelte-sonner';
 	await initializeAppMenu();
 
 	//! TODO: Better Approach would be to load the setting
-	SHOW_DECORATION.set(false);
+	if (OS === 'windows') SHOW_DECORATION.set(false);
 })();
