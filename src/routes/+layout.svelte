@@ -8,9 +8,10 @@
 	import Sonner from '$lib/components/ui/sonner/sonner.svelte';
 	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
 	import { checkUpdate } from '$lib/updater';
-	import { APPWINDOW, NOTES, SHOW_DECORATION } from '$lib/contants';
+	import { APPWINDOW, NOTES } from '$lib/contants';
 	import { RECENT_NOTES } from '$lib/recents';
 	import WindowButtons from '$lib/components/customs/window-buttons.svelte';
+	import { CHECK_UPDATE_ON_START, SHOW_DECORATION } from '$lib/app_settings';
 	let { children } = $props();
 
 	onMount(async () => {
@@ -25,7 +26,7 @@
 		await APPWINDOW.show();
 
 		// check for updates
-		await checkUpdate();
+		if ($CHECK_UPDATE_ON_START) await checkUpdate();
 	});
 </script>
 
