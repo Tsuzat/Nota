@@ -1,9 +1,8 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import Themetoggler from '../themetoggler.svelte';
-	import { SHOW_DECORATION } from '$lib/contants';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
-	import { USER_ICON, USER_NAME } from '$lib/app_settings';
+	import { SHOW_DECORATION, USER_ICON, USER_NAME } from '$lib/app_settings';
 	import { Button } from '$lib/components/ui/button';
 	import { APP_MENU } from '$lib/app_menu';
 
