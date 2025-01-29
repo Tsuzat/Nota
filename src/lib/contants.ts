@@ -3,6 +3,8 @@ import type { WorkSpaceDB } from './database/workspace';
 import type { NotesDB } from './database/notes';
 import { platform } from '@tauri-apps/plugin-os';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { getCurrentWebview } from '@tauri-apps/api/webview';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 /** Global Variables For showing new work space dialog */
 export const OPEN_NEW_WORKSPACE_DIALOG = writable(false);
@@ -22,20 +24,12 @@ export const OPEN_COMMAND_BAR = writable(false);
 /** Global Variable for controlling Application Window  */
 export const APPWINDOW = getCurrentWindow();
 
+/** Global Variable for toggling settings dialog */
+export const SHOW_SETTINGS = writable(false);
+
 /** Global Variable for check the current window is maximized or not */
 export const IS_MAXIMUM = writable(false);
 
 APPWINDOW.listen('tauri://resize', async () => {
 	IS_MAXIMUM.set(await APPWINDOW.isMaximized());
-});
-
-/**
- * Global Variable for toggling window decoration
- * Platform specific - Supports Windows only
- * */
-export const SHOW_DECORATION = writable(true);
-
-SHOW_DECORATION.subscribe(async (value) => {
-	if (OS !== 'windows') return;
-	await APPWINDOW.setDecorations(value);
 });
