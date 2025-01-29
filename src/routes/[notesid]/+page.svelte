@@ -19,7 +19,7 @@
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
-	import { APPWINDOW, NOTES, OS, SHOW_DECORATION, WORKSPACES } from '$lib/contants';
+	import { APPWINDOW, NOTES, OS, WORKSPACES } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { cn, updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
@@ -29,6 +29,7 @@
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
 	import { fade } from 'svelte/transition';
 	import { Skeleton } from '$lib/components/ui/skeleton';
+	import { SHOW_DECORATION } from '$lib/app_settings';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
