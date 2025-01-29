@@ -1,12 +1,12 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { RefreshCw, Settings, Trash2 } from 'lucide-svelte';
+	import { Settings, Trash2 } from 'lucide-svelte';
 	import * as Popover from '$lib/components/ui/popover';
 	import Input from '$lib/components/ui/input/input.svelte';
-	import { NOTES } from '$lib/contants';
+	import { NOTES, SHOW_SETTINGS } from '$lib/contants';
 	import TrashedNotes from '../tiles/trashed-notes.svelte';
 	import type { NotesDB } from '$lib/database/notes';
-	import { checkUpdate } from '$lib/updater';
+	import SettingComponent from '$lib/components/customs/dialogs/settings.svelte';
 
 	let search: string = $state('');
 
@@ -40,21 +40,14 @@
 		</Popover.Content>
 	</Popover.Root>
 	<Sidebar.GroupContent>
+		<SettingComponent />
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton class="group/settings">
+				<Sidebar.MenuButton class="group/settings" onclick={() => SHOW_SETTINGS.set(true)}>
 					<Settings
 						class="group-hover/settings:rotate-90 rotate-0 transition-transform duration-500"
 					/>
 					<span>Settings</span>
-				</Sidebar.MenuButton>
-			</Sidebar.MenuItem>
-			<Sidebar.MenuItem class="group/update">
-				<Sidebar.MenuButton onclick={checkUpdate}>
-					<RefreshCw
-						class="group-hover/update:rotate-45 rotate-0 transition-transform duration-500"
-					/>
-					<span>Check Update</span>
 				</Sidebar.MenuButton>
 			</Sidebar.MenuItem>
 		</Sidebar.Menu>
