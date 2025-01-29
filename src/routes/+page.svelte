@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { SHOW_DECORATION } from '$lib/app_settings';
 	import src from '$lib/assets/static/icon.png';
 	import Navigation from '$lib/components/customs/navigation.svelte';
 	import RecentNotes from '$lib/components/customs/tiles/recent-notes.svelte';
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { APPWINDOW, NOTES, OS, SHOW_DECORATION } from '$lib/contants';
+	import { APPWINDOW, NOTES, OS } from '$lib/contants';
 	import { clearRecents, RECENT_NOTES } from '$lib/recents';
 	import { cn } from '$lib/utils';
 	import { onMount } from 'svelte';
