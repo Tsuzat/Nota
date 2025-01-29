@@ -21,8 +21,8 @@
 
 	const minWidth = 150;
 
-	let imgRef: HTMLImageElement;
-	let nodeRef: HTMLDivElement;
+	let imgRef: HTMLImageElement | undefined = $state();
+	let nodeRef: HTMLDivElement | undefined = $state();
 
 	let resizing = $state(false);
 	let resizingInitialWidth = $state(0);
@@ -53,12 +53,14 @@
 		if (newWidth < parentWidth) {
 			updateAttributes({ width: newWidth });
 		}
+		console.log('Resizing width', newWidth);
 	}
 
 	function endResize() {
 		resizing = false;
 		resizingInitialMouseX = 0;
 		resizingInitialWidth = 0;
+		console.log('End resizing');
 	}
 
 	function handleTouchStart(e: TouchEvent, position: 'left' | 'right') {
