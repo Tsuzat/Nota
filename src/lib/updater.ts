@@ -4,8 +4,15 @@ import { toast } from 'svelte-sonner';
 import { getVersion } from '@tauri-apps/api/app';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
-export async function checkUpdate() {
-	const id = toast.loading('Checking for updates...');
+/**
+ * Function to check for updates
+ * @param isAuto boolean - weather the check is triggered by app or user, if true then it's triggered by app
+ */
+export async function checkUpdate(isAuto: boolean = false) {
+	let id: number | string | undefined = undefined;
+	if (!isAuto) {
+		id = toast.loading('Checking for updates...');
+	}
 	const update = await check();
 	if (update !== null) {
 		toast.info(`New version ${update.version} is available.`, {
@@ -21,6 +28,7 @@ export async function checkUpdate() {
 			}
 		});
 	} else {
+		if (isAuto) return;
 		toast.success('No updates available', {
 			id,
 			description: `You are using the latest version ${await getVersion()}`,
