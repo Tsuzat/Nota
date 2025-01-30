@@ -26,7 +26,7 @@
 		await APPWINDOW.show();
 
 		// check for updates
-		if ($CHECK_UPDATE_ON_START) await checkUpdate();
+		if ($CHECK_UPDATE_ON_START) await checkUpdate(true);
 	});
 </script>
 
