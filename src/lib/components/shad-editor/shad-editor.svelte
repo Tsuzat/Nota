@@ -226,7 +226,6 @@
 			onTransaction: (transaction) => {
 				editor = undefined;
 				editor = transaction.editor;
-				content = editor.getJSON();
 			}
 		});
 	});
