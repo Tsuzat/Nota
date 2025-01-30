@@ -20,9 +20,11 @@
 	const { node, editor, selected, deleteNode, updateAttributes }: NodeViewProps = $props();
 
 	const minWidth = 150;
+	/** Max Width of Video */
+	let maxWidth = $state(700);
 
-	let vidRef: HTMLVideoElement;
-	let nodeRef: HTMLDivElement;
+	let vidRef: HTMLVideoElement | undefined = $state(undefined);
+	let nodeRef: HTMLDivElement | undefined = $state(undefined);
 
 	let resizing = $state(false);
 	let resizingInitialWidth = $state(0);
@@ -48,11 +50,9 @@
 		if (resizingPosition === 'left') {
 			dx = resizingInitialMouseX - e.clientX;
 		}
-		const newWidth = Math.max(resizingInitialWidth + dx, minWidth);
-		const parentWidth = nodeRef?.parentElement?.offsetWidth || 0;
-		if (newWidth < parentWidth) {
-			updateAttributes({ width: newWidth });
-		}
+		let newWidth = Math.max(resizingInitialWidth + dx, minWidth);
+		newWidth = Math.min(newWidth, maxWidth);
+		updateAttributes({ width: newWidth });
 	}
 
 	function endResize() {
@@ -91,6 +91,7 @@
 	onMount(() => {
 		// Attach id to nodeRef
 		nodeRef = document.getElementById('resizable-container') as HTMLDivElement;
+		maxWidth = nodeRef?.parentElement?.offsetWidth || 700;
 
 		// Mouse events
 		window.addEventListener('mousemove', resize);
