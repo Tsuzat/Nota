@@ -13,6 +13,11 @@
 	import { fly } from 'svelte/transition';
 
 	onMount(async () => {
+		// load recents
+		const rawData = localStorage.getItem('recent-notes') || '[]';
+		let notesIds: string[] = JSON.parse(rawData);
+		RECENT_NOTES.set(notesIds);
+
 		await APPWINDOW.setTitle('Nota - Home');
 	});
 </script>
