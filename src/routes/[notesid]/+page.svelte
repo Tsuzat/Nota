@@ -205,7 +205,7 @@
 <svelte:document onkeydown={handleKeydown} />
 
 {#key notesId}
-	<main transition:fade={{ duration: 100 }} class="flex flex-col w-full h-full">
+	<main class="flex flex-col w-full h-full">
 		<header
 			{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
 			class={cn(
@@ -277,7 +277,7 @@
 			/>
 		{:else}
 			<div class="flex-grow max-h-[calc(90vh)] w-full rounded">
-				<Skeleton class="size-full max-w-3xl m-auto" />
+				<Skeleton class="size-full max-w-3xl bg-muted/50 m-auto" />
 			</div>
 		{/if}
 	</main>
