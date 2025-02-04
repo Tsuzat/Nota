@@ -15,14 +15,6 @@
 	let { children } = $props();
 
 	onMount(async () => {
-		// load recents
-		const rawData = localStorage.getItem('recent-notes') || '[]';
-		let notesIds: string[] = JSON.parse(rawData);
-		// remove the redundant notes from recents
-		if (notesIds.length > 0)
-			notesIds = notesIds.filter((noteId) => $NOTES.find((note) => note.id === noteId));
-		RECENT_NOTES.set(notesIds);
-
 		await APPWINDOW.show();
 
 		// check for updates
