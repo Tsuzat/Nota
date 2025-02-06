@@ -169,7 +169,7 @@
 				}),
 				GlobalDragHandle.configure({
 					scrollTreshold: 100,
-					dragHandleSelector: '#drag-handle',
+					dragHandleSelector: '.drag-handle',
 					excludedTags: ['pre', 'code']
 				}),
 				AutoJoiner,
