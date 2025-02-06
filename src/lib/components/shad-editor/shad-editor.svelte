@@ -23,10 +23,6 @@
 
 	import { SmilieReplacer } from './custom/Extentions/SmilieReplacer.js';
 	import { ColorHighlighter } from './custom/Extentions/ColorHighlighter.js';
-	import Table from '@tiptap/extension-table';
-	import TableRow from '@tiptap/extension-table-row';
-	import TableHeader from '@tiptap/extension-table-header';
-	import TableCell from '@tiptap/extension-table-cell';
 	import { ImageExtension } from './custom/Extentions/ImageExtention.js';
 	import { SvelteNodeViewRenderer } from 'svelte-tiptap';
 	import CodeExtended from './custom/code-extended.svelte';
@@ -52,6 +48,9 @@
 	import { slide } from 'svelte/transition';
 	import { VideoExtention } from './custom/Extentions/VideoExtended';
 	import LinkMenu from './menus/link-menu.svelte';
+	import { Table, TableCell, TableHeader, TableRow } from './custom/Extentions/table';
+	import TableColMenu from './custom/Extentions/table/menu/table-col-menu.svelte';
+	import TableRowMenu from './custom/Extentions/table/menu/table-row-menu.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -206,10 +205,7 @@
 				}),
 				SmilieReplacer,
 				ColorHighlighter,
-				Table.configure({
-					allowTableNodeSelection: true,
-					resizable: true
-				}),
+				Table,
 				TableRow,
 				TableHeader,
 				TableCell,
@@ -251,6 +247,8 @@
 	{#if editor}
 		<SearchReplace {editor} bind:open={searchReplaceOpen} />
 		<LinkMenu {editor} />
+		<TableColMenu {editor} />
+		<TableRowMenu {editor} />
 		{#if showToolbar}
 			<span transition:slide={{ duration: 300 }}>
 				<EditorToolbar {editor} {path} />
