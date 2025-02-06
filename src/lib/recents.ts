@@ -10,6 +10,7 @@ RECENT_NOTES.subscribe((notes) => {
 
 export function addNoteToRecents(noteId: string) {
 	RECENT_NOTES.update((notes) => {
+		if (!notes) return notes;
 		if (notes.find((n) => n === noteId)) return notes;
 		if (notes.length >= RECENT_NOTES_SIZE) {
 			notes.shift();
