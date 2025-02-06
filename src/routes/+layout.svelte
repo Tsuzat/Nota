@@ -8,10 +8,10 @@
 	import Sonner from '$lib/components/ui/sonner/sonner.svelte';
 	import Commandbar from '$lib/components/customs/dialogs/commandbar.svelte';
 	import { checkUpdate } from '$lib/updater';
-	import { APPWINDOW, NOTES } from '$lib/contants';
-	import { RECENT_NOTES } from '$lib/recents';
+	import { APPWINDOW } from '$lib/contants';
 	import WindowButtons from '$lib/components/customs/window-buttons.svelte';
 	import { CHECK_UPDATE_ON_START, SHOW_DECORATION } from '$lib/app_settings';
+	import Settings from '$lib/components/customs/dialogs/settings.svelte';
 	let { children } = $props();
 
 	onMount(async () => {
@@ -27,6 +27,7 @@
 
 <Commandbar />
 <NewWorkSpace />
+<Settings />
 
 <SidebarPage>
 	{#if $SHOW_DECORATION === false}
