@@ -48,9 +48,10 @@
 	import { ArrowUp } from 'lucide-svelte';
 	import Tooltip from '../customs/tooltip.svelte';
 	import { handleRawImage } from './utils';
-	import { printAsPDF } from '$lib/utils';
+	import { cn, printAsPDF } from '$lib/utils';
 	import { slide } from 'svelte/transition';
 	import { VideoExtention } from './custom/Extentions/VideoExtended';
+	import LinkMenu from './menus/link-menu.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -118,16 +119,15 @@
 					text: false
 				}),
 				Placeholder.configure({
-					// Use a placeholder:
-					placeholder: 'Write something …'
-					// Use different placeholders depending on the node type:
-					// placeholder: ({ node }) => {
-					//   if (node.type.name === 'heading') {
-					//     return 'What’s the title?'
-					//   }
-
-					//   return 'Can you add some further context?'
-					// },
+					placeholder: ({ node }) => {
+						if (node.type.name === 'heading') {
+							return 'What’s the title?';
+						}
+						if (node.type.name === 'paragraph') {
+							return 'Write something …';
+						}
+						return '';
+					}
 				}),
 				FileHandler.configure({
 					allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
@@ -187,10 +187,9 @@
 				Link.configure({
 					openOnClick: false,
 					autolink: true,
-					defaultProtocol: 'https',
 					HTMLAttributes: {
-						target: '_blank',
-						rel: 'noopener noreferrer'
+						target: '_tab',
+						rel: 'noopener noreferrer nofollow'
 					}
 				}),
 				TaskList,
@@ -248,9 +247,10 @@
 
 <svelte:document onkeydown={handleKeydown} />
 
-<div class={className}>
+<div class={cn('!overflow-hidden', className)}>
 	{#if editor}
 		<SearchReplace {editor} bind:open={searchReplaceOpen} />
+		<LinkMenu {editor} />
 		{#if showToolbar}
 			<span transition:slide={{ duration: 300 }}>
 				<EditorToolbar {editor} {path} />
