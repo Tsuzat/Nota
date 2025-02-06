@@ -59,7 +59,6 @@
 		resizing = false;
 		resizingInitialMouseX = 0;
 		resizingInitialWidth = 0;
-		console.log('End resizing');
 	}
 
 	function handleTouchStart(e: TouchEvent, position: 'left' | 'right') {
