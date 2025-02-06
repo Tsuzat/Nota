@@ -6,7 +6,6 @@
 	import { NOTES, SHOW_SETTINGS } from '$lib/contants';
 	import TrashedNotes from '../tiles/trashed-notes.svelte';
 	import type { NotesDB } from '$lib/database/notes';
-	import SettingComponent from '$lib/components/customs/dialogs/settings.svelte';
 
 	let search: string = $state('');
 
@@ -40,7 +39,6 @@
 		</Popover.Content>
 	</Popover.Root>
 	<Sidebar.GroupContent>
-		<SettingComponent />
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton class="group/settings" onclick={() => SHOW_SETTINGS.set(true)}>
