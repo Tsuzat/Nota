@@ -4,6 +4,7 @@
 	import { Trash2, Undo2 } from 'lucide-svelte';
 	import Tooltip from '../tooltip.svelte';
 	import { updateNOTES } from '$lib/utils';
+	import IconRender from '$lib/components/icons/icon-render.svelte';
 
 	interface Props {
 		notes: NotesDB;
@@ -20,7 +21,7 @@
 </script>
 
 <div class="p-1 flex items-center text-sm cursor-pointer hover:bg-muted/50 hover:rounded">
-	<span>{notes.icon}</span>
+	<IconRender icon={notes.icon} class="mr-2" />
 	<span class="text-ellipsis overflow-hidden whitespace-nowrap mr-2" title={notes.name}
 		>{notes.name}</span
 	>
