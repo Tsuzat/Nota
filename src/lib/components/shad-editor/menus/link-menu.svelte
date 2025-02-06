@@ -20,7 +20,7 @@
 	shouldShow={(props: ShouldShowProps) => {
 		return props.editor.isActive('link');
 	}}
-	class="flex h-fit w-fit items-center gap-1 rounded border bg-background p-1 shadow-lg"
+	class="flex h-fit w-fit items-center gap-1 rounded border bg-background p-1 shadow-lg -z-50"
 >
 	<Button variant="link" href={link} class="max-w-80 p-1" target="_blank">
 		<span class="w-full overflow-hidden text-ellipsis">
