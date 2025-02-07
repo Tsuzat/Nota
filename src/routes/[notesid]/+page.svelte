@@ -270,7 +270,7 @@
 				showToolbar={!isLocked && showToolbar}
 				editable={!isLocked}
 				{spellCheck}
-				class="flex-grow max-h-[calc(100vh-3rem)] flex flex-col h-full w-full"
+				class="flex-grow max-h-[calc(100dvh-3rem)] flex flex-col h-full w-full"
 				path={$path}
 				content={$notes.content}
 				onChange={updateContent}
