@@ -1,24 +1,25 @@
-name: Testing with Vitest
-
+name: 'Testing with Vitest'
 on: [push, pull_request]
 
 jobs:
-  test:
+  unit-tests:
     runs-on: ubuntu-latest
-
+    env:
+      TIPTAP_PRO_TOKEN: ${{secrets.TIPTAP_PRO_TOKEN}}
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '22'
-      - name: Set up pnpm
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and Install PNPM
         uses: pnpm/action-setup@v2
         with:
-          version: 8.11.0
-      - name: Install dependencies
-        run: pnpm install
-      - name: Run tests
+          version: latest
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run SvelteKit Sync
+        run: pnpm prepare
+
+      - name: Run Tests
         run: pnpm test
-        env:
-          TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
