@@ -101,8 +101,8 @@ input[type='checkbox'] {
 }
 
 /* Drag Handle Related CSS*/
-.drag-handle {
-	@apply fixed z-50 size-6 cursor-grab opacity-100 transition-opacity duration-200 ease-in;
+/* .drag-handle {
+	@apply fixed right-0 z-50 h-8 bg-red-900 cursor-grab opacity-100 transition-opacity duration-200 ease-in;
 
 	&:active {
 		cursor: grabbing;
@@ -117,12 +117,12 @@ input[type='checkbox'] {
 		display: none;
 		pointer-events: none;
 	}
-}
+} */
 
-.drag-handle::after {
+/* .drag-handle::after {
 	@apply text-muted-foreground;
 	content: '⠿';
-}
+} */
 
 /* Mathematics extension styles */
 .Tiptap-mathematics-editor {
