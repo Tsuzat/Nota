@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ShouldShowProps } from '$lib/shad-editor/menus/types.js';
+	import type { ShouldShowProps } from '$lib/components/shad-editor/menus/types.js';
 	import { type Editor } from '@tiptap/core';
 	import { BubbleMenu } from 'svelte-tiptap';
 	import { ArrowDownFromLine, ArrowUpFromLine, Trash } from 'lucide-svelte';

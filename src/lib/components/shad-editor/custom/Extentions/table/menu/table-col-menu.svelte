@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { ShouldShowProps } from '$lib/shad-editor/menus/types.js';
 	import { type Editor } from '@tiptap/core';
 	import { BubbleMenu } from 'svelte-tiptap';
 	import { ArrowLeftFromLine, ArrowRightFromLine, Trash } from 'lucide-svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { isColumnGripSelected } from './utils.js';
+	import type { ShouldShowProps } from '$lib/components/shad-editor/menus/types.js';
 	interface Props {
 		editor: Editor;
 	}
