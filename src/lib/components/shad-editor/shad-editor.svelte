@@ -51,6 +51,7 @@
 	import { Table, TableCell, TableHeader, TableRow } from './custom/Extentions/table';
 	import TableColMenu from './custom/Extentions/table/menu/table-col-menu.svelte';
 	import TableRowMenu from './custom/Extentions/table/menu/table-row-menu.svelte';
+	import DragHandle from './drag-handle.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -166,11 +167,10 @@
 						});
 					}
 				}),
-				GlobalDragHandle.configure({
-					scrollTreshold: 100,
-					dragHandleSelector: '.drag-handle',
-					excludedTags: ['pre', 'code']
-				}),
+				// GlobalDragHandle.configure({
+				// 	scrollTreshold: 100,
+				// 	dragHandleSelector: '.drag-handle'
+				// }),
 				AutoJoiner,
 				Typography,
 				Text,
@@ -245,6 +245,7 @@
 
 <div class={cn('!overflow-hidden', className)}>
 	{#if editor}
+		<DragHandle {editor} />
 		<SearchReplace {editor} bind:open={searchReplaceOpen} />
 		<LinkMenu {editor} />
 		<TableColMenu {editor} />
