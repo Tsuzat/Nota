@@ -19,14 +19,17 @@
 		const plugin = DragHandlePlugin({
 			pluginKey,
 			editor,
-			element
+			element,
+			tippyOptions: {
+				zIndex: 0
+			}
 		});
 		editor.registerPlugin(plugin);
 		return () => editor.unregisterPlugin(pluginKey);
 	});
 </script>
 
-<div bind:this={element} class="flex gap-1">
+<div bind:this={element} class="flex gap-1 overflow-hidden p-1">
 	<!-- <Button variant="ghost" class="size-6 p-1">
 		<Plus />
 	</Button> -->
