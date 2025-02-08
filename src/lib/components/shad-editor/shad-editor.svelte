@@ -38,7 +38,6 @@
 	import './onedark.css';
 	import SearchAndReplace from './custom/Extentions/SearchAndReplace.js';
 	import SearchReplace from './icons/search-replace.svelte';
-	import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 	import AutoJoiner from 'tiptap-extension-auto-joiner';
 	import Button from '../ui/button/button.svelte';
 	import { ArrowUp } from 'lucide-svelte';
@@ -82,6 +81,9 @@
 
 	let editor = $state<Editor>();
 	let element = $state<HTMLElement>();
+
+	// Show Drag Menu
+	let showDragMenu = $state(false);
 
 	// Open Popovers
 	let searchReplaceOpen = $state(false);
@@ -167,10 +169,6 @@
 						});
 					}
 				}),
-				// GlobalDragHandle.configure({
-				// 	scrollTreshold: 100,
-				// 	dragHandleSelector: '.drag-handle'
-				// }),
 				AutoJoiner,
 				Typography,
 				Text,
