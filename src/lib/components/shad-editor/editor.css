@@ -102,7 +102,7 @@ input[type='checkbox'] {
 
 /* Drag Handle Related CSS*/
 /* .drag-handle {
-	@apply fixed right-0 z-50 h-8 bg-red-900 cursor-grab opacity-100 transition-opacity duration-200 ease-in;
+	@apply fixed z-50 cursor-grab opacity-100 transition-opacity duration-200 ease-in;
 
 	&:active {
 		cursor: grabbing;
@@ -117,9 +117,9 @@ input[type='checkbox'] {
 		display: none;
 		pointer-events: none;
 	}
-} */
+}
 
-/* .drag-handle::after {
+.drag-handle::after {
 	@apply text-muted-foreground;
 	content: '⠿';
 } */
@@ -175,7 +175,7 @@ input[type='checkbox'] {
 		}
 
 		.column-resize-handle {
-			@apply pointer-events-none absolute -bottom-[2px] -right-1 top-0 flex w-2;
+			@apply cursor-col-resize absolute -bottom-[2px] -right-1 top-0 flex w-2;
 
 			&::before {
 				@apply ml-2 h-full w-[1px] bg-muted;
