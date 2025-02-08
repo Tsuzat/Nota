@@ -59,6 +59,9 @@ importers:
       '@tauri-apps/plugin-window-state':
         specifier: ~2.2.0
         version: 2.2.0
+      '@tiptap-pro/extension-drag-handle':
+        specifier: ^2.17.3
+        version: 2.17.3(@tiptap-pro/extension-node-range@2.17.3(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0))(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/extension-collaboration@2.11.5(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0)(y-prosemirror@1.2.15(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.37.1)(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23)))(@tiptap/pm@2.11.0)(y-prosemirror@1.2.15(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.37.1)(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23))
       '@tiptap-pro/extension-file-handler':
         specifier: ^2.17.2
         version: 2.17.2(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0)
@@ -687,6 +690,15 @@ packages:
   '@tauri-apps/plugin-window-state@2.2.0':
     resolution: {integrity: sha512-PFZ/vkZ6UPaRyuggEn8jWc/xwpiEw3Id8i6bin54zUR3vHY0MOK+ovvpvp6SEHKryCJbZMigYJz0OUT2eZ4YmQ==}
 
+  '@tiptap-pro/extension-drag-handle@2.17.3':
+    resolution: {integrity: sha512-6a7P2BWV3v4QpA4hPvCBFO8a9nOPHRWGCpR0f22UOVLP6kRsv1O2lnjI/koxcHQl+ZE/ZEtrKDkLsE77zVloSA==}
+    peerDependencies:
+      '@tiptap-pro/extension-node-range': ^2.7.7
+      '@tiptap/core': ^2.0.0
+      '@tiptap/extension-collaboration': ^2.0.0
+      '@tiptap/pm': ^2.0.0
+      y-prosemirror: ^1.2.5
+
   '@tiptap-pro/extension-file-handler@2.17.2':
     resolution: {integrity: sha512-G+vX/6ROvELer70XzUqT5W9fvf5C2nk/dcwDtiUVAHXEqiF+iQMMgo43UvK8UCTQwFCBJn17RicvzX37BOcYbw==}
     peerDependencies:
@@ -699,6 +711,12 @@ packages:
       '@tiptap/core': ^2.0.0
       '@tiptap/pm': ^2.0.0
       katex: ^0.16.4
+
+  '@tiptap-pro/extension-node-range@2.17.3':
+    resolution: {integrity: sha512-5UZx3VxaQC6l24qeX3h3QMOxtEcYrFwKhtefpNL/tfce0aUXnBykA2PNi7wIowToEnRggUjjCNmizZD3Vb69Mw==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0
+      '@tiptap/pm': ^2.0.0
 
   '@tiptap/core@2.11.0':
     resolution: {integrity: sha512-0S3AWx6E2QqwdQqb6z0/q6zq2u9lA9oL3BLyAaITGSC9zt8OwjloS2k1zN6wLa9hp2rO0c0vDnWsTPeFaEaMdw==}
@@ -745,6 +763,13 @@ packages:
     resolution: {integrity: sha512-2roNZxcny1bGjyZ8x6VmGTuKbwfJyTZ1hiqPc/CRTQ1u42yOhbjF4ziA5kfyUoQlzygZrWH9LR5IMYGzPQ1N3w==}
     peerDependencies:
       '@tiptap/core': ^2.7.0
+
+  '@tiptap/extension-collaboration@2.11.5':
+    resolution: {integrity: sha512-3tMMq0E+FM3/3YBUMq5rLvks2DC/t1XLH2Kz/VcuVCxqg1Zg5s9nKOl6CcUZ8gbdvZoEd/GYoQyROJ957v9wzw==}
+    peerDependencies:
+      '@tiptap/core': ^2.7.0
+      '@tiptap/pm': ^2.7.0
+      y-prosemirror: ^1.2.11
 
   '@tiptap/extension-color@2.11.0':
     resolution: {integrity: sha512-9dO6zr7Zzz7vvJAct+IGHvYpV6pHcNyifLjmXNdJdKY118lnoeQfu1dsxiPGl9KXCv5bHgn4dUg3CsrnAlb9OQ==}
@@ -1355,6 +1380,9 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
+  isomorphic.js@0.2.5:
+    resolution: {integrity: sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==}
+
   jackspeak@3.4.3:
     resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
 
@@ -1378,6 +1406,11 @@ packages:
   kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
+
+  lib0@0.2.99:
+    resolution: {integrity: sha512-vwztYuUf1uf/1zQxfzRfO5yzfNKhTtgOByCruuiQQxWQXnPb8Itaube5ylofcV0oM0aKal9Mv+S1s1Ky0UYP1w==}
+    engines: {node: '>=16'}
+    hasBin: true
 
   lilconfig@3.1.3:
     resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
@@ -2078,10 +2111,30 @@ packages:
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
 
+  y-prosemirror@1.2.15:
+    resolution: {integrity: sha512-XDdrytq2M5bIy3qusQvfRclLu2eWZYPA+BbGWAb9FFWEhOB5FCrnzez2vsA+gvAd0FJTAcr89mjJ5g45r0j7TQ==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      prosemirror-model: ^1.7.1
+      prosemirror-state: ^1.2.3
+      prosemirror-view: ^1.9.10
+      y-protocols: ^1.0.1
+      yjs: ^13.5.38
+
+  y-protocols@1.0.6:
+    resolution: {integrity: sha512-vHRF2L6iT3rwj1jub/K5tYcTT/mEYDUppgNPXwp8fmLpui9f7Yeq3OEtTLVF012j39QnV+KEQpNqoN7CWU7Y9Q==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      yjs: ^13.0.0
+
   yaml@2.7.0:
     resolution: {integrity: sha512-+hSoy/QHluxmC9kCIJyL/uyFmLmc+e5CFR5Wa+bpIhIj85LVb9ZH2nVnqrHoSvKogwODv0ClqZkmiSSaIH5LTA==}
     engines: {node: '>= 14'}
     hasBin: true
+
+  yjs@13.6.23:
+    resolution: {integrity: sha512-ExtnT5WIOVpkL56bhLeisG/N5c4fmzKn4k0ROVfJa5TY2QHbH7F0Wu2T5ZhR7ErsFWQEFafyrnSI8TPKVF9Few==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
 
   zimmerframe@1.1.2:
     resolution: {integrity: sha512-rAbqEGa8ovJy4pyBxZM70hg4pE6gDgaQ0Sl9M3enG3I0d6H4XSAM3GeNGLKnsBpuijUow064sf7ww1nutC5/3w==}
@@ -2436,6 +2489,15 @@ snapshots:
     dependencies:
       '@tauri-apps/api': 2.2.0
 
+  '@tiptap-pro/extension-drag-handle@2.17.3(@tiptap-pro/extension-node-range@2.17.3(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0))(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/extension-collaboration@2.11.5(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0)(y-prosemirror@1.2.15(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.37.1)(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23)))(@tiptap/pm@2.11.0)(y-prosemirror@1.2.15(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.37.1)(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23))':
+    dependencies:
+      '@tiptap-pro/extension-node-range': 2.17.3(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0)
+      '@tiptap/core': 2.11.0(@tiptap/pm@2.11.0)
+      '@tiptap/extension-collaboration': 2.11.5(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0)(y-prosemirror@1.2.15(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.37.1)(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23))
+      '@tiptap/pm': 2.11.0
+      tippy.js: 6.3.7
+      y-prosemirror: 1.2.15(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.37.1)(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23)
+
   '@tiptap-pro/extension-file-handler@2.17.2(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0)':
     dependencies:
       '@tiptap/core': 2.11.0(@tiptap/pm@2.11.0)
@@ -2446,6 +2508,11 @@ snapshots:
       '@tiptap/core': 2.11.0(@tiptap/pm@2.11.0)
       '@tiptap/pm': 2.11.0
       katex: 0.16.19
+
+  '@tiptap-pro/extension-node-range@2.17.3(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0)':
+    dependencies:
+      '@tiptap/core': 2.11.0(@tiptap/pm@2.11.0)
+      '@tiptap/pm': 2.11.0
 
   '@tiptap/core@2.11.0(@tiptap/pm@2.11.0)':
     dependencies:
@@ -2485,6 +2552,12 @@ snapshots:
   '@tiptap/extension-code@2.11.0(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))':
     dependencies:
       '@tiptap/core': 2.11.0(@tiptap/pm@2.11.0)
+
+  '@tiptap/extension-collaboration@2.11.5(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/pm@2.11.0)(y-prosemirror@1.2.15(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.37.1)(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23))':
+    dependencies:
+      '@tiptap/core': 2.11.0(@tiptap/pm@2.11.0)
+      '@tiptap/pm': 2.11.0
+      y-prosemirror: 1.2.15(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.37.1)(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23)
 
   '@tiptap/extension-color@2.11.0(@tiptap/core@2.11.0(@tiptap/pm@2.11.0))(@tiptap/extension-text-style@2.11.0(@tiptap/core@2.11.0(@tiptap/pm@2.11.0)))':
     dependencies:
@@ -3105,6 +3178,8 @@ snapshots:
 
   isexe@2.0.0: {}
 
+  isomorphic.js@0.2.5: {}
+
   jackspeak@3.4.3:
     dependencies:
       '@isaacs/cliui': 8.0.2
@@ -3147,6 +3222,10 @@ snapshots:
       commander: 8.3.0
 
   kleur@4.1.5: {}
+
+  lib0@0.2.99:
+    dependencies:
+      isomorphic.js: 0.2.5
 
   lilconfig@3.1.3: {}
 
@@ -3877,6 +3956,24 @@ snapshots:
   xmlchars@2.2.0:
     optional: true
 
+  y-prosemirror@1.2.15(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.37.1)(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23):
+    dependencies:
+      lib0: 0.2.99
+      prosemirror-model: 1.24.1
+      prosemirror-state: 1.4.3
+      prosemirror-view: 1.37.1
+      y-protocols: 1.0.6(yjs@13.6.23)
+      yjs: 13.6.23
+
+  y-protocols@1.0.6(yjs@13.6.23):
+    dependencies:
+      lib0: 0.2.99
+      yjs: 13.6.23
+
   yaml@2.7.0: {}
+
+  yjs@13.6.23:
+    dependencies:
+      lib0: 0.2.99
 
   zimmerframe@1.1.2: {}
