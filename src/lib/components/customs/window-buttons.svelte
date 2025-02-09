@@ -17,7 +17,7 @@
 	<Button
 		variant="ghost"
 		size="default"
-		class="h-12 rounded-none"
+		class="h-10 rounded-none"
 		title="Minimize"
 		onclick={minimize}
 	>
@@ -38,7 +38,7 @@
 	<Button
 		variant="ghost"
 		size="default"
-		class="h-12 rounded-none"
+		class="h-10 rounded-none"
 		title={$IS_MAXIMUM ? 'Restore' : 'Maximize'}
 		onclick={toggleMaximize}
 	>
@@ -75,7 +75,7 @@
 	<Button
 		variant="ghost"
 		size="default"
-		class="h-12 rounded-none hover:bg-red-500"
+		class="h-10 rounded-none hover:bg-red-500"
 		title="Close"
 		onclick={close}
 	>
