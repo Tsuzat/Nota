@@ -10,7 +10,7 @@
 	const { props }: Props = $props();
 
 	let scrollContainer = $state<HTMLElement | null>(null);
-	let activeItem = $state<HTMLButtonElement | null>(null);
+	// let activeItem = $state<HTMLButtonElement | null>(null);
 
 	let selectedGroupIndex = $state<number>(0);
 	let selectedCommandIndex = $state<number>(0);
@@ -26,18 +26,17 @@
 	});
 
 	$effect(() => {
-		if (selectedCommandIndex && selectedGroupIndex)
-			if (activeItem !== null && scrollContainer !== null) {
-				const offsetTop = activeItem.offsetTop;
-				const offsetHeight = activeItem.offsetHeight;
-				console.log(offsetTop, offsetHeight);
-				scrollContainer.scrollTop = offsetTop - offsetHeight;
-			}
+		const activeItem = document.getElementById(`${selectedGroupIndex}-${selectedCommandIndex}`);
+		if (activeItem !== null && scrollContainer !== null) {
+			const offsetTop = activeItem.offsetTop;
+			const offsetHeight = activeItem.offsetHeight;
+			scrollContainer.scrollTop = offsetTop - offsetHeight;
+		}
 	});
 
 	const selectItem = (groupIndex: number, commandIndex: number) => {
-		const cmd = items[groupIndex].commands[commandIndex];
-		cmd.action(editor);
+		const command = props.items[groupIndex].commands[commandIndex];
+		props.command(command);
 	};
 
 	function handleKeyDown(e: KeyboardEvent) {
@@ -96,29 +95,34 @@
 
 <svelte:window onkeydown={handleKeyDown} />
 
-<div
-	bind:this={scrollContainer}
-	class="rounded bg-background/90 backdrop-blur-md p-2 w-48 border max-h-[min(80vh,24rem)] overflow-auto flex-wrap mb-8"
->
-	{#each items as grp, groupIndex}
-		<span class="text-sm font-medium text-muted-foreground">{grp.title}</span>
-
-		{#each grp.commands as command, commandIndex}
-			{@const Icon = icons[command.iconName]}
-			<Button
-				bind:ref={activeItem}
-				variant="ghost"
-				class={cn(
-					'w-full items-center justify-start gap-2 p-1.5 h-fit',
-					selectedGroupIndex === groupIndex && selectedCommandIndex === commandIndex
-						? 'bg-muted'
-						: ''
-				)}
-				onclick={() => command.action(editor)}
+{#if items.length}
+	<div
+		bind:this={scrollContainer}
+		class="rounded bg-background/90 backdrop-blur-md p-2 w-48 border max-h-[min(80vh,20rem)] overflow-auto flex-wrap mb-8 scroll-smooth"
+	>
+		{#each items as grp, groupIndex}
+			<span
+				class="text-sm text-muted-foreground m-2 font-semibold tracking-wider select-none uppercase"
+				>{grp.title}</span
 			>
-				<Icon />
-				<span>{command.label}</span>
-			</Button>
+
+			{#each grp.commands as command, commandIndex}
+				{@const Icon = icons[command.iconName]}
+				{@const isActive =
+					selectedGroupIndex === groupIndex && selectedCommandIndex === commandIndex}
+				<Button
+					variant="ghost"
+					id={`${groupIndex}-${commandIndex}`}
+					class={cn(
+						'w-full items-center justify-start gap-2 p-1.5 h-fit',
+						isActive ? 'bg-muted' : ''
+					)}
+					onclick={() => command.action(editor)}
+				>
+					<Icon />
+					<span>{command.label}</span>
+				</Button>
+			{/each}
 		{/each}
-	{/each}
-</div>
+	</div>
+{/if}
