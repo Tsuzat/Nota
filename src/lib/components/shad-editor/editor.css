@@ -8,7 +8,6 @@
 }
 
 .tiptap code:not(pre code) {
-	/* Remove the before and after pseudo elements */
 	@apply rounded border bg-muted/50 p-1 before:content-[''] after:content-[''];
 }
 
@@ -100,30 +99,6 @@ input[type='checkbox'] {
 	content: attr(data-placeholder);
 }
 
-/* Drag Handle Related CSS*/
-/* .drag-handle {
-	@apply fixed z-50 cursor-grab opacity-100 transition-opacity duration-200 ease-in;
-
-	&:active {
-		cursor: grabbing;
-	}
-
-	&.hide {
-		opacity: 0;
-		pointer-events: none;
-	}
-
-	@media screen and (max-width: 600px) {
-		display: none;
-		pointer-events: none;
-	}
-}
-
-.drag-handle::after {
-	@apply text-muted-foreground;
-	content: '⠿';
-} */
-
 /* Mathematics extension styles */
 .Tiptap-mathematics-editor {
 	@apply bg-muted;
@@ -147,7 +122,7 @@ input[type='checkbox'] {
 
 .ProseMirror {
 	.tableWrapper {
-		@apply my-12;
+		@apply my-2;
 	}
 
 	table {
