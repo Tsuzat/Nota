@@ -19,7 +19,7 @@
 	import { page } from '$app/state';
 
 	import '@fontsource-variable/inter';
-	import { APPWINDOW, NOTES, OS, WORKSPACES } from '$lib/contants';
+	import { APPWINDOW, CURRENT_ACTIVE_NOTE, NOTES, OS, WORKSPACES } from '$lib/contants';
 	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
 	import { cn, updateNOTES } from '$lib/utils';
 	import IconRender from '$lib/components/icons/icon-render.svelte';
@@ -135,6 +135,7 @@
 		// Set the APP Window as notes name
 		APPWINDOW.setTitle(`Nota - ${name}`);
 		if (notesDB !== null) addNoteToRecents($notesDB.id);
+		CURRENT_ACTIVE_NOTE.set($notesDB);
 	}
 
 	// On notesDB changes, uodate DB and gloabal variable
