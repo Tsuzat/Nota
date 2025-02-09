@@ -1,14 +1,10 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import Themetoggler from '../themetoggler.svelte';
-	import IconRender from '$lib/components/icons/icon-render.svelte';
-	import { SHOW_DECORATION, USER_ICON, USER_NAME } from '$lib/app_settings';
+	import { SHOW_DECORATION, USER_NAME } from '$lib/app_settings';
 	import { Button } from '$lib/components/ui/button';
 	import { APP_MENU } from '$lib/app_menu';
-
-	async function onClickIcon() {
-		await APP_MENU.popup();
-	}
+	import src from '$lib/assets/static/icon.png';
 </script>
 
 <Sidebar.Menu>
@@ -18,10 +14,10 @@
 	>
 		<div class="flex items-center gap-2 w-full mr-8">
 			{#if $SHOW_DECORATION}
-				<IconRender icon={$USER_ICON} />
+				<img {src} alt="user-icon" class="size-5" />
 			{:else}
-				<Button variant="ghost" size="icon" class="size-fit p-1" onclick={onClickIcon}>
-					<IconRender icon={$USER_ICON} />
+				<Button variant="ghost" size="icon" class="size-6 p-1" onclick={() => APP_MENU.popup()}>
+					<img {src} alt="user-icon" class="size-full" />
 				</Button>
 			{/if}
 			<span class="text-ellipsis font-bold">{$USER_NAME}</span>
