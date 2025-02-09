@@ -4,7 +4,7 @@
 	let { children } = $props();
 </script>
 
-<Sidebar.Provider class="max-h-screen max-w-screen overflow-hidden overflow-x-scroll">
+<Sidebar.Provider class="h-[100dvh] w-[100dvw] overflow-hidden overflow-x-scroll">
 	<AppSidebar />
 	<Sidebar.Inset>
 		{@render children()}
