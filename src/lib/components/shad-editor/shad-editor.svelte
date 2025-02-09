@@ -52,6 +52,8 @@
 	import TableRowMenu from './custom/Extentions/table/menu/table-row-menu.svelte';
 	import DragHandle from './drag-handle.svelte';
 	import SlashCommand from './custom/Extentions/slash-command/slashcommand';
+	import { ImagePlaceholder } from './custom/Extentions/image-placeholder/ImagePlaceholder';
+	import { VideoPlaceholder } from './custom/Extentions/video-placeholder/VideoPlaceholder';
 
 	const lowlight = createLowlight(all);
 
@@ -124,7 +126,7 @@
 							return 'What’s the title?';
 						}
 						if (node.type.name === 'paragraph') {
-							return 'Write something or press / for commands';
+							return 'Press / or write something..';
 						}
 						return '';
 					}
@@ -208,7 +210,9 @@
 				ImageExtension,
 				Mathematics,
 				VideoExtention,
-				SlashCommand
+				SlashCommand,
+				ImagePlaceholder,
+				VideoPlaceholder
 			],
 			autofocus: true,
 			onUpdate: ({ editor }) => {
