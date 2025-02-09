@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import initializeAppMenu from '$lib/app_menu';
 import { NOTES, WORKSPACES } from '$lib/contants';
 import { getAllNotes } from '$lib/database/notes';
@@ -16,6 +17,13 @@ import { toast } from 'svelte-sonner';
 
 			const notes = await getAllNotes();
 			NOTES.set(notes);
+			const lastActiveNoteId = localStorage.getItem('lastActiveNote');
+			if (lastActiveNoteId) {
+				const note = notes.find((n) => n.id === lastActiveNoteId);
+				if (note) {
+					goto(`/${note.id}`);
+				}
+			}
 		})
 		.catch((err) => {
 			console.error(err);
