@@ -14,7 +14,7 @@
 <Sidebar.Menu>
 	<Sidebar.MenuItem
 		{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
-		class="flex items-center justify-between "
+		class="flex items-center justify-between h-10 min-h-10 max-h-10 m-0 p-0 mb-2"
 	>
 		<div class="flex items-center gap-2 w-full mr-8">
 			{#if $SHOW_DECORATION}
