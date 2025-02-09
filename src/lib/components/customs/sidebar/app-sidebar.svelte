@@ -35,7 +35,7 @@
 </script>
 
 <Sidebar.Root bind:ref class="border-r-0" {...restProps}>
-	<Sidebar.Header>
+	<Sidebar.Header class="m-0 py-0">
 		<UserProfile />
 		<NavMain items={data.navMain} />
 	</Sidebar.Header>
