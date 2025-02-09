@@ -15,18 +15,6 @@ USER_NAME.subscribe(async (value) => {
 });
 
 /**
- * Global Variable for keeping track of the user icon
- */
-export const USER_ICON: Writable<string> = writable(
-	localStorage.getItem('user_icon') || 'emoji:😂'
-);
-USER_ICON.subscribe(async (value) => {
-	if (browser) {
-		localStorage.setItem('user_icon', value);
-	}
-});
-
-/**
  * Global Variable for keeping track of the sidebar open state
  */
 export const SIDEBAR_OPEN: Writable<boolean> = writable(
