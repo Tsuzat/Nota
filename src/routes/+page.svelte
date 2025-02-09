@@ -26,7 +26,7 @@
 	<header
 		{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
 		class={cn(
-			'flex min-h-12 h-12 w-full shrink-0 items-center justify-between gap-2 p-2',
+			'flex min-h-10 max-h-10 h-10 w-full items-center justify-between gap-2',
 			$SHOW_DECORATION === false && 'mr-36'
 		)}
 	>

@@ -27,7 +27,6 @@
 	import Navigation from '$lib/components/customs/navigation.svelte';
 	import { addNoteToRecents } from '$lib/recents';
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
-	import { fade } from 'svelte/transition';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { SHOW_DECORATION } from '$lib/app_settings';
 
@@ -205,11 +204,11 @@
 <svelte:document onkeydown={handleKeydown} />
 
 {#key notesId}
-	<main class="flex flex-col w-full h-full">
+	<main class="flex flex-col w-full max-h-[100dvh]">
 		<header
 			{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
 			class={cn(
-				'flex h-12 shrink-0 items-center gap-2 transition-all',
+				'flex h-10 min-h-10 max-h-10 items-center gap-2 transition-all',
 				$SHOW_DECORATION === false && 'mr-36'
 			)}
 		>
@@ -270,7 +269,7 @@
 				showToolbar={!isLocked && showToolbar}
 				editable={!isLocked}
 				{spellCheck}
-				class="flex-grow max-h-[calc(100dvh-3rem)] flex flex-col h-full w-full"
+				class="max-h-[calc(100dvh-3rem)] flex flex-col h-full w-full"
 				path={$path}
 				content={$notes.content}
 				onChange={updateContent}
