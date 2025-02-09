@@ -92,8 +92,28 @@ export const GROUPS: Group[] = [
 		title: 'Insert',
 		commands: [
 			{
+				name: 'image-placeholder',
+				label: 'Image',
+				iconName: 'Image',
+				description: 'Insert an image',
+				action: (editor) => {
+					editor.chain().focus().insertImagePlaceholder().run();
+				}
+			},
+
+			{
+				name: 'video-placeholder',
+				label: 'Insert Video',
+				iconName: 'Video',
+				description: 'Insert a video',
+				action: (editor) => {
+					editor.chain().focus().insertVideoPlaceholder().run();
+				}
+			},
+
+			{
 				name: 'table',
-				label: 'Table',
+				label: 'Insert Table',
 				iconName: 'Table',
 				description: 'Insert a table',
 				shouldBeHidden: (editor) => editor.isActive('columns'),
