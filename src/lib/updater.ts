@@ -17,9 +17,6 @@ export async function checkUpdate(isAuto: boolean = false) {
 	if (update !== null) {
 		toast.info(`New version ${update.version} is available.`, {
 			id,
-			cancel: {
-				label: 'Ignore'
-			},
 			action: {
 				label: 'Update',
 				onClick: () => {
