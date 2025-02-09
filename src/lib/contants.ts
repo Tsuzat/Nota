@@ -3,8 +3,6 @@ import type { WorkSpaceDB } from './database/workspace';
 import type { NotesDB } from './database/notes';
 import { platform } from '@tauri-apps/plugin-os';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { getCurrentWebview } from '@tauri-apps/api/webview';
-import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 /** Global Variables For showing new work space dialog */
 export const OPEN_NEW_WORKSPACE_DIALOG = writable(false);
@@ -32,4 +30,12 @@ export const IS_MAXIMUM = writable(false);
 
 APPWINDOW.listen('tauri://resize', async () => {
 	IS_MAXIMUM.set(await APPWINDOW.isMaximized());
+});
+
+/** Global Variable for keep track of current active note */
+export const CURRENT_ACTIVE_NOTE = writable<NotesDB | null>(null);
+CURRENT_ACTIVE_NOTE.subscribe((note) => {
+	if (note) {
+		localStorage.setItem('lastActiveNote', note.id);
+	}
 });
