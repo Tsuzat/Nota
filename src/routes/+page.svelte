@@ -1,22 +1,28 @@
 <script lang="ts">
-	import { SHOW_DECORATION } from '$lib/app_settings';
+	import { APP_MENU } from '$lib/app_menu';
+	import { SHOW_DECORATION, SIDEBAR_OPEN } from '$lib/app_settings';
 	import src from '$lib/assets/static/icon.png';
 	import Navigation from '$lib/components/customs/navigation.svelte';
 	import RecentNotes from '$lib/components/customs/tiles/recent-notes.svelte';
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Sidebar from '$lib/components/ui/sidebar';
+	import { useSidebar } from '$lib/components/ui/sidebar';
 	import { APPWINDOW, NOTES, OS } from '$lib/contants';
 	import { clearRecents, RECENT_NOTES } from '$lib/recents';
 	import { cn } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 
+	const sidebar = useSidebar();
+
 	onMount(async () => {
 		// load recents
 		const rawData = localStorage.getItem('recent-notes') || '[]';
 		let notesIds: string[] = JSON.parse(rawData);
 		RECENT_NOTES.set(notesIds);
+
+		sidebar.setOpen($SIDEBAR_OPEN);
 
 		await APPWINDOW.setTitle('Nota - Home');
 	});
@@ -31,8 +37,21 @@
 		)}
 	>
 		<div class="flex items-center gap-2 px-3">
+			{#if sidebar.state === 'collapsed'}
+				{#if $SHOW_DECORATION}
+					<img {src} alt="user-icon" class="size-5" />
+				{:else}
+					<Button variant="ghost" size="icon" class="size-6 p-1" onclick={() => APP_MENU.popup()}>
+						<img {src} alt="user-icon" class="size-full" />
+					</Button>
+				{/if}
+			{/if}
 			<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
-				<Sidebar.Trigger />
+				<Sidebar.Trigger
+					onclick={() => {
+						SIDEBAR_OPEN.set(sidebar.state === 'collapsed');
+					}}
+				/>
 			</Tooltip>
 			<Navigation />
 		</div>
