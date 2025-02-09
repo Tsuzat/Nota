@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
+	import src from '$lib/assets/static/icon.png';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import NavActions from '$lib/components/customs/sidebar/nav-actions.svelte';
 	import ShadEditor from '$lib/components/shad-editor/shad-editor.svelte';
@@ -28,7 +29,10 @@
 	import { addNoteToRecents } from '$lib/recents';
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import { SHOW_DECORATION } from '$lib/app_settings';
+	import { SHOW_DECORATION, SIDEBAR_OPEN } from '$lib/app_settings';
+	import { APP_MENU } from '$lib/app_menu';
+	import { Button } from '$lib/components/ui/button';
+	import { useSidebar } from '$lib/components/ui/sidebar';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -188,7 +192,9 @@
 		$notesDB.name = title;
 	}
 
+	const sidebar = useSidebar();
 	onMount(() => {
+		sidebar.setOpen($SIDEBAR_OPEN);
 		return async () => {
 			if (store) await store.close();
 		};
@@ -214,8 +220,21 @@
 			)}
 		>
 			<div class="flex items-center gap-2 px-3">
+				{#if sidebar.state === 'collapsed'}
+					{#if $SHOW_DECORATION}
+						<img {src} alt="user-icon" class="size-5" />
+					{:else}
+						<Button variant="ghost" size="icon" class="size-6 p-1" onclick={() => APP_MENU.popup()}>
+							<img {src} alt="user-icon" class="size-full" />
+						</Button>
+					{/if}
+				{/if}
 				<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
-					<Sidebar.Trigger />
+					<Sidebar.Trigger
+						onclick={() => {
+							SIDEBAR_OPEN.set(sidebar.state === 'collapsed');
+						}}
+					/>
 				</Tooltip>
 				<Navigation />
 				<div class="flex items-center gap-2 text-xl font-bold">
