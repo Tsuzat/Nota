@@ -5,7 +5,7 @@ import tippy from 'tippy.js';
 
 import { GROUPS } from './groups';
 import MenuList from './menu-list.svelte';
-import SvelteRenderer from '../../svelte-renderer';
+import SvelteRenderer from '$lib/components/shad-editor/svelte-renderer';
 
 const extensionName = 'slashCommand';
 

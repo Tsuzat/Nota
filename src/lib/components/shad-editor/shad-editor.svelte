@@ -51,7 +51,7 @@
 	import TableColMenu from './custom/Extentions/table/menu/table-col-menu.svelte';
 	import TableRowMenu from './custom/Extentions/table/menu/table-row-menu.svelte';
 	import DragHandle from './drag-handle.svelte';
-	import SlashCommand from './tmp/slash-command/slashcommand';
+	import SlashCommand from './custom/Extentions/slash-command/slashcommand';
 
 	const lowlight = createLowlight(all);
 
