@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { CHECK_UPDATE_ON_START, SHOW_DECORATION, USER_ICON, USER_NAME } from '$lib/app_settings';
-	import IconRender from '$lib/components/icons/icon-render.svelte';
-	import Iconpicker from '$lib/components/icons/iconpicker.svelte';
+	import { CHECK_UPDATE_ON_START, SHOW_DECORATION, USER_NAME } from '$lib/app_settings';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { OS, SHOW_SETTINGS } from '$lib/contants';
 	import { mode } from 'mode-watcher';
@@ -26,9 +24,6 @@
 					<div class="description">Change the user icon and name as per your liking</div>
 				</div>
 				<div class="right flex items-center gap-2">
-					<Iconpicker onSelect={(icon) => USER_ICON.set(icon)} side="left">
-						<IconRender icon={$USER_ICON} />
-					</Iconpicker>
 					<input
 						type="text"
 						placeholder="Username"
@@ -65,13 +60,14 @@
 					</div>
 				</div>
 			{/if}
-			<div id="user" class="setting-tile" title="Window Preferences">
+
+			<div id="user" class="setting-tile" title="On Application Startup">
 				<div class="left">
 					<div class="title">
 						<CheckCircle2 class="size-4" />
 						<span>Check Update on start</span>
 					</div>
-					<div class="description">Weather to check for update on app start or not</div>
+					<div class="description">Check for update on app start in background</div>
 				</div>
 				<div class="right flex items-center gap-2">
 					<Switch bind:checked={$CHECK_UPDATE_ON_START} />
