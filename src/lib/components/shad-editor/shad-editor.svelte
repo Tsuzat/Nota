@@ -51,6 +51,7 @@
 	import TableColMenu from './custom/Extentions/table/menu/table-col-menu.svelte';
 	import TableRowMenu from './custom/Extentions/table/menu/table-row-menu.svelte';
 	import DragHandle from './drag-handle.svelte';
+	import SlashCommand from './tmp/slash-command/slashcommand';
 
 	const lowlight = createLowlight(all);
 
@@ -81,9 +82,6 @@
 
 	let editor = $state<Editor>();
 	let element = $state<HTMLElement>();
-
-	// Show Drag Menu
-	let showDragMenu = $state(false);
 
 	// Open Popovers
 	let searchReplaceOpen = $state(false);
@@ -126,7 +124,7 @@
 							return 'What’s the title?';
 						}
 						if (node.type.name === 'paragraph') {
-							return 'Write something …';
+							return 'Write something or press / for commands';
 						}
 						return '';
 					}
@@ -209,7 +207,8 @@
 				TableCell,
 				ImageExtension,
 				Mathematics,
-				VideoExtention
+				VideoExtention,
+				SlashCommand
 			],
 			autofocus: true,
 			onUpdate: ({ editor }) => {
