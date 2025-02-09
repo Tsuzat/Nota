@@ -24,10 +24,9 @@
 
 	interface Props {
 		editor: Editor;
-		path: string;
 	}
 
-	let { editor, path }: Props = $props();
+	let { editor }: Props = $props();
 </script>
 
 <div class="flex max-w-fit mx-auto mb-1">
@@ -45,8 +44,8 @@
 	<ButtleList {editor} />
 	<OrderedList {editor} />
 	<TaskList {editor} />
-	<Image {editor} {path} />
-	<Video {editor} {path} />
+	<Image {editor} />
+	<Video {editor} />
 	<Table {editor} />
 	<Textcolor {editor} />
 	<Highlighter {editor} />

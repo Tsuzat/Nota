@@ -253,7 +253,7 @@
 		<TableRowMenu {editor} />
 		{#if showToolbar}
 			<span transition:slide={{ duration: 300 }}>
-				<EditorToolbar {editor} {path} />
+				<EditorToolbar {editor} />
 			</span>
 		{/if}
 	{/if}
