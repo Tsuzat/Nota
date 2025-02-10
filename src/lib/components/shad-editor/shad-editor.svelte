@@ -54,6 +54,7 @@
 	import SlashCommand from './custom/Extentions/slash-command/slashcommand';
 	import { ImagePlaceholder } from './custom/Extentions/image-placeholder/ImagePlaceholder';
 	import { VideoPlaceholder } from './custom/Extentions/video-placeholder/VideoPlaceholder';
+	import FontSize from './custom/Extentions/FontSize';
 
 	const lowlight = createLowlight(all);
 
@@ -212,7 +213,8 @@
 				VideoExtention,
 				SlashCommand,
 				ImagePlaceholder,
-				VideoPlaceholder
+				VideoPlaceholder,
+				FontSize
 			],
 			autofocus: true,
 			onUpdate: ({ editor }) => {
@@ -244,21 +246,23 @@
 
 <svelte:document onkeydown={handleKeydown} />
 
-<div class={cn('!overflow-hidden', className)}>
+<div class={cn(className)}>
 	{#if editor}
-		<DragHandle {editor} />
-		<SearchReplace {editor} bind:open={searchReplaceOpen} />
-		<LinkMenu {editor} />
-		<TableColMenu {editor} />
-		<TableRowMenu {editor} />
 		{#if showToolbar}
 			<span transition:slide={{ duration: 300 }}>
 				<EditorToolbar {editor} />
 			</span>
 		{/if}
+		<div class="absolute top-0 right-0">
+			<DragHandle {editor} />
+			<SearchReplace {editor} bind:open={searchReplaceOpen} />
+			<LinkMenu {editor} />
+			<TableColMenu {editor} />
+			<TableRowMenu {editor} />
+		</div>
 	{/if}
-	<div bind:this={element} spellcheck={spellCheck} class="h-full overflow-y-auto flex-1"></div>
-	<div class="fixed right-4 bottom-4">
+	<div bind:this={element} spellcheck={spellCheck} class="flex-1 overflow-auto"></div>
+	<div class="absolute right-4 bottom-4">
 		<Tooltip text="Scroll to Top" side="left">
 			<Button
 				variant="outline"
