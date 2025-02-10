@@ -21,6 +21,7 @@
 	import Textcolor from './icons/textcolor.svelte';
 	import Highlighter from './icons/highlighter.svelte';
 	import Video from './icons/video.svelte';
+	import FontSize from './icons/font-size.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -29,8 +30,11 @@
 	let { editor }: Props = $props();
 </script>
 
-<div class="flex max-w-fit mx-auto mb-1 bg-muted/10 border border-opacity-10 rounded-md gap-0.5">
+<div
+	class="flex max-w-fit max-h-fit mx-auto mb-1 bg-muted/10 border border-opacity-10 rounded-md gap-0.5"
+>
 	<Text {editor} />
+	<FontSize {editor} />
 	<Bold {editor} />
 	<Italic {editor} />
 	<Underline {editor} />
