@@ -29,7 +29,7 @@
 	let { editor }: Props = $props();
 </script>
 
-<div class="flex max-w-fit mx-auto mb-1">
+<div class="flex max-w-fit mx-auto mb-1 bg-muted/10 border border-opacity-10 rounded-md gap-0.5">
 	<Text {editor} />
 	<Bold {editor} />
 	<Italic {editor} />
