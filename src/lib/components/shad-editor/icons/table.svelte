@@ -23,7 +23,7 @@
 						<ChevronDown class="!size-3" />
 					</Button>
 				</Tooltip.Trigger>
-				<Tooltip.Content>
+				<Tooltip.Content class="bg-background text-foreground border font-medium p-2">
 					<p>Table</p>
 				</Tooltip.Content>
 			</Tooltip.Root>
