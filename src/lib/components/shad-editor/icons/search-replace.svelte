@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Tooltip from '$lib/components/customs/tooltip.svelte';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
+	import { cn } from '$lib/utils';
 	import { type Editor } from '@tiptap/core';
-	import { ArrowLeft, ArrowRight, X, Replace, ReplaceAll } from 'lucide-svelte';
-	import { scale } from 'svelte/transition';
+	import { ArrowLeft, ArrowRight, X, Replace, ReplaceAll, CaseSensitive } from 'lucide-svelte';
+	import { scale, slide } from 'svelte/transition';
 
 	let { editor, open = $bindable(false) }: { editor: Editor; open: boolean } = $props();
 
@@ -70,60 +70,94 @@
 		}
 	}}
 >
-	<Popover.Trigger class="absolute top-4 right-4"></Popover.Trigger>
-	<Popover.Content class="bg-popover shadow-lg *:my-2">
-		<div class="flex items-center justify-between">
+	<Popover.Trigger class="absolute top-4 right-4">
+		<span class="sr-only">Open Search Menu</span>
+	</Popover.Trigger>
+	<Popover.Content class="shadow-lg h-fit w-fit flex flex-col gap-2">
+		<Popover.Close
+			class={buttonVariants({
+				variant: 'ghost',
+				class: 'size-2 absolute right-2 top-2 p-1 rounded-sm',
+				size: 'sm'
+			})}
+		>
+			<X />
+		</Popover.Close>
+		<div class="flex items-center justify-between gap-1">
 			<Input
 				placeholder="Enter Text to search.."
 				bind:value={searchText}
 				oninput={() => updateSearchTerm()}
-				class="mr-1 "
 			/>
-			<Tooltip text="Previous">
-				<Button variant="ghost" class="ml-1 size-8" onclick={previous}>
-					<ArrowLeft />
-				</Button>
-			</Tooltip>
-			<Tooltip text="Next">
-				<Button variant="ghost" class="ml-1 size-8" onclick={next}>
-					<ArrowRight />
-				</Button>
-			</Tooltip>
+			{#if !showReplace}
+				<div transition:slide={{ duration: 300 }} class="w-fit">
+					{searchCount > 0 ? searchIndex + 1 : 0}/{searchCount}
+				</div>
+			{/if}
+			<Button variant="ghost" class="size-8" onclick={previous} title="Previous">
+				<ArrowLeft />
+			</Button>
+			<Button variant="ghost" class="size-8" onclick={next} title="Next">
+				<ArrowRight />
+			</Button>
+			{#if !showReplace}
+				<div transition:slide={{ duration: 300 }} class="flex items-center gap-1">
+					<Button
+						variant="ghost"
+						class={cn('size-8', caseSensitive && 'bg-muted')}
+						onclick={() => {
+							caseSensitive = !caseSensitive;
+							updateSearchTerm();
+						}}
+						title={caseSensitive ? 'Disable Case Sensitive' : 'Enable Case Sensitive'}
+					>
+						<CaseSensitive />
+					</Button>
+					<Button
+						variant="ghost"
+						class={cn('size-8', showReplace && 'bg-muted')}
+						onclick={() => (showReplace = !showReplace)}
+						title={showReplace ? 'Close Replace Menu' : 'Open Replace Menu'}
+					>
+						<Replace />
+					</Button>
+				</div>
+			{/if}
 		</div>
 		{#if showReplace}
-			<div transition:scale={{ duration: 300 }} class="flex items-center justify-between">
+			<div transition:slide={{ duration: 300 }} class="flex items-center justify-between">
 				<Input
 					placeholder="Enter Text to Replace.."
 					bind:value={replaceText}
 					oninput={() => updateSearchTerm()}
 					class="mr-1 "
 				/>
-				<Tooltip text="Replace">
-					<Button variant="ghost" class="ml-1 size-8" onclick={replace}>
-						<Replace />
-					</Button>
-				</Tooltip>
-				<Tooltip text="Replace All">
-					<Button variant="ghost" class="ml-1 size-8" onclick={replaceAll}>
-						<ReplaceAll />
-					</Button>
-				</Tooltip>
+				<Button variant="ghost" class="ml-1 size-8" onclick={replace} title="Replace">
+					<Replace />
+				</Button>
+				<Button variant="ghost" class="ml-1 size-8" onclick={replaceAll} title="Replace All">
+					<ReplaceAll />
+				</Button>
+			</div>
+			<div transition:slide={{ duration: 300 }} class="flex items-center justify-between">
+				<div class="flex items-center gap-2">
+					<input
+						type="checkbox"
+						class="checkbox hidden"
+						bind:checked={caseSensitive}
+						onchange={() => updateSearchTerm()}
+					/>
+					<Checkbox bind:checked={caseSensitive} />
+					<p>Case Sensitive</p>
+				</div>
+				<div class="flex items-center gap-2">
+					{searchCount > 0 ? searchIndex + 1 : 0} / {searchCount}
+				</div>
+			</div>
+			<div transition:slide={{ duration: 300 }} class="flex items-center gap-2">
+				<Checkbox bind:checked={showReplace} />
+				<p>Open Replace Menu</p>
 			</div>
 		{/if}
-		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-2">
-				<input
-					type="checkbox"
-					class="checkbox hidden"
-					bind:checked={caseSensitive}
-					onchange={() => updateSearchTerm()}
-				/>
-				<Checkbox bind:checked={caseSensitive} />
-				<p>Case Sensitive</p>
-			</div>
-			<div class="flex items-center gap-2">
-				{searchCount > 0 ? searchIndex + 1 : 0} / {searchCount}
-			</div>
-		</div>
 	</Popover.Content>
 </Popover.Root>
