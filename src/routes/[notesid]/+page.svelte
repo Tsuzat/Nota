@@ -211,12 +211,12 @@
 <svelte:document onkeydown={handleKeydown} />
 
 {#key notesId}
-	<main class="flex flex-col w-full max-h-[100dvh]">
+	<main class="flex flex-col w-full max-h-[100dvh] overflow-hidden">
 		<header
 			{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
 			class={cn(
-				'flex h-10 min-h-10 max-h-10 items-center gap-2 transition-all',
-				$SHOW_DECORATION === false && 'mr-36'
+				$SHOW_DECORATION === false && 'mr-36',
+				'max-w-[calc(100%-0px)] flex h-10 items-center p-2 gap-2 transition-all'
 			)}
 		>
 			<div class="flex items-center gap-2 px-3">
@@ -284,20 +284,22 @@
 				</div>
 			{/if}
 		</header>
-		{#if $notes !== null}
-			<ShadEditor
-				showToolbar={!isLocked && showToolbar}
-				editable={!isLocked}
-				{spellCheck}
-				class="max-h-[calc(100dvh-3rem)] flex flex-col h-full w-full"
-				path={$path}
-				content={$notes.content}
-				onChange={updateContent}
-			/>
-		{:else}
-			<div class="flex-grow max-h-[calc(90vh)] w-full rounded">
-				<Skeleton class="size-full max-w-3xl bg-muted/50 m-auto" />
-			</div>
-		{/if}
+		<div class="flex-grow-0 flex-shrink flex flex-col z-10 max-h-full h-[calc(-2.5rem+100vh)]">
+			{#if $notes !== null}
+				<ShadEditor
+					showToolbar={!isLocked && showToolbar}
+					editable={!isLocked}
+					{spellCheck}
+					class="max-h-[calc(100dvh-3rem)] flex flex-col w-full"
+					path={$path}
+					content={$notes.content}
+					onChange={updateContent}
+				/>
+			{:else}
+				<div class="flex-grow max-h-[calc(90vh)] w-full rounded">
+					<Skeleton class="size-full max-w-3xl bg-muted/50 m-auto" />
+				</div>
+			{/if}
+		</div>
 	</main>
 {/key}
