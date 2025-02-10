@@ -1,10 +1,12 @@
 <script lang="ts">
 	import Tooltip from '$lib/components/customs/tooltip.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { type Editor } from '@tiptap/core';
 	import { ArrowLeft, ArrowRight, X, Replace, ReplaceAll } from 'lucide-svelte';
+	import { scale } from 'svelte/transition';
 
 	let { editor, open = $bindable(false) }: { editor: Editor; open: boolean } = $props();
 
@@ -68,7 +70,7 @@
 		}
 	}}
 >
-	<Popover.Trigger class="fixed top-4 right-4"></Popover.Trigger>
+	<Popover.Trigger class="absolute top-4 right-4"></Popover.Trigger>
 	<Popover.Content class="bg-popover shadow-lg *:my-2">
 		<div class="flex items-center justify-between">
 			<Input
@@ -89,7 +91,7 @@
 			</Tooltip>
 		</div>
 		{#if showReplace}
-			<div class="flex items-center justify-between">
+			<div transition:scale={{ duration: 300 }} class="flex items-center justify-between">
 				<Input
 					placeholder="Enter Text to Replace.."
 					bind:value={replaceText}
@@ -112,10 +114,11 @@
 			<div class="flex items-center gap-2">
 				<input
 					type="checkbox"
-					class="checkbox"
+					class="checkbox hidden"
 					bind:checked={caseSensitive}
 					onchange={() => updateSearchTerm()}
 				/>
+				<Checkbox bind:checked={caseSensitive} />
 				<p>Case Sensitive</p>
 			</div>
 			<div class="flex items-center gap-2">
