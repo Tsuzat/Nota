@@ -253,13 +253,11 @@
 				<EditorToolbar {editor} />
 			</span>
 		{/if}
-		<div class="absolute top-0 right-0">
-			<DragHandle {editor} />
-			<SearchReplace {editor} bind:open={searchReplaceOpen} />
-			<LinkMenu {editor} />
-			<TableColMenu {editor} />
-			<TableRowMenu {editor} />
-		</div>
+		<DragHandle {editor} />
+		<SearchReplace {editor} bind:open={searchReplaceOpen} />
+		<LinkMenu {editor} />
+		<TableColMenu {editor} />
+		<TableRowMenu {editor} />
 	{/if}
 	<div bind:this={element} spellcheck={spellCheck} class="flex-1 overflow-auto"></div>
 	<div class="absolute right-4 bottom-4">
