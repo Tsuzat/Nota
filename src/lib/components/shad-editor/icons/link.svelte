@@ -16,7 +16,7 @@
 			editor.chain().focus().extendMarkRange('link').unsetLink().run();
 			return;
 		}
-		editor?.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+		editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
 	}
 </script>
 
