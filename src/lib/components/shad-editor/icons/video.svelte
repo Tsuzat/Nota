@@ -13,7 +13,7 @@
 		<Tooltip.Trigger>
 			<Button
 				variant="ghost"
-				class={cn('h-8 w-fit px-2', editor.isActive('video') && 'bg-muted')}
+				class={cn('size-8', editor.isActive('video') && 'bg-muted')}
 				onclick={() => editor.chain().focus().insertVideoPlaceholder().run()}
 			>
 				<Video />
