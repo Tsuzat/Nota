@@ -15,7 +15,6 @@
 		Captions
 	} from 'lucide-svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { duplicateContent } from './utils.js';
 
 	const { node, editor, selected, deleteNode, updateAttributes }: NodeViewProps = $props();
 
@@ -226,13 +225,6 @@
 							}}
 						>
 							<Captions class="mr-1 size-4" /> Caption
-						</DropdownMenu.Item>
-						<DropdownMenu.Item
-							onclick={() => {
-								duplicateContent(editor);
-							}}
-						>
-							<CopyIcon class="mr-1 size-4" /> Duplicate
 						</DropdownMenu.Item>
 						<DropdownMenu.Item
 							onclick={() => {
