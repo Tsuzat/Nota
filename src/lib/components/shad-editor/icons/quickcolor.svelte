@@ -33,7 +33,7 @@
 					<Button
 						variant="ghost"
 						size="sm"
-						class="h-8 w-fit p-1 gap-1"
+						class="h-8 w-fit p-1 px-1.5 gap-1"
 						style={`color: ${currentColor}; background-color: ${currentHighlight}30;`}
 					>
 						A
@@ -49,10 +49,7 @@
 			</Tooltip.Root>
 		</Tooltip.Provider>
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content
-		class="max-h-60 h-fit w-fit max-w-60 overflow-auto"
-		portalProps={{ disabled: true, to: undefined }}
-	>
+	<DropdownMenu.Content class="h-fit w-fit p-2" portalProps={{ disabled: true, to: undefined }}>
 		<span class="text-[0.75rem] font-medium text-muted-foreground">Text Color</span>
 		<DropdownMenu.Group class="grid grid-cols-5 gap-2">
 			{#each colors as color}
@@ -72,7 +69,7 @@
 					class={buttonVariants({
 						variant: 'ghost',
 						class: cn(
-							'size-8 p-1 bg-muted/50 cursor-pointer',
+							'size-6 p-1 bg-muted/50 cursor-pointer',
 							editor.isActive('textStyle', { color: color.value }) && 'border-2 font-semibold'
 						)
 					})}
@@ -90,11 +87,11 @@
 					class={buttonVariants({
 						variant: 'ghost',
 						class: cn(
-							'size-8 p-1 bg-muted/50 cursor-pointer',
+							'size-6 p-1 bg-muted/50 cursor-pointer',
 							editor.isActive('highlight', { color: color.value }) && 'border-2 font-semibold'
 						)
 					})}
-					style={`background-color: ${color.value}80; border-color: ${color.value};`}
+					style={`background-color: ${color.value}50; border-color: ${color.value};`}
 					onclick={() => {
 						if (color.value === '' || color.label === 'Default')
 							editor.chain().focus().unsetHighlight().run();
