@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import type { Editor } from '@tiptap/core';
 	import { ChevronDown } from 'lucide-svelte';
 
@@ -28,13 +29,25 @@
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger
-		class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'h-8 w-fit p-0 px-2' })}
-	>
-		<span>{currentLabel}</span>
-		<ChevronDown class="!size-4" />
+	<DropdownMenu.Trigger>
+		<Tooltip.Provider delayDuration={100}>
+			<Tooltip.Root>
+				<Tooltip.Trigger
+					class={buttonVariants({ variant: 'ghost', class: 'h-8 w-fit p-0 px-2 gap-1' })}
+				>
+					<span>{currentLabel}</span>
+					<ChevronDown class="!size-2 text-muted-foreground" />
+				</Tooltip.Trigger>
+				<Tooltip.Content
+					avoidCollisions
+					class="bg-background text-foreground border font-medium p-2"
+				>
+					<p>Font Size</p>
+				</Tooltip.Content>
+			</Tooltip.Root>
+		</Tooltip.Provider>
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content class="w-fit h-fit">
+	<DropdownMenu.Content class="w-fit h-fit" portalProps={{ disabled: true, to: undefined }}>
 		{#each FONT_SIZE as fontSize}
 			<DropdownMenu.Item
 				onclick={() => {
