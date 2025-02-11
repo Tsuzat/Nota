@@ -5,7 +5,6 @@
 	import Italic from './icons/italic.svelte';
 	import Underline from './icons/underline.svelte';
 	import Strikethrough from './icons/strikethrough.svelte';
-	import Link from './icons/link.svelte';
 	import Code from './icons/code.svelte';
 	import Subscript from './icons/subscript.svelte';
 	import ButtleList from './icons/buttle-list.svelte';
@@ -19,6 +18,7 @@
 	import BlockQuote from './icons/block-quote.svelte';
 	import Textcolor from './icons/textcolor.svelte';
 	import Highlighter from './icons/highlighter.svelte';
+	import CodeBlock from './icons/code-block.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -38,6 +38,7 @@
 	<Align {editor} />
 	<!-- <Link {editor} /> -->
 	<Code {editor} />
+	<CodeBlock {editor} />
 	<BlockQuote {editor} />
 	<Subscript {editor} />
 	<Superscript {editor} />

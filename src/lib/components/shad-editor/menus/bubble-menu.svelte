@@ -20,6 +20,7 @@
 	import BlockQuote from '../icons/block-quote.svelte';
 	import Code from '../icons/code.svelte';
 	import Quickcolor from '../icons/quickcolor.svelte';
+	import CodeBlock from '../icons/code-block.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -34,7 +35,6 @@
 		}
 		if (editor.isActive('link')) return false;
 		if (editor.isActive('codeBlock')) return false;
-
 		const {
 			state: {
 				doc,
@@ -42,7 +42,6 @@
 				selection: { empty, from, to }
 			}
 		} = editor;
-
 		// check if the selection is a table grip
 		const domAtPos = view.domAtPos(from || 0).node as HTMLElement;
 		const nodeDOM = view.nodeDOM(from || 0) as HTMLElement;
@@ -51,7 +50,6 @@
 		if (isTableGripSelected(node)) {
 			return false;
 		}
-
 		// Sometime check for `empty` is not enough.
 		// Doubleclick an empty paragraph returns a node size of 2.
 		// So we check also for an empty text size.
@@ -110,6 +108,7 @@
 	<Textalign {editor} />
 	<Quickcolor {editor} />
 	<Link {editor} />
+	<CodeBlock {editor} />
 	<Bold {editor} />
 	<Italic {editor} />
 	<Underline {editor} />
@@ -124,6 +123,7 @@
 			align="start"
 			class="h-fit w-fit flex items-center p-0.5 gap-1"
 			portalProps={{ disabled: true, to: undefined }}
+			trapFocus={false}
 		>
 			<BlockQuote {editor} />
 			<Code {editor} />
