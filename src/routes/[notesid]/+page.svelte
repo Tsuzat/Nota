@@ -211,7 +211,7 @@
 <svelte:document onkeydown={handleKeydown} />
 
 {#key notesId}
-	<main class="flex flex-col w-full max-h-[100dvh] overflow-hidden">
+	<main class="flex flex-col w-full h-full overflow-auto">
 		<header
 			{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
 			class={cn(
