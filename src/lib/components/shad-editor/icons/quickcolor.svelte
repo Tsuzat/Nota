@@ -33,7 +33,7 @@
 					<Button
 						variant="ghost"
 						size="sm"
-						class="h-8 w-fit px-2 gap-1"
+						class="h-8 w-fit p-1 gap-1"
 						style={`color: ${currentColor}; background-color: ${currentHighlight}30;`}
 					>
 						A
