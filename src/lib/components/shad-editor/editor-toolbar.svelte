@@ -15,13 +15,11 @@
 	import Align from './icons/textalign.svelte';
 	import Quickcolor from './icons/quickcolor.svelte';
 	import Table from './icons/table.svelte';
-	import Image from './icons/image.svelte';
 	import Text from './icons/text.svelte';
 	import BlockQuote from './icons/block-quote.svelte';
 	import Textcolor from './icons/textcolor.svelte';
 	import Highlighter from './icons/highlighter.svelte';
-	import Video from './icons/video.svelte';
-	import FontSize from './icons/font-size.svelte';
+
 
 	interface Props {
 		editor: Editor;
@@ -34,13 +32,12 @@
 	class="flex max-w-fit max-h-fit mx-auto mb-1 bg-muted/10 border border-opacity-10 rounded-md gap-0.5"
 >
 	<Text {editor} />
-	<FontSize {editor} />
 	<Bold {editor} />
 	<Italic {editor} />
 	<Underline {editor} />
 	<Strikethrough {editor} />
 	<Align {editor} />
-	<Link {editor} />
+	<!-- <Link {editor} /> -->
 	<Code {editor} />
 	<BlockQuote {editor} />
 	<Subscript {editor} />
@@ -48,8 +45,8 @@
 	<ButtleList {editor} />
 	<OrderedList {editor} />
 	<TaskList {editor} />
-	<Image {editor} />
-	<Video {editor} />
+	<!-- <Image {editor} />
+	<Video {editor} /> -->
 	<Table {editor} />
 	<Textcolor {editor} />
 	<Highlighter {editor} />
