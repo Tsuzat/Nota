@@ -11,7 +11,7 @@
 <Dialog.Root bind:open={$SHOW_SETTINGS}>
 	<Dialog.Content class="max-w-3xl h-[80vh] p-4 flex flex-col gap-2">
 		<h1 class="text-3xl font-bold text-center">Settings</h1>
-		<p class="text-xs text-muted-foreground text-center">
+		<p class="text-sm text-muted-foreground text-center">
 			Manage your account settings and preferences.
 		</p>
 		<div class="mt-4 flex-grow flex flex-col overflow-auto">
