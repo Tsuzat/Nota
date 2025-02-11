@@ -32,9 +32,7 @@
 	<DropdownMenu.Trigger>
 		<Tooltip.Provider delayDuration={100}>
 			<Tooltip.Root>
-				<Tooltip.Trigger
-					class={buttonVariants({ variant: 'ghost', class: 'h-8 w-fit p-0 px-2 gap-1' })}
-				>
+				<Tooltip.Trigger class={buttonVariants({ variant: 'ghost', class: 'h-8 w-fit p-1 gap-1' })}>
 					<span>{currentLabel}</span>
 					<ChevronDown class="!size-2 text-muted-foreground" />
 				</Tooltip.Trigger>

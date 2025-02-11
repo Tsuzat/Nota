@@ -20,7 +20,7 @@
 		<Tooltip.Provider delayDuration={100}>
 			<Tooltip.Root>
 				<Tooltip.Trigger>
-					<Button variant="ghost" size="sm" class="h-8 gap-1">
+					<Button variant="ghost" size="sm" class="h-8 gap-1 p-1">
 						{#if editor.isActive({ textAlign: 'left' })}
 							<AlignLeft />
 						{:else if editor.isActive({ textAlign: 'center' })}
