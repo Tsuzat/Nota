@@ -34,9 +34,9 @@
 		--sidebar-ring: 217.2 91.2% 59.8%;
 
 		font-size: 16px !important;
-		font-family: 'DM Sans Variable', sans-serif, 'Noto Color Emoji', 'Apple Color Emoji',
-			'Segoe UI Emoji', Times, Symbola, Aegyptus, Code2000, Code2001, Code2002, Musica, serif,
-			LastResort;
+		font-family:
+			'DM Sans Variable', sans-serif, 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji',
+			Times, Symbola, Aegyptus, Code2000, Code2001, Code2002, Musica, serif, LastResort;
 		line-height: 24px;
 		font-weight: 400;
 		text-rendering: optimizeLegibility;
