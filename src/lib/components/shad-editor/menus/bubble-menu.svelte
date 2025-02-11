@@ -17,6 +17,9 @@
 	import ButtleList from '../icons/buttle-list.svelte';
 	import OrderedList from '../icons/ordered-list.svelte';
 	import TaskList from '../icons/task-list.svelte';
+	import BlockQuote from '../icons/block-quote.svelte';
+	import Code from '../icons/code.svelte';
+	import Quickcolor from '../icons/quickcolor.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -78,6 +81,7 @@
 >
 	<FontSize {editor} />
 	<Textalign {editor} />
+	<Quickcolor {editor} />
 	<Link {editor} />
 	<Bold {editor} />
 	<Italic {editor} />
@@ -94,6 +98,8 @@
 			class="h-fit w-fit flex items-center p-0.5 gap-1"
 			portalProps={{ disabled: true, to: undefined }}
 		>
+			<BlockQuote {editor} />
+			<Code {editor} />
 			<Superscript {editor} />
 			<Subscript {editor} />
 			<ButtleList {editor} />
