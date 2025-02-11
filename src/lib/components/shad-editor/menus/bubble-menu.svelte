@@ -11,7 +11,12 @@
 	import Subscript from '../icons/subscript.svelte';
 	import type { ShouldShowProps } from './types';
 	import Link from '../icons/link.svelte';
-	import { Separator } from '$lib/components/ui/separator';
+	import * as Popover from '$lib/components/ui/popover';
+	import { EllipsisVertical } from 'lucide-svelte';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import ButtleList from '../icons/buttle-list.svelte';
+	import OrderedList from '../icons/ordered-list.svelte';
+	import TaskList from '../icons/task-list.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -71,14 +76,29 @@
 		maxWidth: 'calc(100vw - 16px)'
 	}}
 >
+	<FontSize {editor} />
+	<Textalign {editor} />
+	<Link {editor} />
 	<Bold {editor} />
 	<Italic {editor} />
 	<Underline {editor} />
 	<Strikethrough {editor} />
-	<Superscript {editor} />
-	<Subscript {editor} />
-	<Separator orientation="vertical" />
-	<Link {editor} />
-	<FontSize {editor} />
-	<Textalign {editor} />
+	<Popover.Root>
+		<Popover.Trigger class={buttonVariants({ variant: 'ghost', class: 'size-8' })}>
+			<EllipsisVertical />
+		</Popover.Trigger>
+		<Popover.Content
+			side="top"
+			sideOffset={10}
+			align="start"
+			class="h-fit w-fit flex items-center p-0.5 gap-1"
+			portalProps={{ disabled: true, to: undefined }}
+		>
+			<Superscript {editor} />
+			<Subscript {editor} />
+			<ButtleList {editor} />
+			<OrderedList {editor} />
+			<TaskList {editor} />
+		</Popover.Content>
+	</Popover.Root>
 </BubbleMenu>
