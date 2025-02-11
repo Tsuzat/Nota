@@ -33,6 +33,7 @@
 			return false;
 		}
 		if (editor.isActive('link')) return false;
+		if (editor.isActive('codeBlock')) return false;
 
 		const {
 			state: {
