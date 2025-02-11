@@ -33,6 +33,7 @@
 			return false;
 		}
 		if (editor.isActive('link')) return false;
+
 		const {
 			state: {
 				doc,
@@ -40,6 +41,16 @@
 				selection: { empty, from, to }
 			}
 		} = editor;
+
+		// check if the selection is a table grip
+		const domAtPos = view.domAtPos(from || 0).node as HTMLElement;
+		const nodeDOM = view.nodeDOM(from || 0) as HTMLElement;
+		const node = nodeDOM || domAtPos;
+
+		if (isTableGripSelected(node)) {
+			return false;
+		}
+
 		// Sometime check for `empty` is not enough.
 		// Doubleclick an empty paragraph returns a node size of 2.
 		// So we check also for an empty text size.
@@ -49,6 +60,21 @@
 		}
 		return true;
 	}
+
+	const isTableGripSelected = (node: HTMLElement) => {
+		let container = node;
+		while (container && !['TD', 'TH'].includes(container.tagName)) {
+			container = container.parentElement!;
+		}
+		const gripColumn =
+			container && container.querySelector && container.querySelector('a.grip-column.selected');
+		const gripRow =
+			container && container.querySelector && container.querySelector('a.grip-row.selected');
+		if (gripColumn || gripRow) {
+			return true;
+		}
+		return false;
+	};
 </script>
 
 <BubbleMenu
