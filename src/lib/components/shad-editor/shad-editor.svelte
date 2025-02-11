@@ -73,7 +73,7 @@
 		class: className = '',
 		content = $bindable(''),
 		path,
-		showToolbar = true,
+		showToolbar = false,
 		editable = true,
 		spellCheck = false,
 		onChange

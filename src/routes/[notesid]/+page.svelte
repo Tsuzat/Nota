@@ -49,8 +49,8 @@
 
 	// Page Related settings
 	let isLocked = $state(false);
-	let showToolbar = $state(true);
-	let spellCheck = $state(false);
+	let showToolbar = $state(false);
+	let spellCheck = $state(true);
 
 	$effect(() => {
 		loadNotes(notesId);
