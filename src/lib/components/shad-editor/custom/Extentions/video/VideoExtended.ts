@@ -1,6 +1,6 @@
 import { SvelteNodeViewRenderer } from 'svelte-tiptap';
 import { Video } from './VideoExtention.js';
-import VideoExtendedComponent from '../video-extended-component.svelte';
+import VideoExtendedComponent from './video-extended-component.svelte';
 
 export const VideoExtention = Video.extend({
 	addAttributes() {

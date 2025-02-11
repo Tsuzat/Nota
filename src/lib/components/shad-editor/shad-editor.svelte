@@ -45,7 +45,7 @@
 	import { handleRawImage } from './utils';
 	import { cn, printAsPDF } from '$lib/utils';
 	import { slide } from 'svelte/transition';
-	import { VideoExtention } from './custom/Extentions/VideoExtended';
+	import { VideoExtention } from './custom/Extentions/video/VideoExtended';
 	import LinkMenu from './menus/link-menu.svelte';
 	import { Table, TableCell, TableHeader, TableRow } from './custom/Extentions/table';
 	import TableColMenu from './custom/Extentions/table/menu/table-col-menu.svelte';
@@ -53,7 +53,7 @@
 	import DragHandle from './drag-handle.svelte';
 	import SlashCommand from './custom/Extentions/slash-command/slashcommand';
 	import { ImagePlaceholder } from './custom/Extentions/image-placeholder/ImagePlaceholder';
-	import { VideoPlaceholder } from './custom/Extentions/video-placeholder/VideoPlaceholder';
+	import { VideoPlaceholder } from './custom/Extentions/video/VideoPlaceholder';
 	import FontSize from './custom/Extentions/FontSize';
 	import BubbleMenu from './menus/bubble-menu.svelte';
 
