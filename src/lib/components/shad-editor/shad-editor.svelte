@@ -98,7 +98,7 @@
 			editorProps: {
 				attributes: {
 					class:
-						'm-auto p-2 pl-4 focus:outline-none flex-1 prose text-foreground mx-auto sm:max-w-3xl w-full overflow-x-auto dark:prose-invert *:my-2'
+						'm-auto p-2 pl-4 focus:outline-none flex-1 prose text-foreground mx-auto sm:max-w-3xl w-full dark:prose-invert *:my-2'
 				}
 			},
 			extensions: [
