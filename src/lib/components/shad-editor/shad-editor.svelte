@@ -254,14 +254,16 @@
 				<EditorToolbar {editor} />
 			</span>
 		{/if}
-		<BubbleMenu {editor} />
-		<DragHandle {editor} />
-		<SearchReplace {editor} bind:open={searchReplaceOpen} />
-		<LinkMenu {editor} />
-		<TableColMenu {editor} />
-		<TableRowMenu {editor} />
+		{#if editable}
+			<BubbleMenu {editor} />
+			<DragHandle {editor} />
+			<SearchReplace {editor} bind:open={searchReplaceOpen} />
+			<LinkMenu {editor} />
+			<TableColMenu {editor} />
+			<TableRowMenu {editor} />
+		{/if}
 	{/if}
-	<div bind:this={element} spellcheck={spellCheck} class="flex-1"></div>
+	<div bind:this={element} spellcheck={spellCheck} class="flex-1 overflow-auto"></div>
 	<div class="absolute right-4 bottom-4">
 		<Tooltip text="Scroll to Top" side="left">
 			<Button
