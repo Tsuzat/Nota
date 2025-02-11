@@ -4,8 +4,9 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	const { node, editor, selected, deleteNode, updateAttributes, extension }: NodeViewProps =
 		$props();
-	import { Copy, Check, ChevronDown } from 'lucide-svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import { Copy, Check } from 'lucide-svelte';
+	import * as Popover from '$lib/components/ui/popover/index.js';
+	import * as Command from '$lib/components/ui/command/index.js';
 
 	let preRef: HTMLPreElement;
 
@@ -22,6 +23,8 @@
 		}
 	});
 
+	let open = $state(false);
+
 	function copyCode() {
 		isCopying = true;
 		navigator.clipboard.writeText(preRef.innerText);
@@ -35,38 +38,47 @@
 	class="code-wrapper group relative rounded bg-muted p-6 dark:bg-muted/20"
 	draggable="false"
 >
-	<DropdownMenu.Root>
-		<DropdownMenu.Trigger
+	<Popover.Root bind:open>
+		<Popover.Trigger
 			contenteditable="false"
 			class={buttonVariants({
 				variant: 'ghost',
 				size: 'sm',
 				class:
-					'absolute left-2 top-2 h-4 rounded px-1 py-2 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100'
+					'absolute left-2 top-2 h-4 rounded p-2 text-sm text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100'
 			})}
-			>{defaultLanguage}
-			<ChevronDown class="!size-3" />
-		</DropdownMenu.Trigger>
-		<DropdownMenu.Content class="max-h-80 w-40 overflow-auto" contenteditable="false">
-			{#each languages as language}
-				<DropdownMenu.Item
-					contenteditable="false"
-					data-current={defaultLanguage === language}
-					class="data-[current=true]:bg-muted"
-					textValue={language}
-					onclick={() => {
-						defaultLanguage = language;
-						updateAttributes({ language: defaultLanguage });
-					}}
-				>
-					<span>{language}</span>
-					{#if defaultLanguage === language}
-						<Check class="size-3 ml-auto" />
-					{/if}
-				</DropdownMenu.Item>
-			{/each}
-		</DropdownMenu.Content>
-	</DropdownMenu.Root>
+		>
+			{defaultLanguage}
+		</Popover.Trigger>
+		<Popover.Content class="w-44 p-0">
+			<Command.Root>
+				<Command.Input placeholder="Search a language" />
+				<Command.List>
+					<Command.Empty>No framework found.</Command.Empty>
+					<Command.Group>
+						{#each languages as language}
+							<Command.Item
+								contenteditable="false"
+								data-current={defaultLanguage === language}
+								class="data-[current=true]:bg-muted"
+								value={language}
+								onclick={() => {
+									defaultLanguage = language;
+									updateAttributes({ language: defaultLanguage });
+									open = false;
+								}}
+							>
+								<span>{language}</span>
+								{#if defaultLanguage === language}
+									<Check class="size-3 ml-auto" />
+								{/if}
+							</Command.Item>
+						{/each}
+					</Command.Group>
+				</Command.List>
+			</Command.Root>
+		</Popover.Content>
+	</Popover.Root>
 	<Button
 		variant="ghost"
 		class="absolute right-2 top-2 size-4 p-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
