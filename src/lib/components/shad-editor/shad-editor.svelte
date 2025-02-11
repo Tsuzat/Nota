@@ -55,6 +55,7 @@
 	import { ImagePlaceholder } from './custom/Extentions/image-placeholder/ImagePlaceholder';
 	import { VideoPlaceholder } from './custom/Extentions/video-placeholder/VideoPlaceholder';
 	import FontSize from './custom/Extentions/FontSize';
+	import BubbleMenu from './menus/bubble-menu.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -97,7 +98,7 @@
 			editorProps: {
 				attributes: {
 					class:
-						'm-auto p-2 pl-4 focus:outline-none flex-1 prose text-foreground mx-auto max-w-3xl dark:prose-invert *:my-2'
+						'm-auto p-2 pl-4 focus:outline-none flex-1 prose text-foreground mx-auto sm:max-w-3xl w-full overflow-x-auto dark:prose-invert *:my-2'
 				}
 			},
 			extensions: [
@@ -253,13 +254,14 @@
 				<EditorToolbar {editor} />
 			</span>
 		{/if}
+		<BubbleMenu {editor} />
 		<DragHandle {editor} />
 		<SearchReplace {editor} bind:open={searchReplaceOpen} />
 		<LinkMenu {editor} />
 		<TableColMenu {editor} />
 		<TableRowMenu {editor} />
 	{/if}
-	<div bind:this={element} spellcheck={spellCheck} class="flex-1 overflow-auto"></div>
+	<div bind:this={element} spellcheck={spellCheck} class="flex-1"></div>
 	<div class="absolute right-4 bottom-4">
 		<Tooltip text="Scroll to Top" side="left">
 			<Button
