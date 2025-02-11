@@ -20,7 +20,6 @@
 	import Textcolor from './icons/textcolor.svelte';
 	import Highlighter from './icons/highlighter.svelte';
 
-
 	interface Props {
 		editor: Editor;
 	}
