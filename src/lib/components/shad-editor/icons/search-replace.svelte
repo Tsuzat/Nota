@@ -141,21 +141,15 @@
 			</div>
 			<div transition:slide={{ duration: 300 }} class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
-					<input
-						type="checkbox"
-						class="checkbox hidden"
-						bind:checked={caseSensitive}
-						onchange={() => updateSearchTerm()}
-					/>
-					<Checkbox bind:checked={caseSensitive} />
-					<p>Case Sensitive</p>
+					<input type="checkbox" bind:checked={caseSensitive} onchange={() => updateSearchTerm()} />
+					<span>Case Sensitive</span>
 				</div>
 				<div class="flex items-center gap-2">
 					{searchCount > 0 ? searchIndex + 1 : 0} / {searchCount}
 				</div>
 			</div>
 			<div transition:slide={{ duration: 300 }} class="flex items-center gap-2">
-				<Checkbox bind:checked={showReplace} />
+				<input type="checkbox" bind:checked={showReplace} />
 				<p>Open Replace Menu</p>
 			</div>
 		{/if}
