@@ -57,7 +57,7 @@
 		loadNotes(notesId);
 	});
 
-	// Loads the Notes fro Database and also the store
+	// Loads the Notes from Database and also the store
 	async function loadNotes(notesId: string) {
 		notes.set(null);
 		notesDB.set(null);
@@ -73,7 +73,8 @@
 					onClick: () => {}
 				}
 			});
-			redirect(307, '/');
+			goto('/');
+			return;
 		}
 
 		// Get the path of the notes
@@ -122,17 +123,18 @@
 				}
 			});
 			goto('/');
-		} else
-			notes.set({
-				id,
-				name,
-				icon,
-				cover,
-				description,
-				createdAt,
-				updatedAt,
-				content
-			});
+			return;
+		}
+		notes.set({
+			id,
+			name,
+			icon,
+			cover,
+			description,
+			createdAt,
+			updatedAt,
+			content
+		});
 
 		const workspace = $WORKSPACES.find((workspace) => workspace.id === $notesDB.workspace);
 		if (workspace === undefined) return;

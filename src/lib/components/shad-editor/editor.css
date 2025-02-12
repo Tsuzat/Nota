@@ -7,6 +7,14 @@
 	margin-bottom: 0 !important;
 }
 
+.prose :where(blockquote):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+	@apply not-italic border-s-muted py-1 !important;
+}
+
+.tiptap strong {
+	@apply font-bold;
+}
+
 .tiptap code:not(pre code) {
 	@apply rounded border bg-muted/50 p-1 before:content-[''] after:content-[''];
 }
