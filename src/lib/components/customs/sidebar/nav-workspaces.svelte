@@ -154,7 +154,7 @@
 								{#each $NOTES.filter((note) => note.workspace === workspace.id && !note.trashed) as note (note.id)}
 									<Sidebar.MenuSubItem
 										data-active={page.url.pathname === `/${note.id}`}
-										class="cursor-pointer flex w-full hover:bg-muted/50 data-[active=true]:bg-muted/70 rounded-lg items-center justify-between"
+										class="cursor-pointer flex w-full hover:bg-muted data-[active=true]:bg-muted rounded-lg items-center justify-between"
 									>
 										<Sidebar.MenuSubButton class="flex-grow" onclick={() => goto(`/${note.id}`)}>
 											{#snippet child({ props })}

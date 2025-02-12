@@ -16,7 +16,7 @@
 			{#each favorites as favorite (favorite.id)}
 				<Sidebar.MenuItem
 					data-active={page.url.pathname === `/${favorite.id}`}
-					class="data-[active=true]:bg-muted/70 rounded"
+					class="data-[active=true]:bg-muted rounded"
 				>
 					<Sidebar.MenuButton>
 						{#snippet child({ props })}
