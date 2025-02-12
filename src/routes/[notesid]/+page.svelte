@@ -33,6 +33,7 @@
 	import { APP_MENU } from '$lib/app_menu';
 	import { Button } from '$lib/components/ui/button';
 	import { useSidebar } from '$lib/components/ui/sidebar';
+	import { goto } from '$app/navigation';
 
 	const notes = writable<Notes | null>(null);
 	const notesDB = writable<NotesDB | null>(null);
@@ -120,18 +121,18 @@
 					onClick: () => {}
 				}
 			});
-			redirect(307, '/');
-		}
-		notes.set({
-			id,
-			name,
-			icon,
-			cover,
-			description,
-			createdAt,
-			updatedAt,
-			content
-		});
+			goto('/');
+		} else
+			notes.set({
+				id,
+				name,
+				icon,
+				cover,
+				description,
+				createdAt,
+				updatedAt,
+				content
+			});
 
 		const workspace = $WORKSPACES.find((workspace) => workspace.id === $notesDB.workspace);
 		if (workspace === undefined) return;
