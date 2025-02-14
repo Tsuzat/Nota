@@ -125,6 +125,7 @@
 							<div class="relative flex items-center">
 								<Input
 									bind:value={imageUrl}
+									class="pr-8"
 									placeholder="Image URL https://example.com/image.jpg"
 								/>
 								<Button

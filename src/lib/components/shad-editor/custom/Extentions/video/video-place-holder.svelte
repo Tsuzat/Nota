@@ -124,6 +124,7 @@
 							<div class="relative flex items-center">
 								<Input
 									bind:value={videoUrl}
+									class="pr-8"
 									placeholder="Video URL https://example.com/video.mp4"
 								/>
 								<Button
