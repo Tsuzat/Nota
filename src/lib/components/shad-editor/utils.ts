@@ -72,3 +72,20 @@ export function checkIfVideo(path: string): boolean {
 		path.endsWith('.mkv')
 	);
 }
+
+/**
+ * Function to check if the file with given path is an audio or not
+ * @param path string - Path of the file
+ * @returns boolean - Returns true if the file is an audio
+ */
+export function checkIfAudio(path: string): boolean {
+	return (
+		path.endsWith('.mp3') ||
+		path.endsWith('.wav') ||
+		path.endsWith('.ogg') ||
+		path.endsWith('.m4a') ||
+		path.endsWith('.aac') ||
+		path.endsWith('.flac') ||
+		path.endsWith('.wma')
+	);
+}
