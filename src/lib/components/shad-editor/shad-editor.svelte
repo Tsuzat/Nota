@@ -23,7 +23,7 @@
 
 	import { SmilieReplacer } from './custom/Extentions/SmilieReplacer.js';
 	import { ColorHighlighter } from './custom/Extentions/ColorHighlighter.js';
-	import { ImageExtension } from './custom/Extentions/ImageExtention.js';
+	import { ImageExtension } from './custom/Extentions/image/ImageExtention.js';
 	import { SvelteNodeViewRenderer } from 'svelte-tiptap';
 	import CodeExtended from './custom/code-extended.svelte';
 
@@ -52,10 +52,12 @@
 	import TableRowMenu from './custom/Extentions/table/menu/table-row-menu.svelte';
 	import DragHandle from './drag-handle.svelte';
 	import SlashCommand from './custom/Extentions/slash-command/slashcommand';
-	import { ImagePlaceholder } from './custom/Extentions/image-placeholder/ImagePlaceholder';
+	import { ImagePlaceholder } from './custom/Extentions/image/ImagePlaceholder';
 	import { VideoPlaceholder } from './custom/Extentions/video/VideoPlaceholder';
 	import FontSize from './custom/Extentions/FontSize';
 	import BubbleMenu from './menus/bubble-menu.svelte';
+	import { AudioPlaceholder } from './custom/Extentions/audio/AudioPlaceHolder';
+	import { Audio } from './custom/Extentions/audio/AudioExtention';
 
 	const lowlight = createLowlight(all);
 
@@ -215,7 +217,9 @@
 				SlashCommand,
 				ImagePlaceholder,
 				VideoPlaceholder,
-				FontSize
+				FontSize,
+				AudioPlaceholder,
+				Audio
 			],
 			autofocus: true,
 			onUpdate: ({ editor }) => {
