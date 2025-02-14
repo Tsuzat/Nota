@@ -93,7 +93,7 @@ export const GROUPS: Group[] = [
 		commands: [
 			{
 				name: 'image-placeholder',
-				label: 'Image',
+				label: 'Image Image',
 				iconName: 'Image',
 				description: 'Insert an image',
 				action: (editor) => {
@@ -108,6 +108,16 @@ export const GROUPS: Group[] = [
 				description: 'Insert a video',
 				action: (editor) => {
 					editor.chain().focus().insertVideoPlaceholder().run();
+				}
+			},
+
+			{
+				name: 'audio-placeholder',
+				label: 'Insert Audio',
+				iconName: 'AudioLines',
+				description: 'Insert an audio',
+				action: (editor) => {
+					editor.chain().focus().insertAudioPlaceholder().run();
 				}
 			},
 
