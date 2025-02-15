@@ -117,7 +117,7 @@
 						'w-full items-center justify-start gap-2 p-1.5 h-fit',
 						isActive ? 'bg-muted' : ''
 					)}
-					onclick={() => command.action(editor)}
+					onclick={() => selectItem(groupIndex, commandIndex)}
 				>
 					<Icon />
 					<span>{command.label}</span>
