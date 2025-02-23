@@ -4,6 +4,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
 	import { NOTES } from '$lib/contants';
+	import { slide } from 'svelte/transition';
 
 	const sidebar = useSidebar();
 </script>
@@ -14,19 +15,20 @@
 		<Sidebar.GroupLabel>Favorites</Sidebar.GroupLabel>
 		<Sidebar.Menu>
 			{#each favorites as favorite (favorite.id)}
-				<Sidebar.MenuItem
-					data-active={page.url.pathname === `/${favorite.id}`}
-					class="data-[active=true]:bg-muted rounded"
-				>
-					<Sidebar.MenuButton>
-						{#snippet child({ props })}
-							<a href="/{favorite.id}" title={favorite.name} {...props}>
-								<IconRender icon={favorite.icon} />
-								<span>{favorite.name}</span>
-							</a>
-						{/snippet}
-					</Sidebar.MenuButton>
-					<!-- <DropdownMenu.Root>
+				<div transition:slide>
+					<Sidebar.MenuItem
+						data-active={page.url.pathname === `/${favorite.id}`}
+						class="data-[active=true]:bg-muted rounded"
+					>
+						<Sidebar.MenuButton>
+							{#snippet child({ props })}
+								<a href="/{favorite.id}" title={favorite.name} {...props}>
+									<IconRender icon={favorite.icon} />
+									<span>{favorite.name}</span>
+								</a>
+							{/snippet}
+						</Sidebar.MenuButton>
+						<!-- <DropdownMenu.Root>
 						<DropdownMenu.Trigger>
 							{#snippet child({ props })}
 								<Sidebar.MenuAction showOnHover {...props}>
@@ -62,7 +64,8 @@
 							</DropdownMenu.Item>
 						</DropdownMenu.Content>
 					</DropdownMenu.Root> -->
-				</Sidebar.MenuItem>
+					</Sidebar.MenuItem>
+				</div>
 			{/each}
 		</Sidebar.Menu>
 	{/if}
