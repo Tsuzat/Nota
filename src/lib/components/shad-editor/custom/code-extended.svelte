@@ -54,7 +54,7 @@
 			<Command.Root>
 				<Command.Input placeholder="Search a language" />
 				<Command.List>
-					<Command.Empty>No framework found.</Command.Empty>
+					<Command.Empty>No Language found.</Command.Empty>
 					<Command.Group>
 						{#each languages as language}
 							<Command.Item
@@ -91,6 +91,11 @@
 		{/if}
 	</Button>
 	<pre bind:this={preRef}>
-		<NodeViewContent as="code" class={`language-${defaultLanguage}`} {...node.attrs} />	
+		<NodeViewContent
+			as="code"
+			spellcheck={false}
+			class={`language-${defaultLanguage}`}
+			{...node.attrs}
+		/>	
 	</pre>
 </NodeViewWrapper>
