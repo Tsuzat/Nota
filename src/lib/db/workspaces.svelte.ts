@@ -1,3 +1,5 @@
+import { getContext, setContext } from 'svelte';
+
 export interface WorkSpace {
 	id: string;
 	name: string;
@@ -22,6 +24,8 @@ class WorkSpaces {
 		return this.#workspaces;
 	}
 
+	async fetchFromDB() {}
+
 	async add(workspace: WorkSpace) {
 		this.#workspaces = [...this.#workspaces, workspace];
 	}
@@ -36,3 +40,17 @@ class WorkSpaces {
 		});
 	}
 }
+
+const WORKSPACES = Symbol('WORKSPACE');
+
+/**
+ * Set the workspace context for global variable
+ * @param workspace WorkSpaces[]
+ */
+export const setWorkSpaces = (workspaces: WorkSpace[] = []) => {
+	return setContext(WORKSPACES, new WorkSpaces(workspaces));
+};
+
+export const useWorkSpaces = () => {
+	return getContext<ReturnType<typeof setWorkSpaces>>(WORKSPACES);
+};
