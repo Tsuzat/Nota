@@ -1,26 +1,26 @@
 <script lang="ts" module>
-	import type { WithElementRef } from 'bits-ui';
+	import { cn, type WithElementRef } from '$lib/utils.js';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import { type VariantProps, tv } from 'tailwind-variants';
 
 	export const buttonVariants = tv({
-		base: 'focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+		base: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 		variants: {
 			variant: {
-				default:
-					'bg-radial-[at_52%_-52%] **:[text-shadow:0_1px_0_var(--color-primary)] border-primary from-primary/70 to-primary/95 text-primary-foreground inset-shadow-2xs inset-shadow-white/25 dark:inset-shadow-white dark:from-primary dark:to-primary/70 dark:hover:to-primary border text-sm shadow-md shadow-zinc-950/30 ring-0 transition-[filter] duration-200  active:brightness-95 dark:border-0',
-				destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xs',
+				default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+				destructive:
+					'bg-destructive shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white',
 				outline:
-					'shadow-xs bg-linear-to-t hover:to-muted to-background from-muted dark:from-muted/50 dark:hover:to-muted/50 dark:border-border border border-zinc-300 shadow-zinc-950/10 duration-200',
-				secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-xs',
-				ghost: 'hover:bg-accent hover:text-accent-foreground',
+					'bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border',
+				secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
+				ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
 				link: 'text-primary underline-offset-4 hover:underline'
 			},
 			size: {
-				default: 'h-9 px-4 py-2',
-				sm: 'h-8 rounded-md px-3 text-xs',
-				lg: 'h-10 rounded-md px-8',
-				icon: 'h-9 w-9'
+				default: 'h-9 px-4 py-2 has-[>svg]:px-3',
+				sm: 'h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5',
+				lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
+				icon: 'size-9'
 			}
 		},
 		defaultVariants: {
@@ -40,8 +40,6 @@
 </script>
 
 <script lang="ts">
-	import { cn } from '$lib/utils.js';
-
 	let {
 		class: className,
 		variant = 'default',
@@ -49,20 +47,32 @@
 		ref = $bindable(null),
 		href = undefined,
 		type = 'button',
+		disabled,
 		children,
 		...restProps
 	}: ButtonProps = $props();
 </script>
 
 {#if href}
-	<a bind:this={ref} class={cn(buttonVariants({ variant, size }), className)} {href} {...restProps}>
+	<a
+		bind:this={ref}
+		data-slot="button"
+		class={cn(buttonVariants({ variant, size }), className)}
+		href={disabled ? undefined : href}
+		aria-disabled={disabled}
+		role={disabled ? 'link' : undefined}
+		tabindex={disabled ? -1 : undefined}
+		{...restProps}
+	>
 		{@render children?.()}
 	</a>
 {:else}
 	<button
 		bind:this={ref}
+		data-slot="button"
 		class={cn(buttonVariants({ variant, size }), className)}
 		{type}
+		{disabled}
 		{...restProps}
 	>
 		{@render children?.()}
