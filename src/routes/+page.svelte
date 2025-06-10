@@ -1,90 +1,156 @@
 <script lang="ts">
-	import { APP_MENU } from '$lib/app_menu';
-	import { SHOW_DECORATION, SIDEBAR_OPEN } from '$lib/app_settings';
-	import src from '$lib/assets/static/icon.png';
-	import Navigation from '$lib/components/customs/navigation.svelte';
-	import RecentNotes from '$lib/components/customs/tiles/recent-notes.svelte';
-	import Tooltip from '$lib/components/customs/tooltip.svelte';
-	import { Button } from '$lib/components/ui/button';
-	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { useSidebar } from '$lib/components/ui/sidebar';
-	import { APPWINDOW, NOTES, OS } from '$lib/contants';
-	import { clearRecents, RECENT_NOTES } from '$lib/recents';
-	import { cn } from '$lib/utils';
-	import { onMount } from 'svelte';
-	import { fly } from 'svelte/transition';
+  import { invoke } from "@tauri-apps/api/core";
 
-	const sidebar = useSidebar();
+  let name = $state("");
+  let greetMsg = $state("");
 
-	onMount(async () => {
-		// load recents
-		const rawData = localStorage.getItem('recent-notes') || '[]';
-		let notesIds: string[] = JSON.parse(rawData);
-		RECENT_NOTES.set(notesIds);
-
-		sidebar.setOpen($SIDEBAR_OPEN);
-
-		await APPWINDOW.setTitle('Nota - Home');
-	});
+  async function greet(event: Event) {
+    event.preventDefault();
+    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+    greetMsg = await invoke("greet", { name });
+  }
 </script>
 
-<main>
-	<header
-		{...$SHOW_DECORATION ? {} : { 'data-tauri-drag-region': '' }}
-		class={cn(
-			'flex min-h-10 max-h-10 h-10 w-full items-center justify-between gap-2',
-			$SHOW_DECORATION === false && 'mr-36'
-		)}
-	>
-		<div class="flex items-center gap-2 px-3">
-			{#if sidebar.state === 'collapsed'}
-				{#if $SHOW_DECORATION}
-					<img {src} alt="user-icon" class="size-5" />
-				{:else}
-					<Button variant="ghost" size="icon" class="size-6 p-1" onclick={() => APP_MENU.popup()}>
-						<img {src} alt="user-icon" class="size-full" />
-					</Button>
-				{/if}
-			{/if}
-			<Tooltip text="Toggle Sidebar" key={`${OS === 'macos' ? '⌘' : 'Ctrl'} \\`}>
-				<Sidebar.Trigger
-					onclick={() => {
-						SIDEBAR_OPEN.set(sidebar.state === 'collapsed');
-					}}
-				/>
-			</Tooltip>
-			<Navigation />
-		</div>
-	</header>
-	<div class="flex flex-1 flex-col gap-4 p-2">
-		<div class="mx-auto h-24 w-full max-w-3xl rounded-xl flex flex-col items-center justify-around">
-			<div class="inline-flex items-center justify-center gap-4">
-				<img {src} alt="App Logo" srcset="App Logo" class="size-8" />
-				<span class="text-2xl font-bold">N O T A</span>
-			</div>
-			<div class="font-medium">Welcome to Nota - Your Note Taking App</div>
-		</div>
+<main class="container">
+  <h1>Welcome to Tauri + Svelte</h1>
 
-		<div class="mx-auto w-full max-w-3xl rounded-xl p-4">
-			{#if $RECENT_NOTES}
-				<div
-					transition:fly={{ duration: 300 }}
-					class="text-sm text-muted-foreground inline-flex items-center w-full"
-				>
-					<span> RECENT NOTES </span>
-					<span class="text-sm text-foreground font-medium mx-2">{$RECENT_NOTES.length}</span>
-					<span class="ml-auto">
-						<Tooltip text="Clear all recent notes" delayDuration={100}>
-							<Button variant="outline" size="sm" onclick={clearRecents}>Clear All</Button>
-						</Tooltip>
-					</span>
-				</div>
-				<div class="flex gap-2 p-2 rounded-xl flex-wrap">
-					{#each $NOTES.filter((n) => $RECENT_NOTES.includes(n.id)) as note}
-						<RecentNotes {note} />
-					{/each}
-				</div>
-			{/if}
-		</div>
-	</div>
+  <div class="row">
+    <a href="https://vitejs.dev" target="_blank">
+      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
+    </a>
+    <a href="https://tauri.app" target="_blank">
+      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
+    </a>
+    <a href="https://kit.svelte.dev" target="_blank">
+      <img src="/svelte.svg" class="logo svelte-kit" alt="SvelteKit Logo" />
+    </a>
+  </div>
+  <p>Click on the Tauri, Vite, and SvelteKit logos to learn more.</p>
+
+  <form class="row" onsubmit={greet}>
+    <input id="greet-input" placeholder="Enter a name..." bind:value={name} />
+    <button type="submit">Greet</button>
+  </form>
+  <p>{greetMsg}</p>
 </main>
+
+<style>
+.logo.vite:hover {
+  filter: drop-shadow(0 0 2em #747bff);
+}
+
+.logo.svelte-kit:hover {
+  filter: drop-shadow(0 0 2em #ff3e00);
+}
+
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color: #0f0f0f;
+  background-color: #f6f6f6;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+.container {
+  margin: 0;
+  padding-top: 10vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: 0.75s;
+}
+
+.logo.tauri:hover {
+  filter: drop-shadow(0 0 2em #24c8db);
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+h1 {
+  text-align: center;
+}
+
+input,
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  color: #0f0f0f;
+  background-color: #ffffff;
+  transition: border-color 0.25s;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: #396cd8;
+}
+button:active {
+  border-color: #396cd8;
+  background-color: #e8e8e8;
+}
+
+input,
+button {
+  outline: none;
+}
+
+#greet-input {
+  margin-right: 5px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #2f2f2f;
+  }
+
+  a:hover {
+    color: #24c8db;
+  }
+
+  input,
+  button {
+    color: #ffffff;
+    background-color: #0f0f0f98;
+  }
+  button:active {
+    background-color: #0f0f0f69;
+  }
+}
+
+</style>

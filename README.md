@@ -1,6 +1,7 @@
-# Nota - A note taking app (WIP)
+# Tauri + SvelteKit + TypeScript
 
-![Waka Api](https://waka-api.dev-tsuzat.workers.dev/Nota)
+This template should help get you started developing with Tauri, SvelteKit and TypeScript in Vite.
 
-![Screenshot 2025-02-12 001252 png](https://github.com/user-attachments/assets/82ff253a-56e2-4189-893a-e7105310833c)
-![Screenshot 2025-02-12 001302 png](https://github.com/user-attachments/assets/d50739b0-0229-4338-b17a-3dad1fca6ed3)
+## Recommended IDE Setup
+
+[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
