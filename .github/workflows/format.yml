@@ -8,15 +8,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js and Install PNPM
-        uses: pnpm/action-setup@v2
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          version: latest
+          bun-version: latest
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
         env:
           TIPTAP_PRO_TOKEN: ${{secrets.TIPTAP_PRO_TOKEN}}
 
       - name: Run Lint
-        run: pnpm lint
+        run: bun run lint
