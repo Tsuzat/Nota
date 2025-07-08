@@ -20,6 +20,10 @@
 		"@fontsource-variable/dm-sans": "^5.2.6",
 		"@tauri-apps/api": "^2.6.0",
 		"@tauri-apps/plugin-opener": "^2.4.0",
+		"@tauri-apps/plugin-os": "~2",
+		"@tauri-apps/plugin-sql": "~2",
+		"@tauri-apps/plugin-store": "~2",
+		"@tauri-apps/plugin-window-state": "~2",
 		"mode-watcher": "^1.1.0"
 	},
 	"devDependencies": {
