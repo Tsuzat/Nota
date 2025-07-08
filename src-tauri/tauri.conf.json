@@ -12,7 +12,7 @@
 	"app": {
 		"windows": [
 			{
-				"title": "nota",
+				"title": "Nota",
 				"width": 800,
 				"height": 600
 			}
