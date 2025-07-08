@@ -139,3 +139,8 @@ html {
 		@apply bg-background text-foreground;
 	}
 }
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--muted-foreground) 25%, transparent) transparent;
+}
