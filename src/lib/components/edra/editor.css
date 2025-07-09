@@ -199,8 +199,8 @@ input[type='checkbox'] {
 .drag-handle {
 	position: fixed;
 	z-index: 50;
-	width: 1.5rem;
-	height: 1.5rem;
+	width: 2rem;
+	height: 2rem;
 	display: flex;
 	padding-right: 0.5rem;
 	flex-direction: column;
@@ -422,8 +422,8 @@ input[type='checkbox'] {
 
 .code-wrapper {
 	background-color: var(--codeblock-bg);
-	border-radius: 0.5rem;
-	padding: 1rem;
+	border-radius: 0.25rem;
+	padding: 2rem 1.5rem;
 	position: relative;
 	height: fit-content;
 	width: 100%;
@@ -435,8 +435,8 @@ input[type='checkbox'] {
 	width: 100%;
 	display: flex;
 	position: absolute;
-	top: 0;
 	padding: 0.25rem;
+	top: 0rem;
 	right: 0;
 	align-items: center;
 	justify-content: space-between;
