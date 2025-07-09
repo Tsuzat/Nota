@@ -12,13 +12,23 @@
 	"app": {
 		"windows": [
 			{
-				"title": "Nota",
+				"title": "Nota - A note taking app",
+				"label": "main",
 				"width": 800,
-				"height": 600
+				"height": 600,
+				"minHeight": 400,
+				"minWidth": 500,
+				"visible": false,
+				"dragDropEnabled": false,
+				"zoomHotkeysEnabled": true
 			}
 		],
 		"security": {
-			"csp": null
+			"csp": "asset: http://asset.localhost",
+			"assetProtocol": {
+				"enable": true,
+				"scope": ["**"]
+			}
 		}
 	},
 	"bundle": {
