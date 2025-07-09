@@ -4,11 +4,21 @@ import { toast } from 'svelte-sonner';
 export let DB: Database;
 
 const query = `
+CREATE TABLE IF NOT EXISTS userworkspaces (
+	id TEXT PRIMARY KEY,
+	name TEXT NOT NULL,
+	icon TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS workspaces (
 	id TEXT PRIMARY KEY,
 	name TEXT NOT NULL,
 	icon TEXT NOT NULL,
 	path TEXT NOT NULL UNIQUE
+	created_at TEXT NOT NULL,
+	updated_at TEXT NOT NULL,
+	userworkspace TEXT NOT NULL,
+	FOREIGN KEY(userworkspace) REFERENCES userworkspaces(id)
 );
 
 CREATE TABLE IF NOT EXISTS notes (
@@ -19,6 +29,8 @@ CREATE TABLE IF NOT EXISTS notes (
 	workspace TEXT NOT NULL,
 	favorite BOOLEAN NOT NULL DEFAULT FALSE,
   	trashed BOOLEAN NOT NULL DEFAULT FALSE,
+	created_at TEXT NOT NULL,
+	updated_at TEXT NOT NULL,
 	FOREIGN KEY(workspace) REFERENCES workspaces(id)
 );
 `;

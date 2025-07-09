@@ -24,9 +24,12 @@ class WorkSpaces {
 		this.#workspaces = workspaces;
 	}
 
-	async fetchWorkspaces() {
+	async fetchWorkspaces(userWorkspaceId: string) {
 		try {
-			const res = await DB.select<LocalWorkSpace[]>('SELECT * FROM workspaces');
+			const res = await DB.select<LocalWorkSpace[]>(
+				'SELECT * FROM workspaces WHERE userworkspace = $1',
+				[userWorkspaceId]
+			);
 			this.setWorkspaces(res);
 		} catch (e) {
 			toast.error('Something went wrong when getting the workspaces');
