@@ -297,7 +297,7 @@ export function DragHandlePlugin(options: GlobalDragHandleOptions & { pluginKey:
 
 					if (!dragHandleElement) return;
 
-					dragHandleElement.style.left = `${rect.left - rect.width}px`;
+					dragHandleElement.style.left = `${rect.left - rect.width - 5}px`;
 					dragHandleElement.style.top = `${rect.top}px`;
 					showDragHandle();
 				},
