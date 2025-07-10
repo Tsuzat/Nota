@@ -36,9 +36,9 @@ class UserWorkspaces {
 			this.setUserWorkspaces(res);
 			if (res.length === 0) return;
 			const raw = localStorage.getItem('currentUserWorkspaceId');
-			const setCurrentUserWorkspace = raw ? res.find((w) => w.id === raw) : res[0];
-			if (setCurrentUserWorkspace) {
-				this.setCurrentUserWorkspace(setCurrentUserWorkspace);
+			const currentUsrWrk = raw !== null ? res.find((w) => w.id === raw) : res[0];
+			if (currentUsrWrk) {
+				this.setCurrentUserWorkspace(currentUsrWrk);
 			}
 		} catch (e) {
 			toast.error('Something went wrong when getting the user workspaces');
