@@ -83,15 +83,8 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import StarIcon from '@lucide/svelte/icons/star';
-	import { untrack } from 'svelte';
 
 	let open = $state(false);
-
-	$effect(() => {
-		untrack(() => {
-			open = true;
-		});
-	});
 </script>
 
 <div class="flex items-center gap-2 text-sm">
