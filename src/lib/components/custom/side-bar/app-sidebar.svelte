@@ -250,6 +250,9 @@
 	import TeamSwitcher from './team-switcher.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
+	import NavWorkspacesLocal from './nav-workspaces-local.svelte';
+	import { ISTAURI } from '$lib/utils';
+	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
@@ -261,6 +264,9 @@
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<NavFavorites favorites={data.favorites} />
+		{#if ISTAURI}
+			<NavWorkspacesLocal />
+		{/if}
 		<NavWorkspaces workspaces={data.workspaces} />
 		<NavSecondary items={data.navSecondary} class="mt-auto" />
 	</Sidebar.Content>
