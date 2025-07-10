@@ -19,9 +19,6 @@
 
 	onMount(async () => {
 		if (ISTAURI) {
-			const d = await readDir('', { baseDir: BaseDirectory.AppConfig });
-			console.log(d.map((d) => d.name));
-
 			try {
 				const localUserWorkspaces = getLocalUserWorkspaces();
 				const localWorkspaces = getLocalWorkspaces();
