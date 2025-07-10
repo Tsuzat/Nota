@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS workspaces (
 	id TEXT PRIMARY KEY,
 	name TEXT NOT NULL,
 	icon TEXT NOT NULL,
-	path TEXT NOT NULL UNIQUE
+	path TEXT NOT NULL UNIQUE,
 	created_at TEXT NOT NULL,
 	updated_at TEXT NOT NULL,
 	userworkspace TEXT NOT NULL,
