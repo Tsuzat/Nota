@@ -42,11 +42,6 @@
 	});
 
 	const { children } = $props();
-
-	let open = $state(false);
-	function toggleOpen() {
-		open = !open;
-	}
 </script>
 
 <Sidebar.Provider>
@@ -56,10 +51,6 @@
 			<div class="flex flex-1 items-center gap-2 px-3">
 				<Sidebar.Trigger />
 				<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
-				<Button onclick={toggleOpen}>
-					<IconPicker bind:open />
-					open
-				</Button>
 				<h3>My Notes</h3>
 			</div>
 			<div class="ml-auto px-3">

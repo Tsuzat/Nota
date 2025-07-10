@@ -1,6 +1,8 @@
 import { isTauri } from '@tauri-apps/api/core';
+import { type } from '@tauri-apps/plugin-os';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { isMac } from './components/edra/utils';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -14,3 +16,4 @@ export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
 
 export const ISTAURI = isTauri();
+export const ISMACOS = ISTAURI ? type() === 'macos' : isMac;
