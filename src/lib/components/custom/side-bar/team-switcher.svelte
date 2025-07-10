@@ -1,22 +1,13 @@
 <script lang="ts">
+	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 
-	let {
-		teams
-	}: {
-		teams: {
-			name: string;
-			// This should be `Component` after @lucide/svelte updates types
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			logo: any;
-			plan: string;
-		}[];
-	} = $props();
-
-	let activeTeam = $state(teams[0]);
+	const localUserWorkspaces = getLocalUserWorkspaces();
+	let activeWorkspace = $derived(localUserWorkspaces.getCurrentUserWorkspace());
 </script>
 
 <Sidebar.Menu>
@@ -25,24 +16,26 @@
 			<DropdownMenu.Trigger>
 				{#snippet child({ props })}
 					<Sidebar.MenuButton {...props} class="w-fit px-1.5">
-						<div
-							class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-5 items-center justify-center rounded-md"
-						>
-							<activeTeam.logo class="size-3" />
-						</div>
-						<span class="truncate font-medium">{activeTeam.name}</span>
-						<ChevronDownIcon class="opacity-50" />
+						{#if activeWorkspace}
+							<div
+								class="bg-sidebar-primary text-sidebar-primary-foreground flex size-6 items-center justify-center rounded border"
+							>
+								<IconRenderer icon={activeWorkspace.icon} class="!size-4" />
+							</div>
+							<span class="truncate font-medium">{activeWorkspace.name}</span>
+							<ChevronDownIcon class="opacity-50" />
+						{/if}
 					</Sidebar.MenuButton>
 				{/snippet}
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content class="w-64 rounded-lg" align="start" side="bottom" sideOffset={4}>
 				<DropdownMenu.Label class="text-muted-foreground text-xs">Teams</DropdownMenu.Label>
-				{#each teams as team, index (team.name)}
-					<DropdownMenu.Item onSelect={() => (activeTeam = team)} class="gap-2 p-2">
-						<div class="flex size-6 items-center justify-center rounded-sm border">
-							<team.logo class="size-4 shrink-0" />
+				{#each localUserWorkspaces.getUserWorkspaces() as workspace, index (workspace.id)}
+					<DropdownMenu.Item onSelect={() => (activeWorkspace = workspace)} class="gap-2 p-2">
+						<div class="flex size-6 items-center justify-center rounded border">
+							<IconRenderer icon={workspace.icon} />
 						</div>
-						{team.name}
+						<span class="truncate">{workspace.name}</span>
 						<DropdownMenu.Shortcut>⌘{index + 1}</DropdownMenu.Shortcut>
 					</DropdownMenu.Item>
 				{/each}
@@ -51,7 +44,7 @@
 					<div class="bg-background flex size-6 items-center justify-center rounded-md border">
 						<PlusIcon class="size-4" />
 					</div>
-					<div class="text-muted-foreground font-medium">Add team</div>
+					<div class="text-muted-foreground font-medium">Add User Workspace</div>
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>

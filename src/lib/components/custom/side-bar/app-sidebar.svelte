@@ -252,14 +252,13 @@
 	import type { ComponentProps } from 'svelte';
 	import NavWorkspacesLocal from './nav-workspaces-local.svelte';
 	import { ISTAURI } from '$lib/utils';
-	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
 
 <Sidebar.Root bind:ref class="border-r-0" {...restProps}>
 	<Sidebar.Header>
-		<TeamSwitcher teams={data.teams} />
+		<TeamSwitcher />
 		<NavMain items={data.navMain} />
 	</Sidebar.Header>
 	<Sidebar.Content>
