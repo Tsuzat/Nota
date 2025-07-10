@@ -2,7 +2,7 @@ import { getContext, setContext } from 'svelte';
 import { DB } from './db';
 import { toast } from 'svelte-sonner';
 
-interface LocalWorkSpace {
+export interface LocalWorkSpace {
 	id: string;
 	name: string;
 	icon: string;

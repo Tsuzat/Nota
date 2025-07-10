@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS workspaces (
 	created_at TEXT NOT NULL,
 	updated_at TEXT NOT NULL,
 	userworkspace TEXT NOT NULL,
-	FOREIGN KEY(userworkspace) REFERENCES userworkspaces(id)
+	FOREIGN KEY(userworkspace) REFERENCES userworkspaces(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS notes (
@@ -27,11 +27,12 @@ CREATE TABLE IF NOT EXISTS notes (
 	icon TEXT NOT NULL,
 	path TEXT NOT NULL UNIQUE,
 	workspace TEXT NOT NULL,
+	userworkspace TEXT NOT NULL,
 	favorite BOOLEAN NOT NULL DEFAULT FALSE,
   	trashed BOOLEAN NOT NULL DEFAULT FALSE,
 	created_at TEXT NOT NULL,
 	updated_at TEXT NOT NULL,
-	FOREIGN KEY(workspace) REFERENCES workspaces(id)
+	FOREIGN KEY(workspace) REFERENCES workspaces(id) ON DELETE CASCADE
 );
 `;
 

@@ -2,7 +2,7 @@ import { toast } from 'svelte-sonner';
 import { DB } from './db';
 import { setContext, getContext } from 'svelte';
 
-interface LocalUserWorkspace {
+export interface LocalUserWorkspace {
 	id: string;
 	name: string;
 	icon: string;
@@ -10,6 +10,7 @@ interface LocalUserWorkspace {
 
 class UserWorkspaces {
 	#userWorkspaces = $state<LocalUserWorkspace[]>([]);
+	#currentUserWorkspace = $state<LocalUserWorkspace>();
 
 	constructor(userWorkspaces: LocalUserWorkspace[]) {
 		this.#userWorkspaces = userWorkspaces;
@@ -18,15 +19,27 @@ class UserWorkspaces {
 	getUserWorkspaces() {
 		return this.#userWorkspaces;
 	}
-
 	setUserWorkspaces(userWorkspaces: LocalUserWorkspace[]) {
 		this.#userWorkspaces = userWorkspaces;
+	}
+	getCurrentUserWorkspace() {
+		return this.#currentUserWorkspace;
+	}
+	setCurrentUserWorkspace(currentUserWorkspace: LocalUserWorkspace) {
+		localStorage.setItem('currentUserWorkspaceId', currentUserWorkspace.id);
+		this.#currentUserWorkspace = currentUserWorkspace;
 	}
 
 	async fetchUserWorkspaces() {
 		try {
 			const res = await DB.select<LocalUserWorkspace[]>('SELECT * FROM userworkspaces');
 			this.setUserWorkspaces(res);
+			if (res.length === 0) return;
+			const raw = localStorage.getItem('currentUserWorkspaceId');
+			const setCurrentUserWorkspace = raw ? res.find((w) => w.id === raw) : res[0];
+			if (setCurrentUserWorkspace) {
+				this.setCurrentUserWorkspace(setCurrentUserWorkspace);
+			}
 		} catch (e) {
 			toast.error('Something went wrong when getting the user workspaces');
 			console.error(e);
