@@ -56,9 +56,13 @@
 	font-weight: 600;
 }
 
+.tiptap em {
+	font-weight: 200;
+}
+
 .tiptap blockquote {
 	margin: 1rem 0rem;
-	padding: 0.25rem 0;
+	padding: 0.5rem 0;
 	padding-left: 0.75rem;
 	font-style: italic;
 	color: var(--blockquote-color);

@@ -47,6 +47,10 @@
 		if (editor.isActive('video-placeholder')) return false;
 		if (editor.isActive('audio-placeholder')) return false;
 		if (editor.isActive('iframe-placeholder')) return false;
+		if (editor.isActive('image')) return false;
+		if (editor.isActive('video')) return false;
+		if (editor.isActive('iframe')) return false;
+		if (editor.isActive('audio')) return false;
 		const {
 			state: {
 				doc,
@@ -92,7 +96,10 @@
 	{editor}
 	pluginKey="link-bubble-menu"
 	{shouldShow}
-	class={cn('edra-bubble-menu bg-popover flex h-fit w-fit items-center rounded p-0.5', className)}
+	class={cn(
+		'edra-bubble-menu bg-popover flex h-fit w-fit items-center rounded-lg border p-0',
+		className
+	)}
 >
 	{#if children}
 		{@render children()}

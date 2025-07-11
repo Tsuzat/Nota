@@ -95,13 +95,5 @@
 {/if}
 <div
 	bind:this={element}
-	role="button"
-	tabindex="0"
-	onclick={(event) => focusEditor(editor, event)}
-	onkeydown={(event) => {
-		if (event.key === 'Enter' || event.key === ' ') {
-			focusEditor(editor, event);
-		}
-	}}
 	class={cn('edra-editor h-full w-full cursor-auto *:outline-none', className)}
 ></div>

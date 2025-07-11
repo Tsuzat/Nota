@@ -25,7 +25,7 @@
 	options={{
 		strategy: 'fixed'
 	}}
-	class="bg-popover flex h-fit w-fit items-center gap-1 rounded border p-1 shadow-lg"
+	class="bg-popover flex h-fit w-fit items-center gap-1 rounded border p-0 shadow-lg"
 >
 	<Button variant="link" href={link} class="max-w-80 p-1" target="_blank">
 		<span class="w-full overflow-hidden text-ellipsis">
