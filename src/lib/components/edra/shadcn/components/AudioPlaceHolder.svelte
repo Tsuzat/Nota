@@ -36,9 +36,6 @@
 		<Popover.Content class="bg-popover w-96 p-4" portalProps={{ disabled: true, to: undefined }}>
 			<div class="mb-4 flex items-center justify-between">
 				<span>Insert an audio</span>
-				<Popover.Close class={buttonVariants({ variant: 'ghost', size: 'sm' })}>
-					<X />
-				</Popover.Close>
 			</div>
 			<form onsubmit={handleSubmit} class="flex flex-col gap-2">
 				<Input placeholder="Enter the audio URL..." bind:value={audioUrl} required type="url" />

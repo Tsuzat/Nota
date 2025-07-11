@@ -41,9 +41,6 @@
 		>
 			<div class="mb-4 flex items-center justify-between">
 				<span>Insert an iframe</span>
-				<Popover.Close class={buttonVariants({ variant: 'ghost', size: 'sm' })}>
-					<X />
-				</Popover.Close>
 			</div>
 			<form onsubmit={handleSubmit} class="flex flex-col gap-2">
 				<Input placeholder="Enter the iframe URL..." bind:value={iframUrl} required type="url" />
