@@ -134,7 +134,7 @@
 .tiptap ul[data-type='taskList'] li {
 	align-items: center;
 	display: flex;
-	margin: 0 !important;
+	margin: 0.5rem 0 !important;
 }
 
 .tiptap ul[data-type='taskList'] li > label {
