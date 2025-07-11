@@ -16,7 +16,7 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import { Button, buttonVariants } from '../ui/button';
 	import Input from '../ui/input/input.svelte';
-	import { Shuffle, X, Search } from '@lucide/svelte';
+	import { Shuffle, X } from '@lucide/svelte';
 
 	interface Props {
 		searchTerm?: string;
