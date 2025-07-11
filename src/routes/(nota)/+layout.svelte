@@ -9,9 +9,7 @@
 	import { ISTAURI } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { BaseDirectory, readDir } from '@tauri-apps/plugin-fs';
-	import IconPicker from '$lib/components/icons/icon-picker.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import NewWorkspace from '$lib/components/custom/dialogs/new-workspace.svelte';
 
 	setLocalUserWorkspaces();
 	setLocalWorkspaces();
@@ -45,6 +43,7 @@
 </script>
 
 <Sidebar.Provider>
+	<NewWorkspace />
 	<AppSidebar />
 	<Sidebar.Inset class="flex h-screen w-full flex-col overflow-hidden">
 		<header class="flex h-14 shrink-0 items-center gap-2">
