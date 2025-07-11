@@ -58,7 +58,7 @@
 
 .tiptap blockquote {
 	margin: 1rem 0rem;
-	padding: 0.5rem 0;
+	padding: 0.25rem 0;
 	padding-left: 0.75rem;
 	font-style: italic;
 	color: var(--blockquote-color);
@@ -71,7 +71,7 @@
 	left: 0;
 	top: 0;
 	bottom: 0;
-	width: 0.25rem;
+	width: 0.4rem;
 	background-color: var(--blockquote-border);
 	border-radius: 0.5rem;
 }
@@ -146,7 +146,7 @@ ul[data-type='taskList'] li[data-checked='true'] div {
 	text-decoration: line-through;
 }
 
-input[type='checkbox'] {
+/* input[type='checkbox'] {
 	position: relative;
 	top: 0.25rem;
 	margin: 0;
@@ -156,6 +156,51 @@ input[type='checkbox'] {
 	width: 1rem;
 	height: 1rem;
 	border-radius: 0.25rem;
+} */
+
+input[type='checkbox'] {
+	-webkit-appearance: none;
+	position: relative;
+	top: 0.25rem;
+	margin: 0;
+	display: grid;
+	width: 1.25rem;
+	height: 1.25rem;
+	cursor: pointer;
+	appearance: none;
+	place-content: center;
+	border-radius: 0.25rem;
+	border: 1px solid var(--color-border);
+	background-color: transparent;
+}
+
+input[type='checkbox']:hover {
+	background-color: color-mix(in srgb, var(--color-muted) 50%, transparent);
+}
+
+input[type='checkbox']:active {
+	background-color: var(--color-muted);
+}
+
+input[type='checkbox']::before {
+	content: '';
+	height: 0.75rem;
+	width: 0.75rem;
+	padding: 0.25rem;
+	color: var(--color-secondary);
+	transform: scale(0);
+	transition: 200ms transform ease-in-out;
+	box-shadow: inset 1em 1em;
+	transform-origin: center;
+	clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+input[type='checkbox']:checked {
+	background-color: var(--color-secondary-foreground);
+}
+
+input[type='checkbox']:checked::before {
+	transform: scale(1);
 }
 
 /* Color Swatches */
@@ -199,13 +244,6 @@ input[type='checkbox'] {
 .drag-handle {
 	position: fixed;
 	z-index: 50;
-	width: 2rem;
-	height: 2rem;
-	display: flex;
-	padding-right: 0.5rem;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
 	cursor: grab;
 	opacity: 100;
 	transition-property: opacity;
@@ -228,11 +266,6 @@ input[type='checkbox'] {
 		display: none;
 		pointer-events: none;
 	}
-}
-
-.drag-handle svg {
-	height: 1rem;
-	width: 1rem;
 }
 
 /* Math Equations (KaTeX) */
