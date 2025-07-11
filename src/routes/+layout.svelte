@@ -10,7 +10,7 @@
 	onMount(() => {});
 </script>
 
-<Toaster richColors closeButton position="top-right" />
+<Toaster richColors closeButton />
 
 <ModeWatcher />
 
