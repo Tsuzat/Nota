@@ -1,6 +1,6 @@
 <script lang="ts">
+	import '@fontsource-variable/inter';
 	import '../app.css';
-	import '@fontsource-variable/dm-sans';
 	import { ModeWatcher } from 'mode-watcher';
 	import { onMount } from 'svelte';
 	import { Toaster } from '$lib/components/ui/sonner';

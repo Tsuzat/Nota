@@ -87,6 +87,10 @@
 	margin: 1rem 0;
 }
 
+.tiptap code {
+	font-family: 'Fira Code Variable', monospace;
+}
+
 /* Inline Code */
 .tiptap code:not(pre code) {
 	background-color: var(--code-bg);
@@ -103,6 +107,11 @@
 .tiptap ol {
 	padding: 0 1rem;
 	margin: 0.5rem 1rem 0.5rem 0.4rem;
+}
+
+.tiptap ul li::marker,
+.tiptap ol li::marker {
+	color: var(--color-muted-foreground);
 }
 
 .tiptap ul li p,
@@ -229,7 +238,6 @@ input[type='checkbox']:checked::before {
 	background-color: transparent;
 	padding: 0;
 	color: inherit;
-	font-family: 'JetBrains Mono', monospace, Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono';
 }
 
 /* Drag Handle Styling */

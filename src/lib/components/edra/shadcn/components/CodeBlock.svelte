@@ -43,10 +43,10 @@
 				</span>
 				<ChevronDown class="!size-2" />
 			</Popover.Trigger>
-			<Popover.Content class="h-96 w-40 p-0" contenteditable="false">
+			<Popover.Content class="h-96 w-40 p-0 transition-all duration-500" contenteditable="false">
 				<Command.Root>
 					<Command.Input placeholder="Search..." />
-					<Command.List>
+					<Command.List class="!max-h-full">
 						<Command.Empty>No language found.</Command.Empty>
 						{#each languages as language (language)}
 							<Command.Item
