@@ -21,7 +21,7 @@
 </script>
 
 {#if editor && !editor?.isDestroyed}
-	<EdraDragHandleExtended {editor} />
 	<EdraBubbleMenu {editor} />
+	<EdraDragHandleExtended {editor} />
 {/if}
 <EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} />

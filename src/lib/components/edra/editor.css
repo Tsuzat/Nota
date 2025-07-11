@@ -119,18 +119,22 @@
 }
 
 .tiptap ul[data-type='taskList'] li {
-	align-items: flex-start;
+	align-items: center;
 	display: flex;
+	margin: 0 !important;
 }
 
 .tiptap ul[data-type='taskList'] li > label {
-	flex: 0 0 auto;
 	margin-right: 0.5rem;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	user-select: none;
 }
 
-.tiptap ul[data-type='taskList'] li > div {
-	flex: 1 1 auto;
+.tiptap ul[data-type='taskList'] li > div > p {
+	margin: 0;
 }
 
 .tiptap ul[data-type='taskList'] input[type='checkbox'] {
@@ -146,26 +150,14 @@ ul[data-type='taskList'] li[data-checked='true'] div {
 	text-decoration: line-through;
 }
 
-/* input[type='checkbox'] {
-	position: relative;
-	top: 0.25rem;
-	margin: 0;
-	display: grid;
-	place-content: center;
-	cursor: pointer;
-	width: 1rem;
-	height: 1rem;
-	border-radius: 0.25rem;
-} */
-
 input[type='checkbox'] {
 	-webkit-appearance: none;
 	position: relative;
-	top: 0.25rem;
+	top: 0rem;
 	margin: 0;
 	display: grid;
-	width: 1.25rem;
-	height: 1.25rem;
+	width: 1.125rem;
+	height: 1.125rem;
 	cursor: pointer;
 	appearance: none;
 	place-content: center;
@@ -244,6 +236,13 @@ input[type='checkbox']:checked::before {
 .drag-handle {
 	position: fixed;
 	z-index: 50;
+	width: 1.5rem;
+	height: 1.5rem;
+	display: flex;
+	padding-right: 0.5rem;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	cursor: grab;
 	opacity: 100;
 	transition-property: opacity;
@@ -268,6 +267,10 @@ input[type='checkbox']:checked::before {
 	}
 }
 
+.drag-handle svg {
+	height: 1rem;
+	width: 1rem;
+}
 /* Math Equations (KaTeX) */
 .katex:hover {
 	background-color: var(--code-bg);

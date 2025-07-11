@@ -102,5 +102,5 @@
 			focusEditor(editor, event);
 		}
 	}}
-	class={cn('edra-editor h-full w-full cursor-auto px-4 *:outline-none', className)}
+	class={cn('edra-editor h-full w-full cursor-auto *:outline-none', className)}
 ></div>

@@ -79,31 +79,31 @@
 	};
 </script>
 
-<div class="drag-handle py-0.5 pr-2">
-	<Button variant="ghost" class="!size-8 rounded-sm p-1" onclick={() => (open = true)}>
+<div class="drag-handle">
+	<Button variant="ghost" class="!size-6 rounded-sm p-0" onclick={() => (open = true)}>
 		<GripVertical />
-		<DropdownMenu.Root bind:open>
-			<DropdownMenu.Trigger class="sr-only">
-				<span>Drag Handle</span>
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content>
-				<DropdownMenu.Item onclick={handleRemoveFormatting}>
-					<RemoveFormatting />
-					Remove Formatting
-				</DropdownMenu.Item>
-				<DropdownMenu.Item onclick={handleDuplicate}>
-					<Duplicate />
-					Duplicate Node
-				</DropdownMenu.Item>
-				<DropdownMenu.Item onclick={handleCopyToClipboard}>
-					<Clipboard />
-					Copy to clipboard
-				</DropdownMenu.Item>
-				<DropdownMenu.Item onclick={handleDelete}>
-					<Delete class="text-destructive" />
-					Delete Node
-				</DropdownMenu.Item>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
 	</Button>
+	<DropdownMenu.Root bind:open>
+		<DropdownMenu.Trigger class="sr-only">
+			<span>Drag Handle</span>
+		</DropdownMenu.Trigger>
+		<DropdownMenu.Content>
+			<DropdownMenu.Item onclick={handleRemoveFormatting}>
+				<RemoveFormatting />
+				Remove Formatting
+			</DropdownMenu.Item>
+			<DropdownMenu.Item onclick={handleDuplicate}>
+				<Duplicate />
+				Duplicate Node
+			</DropdownMenu.Item>
+			<DropdownMenu.Item onclick={handleCopyToClipboard}>
+				<Clipboard />
+				Copy to clipboard
+			</DropdownMenu.Item>
+			<DropdownMenu.Item onclick={handleDelete}>
+				<Delete class="text-destructive" />
+				Delete Node
+			</DropdownMenu.Item>
+		</DropdownMenu.Content>
+	</DropdownMenu.Root>
 </div>
