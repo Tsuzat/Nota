@@ -236,7 +236,7 @@
 							onclick={() => {
 								if (node.attrs.title === null || node.attrs.title.trim() === '')
 									updateAttributes({
-										title: 'Image Caption'
+										title: 'Your Media Caption'
 									});
 							}}
 						>
