@@ -7,7 +7,6 @@
 	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import * as Popover from '$lib/components/ui/popover';
 	import { Input } from '$lib/components/ui/input';
-	import { X } from '@lucide/svelte';
 	import { NodeViewWrapper } from 'svelte-tiptap';
 
 	let open = $state(false);
@@ -23,27 +22,25 @@
 <NodeViewWrapper
 	as="div"
 	contenteditable="false"
-	class="media-placeholder"
+	class={buttonVariants({
+		variant: 'secondary',
+		class: 'media-placeholder relative my-2 w-full justify-start p-6'
+	})}
 	style="user-select: none;"
 	draggable={true}
+	onclick={() => (open = true)}
 >
+	<CodeXml />
+	<span>Insert an iframe</span>
 	<Popover.Root bind:open>
-		<Popover.Trigger
-			class={buttonVariants({ variant: 'secondary', class: 'my-2 w-full justify-start p-6' })}
-		>
-			<CodeXml />
-			<span>Insert an iframe</span>
-		</Popover.Trigger>
+		<Popover.Trigger class="sr-only absolute left-1/2">Open</Popover.Trigger>
 		<Popover.Content
 			contenteditable={false}
-			class="bg-popover w-96 p-4"
+			class="bg-popover w-96 p-4 transition-all duration-300"
 			portalProps={{ disabled: true, to: undefined }}
 		>
-			<div class="mb-4 flex items-center justify-between">
-				<span>Insert an iframe</span>
-			</div>
 			<form onsubmit={handleSubmit} class="flex flex-col gap-2">
-				<Input placeholder="Enter the iframe URL..." bind:value={iframUrl} required type="url" />
+				<Input placeholder="Embed IFrame" bind:value={iframUrl} required type="url" />
 				<Button type="submit" variant="secondary">Insert</Button>
 			</form>
 		</Popover.Content>

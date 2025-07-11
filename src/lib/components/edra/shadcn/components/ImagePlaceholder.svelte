@@ -43,17 +43,18 @@
 <NodeViewWrapper
 	as="div"
 	contenteditable="false"
-	class="media-placeholder"
+	class={buttonVariants({
+		variant: 'secondary',
+		class: 'media-placeholder relative my-2 w-full justify-start p-6'
+	})}
 	style="user-select: none;"
 	draggable={true}
+	onclick={() => (open = true)}
 >
+	<Image />
+	<span>Insert an Image</span>
 	<Popover.Root bind:open>
-		<Popover.Trigger
-			class={buttonVariants({ variant: 'secondary', class: 'my-2 w-full justify-start p-6' })}
-		>
-			<Image />
-			<span>Insert an Image</span>
-		</Popover.Trigger>
+		<Popover.Trigger class="sr-only absolute left-1/2">Open</Popover.Trigger>
 		<Popover.Content
 			contenteditable={false}
 			class="bg-popover w-96 p-1 transition-all duration-500"
