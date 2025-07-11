@@ -32,7 +32,7 @@
 		mediaRef = $bindable()
 	}: MediaExtendedProps = $props();
 
-	const minWidthPercent = 15;
+	const minWidthPercent = 20;
 	const maxWidthPercent = 100;
 
 	let nodeRef = $state<HTMLElement>();
@@ -133,142 +133,142 @@
 	});
 </script>
 
-<!-- !FIXME: For some wierd reason, the change in `node.attrs.align` is not reactive to NodeViewWrapper 
- So for now, we'll re-render it when the align changes.
--->
-
-{#key node.attrs.align}
-	<NodeViewWrapper
-		id="resizable-container-media"
-		class={cn(
-			'relative my-2 flex flex-col rounded-md border-2 border-transparent',
-			selected ? 'border-muted-foreground' : '',
-			node.attrs.align === 'left' && 'left-0 -translate-x-0',
-			node.attrs.align === 'center' && 'left-1/2 -translate-x-1/2',
-			node.attrs.align === 'right' && 'left-full -translate-x-full'
-		)}
-		style={`width: ${node.attrs.width}`}
-	>
-		<div class={cn('group relative flex flex-col rounded-md', resizing && '')}>
-			{@render children()}
-
-			{#if editor.isEditable}
+<NodeViewWrapper
+	id="resizable-container-media"
+	class={cn(
+		'relative my-2 flex flex-col rounded-md border border-transparent',
+		selected && 'ring-1',
+		node.attrs.align === 'left' && 'left-0 -translate-x-0',
+		node.attrs.align === 'center' && 'left-1/2 -translate-x-1/2',
+		node.attrs.align === 'right' && 'left-full -translate-x-full'
+	)}
+	style={`width: ${node.attrs.width}`}
+>
+	<div class={cn('group relative flex flex-col rounded-md', resizing && '')}>
+		{@render children()}
+		{#if node.attrs.title !== null && node.attrs.title.trim() !== ''}
+			<input
+				value={node.attrs.title}
+				type="text"
+				class="text-muted-foreground my-1 w-full bg-transparent text-center text-sm outline-none"
+				onchange={(e) => {
+					const target = e.target as HTMLInputElement;
+					updateAttributes({ title: target.value });
+				}}
+			/>
+		{/if}
+		{#if editor.isEditable}
+			<div
+				role="button"
+				tabindex="0"
+				aria-label="Back"
+				class="absolute inset-y-0 z-20 flex w-5 cursor-col-resize items-center justify-start p-2"
+				style="left: 0px"
+				onmousedown={(event: MouseEvent) => {
+					handleResizingPosition(event, 'left');
+				}}
+				ontouchstart={(event: TouchEvent) => {
+					handleTouchStart(event, 'left');
+				}}
+			>
 				<div
-					role="button"
-					tabindex="0"
-					aria-label="Back"
-					class="absolute inset-y-0 z-20 flex w-[25px] cursor-col-resize items-center justify-start p-2"
-					style="left: 0px"
-					onmousedown={(event: MouseEvent) => {
-						handleResizingPosition(event, 'left');
-					}}
-					ontouchstart={(event: TouchEvent) => {
-						handleTouchStart(event, 'left');
-					}}
-				>
-					<div
-						class="bg-muted z-20 h-[70px] w-1 rounded-xl border opacity-0 transition-all group-hover:opacity-100"
-					></div>
-				</div>
+					class="bg-muted z-20 h-16 w-1 rounded-xl border opacity-0 transition-all group-hover:opacity-100"
+				></div>
+			</div>
 
+			<div
+				role="button"
+				tabindex="0"
+				aria-label="Back"
+				class="absolute inset-y-0 z-20 flex w-5 cursor-col-resize items-center justify-end p-2"
+				style="right: 0px"
+				onmousedown={(event: MouseEvent) => {
+					handleResizingPosition(event, 'right');
+				}}
+				ontouchstart={(event: TouchEvent) => {
+					handleTouchStart(event, 'right');
+				}}
+			>
 				<div
-					role="button"
-					tabindex="0"
-					aria-label="Back"
-					class="absolute inset-y-0 z-20 flex w-[25px] cursor-col-resize items-center justify-end p-2"
-					style="right: 0px"
-					onmousedown={(event: MouseEvent) => {
-						handleResizingPosition(event, 'right');
-					}}
-					ontouchstart={(event: TouchEvent) => {
-						handleTouchStart(event, 'right');
-					}}
+					class="bg-muted z-20 h-16 w-1 rounded-xl border opacity-0 transition-all group-hover:opacity-100"
+				></div>
+			</div>
+			<div
+				class={cn(
+					'bg-background/50 absolute -top-2 left-[calc(50%-3rem)] flex items-center gap-1 rounded border p-1 opacity-0 backdrop-blur-sm transition-opacity',
+					!resizing && 'group-hover:opacity-100',
+					openedMore && 'opacity-100'
+				)}
+			>
+				<Button
+					variant="ghost"
+					class={cn('size-6 p-0', node.attrs.align === 'left' && 'bg-muted')}
+					onclick={() => updateAttributes({ align: 'left' })}
+					title="Align Left"
 				>
-					<div
-						class="bg-muted z-20 h-[70px] w-1 rounded-xl border opacity-0 transition-all group-hover:opacity-100"
-					></div>
-				</div>
-				<div
-					class={cn(
-						'bg-background/50 absolute -top-2 left-[calc(50%-3rem)] flex items-center gap-1 rounded border p-1 opacity-0 backdrop-blur-sm transition-opacity',
-						!resizing && 'group-hover:opacity-100',
-						openedMore && 'opacity-100'
-					)}
+					<AlignLeft class="size-4" />
+				</Button>
+				<Button
+					variant="ghost"
+					class={cn('size-6 p-0', node.attrs.align === 'center' && 'bg-muted')}
+					onclick={() => updateAttributes({ align: 'center' })}
+					title="Align Center"
 				>
-					<Button
-						variant="ghost"
-						class={cn('size-6 p-0', node.attrs.align === 'left' && 'bg-muted')}
-						onclick={() => updateAttributes({ align: 'left' })}
-						title="Align Left"
+					<AlignCenter class="size-4" />
+				</Button>
+				<Button
+					variant="ghost"
+					class={cn('size-6 p-0', node.attrs.align === 'right' && 'bg-muted')}
+					onclick={() => updateAttributes({ align: 'right' })}
+					title="Align Right"
+				>
+					<AlignRight class="size-4" />
+				</Button>
+				<DropdownMenu.Root bind:open={openedMore} onOpenChange={(value) => (openedMore = value)}>
+					<DropdownMenu.Trigger
+						class={buttonVariants({ variant: 'ghost', class: 'size-6 p-0' })}
+						title="More Options"
 					>
-						<AlignLeft class="size-4" />
-					</Button>
-					<Button
-						variant="ghost"
-						class={cn('size-6 p-0', node.attrs.align === 'center' && 'bg-muted')}
-						onclick={() => updateAttributes({ align: 'center' })}
-						title="Align Center"
-					>
-						<AlignCenter class="size-4" />
-					</Button>
-					<Button
-						variant="ghost"
-						class={cn('size-6 p-0', node.attrs.align === 'right' && 'bg-muted')}
-						onclick={() => updateAttributes({ align: 'right' })}
-						title="Align Right"
-					>
-						<AlignRight class="size-4" />
-					</Button>
-					<DropdownMenu.Root bind:open={openedMore} onOpenChange={(value) => (openedMore = value)}>
-						<DropdownMenu.Trigger
-							class={buttonVariants({ variant: 'ghost', class: 'size-6 p-0' })}
-							title="More Options"
-						>
-							<EllipsisVertical class="size-4" />
-						</DropdownMenu.Trigger>
-						<DropdownMenu.Content
-							align="start"
-							alignOffset={-90}
-							class="mt-1 overflow-auto text-sm"
-						>
-							<DropdownMenu.Item
-								onclick={() => {
-									if (node.attrs.title === null || node.attrs.title.trim() === '')
-										updateAttributes({
-											title: 'Image Caption'
-										});
-								}}
-							>
-								<Captions class="mr-1 size-4" /> Caption
-							</DropdownMenu.Item>
-							<DropdownMenu.Item
-								onclick={() => {
-									duplicateContent(editor, node);
-								}}
-							>
-								<CopyIcon class="mr-1 size-4" /> Duplicate
-							</DropdownMenu.Item>
-							<DropdownMenu.Item
-								onclick={() => {
+						<EllipsisVertical class="size-4" />
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="start" alignOffset={-90} class="mt-1 overflow-auto text-sm">
+						<DropdownMenu.Item
+							onclick={() => {
+								if (node.attrs.title === null || node.attrs.title.trim() === '')
 									updateAttributes({
-										width: '100%'
+										title: 'Image Caption'
 									});
-								}}
-							>
-								<Fullscreen class="mr-1 size-4" /> Full Screen
-							</DropdownMenu.Item>
-							<DropdownMenu.Item
-								onclick={() => {
-									deleteNode();
-								}}
-								class="text-destructive"
-							>
-								<Trash class="mr-1 size-4" /> Delete
-							</DropdownMenu.Item>
-						</DropdownMenu.Content>
-					</DropdownMenu.Root>
-				</div>
-			{/if}
-		</div>
-	</NodeViewWrapper>
-{/key}
+							}}
+						>
+							<Captions class="mr-1 size-4" /> Caption
+						</DropdownMenu.Item>
+						<DropdownMenu.Item
+							onclick={() => {
+								duplicateContent(editor, node);
+							}}
+						>
+							<CopyIcon class="mr-1 size-4" /> Duplicate
+						</DropdownMenu.Item>
+						<DropdownMenu.Item
+							onclick={() => {
+								updateAttributes({
+									width: '100%'
+								});
+							}}
+						>
+							<Fullscreen class="mr-1 size-4" /> Full Screen
+						</DropdownMenu.Item>
+						<DropdownMenu.Item
+							onclick={() => {
+								deleteNode();
+							}}
+							class="text-destructive"
+						>
+							<Trash class="mr-1 size-4" /> Delete
+						</DropdownMenu.Item>
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+			</div>
+		{/if}
+	</div>
+</NodeViewWrapper>
