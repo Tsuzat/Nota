@@ -1,4 +1,5 @@
 <script lang="ts">
+	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
@@ -7,7 +8,7 @@
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 
-	const workspaces = getLocalWorkspaces().getWorkspaces();
+	const workspaces = $derived(getLocalWorkspaces().getWorkspaces());
 </script>
 
 <Sidebar.Group>
@@ -21,8 +22,7 @@
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}
 									<a href="##" {...props}>
-										<!-- <span>{workspace.emoji}</span> -->
-										<span>😎</span>
+										<IconRenderer icon={workspace.icon} />
 										<span>{workspace.name}</span>
 									</a>
 								{/snippet}
