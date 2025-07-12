@@ -17,3 +17,15 @@ export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?:
 
 export const ISTAURI = isTauri();
 export const ISMACOS = ISTAURI ? type() === 'macos' : isMac;
+
+export const getNewUUID = (uuids: string[]) => {
+	const threshold = 1000;
+	const i = 0;
+	while (i < threshold) {
+		const uuid = crypto.randomUUID();
+		if (!uuids.includes(uuid)) {
+			return uuid;
+		}
+	}
+	throw new Error('Could not generate a new UUID');
+};
