@@ -1,9 +1,14 @@
 name: 'Code Formatting with Prettier'
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: 'macos-latest'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
