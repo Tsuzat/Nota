@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS notes (
   	trashed BOOLEAN NOT NULL DEFAULT FALSE,
 	created_at TEXT NOT NULL,
 	updated_at TEXT NOT NULL,
-	FOREIGN KEY(workspace) REFERENCES workspaces(id) ON DELETE CASCADE
+	FOREIGN KEY(workspace) REFERENCES workspaces(id) ON DELETE CASCADE,
+	FOREIGN KEY(userworkspace) REFERENCES userworkspaces(id) ON DELETE CASCADE
 );
 `;
 

@@ -8,6 +8,7 @@ export interface LocalNote {
 	icon: string;
 	path: string;
 	workspace: string;
+	userworkspace: string;
 	favorite: boolean;
 	trashed: boolean;
 	created_at: string;
