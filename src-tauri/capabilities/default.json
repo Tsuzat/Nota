@@ -9,6 +9,59 @@
 		"sql:default",
 		"sql:allow-execute",
 		"dialog:allow-open",
-		"dialog:allow-save"
+		"dialog:allow-save",
+		"fs:allow-mkdir",
+		"fs:allow-remove",
+		"fs:allow-read",
+		"fs:allow-create",
+		"store:default",
+		{
+			"identifier": "fs:allow-mkdir",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		},
+		{
+			"identifier": "fs:allow-remove",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		},
+		{
+			"identifier": "fs:allow-size",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		},
+		{
+			"identifier": "fs:write-files",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		},
+		{
+			"identifier": "fs:allow-copy-file",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		},
+		{
+			"identifier": "fs:allow-read-dir",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		}
 	]
 }
