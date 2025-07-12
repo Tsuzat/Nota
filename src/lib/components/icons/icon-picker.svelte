@@ -3,6 +3,7 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import type { Snippet } from 'svelte';
 	import EmojiPicker from './emoji-picker.svelte';
+	import LucideIcons from './lucide-icons.svelte';
 	interface Props {
 		open?: boolean;
 		icon?: string;
@@ -22,12 +23,13 @@
 	{/if}
 	<Popover.Content class="flex h-fit w-96 flex-col gap-1 p-0" {side}>
 		<Tabs.Root value="emojis">
-			<Tabs.List>
+			<Tabs.List class="w-full">
 				<Tabs.Trigger value="emojis">Emoji</Tabs.Trigger>
 				<Tabs.Trigger value="icons">Icon</Tabs.Trigger>
+				<Tabs.Trigger value="url">URL</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="icons">
-				<h1>Icons</h1>
+				<LucideIcons {onSelect} />
 			</Tabs.Content>
 			<Tabs.Content value="emojis">
 				<EmojiPicker {onSelect} />

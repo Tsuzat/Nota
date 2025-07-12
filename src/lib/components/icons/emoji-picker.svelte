@@ -191,7 +191,7 @@
 			{/each}
 		</div>
 	</Tabs.Content>
-	<div class="flex w-fit items-center gap-2 p-1">
+	<div class="flex w-full items-center justify-between gap-2 p-1">
 		<div class="relative flex w-full items-center">
 			<Input bind:value={searchTerm} placeholder="Search Emojies..." class="pr-6" />
 			<Button variant="ghost" class="absolute right-2 size-4 p-0" onclick={() => (searchTerm = '')}>
