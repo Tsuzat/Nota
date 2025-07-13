@@ -4,12 +4,20 @@
 	margin-top: 0;
 }
 
+.tiptap :last-child {
+	margin-bottom: 0;
+}
+
+.tiptap > p {
+	margin: 0.5rem 0;
+}
+
 /* For Placeholder */
 .tiptap .is-empty::before {
 	pointer-events: none;
 	float: left;
 	height: 0;
-	color: var(--border-color-hover);
+	color: var(--color-muted-foreground);
 	content: attr(data-placeholder);
 }
 
