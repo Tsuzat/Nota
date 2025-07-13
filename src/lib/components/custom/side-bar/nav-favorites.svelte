@@ -1,36 +1,35 @@
 <script lang="ts">
+	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
+	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import ArrowUpRightIcon from '@lucide/svelte/icons/arrow-up-right';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import LinkIcon from '@lucide/svelte/icons/link';
 	import StarOffIcon from '@lucide/svelte/icons/star-off';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
-	let {
-		favorites
-	}: {
-		favorites: {
-			name: string;
-			url: string;
-			emoji: string;
-		}[];
-	} = $props();
-
 	const sidebar = useSidebar();
+	let showMore = $state(false);
+	const notes = $derived(
+		getLocalNotes()
+			.getNotes()
+			.filter((n) => n.favorite)
+			.slice(0, showMore ? undefined : 5)
+	);
 </script>
 
 <Sidebar.Group class="group-data-[collapsible=icon]:hidden">
 	<Sidebar.GroupLabel>Favorites</Sidebar.GroupLabel>
 	<Sidebar.Menu>
-		{#each favorites as item (item.name)}
+		{#each notes as note (note.id)}
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton>
 					{#snippet child({ props })}
-						<a href={item.url} title={item.name} {...props}>
-							<span>{item.emoji}</span>
-							<span>{item.name}</span>
+						<a href="local-note-{note.id}" title={note.name} {...props}>
+							<IconRenderer icon={note.icon} />
+							<span>{note.name}</span>
 						</a>
 					{/snippet}
 				</Sidebar.MenuButton>
@@ -71,9 +70,9 @@
 			</Sidebar.MenuItem>
 		{/each}
 		<Sidebar.MenuItem>
-			<Sidebar.MenuButton class="text-sidebar-foreground/70">
+			<Sidebar.MenuButton class="text-sidebar-foreground/70" onclick={() => (showMore = !showMore)}>
 				<EllipsisIcon />
-				<span>More</span>
+				<span>{showMore ? 'Less' : 'More'}</span>
 			</Sidebar.MenuButton>
 		</Sidebar.MenuItem>
 	</Sidebar.Menu>

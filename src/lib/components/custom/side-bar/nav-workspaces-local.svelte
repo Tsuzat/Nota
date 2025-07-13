@@ -1,18 +1,77 @@
 <script lang="ts">
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import * as Collapsible from '$lib/components/ui/collapsible';
+	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
+	import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import PlusIcon from '@lucide/svelte/icons/plus';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { LinkIcon, Pencil, Trash2Icon } from '@lucide/svelte';
+	import { ask } from '@tauri-apps/plugin-dialog';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
+	import { getKeyboardShortcut } from '$lib/utils';
+	import SimpleTooltip from '../simple-tooltip.svelte';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import NewWorkspace from '../dialogs/local/new-workspace.svelte';
+	import NewNotes from '../dialogs/local/new-notes.svelte';
 
-	const workspaces = $derived(getLocalWorkspaces().getWorkspaces());
+	let showMore = $state(false);
+
+	const localWorkspaces = getLocalWorkspaces();
+	const workspaces = $derived(localWorkspaces.getWorkspaces().slice(0, showMore ? undefined : 5));
+	const sidebar = Sidebar.useSidebar();
+
+	let open = $state(false);
+	let openNewNotes = $state(false);
+
+	let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
+
+	async function handleDelete(workspace: LocalWorkSpace) {
+		const allowed = await ask(
+			'This workspace will be deleted permanently and all data will be erased.',
+			{
+				title: `Delete Workspace - ${workspace.name}`,
+				kind: 'warning',
+				okLabel: 'Yes, Delete'
+			}
+		);
+		if (allowed) {
+			toast.promise(localWorkspaces.deleteWorkspace(workspace), {
+				loading: 'Deleting workspace...',
+				success: () => {
+					if (page.url.pathname === `local-workspace-${workspace.id}`) {
+						goto('/home');
+					}
+					return `Workspace ${workspace.name} deleted successfully`;
+				},
+				error: `Could not delete workspace ${workspace.name}`
+			});
+		}
+	}
 </script>
 
+<NewWorkspace bind:open />
+
+<NewNotes bind:open={openNewNotes} workspace={currentLocalWorkspace} />
 <Sidebar.Group>
-	<Sidebar.GroupLabel>Local Workspaces</Sidebar.GroupLabel>
+	<Sidebar.GroupLabel class="justify-between">
+		Local Workspaces
+		<SimpleTooltip>
+			<Button variant="ghost" class="size-6" onclick={() => (open = true)}>
+				<PlusIcon />
+			</Button>
+			{#snippet child()}
+				<div class="flex flex-col items-center gap-1">
+					<span>Create Workspace</span>
+					<span class="bg-muted text-primary rounded p-0.5">{getKeyboardShortcut('N', true)}</span>
+				</div>
+			{/snippet}
+		</SimpleTooltip>
+	</Sidebar.GroupLabel>
 	<Sidebar.GroupContent>
 		{#if workspaces.length > 0}
 			<Sidebar.Menu>
@@ -21,10 +80,11 @@
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}
-									<a href="##" {...props}>
+									<!-- <a href="local-workspace-{workspace.id}" {...props}> -->
+									<span {...props}>
 										<IconRenderer icon={workspace.icon} />
 										<span>{workspace.name}</span>
-									</a>
+									</span>
 								{/snippet}
 							</Sidebar.MenuButton>
 							<Collapsible.Trigger>
@@ -38,9 +98,47 @@
 									</Sidebar.MenuAction>
 								{/snippet}
 							</Collapsible.Trigger>
-							<Sidebar.MenuAction showOnHover>
-								<PlusIcon />
-							</Sidebar.MenuAction>
+							<DropdownMenu.Root>
+								<DropdownMenu.Trigger>
+									{#snippet child({ props })}
+										<Sidebar.MenuAction showOnHover {...props}>
+											<EllipsisIcon />
+											<span class="sr-only">More</span>
+										</Sidebar.MenuAction>
+									{/snippet}
+								</DropdownMenu.Trigger>
+								<DropdownMenu.Content
+									class="bg-popover w-fit"
+									side={sidebar.isMobile ? 'bottom' : 'right'}
+									align={sidebar.isMobile ? 'end' : 'start'}
+									portalProps={{ disabled: true, children: undefined }}
+								>
+									<DropdownMenu.Item
+										onclick={() => {
+											openNewNotes = true;
+										}}
+									>
+										<PlusIcon />
+										<span>Create Notes</span>
+									</DropdownMenu.Item>
+									<DropdownMenu.Item>
+										<LinkIcon />
+										<span>Copy Link</span>
+									</DropdownMenu.Item>
+									<DropdownMenu.Item>
+										<Pencil />
+										<span>Rename</span>
+									</DropdownMenu.Item>
+									<DropdownMenu.Item>
+										<Trash2Icon />
+										<span>Move to trash</span>
+									</DropdownMenu.Item>
+									<DropdownMenu.Item variant="destructive" onclick={() => handleDelete(workspace)}>
+										<Trash2Icon />
+										<span>Delete Workspace</span>
+									</DropdownMenu.Item>
+								</DropdownMenu.Content>
+							</DropdownMenu.Root>
 							<Collapsible.Content>
 								<Sidebar.MenuSub>
 									{@const notes = getLocalNotes()
@@ -50,9 +148,8 @@
 										<Sidebar.MenuSubItem>
 											<Sidebar.MenuSubButton>
 												{#snippet child({ props })}
-													<a href="##" {...props}>
-														<!-- <span>{note.icon}</span> -->
-														<span>📝</span>
+													<a href="local-note-{note.id}" {...props}>
+														<IconRenderer icon={note.icon} />
 														<span>{note.name}</span>
 													</a>
 												{/snippet}
@@ -65,18 +162,24 @@
 					</Collapsible.Root>
 				{/each}
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton class="text-sidebar-foreground/70">
+					<Sidebar.MenuButton
+						class="text-sidebar-foreground/70"
+						onclick={() => (showMore = !showMore)}
+					>
 						<EllipsisIcon />
-						<span>More</span>
+						<span>{showMore ? 'Less' : 'More'}</span>
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>
 			</Sidebar.Menu>
 		{:else}
 			<Sidebar.Menu>
-				<Sidebar.MenuItem>
-					<Sidebar.MenuButton class="text-sidebar-foreground/70">
+				<Sidebar.MenuItem class="flex items-center gap-2">
+					<Sidebar.MenuButton class="text-sidebar-foreground/70" onclick={() => (open = true)}>
 						<PlusIcon />
-						<span>Create local workspace</span>
+						<span>Add Workspace</span>
+						<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded p-1">
+							{getKeyboardShortcut('N', true)}
+						</Sidebar.MenuBadge>
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>
 			</Sidebar.Menu>
