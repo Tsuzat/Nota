@@ -4,6 +4,7 @@
 	import type { Snippet } from 'svelte';
 	import EmojiPicker from './emoji-picker.svelte';
 	import LucideIcons from './lucide-icons.svelte';
+	import EmbedUrl from './embed-url.svelte';
 	interface Props {
 		open?: boolean;
 		icon?: string;
@@ -26,13 +27,16 @@
 			<Tabs.List class="w-full">
 				<Tabs.Trigger value="emojis">Emoji</Tabs.Trigger>
 				<Tabs.Trigger value="icons">Icon</Tabs.Trigger>
-				<Tabs.Trigger value="url">URL</Tabs.Trigger>
+				<Tabs.Trigger value="url">Embed Url</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="icons">
 				<LucideIcons {onSelect} />
 			</Tabs.Content>
 			<Tabs.Content value="emojis">
 				<EmojiPicker {onSelect} />
+			</Tabs.Content>
+			<Tabs.Content value="url">
+				<EmbedUrl {onSelect} />
 			</Tabs.Content>
 		</Tabs.Root>
 	</Popover.Content>

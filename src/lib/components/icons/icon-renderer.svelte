@@ -2,6 +2,7 @@
 	import { icons } from '@lucide/svelte';
 	import LucideRenderer from './lucide-renderer.svelte';
 	import { getIconData, type IconData } from './utils';
+	import { cn } from '$lib/utils';
 
 	const { icon, class: className }: { icon: string; class?: string } = $props();
 
@@ -14,7 +15,7 @@
 	{:else if iconData.iconType === 'lucide'}
 		<LucideRenderer icon={iconData.iconData as keyof typeof icons} class={className} />
 	{:else if iconData.iconType === 'url'}
-		<img src={iconData.iconData} alt="icon" class={className} />
+		<img src={iconData.iconData} alt="icon" class={cn(className, 'aspect-square size-5')} />
 	{/if}
 {/snippet}
 
