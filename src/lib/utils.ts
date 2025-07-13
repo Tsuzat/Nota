@@ -29,3 +29,18 @@ export const getNewUUID = (uuids: string[]) => {
 	}
 	throw new Error('Could not generate a new UUID');
 };
+
+export const getKeyboardShortcut = (key: string, ctrl = false, shift = false, alt = false) => {
+	const modifiers: string[] = [];
+	if (ISMACOS) {
+		if (ctrl) modifiers.push('⌘');
+		if (shift) modifiers.push('⇧');
+		if (alt) modifiers.push('⌥');
+	} else {
+		if (ctrl) modifiers.push('Ctrl');
+		if (shift) modifiers.push('Shift');
+		if (alt) modifiers.push('Alt');
+	}
+
+	return [...modifiers, key].join(' ');
+};
