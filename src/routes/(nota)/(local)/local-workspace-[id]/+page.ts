@@ -9,6 +9,7 @@ export const load: PageLoad = ({ params }) => {
 		goto('/home');
 	}
 	const { id } = params;
+
 	return {
 		id
 	};
