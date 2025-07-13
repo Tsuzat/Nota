@@ -4,6 +4,8 @@ import { toast } from 'svelte-sonner';
 export let DB: Database;
 
 const query = `
+PRAGMA foreign_keys = ON;
+
 CREATE TABLE IF NOT EXISTS userworkspaces (
 	id TEXT PRIMARY KEY,
 	name TEXT NOT NULL,

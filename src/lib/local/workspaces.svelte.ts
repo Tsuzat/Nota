@@ -5,6 +5,7 @@ import { mkdir, remove } from '@tauri-apps/plugin-fs';
 import { load } from '@tauri-apps/plugin-store';
 import { resolve } from '@tauri-apps/api/path';
 import { getNewUUID } from '$lib/utils';
+import { getLocalNotes } from './notes.svelte';
 
 export interface LocalWorkSpace {
 	id: string;
@@ -88,6 +89,24 @@ class WorkSpaces {
 			console.error(e);
 			toast.error('Something went wrong');
 			await remove(path);
+		}
+	}
+
+	async deleteWorkspace(workspace: LocalWorkSpace) {
+		try {
+			const res = await DB.execute('DELETE FROM workspaces WHERE id = $1', [workspace.id]);
+			if (res.rowsAffected === 1) {
+				await remove(workspace.path);
+				this.setWorkspaces(this.getWorkspaces().filter((w) => w.id !== workspace.id));
+				toast.success('Workspace deleted successfully');
+				const localNotes = getLocalNotes();
+				localNotes.setNotes(localNotes.getNotes().filter((n) => n.workspace !== workspace.id));
+			} else {
+				toast.warning('Could not delete workspace from database.');
+			}
+		} catch (e) {
+			console.error(e);
+			toast.error('Something went wrong when deleting the workspace.');
 		}
 	}
 }
