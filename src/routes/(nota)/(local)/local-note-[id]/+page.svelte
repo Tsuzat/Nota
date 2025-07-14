@@ -41,7 +41,8 @@
 		}
 		store = await load(note.path, { autoSave: false });
 		const content = await store.get<Content>('content');
-		if (content) editor?.commands.setContent(content);
+		editor?.commands.setContent(content ?? {});
+
 		isLoading = false;
 	}
 
@@ -114,7 +115,7 @@
 			</IconPicker>
 			<input
 				value={note.name}
-				class="truncate text-lg focus:outline-none"
+				class="truncate text-lg font-bold focus:outline-none"
 				onchange={(e) => {
 					const target = e.target as HTMLInputElement;
 					const value = target.value;

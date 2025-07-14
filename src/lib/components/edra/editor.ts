@@ -93,7 +93,7 @@ export default (
 				linkify: true,
 				breaks: true,
 				transformPastedText: true,
-				transformCopiedText: false
+				transformCopiedText: true
 			}),
 
 			...(extensions ?? [])
