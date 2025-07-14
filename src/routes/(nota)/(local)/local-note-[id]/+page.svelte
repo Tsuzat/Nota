@@ -1,20 +1,24 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import NavActions from '$lib/components/custom/side-bar/nav-actions.svelte';
+	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
 	import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '$lib/components/edra/shadcn';
 	import IconPicker from '$lib/components/icons/icon-picker.svelte';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { Separator } from '$lib/components/ui/separator';
-	import { SidebarTrigger } from '$lib/components/ui/sidebar';
+	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte.js';
+	import { cn, ISMACOS, ISTAURI } from '$lib/utils.js';
 	import { Loader } from '@lucide/svelte';
 	import { load, Store } from '@tauri-apps/plugin-store';
 	import type { Editor, Content } from '@tiptap/core';
 	import { onDestroy } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
-	let content = $state<Content>();
+	const sidebar = useSidebar();
+
 	let editor = $state<Editor>();
 	const { data } = $props();
 
@@ -22,7 +26,6 @@
 	let note = $state<LocalNote>();
 	let isLoading = $state(false);
 	let store = $state<Store>();
-	let syncing = $state(false);
 
 	$effect(() => {
 		loadNotes(data.id);
@@ -32,17 +35,18 @@
 		isLoading = true;
 		note = localNotes.getNotes().find((n) => n.id === id);
 		if (note === undefined) {
-			toast.error(`Workspace is not found`);
+			toast.error(`Note is not found`);
 			goto('/home');
 			return;
 		}
 		store = await load(note.path, { autoSave: false });
-		content = await store.get<Content>('content');
+		const content = await store.get<Content>('content');
+		if (content) editor?.commands.setContent(content);
 		isLoading = false;
 	}
 
 	async function onUpdate() {
-		content = editor?.getJSON();
+		const content = editor?.getJSON();
 		store
 			?.set('content', content)
 			.then(() => {
@@ -60,7 +64,6 @@
 	async function updateIcon(icon: string) {
 		if (note === undefined) return;
 		try {
-			syncing = true;
 			await store?.set('icon', icon);
 			await store?.save();
 			note.icon = icon;
@@ -68,15 +71,12 @@
 		} catch (e) {
 			toast.error('Could not update note icon');
 			console.error(e);
-		} finally {
-			syncing = false;
 		}
 	}
 
 	async function updateName(name: string) {
 		if (note === undefined) return;
 		try {
-			syncing = true;
 			await store?.set('name', name);
 			await store?.save();
 			note.name = name;
@@ -84,8 +84,6 @@
 		} catch (e) {
 			toast.error('Could not update note name');
 			console.error(e);
-		} finally {
-			syncing = false;
 		}
 	}
 </script>
@@ -98,28 +96,44 @@
 		</div>
 	</div>
 {:else if note !== undefined}
-	<header class="flex h-14 shrink-0 items-center gap-2">
-		<div class="flex flex-1 items-center gap-2 px-3">
+	<header class="flex h-12 shrink-0 items-center gap-2">
+		<div
+			data-open={ISMACOS && sidebar.open}
+			class="z-20 flex items-center gap-2 px-3 data-[open=false]:ml-18"
+		>
 			<SidebarTrigger />
+			<BackAndForthButtons />
 			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
 			<IconPicker onSelect={updateIcon}>
 				<div class={buttonVariants({ variant: 'ghost', class: '!size-7 p-1' })}>
 					<IconRenderer icon={note.icon} />
 				</div>
 			</IconPicker>
-			<h4>{note.name}</h4>
+			<input
+				value={note.name}
+				class="truncate text-lg focus:outline-none"
+				onchange={(e) => {
+					const target = e.target as HTMLInputElement;
+					const value = target.value;
+					if (value.trim() === '') return;
+					updateName(target.value);
+				}}
+			/>
 		</div>
-		<div class="ml-auto px-3">
+		<div class={cn('z-20 ml-auto px-3', !ISMACOS && ISTAURI && 'mr-30')}>
 			<NavActions />
 		</div>
+		{#if !ISMACOS && ISTAURI}
+			<WindowsButtons />
+		{/if}
 	</header>
-	<div class="flex h-[calc(100vh-4rem)] flex-1 flex-grow flex-col overflow-auto">
+	<div class="flex h-[calc(100vh-3rem)] flex-1 flex-grow flex-col overflow-auto">
 		<div class="mx-auto h-full w-full max-w-3xl flex-1 flex-grow">
 			{#if editor && !editor?.isDestroyed}
 				<EdraBubbleMenu {editor} />
 				<EdraDragHandleExtended {editor} />
 			{/if}
-			<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} />
+			<EdraEditor bind:editor class="size-full !p-8" {onUpdate} />
 		</div>
 	</div>
 {:else}

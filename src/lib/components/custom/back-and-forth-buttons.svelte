@@ -3,11 +3,11 @@
 	import { Button } from '$lib/components/ui/button';
 	import SimpleTooltip from './simple-tooltip.svelte';
 
-	async function gotoPrev() {
+	function gotoPrev() {
 		window.history.back();
 	}
 
-	async function gotoNext() {
+	function gotoNext() {
 		window.history.forward();
 	}
 </script>
