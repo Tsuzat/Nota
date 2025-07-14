@@ -31,7 +31,10 @@
 <header class="flex h-12 shrink-0 items-center gap-2">
 	<div
 		data-open={ISMACOS && sidebar.open}
-		class="z-20 flex items-center gap-2 px-3 data-[open=false]:ml-18"
+		class={cn(
+			'z-20 !ml-18 flex items-center gap-2 px-3 data-[open=false]:ml-18',
+			ISTAURI && 'md:!ml-0'
+		)}
 	>
 		<SidebarTrigger />
 		<BackAndForthButtons />
