@@ -20,7 +20,13 @@
 				"minWidth": 500,
 				"visible": false,
 				"dragDropEnabled": false,
-				"zoomHotkeysEnabled": true
+				"zoomHotkeysEnabled": true,
+				"hiddenTitle": true,
+				"titleBarStyle": "Overlay",
+				"trafficLightPosition": {
+					"x": 12,
+					"y": 20
+				}
 			}
 		],
 		"security": {
