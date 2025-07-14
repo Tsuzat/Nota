@@ -144,11 +144,13 @@
 									{@const notes = getLocalNotes()
 										.getNotes()
 										.filter((n) => n.workspace === workspace.id)}
-									{#each notes as note (note.name)}
+									{#each notes as note (note.id)}
+										{@const href = `local-note-${note.id}`}
+										{@const isActive = page.url.pathname.endsWith(href)}
 										<Sidebar.MenuSubItem>
-											<Sidebar.MenuSubButton>
+											<Sidebar.MenuSubButton {isActive}>
 												{#snippet child({ props })}
-													<a href="local-note-{note.id}" {...props}>
+													<a {href} {...props}>
 														<IconRenderer icon={note.icon} />
 														<span>{note.name}</span>
 													</a>

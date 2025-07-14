@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { Component } from 'svelte';
 
@@ -7,7 +8,7 @@
 	}: {
 		items: {
 			title: string;
-			url: string;
+			url?: string;
 			icon: Component;
 			isActive?: boolean;
 		}[];
@@ -17,7 +18,8 @@
 <Sidebar.Menu>
 	{#each items as item (item.title)}
 		<Sidebar.MenuItem>
-			<Sidebar.MenuButton isActive={item.isActive}>
+			{@const isActive = page.url.pathname.endsWith(item.url ?? '')}
+			<Sidebar.MenuButton {isActive}>
 				{#snippet child({ props })}
 					<a href={item.url} {...props}>
 						<item.icon />

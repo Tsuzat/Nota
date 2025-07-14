@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -24,10 +25,12 @@
 	<Sidebar.GroupLabel>Favorites</Sidebar.GroupLabel>
 	<Sidebar.Menu>
 		{#each notes as note (note.id)}
+			{@const href = `local-note-${note.id}`}
+			{@const isActive = page.url.pathname.endsWith(href)}
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton>
+				<Sidebar.MenuButton {isActive}>
 					{#snippet child({ props })}
-						<a href="local-note-{note.id}" title={note.name} {...props}>
+						<a {href} title={note.name} {...props}>
 							<IconRenderer icon={note.icon} />
 							<span>{note.name}</span>
 						</a>

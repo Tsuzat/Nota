@@ -20,8 +20,7 @@
 			{
 				title: 'Home',
 				url: '/home',
-				icon: HouseIcon,
-				isActive: true
+				icon: HouseIcon
 			}
 		],
 		navSecondary: [
