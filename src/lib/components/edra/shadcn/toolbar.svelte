@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { cn } from '$lib/utils.js';
+	import { slide } from 'svelte/transition';
 	import commands from '../commands/toolbar-commands.js';
 	import type { EdraToolbarProps } from '../types.js';
 	import Alignment from './components/toolbar/Alignment.svelte';
@@ -14,7 +15,10 @@
 	const toolbarCommands = Object.keys(commands).filter((key) => !excludedCommands?.includes(key));
 </script>
 
-<div class={cn('edra-toolbar', className)}>
+<div
+	class={cn('edra-toolbar bg-muted/25 mx-auto flex items-center rounded ', className)}
+	transition:slide
+>
 	{#if children}
 		{@render children()}
 	{:else}
@@ -23,6 +27,8 @@
 				<Headings {editor} />
 			{:else if cmd === 'alignment'}
 				<Alignment {editor} />
+			{:else if ['lists', 'media', 'table'].includes(cmd)}
+				<span></span>
 			{:else}
 				{@const commandGroup = commands[cmd]}
 				{#each commandGroup as command (command)}

@@ -17,7 +17,9 @@
 		</Tooltip.Trigger>
 		<Tooltip.Content>
 			<span>{tooltip}</span>
-			<span class="text-muted-foreground">{shortCut}</span>
+			{#if shortCut}
+				<span class="bg-background text-primary rounded p-0.5">{shortCut}</span>
+			{/if}
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>

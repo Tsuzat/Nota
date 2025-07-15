@@ -46,7 +46,8 @@
 		content,
 		onUpdate,
 		autofocus = false,
-		class: className
+		class: className,
+		spellcheck
 	}: EdraEditorProps = $props();
 
 	onMount(() => {
@@ -96,4 +97,5 @@
 <div
 	bind:this={element}
 	class={cn('edra-editor h-full w-full cursor-auto *:outline-none', className)}
+	{spellcheck}
 ></div>
