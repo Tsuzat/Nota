@@ -13,7 +13,6 @@
 		"core:window:allow-toggle-maximize",
 		"core:window:allow-minimize",
 		"core:window:allow-close",
-		"opener:default",
 		"sql:default",
 		"sql:allow-execute",
 		"dialog:default",
@@ -22,6 +21,14 @@
 		"fs:allow-read",
 		"fs:allow-create",
 		"store:default",
+		{
+			"identifier": "opener:allow-open-path",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		},
 		{
 			"identifier": "fs:allow-mkdir",
 			"allow": [
