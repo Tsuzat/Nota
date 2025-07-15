@@ -78,13 +78,14 @@
 </script>
 
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
+	import * as Dropdown from '$lib/components/ui/dropdown-menu';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import StarIcon from '@lucide/svelte/icons/star';
-	import type { NotePageSettingsType } from '$lib/types';
+	import { type NotePageSettingsType } from '$lib/types';
 	import { cn } from '$lib/utils';
+	import { Bubbles, Film, Lock, PenTool, SpellCheck } from '@lucide/svelte';
+	import SimpleTooltip from '../simple-tooltip.svelte';
 
 	interface Props {
 		settings: NotePageSettingsType;
@@ -98,38 +99,63 @@
 </script>
 
 <div class="flex items-center gap-2 text-sm">
+	{#if settings.locked}
+		<SimpleTooltip>
+			<Button
+				variant="ghost"
+				size="icon"
+				class="size-7"
+				onclick={() => (settings.locked = !settings.locked)}
+			>
+				<Lock />
+			</Button>
+			{#snippet child()}
+				<div class="flex flex-col">
+					<span class="font-semibold">Content Read-only</span>
+					<span class="text-muted-foreground">Click to unlock</span>
+				</div>
+			{/snippet}
+		</SimpleTooltip>
+	{/if}
 	<div class="text-muted-foreground hidden font-medium md:inline-block">Edit Oct 08</div>
 	<Button variant="ghost" size="icon" class="size-7" onclick={toggleStar}>
 		<StarIcon class={cn(starred && 'fill-yellow-500 text-yellow-500')} />
 	</Button>
-	<Popover.Root bind:open>
-		<Popover.Trigger>
-			{#snippet child({ props })}
-				<Button {...props} variant="ghost" size="icon" class="data-[state=open]:bg-accent size-7">
-					<EllipsisIcon />
-				</Button>
-			{/snippet}
-		</Popover.Trigger>
-		<Popover.Content class="w-56 overflow-hidden rounded-lg p-0" align="end">
-			<Sidebar.Root collapsible="none" class="bg-transparent">
-				<Sidebar.Content>
-					{#each data as group, index (index)}
-						<Sidebar.Group class="border-b last:border-none">
-							<Sidebar.GroupContent class="gap-0">
-								<Sidebar.Menu>
-									{#each group as item, index (index)}
-										<Sidebar.MenuItem>
-											<Sidebar.MenuButton class="hover:bg-accent hover:text-accent-foreground">
-												<item.icon /> <span>{item.label}</span>
-											</Sidebar.MenuButton>
-										</Sidebar.MenuItem>
-									{/each}
-								</Sidebar.Menu>
-							</Sidebar.GroupContent>
-						</Sidebar.Group>
-					{/each}
-				</Sidebar.Content>
-			</Sidebar.Root>
-		</Popover.Content>
-	</Popover.Root>
+	<Dropdown.Root bind:open>
+		<Dropdown.Trigger
+			class={buttonVariants({
+				variant: 'ghost',
+				size: 'icon',
+				class: 'data-[state=open]:bg-accent size-7'
+			})}
+		>
+			<EllipsisIcon />
+		</Dropdown.Trigger>
+		<Dropdown.Content class="bg-popover h-full w-fit overflow-auto" align="end">
+			<Dropdown.Group>
+				<Dropdown.GroupHeading>Notes Page Settings</Dropdown.GroupHeading>
+				<Dropdown.CheckboxItem bind:checked={settings.locked}>
+					<Lock />
+					{settings.locked ? 'Lock' : 'Unlock'}
+				</Dropdown.CheckboxItem>
+				<Dropdown.CheckboxItem bind:checked={settings.showtoolbar}>
+					<PenTool />
+					Toolbar
+				</Dropdown.CheckboxItem>
+				<Dropdown.CheckboxItem bind:checked={settings.spellcheck}>
+					<SpellCheck />
+					Spell Check
+				</Dropdown.CheckboxItem>
+				<Dropdown.CheckboxItem bind:checked={settings.showbubblemenu}>
+					<Bubbles />
+					Bubble Menu
+				</Dropdown.CheckboxItem>
+				<Dropdown.CheckboxItem bind:checked={settings.compressmedia}>
+					<Film />
+					Compress Media
+				</Dropdown.CheckboxItem>
+			</Dropdown.Group>
+			<Dropdown.Separator />
+		</Dropdown.Content>
+	</Dropdown.Root>
 </div>
