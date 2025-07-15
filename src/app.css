@@ -7,10 +7,13 @@
 html {
 	-webkit-text-size-adjust: 100%;
 	-ms-overflow-style: -ms-autohiding-scrollbar;
-	scroll-behavior: smooth;
+	scroll-behavior: auto;
 	user-select: none;
+	overscroll-behavior: none;
+	-webkit-overflow-scrolling: auto;
 }
 
+/* For Windows application with touch support */
 *[data-tauri-drag-region] {
 	app-region: drag;
 }
