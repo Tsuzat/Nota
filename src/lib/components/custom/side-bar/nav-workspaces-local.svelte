@@ -122,6 +122,7 @@
 								>
 									<DropdownMenu.Item
 										onclick={() => {
+											currentLocalWorkspace = workspace;
 											openNewNotes = true;
 										}}
 									>
