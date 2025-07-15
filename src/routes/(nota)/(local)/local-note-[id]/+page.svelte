@@ -1,21 +1,26 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import NavActions from '$lib/components/custom/side-bar/nav-actions.svelte';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
-	import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '$lib/components/edra/shadcn';
+	import {
+		EdraBubbleMenu,
+		EdraDragHandleExtended,
+		EdraEditor,
+		EdraToolBar
+	} from '$lib/components/edra/shadcn';
 	import IconPicker from '$lib/components/icons/icon-picker.svelte';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
-	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte.js';
-	import { cn, ISMACOS, ISTAURI } from '$lib/utils.js';
+	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+	import { cn, ISMACOS, ISTAURI } from '$lib/utils';
 	import { Loader } from '@lucide/svelte';
-	import { load, Store } from '@tauri-apps/plugin-store';
 	import type { Editor, Content } from '@tiptap/core';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
 
 	const sidebar = useSidebar();
 
@@ -23,42 +28,44 @@
 	const { data } = $props();
 
 	const localNotes = getLocalNotes();
-	let note = $state<LocalNote>();
+	let note = $derived(data.note);
+	let store = $derived(data.store);
+	let content = $derived(data.content);
+
 	let isLoading = $state(false);
-	let store = $state<Store>();
+
+	let pageSettings = $state<NotePageSettingsType>(DEFAULT_SETTINGS);
 
 	$effect(() => {
-		loadNotes(data.id);
-	});
-
-	async function loadNotes(id: string) {
-		isLoading = true;
-		note = localNotes.getNotes().find((n) => n.id === id);
-		if (note === undefined) {
-			toast.error(`Note is not found`);
-			goto('/home');
-			return;
-		}
-		store = await load(note.path, { autoSave: false });
-		const content = await store.get<Content>('content');
-		editor?.commands.setContent(content ?? {});
-
-		isLoading = false;
-	}
-
-	async function onUpdate() {
-		const content = editor?.getJSON();
-		store
-			?.set('content', content)
+		untrack(() => store)
+			?.set('settings', pageSettings)
 			.then(() => {
 				store?.save();
-			})
-			.catch((e) => {
-				console.error(e);
-				toast.warning('Could not save workspace note content');
 			});
+	});
+
+	$effect(() => {
+		untrack(() => editor)?.setEditable(!pageSettings.locked, true);
+	});
+
+	async function onUpdate() {
+		try {
+			const content = editor?.getJSON();
+			toast.success('Content Updated');
+			await store?.set('content', content);
+			await store?.save();
+		} catch (error) {
+			toast.warning('Could not save workspace note content');
+			console.error(error);
+		}
 	}
+
+	beforeNavigate(() => {
+		// editor?.destroy();
+		store?.close();
+	});
 	onDestroy(() => {
+		editor?.destroy();
 		store?.close();
 	});
 
@@ -67,7 +74,7 @@
 		try {
 			await store?.set('icon', icon);
 			await store?.save();
-			note.icon = icon;
+			note = { ...note, icon };
 			await localNotes.updateNote(note);
 		} catch (e) {
 			toast.error('Could not update note icon');
@@ -80,10 +87,21 @@
 		try {
 			await store?.set('name', name);
 			await store?.save();
-			note.name = name;
+			note = { ...note, name };
 			await localNotes.updateNote(note);
 		} catch (e) {
 			toast.error('Could not update note name');
+			console.error(e);
+		}
+	}
+
+	async function toggleStar() {
+		if (note === undefined) return;
+		try {
+			note = { ...note, favorite: !note.favorite };
+			await localNotes.updateNote(note);
+		} catch (e) {
+			toast.error('Could not update note starred');
 			console.error(e);
 		}
 	}
@@ -125,19 +143,26 @@
 			/>
 		</div>
 		<div class={cn('z-20 ml-auto px-3', !ISMACOS && ISTAURI && 'mr-30')}>
-			<NavActions />
+			<NavActions starred={note.favorite} {toggleStar} bind:settings={pageSettings} />
 		</div>
 		{#if !ISMACOS && ISTAURI}
 			<WindowsButtons />
 		{/if}
 	</header>
+	{#if pageSettings.showtoolbar && editor && !editor?.isDestroyed && !editor?.isEditable}
+		<EdraToolBar {editor} />
+	{/if}
 	<div class="flex h-[calc(100vh-3rem)] flex-1 flex-grow flex-col overflow-auto">
 		<div class="mx-auto h-full w-full max-w-3xl flex-1 flex-grow">
 			{#if editor && !editor?.isDestroyed}
-				<EdraBubbleMenu {editor} />
+				{#if pageSettings.showbubblemenu}
+					<EdraBubbleMenu {editor} />
+				{/if}
 				<EdraDragHandleExtended {editor} />
 			{/if}
-			<EdraEditor bind:editor class="size-full !p-8" {onUpdate} />
+			{#key content}
+				<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} />
+			{/key}
 		</div>
 	</div>
 {:else}
