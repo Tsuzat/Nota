@@ -16,7 +16,7 @@
 	const data = [
 		[
 			{
-				label: 'Customize Page',
+				label: 'Note Settings',
 				icon: Settings2Icon
 			},
 			{
@@ -83,14 +83,24 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import StarIcon from '@lucide/svelte/icons/star';
+	import type { NotePageSettingsType } from '$lib/types';
+	import { cn } from '$lib/utils';
+
+	interface Props {
+		settings: NotePageSettingsType;
+		starred?: boolean;
+		toggleStar?: () => void;
+	}
+
+	let { settings = $bindable(), starred, toggleStar }: Props = $props();
 
 	let open = $state(false);
 </script>
 
 <div class="flex items-center gap-2 text-sm">
 	<div class="text-muted-foreground hidden font-medium md:inline-block">Edit Oct 08</div>
-	<Button variant="ghost" size="icon" class="size-7">
-		<StarIcon />
+	<Button variant="ghost" size="icon" class="size-7" onclick={toggleStar}>
+		<StarIcon class={cn(starred && 'fill-yellow-500 text-yellow-500')} />
 	</Button>
 	<Popover.Root bind:open>
 		<Popover.Trigger>

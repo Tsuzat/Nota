@@ -8,12 +8,19 @@
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { LinkIcon, Pencil, Trash2Icon } from '@lucide/svelte';
+	import {
+		ArrowDownFromLine,
+		ArrowUpFromLine,
+		ExternalLink,
+		Pencil,
+		Trash2Icon
+	} from '@lucide/svelte';
 	import { ask } from '@tauri-apps/plugin-dialog';
+	import { openPath } from '@tauri-apps/plugin-opener';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { getKeyboardShortcut } from '$lib/utils';
+	import { getKeyboardShortcut, ISMACOS } from '$lib/utils';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import NewWorkspace from '../dialogs/local/new-workspace.svelte';
@@ -121,13 +128,26 @@
 										<PlusIcon />
 										<span>Create Notes</span>
 									</DropdownMenu.Item>
-									<DropdownMenu.Item>
-										<LinkIcon />
-										<span>Copy Link</span>
+									<DropdownMenu.Item
+										onclick={async () => {
+											await openPath(workspace.path);
+										}}
+									>
+										<ExternalLink />
+										<span>Reveal in {ISMACOS ? 'Finder' : 'File Explorer'}</span>
 									</DropdownMenu.Item>
 									<DropdownMenu.Item>
 										<Pencil />
 										<span>Rename</span>
+									</DropdownMenu.Item>
+									<DropdownMenu.Separator />
+									<DropdownMenu.Item>
+										<ArrowUpFromLine />
+										<span>Export Workspace</span>
+									</DropdownMenu.Item>
+									<DropdownMenu.Item>
+										<ArrowDownFromLine />
+										<span>Import Notes</span>
 									</DropdownMenu.Item>
 									<DropdownMenu.Item>
 										<Trash2Icon />

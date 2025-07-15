@@ -6,17 +6,19 @@
 		content?: string;
 		children: Snippet<[]>;
 		child?: Snippet<[]>;
+		delayDuration?: number;
+		side?: 'top' | 'bottom' | 'left' | 'right';
 	}
 
-	const { content, children, child }: Props = $props();
+	const { content, children, child, delayDuration, side }: Props = $props();
 </script>
 
-<Tooltip.Provider>
+<Tooltip.Provider {delayDuration}>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			{@render children()}
 		</Tooltip.Trigger>
-		<Tooltip.Content>
+		<Tooltip.Content {side}>
 			{#if content}
 				<p>{content}</p>
 			{/if}
