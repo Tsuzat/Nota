@@ -32,6 +32,10 @@
 	let store = $derived(data.store);
 	let content = $derived(data.content);
 
+	$effect(() => {
+		untrack(() => editor)?.commands.setContent(data.content ?? null);
+	});
+
 	let isLoading = $state(false);
 
 	let pageSettings = $state<NotePageSettingsType>(DEFAULT_SETTINGS);
@@ -159,9 +163,7 @@
 				{/if}
 				<EdraDragHandleExtended {editor} />
 			{/if}
-			{#key content}
-				<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} />
-			{/key}
+			<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} />
 		</div>
 	</div>
 {:else}
