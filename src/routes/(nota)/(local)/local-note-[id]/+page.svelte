@@ -51,7 +51,6 @@
 	async function onUpdate() {
 		try {
 			const content = editor?.getJSON();
-			toast.success('Content Updated');
 			await store?.set('content', content);
 			await store?.save();
 		} catch (error) {

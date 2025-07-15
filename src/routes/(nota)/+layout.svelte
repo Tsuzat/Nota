@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import NewWorkspace from '$lib/components/custom/dialogs/local/new-workspace.svelte';
 	import AppSidebar from '$lib/components/custom/side-bar/app-sidebar.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -6,38 +7,41 @@
 	import { getLocalUserWorkspaces, setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import { getLocalWorkspaces, setLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { ISTAURI } from '$lib/utils';
-	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	setLocalUserWorkspaces();
 	setLocalWorkspaces();
 	setLocalNotes();
 
-	onMount(async () => {
-		if (ISTAURI) {
-			try {
-				const localUserWorkspaces = getLocalUserWorkspaces();
-				const localWorkspaces = getLocalWorkspaces();
-				const localNotes = getLocalNotes();
+	const { children, data } = $props();
 
-				await localUserWorkspaces.fetchUserWorkspaces();
-				const curLocUsrWrkspc = localUserWorkspaces.getCurrentUserWorkspace();
-				if (curLocUsrWrkspc === undefined) {
-					toast.warning('No user workspace found. Creating a new one');
-					await localUserWorkspaces.createUserWorkspace('My Workspace', 'lucide:User');
-				}
-				if (curLocUsrWrkspc) {
-					await localWorkspaces.fetchWorkspaces(curLocUsrWrkspc.id);
-					await localNotes.fetchNotes(curLocUsrWrkspc.id);
-				}
-			} catch (e) {
-				toast.error('Something went wrong when loading the local data');
-				console.error(e);
-			}
+	$effect(() => {
+		if (
+			data.localUserWorkspaces === undefined ||
+			data.currentUserWorkspace === undefined ||
+			data.localWorkspaces === undefined ||
+			data.localNotes === undefined
+		) {
+			toast.error('Something went wrong when loading the local data');
+			goto('/');
 		}
 	});
 
-	const { children } = $props();
+	if (
+		ISTAURI &&
+		data.currentUserWorkspace &&
+		data.localUserWorkspaces &&
+		data.localWorkspaces &&
+		data.localNotes
+	) {
+		const localUserWorkspaces = getLocalUserWorkspaces();
+		const localWorkspaces = getLocalWorkspaces();
+		const localNotes = getLocalNotes();
+		localUserWorkspaces.setUserWorkspaces(data.localUserWorkspaces);
+		localUserWorkspaces.setCurrentUserWorkspace(data.currentUserWorkspace);
+		localWorkspaces.setWorkspaces(data.localWorkspaces);
+		localNotes.setNotes(data.localNotes);
+	}
 </script>
 
 <Sidebar.Provider>
