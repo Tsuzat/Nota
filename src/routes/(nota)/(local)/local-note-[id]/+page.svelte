@@ -33,7 +33,7 @@
 	let store = $derived(data.store);
 	let content = $derived(data.content);
 
-	const onFileDrop = $derived.by(() => {
+	const onFileSelect = $derived.by(() => {
 		if (data.assetsPath === undefined) return;
 		return async (files: string[]) => moveFilesToAssets(files, data.assetsPath);
 	});
@@ -177,7 +177,7 @@
 				{/if}
 				<EdraDragHandleExtended {editor} />
 			{/if}
-			<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} {onFileDrop} />
+			<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} {onFileSelect} />
 		</div>
 	</div>
 {:else}

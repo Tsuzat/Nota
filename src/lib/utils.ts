@@ -47,11 +47,12 @@ export const getKeyboardShortcut = (key: string, ctrl = false, shift = false, al
 };
 
 export function handleKeydown(e: KeyboardEvent) {
-	e.preventDefault();
 	if (e.metaKey || e.ctrlKey) {
 		if (e.key === 'ArrowLeft') {
+			e.preventDefault();
 			history.back();
 		} else if (e.key === 'ArrowRight') {
+			e.preventDefault();
 			history.forward();
 		}
 	}
