@@ -13,12 +13,13 @@
 		"windows": [
 			{
 				"title": "Nota - A note taking app",
+				"url": "home",
 				"label": "main",
 				"width": 800,
 				"height": 600,
 				"minHeight": 400,
 				"minWidth": 500,
-				"visible": false,
+				"visible": true,
 				"dragDropEnabled": false,
 				"zoomHotkeysEnabled": true,
 				"hiddenTitle": true,
