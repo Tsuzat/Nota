@@ -6,7 +6,7 @@
 	import { getLocalNotes, setLocalNotes } from '$lib/local/notes.svelte';
 	import { getLocalUserWorkspaces, setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import { getLocalWorkspaces, setLocalWorkspaces } from '$lib/local/workspaces.svelte';
-	import { ISTAURI } from '$lib/utils';
+	import { handleKeydown, ISTAURI } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 
 	setLocalUserWorkspaces();
@@ -44,6 +44,7 @@
 	}
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
 <Sidebar.Provider>
 	<NewWorkspace />
 	<AppSidebar />

@@ -3,8 +3,9 @@
 	import NavActions from '$lib/components/custom/side-bar/nav-actions.svelte';
 	import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '$lib/components/edra/shadcn';
 	import { Separator } from '$lib/components/ui/separator';
-	import { SidebarTrigger } from '$lib/components/ui/sidebar';
+	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
 	import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte.js';
+	import { cn, ISMACOS, ISTAURI } from '$lib/utils.js';
 	import { Loader } from '@lucide/svelte';
 	import { resolve } from '@tauri-apps/api/path';
 	import { load, Store } from '@tauri-apps/plugin-store';
@@ -15,6 +16,7 @@
 	let content = $state<Content>();
 	let editor = $state<Editor>();
 	const { data } = $props();
+	const sidebar = useSidebar();
 
 	const localWorkspaces = getLocalWorkspaces();
 	let workspace = $state<LocalWorkSpace>();
@@ -66,14 +68,20 @@
 	</div>
 {:else if workspace !== undefined}
 	<header class="flex h-14 shrink-0 items-center gap-2">
-		<div class="flex flex-1 items-center gap-2 px-3">
+		<div
+			data-open={ISMACOS && sidebar.open}
+			class={cn(
+				'z-20 ml-18 flex items-center gap-2 px-3 data-[open=false]:ml-18',
+				ISTAURI && 'md:ml-0'
+			)}
+		>
 			<SidebarTrigger />
 			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
 			<h3>{workspace.name}</h3>
 		</div>
-		<div class="ml-auto px-3">
+		<!-- <div class="ml-auto px-3">
 			<NavActions />
-		</div>
+		</div> -->
 	</header>
 	<div class="flex h-[calc(100vh-4rem)] flex-1 flex-grow flex-col overflow-auto">
 		<div class="mx-auto h-full w-full max-w-3xl flex-1 flex-grow">

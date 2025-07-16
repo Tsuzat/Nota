@@ -32,8 +32,8 @@
 	<div
 		data-open={ISMACOS && sidebar.open}
 		class={cn(
-			'z-20 !ml-18 flex items-center gap-2 px-3 data-[open=false]:ml-18',
-			ISTAURI && 'md:!ml-0'
+			'z-20 ml-18 flex items-center gap-2 px-3 data-[open=false]:ml-18',
+			ISTAURI && 'md:ml-0'
 		)}
 	>
 		<SidebarTrigger />
@@ -42,7 +42,7 @@
 		<h3>My Notes</h3>
 	</div>
 	<div class={cn('z-20 ml-auto px-3', !ISMACOS && ISTAURI && 'mr-30')}>
-		<NavActions />
+		<!-- <NavActions /> -->
 	</div>
 	{#if !ISMACOS && ISTAURI}
 		<WindowsButtons />

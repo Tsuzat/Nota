@@ -45,3 +45,14 @@ export const getKeyboardShortcut = (key: string, ctrl = false, shift = false, al
 
 	return [...modifiers, key].join(' ');
 };
+
+export function handleKeydown(e: KeyboardEvent) {
+	e.preventDefault();
+	if (e.metaKey || e.ctrlKey) {
+		if (e.key === 'ArrowLeft') {
+			history.back();
+		} else if (e.key === 'ArrowRight') {
+			history.forward();
+		}
+	}
+}
