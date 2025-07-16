@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Sidebar from '$lib/components/ui/sidebar';
+	import { useSidebar } from '$lib/components/ui/sidebar';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { ISMACOS } from '$lib/utils';
 	import ArrowUpRightIcon from '@lucide/svelte/icons/arrow-up-right';
@@ -12,10 +12,12 @@
 	import StarOffIcon from '@lucide/svelte/icons/star-off';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import { openPath as reveal } from '@tauri-apps/plugin-opener';
+	import { ask } from '@tauri-apps/plugin-dialog';
 	import { toast } from 'svelte-sonner';
 	import { linear } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import { dirname } from '@tauri-apps/api/path';
+	import { goto } from '$app/navigation';
 
 	const sidebar = useSidebar();
 	let showMore = $state(false);
@@ -42,7 +44,19 @@
 		await reveal(dir);
 	}
 
-	async function deleteNote(note: LocalNote) {}
+	async function deleteNote(note: LocalNote) {
+		const allowed = await ask(
+			'This note will be deleted permanently and all data will be erased.',
+			{
+				title: `Delete Note - ${note.name}`,
+				okLabel: 'Yes, Delete',
+				kind: 'warning'
+			}
+		);
+		if (allowed) {
+			localNotes.deleteNote(note);
+		}
+	}
 </script>
 
 {#if notes.length > 0}
@@ -90,7 +104,7 @@
 									<span>Open in {ISMACOS ? 'Finder' : 'File Explorer'}</span>
 								</DropdownMenu.Item>
 								<DropdownMenu.Separator />
-								<DropdownMenu.Item>
+								<DropdownMenu.Item onclick={() => deleteNote(note)} variant="destructive">
 									<Trash2Icon class="text-muted-foreground" />
 									<span>Delete</span>
 								</DropdownMenu.Item>

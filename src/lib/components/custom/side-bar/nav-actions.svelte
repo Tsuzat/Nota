@@ -83,7 +83,7 @@
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import StarIcon from '@lucide/svelte/icons/star';
 	import { type NotePageSettingsType } from '$lib/types';
-	import { cn } from '$lib/utils';
+	import { cn, getKeyboardShortcut } from '$lib/utils';
 	import { Bubbles, Film, Lock, PenTool, SpellCheck } from '@lucide/svelte';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 
@@ -105,14 +105,19 @@
 				variant="ghost"
 				size="icon"
 				class="size-7"
-				onclick={() => (settings.locked = !settings.locked)}
+				onclick={() => (settings = { ...settings, locked: !settings.locked })}
 			>
 				<Lock />
 			</Button>
 			{#snippet child()}
 				<div class="flex flex-col">
 					<span class="font-semibold">Content Read-only</span>
-					<span class="text-muted-foreground">Click to unlock</span>
+					<span>
+						Click to unlock
+						<span class="bg-background text-primary rounded p-0.5"
+							>{getKeyboardShortcut('L', true)}</span
+						>
+					</span>
 				</div>
 			{/snippet}
 		</SimpleTooltip>
@@ -134,23 +139,38 @@
 		<Dropdown.Content class="bg-popover h-full w-fit overflow-auto" align="end">
 			<Dropdown.Group>
 				<Dropdown.GroupHeading>Notes Page Settings</Dropdown.GroupHeading>
-				<Dropdown.CheckboxItem bind:checked={settings.locked}>
+				<Dropdown.CheckboxItem
+					checked={settings.locked}
+					onclick={() => (settings = { ...settings, locked: !settings.locked })}
+				>
 					<Lock />
 					{settings.locked ? 'Lock' : 'Unlock'}
 				</Dropdown.CheckboxItem>
-				<Dropdown.CheckboxItem bind:checked={settings.showtoolbar}>
+				<Dropdown.CheckboxItem
+					checked={settings.showtoolbar}
+					onclick={() => (settings = { ...settings, showtoolbar: !settings.showtoolbar })}
+				>
 					<PenTool />
 					Toolbar
 				</Dropdown.CheckboxItem>
-				<Dropdown.CheckboxItem bind:checked={settings.spellcheck}>
+				<Dropdown.CheckboxItem
+					checked={settings.spellcheck}
+					onclick={() => (settings = { ...settings, spellcheck: !settings.spellcheck })}
+				>
 					<SpellCheck />
 					Spell Check
 				</Dropdown.CheckboxItem>
-				<Dropdown.CheckboxItem bind:checked={settings.showbubblemenu}>
+				<Dropdown.CheckboxItem
+					checked={settings.showbubblemenu}
+					onclick={() => (settings = { ...settings, showbubblemenu: !settings.showbubblemenu })}
+				>
 					<Bubbles />
 					Bubble Menu
 				</Dropdown.CheckboxItem>
-				<Dropdown.CheckboxItem bind:checked={settings.compressmedia}>
+				<Dropdown.CheckboxItem
+					checked={settings.compressmedia}
+					onclick={() => (settings = { ...settings, compressmedia: !settings.compressmedia })}
+				>
 					<Film />
 					Compress Media
 				</Dropdown.CheckboxItem>
