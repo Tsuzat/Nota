@@ -136,7 +136,7 @@
 <NodeViewWrapper
 	id="resizable-container-media"
 	class={cn(
-		'relative my-2 flex flex-col rounded-md border border-transparent',
+		'relative !my-4 flex flex-col rounded-md border border-transparent',
 		selected && 'ring-1',
 		node.attrs.align === 'left' && 'left-0 -translate-x-0',
 		node.attrs.align === 'center' && 'left-1/2 -translate-x-1/2',

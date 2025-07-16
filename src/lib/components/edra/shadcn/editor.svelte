@@ -2,7 +2,6 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { EdraEditorProps } from '../types';
 	import initEditor from '../editor';
-	import { focusEditor } from '../utils';
 	import { cn } from '$lib/utils';
 	import '@fontsource-variable/fira-code';
 	import '../editor.css';
@@ -33,6 +32,7 @@
 	import Link from './menus/Link.svelte';
 	import slashcommand from '../extensions/slash-command/slashcommand';
 	import SlashCommandList from './components/SlashCommandList.svelte';
+	import { FileDrop } from '../extensions/HandleFileDrop';
 
 	const lowlight = createLowlight(all);
 
@@ -47,7 +47,8 @@
 		onUpdate,
 		autofocus = false,
 		class: className,
-		spellcheck = true
+		spellcheck = true,
+		onFileDrop
 	}: EdraEditorProps = $props();
 
 	onMount(() => {
@@ -70,7 +71,10 @@
 				AudioExtended(AudioExtendedComp),
 				IFramePlaceholder(IFramePlaceHolderComp),
 				IFrameExtended(IFrameExtendedComp),
-				slashcommand(SlashCommandList)
+				slashcommand(SlashCommandList),
+				FileDrop.configure({
+					handler: onFileDrop
+				})
 			],
 			{
 				onUpdate,

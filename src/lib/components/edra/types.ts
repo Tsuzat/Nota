@@ -11,6 +11,7 @@ export interface EdraEditorProps {
 	onUpdate?: () => void;
 	class?: string;
 	spellcheck?: boolean;
+	onFileDrop?: (files: string[]) => Promise<string[]>;
 }
 
 export interface EdraToolbarProps {
