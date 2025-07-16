@@ -17,6 +17,7 @@ export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?:
 
 export const ISTAURI = isTauri();
 export const ISMACOS = ISTAURI ? type() === 'macos' : isMac;
+export const ISWINDOWS = ISTAURI ? type() === 'windows' : false;
 
 export const getNewUUID = (uuids: string[]) => {
 	const threshold = 1000;
