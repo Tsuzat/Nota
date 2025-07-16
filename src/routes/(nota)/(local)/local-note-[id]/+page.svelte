@@ -38,7 +38,7 @@
 
 	let isLoading = $state(false);
 
-	let pageSettings = $state<NotePageSettingsType>(DEFAULT_SETTINGS);
+	let pageSettings = $derived(data.settings ?? DEFAULT_SETTINGS);
 
 	$effect(() => {
 		untrack(() => store)
@@ -49,7 +49,7 @@
 	});
 
 	$effect(() => {
-		untrack(() => editor)?.setEditable(!pageSettings.locked, true);
+		untrack(() => editor)?.setEditable(!pageSettings.locked);
 	});
 
 	async function onUpdate() {
@@ -58,7 +58,6 @@
 			await store?.set('content', content);
 			await store?.save();
 		} catch (error) {
-			toast.warning('Could not save workspace note content');
 			console.error(error);
 		}
 	}
@@ -108,7 +107,16 @@
 			console.error(e);
 		}
 	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.metaKey && event.key === 'l') {
+			event.preventDefault();
+			pageSettings = { ...pageSettings, locked: !pageSettings.locked };
+		}
+	}
 </script>
+
+<svelte:document onkeydown={handleKeydown} />
 
 {#if note === undefined && isLoading}
 	<div class="flex size-full flex-col items-center justify-center">
@@ -152,7 +160,7 @@
 			<WindowsButtons />
 		{/if}
 	</header>
-	{#if pageSettings.showtoolbar && editor && !editor?.isDestroyed && !editor?.isEditable}
+	{#if pageSettings.showtoolbar && editor && !editor?.isDestroyed && editor?.isEditable}
 		<EdraToolBar {editor} />
 	{/if}
 	<div class="flex h-[calc(100vh-3rem)] flex-1 flex-grow flex-col overflow-auto">

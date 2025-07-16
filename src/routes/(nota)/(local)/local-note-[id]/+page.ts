@@ -39,7 +39,11 @@ export const load: PageLoad = async ({ params }) => {
 
 	const content = (await store.get<Content>('content')) ?? null;
 
-	const settings = (await store.get<NotePageSettingsType>('settings')) ?? DEFAULT_SETTINGS;
+	const settings = await store.get<NotePageSettingsType>('settings');
+	if (settings === undefined) {
+		await store.set('settings', DEFAULT_SETTINGS);
+		await store.save();
+	}
 
 	return {
 		note,
