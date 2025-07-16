@@ -7,6 +7,7 @@ import { DB } from '$lib/local/db';
 import { load as loadStore } from '@tauri-apps/plugin-store';
 import type { Content } from '@tiptap/core';
 import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
+import { dirname, resolve } from '@tauri-apps/api/path';
 
 async function loadLocalNote(id: string): Promise<LocalNote | null> {
 	try {
@@ -45,10 +46,14 @@ export const load: PageLoad = async ({ params }) => {
 		await store.save();
 	}
 
+	const noteDir = await dirname(note.path);
+	const assetsPath = await resolve(noteDir, 'assets');
+
 	return {
 		note,
 		store,
 		content,
-		settings
+		settings,
+		assetsPath
 	};
 };

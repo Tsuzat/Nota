@@ -14,13 +14,14 @@
 	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
-	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import { cn, ISMACOS, ISTAURI } from '$lib/utils';
 	import { Loader } from '@lucide/svelte';
-	import type { Editor, Content } from '@tiptap/core';
+	import type { Editor } from '@tiptap/core';
 	import { onDestroy, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
+	import { DEFAULT_SETTINGS } from '$lib/types';
+	import { moveFilesToAssets } from '$lib/local/utils.js';
 
 	const sidebar = useSidebar();
 
@@ -31,6 +32,11 @@
 	let note = $derived(data.note);
 	let store = $derived(data.store);
 	let content = $derived(data.content);
+
+	const onFileDrop = $derived.by(() => {
+		if (data.assetsPath === undefined) return;
+		return async (files: string[]) => moveFilesToAssets(files, data.assetsPath);
+	});
 
 	$effect(() => {
 		untrack(() => editor)?.commands.setContent(data.content ?? null);
@@ -171,7 +177,7 @@
 				{/if}
 				<EdraDragHandleExtended {editor} />
 			{/if}
-			<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} />
+			<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} {onFileDrop} />
 		</div>
 	</div>
 {:else}
