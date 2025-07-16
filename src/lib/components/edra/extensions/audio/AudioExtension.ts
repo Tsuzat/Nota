@@ -68,7 +68,7 @@ export const Audio = Node.create<AudioOptions>({
 				(src: string) =>
 				({ commands }) =>
 					commands.insertContent(
-						`<audio controls autoplay="false" style="width: 100%;" src="${src}"></audio>`
+						`<audio controls autoplay="false" style="width: 100%;" src="${src}"/>`
 					),
 
 			toggleAudio:
