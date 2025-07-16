@@ -47,7 +47,7 @@
 		onUpdate,
 		autofocus = false,
 		class: className,
-		spellcheck
+		spellcheck = true
 	}: EdraEditorProps = $props();
 
 	onMount(() => {
