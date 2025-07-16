@@ -10,7 +10,7 @@
 		side?: 'top' | 'bottom' | 'left' | 'right';
 	}
 
-	const { content, children, child, delayDuration, side }: Props = $props();
+	const { content, children, child, delayDuration = 100, side }: Props = $props();
 </script>
 
 <Tooltip.Provider {delayDuration}>
