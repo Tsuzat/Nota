@@ -94,7 +94,7 @@
 
 <BubbleMenu
 	{editor}
-	pluginKey="link-bubble-menu"
+	pluginKey="edra-bubble-menu"
 	{shouldShow}
 	class={cn(
 		'edra-bubble-menu bg-popover flex h-fit w-fit items-center rounded-lg border p-0',

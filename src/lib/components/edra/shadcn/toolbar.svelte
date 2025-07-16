@@ -16,7 +16,7 @@
 </script>
 
 <div
-	class={cn('edra-toolbar bg-muted/25 mx-auto flex items-center rounded ', className)}
+	class={cn('edra-toolbar bg-muted/25 mx-auto flex items-center rounded-lg', className)}
 	transition:slide
 >
 	{#if children}
