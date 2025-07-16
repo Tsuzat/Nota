@@ -9,6 +9,9 @@
 	import { NodeViewWrapper } from 'svelte-tiptap';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { open as openDialog } from '@tauri-apps/plugin-dialog';
+	import { ISTAURI } from '$lib/utils';
+	import { toast } from 'svelte-sonner';
+	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 
 	let open = $state(false);
@@ -27,21 +30,44 @@
 			directory: false,
 			filters: [
 				{
-					name: 'Select Images',
+					name: 'Images',
 					extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico', 'raw', 'tga']
 				}
 			]
 		});
 		if (!files) return;
-		files.forEach(async (file) => {
-			const src = convertFileSrc(file);
-			editor.chain().focus().setImage({ src }).run();
-		});
+		if (ISTAURI) {
+			try {
+				const uploadedFiles = await editor?.commands.handleFileDrop(files);
+				uploadedFiles.forEach(async (file) => {
+					const src = convertFileSrc(file);
+					editor
+						.chain()
+						.focus()
+						.insertContent([
+							{
+								type: 'image',
+								attrs: { src }
+							},
+							{
+								type: 'paragraph'
+							}
+						])
+						.run();
+
+					// Move the cursor to the empty paragraph after image
+					editor.commands.focus('end');
+				});
+			} catch (e) {
+				console.error(e);
+				toast.error('Could not process images');
+			}
+		}
 	}
 </script>
 
 <NodeViewWrapper
-	as="div"
+	as="button"
 	contenteditable="false"
 	class={buttonVariants({
 		variant: 'secondary',
@@ -57,7 +83,7 @@
 		<Popover.Trigger class="sr-only absolute left-1/2">Open</Popover.Trigger>
 		<Popover.Content
 			contenteditable={false}
-			class="bg-popover w-96 p-1 transition-all duration-500"
+			class="bg-popover w-96 p-1"
 			portalProps={{ disabled: true, to: undefined }}
 		>
 			<Tabs.Root value="local">
