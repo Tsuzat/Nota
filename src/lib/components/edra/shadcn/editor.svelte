@@ -48,7 +48,7 @@
 		autofocus = false,
 		class: className,
 		spellcheck = true,
-		onFileDrop
+		onFileSelect
 	}: EdraEditorProps = $props();
 
 	onMount(() => {
@@ -73,7 +73,7 @@
 				IFrameExtended(IFrameExtendedComp),
 				slashcommand(SlashCommandList),
 				FileDrop.configure({
-					handler: onFileDrop
+					handler: onFileSelect
 				})
 			],
 			{
