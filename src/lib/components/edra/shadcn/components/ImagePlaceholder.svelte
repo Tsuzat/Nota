@@ -24,9 +24,9 @@
 	}
 
 	async function openFileDialog() {
-		const files = await openDialog({
+		const file = await openDialog({
 			title: 'Select Images',
-			multiple: true,
+			multiple: false,
 			directory: false,
 			filters: [
 				{
@@ -35,39 +35,25 @@
 				}
 			]
 		});
-		if (!files) return;
+		if (!file) return;
 		if (ISTAURI) {
 			try {
-				const uploadedFiles = await editor?.commands.handleFileDrop(files);
+				const uploadedFiles = await editor?.commands.handleFileDrop([file]);
 				uploadedFiles.forEach(async (file) => {
 					const src = convertFileSrc(file);
-					editor
-						.chain()
-						.focus()
-						.insertContent([
-							{
-								type: 'image',
-								attrs: { src }
-							},
-							{
-								type: 'paragraph'
-							}
-						])
-						.run();
-
-					// Move the cursor to the empty paragraph after image
-					editor.commands.focus('end');
+					editor.chain().focus().setImage({ src }).run();
 				});
+				open = true;
 			} catch (e) {
 				console.error(e);
-				toast.error('Could not process images');
+				toast.error('Could not process images.');
 			}
 		}
 	}
 </script>
 
 <NodeViewWrapper
-	as="button"
+	as="div"
 	contenteditable="false"
 	class={buttonVariants({
 		variant: 'secondary',

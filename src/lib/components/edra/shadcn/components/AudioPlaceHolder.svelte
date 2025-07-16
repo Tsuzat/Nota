@@ -10,6 +10,8 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { open as openDialog } from '@tauri-apps/plugin-dialog';
 	import { convertFileSrc } from '@tauri-apps/api/core';
+	import { toast } from 'svelte-sonner';
+	import { ISTAURI } from '$lib/utils';
 
 	let open = $state(false);
 	let audioUrl = $state('');
@@ -21,9 +23,9 @@
 	}
 
 	async function openFileDialog() {
-		const files = await openDialog({
+		const file = await openDialog({
 			title: 'Select Audio',
-			multiple: true,
+			multiple: false,
 			directory: false,
 			filters: [
 				{
@@ -32,11 +34,20 @@
 				}
 			]
 		});
-		if (!files) return;
-		files.forEach(async (file) => {
-			const src = convertFileSrc(file);
-			editor.chain().focus().setAudio(src).run();
-		});
+		if (!file) return;
+		if (ISTAURI) {
+			try {
+				const uploadedFiles = await editor?.commands.handleFileDrop([file]);
+				uploadedFiles.forEach(async (file) => {
+					const src = convertFileSrc(file);
+					editor.chain().focus().setAudio(src).run();
+				});
+				open = false;
+			} catch (e) {
+				console.error(e);
+				toast.error('Could not process audio.');
+			}
+		}
 	}
 </script>
 
@@ -49,6 +60,9 @@
 	})}
 	style="user-select: none;"
 	draggable={true}
+	onclick={() => {
+		open = true;
+	}}
 >
 	<Audio />
 	<span>Insert an audio</span>
