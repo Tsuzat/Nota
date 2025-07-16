@@ -7,6 +7,7 @@ import { resolve } from '@tauri-apps/api/path';
 import { goto } from '$app/navigation';
 import { load } from '@tauri-apps/plugin-store';
 import { remove } from '@tauri-apps/plugin-fs';
+import { page } from '$app/state';
 
 export interface LocalNote {
 	id: string;
@@ -115,6 +116,22 @@ class Notes {
 			}
 		} catch (e) {
 			toast.error('Something went wrong when updating the note');
+			console.error(e);
+		}
+	}
+
+	async deleteNote(note: LocalNote) {
+		try {
+			if (page.url.pathname.endsWith(`local-note-${note.id}`)) goto('/home');
+			const res = await DB.execute('DELETE FROM notes WHERE id = $1', [note.id]);
+			if (res.rowsAffected === 1) {
+				this.setNotes(this.getNotes().filter((n) => n.id !== note.id));
+				await remove(note.path);
+			} else {
+				toast.error('Something went wrong when deleting the note');
+			}
+		} catch (e) {
+			toast.error('Something went wrong when deleting the note');
 			console.error(e);
 		}
 	}
