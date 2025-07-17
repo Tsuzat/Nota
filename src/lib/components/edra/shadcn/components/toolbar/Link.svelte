@@ -4,9 +4,10 @@
 	import EdraToolTip from '../EdraToolTip.svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
-	import { ChevronDown, Link } from '@lucide/svelte';
+	import { Check, ChevronDown, Link } from '@lucide/svelte';
 	import { Input } from '$lib/components/ui/input';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -42,10 +43,14 @@
 			</div>
 		</EdraToolTip>
 	</Popover.Trigger>
-	<Popover.Content portalProps={{ to: undefined, disabled: true }} class="h-fit w-80">
+	<Popover.Content portalProps={{ to: undefined, disabled: true }} class="h-fit w-80 p-1">
 		<form class="flex items-center gap-2" onsubmit={handleSubmit}>
 			<Input placeholder="Type or paste a link" bind:value required type="url" />
-			<Button type="submit">Insert</Button>
+			<SimpleTooltip content="Insert link">
+				<Button type="submit" size="icon">
+					<Check />
+				</Button>
+			</SimpleTooltip>
 		</form>
 	</Popover.Content>
 </Popover.Root>

@@ -32,12 +32,13 @@
 			from: props.from
 		});
 	}}
-	class="bg-background flex h-fit w-fit items-center gap-1 rounded border shadow-lg"
+	class="bg-background flex h-fit w-fit items-center gap-1 rounded-lg border shadow-lg"
 >
 	<EdraToolTip tooltip="Add Column After">
 		<Button
 			variant="ghost"
 			size="icon"
+			class="size-7"
 			onclick={() => editor.chain().focus().addColumnAfter().run()}
 		>
 			<ArrowRightFromLine />
@@ -47,6 +48,7 @@
 		<Button
 			variant="ghost"
 			size="icon"
+			class="size-7"
 			onclick={() => editor.chain().focus().addColumnBefore().run()}
 		>
 			<ArrowLeftFromLine />
@@ -54,7 +56,12 @@
 	</EdraToolTip>
 
 	<EdraToolTip tooltip="Delete This Column">
-		<Button variant="ghost" size="icon" onclick={() => editor.chain().focus().deleteColumn().run()}>
+		<Button
+			variant="ghost"
+			size="icon"
+			class="size-7"
+			onclick={() => editor.chain().focus().deleteColumn().run()}
+		>
 			<Trash />
 		</Button>
 	</EdraToolTip>

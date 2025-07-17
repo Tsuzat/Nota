@@ -33,18 +33,33 @@
 	class="bg-background flex h-fit w-fit items-center gap-1 rounded border shadow-lg"
 >
 	<EdraToolTip tooltip="Add Row After">
-		<Button variant="ghost" size="icon" onclick={() => editor.chain().focus().addRowAfter().run()}>
+		<Button
+			variant="ghost"
+			size="icon"
+			class="size-7"
+			onclick={() => editor.chain().focus().addRowAfter().run()}
+		>
 			<ArrowDownFromLine />
 		</Button>
 	</EdraToolTip>
 	<EdraToolTip tooltip="Add Row Before">
-		<Button variant="ghost" size="icon" onclick={() => editor.chain().focus().addRowBefore().run()}>
+		<Button
+			variant="ghost"
+			size="icon"
+			class="size-7"
+			onclick={() => editor.chain().focus().addRowBefore().run()}
+		>
 			<ArrowUpFromLine />
 		</Button>
 	</EdraToolTip>
 
 	<EdraToolTip tooltip="Delete This Row">
-		<Button variant="ghost" size="icon" onclick={() => editor.chain().focus().deleteRow().run()}>
+		<Button
+			variant="ghost"
+			size="icon"
+			class="size-7"
+			onclick={() => editor.chain().focus().deleteRow().run()}
+		>
 			<Trash />
 		</Button>
 	</EdraToolTip>
