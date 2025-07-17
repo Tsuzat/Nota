@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { afterNavigate, beforeNavigate } from '$app/navigation';
+	import { beforeNavigate } from '$app/navigation';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import NavActions from '$lib/components/custom/side-bar/nav-actions.svelte';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
@@ -73,9 +73,10 @@
 		}
 	}
 
-	beforeNavigate(() => {
+	beforeNavigate(async () => {
 		// editor?.destroy();
-		store?.close();
+		await store?.save();
+		await store?.close();
 	});
 	onDestroy(() => {
 		editor?.destroy();
