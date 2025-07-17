@@ -1,0 +1,51 @@
+<script lang="ts">
+	import * as Popover from '$lib/components/ui/popover';
+	import type { Editor } from '@tiptap/core';
+	import EdraToolTip from '../EdraToolTip.svelte';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import { cn } from '$lib/utils';
+	import { ChevronDown, Link } from '@lucide/svelte';
+	import { Input } from '$lib/components/ui/input';
+	import Button from '$lib/components/ui/button/button.svelte';
+
+	interface Props {
+		editor: Editor;
+		open?: boolean;
+	}
+
+	let { editor, open = $bindable(false) }: Props = $props();
+
+	let value = $state<string>();
+
+	function handleSubmit(e: Event) {
+		e.preventDefault();
+		if (value === undefined || value.trim() === '') return;
+		editor.chain().focus().setLink({ href: value }).run();
+		open = false;
+	}
+</script>
+
+<Popover.Root bind:open>
+	<Popover.Trigger>
+		{@const isActive = editor.isActive('link')}
+		<EdraToolTip tooltip="Link">
+			<div
+				class={buttonVariants({
+					variant: 'ghost',
+					size: 'icon',
+					class: cn('gap-0')
+				})}
+				class:bg-muted={isActive}
+			>
+				<Link />
+				<ChevronDown class="text-muted-foreground !size-2" />
+			</div>
+		</EdraToolTip>
+	</Popover.Trigger>
+	<Popover.Content portalProps={{ to: undefined, disabled: true }} class="h-fit w-80">
+		<form class="flex items-center gap-2" onsubmit={handleSubmit}>
+			<Input placeholder="Type or paste a link" bind:value required type="url" />
+			<Button type="submit">Insert</Button>
+		</form>
+	</Popover.Content>
+</Popover.Root>
