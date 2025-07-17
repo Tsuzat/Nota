@@ -94,7 +94,7 @@
 	}}
 >
 	<Popover.Trigger>
-		<EdraToolTip tooltip="Search and Replace" shortCut={getKeyboardShortcut('f', true)}>
+		<EdraToolTip tooltip="Search and Replace" shortCut={getKeyboardShortcut('F', true)}>
 			<Button variant="ghost" size="icon" class="size-7">
 				<Search />
 			</Button>
