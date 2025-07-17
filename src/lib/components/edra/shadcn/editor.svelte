@@ -70,7 +70,7 @@
 				VideoPlaceholder(VideoPlaceHolderComp),
 				VideoExtended(VideoExtendedComp, onDropOrPaste),
 				AudioPlaceholder(AudioPlaceHolderComp),
-				AudioExtended(AudioExtendedComp),
+				AudioExtended(AudioExtendedComp, onDropOrPaste),
 				IFramePlaceholder(IFramePlaceHolderComp),
 				IFrameExtended(IFrameExtendedComp),
 				slashcommand(SlashCommandList),
