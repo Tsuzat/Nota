@@ -1,6 +1,8 @@
 import { ISWINDOWS } from '$lib/utils';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import { resolve } from '@tauri-apps/api/path';
-import { copyFile, exists } from '@tauri-apps/plugin-fs';
+import { copyFile, exists, writeFile } from '@tauri-apps/plugin-fs';
+import { toast } from 'svelte-sonner';
 
 /**
  * Helping function to copy assets to the workspace
@@ -20,4 +22,34 @@ export const moveFilesToAssets = async (files: string[], assetsPath: string) => 
 		copiedFiles.push(finalPath);
 	}
 	return copiedFiles;
+};
+
+export const createFile = async (file: File, path: string): Promise<string> => {
+	const id = toast.loading(`Saving ${file.name} of ${file.size} bytes...`);
+	const fileReader = new FileReader();
+
+	// Construct the asset path
+	const assetsPath = await resolve(path, file.name);
+
+	// Create a promise to handle the asynchronous file writing
+	return new Promise((resolve, reject) => {
+		fileReader.onload = async () => {
+			if (fileReader.result instanceof ArrayBuffer) {
+				const binary = new Uint8Array(fileReader.result);
+				try {
+					await writeFile(assetsPath, binary);
+					resolve(convertFileSrc(assetsPath));
+					toast.success('File saved successfully!', { id });
+				} catch (err) {
+					toast.error('Error saving image!', { id });
+					reject(`Error saving file: ${err}`);
+				}
+			}
+		};
+		fileReader.onerror = (err) => {
+			toast.error('Error saving image!', { id });
+			reject(`Error reading file: ${err}`);
+		};
+		fileReader.readAsArrayBuffer(file);
+	});
 };
