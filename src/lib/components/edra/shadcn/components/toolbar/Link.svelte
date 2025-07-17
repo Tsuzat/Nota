@@ -22,6 +22,7 @@
 		e.preventDefault();
 		if (value === undefined || value.trim() === '') return;
 		editor.chain().focus().setLink({ href: value }).run();
+		value = undefined;
 		open = false;
 	}
 </script>

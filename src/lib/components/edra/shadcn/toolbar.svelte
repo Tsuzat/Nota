@@ -9,6 +9,7 @@
 	import QuickColors from './components/toolbar/QuickColors.svelte';
 	import SearchAndReplace from './components/toolbar/SearchAndReplace.svelte';
 	import ToolBarIcon from './components/ToolBarIcon.svelte';
+	import Link from './components/toolbar/Link.svelte';
 
 	const { editor, class: className, excludedCommands, children }: EdraToolbarProps = $props();
 
@@ -32,12 +33,15 @@
 			{:else}
 				{@const commandGroup = commands[cmd]}
 				{#each commandGroup as command (command)}
-					<ToolBarIcon {editor} {command} />
+					{#if command.name === 'link'}
+						<Link {editor} />
+					{:else}
+						<ToolBarIcon {editor} {command} />
+					{/if}
 				{/each}
 			{/if}
 		{/each}
 		<FontSize {editor} />
 		<QuickColors {editor} />
-		<SearchAndReplace {editor} />
 	{/if}
 </div>
