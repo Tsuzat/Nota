@@ -21,7 +21,7 @@
 	import { onDestroy, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { DEFAULT_SETTINGS } from '$lib/types';
-	import { moveFilesToAssets } from '$lib/local/utils.js';
+	import { createFile, moveFilesToAssets } from '$lib/local/utils.js';
 
 	const sidebar = useSidebar();
 
@@ -36,6 +36,11 @@
 	const onFileSelect = $derived.by(() => {
 		if (data.assetsPath === undefined) return;
 		return async (files: string[]) => moveFilesToAssets(files, data.assetsPath);
+	});
+
+	const onDropOrPaste = $derived.by(() => {
+		if (data.assetsPath === undefined) return;
+		return async (file: File) => createFile(file, data.assetsPath);
 	});
 
 	$effect(() => {
@@ -177,7 +182,14 @@
 				{/if}
 				<EdraDragHandleExtended {editor} />
 			{/if}
-			<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} {onFileSelect} />
+			<EdraEditor
+				bind:editor
+				{content}
+				class="size-full !p-8"
+				{onUpdate}
+				{onFileSelect}
+				{onDropOrPaste}
+			/>
 		</div>
 	</div>
 {:else}
