@@ -9,13 +9,7 @@
 
 <MediaExtended bind:mediaRef {...rest}>
 	{@const node = rest.node}
-	<video
-		bind:this={mediaRef}
-		src={node.attrs.src}
-		controls
-		title={node.attrs.title}
-		class="m-0 object-cover"
-	>
-		<track kind="captions" />
-	</video>
+	<!-- svelte-ignore element_invalid_self_closing_tag -->
+	<!-- svelte-ignore a11y_media_has_caption -->
+	<video bind:this={mediaRef} src={node.attrs.src} playsinline controls title={node.attrs.title} />
 </MediaExtended>

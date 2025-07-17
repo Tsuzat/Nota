@@ -48,7 +48,8 @@
 		autofocus = false,
 		class: className,
 		spellcheck = true,
-		onFileSelect
+		onFileSelect,
+		onDropOrPaste
 	}: EdraEditorProps = $props();
 
 	onMount(() => {
@@ -66,7 +67,7 @@
 				ImagePlaceholder(ImagePlaceholderComp),
 				ImageExtended(ImageExtendedComp),
 				VideoPlaceholder(VideoPlaceHolderComp),
-				VideoExtended(VideoExtendedComp),
+				VideoExtended(VideoExtendedComp, onDropOrPaste),
 				AudioPlaceholder(AudioPlaceHolderComp),
 				AudioExtended(AudioExtendedComp),
 				IFramePlaceholder(IFramePlaceHolderComp),
