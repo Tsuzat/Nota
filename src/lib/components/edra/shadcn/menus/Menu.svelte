@@ -10,6 +10,7 @@
 	import Headings from '../components/toolbar/Headings.svelte';
 	import QuickColors from '../components/toolbar/QuickColors.svelte';
 	import ToolBarIcon from '../components/ToolBarIcon.svelte';
+	import Link from '../components/toolbar/Link.svelte';
 
 	const {
 		editor,
@@ -112,7 +113,11 @@
 			{:else}
 				{@const commandGroup = commands[cmd]}
 				{#each commandGroup as command (command)}
-					<ToolBarIcon {editor} {command} />
+					{#if command.name === 'link'}
+						<Link {editor} />
+					{:else}
+						<ToolBarIcon {editor} {command} />
+					{/if}
 				{/each}
 			{/if}
 		{/each}
