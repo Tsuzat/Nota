@@ -2,7 +2,7 @@
 	import { NodeViewWrapper, NodeViewContent } from 'svelte-tiptap';
 	import type { NodeViewProps } from '@tiptap/core';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-	const { node, updateAttributes, extension }: NodeViewProps = $props();
+	const { editor, node, updateAttributes, extension }: NodeViewProps = $props();
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Check from '@lucide/svelte/icons/check';
 	import Copy from '@lucide/svelte/icons/copy';
@@ -32,6 +32,7 @@
 		<Popover.Root>
 			<Popover.Trigger
 				contenteditable="false"
+				disabled={!editor.isEditable}
 				class={buttonVariants({
 					variant: 'ghost',
 					size: 'sm',
