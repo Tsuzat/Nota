@@ -22,6 +22,7 @@
 	import { toast } from 'svelte-sonner';
 	import { DEFAULT_SETTINGS } from '$lib/types';
 	import { createFile, moveFilesToAssets } from '$lib/local/utils.js';
+	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 
 	const sidebar = useSidebar();
 
@@ -165,7 +166,11 @@
 				}}
 			/>
 		</div>
-		<div class={cn('z-20 ml-auto px-3', !ISMACOS && ISTAURI && 'mr-30')}>
+
+		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', !ISMACOS && ISTAURI && 'mr-30')}>
+			{#if editor && !editor?.isDestroyed}
+				<SearchAndReplace {editor} />
+			{/if}
 			<NavActions starred={note.favorite} {toggleStar} bind:settings={pageSettings} />
 		</div>
 		{#if !ISMACOS && ISTAURI}
