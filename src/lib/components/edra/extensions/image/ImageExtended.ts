@@ -31,6 +31,6 @@ export const ImageExtended = (component: Component<NodeViewProps>): Node<ImageOp
 			return SvelteNodeViewRenderer(component);
 		}
 	}).configure({
-		allowBase64: true
+		allowBase64: false
 	});
 };

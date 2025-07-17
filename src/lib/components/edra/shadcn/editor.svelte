@@ -33,6 +33,7 @@
 	import slashcommand from '../extensions/slash-command/slashcommand';
 	import SlashCommandList from './components/SlashCommandList.svelte';
 	import { FileDrop } from '../extensions/HandleFileDrop';
+	import { getHandleDropImage, getHandlePasteImage } from '../utils';
 
 	const lowlight = createLowlight(all);
 
@@ -87,6 +88,12 @@
 				autofocus
 			}
 		);
+		editor.setOptions({
+			editorProps: {
+				handlePaste: getHandlePasteImage(onDropOrPaste),
+				handleDrop: getHandleDropImage(onDropOrPaste)
+			}
+		});
 	});
 
 	onDestroy(() => {

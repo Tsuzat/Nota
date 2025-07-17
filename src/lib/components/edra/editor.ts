@@ -1,16 +1,15 @@
 import { Editor, type Extensions, type EditorOptions, type Content } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
-import { getHandlePaste } from './utils.js';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import Typography from '@tiptap/extension-typography';
-import { ColorHighlighter } from './extensions/ColorHighlighter.js';
+import { ColorHighlighter } from './extensions/ColorHighlighter';
 import { FontSize, TextStyle, Color } from '@tiptap/extension-text-style';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
-import SearchAndReplace from './extensions/FindAndReplace.js';
+import SearchAndReplace from './extensions/FindAndReplace';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
-import { Table, TableCell, TableRow, TableHeader } from './extensions/table/index.js';
+import { Table, TableCell, TableRow, TableHeader } from './extensions/table';
 import { Placeholder } from '@tiptap/extensions';
 import { Markdown } from 'tiptap-markdown';
 import MathExtension from '@aarkue/tiptap-math-extension';
@@ -101,10 +100,5 @@ export default (
 		...options
 	});
 
-	editor.setOptions({
-		editorProps: {
-			handlePaste: getHandlePaste(editor)
-		}
-	});
 	return editor;
 };
