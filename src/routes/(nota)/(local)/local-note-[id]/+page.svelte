@@ -162,7 +162,7 @@
 			</IconPicker>
 			<input
 				value={note.name}
-				class="truncate text-lg font-bold focus:outline-none"
+				class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
 				onchange={(e) => {
 					const target = e.target as HTMLInputElement;
 					const value = target.value;
