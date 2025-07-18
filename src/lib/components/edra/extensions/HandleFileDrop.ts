@@ -1,3 +1,4 @@
+import type { FileType } from '$lib/utils';
 import { Extension } from '@tiptap/core';
 
 export interface FileDropOptions {
@@ -5,6 +6,10 @@ export interface FileDropOptions {
 	 * The current handler. By default it just echoes back the input.
 	 */
 	handler: (files: string[]) => Promise<string[]>;
+	/**
+	 * The assets getter. By default it returns an empty array.
+	 */
+	assetsGetter: (fileType: FileType) => Promise<string[]>;
 }
 
 declare module '@tiptap/core' {
@@ -20,6 +25,23 @@ declare module '@tiptap/core' {
 			 * returns a Promise<string[]> of the uploaded URLs.
 			 */
 			handleFileDrop: (files: string[]) => Promise<string[]>;
+			/**
+			 * Set the assets getter that takes a file type
+			 * and returns a Promise of the asset URLs.
+			 */
+			setGetAssets: (getter: (fileType: string) => Promise<string[]>) => ReturnType;
+			/**
+			 * Get assets for a specific file type,
+			 * returns a Promise<string[]> of the asset URLs.
+			 */
+			getAssets: (fileType: string) => Promise<string[]>;
+		};
+	}
+
+	interface Storage {
+		fileDrop: {
+			handler: (files: string[]) => Promise<string[]>;
+			assetsGetter: (fileType: string) => Promise<string[]>;
 		};
 	}
 }
@@ -27,17 +49,19 @@ declare module '@tiptap/core' {
 export const FileDrop = Extension.create<FileDropOptions>({
 	name: 'fileDrop',
 
-	// initial default (identity) handler
+	// initial default handlers
 	addOptions() {
 		return {
-			handler: async (files: string[]) => files
+			handler: async (files: string[]) => files,
+			assetsGetter: async () => []
 		};
 	},
 
 	// this creates a little storage bucket on `editor.storage.fileDrop`
 	addStorage() {
 		return {
-			handler: this.options.handler
+			handler: this.options.handler,
+			assetsGetter: this.options.assetsGetter
 		};
 	},
 
@@ -45,17 +69,30 @@ export const FileDrop = Extension.create<FileDropOptions>({
 		return {
 			setHandleFileDrop:
 				(handler) =>
-				({ commands, editor }) => {
+				({ editor }) => {
 					editor.storage.fileDrop.handler = handler;
 					return true;
 				},
 
 			handleFileDrop:
 				(files) =>
-				async ({ editor }) => {
+				({ editor }) => {
 					// await the currently-registered handler
-					const urls = await editor.storage.fileDrop.handler(files);
-					return urls;
+					return editor.storage.fileDrop.handler(files);
+				},
+
+			setGetAssets:
+				(getter) =>
+				({ editor }) => {
+					editor.storage.fileDrop.assetsGetter = getter;
+					return true;
+				},
+
+			getAssets:
+				(fileType) =>
+				({ editor }) => {
+					// await the currently-registered assets getter
+					return editor.storage.fileDrop.assetsGetter(fileType);
 				}
 		};
 	}
