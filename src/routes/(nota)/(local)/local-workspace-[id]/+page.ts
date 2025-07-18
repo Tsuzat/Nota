@@ -37,7 +37,8 @@ export const load: PageLoad = async ({ params }) => {
 		return;
 	}
 
-	const store = await loadStore(workspace.path, { autoSave: false });
+	const path = await resolve(workspace.path, '.workspace.nota');
+	const store = await loadStore(path, { autoSave: false });
 
 	const content = (await store.get<Content>('content')) ?? null;
 

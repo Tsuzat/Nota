@@ -2,15 +2,10 @@
 	import { beforeNavigate } from '$app/navigation';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
-	import {
-		EdraBubbleMenu,
-		EdraDragHandleExtended,
-		EdraEditor,
-		EdraToolBar
-	} from '$lib/components/edra/shadcn';
+	import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '$lib/components/edra/shadcn';
 	import IconPicker from '$lib/components/icons/icon-picker.svelte';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
+	import { buttonVariants } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
 	import { cn, FileType, ISMACOS, ISTAURI } from '$lib/utils';
@@ -22,6 +17,7 @@
 	import { createFile, getAssetsByFileType, moveFilesToAssets } from '$lib/local/utils';
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte.js';
+	import * as Tabs from '$lib/components/ui/tabs';
 
 	const sidebar = useSidebar();
 
@@ -169,9 +165,11 @@
 			<WindowsButtons />
 		{/if}
 	</header>
-	{#if pageSettings.showtoolbar && editor}
+	<!-- {#if pageSettings.showtoolbar && editor}
 		<EdraToolBar {editor} />
-	{/if}
+	{/if} -->
+	<Tabs.Root></Tabs.Root>
+
 	<div class="flex h-[calc(100vh-3rem)] flex-1 flex-grow flex-col overflow-auto">
 		<div class="mx-auto h-full w-full max-w-3xl flex-1 flex-grow">
 			{#if editor && !editor?.isDestroyed}
