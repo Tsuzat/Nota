@@ -122,7 +122,6 @@
 			{/snippet}
 		</SimpleTooltip>
 	{/if}
-	<div class="text-muted-foreground hidden font-medium md:inline-block">Edit Oct 08</div>
 	<Button variant="ghost" size="icon" class="size-7" onclick={toggleStar}>
 		<StarIcon class={cn(starred && 'fill-yellow-500 text-yellow-500')} />
 	</Button>
