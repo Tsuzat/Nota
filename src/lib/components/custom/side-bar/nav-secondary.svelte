@@ -1,39 +1,25 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import type { Component, ComponentProps } from 'svelte';
-
-	let {
-		ref = $bindable(null),
-		items,
-		...restProps
-	}: ComponentProps<typeof Sidebar.Group> & {
-		items: {
-			title: string;
-			url: string;
-			icon: Component;
-			badge?: string;
-		}[];
-	} = $props();
+	import { Settings, Trash2 } from '@lucide/svelte';
 </script>
 
-<Sidebar.Group bind:ref {...restProps}>
+<Sidebar.Group class="mt-auto">
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
-			{#each items as item (item.title)}
-				<Sidebar.MenuItem>
-					<Sidebar.MenuButton>
-						{#snippet child({ props })}
-							<a href={item.url} {...props}>
-								<item.icon />
-								<span>{item.title}</span>
-							</a>
-						{/snippet}
-					</Sidebar.MenuButton>
-					{#if item.badge}
-						<Sidebar.MenuBadge>{item.badge}</Sidebar.MenuBadge>
-					{/if}
-				</Sidebar.MenuItem>
-			{/each}
+			<Sidebar.MenuItem>
+				<Sidebar.MenuButton class="group/settings">
+					<Settings
+						class="rotate-0 transition-transform duration-700 group-hover/settings:rotate-180"
+					/>
+					<span>Settings</span>
+				</Sidebar.MenuButton>
+			</Sidebar.MenuItem>
+			<Sidebar.MenuItem>
+				<Sidebar.MenuButton class="group/trash">
+					<Trash2 class="group-hover/trash:animate-bounce" />
+					<span>Trash</span>
+				</Sidebar.MenuButton>
+			</Sidebar.MenuItem>
 		</Sidebar.Menu>
 	</Sidebar.GroupContent>
 </Sidebar.Group>

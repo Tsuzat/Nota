@@ -11,20 +11,20 @@
 
 <Sidebar.Menu>
 	<Sidebar.MenuItem>
-		<Sidebar.MenuButton onclick={() => (search.open = true)}>
+		<Sidebar.MenuButton class="border py-2" onclick={() => (search.open = true)}>
 			<Search />
 			<span>Search</span>
-			<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded p-1">
+			<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded-md p-1">
 				{getKeyboardShortcut('K', true)}
 			</Sidebar.MenuBadge>
 		</Sidebar.MenuButton>
 	</Sidebar.MenuItem>
-	<Sidebar.MenuItem>
+	<!-- <Sidebar.MenuItem>
 		<Sidebar.MenuButton>
 			<Sparkle />
 			<span>Ask AI</span>
 		</Sidebar.MenuButton>
-	</Sidebar.MenuItem>
+	</Sidebar.MenuItem> -->
 	<Sidebar.MenuItem>
 		<Sidebar.MenuButton
 			isActive={page.url.pathname.endsWith('/home')}
