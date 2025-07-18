@@ -6,23 +6,6 @@
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
 	const data = {
-		navMain: [
-			{
-				title: 'Search',
-				url: '#',
-				icon: SearchIcon
-			},
-			{
-				title: 'Ask AI',
-				url: '#',
-				icon: SparklesIcon
-			},
-			{
-				title: 'Home',
-				url: '/home',
-				icon: HouseIcon
-			}
-		],
 		navSecondary: [
 			{
 				title: 'Settings',
@@ -56,6 +39,7 @@
 	import { MoonStar, Sun } from '@lucide/svelte';
 	import { toggleMode } from 'mode-watcher';
 	import SimpleTooltip from '../simple-tooltip.svelte';
+	import { page } from '$app/state';
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
@@ -78,7 +62,7 @@
 			</SimpleTooltip>
 		</div>
 		<TeamSwitcher />
-		<NavMain items={data.navMain} />
+		<NavMain />
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<NavFavorites />

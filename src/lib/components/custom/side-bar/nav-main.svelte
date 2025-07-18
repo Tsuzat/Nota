@@ -1,32 +1,33 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import type { Component } from 'svelte';
+	import { getKeyboardShortcut } from '$lib/utils';
+	import { Home, Search, Sparkle } from '@lucide/svelte';
+	import { getGlobalSearch } from '../global-search/constants.svelte';
 
-	let {
-		items
-	}: {
-		items: {
-			title: string;
-			url?: string;
-			icon: Component;
-			isActive?: boolean;
-		}[];
-	} = $props();
+	const search = getGlobalSearch();
 </script>
 
 <Sidebar.Menu>
-	{#each items as item (item.title)}
-		<Sidebar.MenuItem>
-			{@const isActive = page.url.pathname.endsWith(item.url ?? '')}
-			<Sidebar.MenuButton {isActive}>
-				{#snippet child({ props })}
-					<a href={item.url} {...props}>
-						<item.icon />
-						<span>{item.title}</span>
-					</a>
-				{/snippet}
-			</Sidebar.MenuButton>
-		</Sidebar.MenuItem>
-	{/each}
+	<Sidebar.MenuItem>
+		<Sidebar.MenuButton onclick={() => (search.open = true)}>
+			<Search />
+			<span>Search</span>
+			<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded p-1">
+				{getKeyboardShortcut('K', true)}
+			</Sidebar.MenuBadge>
+		</Sidebar.MenuButton>
+	</Sidebar.MenuItem>
+	<Sidebar.MenuItem>
+		<Sidebar.MenuButton>
+			<Sparkle />
+			<span>Ask AI</span>
+		</Sidebar.MenuButton>
+	</Sidebar.MenuItem>
+	<Sidebar.MenuItem>
+		<Sidebar.MenuButton isActive={page.url.pathname.endsWith('/home')}>
+			<Home />
+			<span>Home</span>
+		</Sidebar.MenuButton>
+	</Sidebar.MenuItem>
 </Sidebar.Menu>
