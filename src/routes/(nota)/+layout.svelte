@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { GlobalSearch, setGlobalSearch } from '$lib/components/custom/global-search';
 	import NewWorkspace from '$lib/components/custom/dialogs/local/new-workspace.svelte';
 	import AppSidebar from '$lib/components/custom/side-bar/app-sidebar.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -12,6 +13,7 @@
 	setLocalUserWorkspaces();
 	setLocalWorkspaces();
 	setLocalNotes();
+	setGlobalSearch();
 
 	const { children, data } = $props();
 
@@ -45,6 +47,8 @@
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
+
+<GlobalSearch />
 <Sidebar.Provider>
 	<NewWorkspace />
 	<AppSidebar />
