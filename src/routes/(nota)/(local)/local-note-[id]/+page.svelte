@@ -15,13 +15,13 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import { cn, ISMACOS, ISTAURI } from '$lib/utils';
+	import { cn, FileType, ISMACOS, ISTAURI } from '$lib/utils';
 	import { Loader } from '@lucide/svelte';
 	import type { Editor } from '@tiptap/core';
 	import { onDestroy, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { DEFAULT_SETTINGS } from '$lib/types';
-	import { createFile, moveFilesToAssets } from '$lib/local/utils.js';
+	import { createFile, getAssetsByFileType, moveFilesToAssets } from '$lib/local/utils';
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 
 	const sidebar = useSidebar();
@@ -42,6 +42,11 @@
 	const onDropOrPaste = $derived.by(() => {
 		if (data.assetsPath === undefined) return;
 		return async (file: File) => createFile(file, data.assetsPath);
+	});
+
+	const getAssets = $derived.by(() => {
+		if (data.assetsPath === undefined) return;
+		return async (fileType: FileType) => getAssetsByFileType(fileType, data.assetsPath);
 	});
 
 	$effect(() => {
@@ -195,6 +200,7 @@
 				{onUpdate}
 				{onFileSelect}
 				{onDropOrPaste}
+				{getAssets}
 			/>
 		</div>
 	</div>
