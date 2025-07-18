@@ -4,6 +4,7 @@
 	import { getKeyboardShortcut } from '$lib/utils';
 	import { Home, Search, Sparkle } from '@lucide/svelte';
 	import { getGlobalSearch } from '../global-search/constants.svelte';
+	import { goto } from '$app/navigation';
 
 	const search = getGlobalSearch();
 </script>
@@ -25,7 +26,10 @@
 		</Sidebar.MenuButton>
 	</Sidebar.MenuItem>
 	<Sidebar.MenuItem>
-		<Sidebar.MenuButton isActive={page.url.pathname.endsWith('/home')}>
+		<Sidebar.MenuButton
+			isActive={page.url.pathname.endsWith('/home')}
+			onclick={() => goto('/home')}
+		>
 			<Home />
 			<span>Home</span>
 		</Sidebar.MenuButton>

@@ -21,7 +21,7 @@
 <svelte:document onkeydown={handleKeydown} />
 
 <Command.Dialog bind:open={search.open} class="rounded-lg">
-	<Command.Input placeholder="Type a something to search..." />
+	<Command.Input class="p-2" placeholder="Type a something to search..." />
 	<Command.List>
 		<Command.Empty>No results found.</Command.Empty>
 		<Command.Group heading="Suggestions">
