@@ -17,7 +17,6 @@
 	import { linear } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import { dirname } from '@tauri-apps/api/path';
-	import { goto } from '$app/navigation';
 
 	const sidebar = useSidebar();
 	let showMore = $state(false);
@@ -113,7 +112,6 @@
 					</Sidebar.MenuItem>
 				</div>
 			{/each}
-
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton
 					class="text-sidebar-foreground/70"
