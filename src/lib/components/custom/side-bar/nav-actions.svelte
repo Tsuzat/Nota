@@ -1,36 +1,3 @@
-<script lang="ts" module>
-	import ArrowDownIcon from '@lucide/svelte/icons/arrow-down';
-	import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
-	import CopyIcon from '@lucide/svelte/icons/copy';
-	import GalleryVerticalEndIcon from '@lucide/svelte/icons/gallery-vertical-end';
-	import LinkIcon from '@lucide/svelte/icons/link';
-	import Settings2Icon from '@lucide/svelte/icons/settings-2';
-	import Trash2Icon from '@lucide/svelte/icons/trash-2';
-
-	const data = [
-		{
-			label: 'Copy Link',
-			icon: LinkIcon
-		},
-		{
-			label: 'Duplicate',
-			icon: CopyIcon
-		},
-		{
-			label: 'Version History',
-			icon: GalleryVerticalEndIcon
-		},
-		{
-			label: 'Import',
-			icon: ArrowUpIcon
-		},
-		{
-			label: 'Export',
-			icon: ArrowDownIcon
-		}
-	];
-</script>
-
 <script lang="ts">
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dropdown from '$lib/components/ui/dropdown-menu';
@@ -38,7 +5,18 @@
 	import StarIcon from '@lucide/svelte/icons/star';
 	import { type NotePageSettingsType } from '$lib/types';
 	import { cn, getKeyboardShortcut } from '$lib/utils';
-	import { Bubbles, Film, Lock, PenTool, SpellCheck } from '@lucide/svelte';
+	import {
+		ArrowDown,
+		ArrowUp,
+		Bubbles,
+		CopyIcon,
+		Film,
+		Lock,
+		PenTool,
+		Settings2Icon,
+		SpellCheck,
+		Trash2Icon
+	} from '@lucide/svelte';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 
 	interface Props {
@@ -137,13 +115,18 @@
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
-				{#each data as d}
-					{@const Icon = d.icon}
-					<Dropdown.Item>
-						<Icon />
-						{d.label}
-					</Dropdown.Item>
-				{/each}
+				<Dropdown.Item>
+					<CopyIcon />
+					Duplicate
+				</Dropdown.Item>
+				<Dropdown.Item>
+					<ArrowDown />
+					Import
+				</Dropdown.Item>
+				<Dropdown.Item>
+					<ArrowUp />
+					Export
+				</Dropdown.Item>
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
