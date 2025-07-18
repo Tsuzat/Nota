@@ -109,6 +109,32 @@ class WorkSpaces {
 			toast.error('Something went wrong when deleting the workspace.');
 		}
 	}
+
+	async updateWorkspace(workspace: LocalWorkSpace) {
+		try {
+			const res = await DB.execute(
+				'UPDATE workspaces SET name = $1, icon = $2, path = $3, created_at = $4, updated_at = $5 WHERE id = $6',
+				[
+					workspace.name,
+					workspace.icon,
+					workspace.path,
+					workspace.created_at,
+					workspace.updated_at,
+					workspace.id
+				]
+			);
+			if (res.rowsAffected === 1) {
+				this.setWorkspaces(
+					this.getWorkspaces().map((w) => (w.id === workspace.id ? workspace : w))
+				);
+			} else {
+				toast.warning('Could not update workspace.');
+			}
+		} catch (e) {
+			console.error(e);
+			toast.error('Something went wrong when updating the workspace.');
+		}
+	}
 }
 
 const WORKSPACESKEY = Symbol('WORKSPACESID');
