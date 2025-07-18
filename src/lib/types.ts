@@ -7,7 +7,7 @@ export type NotePageSettingsType = {
 };
 
 export const DEFAULT_SETTINGS: NotePageSettingsType = {
-	showtoolbar: true,
+	showtoolbar: false,
 	showbubblemenu: true,
 	compressmedia: false,
 	spellcheck: true,

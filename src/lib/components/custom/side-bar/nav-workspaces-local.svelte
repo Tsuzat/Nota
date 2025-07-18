@@ -150,10 +150,10 @@
 										<ArrowDownFromLine />
 										<span>Import Notes</span>
 									</DropdownMenu.Item>
-									<DropdownMenu.Item>
+									<!-- <DropdownMenu.Item>
 										<Trash2Icon />
 										<span>Move to trash</span>
-									</DropdownMenu.Item>
+									</DropdownMenu.Item> -->
 									<DropdownMenu.Item variant="destructive" onclick={() => handleDelete(workspace)}>
 										<Trash2Icon />
 										<span>Delete Workspace</span>
