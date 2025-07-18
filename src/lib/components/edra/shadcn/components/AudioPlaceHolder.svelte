@@ -11,10 +11,13 @@
 	import { open as openDialog } from '@tauri-apps/plugin-dialog';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import { toast } from 'svelte-sonner';
-	import { ISTAURI } from '$lib/utils';
+	import { FileType, ISTAURI } from '$lib/utils';
+	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 
 	let open = $state(false);
 	let audioUrl = $state('');
+
+	const assetsFiles = editor.commands.getAssets(FileType.AUDIO);
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -70,13 +73,14 @@
 		<Popover.Trigger class="sr-only absolute left-1/2">Open</Popover.Trigger>
 		<Popover.Content
 			contenteditable={false}
-			class="bg-popover w-96 p-1 transition-all duration-500"
+			class="bg-popover w-96 rounded-lg p-0 transition-all duration-500"
 			portalProps={{ disabled: true, to: undefined }}
 		>
 			<Tabs.Root value="local">
 				<Tabs.List>
 					<Tabs.Trigger value="local">Upload</Tabs.Trigger>
 					<Tabs.Trigger value="url">Embed Link</Tabs.Trigger>
+					<Tabs.Trigger value="assets">Assets</Tabs.Trigger>
 				</Tabs.List>
 				<Tabs.Content value="local" class="py-2">
 					<Button class="w-full" onclick={openFileDialog}>Upload an Audio</Button>
@@ -84,8 +88,35 @@
 				<Tabs.Content value="url" class="py-2">
 					<form onsubmit={handleSubmit} class="flex flex-col gap-2">
 						<Input placeholder="Embed Audio" bind:value={audioUrl} required type="url" />
-						<Button type="submit" variant="secondary">Insert</Button>
+						<Button type="submit">Insert</Button>
 					</form>
+				</Tabs.Content>
+				<Tabs.Content value="assets" class="max-h-96 overflow-y-auto py-2">
+					<span class="mb-4">Your Workspace Assets</span>
+					{#await assetsFiles}
+						<div class="flex h-16 items-center justify-center">Loading...</div>
+					{:then assets}
+						{#if assets.length === 0}
+							<div class="flex h-16 items-center justify-center">No assets found</div>
+						{:else}
+							{#each assets as asset}
+								<div class="flex flex-col items-center justify-center gap-2">
+									<SimpleTooltip content="Drag and Drop or click to insert">
+										<Button
+											variant="ghost"
+											class="size-fit p-1"
+											onclick={() => {
+												open = editor.commands.setAudio(asset);
+											}}
+										>
+											<!-- svelte-ignore element_invalid_self_closing_tag -->
+											<audio src={asset} controls class="h-auto w-full rounded-md object-cover" />
+										</Button>
+									</SimpleTooltip>
+								</div>
+							{/each}
+						{/if}
+					{/await}
 				</Tabs.Content>
 			</Tabs.Root>
 		</Popover.Content>
