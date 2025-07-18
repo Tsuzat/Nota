@@ -182,7 +182,7 @@
 			<WindowsButtons />
 		{/if}
 	</header>
-	{#if pageSettings.showtoolbar && editor && !editor?.isDestroyed && editor?.isEditable}
+	{#if pageSettings.showtoolbar && editor}
 		<EdraToolBar {editor} />
 	{/if}
 	<div class="flex h-[calc(100vh-3rem)] flex-1 flex-grow flex-col overflow-auto">
