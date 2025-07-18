@@ -1,7 +1,7 @@
-import { ISWINDOWS } from '$lib/utils';
+import { FileType, getFileTypeExtensions, ISWINDOWS } from '$lib/utils';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { resolve } from '@tauri-apps/api/path';
-import { copyFile, exists, writeFile } from '@tauri-apps/plugin-fs';
+import { copyFile, exists, readDir, writeFile } from '@tauri-apps/plugin-fs';
 import { toast } from 'svelte-sonner';
 
 /**
@@ -52,4 +52,21 @@ export const createFile = async (file: File, path: string): Promise<string> => {
 		};
 		fileReader.readAsArrayBuffer(file);
 	});
+};
+
+export const getAssetsByFileType = async (fileType: FileType, path: string): Promise<string[]> => {
+	const dirEntries = await readDir(path);
+	const extensions = getFileTypeExtensions(fileType);
+	const files: string[] = [];
+	for (const dirEntry of dirEntries) {
+		if (!dirEntry.isFile) continue;
+		const fileName = dirEntry.name;
+		const fileExtension = fileName.split('.').pop();
+		if (fileExtension !== undefined && extensions.includes(fileExtension)) {
+			const filePath = await resolve(path, fileName);
+			const src = convertFileSrc(filePath);
+			files.push(src);
+		}
+	}
+	return files;
 };

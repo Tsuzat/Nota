@@ -57,3 +57,31 @@ export function handleKeydown(e: KeyboardEvent) {
 		}
 	}
 }
+
+export enum FileType {
+	IMAGE = 'image',
+	VIDEO = 'video',
+	AUDIO = 'audio',
+	DOCS = 'docs',
+	UNKNOWN = 'unknown'
+}
+
+/**
+ * Helper function to get web standard file extensions
+ * @param fileType - FileType
+ * @returns - Array of file extensions
+ */
+export const getFileTypeExtensions = (fileType: FileType) => {
+	switch (fileType) {
+		case FileType.IMAGE:
+			return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+		case FileType.VIDEO:
+			return ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
+		case FileType.AUDIO:
+			return ['mp3', 'wav', 'ogg', 'flac', 'aac'];
+		case FileType.DOCS:
+			return ['docx', 'doc', 'pptx', 'ppt', 'xlsx', 'xls'];
+		case FileType.UNKNOWN:
+			return [];
+	}
+};
