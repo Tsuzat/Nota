@@ -1,3 +1,4 @@
+import type { FileType } from '$lib/utils';
 import type { Content, Editor } from '@tiptap/core';
 import type { EditorState } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
@@ -13,6 +14,7 @@ export interface EdraEditorProps {
 	spellcheck?: boolean;
 	onFileSelect?: (files: string[]) => Promise<string[]>;
 	onDropOrPaste?: (file: File) => Promise<string>;
+	getAssets?: (fileType: FileType) => Promise<string[]>;
 }
 
 export interface EdraToolbarProps {
