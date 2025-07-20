@@ -1,6 +1,13 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import { Settings, Trash2 } from '@lucide/svelte';
+
+	const trashedNotes = $derived(
+		getLocalNotes()
+			.getNotes()
+			.filter((n) => n.trashed).length
+	);
 </script>
 
 <Sidebar.Group class="mt-auto">
@@ -19,6 +26,9 @@
 					<Trash2 class="group-hover/trash:animate-bounce" />
 					<span>Trash</span>
 				</Sidebar.MenuButton>
+				<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded-full p-1.5"
+					>{trashedNotes}</Sidebar.MenuBadge
+				>
 			</Sidebar.MenuItem>
 		</Sidebar.Menu>
 	</Sidebar.GroupContent>
