@@ -54,9 +54,11 @@
 			{/snippet}
 		</SimpleTooltip>
 	{/if}
-	<Button variant="ghost" size="icon" class="size-7" onclick={toggleStar}>
-		<StarIcon class={cn(starred && 'fill-yellow-500 text-yellow-500')} />
-	</Button>
+	<SimpleTooltip content="Toggle Favorite">
+		<Button variant="ghost" size="icon" class="size-7" onclick={toggleStar}>
+			<StarIcon class={cn(starred && 'fill-yellow-500 text-yellow-500')} />
+		</Button>
+	</SimpleTooltip>
 	<Dropdown.Root bind:open>
 		<Dropdown.Trigger
 			class={buttonVariants({
