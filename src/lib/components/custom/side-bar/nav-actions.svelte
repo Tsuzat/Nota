@@ -18,14 +18,24 @@
 		Trash2Icon
 	} from '@lucide/svelte';
 	import SimpleTooltip from '../simple-tooltip.svelte';
+	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 
 	interface Props {
 		settings: NotePageSettingsType;
 		starred?: boolean;
 		toggleStar?: () => void;
+		note: LocalNote;
 	}
 
-	let { settings = $bindable(), starred, toggleStar }: Props = $props();
+	let { settings = $bindable(), starred, toggleStar, note }: Props = $props();
+
+	const localNotes = getLocalNotes();
+	const workspace = $derived(
+		getLocalWorkspaces()
+			.getWorkspaces()
+			.find((w) => w.id === note.workspace)
+	);
 
 	let open = $state(false);
 </script>
@@ -117,26 +127,28 @@
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
-				<Dropdown.Item>
-					<CopyIcon />
-					Duplicate
-				</Dropdown.Item>
-				<Dropdown.Item>
+				{#if workspace}
+					<Dropdown.Item onclick={() => localNotes.duplicateNote(workspace, note)}>
+						<CopyIcon />
+						Duplicate
+					</Dropdown.Item>
+				{/if}
+				<Dropdown.Item onclick={() => localNotes.importNote()}>
 					<ArrowDown />
 					Import
 				</Dropdown.Item>
-				<Dropdown.Item>
+				<Dropdown.Item onclick={() => localNotes.exportNote(note)}>
 					<ArrowUp />
 					Export
 				</Dropdown.Item>
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
-				<Dropdown.Item>
+				<Dropdown.Item onclick={() => localNotes.trashNote(note)}>
 					<Trash2Icon />
 					<span>Move to Trash</span>
 				</Dropdown.Item>
-				<Dropdown.Item variant="destructive">
+				<Dropdown.Item variant="destructive" onclick={() => localNotes.deleteNote(note)}>
 					<Trash2Icon />
 					<span>Delete Note</span>
 				</Dropdown.Item>

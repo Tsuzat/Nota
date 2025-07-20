@@ -35,16 +35,22 @@
 					<span class="text-muted-foreground truncate text-xs">Workspace: {workspace?.name}</span>
 				</div>
 				<div class="ml-auto">
-					<SimpleTooltip content="Restore Note">
-						<Button variant="ghost" onclick={() => localNotes.restoreNote(note)} class="!size-7">
-							<RotateCcw />
-						</Button>
-					</SimpleTooltip>
-					<SimpleTooltip content="Delete Note">
-						<Button variant="ghost" onclick={() => localNotes.deleteNote(note)} class="!size-7">
-							<Trash2Icon />
-						</Button>
-					</SimpleTooltip>
+					<Button
+						title="Restore Note"
+						variant="ghost"
+						onclick={() => localNotes.restoreNote(note)}
+						class="!size-7"
+					>
+						<RotateCcw />
+					</Button>
+					<Button
+						title="Delete Permanently"
+						variant="ghost"
+						onclick={() => localNotes.deleteNote(note)}
+						class="!size-7"
+					>
+						<Trash2Icon />
+					</Button>
 				</div>
 			</div>
 		{/each}
