@@ -9,11 +9,13 @@
 	import { getLocalWorkspaces, setLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { handleKeydown, ISTAURI } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
+	import { GlobalSettings, setGlobalSettings } from '$lib/components/custom/settings';
 
 	setLocalUserWorkspaces();
 	setLocalWorkspaces();
 	setLocalNotes();
 	setGlobalSearch();
+	setGlobalSettings();
 
 	const { children, data } = $props();
 
@@ -49,6 +51,8 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <GlobalSearch />
+<GlobalSettings />
+
 <Sidebar.Provider>
 	<NewWorkspace />
 	<AppSidebar />
