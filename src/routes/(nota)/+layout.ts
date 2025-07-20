@@ -76,9 +76,12 @@ async function loadLocalWorkspaces(
 
 async function loadLocalNotes(currentUserWorkspaceId: string): Promise<LocalNote[] | null> {
 	try {
-		const res = await DB.select<LocalNote[]>('SELECT * FROM notes WHERE userworkspace = $1', [
+		let res = await DB.select<LocalNote[]>('SELECT * FROM notes WHERE userworkspace = $1', [
 			currentUserWorkspaceId
 		]);
+		res = res.map((r) => {
+			return { ...r, favorite: r.favorite === 'true', trashed: r.trashed === 'true' };
+		});
 		return res;
 	} catch (error) {
 		console.error(error);
