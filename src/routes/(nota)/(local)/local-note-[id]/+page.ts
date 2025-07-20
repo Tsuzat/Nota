@@ -15,7 +15,12 @@ async function loadLocalNote(id: string): Promise<LocalNote | null> {
 		if (res.length === 0) {
 			return null;
 		} else {
-			return res[0];
+			const note: LocalNote = {
+				...res[0],
+				favorite: res[0].favorite === 'true',
+				trashed: res[0].trashed === 'true'
+			};
+			return note;
 		}
 	} catch (e) {
 		console.error(e);
