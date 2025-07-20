@@ -3,6 +3,8 @@
 	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import { Settings, Trash2 } from '@lucide/svelte';
 	import Trashed from '../dialogs/trashed.svelte';
+	import { getGlobalSettings } from '../settings';
+	import { getKeyboardShortcut } from '$lib/utils';
 
 	const trashedNotes = $derived(
 		getLocalNotes()
@@ -11,18 +13,23 @@
 	);
 
 	let open = $state(false);
+
+	const useSettings = getGlobalSettings();
 </script>
 
 <Sidebar.Group class="mt-auto">
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton class="group/settings">
+				<Sidebar.MenuButton class="group/settings" onclick={() => (useSettings.open = true)}>
 					<Settings
 						class="rotate-0 transition-transform duration-700 group-hover/settings:rotate-180"
 					/>
 					<span>Settings</span>
 				</Sidebar.MenuButton>
+				<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded-md p-1.5">
+					{getKeyboardShortcut(',', true)}
+				</Sidebar.MenuBadge>
 			</Sidebar.MenuItem>
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton class="group/trash" onclick={() => (open = true)}>
