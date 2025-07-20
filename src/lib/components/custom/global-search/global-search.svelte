@@ -3,10 +3,11 @@
 	import { ISTAURI } from '$lib/utils';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import { HomeIcon } from '@lucide/svelte';
+	import { HomeIcon, StarIcon, Trash2Icon } from '@lucide/svelte';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { getGlobalSearch } from './constants.svelte';
 	import { goto } from '$app/navigation';
+	import SimpleTooltip from '../simple-tooltip.svelte';
 
 	const search = getGlobalSearch();
 
@@ -56,6 +57,18 @@
 					<Command.Item value={note.name} {onselect} onclick={onselect}>
 						<IconRenderer icon={note.icon} class="mr-2 size-4" />
 						<span>{note.name}</span>
+						<Command.Shortcut class="flex gap-1">
+							{#if note.favorite}
+								<SimpleTooltip content="Favorite">
+									<StarIcon class="size-3 fill-amber-500 text-amber-500" />
+								</SimpleTooltip>
+							{/if}
+							{#if note.trashed}
+								<SimpleTooltip content="Trash">
+									<Trash2Icon class="size-3" />
+								</SimpleTooltip>
+							{/if}
+						</Command.Shortcut>
 					</Command.Item>
 				{/each}
 			</Command.Group>
