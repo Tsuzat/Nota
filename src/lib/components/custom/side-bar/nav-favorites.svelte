@@ -24,7 +24,7 @@
 	const notes = $derived(
 		localNotes
 			.getNotes()
-			.filter((n) => n.favorite)
+			.filter((n) => n.favorite && !n.trashed)
 			.slice(0, showMore ? undefined : 5)
 	);
 
@@ -41,20 +41,6 @@
 	async function openPath(note: LocalNote) {
 		const dir = await dirname(note.path);
 		await reveal(dir);
-	}
-
-	async function deleteNote(note: LocalNote) {
-		const allowed = await ask(
-			'This note will be deleted permanently and all data will be erased.',
-			{
-				title: `Delete Note - ${note.name}`,
-				okLabel: 'Yes, Delete',
-				kind: 'warning'
-			}
-		);
-		if (allowed) {
-			localNotes.deleteNote(note);
-		}
 	}
 </script>
 
@@ -85,27 +71,34 @@
 								{/snippet}
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content
-								class="w-56 rounded-lg"
+								class="w-fit rounded-lg"
 								side={sidebar.isMobile ? 'bottom' : 'right'}
 								align={sidebar.isMobile ? 'end' : 'start'}
 							>
 								<DropdownMenu.Item onclick={() => toggleStar(note)}>
-									<StarOffIcon class="text-muted-foreground" />
-									<span>Remove from Favorites</span>
+									<StarOffIcon />
+									Unfavorites
 								</DropdownMenu.Item>
 								<DropdownMenu.Separator />
 								<DropdownMenu.Item onclick={() => window.navigator.clipboard.writeText(note.path)}>
-									<LinkIcon class="text-muted-foreground" />
-									<span>Copy Path</span>
+									<LinkIcon />
+									Copy Path
 								</DropdownMenu.Item>
 								<DropdownMenu.Item onclick={() => openPath(note)}>
-									<ArrowUpRightIcon class="text-muted-foreground" />
-									<span>Open in {ISMACOS ? 'Finder' : 'File Explorer'}</span>
+									<ArrowUpRightIcon />
+									Open in {ISMACOS ? 'Finder' : 'File Explorer'}
 								</DropdownMenu.Item>
 								<DropdownMenu.Separator />
-								<DropdownMenu.Item onclick={() => deleteNote(note)} variant="destructive">
-									<Trash2Icon class="text-muted-foreground" />
-									<span>Delete</span>
+								<DropdownMenu.Item variant="destructive" onclick={() => localNotes.trashNote(note)}>
+									<Trash2Icon />
+									Move to trash
+								</DropdownMenu.Item>
+								<DropdownMenu.Item
+									onclick={() => localNotes.deleteNote(note)}
+									variant="destructive"
+								>
+									<Trash2Icon />
+									Delete
 								</DropdownMenu.Item>
 							</DropdownMenu.Content>
 						</DropdownMenu.Root>
