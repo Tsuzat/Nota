@@ -11,8 +11,11 @@
 	import {
 		ArrowDownFromLine,
 		ArrowUpFromLine,
+		CopyIcon,
 		ExternalLink,
 		Pencil,
+		StarIcon,
+		Trash2,
 		Trash2Icon
 	} from '@lucide/svelte';
 	import { ask } from '@tauri-apps/plugin-dialog';
@@ -20,7 +23,7 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { getKeyboardShortcut, ISMACOS } from '$lib/utils';
+	import { cn, getKeyboardShortcut, ISMACOS } from '$lib/utils';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import NewWorkspace from '../dialogs/local/new-workspace.svelte';
@@ -31,6 +34,7 @@
 	const localWorkspaces = getLocalWorkspaces();
 	const workspaces = $derived(localWorkspaces.getWorkspaces().slice(0, showMore ? undefined : 5));
 	const sidebar = Sidebar.useSidebar();
+	const localNotes = getLocalNotes();
 
 	let open = $state(false);
 	let openNewNotes = $state(false);
@@ -162,9 +166,9 @@
 							</DropdownMenu.Root>
 							<Collapsible.Content>
 								<Sidebar.MenuSub>
-									{@const notes = getLocalNotes()
+									{@const notes = localNotes
 										.getNotes()
-										.filter((n) => n.workspace === workspace.id)}
+										.filter((n) => n.workspace === workspace.id && !n.trashed)}
 									{#each notes as note (note.id)}
 										{@const href = `local-note-${note.id}`}
 										{@const isActive = page.url.pathname.endsWith(href)}
@@ -177,6 +181,44 @@
 													</a>
 												{/snippet}
 											</Sidebar.MenuSubButton>
+											<DropdownMenu.Root>
+												<DropdownMenu.Trigger>
+													{#snippet child({ props })}
+														<Sidebar.MenuAction showOnHover {...props}>
+															<EllipsisIcon />
+															<span class="sr-only">More</span>
+														</Sidebar.MenuAction>
+													{/snippet}
+												</DropdownMenu.Trigger>
+												<DropdownMenu.Content>
+													<DropdownMenu.Item>
+														{@const favorite = note.favorite}
+														<StarIcon class={cn(favorite && 'fill-yellow-500 text-yellow-500')} />
+														{favorite ? 'Unfavorite' : 'Favorite'}
+													</DropdownMenu.Item>
+													<DropdownMenu.Item
+														onclick={() => localNotes.duplicateNote(workspace, note)}
+													>
+														<CopyIcon />
+														Duplicate
+													</DropdownMenu.Item>
+													<DropdownMenu.Separator />
+													<DropdownMenu.Item
+														variant="destructive"
+														onclick={() => localNotes.trashNote(note)}
+													>
+														<Trash2Icon />
+														Move to Trash
+													</DropdownMenu.Item>
+													<DropdownMenu.Item
+														variant="destructive"
+														onclick={() => localNotes.deleteNote(note)}
+													>
+														<Trash2Icon />
+														Delete
+													</DropdownMenu.Item>
+												</DropdownMenu.Content>
+											</DropdownMenu.Root>
 										</Sidebar.MenuSubItem>
 									{/each}
 								</Sidebar.MenuSub>
