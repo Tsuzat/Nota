@@ -12,6 +12,7 @@
 	import { toast } from 'svelte-sonner';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
+	import { goto } from '$app/navigation';
 
 	const localUserWorkspaces = getLocalUserWorkspaces();
 	const localWorkspaces = getLocalWorkspaces();
@@ -27,6 +28,7 @@
 			localUserWorkspaces.setCurrentUserWorkspace(workspace);
 			await localWorkspaces.fetchWorkspaces(workspace.id);
 			await localNotes.fetchNotes(workspace.id);
+			goto('/home');
 			toast.success('Changed User Workspace to' + workspace.name, { id });
 		} catch (error) {
 			console.error(error);
