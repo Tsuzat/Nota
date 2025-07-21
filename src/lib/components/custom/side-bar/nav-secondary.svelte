@@ -20,7 +20,7 @@
 <Sidebar.Group class="mt-auto">
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
-			<Sidebar.MenuItem>
+			<!-- <Sidebar.MenuItem>
 				<Sidebar.MenuButton class="group/settings" onclick={() => (useSettings.open = true)}>
 					<Settings
 						class="rotate-0 transition-transform duration-700 group-hover/settings:rotate-180"
@@ -30,7 +30,7 @@
 				<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded-md p-1.5">
 					{getKeyboardShortcut(',', true)}
 				</Sidebar.MenuBadge>
-			</Sidebar.MenuItem>
+			</Sidebar.MenuItem> -->
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton class="group/trash" onclick={() => (open = true)}>
 					<Trash2 class="group-hover/trash:animate-bounce" />
