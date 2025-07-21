@@ -10,12 +10,14 @@
 	import { handleKeydown, ISTAURI } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import { GlobalSettings, setGlobalSettings } from '$lib/components/custom/settings';
+	import { NewUserWorkspace, setNewUserWorkspace } from '$lib/components/custom/user-workspace';
 
 	setLocalUserWorkspaces();
 	setLocalWorkspaces();
 	setLocalNotes();
 	setGlobalSearch();
 	setGlobalSettings();
+	setNewUserWorkspace();
 
 	const { children, data } = $props();
 
@@ -52,6 +54,7 @@
 
 <GlobalSearch />
 <GlobalSettings />
+<NewUserWorkspace />
 
 <Sidebar.Provider>
 	<NewWorkspace />
