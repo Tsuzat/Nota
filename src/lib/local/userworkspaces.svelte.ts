@@ -49,12 +49,17 @@ class UserWorkspaces {
 	async createUserWorkspace(name: string, icon: string) {
 		try {
 			const id = crypto.randomUUID();
+			const newUserWorkspaces: LocalUserWorkspace = {
+				id,
+				name,
+				icon
+			};
 			const res = await DB.execute(
 				'INSERT INTO userworkspaces (id, name, icon) VALUES ($1, $2, $3)',
 				[id, name, icon]
 			);
 			if (res.rowsAffected > 0) {
-				this.fetchUserWorkspaces();
+				this.setUserWorkspaces([...this.getUserWorkspaces(), newUserWorkspaces]);
 			} else {
 				toast.error('Something went wrong when creating the user workspace');
 			}
