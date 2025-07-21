@@ -176,7 +176,12 @@
 			{#if editor && !editor?.isDestroyed}
 				<SearchAndReplace {editor} />
 			{/if}
-			<NavActions starred={note.favorite} {toggleStar} bind:settings={pageSettings} />
+			<NavActions
+				starred={note.favorite as boolean}
+				{toggleStar}
+				bind:settings={pageSettings}
+				{note}
+			/>
 		</div>
 		{#if !ISMACOS && ISTAURI}
 			<WindowsButtons />

@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
-	import NavActions from '$lib/components/custom/side-bar/nav-actions.svelte';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
 	import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '$lib/components/edra/shadcn';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
+	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import { cn, ISMACOS, ISTAURI } from '$lib/utils';
 	import type { Content, Editor } from '@tiptap/core';
 	let content = $state<Content>();
 	let editor = $state<Editor>();
 
 	const sidebar = useSidebar();
+	const useLocalUserWorkspaces = getLocalUserWorkspaces();
+	const currentUserWorkspace = $derived(useLocalUserWorkspaces.getCurrentUserWorkspace());
 
 	if (browser) {
 		const raw = localStorage.getItem('content');
@@ -39,7 +41,7 @@
 		<SidebarTrigger />
 		<BackAndForthButtons />
 		<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
-		<h3>My Notes</h3>
+		<h3>Home - {currentUserWorkspace?.name}</h3>
 	</div>
 	<div class={cn('z-20 ml-auto px-3', !ISMACOS && ISTAURI && 'mr-30')}>
 		<!-- <NavActions /> -->

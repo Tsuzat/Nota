@@ -45,7 +45,7 @@
 					<Sidebar.MenuButton {...props} class="w-fit px-1.5">
 						{#if activeWorkspace}
 							<div
-								class="bg-sidebar-primary text-sidebar-primary-foreground flex size-6 items-center justify-center rounded border"
+								class="bg-sidebar-primary text-sidebar-primary-foreground flex size-6 items-center justify-center rounded border p-1"
 							>
 								<IconRenderer icon={activeWorkspace.icon} />
 							</div>
