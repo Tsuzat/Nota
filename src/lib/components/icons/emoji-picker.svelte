@@ -126,9 +126,7 @@
 
 	// Clear cache when category or skin tone changes
 	$effect(() => {
-		const _ = selectedCategory;
-		const __ = skinTone;
-		filteredEmojiCache.clear();
+		if (selectedCategory && skinTone) filteredEmojiCache.clear();
 	});
 
 	function getRandom(): string {
@@ -136,36 +134,11 @@
 		const randomIndex = Math.floor(Math.random() * allEmojis.length);
 		return allEmojis[randomIndex].emoji;
 	}
-
-	// Computed filtered emojis for better performance
-	const filteredEmojis = $derived(() => {
-		const categoryEmojis = emojis[selectedCategory] || [];
-		const shouldUseSkinTone =
-			selectedCategory === 'People & Body' || debouncedSearchTerm.trim() !== '';
-		return applyFilters(
-			categoryEmojis,
-			debouncedSearchTerm,
-			shouldUseSkinTone ? skinTone : 'default'
-		);
-	});
-
-	// Clear search function
-	function clearSearch() {
-		searchTerm = '';
-		debouncedSearchTerm = '';
-	}
-
-	// Handle keyboard navigation
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			clearSearch();
-		}
-	}
 </script>
 
 <Tabs.Root bind:value={selectedCategory} class="flex h-96 w-full flex-col-reverse gap-0">
 	<Tabs.List class="flex w-full items-center justify-evenly rounded-sm">
-		{#each categories as catergory}
+		{#each categories as catergory, idx (idx)}
 			<Tabs.Trigger value={catergory}>
 				<Tooltip content={catergory}>
 					{categoriesEmojis[catergory]}
@@ -175,7 +148,7 @@
 	</Tabs.List>
 	<Tabs.Content value={selectedCategory} class="w-full overflow-y-auto">
 		<div class="grid grid-cols-10 justify-between">
-			{#each applyFilters(emojis[selectedCategory], debouncedSearchTerm, selectedCategory === 'People & Body' || searchTerm.trim() !== '' ? skinTone : 'default') as emoji}
+			{#each applyFilters(emojis[selectedCategory], debouncedSearchTerm, selectedCategory === 'People & Body' || searchTerm.trim() !== '' ? skinTone : 'default') as emoji, idx (idx)}
 				<Tooltip content={emoji.name}>
 					<Button
 						variant="ghost"
@@ -216,10 +189,10 @@
 				</Tooltip>
 			</Popover.Trigger>
 			<Popover.Content class="bg-popover flex h-fit w-fit p-0">
-				{#each Object.keys(skinTones) as st}
+				{#each Object.keys(skinTones) as st, idx (idx)}
 					<Button variant="ghost" class="size-8 p-1 text-xl" onclick={() => (skinTone = st)}>
 						<Tooltip content={st}>
-							{[skinTones[st]]}
+							{skinTones[st]}
 						</Tooltip>
 					</Button>
 				{/each}

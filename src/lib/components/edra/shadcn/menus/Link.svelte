@@ -6,12 +6,10 @@
 	import Copy from '@lucide/svelte/icons/copy';
 	import Trash from '@lucide/svelte/icons/trash';
 	import { Input } from '$lib/components/ui/input';
-	import { Check, Edit, Pen } from '@lucide/svelte';
+	import { Check, Edit } from '@lucide/svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
-	import { toast } from 'svelte-sonner';
 	import { ISTAURI } from '$lib/utils.js';
 	import { openUrl } from '@tauri-apps/plugin-opener';
-	import { ask } from '@tauri-apps/plugin-dialog';
 
 	interface Props {
 		editor: Editor;

@@ -186,7 +186,9 @@ class Notes {
 	}
 
 	// export the note with it's assets
-	async exportNote(note: LocalNote) {}
+	async exportNote(note: LocalNote) {
+		toast.loading(`Exporting note ${note.name}...`);
+	}
 
 	// import a note
 	async importNote() {}

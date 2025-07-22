@@ -5,11 +5,8 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { type Snippet } from 'svelte';
-	import { open as openDialog } from '@tauri-apps/plugin-dialog';
-	import { documentDir, resolve } from '@tauri-apps/api/path';
-	import { ISTAURI } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
-	import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
+	import { type LocalWorkSpace } from '$lib/local/workspaces.svelte';
 	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import { Loader2 } from '@lucide/svelte';
 	import { Checkbox } from '$lib/components/ui/checkbox';
@@ -18,12 +15,11 @@
 
 	interface Props {
 		open?: boolean;
-		type?: 'local' | 'cloud';
 		workspace: LocalWorkSpace;
 		children?: Snippet<[]>;
 	}
 
-	let { open = $bindable(false), type = 'local', workspace, children }: Props = $props();
+	let { open = $bindable(false), workspace, children }: Props = $props();
 
 	let name: string | undefined = $state<string>();
 	let icon: string = $state('lucide:FileText');
@@ -50,6 +46,7 @@
 			open = false;
 		} catch (e) {
 			loading = false;
+			console.error(e);
 			toast.error('Could not create notes');
 			return;
 		} finally {

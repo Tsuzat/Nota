@@ -20,8 +20,6 @@ jobs:
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
-        env:
-          TIPTAP_PRO_TOKEN: ${{secrets.TIPTAP_PRO_TOKEN}}
 
       - name: Run Lint
         run: bun run lint

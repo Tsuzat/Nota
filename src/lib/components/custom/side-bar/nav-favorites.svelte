@@ -12,7 +12,6 @@
 	import StarOffIcon from '@lucide/svelte/icons/star-off';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import { openPath as reveal } from '@tauri-apps/plugin-opener';
-	import { ask } from '@tauri-apps/plugin-dialog';
 	import { toast } from 'svelte-sonner';
 	import { linear } from 'svelte/easing';
 	import { slide } from 'svelte/transition';

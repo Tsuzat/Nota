@@ -71,7 +71,7 @@
 			</SimpleTooltip>
 		</div>
 		<div class="flex w-full items-center gap-2 overflow-x-auto">
-			{#each useLocalUserWorkspaces.getUserWorkspaces() as workspace}
+			{#each useLocalUserWorkspaces.getUserWorkspaces() as workspace (workspace.id)}
 				<Button
 					variant="secondary"
 					class={cn(
@@ -98,7 +98,7 @@
 			<span class="text-muted-foreground text-sm">{recentNotes.length}</span>
 		</h4>
 		<div class="flex w-full items-center gap-2 overflow-x-auto">
-			{#each recentNotes as recent}
+			{#each recentNotes as recent (recent.id)}
 				<a
 					class="bg-card group relative flex w-fit items-center gap-2 rounded-lg p-4"
 					href="/local-note-{recent.id}"

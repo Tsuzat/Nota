@@ -11,7 +11,7 @@
 	import { toast } from 'svelte-sonner';
 	import { GlobalSettings, setGlobalSettings } from '$lib/components/custom/settings';
 	import { NewUserWorkspace, setNewUserWorkspace } from '$lib/components/custom/user-workspace';
-	import { getRecentsContext, setRecentsContext } from '$lib/recents.svelte.js';
+	import { setRecentsContext } from '$lib/recents.svelte.js';
 	import { page } from '$app/state';
 
 	setLocalUserWorkspaces();

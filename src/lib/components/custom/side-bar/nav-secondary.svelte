@@ -1,10 +1,8 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import { Settings, Trash2 } from '@lucide/svelte';
+	import { Trash2 } from '@lucide/svelte';
 	import Trashed from '../dialogs/trashed.svelte';
-	import { getGlobalSettings } from '../settings';
-	import { getKeyboardShortcut } from '$lib/utils';
 
 	const trashedNotes = $derived(
 		getLocalNotes()
@@ -13,8 +11,6 @@
 	);
 
 	let open = $state(false);
-
-	const useSettings = getGlobalSettings();
 </script>
 
 <Sidebar.Group class="mt-auto">

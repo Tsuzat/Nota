@@ -6,7 +6,6 @@
 	import { Input } from '$lib/components/ui/input';
 	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import { Loader2 } from '@lucide/svelte';
-	import type { Snippet } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { getNewUserWorkspace } from '.';
 

@@ -15,7 +15,6 @@
 		ExternalLink,
 		Pencil,
 		StarIcon,
-		Trash2,
 		Trash2Icon
 	} from '@lucide/svelte';
 	import { ask } from '@tauri-apps/plugin-dialog';
@@ -86,7 +85,7 @@
 	<Sidebar.GroupContent>
 		{#if workspaces.length > 0}
 			<Sidebar.Menu>
-				{#each workspaces as workspace (workspace.name)}
+				{#each workspaces as workspace (workspace.id)}
 					<Collapsible.Root>
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton>

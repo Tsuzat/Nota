@@ -35,7 +35,7 @@
 		{#if ISTAURI}
 			{@const workspaces = getLocalWorkspaces().getWorkspaces()}
 			<Command.Group value="Local Workspaces" heading={'Local Workspaces : ' + workspaces.length}>
-				{#each workspaces as workspace}
+				{#each workspaces as workspace (workspace.id)}
 					{@const onselect = () => {
 						goto(`local-workspace-${workspace.id}`);
 						search.open = false;
@@ -49,7 +49,7 @@
 			<Command.Separator />
 			{@const notes = getLocalNotes().getNotes()}
 			<Command.Group value="Local Notes" heading={'Local Notes : ' + notes.length}>
-				{#each notes as note}
+				{#each notes as note (note.id)}
 					{@const onselect = () => {
 						goto(`local-note-${note.id}`);
 						search.open = false;

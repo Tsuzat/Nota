@@ -97,7 +97,7 @@
 						{#if assets.length === 0}
 							<div class="flex h-16 items-center justify-center">No assets found</div>
 						{:else}
-							{#each assets as asset}
+							{#each assets as asset, idx (idx)}
 								<div class="flex flex-col items-center justify-center gap-2">
 									<SimpleTooltip content="Drag and Drop or click to insert">
 										<Button

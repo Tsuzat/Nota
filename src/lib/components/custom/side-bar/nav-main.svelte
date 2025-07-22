@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { getKeyboardShortcut } from '$lib/utils';
-	import { Home, Search, Sparkle } from '@lucide/svelte';
+	import { Home, Search } from '@lucide/svelte';
 	import { getGlobalSearch } from '../global-search/constants.svelte';
 	import { goto } from '$app/navigation';
 

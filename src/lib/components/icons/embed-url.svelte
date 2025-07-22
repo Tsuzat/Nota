@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Button from '../ui/button/button.svelte';
 	import { Input } from '../ui/input';
-	import { Loader } from '@lucide/svelte';
 
 	interface Props {
 		onSelect?: (url: string) => void;

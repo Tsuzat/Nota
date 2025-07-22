@@ -4,7 +4,6 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import { RotateCcw, Trash2Icon } from '@lucide/svelte';
-	import SimpleTooltip from '../simple-tooltip.svelte';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 
 	interface Props {
@@ -24,7 +23,7 @@
 		side="right"
 		portalProps={{ disabled: true, to: undefined }}
 	>
-		{#each trashedNotes as note}
+		{#each trashedNotes as note (note.id)}
 			{@const workspace = getLocalWorkspaces()
 				.getWorkspaces()
 				.find((w) => w.id === note.workspace)}
