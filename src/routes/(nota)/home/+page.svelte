@@ -1,6 +1,5 @@
 <script lang="ts">
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
-	import { selectUserWorkspace } from '$lib/components/custom/side-bar/team-switcher.svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { getNewUserWorkspace } from '$lib/components/custom/user-workspace';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
@@ -13,7 +12,6 @@
 	import { getRecentsContext } from '$lib/recents.svelte';
 	import { cn, ISMACOS, ISTAURI } from '$lib/utils';
 	import { PlusIcon } from '@lucide/svelte';
-	import type { Content, Editor } from '@tiptap/core';
 
 	const sidebar = useSidebar();
 	const useLocalUserWorkspaces = getLocalUserWorkspaces();
@@ -57,21 +55,21 @@
 </header>
 <div class="mx-auto flex h-[calc(100vh-3rem)] w-3xl flex-1 flex-grow flex-col gap-8 overflow-auto">
 	<section class="my-4 flex w-full flex-col items-start gap-4 p-4">
-		<h4 class="text-muted-foreground flex w-full items-center gap-2">
-			User Workspaces
+		<div class="text-muted-foreground flex w-full items-center gap-2">
+			<h4>User Workspaces</h4>
 			<span class="text-foreground text-sm"
 				>{useLocalUserWorkspaces.getUserWorkspaces().length}</span
 			>
 			<SimpleTooltip content="Add New UserWorkspace">
 				<Button
 					variant="ghost"
-					class="ml-auto size-6 rounded-full p-1"
+					class="size-7 rounded-full"
 					onclick={() => (useNewUserWorkspace.open = true)}
 				>
 					<PlusIcon />
 				</Button>
 			</SimpleTooltip>
-		</h4>
+		</div>
 		<div class="flex w-full items-center gap-2 overflow-x-auto">
 			{#each useLocalUserWorkspaces.getUserWorkspaces() as workspace}
 				<Button
@@ -80,7 +78,9 @@
 						'w-fit rounded-lg !p-6',
 						currentUserWorkspace?.id === workspace.id && 'border-primary border'
 					)}
-					onclick={() => selectUserWorkspace(workspace)}
+					onclick={() => {
+						if (currentUserWorkspace?.id === workspace.id) return;
+					}}
 				>
 					<IconRenderer icon={workspace.icon} class="mr-2 size-4" />
 					<span class="text-muted-foreground">{workspace.name}</span>
