@@ -6,8 +6,6 @@
 	import { type NotePageSettingsType } from '$lib/types';
 	import { cn, getKeyboardShortcut } from '$lib/utils';
 	import {
-		ArrowDown,
-		ArrowUp,
 		Bubbles,
 		CopyIcon,
 		Film,
@@ -133,14 +131,14 @@
 						Duplicate
 					</Dropdown.Item>
 				{/if}
-				<Dropdown.Item onclick={() => localNotes.importNote()}>
+				<!-- <Dropdown.Item onclick={() => localNotes.importNote()}>
 					<ArrowDown />
 					Import
 				</Dropdown.Item>
 				<Dropdown.Item onclick={() => localNotes.exportNote(note)}>
 					<ArrowUp />
 					Export
-				</Dropdown.Item>
+				</Dropdown.Item> -->
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
