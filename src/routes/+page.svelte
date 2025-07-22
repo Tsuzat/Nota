@@ -7,7 +7,7 @@
 <main class="flex h-screen w-screen flex-col items-center justify-center gap-8">
 	<span class="bg-muted text-muted-foreground rounded-lg p-2"> BETA </span>
 	<div class="flex items-center gap-4">
-		<img src="/favicon.png" alt="Nota" class="mb-4 size-18" />
+		<img src="/favicon.webp" alt="Nota" class="mb-4 size-18" />
 		<h1 class="animate-pulse text-7xl font-bold">Nota</h1>
 	</div>
 	<p class="animate-bounce">
