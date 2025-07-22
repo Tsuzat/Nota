@@ -5,8 +5,10 @@
 
 	import { onMount } from 'svelte';
 	import { getArtifacts, type Artifact } from './artifacts';
+	import { Loader } from '@lucide/svelte';
 
 	let artifacts = $state<Artifact[]>([]);
+	let isLoading = $state(true);
 
 	let current = $derived.by(() => {
 		return artifacts.find((artifact) => artifact.isCurrent);
@@ -14,6 +16,7 @@
 
 	onMount(async () => {
 		artifacts = await getArtifacts();
+		isLoading = false;
 	});
 </script>
 
@@ -25,9 +28,14 @@
 		class="rounded-none shadow-none first:rounded-s-md last:rounded-e-md focus-visible:z-10"
 		href={current?.downloadUrl}
 	>
-		{@const Icon = current?.icon ?? Mac}
-		<Icon />
-		{current?.osName ?? 'MacOS'}
+		{#if isLoading}
+			<Loader class="animate-spin" />
+			<span>Loading...</span>
+		{:else}
+			{@const Icon = current?.icon ?? Mac}
+			<Icon />
+			{current?.osName ?? 'MacOS'}
+		{/if}
 	</Button>
 	<Select.Root type="single">
 		<Select.Trigger

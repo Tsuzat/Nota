@@ -2,7 +2,7 @@ import type { Component } from 'svelte';
 import Mac from './icons/mac.svelte';
 import Windows from './icons/windows.svelte';
 import Linux from './icons/linux.svelte';
-import latest from '$lib/assets/jsons/latest.json';
+import { PUBLIC_NOTA_ARTIFACT_URL } from '$env/static/public';
 
 export interface Artifact {
 	icon?: Component;
@@ -61,12 +61,12 @@ export function detectCurrentPlatform(): string {
 }
 
 export async function getArtifacts(): Promise<Artifact[]> {
-	// const url = PUBLIC_NOTA_ARTIFACT_URL;
+	const url = PUBLIC_NOTA_ARTIFACT_URL;
 
-	// const response = await fetch(url);
-	// if (!response.ok) throw new Error(`Failed to fetch latest.json: ${response.statusText}`);
+	const response = await fetch(url);
+	if (!response.ok) throw new Error(`Failed to fetch latest.json: ${response.statusText}`);
 
-	const json = latest;
+	const json = await response.json();
 	const platforms = json.platforms;
 	if (!platforms) throw new Error('No platforms data found in JSON');
 
