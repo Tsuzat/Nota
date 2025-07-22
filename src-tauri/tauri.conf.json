@@ -47,9 +47,14 @@
 			"icons/128x128@2x.png",
 			"icons/icon.icns",
 			"icons/icon.ico"
-		]
+		],
+		"createUpdaterArtifacts": true
 	},
 	"plugins": {
+		"updater": {
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE3QjBEMzE4QTdGRDhDQjMKUldTempQMm5HTk93cDBDck1mN0lDYWppOWZzM042bXI4c2FJOUszN3VwQjB4Q3RHRXZLbW1YcVUK",
+			"endpoints": ["https://github.com/Tsuzat/Nota/releases/latest/download/latest.json"]
+		},
 		"fs": {
 			"requireLiteralLeadingDot": false
 		}
