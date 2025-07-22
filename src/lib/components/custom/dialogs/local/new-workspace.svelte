@@ -12,6 +12,7 @@
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import { Loader2 } from '@lucide/svelte';
+	import { exists } from '@tauri-apps/plugin-fs';
 
 	interface Props {
 		open?: boolean;
@@ -39,7 +40,18 @@
 			canCreateDirectories: true,
 			defaultPath
 		});
-		if (directory) dir = directory;
+		if (directory) {
+			const path = await resolve(directory, '.workspace.nota');
+			const has = await exists(path);
+			if (has) {
+				toast.error('Workspace already exists', {
+					description:
+						'This location is already in use by another workspace. Please select a different location.'
+				});
+				return;
+			}
+			dir = directory;
+		}
 	}
 
 	async function createLocalWorkspace() {
@@ -63,6 +75,7 @@
 			open = false;
 		} catch (e) {
 			loading = false;
+			console.error(e);
 			toast.error('Could not create workspace');
 			return;
 		} finally {
