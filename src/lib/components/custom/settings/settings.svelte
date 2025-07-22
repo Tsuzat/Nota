@@ -1,9 +1,8 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { MoonStar, Sun, SunMoon } from '@lucide/svelte';
+	import { SunMoon } from '@lucide/svelte';
 	import { getGlobalSettings } from './constants.svelte';
-	import { mode, toggleMode } from 'mode-watcher';
-	import { Button } from '$lib/components/ui/button';
+	import ToggleMode from '../toggle-mode.svelte';
 
 	const useSettings = getGlobalSettings();
 
@@ -34,11 +33,7 @@
 				<div class="description">Toggle theme between light and dark</div>
 			</div>
 			<div class="right flex items-center gap-2">
-				<Button variant="ghost" onclick={toggleMode}>
-					<Sun class="block dark:hidden" />
-					<MoonStar class="hidden dark:block" />
-					<span class="p-1 capitalize">{mode.current + ' Mode'}</span>
-				</Button>
+				<ToggleMode />
 			</div>
 		</div>
 	</Dialog.Content>

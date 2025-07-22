@@ -8,9 +8,7 @@
 	import NavWorkspacesLocal from './nav-workspaces-local.svelte';
 	import { ISMACOS, ISTAURI } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
-	import { MoonStar, Sun } from '@lucide/svelte';
-	import { toggleMode } from 'mode-watcher';
-	import SimpleTooltip from '../simple-tooltip.svelte';
+	import ToggleMode from '../toggle-mode.svelte';
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
@@ -25,12 +23,7 @@
 					<img src="/favicon.png" alt="AppLogo" class="aspect-square size-6" />
 				</Button>
 			{/if}
-			<SimpleTooltip content="Toggle Mode">
-				<Button variant="ghost" size="icon" class="z-10 !size-7" onclick={toggleMode}>
-					<Sun class="block dark:hidden" />
-					<MoonStar class="hidden dark:block" />
-				</Button>
-			</SimpleTooltip>
+			<ToggleMode />
 		</div>
 		<TeamSwitcher />
 		<NavMain />
