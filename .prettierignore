@@ -4,6 +4,7 @@ pnpm-lock.yaml
 yarn.lock
 bun.lock
 bun.lockb
-
 src-tauri/target
+src-tauri/src
+src-tauri/icons
 src-tauri/gen
