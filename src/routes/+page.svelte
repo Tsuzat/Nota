@@ -11,7 +11,7 @@
 		<h1 class="animate-pulse text-7xl font-bold">Nota</h1>
 	</div>
 	<p class="animate-bounce">
-		A fast, modern, feature rich, lightweight and local fist note taking desktop application
+		A fast, modern, feature rich, lightweight and local first note taking desktop application
 	</p>
 	<div class="flex items-center gap-4">
 		<Button variant="secondary" href="https://github.com/Tsuzat/Nota" target="_blank">

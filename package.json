@@ -8,7 +8,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"wrangle:preview": "bun run build && wrangler pages dev",
-		"wrangle:deploy": "bun run build && wrangler pages publish",
+		"wrangle:deploy": "bun run build && wrangler pages deploy",
 		"prepare": "svelte-kit sync",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
