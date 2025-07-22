@@ -41,8 +41,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-          cache: 'bun'
+          node-version: latest
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
