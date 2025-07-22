@@ -20,8 +20,6 @@ jobs:
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
-        env: 
-          PUBLIC_NOTA_ARTIFACT_URL: ""
 
       - name: Run Lint
         run: bun run lint
