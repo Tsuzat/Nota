@@ -1,4 +1,3 @@
-import { PUBLIC_NOTA_ARTIFACT_URL } from '$env/static/public';
 import type { Component } from 'svelte';
 import Mac from './icons/mac.svelte';
 import Windows from './icons/windows.svelte';
@@ -62,7 +61,7 @@ export function detectCurrentPlatform(): string {
 }
 
 export async function getArtifacts(): Promise<Artifact[]> {
-	const url = PUBLIC_NOTA_ARTIFACT_URL;
+	// const url = PUBLIC_NOTA_ARTIFACT_URL;
 
 	// const response = await fetch(url);
 	// if (!response.ok) throw new Error(`Failed to fetch latest.json: ${response.statusText}`);
@@ -74,6 +73,7 @@ export async function getArtifacts(): Promise<Artifact[]> {
 	const currentPlatform = detectCurrentPlatform();
 
 	const artifacts: Artifact[] = Object.entries(platforms).map(
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		([platformKey, data]: [string, any]) => {
 			const osBaseLabel = getOSBaseLabel(platformKey);
 			const icon = osBaseLabel ? osIcons[osBaseLabel] : undefined;

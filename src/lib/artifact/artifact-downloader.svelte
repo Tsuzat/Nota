@@ -41,7 +41,7 @@
 		<Select.Content>
 			<Select.Group>
 				<Select.Label>Select Platform</Select.Label>
-				{#each artifacts as artifact}
+				{#each artifacts as artifact, idx (idx)}
 					<Select.Item
 						value={artifact.osName}
 						label={artifact.osName}
