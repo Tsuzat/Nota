@@ -1,8 +1,10 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import { Trash2 } from '@lucide/svelte';
+	import { Download, Trash2 } from '@lucide/svelte';
 	import Trashed from '../dialogs/trashed.svelte';
+	import { downloadAndInstall } from '$lib/updater';
+	import { check } from '@tauri-apps/plugin-updater';
 
 	const trashedNotes = $derived(
 		getLocalNotes()
@@ -37,6 +39,16 @@
 				</Sidebar.MenuBadge>
 				<Trashed bind:open />
 			</Sidebar.MenuItem>
+			{#await check() then update}
+				{#if update !== null && update !== undefined}
+					<Sidebar.MenuItem>
+						<Sidebar.MenuButton onclick={() => downloadAndInstall(update)}>
+							<Download />
+							<span>Click to Update</span>
+						</Sidebar.MenuButton>
+					</Sidebar.MenuItem>
+				{/if}
+			{/await}
 		</Sidebar.Menu>
 	</Sidebar.GroupContent>
 </Sidebar.Group>
