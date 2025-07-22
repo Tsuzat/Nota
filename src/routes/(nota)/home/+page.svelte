@@ -1,33 +1,38 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
+	import { selectUserWorkspace } from '$lib/components/custom/side-bar/team-switcher.svelte';
+	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
+	import { getNewUserWorkspace } from '$lib/components/custom/user-workspace';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
-	import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '$lib/components/edra/shadcn';
+	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
+	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
+	import { getRecentsContext } from '$lib/recents.svelte';
 	import { cn, ISMACOS, ISTAURI } from '$lib/utils';
+	import { PlusIcon } from '@lucide/svelte';
 	import type { Content, Editor } from '@tiptap/core';
-	let content = $state<Content>();
-	let editor = $state<Editor>();
 
 	const sidebar = useSidebar();
 	const useLocalUserWorkspaces = getLocalUserWorkspaces();
 	const currentUserWorkspace = $derived(useLocalUserWorkspaces.getCurrentUserWorkspace());
+	const localNotes = getLocalNotes();
+	const useRecents = getRecentsContext();
+	const useNewUserWorkspace = getNewUserWorkspace();
 
-	if (browser) {
-		const raw = localStorage.getItem('content');
-		if (raw) {
-			content = JSON.parse(raw);
-		} else {
-			content = {};
+	const recentNotes = $derived.by(() => {
+		const notes = localNotes.getNotes();
+		const recents = useRecents.getRecents();
+		const rn = [];
+		for (const note of notes) {
+			if (recents.has(note.id)) {
+				rn.push(note);
+			}
 		}
-	}
-
-	function onUpdate() {
-		content = editor?.getJSON();
-		localStorage.setItem('content', JSON.stringify(content));
-	}
+		return rn;
+	});
 </script>
 
 <header class="flex h-12 shrink-0 items-center gap-2">
@@ -50,12 +55,61 @@
 		<WindowsButtons />
 	{/if}
 </header>
-<div class="flex h-[calc(100vh-3rem)] flex-1 flex-grow flex-col overflow-auto">
-	<div class="mx-auto h-full w-full max-w-3xl">
-		{#if editor && !editor?.isDestroyed}
-			<EdraBubbleMenu {editor} />
-			<EdraDragHandleExtended {editor} />
-		{/if}
-		<EdraEditor bind:editor {content} class="size-full !p-8" {onUpdate} />
-	</div>
+<div class="mx-auto flex h-[calc(100vh-3rem)] w-3xl flex-1 flex-grow flex-col gap-8 overflow-auto">
+	<section class="my-4 flex w-full flex-col items-start gap-4 p-4">
+		<h4 class="text-muted-foreground flex w-full items-center gap-2">
+			User Workspaces
+			<span class="text-foreground text-sm"
+				>{useLocalUserWorkspaces.getUserWorkspaces().length}</span
+			>
+			<SimpleTooltip content="Add New UserWorkspace">
+				<Button
+					variant="ghost"
+					class="ml-auto size-6 rounded-full p-1"
+					onclick={() => (useNewUserWorkspace.open = true)}
+				>
+					<PlusIcon />
+				</Button>
+			</SimpleTooltip>
+		</h4>
+		<div class="flex w-full items-center gap-2 overflow-x-auto">
+			{#each useLocalUserWorkspaces.getUserWorkspaces() as workspace}
+				<Button
+					variant="secondary"
+					class={cn(
+						'w-fit rounded-lg !p-6',
+						currentUserWorkspace?.id === workspace.id && 'border-primary border'
+					)}
+					onclick={() => selectUserWorkspace(workspace)}
+				>
+					<IconRenderer icon={workspace.icon} class="mr-2 size-4" />
+					<span class="text-muted-foreground">{workspace.name}</span>
+				</Button>
+			{/each}
+			{#if useLocalUserWorkspaces.getUserWorkspaces().length === 0}
+				<span class="text-muted-foreground">No Userworkspaces are found.</span>
+			{/if}
+		</div>
+	</section>
+
+	<section class="my-4 flex w-full flex-col items-start gap-4 p-4">
+		<h4 class="text-foreground flex items-center gap-2">
+			Recents
+			<span class="text-muted-foreground text-sm">{recentNotes.length}</span>
+		</h4>
+		<div class="flex w-full items-center gap-2 overflow-x-auto">
+			{#each recentNotes as recent}
+				<a
+					class="bg-card group relative flex w-fit items-center gap-2 rounded-lg p-4"
+					href="/local-note-{recent.id}"
+				>
+					<IconRenderer icon={recent.icon} class="mr-2 size-4" />
+					<span class="text-muted-foreground">{recent.name}</span>
+				</a>
+			{/each}
+			{#if recentNotes.length === 0}
+				<span class="text-muted-foreground">No recent notes are found.</span>
+			{/if}
+		</div>
+	</section>
 </div>
