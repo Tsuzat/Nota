@@ -11,6 +11,7 @@
 	import Clipboard from '@lucide/svelte/icons/clipboard';
 	import Delete from '@lucide/svelte/icons/trash-2';
 	import { NodeSelection } from '@tiptap/pm/state';
+	import { Plus } from '@lucide/svelte';
 
 	interface Props {
 		editor: Editor;
@@ -77,6 +78,35 @@
 			.deleteSelection()
 			.run();
 	};
+
+	const insertNode = () => {
+		if (currentNodePos === -1) return;
+		const currentNodeSize = currentNode?.nodeSize || 0;
+		const insertPos = currentNodePos + currentNodeSize;
+		const currentNodeIsEmptyParagraph =
+			currentNode?.type.name === 'paragraph' && currentNode?.content?.size === 0;
+		const focusPos = currentNodeIsEmptyParagraph ? currentNodePos + 2 : insertPos + 2;
+		editor
+			.chain()
+			.command(({ dispatch, tr, state }) => {
+				if (dispatch) {
+					if (currentNodeIsEmptyParagraph) {
+						tr.insertText('/', currentNodePos, currentNodePos + 1);
+					} else {
+						tr.insert(
+							insertPos,
+							state.schema.nodes.paragraph.create(null, [state.schema.text('/')])
+						);
+					}
+
+					return dispatch(tr);
+				}
+
+				return true;
+			})
+			.focus(focusPos)
+			.run();
+	};
 </script>
 
 <div class="drag-handle">
@@ -88,6 +118,10 @@
 			<span>Drag Handle</span>
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
+			<DropdownMenu.Item onclick={insertNode}>
+				<Plus />
+				Insert Node
+			</DropdownMenu.Item>
 			<DropdownMenu.Item onclick={handleRemoveFormatting}>
 				<RemoveFormatting />
 				Remove Formatting
