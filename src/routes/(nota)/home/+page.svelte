@@ -38,7 +38,7 @@
 		class={cn(
 			'z-20 ml-18 flex items-center gap-2 px-3',
 			ISMACOS && !sidebar.open && 'ml-18',
-			ISMACOS && ISTAURI && 'md:ml-0'
+			ISMACOS && ISTAURI && sidebar.open && 'md:ml-0'
 		)}
 	>
 		<SidebarTrigger />

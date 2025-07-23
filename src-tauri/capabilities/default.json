@@ -21,6 +21,7 @@
 		"fs:allow-read",
 		"fs:allow-create",
 		"store:default",
+		"core:webview:allow-print",
 		{
 			"identifier": "opener:allow-open-path",
 			"allow": [
