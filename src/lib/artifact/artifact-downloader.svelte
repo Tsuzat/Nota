@@ -40,7 +40,6 @@
 	<Select.Root type="single">
 		<Select.Trigger
 			class={buttonVariants({
-				variant: 'default',
 				class: 'rounded-none shadow-none first:rounded-s-md last:rounded-e-md focus-visible:z-10',
 				size: 'icon'
 			})}
