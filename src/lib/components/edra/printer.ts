@@ -21,7 +21,6 @@ export async function printElementAsPDF(
 		pageMargin = '0.5in',
 		preserveColors = true,
 		useNewWindow = false,
-		closeWindowAfterPrint = true,
 		printDelay = 250
 	} = options;
 
