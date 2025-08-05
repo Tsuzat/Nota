@@ -101,7 +101,7 @@
 				{#if loading}
 					<Loader2 class="animate-spin" />
 				{/if}
-				Create Workspace
+				Create Note
 			</Button>
 		</form>
 	</Dialog.Content>
