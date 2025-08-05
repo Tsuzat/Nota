@@ -22,6 +22,8 @@
 		"fs:allow-create",
 		"store:default",
 		"core:webview:allow-print",
+		"process:allow-restart",
+		"process:allow-exit",
 		{
 			"identifier": "opener:allow-open-path",
 			"allow": [

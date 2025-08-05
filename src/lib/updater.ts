@@ -25,12 +25,14 @@ export async function downloadAndInstall(update: Update) {
 				break;
 			case 'Finished':
 				toast.success(`Update ${update.version} downloaded. Installing...`, {
+					description: undefined,
 					id
 				});
 				break;
 		}
 	});
 	toast.success(`Update ${update.version} installed. Relaunching...`, {
+		description: undefined,
 		id
 	});
 	await relaunch();
