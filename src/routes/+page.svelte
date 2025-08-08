@@ -59,7 +59,7 @@
 </header>
 
 <main
-	class="mx-auto flex size-full max-w-4xl flex-col items-center justify-center gap-8 overflow-auto pt-8"
+	class="mx-auto flex size-full max-w-4xl flex-col items-center justify-between gap-8 overflow-auto pt-8"
 >
 	<p class="animate-bounce">
 		A fast, modern, feature rich, lightweight and local first note taking desktop application
@@ -72,6 +72,5 @@
 		<ArtifactDownloader />
 	</div>
 	<img class="hidden aspect-auto h-auto w-full dark:block" src="/previews/dark.webp" alt="nota" />
-
 	<img class="block aspect-auto h-auto w-full dark:hidden" src="/previews/light.webp" alt="nota" />
 </main>

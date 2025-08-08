@@ -17,6 +17,7 @@
 	import { Button, buttonVariants } from '../ui/button';
 	import Input from '../ui/input/input.svelte';
 	import { Shuffle, X } from '@lucide/svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	interface Props {
 		searchTerm?: string;
@@ -55,7 +56,7 @@
 	let { searchTerm = $bindable(''), onSelect }: Props = $props();
 
 	// Optimized cache with size limit
-	const filteredEmojiCache = new Map<string, EmojiItem[]>();
+	const filteredEmojiCache = new SvelteMap<string, EmojiItem[]>();
 	const MAX_CACHE_SIZE = 50;
 
 	// Native debounce implementation
