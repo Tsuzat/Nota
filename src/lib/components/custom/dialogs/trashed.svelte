@@ -53,5 +53,8 @@
 				</div>
 			</div>
 		{/each}
+		{#if trashedNotes.length === 0}
+			<div class="p-2 text-center">No trashed notes</div>
+		{/if}
 	</Popover.Content>
 </Popover.Root>
