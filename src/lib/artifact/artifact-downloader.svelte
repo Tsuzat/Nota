@@ -25,7 +25,7 @@
 >
 	<Button
 		variant="outline"
-		class="rounded-none shadow-none first:rounded-s-md last:rounded-e-md focus-visible:z-10"
+		class="rounded-none border-r-0 first:rounded-s-md last:rounded-e-md"
 		href={current?.downloadUrl}
 	>
 		{#if isLoading}
@@ -40,8 +40,9 @@
 	<Select.Root type="single">
 		<Select.Trigger
 			class={buttonVariants({
-				class: 'rounded-none shadow-none first:rounded-s-md last:rounded-e-md focus-visible:z-10',
-				size: 'icon'
+				class: 'rounded-none first:rounded-s-md last:rounded-e-md',
+				size: 'icon',
+				variant: 'outline'
 			})}
 			aria-label="Options"
 		></Select.Trigger>

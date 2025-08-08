@@ -64,22 +64,14 @@
 	<p class="animate-bounce">
 		A fast, modern, feature rich, lightweight and local first note taking desktop application
 	</p>
-	<div class="flex items-center gap-4">
+	<div class="flex flex-col items-center gap-4 sm:flex-row">
 		<Button variant="secondary" href="https://github.com/Tsuzat/Nota" target="_blank">
 			<Github />
-			Visit Github
+			Star us on Github
 		</Button>
 		<ArtifactDownloader />
 	</div>
-	<img
-		class="hidden aspect-auto h-auto w-full dark:block"
-		src="https://github.com/user-attachments/assets/ceeaf70d-bf58-4b9e-96bd-f23f2b3f2235"
-		alt="nota"
-	/>
+	<img class="hidden aspect-auto h-auto w-full dark:block" src="/previews/dark.webp" alt="nota" />
 
-	<img
-		class="block aspect-auto h-auto w-full dark:hidden"
-		src="https://github.com/user-attachments/assets/2b1265a0-babc-47ad-aad6-f62b36e5f681"
-		alt="nota"
-	/>
+	<img class="block aspect-auto h-auto w-full dark:hidden" src="/previews/light.webp" alt="nota" />
 </main>
