@@ -1,6 +1,6 @@
 {
 	"name": "nota",
-	"version": "0.2.3",
+	"version": "0.2.4",
 	"description": "Fast, minimal, modern and local fist note taking app",
 	"type": "module",
 	"scripts": {
