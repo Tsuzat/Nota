@@ -8,6 +8,7 @@
 	import { setSessionAndUserContext } from '$lib/supabase/user.svelte';
 	import { invalidate } from '$app/navigation';
 	import { setGlobalSignInContext, GlobalSignIn } from '$lib/components/custom/global-signin';
+	import { useDeepLinkAuth } from '$lib/handleOAuth.svelte';
 
 	setGlobalSignInContext();
 
@@ -41,6 +42,8 @@
 		});
 		return () => data.subscription.unsubscribe();
 	});
+
+	useDeepLinkAuth();
 </script>
 
 <Toaster richColors closeButton />
