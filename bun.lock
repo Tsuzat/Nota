@@ -9,11 +9,13 @@
         "@fontsource-variable/inter": "^5.2.6",
         "@supabase/supabase-js": "^2.53.0",
         "@tauri-apps/api": "^2.7.0",
+        "@tauri-apps/plugin-deep-link": "~2",
         "@tauri-apps/plugin-dialog": "~2.3.2",
         "@tauri-apps/plugin-fs": "~2.4.1",
         "@tauri-apps/plugin-opener": "^2.4.0",
         "@tauri-apps/plugin-os": "~2.3.0",
         "@tauri-apps/plugin-process": "~2.3.0",
+        "@tauri-apps/plugin-shell": "~2",
         "@tauri-apps/plugin-sql": "~2.3.0",
         "@tauri-apps/plugin-store": "~2.3.0",
         "@tauri-apps/plugin-updater": "~2.9.0",
@@ -410,6 +412,8 @@
 
     "@tauri-apps/cli-win32-x64-msvc": ["@tauri-apps/cli-win32-x64-msvc@2.7.1", "", { "os": "win32", "cpu": "x64" }, "sha512-D7Q9kDObutuirCNLxYQ7KAg2Xxg99AjcdYz/KuMw5HvyEPbkC9Q7JL0vOrQOrHEHxIQ2lYzFOZvKKoC2yyqXcg=="],
 
+    "@tauri-apps/plugin-deep-link": ["@tauri-apps/plugin-deep-link@2.4.1", "", { "dependencies": { "@tauri-apps/api": "^2.6.0" } }, "sha512-I8Bo+spcAKGhIIJ1qN/gapp/Ot3mosQL98znxr975Zn2ODAkUZ++BQ9FnTpR7PDwfIl5ANSGdIW/YU01zVTcJw=="],
+
     "@tauri-apps/plugin-dialog": ["@tauri-apps/plugin-dialog@2.3.2", "", { "dependencies": { "@tauri-apps/api": "^2.6.0" } }, "sha512-cNLo9YeQSC0MF4IgXnotHsqEgJk72MBZLXmQPrLA95qTaaWiiaFQ38hIMdZ6YbGUNkr3oni3EhU+AD5jLHcdUA=="],
 
     "@tauri-apps/plugin-fs": ["@tauri-apps/plugin-fs@2.4.1", "", { "dependencies": { "@tauri-apps/api": "^2.6.0" } }, "sha512-vJlKZVGF3UAFGoIEVT6Oq5L4HGDCD78WmA4uhzitToqYiBKWAvZR61M6zAyQzHqLs0ADemkE4RSy/5sCmZm6ZQ=="],
@@ -419,6 +423,8 @@
     "@tauri-apps/plugin-os": ["@tauri-apps/plugin-os@2.3.0", "", { "dependencies": { "@tauri-apps/api": "^2.6.0" } }, "sha512-dm3bDsMuUngpIQdJ1jaMkMfyQpHyDcaTIKTFaAMHoKeUd+Is3UHO2uzhElr6ZZkfytIIyQtSVnCWdW2Kc58f3g=="],
 
     "@tauri-apps/plugin-process": ["@tauri-apps/plugin-process@2.3.0", "", { "dependencies": { "@tauri-apps/api": "^2.6.0" } }, "sha512-0DNj6u+9csODiV4seSxxRbnLpeGYdojlcctCuLOCgpH9X3+ckVZIEj6H7tRQ7zqWr7kSTEWnrxtAdBb0FbtrmQ=="],
+
+    "@tauri-apps/plugin-shell": ["@tauri-apps/plugin-shell@2.3.0", "", { "dependencies": { "@tauri-apps/api": "^2.6.0" } }, "sha512-6GIRxO2z64uxPX4CCTuhQzefvCC0ew7HjdBhMALiGw74vFBDY95VWueAHOHgNOMV4UOUAFupyidN9YulTe5xlA=="],
 
     "@tauri-apps/plugin-sql": ["@tauri-apps/plugin-sql@2.3.0", "", { "dependencies": { "@tauri-apps/api": "^2.6.0" } }, "sha512-JYwIocfsLaDWa41LMiZWuzts7yCJR+EpZPRmgpO7Gd7XiAS9S67dKz306j/k/d9XntB0YopMRBol2OIWMschuA=="],
 
