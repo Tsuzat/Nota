@@ -24,6 +24,8 @@
 		"core:webview:allow-print",
 		"process:allow-restart",
 		"process:allow-exit",
+		"deep-link:default",
+		"shell:allow-open",
 		{
 			"identifier": "opener:allow-open-path",
 			"allow": [

@@ -57,6 +57,11 @@
 		},
 		"fs": {
 			"requireLiteralLeadingDot": false
+		},
+		"deep-link": {
+			"desktop": {
+				"schemes": ["nota.tsuzat.com", "emerging-rabbit-solely.ngrok-free.app"]
+			}
 		}
 	}
 }
