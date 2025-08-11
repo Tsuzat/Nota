@@ -31,6 +31,20 @@
 
 	const globalSignInContext = getGlobalSignInContext();
 	const user = $derived(getSessionAndUserContext().getUser());
+
+	function getUserIntials(name?: string) {
+		if (!name) return 'U';
+		const names = name.split(' ');
+		if (names.length > 1) {
+			return names[0][0] + names[1][0];
+		} else {
+			if (names[0].length > 1) {
+				return names[0][0] + names[0][1];
+			} else {
+				return names[0][0];
+			}
+		}
+	}
 </script>
 
 <Sidebar.Group class="mt-auto">
@@ -87,12 +101,14 @@
 								>
 									<Avatar.Root class="size-8 rounded-lg grayscale">
 										<Avatar.Image src={user?.user_metadata['avatar_url']} alt="User" />
-										<Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
+										<Avatar.Fallback class="rounded-lg"
+											>{getUserIntials(user.user_metadata['full_name'])}</Avatar.Fallback
+										>
 									</Avatar.Root>
 									<div class="grid flex-1 text-left text-sm leading-tight">
 										<span class="truncate font-medium">{user.email}</span>
 										<span class="text-muted-foreground truncate text-xs">
-											{user.email}
+											{user.user_metadata['full_name']}
 										</span>
 									</div>
 									<EllipsisVertical class="ml-auto size-4" />
@@ -109,10 +125,12 @@
 								<div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 									<Avatar.Root class="size-8 rounded-lg">
 										<Avatar.Image src={user.user_metadata['avatar_url']} alt="User" />
-										<Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
+										<Avatar.Fallback class="rounded-lg"
+											>{getUserIntials(user.user_metadata['full_name'])}</Avatar.Fallback
+										>
 									</Avatar.Root>
 									<div class="grid flex-1 text-left text-sm leading-tight">
-										<span class="truncate font-medium">{user.user_metadata['name']}</span>
+										<span class="truncate font-medium">{user.user_metadata['full_name']}</span>
 										<span class="text-muted-foreground truncate text-xs">
 											{user.email}
 										</span>

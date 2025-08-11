@@ -3,15 +3,12 @@
 
 	let counter = $state(5);
 
-	$effect(() => {
-		if (counter <= 0) {
-			window.location.replace('/');
-		}
-	});
-
 	onMount(() => {
 		const interval = setInterval(() => {
 			counter -= 1;
+			if (counter <= 0) {
+				window.location.replace('/');
+			}
 		}, 1000);
 		return () => clearInterval(interval);
 	});

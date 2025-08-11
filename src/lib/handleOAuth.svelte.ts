@@ -2,6 +2,7 @@ import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
 import { auth } from './supabase';
+import { toast } from 'svelte-sonner';
 
 export function useDeepLinkAuth() {
 	let isHandlingAuth = $state(false);

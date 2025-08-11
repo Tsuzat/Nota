@@ -13,11 +13,7 @@
 				provider: 'google',
 				options: {
 					skipBrowserRedirect: true,
-					redirectTo: `${PUBLIC_NOTA_FRONTEND_URL}/auth-success`,
-					queryParams: {
-						access_type: 'offline',
-						prompt: 'consent'
-					}
+					redirectTo: `${PUBLIC_NOTA_FRONTEND_URL}/auth-success`
 				}
 			});
 			if (!data?.url) throw new Error('No auth URL returned');
