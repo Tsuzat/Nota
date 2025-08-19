@@ -52,7 +52,7 @@
 	},
 	"plugins": {
 		"updater": {
-			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE3QjBEMzE4QTdGRDhDQjMKUldTempQMm5HTk93cDBDck1mN0lDYWppOWZzM042bXI4c2FJOUszN3VwQjB4Q3RHRXZLbW1YcVUK",
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVDMkVBM0Y1MjBFMDBBODcKUldTSEN1QWc5YU11N0I5NmxIclFXWTlBc1dBR0cyKzdVSnV4N002TVgxKzNjb0Y4bkR1eHl6ek8K",
 			"endpoints": ["https://github.com/Tsuzat/Nota/releases/latest/download/latest.json"]
 		},
 		"fs": {
