@@ -9,10 +9,16 @@
 	import * as Dropdown from '$lib/components/ui/dropdown-menu';
 	import { getGlobalSignInContext } from '$lib/components/custom/global-signin';
 	import { toast } from 'svelte-sonner';
+	import { onMount } from 'svelte';
+	import { ISTAURI } from '$lib/utils';
 
 	const user = $derived(getSessionAndUserContext().getUser());
 
 	const globalSignInContext = getGlobalSignInContext();
+
+	onMount(() => {
+		if (ISTAURI) window.location.replace('/home');
+	});
 </script>
 
 <header class="sticky top-1 mx-auto flex max-w-4xl items-center justify-between gap-4 p-4">
