@@ -10,7 +10,7 @@
 	import { Loader } from '@lucide/svelte';
 	import { cn } from '$lib/utils';
 	import { PUBLIC_NOTA_ARTIFACT_URL } from '$env/static/public';
-	import Google from './oauth/google.svelte';
+	import OAuth from './oauth.svelte';
 
 	const signInContext = getGlobalSignInContext();
 
@@ -54,7 +54,7 @@
 			email: formData.email,
 			password: formData.password,
 			options: {
-				emailRedirectTo: PUBLIC_NOTA_ARTIFACT_URL,
+				emailRedirectTo: `${PUBLIC_NOTA_ARTIFACT_URL}/auth-success`,
 				data: {
 					full_name: formData.name
 				}
@@ -74,7 +74,7 @@
 </script>
 
 <Dialog.Root bind:open={signInContext.open}>
-	<Dialog.Content class="w-96">
+	<Dialog.Content class="max-h-[95vh] w-96 overflow-y-auto">
 		<Tabs.Root value="signin">
 			<Tabs.List>
 				<Tabs.Trigger value="signin">Sign In</Tabs.Trigger>
@@ -88,7 +88,7 @@
 					</Dialog.Description>
 				</Dialog.Header>
 				<div class="flex flex-col items-center gap-2">
-					<Google />
+					<OAuth />
 					<div class="flex w-full items-center gap-4">
 						<div class="bg-muted h-[1px] w-full"></div>
 						<div>or</div>
@@ -140,14 +140,14 @@
 						Create a new account for Nota. Provide following information,
 					</Dialog.Description>
 				</Dialog.Header>
-				<!-- <div class="flex flex-col items-center gap-2">
-					<Google />
+				<div class="flex flex-col items-center gap-2">
+					<OAuth />
 					<div class="flex w-full items-center gap-4">
 						<div class="bg-muted h-[1px] w-full"></div>
 						<div>or</div>
 						<div class="bg-muted h-[1px] w-full"></div>
 					</div>
-				</div> -->
+				</div>
 				<form class="grid gap-4" onsubmit={createAccount}>
 					<div class="grid gap-2">
 						<Label for="name-signup">Full Name</Label>

@@ -6,13 +6,18 @@
 	import { ISTAURI } from '$lib/utils';
 	import { invoke } from '@tauri-apps/api/core';
 	import { toast } from 'svelte-sonner';
+	import { getGlobalSignInContext } from './constants.svelte';
+	import Github from '$lib/components/icons/customs/github.svelte';
+	import type { Provider } from '@supabase/supabase-js';
 
-	async function signInWithGoogle() {
+	const useGlobalSignIn = getGlobalSignInContext();
+
+	async function signInWithOAuth(provider: Provider) {
 		try {
 			const redirectTo =
 				PUBLIC_NOTA_FRONTEND_URL + '/auth-success' + (ISTAURI ? '?desktop=true' : '');
 			const { data, error } = await auth.signInWithOAuth({
-				provider: 'google',
+				provider: provider,
 				options: {
 					skipBrowserRedirect: true,
 					redirectTo,
@@ -28,6 +33,7 @@
 				window.location.href = data.url;
 			} else {
 				await invoke('plugin:shell|open', { path: data.url });
+				useGlobalSignIn.open = false;
 			}
 		} catch (error) {
 			console.error(error);
@@ -36,7 +42,12 @@
 	}
 </script>
 
-<Button variant="secondary" class="w-full" onclick={signInWithGoogle}>
+<Button variant="secondary" class="w-full" onclick={() => signInWithOAuth('google')}>
 	<Google />
 	Login With Google
+</Button>
+
+<Button variant="secondary" class="w-full" onclick={() => signInWithOAuth('github')}>
+	<Github />
+	Login With Github
 </Button>
