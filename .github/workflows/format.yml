@@ -8,7 +8,7 @@ on:
 
 jobs:
   unit-tests:
-    runs-on: 'macos-latest'
+    runs-on: 'macos-15'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
