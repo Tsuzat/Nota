@@ -9,13 +9,20 @@
 
 	async function signInWithGoogle() {
 		try {
-			const { data } = await auth.signInWithOAuth({
+			const redirectTo =
+				PUBLIC_NOTA_FRONTEND_URL + '/auth-success' + (ISTAURI ? '?desktop=true' : '');
+			const { data, error } = await auth.signInWithOAuth({
 				provider: 'google',
 				options: {
 					skipBrowserRedirect: true,
-					redirectTo: `${PUBLIC_NOTA_FRONTEND_URL}/auth-success`
+					redirectTo,
+					queryParams: {
+						access_type: 'offline',
+						prompt: 'consent'
+					}
 				}
 			});
+			if (error) toast.error(error.message);
 			if (!data?.url) throw new Error('No auth URL returned');
 			if (!ISTAURI) {
 				window.location.href = data.url;

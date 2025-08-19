@@ -87,14 +87,14 @@
 						Welcome back to Nota. Please use any of the followings to sign in.
 					</Dialog.Description>
 				</Dialog.Header>
-				<!-- <div class="flex flex-col items-center gap-2">
+				<div class="flex flex-col items-center gap-2">
 					<Google />
 					<div class="flex w-full items-center gap-4">
 						<div class="bg-muted h-[1px] w-full"></div>
 						<div>or</div>
 						<div class="bg-muted h-[1px] w-full"></div>
 					</div>
-				</div> -->
+				</div>
 				<form class="grid gap-4" onsubmit={signInWithEmailAndPassword}>
 					<div class="grid gap-2">
 						<Label for="email-signin">Email</Label>

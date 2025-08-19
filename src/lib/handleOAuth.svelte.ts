@@ -5,23 +5,15 @@ import { auth } from './supabase';
 import { toast } from 'svelte-sonner';
 
 export function useDeepLinkAuth() {
-	let isHandlingAuth = $state(false);
-
 	$effect(() => {
 		if (!browser) return;
 
-		// Check URL parameters immediately
-		const urlObj = new URL(window.location.href);
-		const searchParams = new URLSearchParams(urlObj.search);
-		const code = searchParams.get('code');
-
-		if (code) {
-			isHandlingAuth = true;
-		}
-
 		const handleUrl = async (urls: string[]) => {
+			const id = toast.loading('processing your request', {
+				description: 'this may take a moment',
+				duration: 10000
+			});
 			try {
-				isHandlingAuth = true;
 				const url = urls[0];
 
 				const urlObj = new URL(url);
@@ -31,13 +23,14 @@ export function useDeepLinkAuth() {
 				if (code) {
 					const { data, error } = await auth.exchangeCodeForSession(code);
 					if (error) throw error;
-					if (data.session) goto('/');
+					if (data.session) goto('/home');
 					return;
 				}
 			} catch (err) {
 				console.error('Error handling deep link:', err);
+				toast.error('Something went wrong', { id });
 			} finally {
-				isHandlingAuth = false;
+				toast.dismiss(id);
 			}
 		};
 
