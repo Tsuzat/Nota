@@ -14,8 +14,8 @@
 	import Tooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import * as Popover from '$lib/components/ui/popover';
-	import { Button, buttonVariants } from '../ui/button';
-	import Input from '../ui/input/input.svelte';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
 	import { Shuffle, X } from '@lucide/svelte';
 
 	interface Props {
@@ -28,7 +28,7 @@
 	let selectedCategory = $state(categories[0]);
 	let skinTone = $state('default');
 	let debouncedSearchTerm = $state('');
-	let debounceTimeout: number | null = null;
+	let debounceTimeout: NodeJS.Timeout | number | null = null;
 
 	const skinTones: Record<string, string> = {
 		default: '✋',
@@ -54,7 +54,6 @@
 
 	let { searchTerm = $bindable(''), onSelect }: Props = $props();
 
-	// Optimized cache with size limit
 	const filteredEmojiCache = new Map<string, EmojiItem[]>();
 	const MAX_CACHE_SIZE = 50;
 
