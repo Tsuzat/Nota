@@ -8,7 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { type LocalWorkSpace } from '$lib/local/workspaces.svelte';
 	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
-	import { Loader2 } from '@lucide/svelte';
+	import { Loader } from '@lucide/svelte';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Label } from '$lib/components/ui/label';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
@@ -99,7 +99,7 @@
 			</div>
 			<Button type="submit">
 				{#if loading}
-					<Loader2 class="animate-spin" />
+					<Loader class="animate-spin" />
 				{/if}
 				Create Note
 			</Button>
