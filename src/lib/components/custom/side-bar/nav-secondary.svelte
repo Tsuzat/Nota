@@ -99,16 +99,18 @@
 									size="lg"
 									class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 								>
-									<Avatar.Root class="size-8 rounded-lg grayscale">
+									<Avatar.Root class="size-8 rounded-lg">
 										<Avatar.Image src={user?.user_metadata['avatar_url']} alt="User" />
 										<Avatar.Fallback class="rounded-lg"
 											>{getUserIntials(user.user_metadata['full_name'])}</Avatar.Fallback
 										>
 									</Avatar.Root>
 									<div class="grid flex-1 text-left text-sm leading-tight">
-										<span class="truncate font-medium">{user.email}</span>
+										<span class="truncate font-medium"
+											>{user.user_metadata['full_name'] ?? 'Unknown'}</span
+										>
 										<span class="text-muted-foreground truncate text-xs">
-											{user.user_metadata['full_name']}
+											{user.email}
 										</span>
 									</div>
 									<EllipsisVertical class="ml-auto size-4" />
@@ -130,7 +132,9 @@
 										>
 									</Avatar.Root>
 									<div class="grid flex-1 text-left text-sm leading-tight">
-										<span class="truncate font-medium">{user.user_metadata['full_name']}</span>
+										<span class="truncate font-medium"
+											>{user.user_metadata['full_name'] ?? 'Unknown'}</span
+										>
 										<span class="text-muted-foreground truncate text-xs">
 											{user.email}
 										</span>
