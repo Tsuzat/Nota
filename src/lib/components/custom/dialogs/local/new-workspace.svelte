@@ -6,12 +6,12 @@
 	import { Input } from '$lib/components/ui/input';
 	import { type Snippet } from 'svelte';
 	import { open as openDialog } from '@tauri-apps/plugin-dialog';
-	import { documentDir, resolve } from '@tauri-apps/api/path';
+	import { appDataDir, resolve } from '@tauri-apps/api/path';
 	import { ISTAURI } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
-	import { Loader2 } from '@lucide/svelte';
+	import { Loader } from '@lucide/svelte';
 	import { exists } from '@tauri-apps/plugin-fs';
 
 	interface Props {
@@ -32,7 +32,7 @@
 	const currentLocalWorkspace = $derived(getLocalUserWorkspaces().getCurrentUserWorkspace());
 
 	async function getWorkspaceDirectory() {
-		const defaultPath = await documentDir();
+		const defaultPath = await appDataDir();
 		const directory = await openDialog({
 			multiple: false,
 			directory: true,
@@ -91,7 +91,6 @@
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		if (type === 'local') {
-			console.log('createLocalWorkspace');
 			await createLocalWorkspace();
 		} else {
 			await createRemoteWorkspace();
@@ -154,7 +153,7 @@
 			{/if}
 			<Button type="submit">
 				{#if loading}
-					<Loader2 class="animate-spin" />
+					<Loader class="animate-spin" />
 				{/if}
 				Create Workspace
 			</Button>
