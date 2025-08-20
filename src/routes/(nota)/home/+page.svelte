@@ -44,11 +44,9 @@
 		<SidebarTrigger />
 		<BackAndForthButtons />
 		<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
-		<h3>Home - {currentUserWorkspace?.name}</h3>
+		<h3>{currentUserWorkspace?.name}</h3>
 	</div>
-	<div class={cn('z-20 ml-auto px-3', !ISMACOS && ISTAURI && 'mr-30')}>
-		<!-- <NavActions /> -->
-	</div>
+	<div class={cn('z-20 ml-auto px-3', !ISMACOS && ISTAURI && 'mr-30')}></div>
 	{#if !ISMACOS && ISTAURI}
 		<WindowsButtons />
 	{/if}
