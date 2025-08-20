@@ -13,11 +13,18 @@
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import { goto } from '$app/navigation';
+	import { Cloud, Monitor } from '@lucide/svelte';
+	import {
+		useCloudUserWorkspaces,
+		type CloudUserWorkspace
+	} from '$lib/supabase/db/clouduserworkspaces.svelte';
 
 	const localUserWorkspaces = getLocalUserWorkspaces();
 	const localWorkspaces = getLocalWorkspaces();
 	const localNotes = getLocalNotes();
 	let activeWorkspace = $derived(localUserWorkspaces.getCurrentUserWorkspace());
+
+	const cloudUserWorkspaces = useCloudUserWorkspaces();
 
 	const useNewLocalUserWorkspace = getNewUserWorkspace();
 
@@ -34,6 +41,12 @@
 			console.error(error);
 			toast.error('Something went wrong when changing the user workspace', { id });
 		}
+	}
+
+	async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
+		toast.info(
+			'Switching to cloud user workspace will be available soon. Please use local workspaces for now.'
+		);
 	}
 </script>
 
@@ -56,14 +69,32 @@
 				{/snippet}
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content class="w-fit rounded-lg" align="start" side="bottom" sideOffset={4}>
-				<DropdownMenu.Label class="text-muted-foreground text-xs">Teams</DropdownMenu.Label>
-				{#each localUserWorkspaces.getUserWorkspaces() as workspace, index (workspace.id)}
+				<DropdownMenu.Label class="text-muted-foreground text-xs"
+					>Local User Workspaces</DropdownMenu.Label
+				>
+				{#each localUserWorkspaces.getUserWorkspaces() as workspace (workspace.id)}
 					<DropdownMenu.Item onSelect={() => selectUserWorkspace(workspace)} class="gap-2 p-2">
 						<div class="flex size-6 items-center justify-center rounded border">
 							<IconRenderer icon={workspace.icon} />
 						</div>
 						<span class="truncate">{workspace.name}</span>
-						<DropdownMenu.Shortcut>⌘{index + 1}</DropdownMenu.Shortcut>
+						<DropdownMenu.Shortcut>
+							<Monitor />
+						</DropdownMenu.Shortcut>
+					</DropdownMenu.Item>
+				{/each}
+				<DropdownMenu.Label class="text-muted-foreground text-xs"
+					>Cloud User Workspaces</DropdownMenu.Label
+				>
+				{#each cloudUserWorkspaces.getWorkspaces() as workspace (workspace.id)}
+					<DropdownMenu.Item onSelect={() => selectCloudUserWorkspace(workspace)} class="gap-2 p-2">
+						<div class="flex size-6 items-center justify-center rounded border">
+							<IconRenderer icon={workspace.icon} />
+						</div>
+						<span class="truncate">{workspace.name}</span>
+						<DropdownMenu.Shortcut>
+							<Cloud />
+						</DropdownMenu.Shortcut>
 					</DropdownMenu.Item>
 				{/each}
 				<DropdownMenu.Separator />
