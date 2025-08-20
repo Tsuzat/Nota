@@ -13,10 +13,33 @@
 	import { NewUserWorkspace, setNewUserWorkspace } from '$lib/components/custom/user-workspace';
 	import { setRecentsContext } from '$lib/recents.svelte.js';
 	import { page } from '$app/state';
+	import { setCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte.js';
+	import { setCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte.js';
+	import { setCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 
+	// Local Workspaces and Notes
 	setLocalUserWorkspaces();
 	setLocalWorkspaces();
 	setLocalNotes();
+
+	// Cloud Workspaces and Notes
+	const cloudUserWorkspaces = setCloudUserWorkspaces();
+	const cloudWorkspaces = setCloudWorkspaces();
+	const cloudNotes = setCloudNotes();
+
+	const user = $derived(getSessionAndUserContext().getUser());
+
+	$effect(() => {
+		if (user === null) {
+			cloudUserWorkspaces.setWorkspace([]);
+			cloudWorkspaces.setWorkspaces([]);
+			cloudNotes.setNotes([]);
+		} else {
+			cloudUserWorkspaces.fetchWorkspaces(user);
+		}
+	});
+
 	setGlobalSearch();
 	setGlobalSettings();
 	setNewUserWorkspace();
