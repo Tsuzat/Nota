@@ -15,11 +15,17 @@ export interface CloudUserWorkspace {
 class CloudUserWorkspaces {
 	#workspaces = $state<CloudUserWorkspace[]>([]);
 
+	setWorkspace(workspace: CloudUserWorkspace[]) {
+		this.#workspaces = workspace;
+	}
+
 	getWorkspaces() {
 		return this.#workspaces;
 	}
 
-	async createWorkspace(userworkspace: Partial<CloudUserWorkspace> & { owner: string }) {
+	async createWorkspace(
+		userworkspace: Partial<CloudUserWorkspace> & { owner: string; name: string }
+	) {
 		try {
 			const { data, error } = await supabase
 				.from('userworkspaces')
@@ -105,12 +111,11 @@ class CloudUserWorkspaces {
 			if (error) {
 				console.error(error);
 				toast.error(error.message);
-				return;
 			}
-			this.#workspaces = data ?? [];
+			if (data) this.#workspaces = data ?? [];
 		} catch (err) {
 			console.error('Error fetching workspaces:', err);
-			throw err;
+			toast.error('Something went wrong');
 		}
 	}
 }

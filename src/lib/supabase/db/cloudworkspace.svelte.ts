@@ -21,6 +21,10 @@ class CloudWorkspaces {
 		return this.#workspaces;
 	}
 
+	setWorkspaces(workspaces: CloudWorkspace[]) {
+		this.#workspaces = workspaces;
+	}
+
 	/**
 	 * Fetch workspaces for a specific user workspace
 	 */

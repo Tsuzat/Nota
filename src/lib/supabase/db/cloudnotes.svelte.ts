@@ -24,6 +24,10 @@ class CloudNotes {
 		return this.#notes;
 	}
 
+	setNotes(notes: CloudNote[]) {
+		this.#notes = notes;
+	}
+
 	/**
 	 * Get notes that are not trashed
 	 */
