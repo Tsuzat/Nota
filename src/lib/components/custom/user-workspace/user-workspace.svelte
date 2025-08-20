@@ -5,16 +5,24 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
-	import { Loader2 } from '@lucide/svelte';
+	import { Cloud, Loader, Monitor } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { getNewUserWorkspace } from '.';
+	import { Label } from '$lib/components/ui/label';
+	import { Switch } from '$lib/components/ui/switch';
+	import SimpleTooltip from '../simple-tooltip.svelte';
+	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
+	import { useCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
 
 	let name: string | undefined = $state<string>();
 	let icon: string = $state('lucide:User');
+	let useCloud = $state(false);
 
 	let loading = $state(false);
 	const localUserWorkspaces = getLocalUserWorkspaces();
+	const cloudUserWorkspaces = useCloudUserWorkspaces();
 	const useNewLocalUserWorkspace = getNewUserWorkspace();
+	const user = $derived(getSessionAndUserContext().getUser());
 
 	async function handlesubmit(e: Event) {
 		e.preventDefault();
@@ -24,7 +32,15 @@
 			return;
 		}
 		try {
-			await localUserWorkspaces.createUserWorkspace(name, icon);
+			if (useCloud) {
+				if (user === null) {
+					toast.error('User is not logged in', {
+						description: 'Please login again or create local user workspaces'
+					});
+					return;
+				}
+				await cloudUserWorkspaces.createWorkspace({ name, icon, owner: user.id });
+			} else await localUserWorkspaces.createUserWorkspace(name, icon);
 			useNewLocalUserWorkspace.open = false;
 			toast.success('User Workspace created successfully');
 		} catch (error) {
@@ -53,11 +69,26 @@
 				</IconPicker>
 				<Input bind:value={name} placeholder="User Workspace Name" type="text" required />
 			</div>
+			{#if user !== null}
+				<div class="flex items-center gap-2">
+					<Label for="cloud">Use Cloud</Label>
+					<Switch bind:checked={useCloud} id="cloud" />
+					<SimpleTooltip content={useCloud ? 'Create On Cloud' : 'Create Locally'}>
+						<Button variant="ghost" size="icon">
+							{#if useCloud}
+								<Cloud />
+							{:else}
+								<Monitor />
+							{/if}
+						</Button>
+					</SimpleTooltip>
+				</div>
+			{/if}
 			<Button type="submit" class="w-full">
 				{#if loading}
-					<Loader2 class="animate-spin" />
+					<Loader class="animate-spin" />
 				{/if}
-				Create User Workspace
+				Create User Workspace {useCloud ? 'On Cloud' : 'Locally'}
 			</Button>
 		</form>
 	</Dialog.Content>
