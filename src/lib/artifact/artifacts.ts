@@ -4,6 +4,12 @@ import Windows from './icons/windows.svelte';
 import Linux from './icons/linux.svelte';
 import { PUBLIC_NOTA_ARTIFACT_URL } from '$env/static/public';
 
+export type ReleaseAssetsResponse = {
+	tag: string;
+	name: string;
+	published_at: string;
+	platforms: Record<'mac' | 'windows' | 'linux', { label: string; url: string }[]>;
+};
 export interface Artifact {
 	icon?: Component;
 	osName: string;
@@ -12,79 +18,48 @@ export interface Artifact {
 }
 
 const osIcons: Record<string, Component> = {
-	MacOS: Mac,
-	Windows: Windows,
-	Linux: Linux
+	mac: Mac,
+	windows: Windows,
+	linux: Linux
 };
 
-const artifactLabels: Record<string, string> = {
-	'darwin-aarch64': 'MacOS Apple Silicon',
-	'darwin-x86_64': 'MacOS Intel Chip',
-	'linux-x86_64': 'Linux x86_64',
-	'windows-x86_64': 'Windows',
-	'windows-aarch64': 'Windows ARM'
-};
+const platformMap = {
+	mac: ['mac', 'macos', 'darwin'],
+	windows: ['win', 'windows'],
+	linux: ['linux', 'ubuntu', 'debian', 'arch']
+} satisfies Record<string, string[]>;
 
-// Maps platformKey to OS category
-function getOSBaseLabel(platformKey: string): keyof typeof osIcons | undefined {
-	if (platformKey.startsWith('darwin')) return 'MacOS';
-	if (platformKey.startsWith('windows')) return 'Windows';
-	if (platformKey.startsWith('linux')) return 'Linux';
-	return undefined;
+function detectCurrentOS(): keyof typeof osIcons {
+	const ua = navigator.userAgent.toLowerCase();
+	if (platformMap.mac.some((key) => ua.includes(key))) return 'mac';
+	if (platformMap.windows.some((key) => ua.includes(key))) return 'windows';
+	if (platformMap.linux.some((key) => ua.includes(key))) return 'linux';
+	return 'mac'; // default fallback
 }
 
-export function detectCurrentPlatform(): string {
-	const userAgent = navigator.userAgent.toLowerCase();
-
-	if (userAgent.includes('mac')) {
-		return 'darwin-aarch64';
-	}
-
-	if (userAgent.includes('win')) {
-		// Windows ARM detection
-		if (userAgent.includes('arm') || userAgent.includes('wow64')) {
-			return 'windows-aarch64';
-		}
-		return 'windows-x86_64';
-	}
-
-	if (userAgent.includes('linux')) {
-		// Linux ARM detection
-		if (userAgent.includes('arm') || userAgent.includes('aarch64')) {
-			return 'linux-aarch64';
-		}
-		return 'linux-x86_64';
-	}
-
-	// Default fallback
-	return 'darwin-aarch64';
-}
-
+/**
+ * Fetch and transform GitHub release artifacts into UI-friendly format
+ */
 export async function getArtifacts(): Promise<Artifact[]> {
 	const url = PUBLIC_NOTA_ARTIFACT_URL;
 
 	const response = await fetch(url);
-	if (!response.ok) throw new Error(`Failed to fetch latest.json: ${response.statusText}`);
+	if (!response.ok) throw new Error(`Failed to fetch release assets: ${response.statusText}`);
 
-	const json = await response.json();
-	const platforms = json.platforms;
-	if (!platforms) throw new Error('No platforms data found in JSON');
+	const { platforms }: ReleaseAssetsResponse = await response.json();
+	const currentOS = detectCurrentOS();
 
-	const currentPlatform = detectCurrentPlatform();
+	const artifacts: Artifact[] = [];
 
-	const artifacts: Artifact[] = Object.entries(platforms).map(
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		([platformKey, data]: [string, any]) => {
-			const osBaseLabel = getOSBaseLabel(platformKey);
-			const icon = osBaseLabel ? osIcons[osBaseLabel] : undefined;
-			return {
-				osName: artifactLabels[platformKey] || platformKey,
-				downloadUrl: data.url,
-				isCurrent: currentPlatform === platformKey,
-				icon
-			};
+	for (const [os, list] of Object.entries(platforms)) {
+		for (const item of list) {
+			artifacts.push({
+				icon: osIcons[os as keyof typeof osIcons],
+				osName: item.label,
+				downloadUrl: item.url,
+				isCurrent: os === currentOS
+			});
 		}
-	);
-
+	}
 	return artifacts;
 }

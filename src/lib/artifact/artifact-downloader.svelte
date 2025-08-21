@@ -55,6 +55,10 @@
 						label={artifact.osName}
 						onclick={() => (current = artifact)}
 					>
+						{#if artifact.icon}
+							{@const Icon = artifact.icon}
+							<Icon />
+						{/if}
 						{artifact.osName}
 					</Select.Item>
 				{/each}
