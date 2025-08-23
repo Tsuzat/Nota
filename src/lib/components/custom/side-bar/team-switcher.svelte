@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Sidebar from '$lib/components/ui/sidebar';
 	import {
 		getLocalUserWorkspaces,
 		type LocalUserWorkspace

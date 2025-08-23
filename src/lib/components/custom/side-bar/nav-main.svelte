@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { getKeyboardShortcut } from '$lib/utils';
 	import { Home, Search } from '@lucide/svelte';
 	import { getGlobalSearch } from '../global-search/constants.svelte';
