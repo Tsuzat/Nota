@@ -3,7 +3,7 @@
 	import { GlobalSearch, setGlobalSearch } from '$lib/components/custom/global-search';
 	import NewWorkspace from '$lib/components/custom/dialogs/local/new-workspace.svelte';
 	import AppSidebar from '$lib/components/custom/side-bar/app-sidebar.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { getLocalNotes, setLocalNotes } from '$lib/local/notes.svelte';
 	import { getLocalUserWorkspaces, setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import { getLocalWorkspaces, setLocalWorkspaces } from '$lib/local/workspaces.svelte';
@@ -11,12 +11,12 @@
 	import { toast } from 'svelte-sonner';
 	import { GlobalSettings, setGlobalSettings } from '$lib/components/custom/settings';
 	import { NewUserWorkspace, setNewUserWorkspace } from '$lib/components/custom/user-workspace';
-	import { setRecentsContext } from '$lib/recents.svelte.js';
+	import { setRecentsContext } from '$lib/recents.svelte';
 	import { page } from '$app/state';
-	import { setCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte.js';
-	import { setCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte.js';
+	import { setCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
+	import { setCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { setCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
+	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 
 	// Local Workspaces and Notes
 	setLocalUserWorkspaces();
