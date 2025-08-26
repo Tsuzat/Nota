@@ -2,6 +2,7 @@
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { getNewUserWorkspace } from '$lib/components/custom/user-workspace';
+	import { useCurrentUserWorkspaceContext } from '$lib/components/custom/user-workspace/userworkspace.svelte';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -15,7 +16,7 @@
 
 	const sidebar = useSidebar();
 	const useLocalUserWorkspaces = getLocalUserWorkspaces();
-	const currentUserWorkspace = $derived(useLocalUserWorkspaces.getCurrentUserWorkspace());
+	const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
 	const localNotes = getLocalNotes();
 	const useRecents = getRecentsContext();
 	const useNewUserWorkspace = getNewUserWorkspace();
