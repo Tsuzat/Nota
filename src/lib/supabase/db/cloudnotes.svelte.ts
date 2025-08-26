@@ -108,6 +108,39 @@ class CloudNotes {
 	}
 
 	/**
+	 * Duplicate a note in Supabase & update local state
+	 * @param note - Note to be duplicated
+	 */
+	async duplicate(note: CloudNote) {
+		try {
+			const { data, error } = await supabase
+				.from('notes')
+				.insert({
+					name: `${note.name} (Copy)`,
+					icon: note.icon,
+					path: note.path,
+					workspace: note.workspace,
+					userworkspace: note.userworkspace,
+					owner: note.owner,
+					favorite: note.favorite,
+					trashed: note.trashed
+				})
+				.select()
+				.single();
+			if (error) {
+				console.error(error);
+				toast.error(error.message);
+			}
+			if (data) {
+				this.#notes = [...this.#notes, data];
+			}
+		} catch (error) {
+			console.error(error);
+			toast.error('Something went wrong when duplicating note.');
+		}
+	}
+
+	/**
 	 * Update an existing note in Supabase & update local state
 	 */
 	async updateNote(note: CloudNote) {
