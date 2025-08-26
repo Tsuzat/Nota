@@ -2,9 +2,12 @@
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Popover from '$lib/components/ui/popover';
-	import { getLocalNotes } from '$lib/local/notes.svelte';
+	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { RotateCcw, Trash2Icon } from '@lucide/svelte';
-	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
+	import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+	import { toast } from 'svelte-sonner';
+	import SimpleTooltip from '../simple-tooltip.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -12,8 +15,33 @@
 
 	let { open = $bindable(false) }: Props = $props();
 
+	const currentUserWorkspace = useCurrentUserWorkspaceContext();
+
 	const localNotes = getLocalNotes();
-	const trashedNotes = $derived(localNotes.getNotes().filter((n) => n.trashed));
+	const cloudNotes = useCloudNotes();
+	const trashedNotes = $derived.by<LocalNote[] | CloudNote[]>(() => {
+		if (currentUserWorkspace.getIsLocal()) return localNotes.getNotes().filter((n) => n.trashed);
+		else return cloudNotes.getTrashedNotes();
+	});
+
+	async function deleteNote(note: LocalNote | CloudNote) {
+		try {
+			if ('owner' in note) await cloudNotes.deleteNote(note.id);
+			else await localNotes.deleteNote(note);
+		} catch (error) {
+			console.error(error);
+			toast.error(`Something went wrong while deleting ${note.name}`);
+		}
+	}
+	async function restoreNote(note: LocalNote | CloudNote) {
+		try {
+			if ('owner' in note) await cloudNotes.restoreFromTrash(note.id);
+			else await localNotes.restoreNote(note);
+		} catch (error) {
+			console.error(error);
+			toast.error(`Something went wrong while restoring ${note.name}`);
+		}
+	}
 </script>
 
 <Popover.Root bind:open>
@@ -24,32 +52,32 @@
 		portalProps={{ disabled: true, to: undefined }}
 	>
 		{#each trashedNotes as note (note.id)}
-			{@const workspace = getLocalWorkspaces()
-				.getWorkspaces()
-				.find((w) => w.id === note.workspace)}
 			<div class="flex items-center gap-2 rounded-lg p-1.5">
 				<IconRenderer icon={note.icon} class="size-4" />
 				<div class="flex flex-col">
 					<span class="truncate">{note.name}</span>
-					<span class="text-muted-foreground truncate text-xs">Workspace: {workspace?.name}</span>
 				</div>
 				<div class="ml-auto">
-					<Button
-						title="Restore Note"
-						variant="ghost"
-						onclick={() => localNotes.restoreNote(note)}
-						class="!size-7"
-					>
-						<RotateCcw />
-					</Button>
-					<Button
-						title="Delete Permanently"
-						variant="ghost"
-						onclick={() => localNotes.deleteNote(note)}
-						class="!size-7"
-					>
-						<Trash2Icon />
-					</Button>
+					<SimpleTooltip content="Restore Note">
+						<Button
+							title="Restore Note"
+							variant="ghost"
+							onclick={() => restoreNote(note)}
+							class="!size-7"
+						>
+							<RotateCcw />
+						</Button>
+					</SimpleTooltip>
+					<SimpleTooltip content="Delete Permanently">
+						<Button
+							title="Delete Permanently"
+							variant="ghost"
+							onclick={() => deleteNote(note)}
+							class="!size-7"
+						>
+							<Trash2Icon />
+						</Button>
+					</SimpleTooltip>
 				</div>
 			</div>
 		{/each}
