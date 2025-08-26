@@ -7,15 +7,18 @@
 	import { type Snippet } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import { Loader } from '@lucide/svelte';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Label } from '$lib/components/ui/label';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
+	import type { CloudWorkspace } from '$lib/supabase/db/cloudworkspace.svelte';
+	import { useCurrentUserWorkspaceContext } from '../../user-workspace/userworkspace.svelte';
+	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 
 	interface Props {
 		open?: boolean;
-		workspace: LocalWorkSpace;
+		workspace: LocalWorkSpace | CloudWorkspace;
 		children?: Snippet<[]>;
 	}
 
@@ -28,11 +31,13 @@
 	let loading = $state(false);
 
 	const localNotes = getLocalNotes();
-	const currentLocalWorkspace = $derived(getLocalUserWorkspaces().getCurrentUserWorkspace());
+	const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
+	const cloudNotes = useCloudNotes();
+	const user = $derived(getSessionAndUserContext().getUser());
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
-		if (currentLocalWorkspace === undefined) {
+		if (currentUserWorkspace === null) {
 			toast.error('Can find current user workspace');
 			return;
 		}
@@ -42,7 +47,23 @@
 		}
 		try {
 			loading = true;
-			await localNotes.createNote(name, icon, isFavorite, workspace, currentLocalWorkspace.id);
+			if (!('owner' in workspace))
+				await localNotes.createNote(name, icon, isFavorite, workspace, currentUserWorkspace.id);
+			else {
+				if (user === null) {
+					toast.error('User is not logged in. Please login to create cloud notes');
+					return;
+				}
+				await cloudNotes.createNote({
+					name,
+					icon,
+					favorite: isFavorite,
+					workspace: workspace.id,
+					userworkspace: currentUserWorkspace.id,
+					owner: user.id
+				});
+			}
+
 			open = false;
 		} catch (e) {
 			loading = false;

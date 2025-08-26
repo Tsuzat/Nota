@@ -10,9 +10,11 @@
 	import { ISTAURI } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 	import { Loader } from '@lucide/svelte';
 	import { exists } from '@tauri-apps/plugin-fs';
+	import { useCurrentUserWorkspaceContext } from '../../user-workspace/userworkspace.svelte';
+	import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
+	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -29,7 +31,14 @@
 	let loading = $state(false);
 
 	const localWorspaces = getLocalWorkspaces();
-	const currentLocalWorkspace = $derived(getLocalUserWorkspaces().getCurrentUserWorkspace());
+	const cloudWorkspaces = useCloudWorkspaces();
+	const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
+	const user = $derived(getSessionAndUserContext().getUser());
+
+	$effect(() => {
+		if (useCurrentUserWorkspaceContext().getIsLocal()) type = 'local';
+		else type = 'cloud';
+	});
 
 	async function getWorkspaceDirectory() {
 		const defaultPath = await appDataDir();
@@ -55,8 +64,8 @@
 	}
 
 	async function createLocalWorkspace() {
-		if (currentLocalWorkspace === undefined) {
-			toast.error('Can find current user workspace');
+		if (currentUserWorkspace === null) {
+			toast.error('Can find current user workspace. Please select one user workspace.');
 			return;
 		}
 		// verify icon, name, dir
@@ -71,7 +80,7 @@
 
 		try {
 			loading = true;
-			await localWorspaces.createWorkspace(icon, name, dir, currentLocalWorkspace.id);
+			await localWorspaces.createWorkspace(icon, name, dir, currentUserWorkspace.id);
 			open = false;
 		} catch (e) {
 			loading = false;
@@ -86,14 +95,43 @@
 	/**
 	 * ! To be implemented
 	 */
-	async function createRemoteWorkspace() {}
+	async function createCloudWorkspace() {
+		if (user === null) {
+			toast.error('No user found. Please login again.');
+			return;
+		}
+		if (currentUserWorkspace === null || !('owner' in currentUserWorkspace)) {
+			toast.error('No cloud user workspace found');
+			return;
+		}
+		// verify icon, name, dir
+		if (!icon || !name || name.trim() === '') {
+			toast.error('Please provide an icon and name');
+			return;
+		}
+		try {
+			loading = true;
+			await cloudWorkspaces.createWorkspace({
+				name,
+				icon,
+				owner: user.id,
+				userworkspace: currentUserWorkspace.id
+			});
+			open = false;
+		} catch (error) {
+			console.error(error);
+			toast.error('Something went wrong.');
+		} finally {
+			loading = false;
+		}
+	}
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		if (type === 'local') {
 			await createLocalWorkspace();
 		} else {
-			await createRemoteWorkspace();
+			await createCloudWorkspace();
 		}
 	}
 
@@ -123,7 +161,7 @@
 			<Dialog.Description
 				>Create a local or remote workspace for
 				<strong>
-					{currentLocalWorkspace?.name}
+					{currentUserWorkspace?.name}
 				</strong>
 			</Dialog.Description>
 		</Dialog.Header>
