@@ -9,8 +9,11 @@
 	import { ISMACOS, ISTAURI } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import ToggleMode from '../toggle-mode.svelte';
+	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+	import NavWorkspacesCloud from './nav-workspaces-cloud.svelte';
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+	const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext());
 </script>
 
 <Sidebar.Root bind:ref class="border-r-0" {...restProps}>
@@ -30,8 +33,11 @@
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<NavFavorites />
-		{#if ISTAURI}
+		{#if ISTAURI && currentUserWorkspace.getIsLocal()}
 			<NavWorkspacesLocal />
+		{/if}
+		{#if !currentUserWorkspace.getIsLocal()}
+			<NavWorkspacesCloud />
 		{/if}
 		<NavSecondary />
 	</Sidebar.Content>

@@ -5,32 +5,38 @@
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { useSidebar } from '$lib/components/ui/sidebar';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-	import { ISMACOS } from '$lib/utils';
+	import { ISMACOS, ISTAURI } from '$lib/utils';
 	import ArrowUpRightIcon from '@lucide/svelte/icons/arrow-up-right';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import LinkIcon from '@lucide/svelte/icons/link';
 	import StarOffIcon from '@lucide/svelte/icons/star-off';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
-	import { openPath as reveal } from '@tauri-apps/plugin-opener';
+	import { openUrl, openPath as reveal } from '@tauri-apps/plugin-opener';
 	import { toast } from 'svelte-sonner';
 	import { linear } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import { dirname } from '@tauri-apps/api/path';
+	import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 
 	const sidebar = useSidebar();
 	let showMore = $state(false);
 	const localNotes = getLocalNotes();
-	const notes = $derived(
-		localNotes
-			.getNotes()
-			.filter((n) => n.favorite && !n.trashed)
-			.slice(0, showMore ? undefined : 5)
-	);
+	const cloudNotes = useCloudNotes();
+	const currentUserWorkspace = useCurrentUserWorkspaceContext();
+	const notes = $derived.by<LocalNote[] | CloudNote[]>(() => {
+		let notes: LocalNote[] | CloudNote[] = [];
+		if (currentUserWorkspace.getIsLocal()) notes = localNotes.getNotes();
+		else notes = cloudNotes.getNotes();
+		return notes.filter((n) => n.favorite && !n.trashed);
+	});
 
-	async function toggleStar(note: LocalNote) {
+	async function toggleStar(note: LocalNote | CloudNote) {
 		try {
 			note.favorite = !note.favorite;
-			await localNotes.updateNote(note);
+			if ('owner' in note) await cloudNotes.updateNote(note);
+			else await localNotes.updateNote(note);
 		} catch (e) {
 			toast.error('Could not update note starred');
 			console.error(e);
@@ -41,14 +47,34 @@
 		const dir = await dirname(note.path);
 		await reveal(dir);
 	}
+
+	async function trashNote(note: LocalNote | CloudNote) {
+		try {
+			if ('owner' in note) await cloudNotes.moveToTrash(note.id);
+			else await localNotes.trashNote(note);
+		} catch (e) {
+			toast.error('Could not update note starred');
+			console.error(e);
+		}
+	}
+	async function deleteNote(note: LocalNote | CloudNote) {
+		try {
+			if ('owner' in note) await cloudNotes.deleteNote(note.id);
+			else await localNotes.deleteNote(note);
+		} catch (e) {
+			toast.error('Could not update note starred');
+			console.error(e);
+		}
+	}
 </script>
 
 {#if notes.length > 0}
 	<Sidebar.Group class="group-data-[collapsible=icon]:hidden">
 		<Sidebar.GroupLabel>Favorites</Sidebar.GroupLabel>
 		<Sidebar.Menu>
-			{#each notes as note (note.id)}
-				{@const href = `local-note-${note.id}`}
+			{#each notes.filter((n) => n.favorite && !n.trashed) as note (note.id)}
+				{@const isCloud = 'owner' in note}
+				{@const href = !isCloud ? 'local-' : '' + `note-${note.id}`}
 				{@const isActive = page.url.pathname.endsWith(href)}
 				<div transition:slide={{ easing: linear, duration: 200 }}>
 					<Sidebar.MenuItem>
@@ -79,23 +105,45 @@
 									Unfavorites
 								</DropdownMenu.Item>
 								<DropdownMenu.Separator />
-								<DropdownMenu.Item onclick={() => window.navigator.clipboard.writeText(note.path)}>
-									<LinkIcon />
-									Copy Path
-								</DropdownMenu.Item>
-								<DropdownMenu.Item onclick={() => openPath(note)}>
-									<ArrowUpRightIcon />
-									Open in {ISMACOS ? 'Finder' : 'File Explorer'}
-								</DropdownMenu.Item>
+								{#if !isCloud}
+									<DropdownMenu.Item
+										onclick={() => window.navigator.clipboard.writeText(note.path)}
+									>
+										<LinkIcon />
+										Copy Path
+									</DropdownMenu.Item>
+									<DropdownMenu.Item onclick={() => openPath(note)}>
+										<ArrowUpRightIcon />
+										Open in {ISMACOS ? 'Finder' : 'File Explorer'}
+									</DropdownMenu.Item>
+								{/if}
+								{#if isCloud}
+									<DropdownMenu.Item
+										onclick={() =>
+											window.navigator.clipboard.writeText(
+												`${PUBLIC_NOTA_FRONTEND_URL}/note-${note.id}`
+											)}
+									>
+										<LinkIcon />
+										Copy Url
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onclick={() => {
+											const url = `${PUBLIC_NOTA_FRONTEND_URL}/note-${note.id}`;
+											if (ISTAURI) openUrl(url);
+											else window.open(url, '_blank');
+										}}
+									>
+										<ArrowUpRightIcon />
+										Open in {ISTAURI ? 'browser' : 'new tab'}
+									</DropdownMenu.Item>
+								{/if}
 								<DropdownMenu.Separator />
-								<DropdownMenu.Item variant="destructive" onclick={() => localNotes.trashNote(note)}>
+								<DropdownMenu.Item variant="destructive" onclick={() => trashNote(note)}>
 									<Trash2Icon />
 									Move to trash
 								</DropdownMenu.Item>
-								<DropdownMenu.Item
-									onclick={() => localNotes.deleteNote(note)}
-									variant="destructive"
-								>
+								<DropdownMenu.Item onclick={() => deleteNote(note)} variant="destructive">
 									<Trash2Icon />
 									Delete
 								</DropdownMenu.Item>

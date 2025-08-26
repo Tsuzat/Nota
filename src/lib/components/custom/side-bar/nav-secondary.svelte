@@ -19,12 +19,20 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { toast } from 'svelte-sonner';
+	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 
-	const trashedNotes = $derived(
-		getLocalNotes()
-			.getNotes()
-			.filter((n) => n.trashed).length
-	);
+	const currentUserWorkspace = useCurrentUserWorkspaceContext();
+	const trashedNotes = $derived.by(() => {
+		if (currentUserWorkspace.getIsLocal())
+			return getLocalNotes()
+				.getNotes()
+				.filter((n) => n.trashed).length;
+		else
+			return useCloudNotes()
+				.getNotes()
+				.filter((n) => n.trashed).length;
+	});
 
 	let open = $state(false);
 	const sidebar = Sidebar.useSidebar();

@@ -18,25 +18,33 @@
 		useCloudUserWorkspaces,
 		type CloudUserWorkspace
 	} from '$lib/supabase/db/clouduserworkspaces.svelte';
+	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+	import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
+	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 
 	const localUserWorkspaces = getLocalUserWorkspaces();
 	const localWorkspaces = getLocalWorkspaces();
 	const localNotes = getLocalNotes();
-	let activeWorkspace = $derived(localUserWorkspaces.getCurrentUserWorkspace());
+	const currentUserWorkspace = useCurrentUserWorkspaceContext();
+	let activeWorkspace = $derived(currentUserWorkspace.getCurrentUserWorkspace());
 
 	const cloudUserWorkspaces = useCloudUserWorkspaces();
+	const cloudWorkspaces = useCloudWorkspaces();
+	const cloudNotes = useCloudNotes();
 
 	const useNewLocalUserWorkspace = getNewUserWorkspace();
 
-	async function selectUserWorkspace(workspace: LocalUserWorkspace) {
+	async function selectLocalUserWorkspace(workspace: LocalUserWorkspace) {
 		if (activeWorkspace?.id === workspace.id) return;
 		const id = toast.loading('Changing User Workspace to ' + workspace.name);
 		try {
-			localUserWorkspaces.setCurrentUserWorkspace(workspace);
+			currentUserWorkspace.setCurrentUserWorkspace(workspace);
 			await localWorkspaces.fetchWorkspaces(workspace.id);
 			await localNotes.fetchNotes(workspace.id);
 			goto('/home');
-			toast.success('Changed User Workspace to' + workspace.name, { id });
+			toast.success('Changed User Workspace to ' + workspace.name, { id });
+			cloudWorkspaces.setWorkspaces([]);
+			cloudNotes.setNotes([]);
 		} catch (error) {
 			console.error(error);
 			toast.error('Something went wrong when changing the user workspace', { id });
@@ -44,9 +52,22 @@
 	}
 
 	async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
-		toast.info(
-			'Switching to cloud user workspace will be available soon. Please use local workspaces for now.'
-		);
+		const id = toast.loading('Switching to cloud workspace');
+		try {
+			currentUserWorkspace.setCurrentUserWorkspace(workspace);
+			toast.loading('Loading Workspaces', { id });
+			await cloudWorkspaces.fetchWorkspaces(workspace);
+			toast.loading('Loading Notes', { id });
+			await cloudNotes.fetchNotes(workspace);
+			toast.dismiss(id);
+			goto('/home');
+			toast.success('Changed User Workspace to ' + workspace.name, { id });
+			localWorkspaces.setWorkspaces([]);
+			localNotes.setNotes([]);
+		} catch (error) {
+			console.error(error);
+			toast.error('Something went wrong.');
+		}
 	}
 </script>
 
@@ -73,7 +94,7 @@
 					>Local User Workspaces</DropdownMenu.Label
 				>
 				{#each localUserWorkspaces.getUserWorkspaces() as workspace (workspace.id)}
-					<DropdownMenu.Item onSelect={() => selectUserWorkspace(workspace)} class="gap-2 p-2">
+					<DropdownMenu.Item onSelect={() => selectLocalUserWorkspace(workspace)} class="gap-2 p-2">
 						<div class="flex size-6 items-center justify-center rounded border">
 							<IconRenderer icon={workspace.icon} />
 						</div>
