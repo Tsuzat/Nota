@@ -3,6 +3,7 @@ import { DB } from '$lib/local/db';
 import type { LocalNote } from '$lib/local/notes.svelte';
 import type { LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import type { LocalWorkSpace } from '$lib/local/workspaces.svelte';
+import { ISTAURI } from '$lib/utils';
 import { toast } from 'svelte-sonner';
 
 async function loadLocalUserWorkspaces(): Promise<LocalUserWorkspace[] | null> {
@@ -90,6 +91,11 @@ async function loadLocalNotes(currentUserWorkspaceId: string): Promise<LocalNote
 }
 
 export const load = async () => {
+	if (!ISTAURI) {
+		console.log("It's browser");
+		return {};
+	}
+
 	const localUserWorkspaces = await loadLocalUserWorkspaces();
 	if (localUserWorkspaces === null) {
 		toast.error('Something went wrong when loading the user workspaces');

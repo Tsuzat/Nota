@@ -40,6 +40,12 @@
 			cloudNotes.setNotes([]);
 		} else {
 			cloudUserWorkspaces.fetchWorkspaces(user);
+			if (
+				currentUserWorkspace.getCurrentUserWorkspace() === null &&
+				cloudUserWorkspaces.getWorkspaces().length > 0
+			) {
+				currentUserWorkspace.setCurrentUserWorkspace(cloudUserWorkspaces.getWorkspaces()[0]);
+			}
 		}
 	});
 
@@ -59,10 +65,11 @@
 
 	$effect(() => {
 		if (
-			data.localUserWorkspaces === undefined ||
-			data.currentUserWorkspace === undefined ||
-			data.localWorkspaces === undefined ||
-			data.localNotes === undefined
+			ISTAURI &&
+			(data.localUserWorkspaces === undefined ||
+				data.currentUserWorkspace === undefined ||
+				data.localWorkspaces === undefined ||
+				data.localNotes === undefined)
 		) {
 			toast.error('Something went wrong when loading the local data');
 			goto('/');
