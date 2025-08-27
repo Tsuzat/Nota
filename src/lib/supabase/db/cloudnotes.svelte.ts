@@ -2,6 +2,7 @@ import { getContext, setContext } from 'svelte';
 import { supabase } from '..';
 import { toast } from 'svelte-sonner';
 import type { CloudUserWorkspace } from './clouduserworkspaces.svelte';
+import type { Content } from '@tiptap/core';
 
 export interface CloudNote {
 	id: string;
@@ -15,6 +16,7 @@ export interface CloudNote {
 	trashed: boolean;
 	created_at: string;
 	updated_at: string;
+	content: Content;
 }
 
 class CloudNotes {
