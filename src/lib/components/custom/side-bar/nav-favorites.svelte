@@ -74,7 +74,7 @@
 		<Sidebar.Menu>
 			{#each notes.filter((n) => n.favorite && !n.trashed) as note (note.id)}
 				{@const isCloud = 'owner' in note}
-				{@const href = !isCloud ? 'local-' : '' + `note-${note.id}`}
+				{@const href = `${isCloud ? '' : 'local-'}note-${note.id}`}
 				{@const isActive = page.url.pathname.endsWith(href)}
 				<div transition:slide={{ easing: linear, duration: 200 }}>
 					<Sidebar.MenuItem>

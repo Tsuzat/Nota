@@ -18,16 +18,18 @@
 
 <Sidebar.Root bind:ref class="border-r-0" {...restProps}>
 	<Sidebar.Header>
-		<div data-tauri-drag-region class="flex h-8 items-center justify-between">
-			{#if ISMACOS}
-				<div></div>
-			{:else}
-				<Button variant="ghost" size="icon" class="z-10">
-					<img src="/favicon.png" alt="AppLogo" class="aspect-square size-6" />
-				</Button>
-			{/if}
-			<ToggleMode />
-		</div>
+		{#if ISTAURI}
+			<div data-tauri-drag-region class="flex h-8 items-center justify-between">
+				{#if ISMACOS}
+					<div></div>
+				{:else}
+					<Button variant="ghost" size="icon" class="z-10">
+						<img src="/favicon.png" alt="AppLogo" class="aspect-square size-6" />
+					</Button>
+				{/if}
+				<ToggleMode />
+			</div>
+		{/if}
 		<TeamSwitcher />
 		<NavMain />
 	</Sidebar.Header>

@@ -21,6 +21,7 @@
 	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 	import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+	import { ISTAURI } from '$lib/utils';
 
 	const localUserWorkspaces = getLocalUserWorkspaces();
 	const localWorkspaces = getLocalWorkspaces();
@@ -85,25 +86,33 @@
 							</div>
 							<span class="truncate font-medium">{activeWorkspace.name}</span>
 							<ChevronDownIcon class="opacity-50" />
+						{:else}
+							<span>Select User Workspace</span>
+							<ChevronDownIcon class="opacity-50" />
 						{/if}
 					</Sidebar.MenuButton>
 				{/snippet}
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content class="w-fit rounded-lg" align="start" side="bottom" sideOffset={4}>
-				<DropdownMenu.Label class="text-muted-foreground text-xs"
-					>Local User Workspaces</DropdownMenu.Label
-				>
-				{#each localUserWorkspaces.getUserWorkspaces() as workspace (workspace.id)}
-					<DropdownMenu.Item onSelect={() => selectLocalUserWorkspace(workspace)} class="gap-2 p-2">
-						<div class="flex size-6 items-center justify-center rounded border">
-							<IconRenderer icon={workspace.icon} />
-						</div>
-						<span class="truncate">{workspace.name}</span>
-						<DropdownMenu.Shortcut>
-							<Monitor />
-						</DropdownMenu.Shortcut>
-					</DropdownMenu.Item>
-				{/each}
+				{#if ISTAURI}
+					<DropdownMenu.Label class="text-muted-foreground text-xs"
+						>Local User Workspaces</DropdownMenu.Label
+					>
+					{#each localUserWorkspaces.getUserWorkspaces() as workspace (workspace.id)}
+						<DropdownMenu.Item
+							onSelect={() => selectLocalUserWorkspace(workspace)}
+							class="gap-2 p-2"
+						>
+							<div class="flex size-6 items-center justify-center rounded border">
+								<IconRenderer icon={workspace.icon} />
+							</div>
+							<span class="truncate">{workspace.name}</span>
+							<DropdownMenu.Shortcut>
+								<Monitor />
+							</DropdownMenu.Shortcut>
+						</DropdownMenu.Item>
+					{/each}
+				{/if}
 				<DropdownMenu.Label class="text-muted-foreground text-xs"
 					>Cloud User Workspaces</DropdownMenu.Label
 				>
