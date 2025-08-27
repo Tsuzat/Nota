@@ -30,7 +30,10 @@
 			from: props.from
 		});
 	}}
-	class="bg-background flex h-fit w-fit items-center gap-1 rounded border shadow-lg"
+	options={{
+		placement: 'top-start'
+	}}
+	class="bg-popover flex h-fit w-fit items-center gap-1 rounded-lg border shadow-lg"
 >
 	<EdraToolTip tooltip="Add Row After">
 		<Button
