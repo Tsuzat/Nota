@@ -1,4 +1,4 @@
-export const load = ({ params }) => {
+export const load = async ({ params }) => {
 	return {
 		id: params.id
 	};
