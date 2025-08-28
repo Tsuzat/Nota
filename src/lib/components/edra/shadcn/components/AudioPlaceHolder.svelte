@@ -13,9 +13,12 @@
 	import { toast } from 'svelte-sonner';
 	import { FileType, ISTAURI } from '$lib/utils';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
+	import { isURL } from '../../utils';
+	import { Loading } from '$lib/components/ui/command';
 
 	let open = $state(false);
 	let audioUrl = $state('');
+	let isUploading = $state(false);
 
 	const assetsFiles = editor.commands.getAssets(FileType.AUDIO);
 
@@ -39,16 +42,17 @@
 		});
 		if (!file) return;
 		if (ISTAURI) {
+			isUploading = true;
 			try {
-				const uploadedFiles = await editor?.commands.handleFileDrop([file]);
-				uploadedFiles.forEach(async (file) => {
-					const src = convertFileSrc(file);
-					editor.chain().focus().setAudio(src).run();
-				});
+				const uploadedFile = await editor?.commands.handleFileDrop(file);
+				const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(uploadedFile);
+				editor.chain().focus().setAudio(src).run();
 				open = false;
 			} catch (e) {
 				console.error(e);
 				toast.error('Could not process audio.');
+			} finally {
+				isUploading = false;
 			}
 		}
 	}
@@ -67,8 +71,13 @@
 		open = true;
 	}}
 >
-	<Audio />
-	<span>Insert an audio</span>
+	{#if isUploading}
+		<Loading class="text-primary animate-spin" />
+		<span>Uploading Audio File</span>
+	{:else}
+		<Audio />
+		<span>Insert an audio</span>
+	{/if}
 	<Popover.Root bind:open>
 		<Popover.Trigger class="sr-only absolute left-1/2">Open</Popover.Trigger>
 		<Popover.Content

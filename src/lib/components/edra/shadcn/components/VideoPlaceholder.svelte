@@ -13,9 +13,12 @@
 	import { toast } from 'svelte-sonner';
 	import { FileType, ISTAURI } from '$lib/utils';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
+	import { isURL } from '../../utils';
+	import { Loader } from '@lucide/svelte';
 
 	let open = $state(false);
 	let videoUrl = $state('');
+	let isUploading = $state(false);
 
 	const assetsFiles = editor.commands.getAssets(FileType.VIDEO);
 
@@ -39,16 +42,17 @@
 		});
 		if (!file) return;
 		if (ISTAURI) {
+			isUploading = true;
 			try {
-				const uploadedFiles = await editor?.commands.handleFileDrop([file]);
-				uploadedFiles.forEach(async (file) => {
-					const src = convertFileSrc(file);
-					editor.chain().focus().setVideo(src).run();
-				});
+				const uploadedFile = await editor?.commands.handleFileDrop(file);
+				const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(file);
+				editor.chain().focus().setVideo(src).run();
 				open = true;
 			} catch (e) {
 				console.error(e);
 				toast.error('Could not process video.');
+			} finally {
+				isUploading = false;
 			}
 		}
 	}
@@ -65,8 +69,13 @@
 	draggable={true}
 	onclick={() => (open = true)}
 >
-	<Video />
-	<span>Insert a video</span>
+	{#if isUploading}
+		<Loader class="text-primary animate-spin" />
+		<span>Uploading Video</span>
+	{:else}
+		<Video />
+		<span>Insert a video</span>
+	{/if}
 	<Popover.Root bind:open>
 		<Popover.Trigger class="sr-only absolute left-1/2">Open</Popover.Trigger>
 		<Popover.Content

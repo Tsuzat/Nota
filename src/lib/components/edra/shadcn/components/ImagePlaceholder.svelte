@@ -13,9 +13,12 @@
 	import { toast } from 'svelte-sonner';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
+	import { Loader } from '@lucide/svelte';
+	import { isURL } from '../../utils';
 
 	let open = $state(false);
 	let imageUrl = $state('');
+	let isUploading = $state(false);
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -39,16 +42,17 @@
 		});
 		if (!file) return;
 		if (ISTAURI) {
+			isUploading = true;
 			try {
-				const uploadedFiles = await editor?.commands.handleFileDrop([file]);
-				uploadedFiles.forEach(async (file) => {
-					const src = convertFileSrc(file);
-					editor.chain().focus().setImage({ src }).run();
-				});
+				const uploadedFile = await editor?.commands.handleFileDrop(file);
+				const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(uploadedFile);
+				editor.chain().focus().setImage({ src }).run();
 				open = true;
 			} catch (e) {
 				console.error(e);
 				toast.error('Could not process images.');
+			} finally {
+				isUploading = false;
 			}
 		}
 	}
@@ -59,14 +63,19 @@
 	contenteditable="false"
 	class={buttonVariants({
 		variant: 'secondary',
-		class: 'media-placeholder relative my-2 w-full justify-start p-6'
+		class: 'media-placeholder relative my-2 flex w-full items-center justify-start gap-4 p-6'
 	})}
 	style="user-select: none;"
 	draggable={true}
-	onclick={() => (open = true)}
+	onclick={() => (open = !open)}
 >
-	<Image />
-	<span>Insert an Image</span>
+	{#if !isUploading}
+		<Image />
+		<span>Insert an Image</span>
+	{:else}
+		<Loader class="text-primary animate-spin" />
+		<span>Uploading Image</span>
+	{/if}
 	<Popover.Root bind:open>
 		<Popover.Trigger class="sr-only absolute left-1/2">Open</Popover.Trigger>
 		<Popover.Content
