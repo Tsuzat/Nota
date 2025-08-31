@@ -90,6 +90,22 @@
 					"path": "**"
 				}
 			]
+		},
+		{
+			"identifier": "fs:allow-read-file",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		},
+		{
+			"identifier": "core:path:allow-basename",
+			"allow": [
+				{
+					"path": "*"
+				}
+			]
 		}
 	]
 }
