@@ -44,10 +44,10 @@
 
 <Button variant="secondary" class="w-full" onclick={() => signInWithOAuth('google')}>
 	<Google />
-	Login With Google
+	Sign In With Google
 </Button>
 
 <Button variant="secondary" class="w-full" onclick={() => signInWithOAuth('github')}>
 	<Github />
-	Login With Github
+	Sign In With Github
 </Button>
