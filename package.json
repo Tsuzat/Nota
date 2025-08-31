@@ -21,6 +21,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@aarkue/tiptap-math-extension": "^1.3.6",
+		"@floating-ui/dom": "^1.7.4",
 		"@fontsource-variable/fira-code": "^5.2.6",
 		"@fontsource-variable/inter": "^5.2.6",
 		"@supabase/supabase-js": "^2.55.0",
