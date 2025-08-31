@@ -10,18 +10,14 @@ import { toast } from 'svelte-sonner';
  * @param assetsPath - path to the assets folder
  * @returns - Array of copied files
  */
-export const moveFilesToAssets = async (files: string[], assetsPath: string) => {
-	const copiedFiles: string[] = [];
-	for (const file of files) {
-		const fileName = file.split(ISWINDOWS ? '\\' : '/').pop();
-		if (fileName === undefined) continue;
-		const finalPath = await resolve(assetsPath, fileName);
-		await copyFile(file, finalPath);
-		const fileExists = await exists(finalPath);
-		if (!fileExists) continue;
-		copiedFiles.push(finalPath);
-	}
-	return copiedFiles;
+export const moveFileToAssets = async (file: string, assetsPath: string) => {
+	const fileName = file.split(ISWINDOWS ? '\\' : '/').pop();
+	if (fileName === undefined) throw new Error('Assets file is not supported');
+	const finalPath = await resolve(assetsPath, fileName);
+	await copyFile(file, finalPath);
+	const fileExists = await exists(finalPath);
+	if (!fileExists) throw new Error('Failed to move file to assets folder');
+	return finalPath;
 };
 
 export const createFile = async (file: File, path: string): Promise<string> => {
