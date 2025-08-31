@@ -12,7 +12,7 @@ export interface EdraEditorProps {
 	onUpdate?: () => void;
 	class?: string;
 	spellcheck?: boolean;
-	onFileSelect?: (files: string[]) => Promise<string[]>;
+	onFileSelect?: (files: string) => Promise<string>;
 	onDropOrPaste?: (file: File) => Promise<string>;
 	getAssets?: (fileType: FileType) => Promise<string[]>;
 }

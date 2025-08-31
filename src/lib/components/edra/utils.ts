@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import type { Editor } from '@tiptap/core';
 import { Decoration, DecorationSet, type EditorView } from '@tiptap/pm/view';
 import { Node } from '@tiptap/pm/model';
+import { toast } from 'svelte-sonner';
 
 /**
  * Check if the current browser is in mac or not
@@ -23,11 +24,18 @@ export function getHandlePasteImage(onDropOrPaste?: (file: File) => Promise<stri
 		}
 		const file = item.getAsFile();
 		if (file === null || file.size === undefined) return;
-		onDropOrPaste?.(file).then((src) => {
-			const node = view.state.schema.nodes.image.create({ src });
-			const transaction = view.state.tr.replaceSelectionWith(node);
-			view.dispatch(transaction);
-		});
+		const id = toast.loading('Processing Pasted Image');
+		onDropOrPaste?.(file)
+			.then((src) => {
+				const node = view.state.schema.nodes.image.create({ src });
+				const transaction = view.state.tr.replaceSelectionWith(node);
+				view.dispatch(transaction);
+				toast.success('Uploaded Successfully', { id, duration: 300 });
+			})
+			.catch((error) => {
+				console.error(error);
+				toast.error('Something went wrong while pasting image', { id, duration: 300 });
+			});
 		return true;
 	};
 }
@@ -38,11 +46,18 @@ export function getHandleDropImage(onDropOrPaste?: (file: File) => Promise<strin
 		if (files.length === 0) return;
 		const file = files[0];
 		if (file === null || file.size === undefined) return;
-		onDropOrPaste?.(file).then((src) => {
-			const node = view.state.schema.nodes.image.create({ src });
-			const transaction = view.state.tr.replaceSelectionWith(node);
-			view.dispatch(transaction);
-		});
+		const id = toast.loading('Processing Dropped Image');
+		onDropOrPaste?.(file)
+			.then((src) => {
+				const node = view.state.schema.nodes.image.create({ src });
+				const transaction = view.state.tr.replaceSelectionWith(node);
+				view.dispatch(transaction);
+				toast.success('Uploaded Successfully', { id, duration: 300 });
+			})
+			.catch((error) => {
+				console.error(error);
+				toast.error('Something went wrong when handling dropped image', { id, duration: 300 });
+			});
 		return true;
 	};
 }
@@ -90,4 +105,15 @@ export const duplicateContent = (editor: Editor, node: Node) => {
 		})
 		.focus(selection.to)
 		.run();
+};
+
+export const isURL = (str: string): boolean => {
+	let isUrl = true;
+	try {
+		new URL(str);
+		isUrl = true;
+	} catch {
+		isUrl = false;
+	}
+	return isUrl;
 };
