@@ -24,6 +24,7 @@
 	import { DEFAULT_SETTINGS } from '$lib/types.js';
 	import { onMount } from 'svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
+	import { uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
 
 	const { data } = $props();
 
@@ -46,6 +47,18 @@
 	let note = $state<CloudNote>();
 	let pageSettings = $state(DEFAULT_SETTINGS);
 	let syncing = $state(false);
+
+	const onFileSelect = $derived.by(() => {
+		return async (file: string) => uploadFileByPath(file);
+	});
+
+	const onDropOrPaste = $derived.by(() => {
+		return async (file: File) => uploadFile(file);
+	});
+
+	const getAssets = $derived.by(() => {
+		return async (fileType: FileType) => [] as string[];
+	});
 
 	async function saveNoteContent() {
 		if (pendingContent === null || note === undefined) return;
@@ -220,7 +233,15 @@
 				{/if}
 				<EdraDragHandleExtended {editor} />
 			{/if}
-			<EdraEditor bind:editor {content} {onUpdate} class="size-full !p-8" />
+			<EdraEditor
+				bind:editor
+				{content}
+				{onUpdate}
+				class="size-full !p-8"
+				{onDropOrPaste}
+				{onFileSelect}
+				{getAssets}
+			/>
 		</div>
 	</div>
 {:else}
