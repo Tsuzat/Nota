@@ -21,7 +21,7 @@
 	import { onDestroy, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { DEFAULT_SETTINGS } from '$lib/types';
-	import { createFile, getAssetsByFileType, moveFilesToAssets } from '$lib/local/utils';
+	import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 
 	const sidebar = useSidebar();
@@ -36,7 +36,7 @@
 
 	const onFileSelect = $derived.by(() => {
 		if (data.assetsPath === undefined) return;
-		return async (files: string[]) => moveFilesToAssets(files, data.assetsPath);
+		return async (file: string) => moveFileToAssets(file, data.assetsPath);
 	});
 
 	const onDropOrPaste = $derived.by(() => {
