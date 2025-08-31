@@ -59,10 +59,10 @@ export function handleKeydown(e: KeyboardEvent) {
 }
 
 export enum FileType {
-	IMAGE = 'image',
-	VIDEO = 'video',
-	AUDIO = 'audio',
-	DOCS = 'docs',
+	IMAGE = 'image/*',
+	VIDEO = 'video/*',
+	AUDIO = 'audio/*',
+	DOCS = 'docs/*',
 	UNKNOWN = 'unknown'
 }
 
@@ -84,6 +84,27 @@ export const getFileTypeExtensions = (fileType: FileType) => {
 		case FileType.UNKNOWN:
 			return [];
 	}
+};
+
+export const getFileTypeFromExtension = (fileName: string): FileType => {
+	const extension = fileName.toLowerCase().split('.').pop();
+
+	if (!extension) return FileType.UNKNOWN;
+
+	const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico', 'tiff', 'tif'];
+	const videoExtensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv', 'm4v', '3gp', 'ogv'];
+	const audioExtensions = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'opus', 'aiff'];
+	const docsExtensions = ['docx', 'doc', 'pptx', 'ppt', 'xlsx', 'xls', 'pdf'];
+
+	if (imageExtensions.includes(extension)) {
+		return FileType.IMAGE;
+	} else if (videoExtensions.includes(extension)) {
+		return FileType.VIDEO;
+	} else if (audioExtensions.includes(extension)) {
+		return FileType.AUDIO;
+	} else if (docsExtensions.includes(extension)) {
+		return FileType.DOCS;
+	} else return FileType.UNKNOWN;
 };
 
 export function timeAgo(date: string): string {
