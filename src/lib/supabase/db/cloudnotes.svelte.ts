@@ -8,7 +8,6 @@ export interface CloudNote {
 	id: string;
 	name: string;
 	icon: string;
-	path: string;
 	workspace: string;
 	userworkspace: string;
 	owner: string;
