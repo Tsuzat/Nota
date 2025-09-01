@@ -85,7 +85,6 @@ class CloudNotes {
 				.insert({
 					name: note.name,
 					icon: note.icon ?? '📝',
-					path: note.path ?? '',
 					workspace: note.workspace,
 					userworkspace: note.userworkspace,
 					owner: note.owner,
@@ -119,7 +118,6 @@ class CloudNotes {
 				.insert({
 					name: `${note.name} (Copy)`,
 					icon: note.icon,
-					path: note.path,
 					workspace: note.workspace,
 					userworkspace: note.userworkspace,
 					owner: note.owner,
@@ -151,7 +149,6 @@ class CloudNotes {
 				.update({
 					name: note.name,
 					icon: note.icon,
-					path: note.path,
 					favorite: note.favorite,
 					trashed: note.trashed
 				})
