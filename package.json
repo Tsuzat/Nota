@@ -56,6 +56,7 @@
 		"katex": "^0.16.22",
 		"lowlight": "^3.3.0",
 		"mode-watcher": "^1.1.0",
+		"nanoid": "^5.1.5",
 		"svelte-tiptap": "^2.2.0",
 		"tippy.js": "^6.3.7",
 		"tiptap-extension-auto-joiner": "^0.1.3",
