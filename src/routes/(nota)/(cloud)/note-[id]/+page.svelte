@@ -4,7 +4,7 @@
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
 	import { useCloudNotes, type CloudNote } from '$lib/supabase/db/cloudnotes.svelte.js';
 	import { supabase } from '$lib/supabase/index.js';
-	import { cn, ISMACOS, ISTAURI } from '$lib/utils';
+	import { cn, FileType, ISMACOS, ISTAURI } from '$lib/utils';
 	import { type Content, Editor } from '@tiptap/core';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
@@ -24,7 +24,8 @@
 	import { DEFAULT_SETTINGS } from '$lib/types.js';
 	import { onMount } from 'svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
-	import { uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
+	import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
+	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 
 	const { data } = $props();
 
@@ -41,6 +42,7 @@
 
 	// cloud related
 	const cloudNotes = useCloudNotes();
+	const user = $derived(getSessionAndUserContext().getUser());
 
 	// notes related
 	let isLoading = $state(false);
@@ -49,15 +51,15 @@
 	let syncing = $state(false);
 
 	const onFileSelect = $derived.by(() => {
-		return async (file: string) => uploadFileByPath(file);
+		if (user) return async (file: string) => uploadFileByPath(user.id, file);
 	});
 
 	const onDropOrPaste = $derived.by(() => {
-		return async (file: File) => uploadFile(file);
+		if (user) return async (file: File) => uploadFile(user.id, file);
 	});
 
 	const getAssets = $derived.by(() => {
-		return async (fileType: FileType) => [] as string[];
+		if (user) return async (fileType: FileType) => getAssetsByFileType(user.id, fileType);
 	});
 
 	async function saveNoteContent() {
