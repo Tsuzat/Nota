@@ -108,12 +108,12 @@
 						{:else}
 							{#each assets as asset, idx (idx)}
 								<div class="flex flex-col items-center justify-center gap-2">
-									<SimpleTooltip content="Drag and Drop or click to insert">
+									<SimpleTooltip content="Click to insert">
 										<Button
 											variant="ghost"
 											class="size-fit p-1"
 											onclick={() => {
-												open = editor.commands.setVideo(asset);
+												editor.commands.setVideo(asset);
 											}}
 										>
 											<!-- svelte-ignore element_invalid_self_closing_tag -->
