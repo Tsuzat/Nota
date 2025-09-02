@@ -6,7 +6,7 @@ import { FileType, getFileTypeFromExtension } from '$lib/utils';
 import { nanoid } from 'nanoid';
 
 export async function uploadFile(id: string, file: File): Promise<string> {
-	const path = `${id}/${nanoid(32)}`;
+	const path = `${id}/${file.type.split('/')[0]}/${nanoid(32)}`;
 	const { data, error } = await supabase.storage.from('notes media').upload(path, file, {
 		upsert: false
 	});
@@ -35,7 +35,9 @@ export async function uploadFileByPath(id: string, path: string): Promise<string
 
 export async function getAssetsByFileType(id: string, fileType: FileType): Promise<string[]> {
 	try {
-		const { data, error } = await supabase.storage.from('notes media').list(id);
+		const path = `${id}/${fileType.split('/')[0]}`;
+		console.log('PATH = ', path);
+		const { data, error } = await supabase.storage.from('notes media').list(path);
 		if (error) {
 			console.error(error);
 			toast.error(error.message);
@@ -43,12 +45,10 @@ export async function getAssetsByFileType(id: string, fileType: FileType): Promi
 		} else {
 			const urls = [];
 			for (const file of data) {
-				const fileMimetype = file.metadata['mimetype'];
-				if (fileMimetype && matchesFileType(fileMimetype, fileType)) {
-					urls.push(
-						supabase.storage.from('notes media').getPublicUrl(`${id}/${file.name}`).data.publicUrl
-					);
-				}
+				if (file.name === '.emptyFolderPlaceholder') continue;
+				urls.push(
+					supabase.storage.from('notes media').getPublicUrl(`${path}/${file.name}`).data.publicUrl
+				);
 			}
 			return urls;
 		}
@@ -57,22 +57,4 @@ export async function getAssetsByFileType(id: string, fileType: FileType): Promi
 		toast.error('Something went wrong when loading assets.');
 		return [];
 	}
-}
-
-/**
- * Helper function to check if a mimetype matches a FileType
- * @param mimetype - The actual mimetype from file metadata (e.g., 'image/png', 'video/mp4')
- * @param fileType - The FileType enum value to match against (e.g., FileType.IMAGE)
- * @returns boolean indicating if the mimetype matches the file type category
- */
-function matchesFileType(mimetype: string, fileType: FileType): boolean {
-	if (fileType === FileType.UNKNOWN) {
-		return false;
-	}
-
-	// Extract the category from the FileType enum (e.g., 'image' from 'image/*')
-	const categoryPattern = fileType.replace('/*', '');
-
-	// Check if the mimetype starts with the category
-	return mimetype.startsWith(categoryPattern + '/');
 }

@@ -51,11 +51,11 @@
 	let syncing = $state(false);
 
 	const onFileSelect = $derived.by(() => {
-		if (user) return async (file: string) => uploadFileByPath(user.id, file);
+		if (user) return (file: string) => uploadFileByPath(user.id, file);
 	});
 
 	const onDropOrPaste = $derived.by(() => {
-		if (user) return async (file: File) => uploadFile(user.id, file);
+		if (user) return (file: File) => uploadFile(user.id, file);
 	});
 
 	const getAssets = $derived.by(() => {
