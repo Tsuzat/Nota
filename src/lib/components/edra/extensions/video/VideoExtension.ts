@@ -130,15 +130,17 @@ export const Video = (onDrop?: (file: File) => Promise<string>) =>
 								}
 
 								const video = videos[0];
+								const id = toast.loading('Processing Pasted Video');
 								onDrop?.(video)
 									.then((src) => {
 										const node = schema.nodes.video.create({ src });
 										const transaction = tr.replaceSelectionWith(node);
 										dispatch(transaction);
+										toast.dismiss(id);
 									})
 									.catch((err) => {
 										console.error(err);
-										toast.error('Could not paste video');
+										toast.error('Could not handle pasted video', { id });
 									});
 
 								return true;
@@ -170,6 +172,7 @@ export const Video = (onDrop?: (file: File) => Promise<string>) =>
 								}
 
 								const video = videos[0];
+								const id = toast.loading('Processing Dropped Video');
 								onDrop?.(video)
 									.then((src) => {
 										if (coordinates && typeof coordinates.pos === 'number') {
@@ -177,10 +180,11 @@ export const Video = (onDrop?: (file: File) => Promise<string>) =>
 											const transaction = tr.insert(coordinates.pos, node);
 											dispatch(transaction);
 										}
+										toast.dismiss(id);
 									})
 									.catch((err) => {
 										console.error(err);
-										toast.error('Could not upload video');
+										toast.error('Could not upload video', { id });
 									});
 
 								return true;

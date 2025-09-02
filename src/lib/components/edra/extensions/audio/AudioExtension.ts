@@ -130,26 +130,18 @@ export const Audio = (onDrop?: (file: File) => Promise<string>) =>
 								}
 
 								const audio = audios[0];
-								if (onDrop) {
-									onDrop(audio)
-										.then((src) => {
-											const node = schema.nodes.audio.create({ src });
-											const transaction = tr.replaceSelectionWith(node);
-											dispatch(transaction);
-										})
-										.catch((err) => {
-											console.error(err);
-											toast.error('Could not paste audio');
-										});
-								} else {
-									const reader = new FileReader();
-									reader.onload = (readerEvent) => {
-										const node = schema.nodes.audio.create({ src: readerEvent.target?.result });
+								const id = toast.loading('Processing Pasted Audio');
+								onDrop?.(audio)
+									.then((src) => {
+										const node = schema.nodes.audio.create({ src });
 										const transaction = tr.replaceSelectionWith(node);
 										dispatch(transaction);
-									};
-									reader.readAsDataURL(audio);
-								}
+										toast.dismiss(id);
+									})
+									.catch((err) => {
+										console.error(err);
+										toast.error('Could not paste audio', { id });
+									});
 
 								return true;
 							},
@@ -180,31 +172,20 @@ export const Audio = (onDrop?: (file: File) => Promise<string>) =>
 								}
 
 								const audio = audios[0];
-								if (onDrop) {
-									onDrop(audio)
-										.then((src) => {
-											if (coordinates && typeof coordinates.pos === 'number') {
-												const node = schema.nodes.audio.create({ src });
-												const transaction = tr.insert(coordinates.pos, node);
-												dispatch(transaction);
-											}
-										})
-										.catch((err) => {
-											console.error(err);
-											toast.error('Could not upload audio');
-										});
-								} else {
-									const reader = new FileReader();
-									reader.onload = (readerEvent) => {
-										const node = schema.nodes.audio.create({ src: readerEvent.target?.result });
-
+								const id = toast.loading('Processing Dropped Audio');
+								onDrop?.(audio)
+									.then((src) => {
 										if (coordinates && typeof coordinates.pos === 'number') {
+											const node = schema.nodes.audio.create({ src });
 											const transaction = tr.insert(coordinates.pos, node);
 											dispatch(transaction);
+											toast.dismiss(id);
 										}
-									};
-									reader.readAsDataURL(audio);
-								}
+									})
+									.catch((err) => {
+										console.error(err);
+										toast.error('Could not upload audio', { id });
+									});
 
 								return true;
 							}
