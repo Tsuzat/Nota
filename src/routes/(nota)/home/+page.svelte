@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { getNewUserWorkspace } from '$lib/components/custom/user-workspace';
@@ -18,7 +19,7 @@
 		useCloudUserWorkspaces,
 		type CloudUserWorkspace
 	} from '$lib/supabase/db/clouduserworkspaces.svelte';
-	import { cn, ISMACOS, ISTAURI } from '$lib/utils';
+	import { cn, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import { PlusIcon } from '@lucide/svelte';
 
 	const sidebar = useSidebar();
@@ -48,21 +49,26 @@
 {#if currentUserWorkspace === null}
 	<h2>No User Workspace Selected</h2>
 {:else}
+	{@const ISDESKTOP = (ISMACOS || ISWINDOWS) && ISTAURI}
 	<header class="flex h-12 shrink-0 items-center gap-2">
 		<div
 			class={cn(
 				'z-20 ml-18 flex items-center gap-2 px-3',
 				ISMACOS && !sidebar.open && 'ml-18',
-				ISMACOS && ISTAURI && sidebar.open && 'md:ml-0'
+				ISWINDOWS && !sidebar.open && 'ml-0',
+				ISDESKTOP && sidebar.open && 'md:ml-0'
 			)}
 		>
+			{#if ISWINDOWS && !sidebar.open}
+				<AppLogoMenu />
+			{/if}
 			<SidebarTrigger />
 			<BackAndForthButtons />
 			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
 			<h3>{currentUserWorkspace?.name}</h3>
 		</div>
-		<div class={cn('z-20 ml-auto px-3', !ISMACOS && ISTAURI && 'mr-30')}></div>
-		{#if !ISMACOS && ISTAURI}
+		<div class={cn('z-20 ml-auto px-3', ISWINDOWS && 'mr-30')}></div>
+		{#if ISWINDOWS}
 			<WindowsButtons />
 		{/if}
 	</header>

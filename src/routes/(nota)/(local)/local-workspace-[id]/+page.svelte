@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
+	import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
 	import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '$lib/components/edra/shadcn';
@@ -8,7 +9,7 @@
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
-	import { cn, FileType, ISMACOS, ISTAURI } from '$lib/utils';
+	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import { Loader } from '@lucide/svelte';
 	import type { Editor } from '@tiptap/core';
 	import { onDestroy, untrack } from 'svelte';
@@ -133,9 +134,13 @@
 			class={cn(
 				'z-20 ml-18 flex items-center gap-2 px-3',
 				ISMACOS && !sidebar.open && 'ml-18',
-				ISMACOS && ISTAURI && sidebar.open && 'md:ml-0'
+				ISWINDOWS && !sidebar.open && 'ml-0',
+				(ISMACOS || ISWINDOWS) && ISTAURI && sidebar.open && 'md:ml-0'
 			)}
 		>
+			{#if ISWINDOWS && !sidebar.open}
+				<AppLogoMenu />
+			{/if}
 			<SidebarTrigger />
 			<BackAndForthButtons />
 			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
@@ -156,12 +161,12 @@
 			/>
 		</div>
 
-		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', !ISMACOS && ISTAURI && 'mr-30')}>
+		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', ISWINDOWS && 'mr-30')}>
 			{#if editor && !editor?.isDestroyed}
 				<SearchAndReplace {editor} />
 			{/if}
 		</div>
-		{#if !ISMACOS && ISTAURI}
+		{#if ISWINDOWS}
 			<WindowsButtons />
 		{/if}
 	</header>
