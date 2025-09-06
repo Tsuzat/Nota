@@ -24,13 +24,7 @@
 </script>
 
 <div class="fixed top-0 right-0 z-20 flex items-center">
-	<Button
-		variant="ghost"
-		size="default"
-		class="h-12 rounded-none"
-		title="Minimize"
-		onclick={minimize}
-	>
+	<Button variant="ghost" class="h-12 rounded-none" title="Minimize" onclick={minimize}>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			x="0px"
@@ -47,7 +41,6 @@
 	</Button>
 	<Button
 		variant="ghost"
-		size="default"
 		class="h-12 rounded-none"
 		title={IS_MAXIMUM ? 'Restore' : 'Maximize'}
 		onclick={toggleMaximize}
@@ -82,13 +75,7 @@
 			</svg>
 		{/if}
 	</Button>
-	<Button
-		variant="ghost"
-		size="default"
-		class="h-12 rounded-none hover:!bg-red-500"
-		title="Close"
-		onclick={close}
-	>
+	<Button variant="ghost" class="h-12 rounded-none hover:!bg-red-500" title="Close" onclick={close}>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			x="0px"
