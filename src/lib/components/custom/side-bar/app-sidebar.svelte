@@ -7,10 +7,10 @@
 	import type { ComponentProps } from 'svelte';
 	import NavWorkspacesLocal from './nav-workspaces-local.svelte';
 	import { ISMACOS, ISTAURI } from '$lib/utils';
-	import { Button } from '$lib/components/ui/button';
 	import ToggleMode from '../toggle-mode.svelte';
 	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 	import NavWorkspacesCloud from './nav-workspaces-cloud.svelte';
+	import AppLogoMenu from '../app-logo-menu.svelte';
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 	const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext());
@@ -23,9 +23,7 @@
 				{#if ISMACOS}
 					<div></div>
 				{:else}
-					<Button variant="ghost" size="icon" class="z-10">
-						<img src="/favicon.png" alt="AppLogo" class="aspect-square size-6" />
-					</Button>
+					<AppLogoMenu />
 				{/if}
 				<ToggleMode />
 			</div>
