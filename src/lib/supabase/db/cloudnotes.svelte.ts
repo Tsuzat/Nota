@@ -122,7 +122,8 @@ class CloudNotes {
 					userworkspace: note.userworkspace,
 					owner: note.owner,
 					favorite: note.favorite,
-					trashed: note.trashed
+					trashed: note.trashed,
+					content: note.content
 				})
 				.select()
 				.single();
