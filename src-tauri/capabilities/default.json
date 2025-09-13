@@ -26,7 +26,14 @@
 		"process:allow-exit",
 		"deep-link:default",
 		"shell:allow-open",
-		"opener:allow-open-url",
+		{
+			"identifier": "opener:allow-open-url",
+			"allow": [
+				{
+					"url": "https://nota.tsuzat.com/*"
+				}
+			]
+		},
 		{
 			"identifier": "opener:allow-open-path",
 			"allow": [
