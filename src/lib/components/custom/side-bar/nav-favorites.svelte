@@ -121,27 +121,27 @@
 									<DropdownMenu.Item
 										onclick={() =>
 											window.navigator.clipboard.writeText(
-												`${PUBLIC_NOTA_FRONTEND_URL}/note-${note.id}`
+												`${PUBLIC_NOTA_FRONTEND_URL}/note-preview-${note.id}`
 											)}
 									>
 										<LinkIcon />
 										Copy Url
 									</DropdownMenu.Item>
 									<DropdownMenu.Item
-										onclick={() => {
-											const url = `${PUBLIC_NOTA_FRONTEND_URL}/note-${note.id}`;
-											if (ISTAURI) openUrl(url);
+										onclick={async () => {
+											const url = `${PUBLIC_NOTA_FRONTEND_URL}/note-preview-${note.id}`;
+											if (ISTAURI) await openUrl(url);
 											else window.open(url, '_blank');
 										}}
 									>
 										<ArrowUpRightIcon />
-										Open in {ISTAURI ? 'browser' : 'new tab'}
+										Open In {ISTAURI ? 'Browser' : 'New Tab'}
 									</DropdownMenu.Item>
 								{/if}
 								<DropdownMenu.Separator />
 								<DropdownMenu.Item variant="destructive" onclick={() => trashNote(note)}>
 									<Trash2Icon />
-									Move to trash
+									Move To Trash
 								</DropdownMenu.Item>
 								<DropdownMenu.Item onclick={() => deleteNote(note)} variant="destructive">
 									<Trash2Icon />
