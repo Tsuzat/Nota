@@ -2,7 +2,7 @@
 	import { NodeViewWrapper, NodeViewContent } from 'svelte-tiptap';
 	import type { NodeViewProps } from '@tiptap/core';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-	const { editor, node, updateAttributes, extension }: NodeViewProps = $props();
+	const { editor, node, updateAttributes, extension, deleteNode }: NodeViewProps = $props();
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Check from '@lucide/svelte/icons/check';
 	import Copy from '@lucide/svelte/icons/copy';
@@ -36,13 +36,13 @@
 				class={buttonVariants({
 					variant: 'ghost',
 					size: 'sm',
-					class: 'text-muted-foreground h-6 px-1 py-2 text-xs'
+					class: 'group text-muted-foreground h-6 px-1 py-2 text-xs'
 				})}
 			>
 				<span class="capitalize">
 					{defaultLanguage}
 				</span>
-				<ChevronDown class="!size-2" />
+				<ChevronDown class="!size-2 opacity-0 group-hover:opacity-100" />
 			</Popover.Trigger>
 			<Popover.Content class="h-96 w-40 p-0 transition-all duration-500" contenteditable="false">
 				<Command.Root>
