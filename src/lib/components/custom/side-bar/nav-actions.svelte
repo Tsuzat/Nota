@@ -18,17 +18,19 @@
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
+	import { useCloudNotes, type CloudNote } from '$lib/supabase/db/cloudnotes.svelte';
 
 	interface Props {
 		settings: NotePageSettingsType;
 		starred?: boolean;
 		toggleStar?: () => void;
-		note: LocalNote;
+		note: LocalNote | CloudNote;
 	}
 
 	let { settings = $bindable(), starred, toggleStar, note }: Props = $props();
 
 	const localNotes = getLocalNotes();
+	const cloudNotes = useCloudNotes();
 	const workspace = $derived(
 		getLocalWorkspaces()
 			.getWorkspaces()
@@ -126,7 +128,12 @@
 			<Dropdown.Separator />
 			<Dropdown.Group>
 				{#if workspace}
-					<Dropdown.Item onclick={() => localNotes.duplicateNote(workspace, note)}>
+					<Dropdown.Item
+						onclick={() => {
+							if ('owner' in note) cloudNotes.duplicate(note);
+							else localNotes.duplicateNote(workspace, note);
+						}}
+					>
 						<CopyIcon />
 						Duplicate
 					</Dropdown.Item>
@@ -142,11 +149,23 @@
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
-				<Dropdown.Item onclick={() => localNotes.trashNote(note)}>
+				<Dropdown.Item
+					onclick={() => {
+						if ('owner' in note) cloudNotes.moveToTrash(note.id);
+						else localNotes.trashNote(note);
+					}}
+				>
 					<Trash2Icon />
 					<span>Move to Trash</span>
 				</Dropdown.Item>
-				<Dropdown.Item variant="destructive" onclick={() => localNotes.deleteNote(note)}>
+				<Dropdown.Item
+					variant="destructive"
+					onclick={() => {
+						if ('owner' in note) cloudNotes.deleteNote(note.id);
+						else localNotes.deleteNote(note);
+						window.location.replace('/home');
+					}}
+				>
 					<Trash2Icon />
 					<span>Delete Note</span>
 				</Dropdown.Item>

@@ -25,7 +25,7 @@
 	const localNotes = getLocalNotes();
 	const cloudNotes = useCloudNotes();
 	const currentUserWorkspace = useCurrentUserWorkspaceContext();
-	const notes = $derived.by<LocalNote[] | CloudNote[]>(() => {
+	const notes = $derived.by(() => {
 		let notes: LocalNote[] | CloudNote[] = [];
 		if (currentUserWorkspace.getIsLocal()) notes = localNotes.getNotes();
 		else notes = cloudNotes.getNotes();
