@@ -488,11 +488,10 @@ input[type='checkbox']:checked::before {
 	position: relative;
 	height: fit-content;
 	width: 100%;
-	margin: 0.5rem 0;
+	margin: 1rem 0 !important;
 }
 
 .code-wrapper-tile {
-	opacity: 0;
 	width: 100%;
 	display: flex;
 	position: absolute;
@@ -503,10 +502,6 @@ input[type='checkbox']:checked::before {
 	justify-content: space-between;
 	gap: 1rem;
 	transition: opacity 0.2s ease-in-out;
-}
-
-.code-wrapper:hover .code-wrapper-tile {
-	opacity: 1;
 }
 
 .tiptap iframe {
