@@ -7,15 +7,7 @@
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { openUrl } from '@tauri-apps/plugin-opener';
-	import {
-		ArrowDownFromLine,
-		ArrowUpFromLine,
-		CopyIcon,
-		ExternalLink,
-		Pencil,
-		StarIcon,
-		Trash2Icon
-	} from '@lucide/svelte';
+	import { CopyIcon, ExternalLink, Pencil, StarIcon, Trash2Icon } from '@lucide/svelte';
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -154,14 +146,14 @@
 										<span>Rename</span>
 									</DropdownMenu.Item>
 									<DropdownMenu.Separator />
-									<DropdownMenu.Item>
+									<!-- <DropdownMenu.Item>
 										<ArrowUpFromLine />
 										<span>Export Workspace</span>
 									</DropdownMenu.Item>
 									<DropdownMenu.Item>
 										<ArrowDownFromLine />
 										<span>Import Notes</span>
-									</DropdownMenu.Item>
+									</DropdownMenu.Item> -->
 									<DropdownMenu.Item variant="destructive" onclick={() => handleDelete(workspace)}>
 										<Trash2Icon />
 										<span>Delete Workspace</span>
