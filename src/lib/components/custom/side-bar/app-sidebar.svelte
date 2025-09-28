@@ -2,7 +2,7 @@
 	import NavFavorites from './nav-favorites.svelte';
 	import NavMain from './nav-main.svelte';
 	import NavSecondary from './nav-secondary.svelte';
-	import TeamSwitcher from './team-switcher.svelte';
+	import TeamSwitcher from './userworkspace-switcher.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import type { ComponentProps } from 'svelte';
 	import NavWorkspacesLocal from './nav-workspaces-local.svelte';
