@@ -113,9 +113,11 @@
 						</DropdownMenu.Item>
 					{/each}
 				{/if}
-				<DropdownMenu.Label class="text-muted-foreground text-xs"
-					>Cloud User Workspaces</DropdownMenu.Label
-				>
+				{#if cloudUserWorkspaces.getWorkspaces().length > 0}
+					<DropdownMenu.Label class="text-muted-foreground text-xs"
+						>Cloud User Workspaces</DropdownMenu.Label
+					>
+				{/if}
 				{#each cloudUserWorkspaces.getWorkspaces() as workspace (workspace.id)}
 					<DropdownMenu.Item onSelect={() => selectCloudUserWorkspace(workspace)} class="gap-2 p-2">
 						<div class="flex size-6 items-center justify-center rounded border">
