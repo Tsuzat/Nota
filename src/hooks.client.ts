@@ -4,11 +4,12 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 
 const init = async () => {
 	if (ISTAURI) {
-		await initializeLocalDB();
+		const window = getCurrentWindow();
 		if (ISWINDOWS) {
-			const window = getCurrentWindow();
 			await window.setDecorations(false);
 		}
+
+		await initializeLocalDB();
 	}
 };
 
