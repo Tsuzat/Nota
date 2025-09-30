@@ -5,9 +5,9 @@
 
 You can download the beta builds on [releases](https://github.com/Tsuzat/Nota/releases/latest) or on [website](https://nota.tsuzat.com/)
 
-<img width="2446" height="1672" alt="Dark Preview" src="https://github.com/user-attachments/assets/735f7b9d-0503-4fca-a055-fbb50dc69df1" />
+![dark](https://github.com/user-attachments/assets/86fadbb4-d6ce-4c1f-9a8b-29c3039a2e33)
 
-<img width="2446" height="1672" alt="Light Preview" src="https://github.com/user-attachments/assets/d3567c99-2c4a-463a-b3eb-83e96f2f6129" />
+![light](https://github.com/user-attachments/assets/c6380b81-d287-473a-9b18-b848cb1038cc)
 
 # Contributing
 
