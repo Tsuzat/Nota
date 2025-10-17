@@ -39,7 +39,7 @@ jobs:
           bun-version: latest
 
       - name: setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: latest
 
@@ -65,6 +65,7 @@ jobs:
           PUBLIC_SUPABASE_ENDPOINT: ${{ secrets.PUBLIC_SUPABASE_ENDPOINT }}
           PUBLIC_NOTA_ARTIFACT_URL: ${{ vars.PUBLIC_NOTA_ARTIFACT_URL }}
           PUBLIC_NOTA_FRONTEND_URL: ${{ vars.PUBLIC_NOTA_FRONTEND_URL }}
+          SUPABASE_API_ENDURL: ${{ vars.SUPABASE_API_ENDURL }}
         with:
           tagName: release-v__VERSION__
           releaseName: 'Nota v__VERSION__'
