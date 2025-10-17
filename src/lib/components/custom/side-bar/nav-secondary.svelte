@@ -94,6 +94,9 @@
 							<Download size={18} isHovered={isDownloadHovered} />
 							<span>Click to Update</span>
 						</Sidebar.MenuButton>
+						<Sidebar.MenuBadge class="bg-muted !text-primary rounded-full p-1.5">
+							{update.version}
+						</Sidebar.MenuBadge>
 					</Sidebar.MenuItem>
 				{/if}
 			{/await}
