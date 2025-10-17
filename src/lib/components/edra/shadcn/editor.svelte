@@ -34,8 +34,17 @@
 	import SlashCommandList from './components/SlashCommandList.svelte';
 	import { FileDrop } from '../extensions/HandleFileDrop';
 	import { getHandleDropImage, getHandlePasteImage } from '../utils';
+	import Math from './menus/Math.svelte';
+	import MathInline from './menus/MathInline.svelte';
+	import Mathematics from '@tiptap/extension-mathematics';
 
 	const lowlight = createLowlight(all);
+
+	let blockMathPos = $state(0);
+	let blockMathLatex = $state('');
+
+	let inlineMathPos = $state(0);
+	let inlineMathLatex = $state('');
 
 	/**
 	 * Bind the element to the editor
@@ -78,6 +87,29 @@
 				FileDrop.configure({
 					handler: onFileSelect,
 					assetsGetter: getAssets
+				}),
+				Mathematics.configure({
+					// Options for the block math node
+					blockOptions: {
+						onClick: (node, pos) => {
+							blockMathPos = pos;
+							blockMathLatex = node.attrs.latex;
+						}
+					},
+					inlineOptions: {
+						onClick: (node, pos) => {
+							inlineMathPos = pos;
+							inlineMathLatex = node.attrs.latex;
+						}
+					},
+					// Options for the KaTeX renderer. See here: https://katex.org/docs/options.html
+					katexOptions: {
+						throwOnError: true, // don't throw an error if the LaTeX code is invalid
+						macros: {
+							'\\R': '\\mathbb{R}', // add a macro for the real numbers
+							'\\N': '\\mathbb{N}' // add a macro for the natural numbers
+						}
+					}
 				})
 			],
 			{
@@ -107,6 +139,8 @@
 	<Link {editor} />
 	<TableCol {editor} />
 	<TableRow {editor} />
+	<Math {editor} mathPos={blockMathPos} mathLatex={blockMathLatex} />
+	<MathInline {editor} mathPos={inlineMathPos} mathLatex={inlineMathLatex} />
 {/if}
 <div
 	bind:this={element}

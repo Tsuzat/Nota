@@ -12,9 +12,9 @@ import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Table, TableCell, TableRow, TableHeader } from './extensions/table';
 import { Placeholder } from '@tiptap/extensions';
 import { Markdown } from 'tiptap-markdown';
-import MathExtension from '@aarkue/tiptap-math-extension';
 import AutoJoiner from 'tiptap-extension-auto-joiner';
 import 'katex/dist/katex.min.css';
+import { InlineMathReplacer } from './extensions/InlineMathReplacer';
 
 export default (
 	element?: HTMLElement,
@@ -82,12 +82,12 @@ export default (
 				nested: true
 			}),
 			SearchAndReplace,
-			MathExtension.configure({ evaluation: true }),
 			AutoJoiner,
 			Table,
 			TableHeader,
 			TableRow,
 			TableCell,
+			InlineMathReplacer,
 			Markdown.configure({
 				html: true,
 				tightLists: true,

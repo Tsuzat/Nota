@@ -20,7 +20,6 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@aarkue/tiptap-math-extension": "^1.4.0",
 		"@floating-ui/dom": "^1.7.4",
 		"@fontsource-variable/fira-code": "^5.2.7",
 		"@fontsource-variable/inter": "^5.2.8",
@@ -43,6 +42,7 @@
 		"@tiptap/extension-highlight": "^3.6.5",
 		"@tiptap/extension-image": "^3.6.5",
 		"@tiptap/extension-list": "^3.6.5",
+		"@tiptap/extension-mathematics": "^3.7.2",
 		"@tiptap/extension-subscript": "^3.6.5",
 		"@tiptap/extension-superscript": "^3.6.5",
 		"@tiptap/extension-table": "^3.6.5",

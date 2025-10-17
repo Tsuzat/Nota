@@ -507,3 +507,41 @@ input[type='checkbox']:checked::before {
 .tiptap iframe {
 	aspect-ratio: 16 / 9;
 }
+
+/* Mathematics extension styles */
+.tiptap .tiptap-mathematics-render {
+	padding: 0 0.25rem;
+	border-radius: 0.25rem;
+}
+
+/* Editable math block */
+.tiptap .tiptap-mathematics-render--editable {
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.tiptap .tiptap-mathematics-render--editable:hover {
+	background: var(--code-bg);
+}
+
+/* Inline math */
+.tiptap .tiptap-mathematics-render[data-type='inline-math'] {
+	display: inline-block;
+}
+
+/* Block math */
+.tiptap .tiptap-mathematics-render[data-type='block-math'] {
+	display: block;
+	margin: 1rem 0;
+	padding: 0.5rem;
+	text-align: center;
+	font-size: 1.25rem;
+}
+
+/* Error styles */
+.tiptap .tiptap-mathematics-render.inline-math-error,
+.tiptap .tiptap-mathematics-render.block-math-error {
+	background: var(--code-bg);
+	color: var(--color-destructive);
+	border: 1px solid darkred;
+}

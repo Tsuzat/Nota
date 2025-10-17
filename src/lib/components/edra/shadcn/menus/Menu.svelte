@@ -15,7 +15,7 @@
 	const {
 		editor,
 		class: className,
-		excludedCommands = ['undo-redo', 'media', 'lists', 'table'],
+		excludedCommands = ['undo-redo', 'media', 'lists', 'table', 'math'],
 		children
 	}: EdraToolbarProps = $props();
 
@@ -52,6 +52,7 @@
 		if (editor.isActive('video')) return false;
 		if (editor.isActive('iframe')) return false;
 		if (editor.isActive('audio')) return false;
+		if (editor.isActive('blockMath') || editor.isActive('inlineMath')) return false;
 		const {
 			state: {
 				doc,
