@@ -1,15 +1,7 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import {
-		CreditCard,
-		Download,
-		EllipsisVertical,
-		LogIn,
-		LogOut,
-		Trash2,
-		UserCircle
-	} from '@lucide/svelte';
+	import { CreditCard, EllipsisVertical, LogOut, CircleUser } from '@lucide/svelte';
 	import Trashed from '../dialogs/trashed.svelte';
 	import { downloadAndInstall } from '$lib/updater';
 	import { check } from '@tauri-apps/plugin-updater';
@@ -21,6 +13,13 @@
 	import { toast } from 'svelte-sonner';
 	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+	import Trash from '$lib/components/icons/moving-icons/trash.svelte';
+	import Download from '$lib/components/icons/moving-icons/download.svelte';
+	import Login from '$lib/components/icons/moving-icons/login.svelte';
+
+	let isTrashHovered = $state(false);
+	let isDownloadHovered = $state(false);
+	let isLoginHovered = $state(false);
 
 	const currentUserWorkspace = useCurrentUserWorkspaceContext();
 	const trashedNotes = $derived.by(() => {
@@ -38,6 +37,7 @@
 	const sidebar = Sidebar.useSidebar();
 
 	const globalSignInContext = getGlobalSignInContext();
+	const session = $derived(getSessionAndUserContext().getSession());
 	const user = $derived(getSessionAndUserContext().getUser());
 
 	function getUserIntials(name?: string) {
@@ -70,11 +70,15 @@
 				</Sidebar.MenuBadge>
 			</Sidebar.MenuItem> -->
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton class="group/trash" onclick={() => (open = true)}>
-					<Trash2 class="group-hover/trash:animate-bounce" />
+				<Sidebar.MenuButton
+					onclick={() => (open = true)}
+					onmouseenter={() => (isTrashHovered = true)}
+					onmouseleave={() => (isTrashHovered = false)}
+				>
+					<Trash size={18} isHovered={isTrashHovered} />
 					<span>Trash</span>
 				</Sidebar.MenuButton>
-				<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded-full p-1.5">
+				<Sidebar.MenuBadge class="bg-muted !text-primary rounded-full p-1.5">
 					{trashedNotes}
 				</Sidebar.MenuBadge>
 				<Trashed bind:open />
@@ -82,8 +86,12 @@
 			{#await check() then update}
 				{#if update !== null && update !== undefined}
 					<Sidebar.MenuItem>
-						<Sidebar.MenuButton onclick={() => downloadAndInstall(update)}>
-							<Download />
+						<Sidebar.MenuButton
+							onclick={() => downloadAndInstall(update)}
+							onmouseenter={() => (isDownloadHovered = true)}
+							onmouseleave={() => (isDownloadHovered = false)}
+						>
+							<Download size={18} isHovered={isDownloadHovered} />
 							<span>Click to Update</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
@@ -91,8 +99,12 @@
 			{/await}
 			{#if user === null}
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton onclick={() => (globalSignInContext.open = true)}>
-						<LogIn />
+					<Sidebar.MenuButton
+						onclick={() => (globalSignInContext.open = true)}
+						onmouseenter={() => (isLoginHovered = true)}
+						onmouseleave={() => (isLoginHovered = false)}
+					>
+						<Login size={18} isHovered={isLoginHovered} />
 						Sign In
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>
@@ -151,8 +163,13 @@
 							</DropdownMenu.Label>
 							<DropdownMenu.Separator />
 							<DropdownMenu.Group>
-								<DropdownMenu.Item>
-									<UserCircle />
+								<DropdownMenu.Item
+									onclick={async () => {
+										let token = session?.access_token;
+										await navigator.clipboard.writeText(token ?? 'Hello');
+									}}
+								>
+									<CircleUser />
 									Account
 								</DropdownMenu.Item>
 								<DropdownMenu.Item>

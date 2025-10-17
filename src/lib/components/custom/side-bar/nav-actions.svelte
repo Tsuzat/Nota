@@ -19,6 +19,7 @@
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { useCloudNotes, type CloudNote } from '$lib/supabase/db/cloudnotes.svelte';
+	import { ask } from '@tauri-apps/plugin-dialog';
 
 	interface Props {
 		settings: NotePageSettingsType;
@@ -127,17 +128,15 @@
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
-				{#if workspace}
-					<Dropdown.Item
-						onclick={() => {
-							if ('owner' in note) cloudNotes.duplicate(note);
-							else localNotes.duplicateNote(workspace, note);
-						}}
-					>
-						<CopyIcon />
-						Duplicate
-					</Dropdown.Item>
-				{/if}
+				<Dropdown.Item
+					onclick={() => {
+						if ('owner' in note) cloudNotes.duplicate(note);
+						else if (workspace) localNotes.duplicateNote(workspace, note);
+					}}
+				>
+					<CopyIcon />
+					Duplicate
+				</Dropdown.Item>
 				<!-- <Dropdown.Item onclick={() => localNotes.importNote()}>
 					<ArrowDown />
 					Import
@@ -160,7 +159,16 @@
 				</Dropdown.Item>
 				<Dropdown.Item
 					variant="destructive"
-					onclick={() => {
+					onclick={async () => {
+						const shouldDelete = await ask(
+							'This action will permanently delete the note. Are you sure you want to continue?',
+							{
+								title: `Delete ${note.name}`,
+								okLabel: 'Delete',
+								cancelLabel: 'Cancel'
+							}
+						);
+						if (!shouldDelete) return;
 						if ('owner' in note) cloudNotes.deleteNote(note.id);
 						else localNotes.deleteNote(note);
 						window.location.replace('/home');
