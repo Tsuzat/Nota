@@ -41,6 +41,7 @@
 		} catch (error) {
 			console.error(error);
 			toast.error('Something went wrong when loading notes');
+			goto('/');
 		} finally {
 			isLoading = false;
 		}

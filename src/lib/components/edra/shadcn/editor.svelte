@@ -36,7 +36,12 @@
 	import { getHandleDropImage, getHandlePasteImage } from '../utils';
 	import Math from './menus/Math.svelte';
 	import MathInline from './menus/MathInline.svelte';
-	import Mathematics from '@tiptap/extension-mathematics';
+	import Mathematics, { migrateMathStrings } from '@tiptap/extension-mathematics';
+	import TableOfContents, {
+		getHierarchicalIndexes,
+		type TableOfContentData
+	} from '@tiptap/extension-table-of-contents';
+	import ToC from '../components/ToC.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -45,6 +50,8 @@
 
 	let inlineMathPos = $state(0);
 	let inlineMathLatex = $state('');
+
+	let tocItems = $state<TableOfContentData>();
 
 	/**
 	 * Bind the element to the editor
@@ -110,9 +117,19 @@
 							'\\N': '\\mathbb{N}' // add a macro for the natural numbers
 						}
 					}
+				}),
+				TableOfContents.configure({
+					getIndex: getHierarchicalIndexes,
+					onUpdate: (indexes) => {
+						console.log('Updated ToC Items');
+						tocItems = indexes;
+					}
 				})
 			],
 			{
+				onCreate: ({ editor: currentEditor }) => {
+					migrateMathStrings(currentEditor);
+				},
 				onUpdate,
 				onTransaction(props) {
 					editor = undefined;
@@ -141,7 +158,9 @@
 	<TableRow {editor} />
 	<Math {editor} mathPos={blockMathPos} mathLatex={blockMathLatex} />
 	<MathInline {editor} mathPos={inlineMathPos} mathLatex={inlineMathLatex} />
+	<ToC {editor} items={tocItems} />
 {/if}
+
 <div
 	bind:this={element}
 	class={cn('edra-editor h-full w-full cursor-auto *:outline-none', className)}
