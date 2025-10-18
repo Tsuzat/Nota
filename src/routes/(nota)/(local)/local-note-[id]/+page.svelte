@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { beforeNavigate } from '$app/navigation';
 	import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import NavActions from '$lib/components/custom/side-bar/nav-actions.svelte';
@@ -15,87 +14,132 @@
 	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
-	import { getLocalNotes } from '$lib/local/notes.svelte';
+	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import { Loader } from '@lucide/svelte';
-	import type { Editor } from '@tiptap/core';
-	import { onDestroy, untrack } from 'svelte';
+	import type { Content, Editor } from '@tiptap/core';
+	import { onDestroy, onMount, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { DEFAULT_SETTINGS } from '$lib/types';
+	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
 	import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
+	import { load } from '@tauri-apps/plugin-store';
+	import { dirname, resolve } from '@tauri-apps/api/path';
+	import { migrateMathStrings } from '@tiptap/extension-mathematics';
+	import { beforeNavigate } from '$app/navigation';
 
 	const sidebar = useSidebar();
 
+	// editor related
 	let editor = $state<Editor>();
-	const { data } = $props();
+	let pendingContent = $state<Content>();
 
 	const localNotes = getLocalNotes();
-	let note = $derived(data.note);
-	let store = $derived(data.store);
-	let content = $derived(data.content);
+	let note = $state<LocalNote>();
+	let assetsPath = $state<string>();
+	let pageSettings = $state(DEFAULT_SETTINGS);
+
+	const { data } = $props();
+
+	$effect(() => {
+		if (data.id) loadData(data.id);
+	});
+
+	async function loadData(id: string) {
+		isLoading = true;
+		pendingContent = undefined;
+		note = localNotes.getNotes().find((n) => n.id === id);
+		if (note === undefined) {
+			toast.error('Note not found');
+			isLoading = false;
+			return;
+		}
+		const dirPath = await dirname(note.path);
+		assetsPath = await resolve(dirPath, 'assets');
+		const store = await load(note.path);
+		const content = await store.get<Content>('content');
+		if (content && editor) {
+			editor.commands.setContent(content);
+			migrateMathStrings(editor);
+		}
+		isLoading = false;
+	}
+
+	onMount(() => {
+		const saveInterval = setInterval(() => {
+			if (pendingContent !== undefined && pendingContent !== null) {
+				saveToStore('content', pendingContent);
+			}
+		}, 1000);
+		return () => clearInterval(saveInterval);
+	});
 
 	const onFileSelect = $derived.by(() => {
-		if (data.assetsPath === undefined) return;
-		return async (file: string) => moveFileToAssets(file, data.assetsPath);
+		if (assetsPath !== undefined) return;
+		return async (file: string) => moveFileToAssets(file, assetsPath);
 	});
 
 	const onDropOrPaste = $derived.by(() => {
-		if (data.assetsPath === undefined) return;
-		return async (file: File) => createFile(file, data.assetsPath);
+		if (assetsPath === undefined) return;
+		return async (file: File) => createFile(file, assetsPath);
 	});
 
 	const getAssets = $derived.by(() => {
-		if (data.assetsPath === undefined) return;
-		return async (fileType: FileType) => getAssetsByFileType(fileType, data.assetsPath);
-	});
-
-	$effect(() => {
-		untrack(() => editor)?.commands.setContent(data.content ?? null);
+		if (assetsPath === undefined) return;
+		return async (fileType: FileType) => getAssetsByFileType(fileType, assetsPath);
 	});
 
 	let isLoading = $state(false);
 
-	let pageSettings = $derived(data.settings ?? DEFAULT_SETTINGS);
+	async function updatePageSettings(settings: NotePageSettingsType) {
+		await saveToStore('settings', settings);
+	}
 
 	$effect(() => {
-		untrack(() => store)
-			?.set('settings', pageSettings)
-			.then(() => {
-				store?.save();
-			});
-	});
-
-	$effect(() => {
-		untrack(() => editor)?.setEditable(!pageSettings.locked);
+		updatePageSettings(pageSettings);
 	});
 
 	async function onUpdate() {
 		try {
-			const content = editor?.getJSON();
-			await store?.set('content', content);
-			await store?.save();
+			pendingContent = editor?.getJSON();
 		} catch (error) {
 			console.error(error);
 		}
 	}
 
 	beforeNavigate(async () => {
-		// editor?.destroy();
-		await store?.save();
-		await store?.close();
+		/// Save before changing the route
+		if (pendingContent !== undefined && pendingContent !== null) {
+			await saveToStore('content', pendingContent);
+		}
+		pendingContent = undefined;
 	});
+
 	onDestroy(() => {
 		editor?.destroy();
-		store?.close();
 	});
+
+	async function saveToStore(key: string, value: any) {
+		if (note === undefined) {
+			console.log('Can not save to a undefined store');
+			return;
+		}
+		try {
+			const store = await load(note.path);
+			await store.set(key, value);
+			await store.save();
+			await store.close();
+		} catch (e) {
+			console.error(e);
+			toast.error(`Unable to save ${key}`);
+		}
+	}
 
 	async function updateIcon(icon: string) {
 		if (note === undefined) return;
 		try {
-			await store?.set('icon', icon);
-			await store?.save();
 			note = { ...note, icon };
+			await saveToStore('icon', icon);
 			await localNotes.updateNote(note);
 		} catch (e) {
 			toast.error('Could not update note icon');
@@ -106,9 +150,8 @@
 	async function updateName(name: string) {
 		if (note === undefined) return;
 		try {
-			await store?.set('name', name);
-			await store?.save();
 			note = { ...note, name };
+			await saveToStore('name', name);
 			await localNotes.updateNote(note);
 		} catch (e) {
 			toast.error('Could not update note name');
@@ -128,23 +171,36 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.metaKey && event.key === 'l') {
+		if ((event.ctrlKey || event.metaKey) && event.key === 'l') {
 			event.preventDefault();
 			pageSettings = { ...pageSettings, locked: !pageSettings.locked };
+		}
+		if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+			event.preventDefault();
+			const content = editor?.getJSON();
+			toast.promise(saveToStore('content', content), {
+				loading: 'Saving to local store',
+				success: 'Note saved',
+				error: (err) => {
+					console.error(err);
+					return 'Could not save note';
+				},
+				duration: 1000
+			});
 		}
 	}
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
 
-{#if note === undefined && isLoading}
+{#if isLoading}
 	<div class="flex size-full flex-col items-center justify-center">
 		<div class="flex items-center gap-4">
 			<Loader class="text-primary animate-spin" />
 			<h4>Loading Local Notes</h4>
 		</div>
 	</div>
-{:else if note !== undefined}
+{:else if !isLoading && note !== undefined}
 	<header class="flex h-12 shrink-0 items-center gap-2">
 		<div
 			class={cn(
@@ -205,7 +261,6 @@
 			{/if}
 			<EdraEditor
 				bind:editor
-				{content}
 				class="size-full !p-8"
 				{onUpdate}
 				{onFileSelect}

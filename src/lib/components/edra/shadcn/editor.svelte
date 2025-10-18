@@ -126,9 +126,6 @@
 				})
 			],
 			{
-				onCreate: ({ editor: currentEditor }) => {
-					migrateMathStrings(currentEditor);
-				},
 				onUpdate,
 				onTransaction(props) {
 					editor = undefined;
