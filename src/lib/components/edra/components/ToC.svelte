@@ -15,10 +15,6 @@
 
 	const { editor, items }: Props = $props();
 
-	$effect(() => {
-		console.log('items = ', items);
-	});
-
 	const onItemClick = (e: Event, id: string) => {
 		e.preventDefault();
 

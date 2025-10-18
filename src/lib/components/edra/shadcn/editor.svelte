@@ -121,7 +121,6 @@
 				TableOfContents.configure({
 					getIndex: getHierarchicalIndexes,
 					onUpdate: (indexes) => {
-						console.log('Updated ToC Items');
 						tocItems = indexes;
 					}
 				})
