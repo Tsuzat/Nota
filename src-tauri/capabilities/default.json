@@ -114,6 +114,10 @@
 					"path": "*"
 				}
 			]
+		},
+		{
+			"identifier": "http:default",
+			"allow": [{ "url": "https://*.supabase.co/*" }]
 		}
 	]
 }
