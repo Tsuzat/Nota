@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { auth } from '$lib/supabase';
 	import { onMount } from 'svelte';
@@ -34,7 +35,7 @@
 	<h2 class="animate-bounce font-semibold">Auth Success</h2>
 	<div>
 		You'll be redired to
-		<a class="text-primary underline" href="/">home</a>
+		<a class="text-primary underline" href={resolve('/')}>home</a>
 		in {counter} seconds
 	</div>
 </div>

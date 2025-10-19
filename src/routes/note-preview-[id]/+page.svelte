@@ -1,18 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { EdraEditor } from '$lib/components/edra/shadcn/index.js';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { supabase } from '$lib/supabase';
 	import type { CloudNote } from '$lib/supabase/db/cloudnotes.svelte';
-	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 	import { Loader } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	let note = $state<CloudNote>();
 	let isLoading = $state(false);
 	const { data } = $props();
-	const sessionAndUser = getSessionAndUserContext();
 
 	$effect(() => {
 		if (data.id) loadData(data.id);
@@ -36,7 +35,7 @@
 		} catch (error) {
 			console.error(error);
 			toast.error('Something went wrong when loading notes');
-			goto('/');
+			goto(resolve('/'));
 		} finally {
 			isLoading = false;
 		}
@@ -68,6 +67,6 @@
 	<main class="flex h-screen w-screen flex-col items-center justify-center gap-2">
 		<h2>Something Went Wrong</h2>
 		<p>Notes might not exist or you may not have permissions for this note.</p>
-		<a href="/" class="underline">Go to Home</a>
+		<a href={resolve('/')} class="underline">Go to Home</a>
 	</main>
 {/if}
