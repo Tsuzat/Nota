@@ -18,7 +18,7 @@
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import { Loader } from '@lucide/svelte';
 	import type { Content, Editor } from '@tiptap/core';
-	import { onDestroy, onMount, untrack } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
 	import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
@@ -76,17 +76,17 @@
 
 	const onFileSelect = $derived.by(() => {
 		if (assetsPath !== undefined) return;
-		return async (file: string) => moveFileToAssets(file, assetsPath);
+		return async (file: string) => moveFileToAssets(file, assetsPath!);
 	});
 
 	const onDropOrPaste = $derived.by(() => {
 		if (assetsPath === undefined) return;
-		return async (file: File) => createFile(file, assetsPath);
+		return async (file: File) => createFile(file, assetsPath!);
 	});
 
 	const getAssets = $derived.by(() => {
 		if (assetsPath === undefined) return;
-		return async (fileType: FileType) => getAssetsByFileType(fileType, assetsPath);
+		return async (fileType: FileType) => getAssetsByFileType(fileType, assetsPath!);
 	});
 
 	let isLoading = $state(false);
