@@ -174,26 +174,20 @@
 		<EdraToolBar {editor} />
 	{/if} -->
 	<Tabs.Root></Tabs.Root>
-
-	<div class="flex h-[calc(100vh-3rem)] flex-1 flex-grow flex-col overflow-auto">
-		<div class="mx-auto h-full w-full max-w-3xl flex-1 flex-grow">
-			{#if editor && !editor?.isDestroyed}
-				{#if pageSettings.showbubblemenu}
-					<EdraBubbleMenu {editor} />
-				{/if}
-				<EdraDragHandleExtended {editor} />
-			{/if}
-			<EdraEditor
-				bind:editor
-				{content}
-				class="size-full !p-8"
-				{onUpdate}
-				{onFileSelect}
-				{onDropOrPaste}
-				{getAssets}
-			/>
-		</div>
-	</div>
+	{#if editor && !editor?.isDestroyed}
+		{#if pageSettings.showbubblemenu}
+			<EdraBubbleMenu {editor} />
+		{/if}
+		<EdraDragHandleExtended {editor} />
+	{/if}
+	<EdraEditor
+		bind:editor
+		class="flex-1 flex-grow flex-col overflow-auto !p-8"
+		{onUpdate}
+		{onFileSelect}
+		{onDropOrPaste}
+		{getAssets}
+	/>
 {:else}
 	<div class="flex size-full flex-col items-center justify-center gap-4">
 		<h4>Something went wrong.</h4>

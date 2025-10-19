@@ -8,7 +8,7 @@
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import { type Content, Editor } from '@tiptap/core';
 	import { toast } from 'svelte-sonner';
-	import { goto } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import IconPicker from '$lib/components/icons/icon-picker.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
@@ -27,6 +27,7 @@
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
+	import { migrateMathStrings } from '@tiptap/extension-mathematics';
 
 	const { data } = $props();
 
@@ -163,16 +164,22 @@
 			syncing = false;
 		}
 	}
+
+	beforeNavigate(async () => {
+		if (pendingContent !== null) {
+			await saveNoteContent();
+		}
+	});
 </script>
 
-{#if note === undefined && isLoading}
+{#if isLoading}
 	<div class="flex size-full flex-col items-center justify-center">
 		<div class="flex items-center gap-4">
 			<Loader class="text-primary animate-spin" />
 			<h4>Loading Local Notes</h4>
 		</div>
 	</div>
-{:else if note !== undefined}
+{:else if !isLoading && note !== undefined}
 	<header class="flex h-12 shrink-0 items-center gap-2">
 		<div
 			class={cn(
@@ -232,25 +239,21 @@
 	{#if pageSettings.showtoolbar && editor}
 		<EdraToolBar {editor} />
 	{/if}
-	<div class="flex h-[calc(100vh-3rem)] flex-1 flex-grow flex-col overflow-auto">
-		<div class="mx-auto h-full w-full max-w-3xl flex-1 flex-grow">
-			{#if editor && !editor?.isDestroyed}
-				{#if pageSettings.showbubblemenu}
-					<EdraBubbleMenu {editor} />
-				{/if}
-				<EdraDragHandleExtended {editor} />
-			{/if}
-			<EdraEditor
-				bind:editor
-				{content}
-				{onUpdate}
-				class="size-full !p-8"
-				{onDropOrPaste}
-				{onFileSelect}
-				{getAssets}
-			/>
-		</div>
-	</div>
+	{#if editor && !editor?.isDestroyed}
+		{#if pageSettings.showbubblemenu}
+			<EdraBubbleMenu {editor} />
+		{/if}
+		<EdraDragHandleExtended {editor} />
+	{/if}
+	<EdraEditor
+		bind:editor
+		{content}
+		class="flex-1 flex-grow flex-col overflow-auto !p-8"
+		{onUpdate}
+		{onFileSelect}
+		{onDropOrPaste}
+		{getAssets}
+	/>
 {:else}
 	<div class="flex size-full flex-col items-center justify-center gap-4">
 		<h4>Something went wrong.</h4>

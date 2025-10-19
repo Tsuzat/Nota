@@ -19,10 +19,6 @@
 	});
 
 	async function loadData(id: string) {
-		if (sessionAndUser.getUser() === null) {
-			goto('/');
-			return;
-		}
 		isLoading = true;
 		note = undefined;
 		try {
@@ -30,8 +26,7 @@
 			if (error) {
 				console.error(error);
 				toast.error(error.details);
-			}
-			if (data) {
+			} else {
 				note = data;
 				if (note)
 					toast.warning('Read Only Mode', {
@@ -57,11 +52,11 @@
 			<span>{note.name}</span>
 		</div>
 	</header>
-	<div class="flex h-[calc(100vh-3rem)] flex-1 flex-grow flex-col overflow-auto">
-		<div class="mx-auto h-full w-full max-w-3xl flex-1 flex-grow">
-			<EdraEditor editable={false} content={note.content} class="size-full !p-8" />
-		</div>
-	</div>
+	<EdraEditor
+		class="flex-1 flex-grow flex-col overflow-auto !p-8"
+		editable={false}
+		content={note.content}
+	/>
 {:else if note === undefined && isLoading}
 	<main class="flex h-screen w-screen flex-col items-center justify-center">
 		<div class="flex items-center gap-2">
