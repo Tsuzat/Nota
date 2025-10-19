@@ -2,6 +2,7 @@ import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 import { goto } from '$app/navigation';
 import { auth } from './supabase';
 import { toast } from 'svelte-sonner';
+import { resolve } from '$app/paths';
 
 export function useDeepLinkAuth() {
 	const handleUrl = async (urls: string[]) => {
@@ -19,7 +20,7 @@ export function useDeepLinkAuth() {
 			if (code) {
 				const { data, error } = await auth.exchangeCodeForSession(code);
 				if (error) throw error;
-				if (data.session) goto('/home');
+				if (data.session) goto(resolve('/home'));
 				return;
 			}
 		} catch (err) {
