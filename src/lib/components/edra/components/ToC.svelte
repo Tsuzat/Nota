@@ -48,27 +48,25 @@
 	>
 		<Menu />
 	</Popover.Trigger>
-	<Popover.Content class="max-h-96 max-w-56 overflow-auto !p-2">
+	<Popover.Content class="flex max-h-96 max-w-56 flex-col gap-1.5 overflow-auto !p-2">
 		{#if items === undefined || items.length === 0}
 			<div>No contents</div>
 		{:else}
-			<div class="flex flex-col gap-1">
-				{#each items as item}
-					{@const isActive = item.isActive}
-					<a
-						href={`#${item.id}`}
-						onclick={(e) => onItemClick(e, item.id)}
-						data-item-index={item.itemIndex}
-						class={cn(
-							'text-muted-foreground text-sm font-thin',
-							isActive && 'text-primary font-medium'
-						)}
-						style={`padding-left: calc(0.5rem * ${item.level - 1});`}
-					>
-						{item.textContent}
-					</a>
-				{/each}
-			</div>
+			{#each items as item}
+				<a
+					href={`#${item.id}`}
+					onclick={(e) => onItemClick(e, item.id)}
+					data-item-index={item.itemIndex}
+					class={cn(
+						'text-foreground text-sm text-wrap transition-all duration-500',
+						item.isScrolledOver && 'text-muted-foreground font-thin'
+					)}
+					class:is-active={item.isActive && !item.isScrolledOver}
+					style={`padding-left: calc(1rem * ${item.level - 1});`}
+				>
+					{item.textContent}
+				</a>
+			{/each}
 		{/if}
 	</Popover.Content>
 </Popover.Root>
