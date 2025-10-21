@@ -36,7 +36,9 @@
 	const useNewLocalUserWorkspace = getNewUserWorkspace();
 
 	async function selectLocalUserWorkspace(workspace: LocalUserWorkspace) {
-		if (activeWorkspace?.id === workspace.id) return;
+		if (activeWorkspace?.id === workspace.id) {
+			return toast.info("You're already in this workspace");
+		}
 		const id = toast.loading('Changing User Workspace to ' + workspace.name);
 		try {
 			currentUserWorkspace.setCurrentUserWorkspace(workspace);
@@ -53,6 +55,9 @@
 	}
 
 	async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
+		if (activeWorkspace?.id === workspace.id) {
+			return toast.info("You're already in this workspace");
+		}
 		const id = toast.loading('Switching to cloud workspace');
 		try {
 			currentUserWorkspace.setCurrentUserWorkspace(workspace);

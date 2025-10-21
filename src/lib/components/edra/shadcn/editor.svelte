@@ -36,12 +36,13 @@
 	import { getHandleDropImage, getHandlePasteImage } from '../utils';
 	import Math from './menus/Math.svelte';
 	import MathInline from './menus/MathInline.svelte';
-	import Mathematics from '@tiptap/extension-mathematics';
+	import Mathematics, { migrateMathStrings } from '@tiptap/extension-mathematics';
 	import TableOfContents, {
 		getHierarchicalIndexes,
 		type TableOfContentData
 	} from '@tiptap/extension-table-of-contents';
 	import ToC from '../components/ToC.svelte';
+	import { toast } from 'svelte-sonner';
 
 	const lowlight = createLowlight(all);
 
@@ -131,6 +132,12 @@
 				onTransaction(props) {
 					editor = undefined;
 					editor = props.editor;
+				},
+				onContentError: (error) => {
+					toast.error('Unable to load the content', {
+						description: 'The content of this page might be corrupted.'
+					});
+					console.error(error);
 				},
 				editable,
 				autofocus

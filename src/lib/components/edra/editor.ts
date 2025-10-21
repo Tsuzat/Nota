@@ -10,7 +10,7 @@ import Highlight from '@tiptap/extension-highlight';
 import SearchAndReplace from './extensions/FindAndReplace';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Table, TableCell, TableRow, TableHeader } from './extensions/table';
-import { Placeholder } from '@tiptap/extensions';
+import { CharacterCount, Placeholder } from '@tiptap/extensions';
 import { Markdown } from 'tiptap-markdown';
 import AutoJoiner from 'tiptap-extension-auto-joiner';
 import 'katex/dist/katex.min.css';
@@ -51,6 +51,7 @@ export default (
 				},
 				codeBlock: false
 			}),
+			CharacterCount,
 			Highlight.configure({
 				multicolor: true
 			}),
