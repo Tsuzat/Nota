@@ -214,6 +214,9 @@
 
 		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', ISWINDOWS && 'mr-30')}>
 			{#if editor && !editor?.isDestroyed}
+				<div class="text-muted-foreground truncate text-xs">
+					{editor.storage.characterCount.words()} Words
+				</div>
 				<SearchAndReplace {editor} />
 			{/if}
 			<SimpleTooltip content={syncing ? 'Syncing' : 'Synced'}>

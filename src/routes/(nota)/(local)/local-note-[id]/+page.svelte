@@ -17,7 +17,7 @@
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import { Loader } from '@lucide/svelte';
-	import type { Content, Editor } from '@tiptap/core';
+	import { type Content, type Editor } from '@tiptap/core';
 	import { onDestroy, onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
@@ -25,13 +25,14 @@
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 	import { load } from '@tauri-apps/plugin-store';
 	import { dirname, resolve } from '@tauri-apps/api/path';
-	import { migrateMathStrings } from '@tiptap/extension-mathematics';
 	import { beforeNavigate } from '$app/navigation';
+	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 
 	const sidebar = useSidebar();
 
 	// editor related
 	let editor = $state<Editor>();
+	let content = $state<Content>();
 	let pendingContent = $state<Content>();
 
 	const localNotes = getLocalNotes();
@@ -47,22 +48,29 @@
 
 	async function loadData(id: string) {
 		isLoading = true;
-		pendingContent = undefined;
-		note = localNotes.getNotes().find((n) => n.id === id);
-		if (note === undefined) {
-			toast.error('Note not found');
+		try {
+			pendingContent = undefined;
+			note = localNotes.getNotes().find((n) => n.id === id);
+			if (note === undefined) {
+				toast.error('Note not found');
+				isLoading = false;
+				return;
+			}
+			const dirPath = await dirname(note.path);
+			assetsPath = await resolve(dirPath, 'assets');
+			const store = await load(note.path);
+			content = await store.get<Content>('content');
+		} catch (error) {
+			console.error(error);
+			toast.error('Something went wrong when loading notes data', {
+				action: {
+					label: 'Retry',
+					onClick: () => loadData(id)
+				}
+			});
+		} finally {
 			isLoading = false;
-			return;
 		}
-		const dirPath = await dirname(note.path);
-		assetsPath = await resolve(dirPath, 'assets');
-		const store = await load(note.path);
-		const content = await store.get<Content>('content');
-		if (content && editor) {
-			editor.commands.setContent(content);
-			migrateMathStrings(editor);
-		}
-		isLoading = false;
 	}
 
 	onMount(() => {
@@ -107,10 +115,10 @@
 		}
 	}
 
-	beforeNavigate(async () => {
+	beforeNavigate(() => {
 		/// Save before changing the route
 		if (pendingContent !== undefined && pendingContent !== null) {
-			await saveToStore('content', pendingContent);
+			saveToStore('content', pendingContent);
 		}
 		pendingContent = undefined;
 	});
@@ -235,6 +243,9 @@
 
 		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', ISWINDOWS && 'mr-30')}>
 			{#if editor && !editor?.isDestroyed}
+				<div class="text-muted-foreground truncate text-xs">
+					{editor.storage.characterCount.words()} Words
+				</div>
 				<SearchAndReplace {editor} />
 			{/if}
 			<NavActions
@@ -259,6 +270,7 @@
 	{/if}
 	<EdraEditor
 		bind:editor
+		{content}
 		class="flex-1 flex-grow flex-col overflow-auto !p-8"
 		{onUpdate}
 		{onFileSelect}
