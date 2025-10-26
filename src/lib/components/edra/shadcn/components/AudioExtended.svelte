@@ -15,6 +15,7 @@
 		controls
 		title={node.attrs.title}
 		class="m-0 w-full"
+		preload="none"
 	>
 	</audio>
 </MediaExtended>

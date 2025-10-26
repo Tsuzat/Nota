@@ -70,7 +70,7 @@ export const Video = (onDrop?: (file: File) => Promise<string>) =>
 					(src: string) =>
 					({ commands }) =>
 						commands.insertContent(
-							`<video playsinline="true" controls="true" src="${src}" style="display: block; width: fit-content"  />`
+							`<video playsinline="true" controls="true" src="${src}" style="display: block; width: fit-content" preload="none" />`
 						),
 
 				toggleVideo:

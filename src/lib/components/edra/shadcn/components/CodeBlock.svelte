@@ -53,7 +53,7 @@
 							<Command.Item
 								contenteditable="false"
 								data-current={defaultLanguage === language}
-								class="data-[current=true]:bg-muted"
+								class="data-[current=true]:bg-muted capitalize"
 								onclick={() => {
 									defaultLanguage = language;
 									updateAttributes({ language: defaultLanguage });

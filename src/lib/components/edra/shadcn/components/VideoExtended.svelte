@@ -11,5 +11,12 @@
 	{@const node = rest.node}
 	<!-- svelte-ignore element_invalid_self_closing_tag -->
 	<!-- svelte-ignore a11y_media_has_caption -->
-	<video bind:this={mediaRef} src={node.attrs.src} playsinline controls title={node.attrs.title} />
+	<video
+		bind:this={mediaRef}
+		src={node.attrs.src}
+		playsinline
+		controls
+		title={node.attrs.title}
+		preload="none"
+	/>
 </MediaExtended>
