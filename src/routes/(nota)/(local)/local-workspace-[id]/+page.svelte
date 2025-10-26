@@ -10,7 +10,7 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
-	import { Loader } from '@lucide/svelte';
+	import Loader from '@lucide/svelte/icons/loader';
 	import type { Editor } from '@tiptap/core';
 	import { onDestroy, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';

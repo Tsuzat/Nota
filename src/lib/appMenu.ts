@@ -19,7 +19,14 @@ export async function setAppMenu() {
 async function openSettings() {
 	const settingsPage = new WebviewWindow('settings', {
 		url: 'settings',
-		title: 'Nota - Settings'
+		width: 800,
+		height: 600,
+		minHeight: 400,
+		minWidth: 500,
+		zoomHotkeysEnabled: true,
+		hiddenTitle: true,
+		decorations: true,
+		titleBarStyle: 'overlay'
 	});
 	await settingsPage.show();
 	await settingsPage.setFocus();

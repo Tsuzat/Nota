@@ -27,7 +27,8 @@ import Video from '@lucide/svelte/icons/video';
 import Audio from '@lucide/svelte/icons/audio-lines';
 import IFrame from '@lucide/svelte/icons/code-xml';
 import Table from '@lucide/svelte/icons/table';
-import { Radical, SquareRadical } from '@lucide/svelte';
+import SquareRadical from '@lucide/svelte/icons/square-radical';
+import Radical from '@lucide/svelte/icons/radical';
 
 const commands: Record<string, EdraToolBarCommands[]> = {
 	'undo-redo': [

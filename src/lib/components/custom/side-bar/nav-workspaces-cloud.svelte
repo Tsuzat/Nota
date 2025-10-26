@@ -7,7 +7,12 @@
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { openUrl } from '@tauri-apps/plugin-opener';
-	import { CopyIcon, ExternalLink, Pencil, StarIcon, Trash2Icon } from '@lucide/svelte';
+	import CopyIcon from '@lucide/svelte/icons/copy';
+	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import Pencil from '@lucide/svelte/icons/pencil';
+	import StarIcon from '@lucide/svelte/icons/star';
+
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';

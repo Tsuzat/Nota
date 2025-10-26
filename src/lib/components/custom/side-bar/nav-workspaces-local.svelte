@@ -8,15 +8,13 @@
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import {
-		ArrowDownFromLine,
-		ArrowUpFromLine,
-		CopyIcon,
-		ExternalLink,
-		Pencil,
-		StarIcon,
-		Trash2Icon
-	} from '@lucide/svelte';
+	import ArrowUpFromLine from '@lucide/svelte/icons/arrow-up-from-line';
+	import ArrowDownFromLine from '@lucide/svelte/icons/arrow-down-from-line';
+	import CopyIcon from '@lucide/svelte/icons/copy';
+	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import Pencil from '@lucide/svelte/icons/pencil';
+	import StarIcon from '@lucide/svelte/icons/star';
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import { openPath } from '@tauri-apps/plugin-opener';
 	import { page } from '$app/state';

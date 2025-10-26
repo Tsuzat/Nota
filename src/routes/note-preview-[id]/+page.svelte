@@ -6,7 +6,7 @@
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { supabase } from '$lib/supabase';
 	import type { CloudNote } from '$lib/supabase/db/cloudnotes.svelte';
-	import { Loader } from '@lucide/svelte';
+	import Loader from '@lucide/svelte/icons/loader';
 	import { toast } from 'svelte-sonner';
 
 	let note = $state<CloudNote>();

@@ -21,7 +21,8 @@
 		EdraEditor,
 		EdraToolBar
 	} from '$lib/components/edra/shadcn/index.js';
-	import { Cloud, Loader } from '@lucide/svelte';
+	import Cloud from '@lucide/svelte/icons/cloud';
+	import Loader from '@lucide/svelte/icons/loader';
 	import { DEFAULT_SETTINGS } from '$lib/types.js';
 	import { onMount } from 'svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';

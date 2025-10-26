@@ -13,7 +13,8 @@
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import { goto } from '$app/navigation';
-	import { Cloud, Monitor } from '@lucide/svelte';
+	import Cloud from '@lucide/svelte/icons/cloud';
+	import Monitor from '@lucide/svelte/icons/monitor';
 	import {
 		useCloudUserWorkspaces,
 		type CloudUserWorkspace

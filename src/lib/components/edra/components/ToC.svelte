@@ -3,7 +3,7 @@
 	import { type TableOfContentData } from '@tiptap/extension-table-of-contents';
 	import * as Popover from '$lib/components/ui/popover';
 	import { buttonVariants } from '$lib/components/ui/button';
-	import { Menu } from '@lucide/svelte';
+	import Menu from '@lucide/svelte/icons/menu';
 	import { cn } from '$lib/utils';
 	import { TextSelection } from '@tiptap/pm/state';
 	import { pushState } from '$app/navigation';

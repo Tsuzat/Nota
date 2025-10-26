@@ -13,7 +13,7 @@
 	import { toast } from 'svelte-sonner';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
-	import { Loader } from '@lucide/svelte';
+	import Loader from '@lucide/svelte/icons/loader';
 	import { isURL } from '../../utils';
 
 	let open = $state(false);

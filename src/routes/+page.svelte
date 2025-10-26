@@ -5,7 +5,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import { auth } from '$lib/supabase';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
-	import { Github, LogOut, User, UserRound } from '@lucide/svelte';
+	import Github from '@lucide/svelte/icons/github';
+	import LogOut from '@lucide/svelte/icons/log-out';
+	import User from '@lucide/svelte/icons/user';
+	import UserRound from '@lucide/svelte/icons/user-round';
 	import * as Dropdown from '$lib/components/ui/dropdown-menu';
 	import { getGlobalSignInContext } from '$lib/components/custom/global-signin';
 	import { toast } from 'svelte-sonner';

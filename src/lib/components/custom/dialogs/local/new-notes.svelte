@@ -7,7 +7,7 @@
 	import { type Snippet } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-	import { Loader } from '@lucide/svelte';
+	import Loader from '@lucide/svelte/icons/loader';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Label } from '$lib/components/ui/label';
 	import { getLocalNotes } from '$lib/local/notes.svelte';

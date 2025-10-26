@@ -5,7 +5,7 @@
 
 	import { onMount } from 'svelte';
 	import { getArtifacts, type Artifact } from './artifacts';
-	import { Loader } from '@lucide/svelte';
+	import Loader from '@lucide/svelte/icons/loader';
 
 	let artifacts = $state<Artifact[]>([]);
 	let isLoading = $state(true);

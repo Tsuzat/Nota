@@ -2,7 +2,9 @@
 	import * as Command from '$lib/components/ui/command';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import { HomeIcon, StarIcon, Trash2Icon } from '@lucide/svelte';
+	import HomeIcon from '@lucide/svelte/icons/home';
+	import StarIcon from '@lucide/svelte/icons/star';
+	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { getGlobalSearch } from './constants.svelte';
 	import { goto } from '$app/navigation';

@@ -4,7 +4,7 @@
 	import BubbleMenu from '../../components/BubbleMenu.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { CornerDownLeft } from '@lucide/svelte';
+	import CornerDownLeft from '@lucide/svelte/icons/corner-down-left';
 
 	interface Props {
 		editor: Editor;

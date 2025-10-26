@@ -11,7 +11,7 @@
 	import Clipboard from '@lucide/svelte/icons/clipboard';
 	import Delete from '@lucide/svelte/icons/trash-2';
 	import { NodeSelection } from '@tiptap/pm/state';
-	import { Plus } from '@lucide/svelte';
+	import Plus from '@lucide/svelte/icons/plus';
 
 	interface Props {
 		editor: Editor;

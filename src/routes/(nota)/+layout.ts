@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 import { DB } from '$lib/local/db';
 import type { LocalNote } from '$lib/local/notes.svelte';
 import type { LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
@@ -99,27 +100,27 @@ export const load = async () => {
 	const localUserWorkspaces = await loadLocalUserWorkspaces();
 	if (localUserWorkspaces === null) {
 		toast.error('Something went wrong when loading the user workspaces');
-		return goto('/');
+		return goto(resolve('/'));
 	}
 	const currentUserWorkspace = await loadCurrentUserWorkspace(localUserWorkspaces);
 
 	if (currentUserWorkspace === null) {
 		toast.error('Something went wrong when loading the current user workspace');
-		return goto('/');
+		return goto(resolve('/'));
 	}
 
 	const localWorkspaces = await loadLocalWorkspaces(currentUserWorkspace.id);
 
 	if (localWorkspaces === null) {
 		toast.error('Something went wrong when loading the workspaces');
-		return goto('/');
+		return goto(resolve('/'));
 	}
 
 	const localNotes = await loadLocalNotes(currentUserWorkspace.id);
 
 	if (localNotes === null) {
 		toast.error('Something went wrong when loading the notes');
-		return goto('/');
+		return goto(resolve('/'));
 	}
 
 	return {
