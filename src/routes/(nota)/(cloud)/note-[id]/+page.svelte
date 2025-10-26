@@ -27,7 +27,6 @@
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
-	import { migrateMathStrings } from '@tiptap/extension-mathematics';
 
 	const { data } = $props();
 
@@ -41,6 +40,7 @@
 	let editor = $state<Editor>();
 	let content = $state<Content>();
 	let pendingContent = $state<Content | null>(null);
+	let isUpdated = $state(false);
 
 	// cloud related
 	const cloudNotes = useCloudNotes();
@@ -85,9 +85,10 @@
 	}
 
 	onMount(() => {
-		const saveInterval = setInterval(() => {
-			if (pendingContent !== null) {
-				saveNoteContent();
+		const saveInterval = setInterval(async () => {
+			if (pendingContent !== null && pendingContent !== undefined && isUpdated) {
+				isUpdated = false;
+				await saveNoteContent();
 			}
 		}, 5000);
 		return () => clearInterval(saveInterval);
@@ -118,6 +119,7 @@
 	async function onUpdate() {
 		try {
 			pendingContent = editor?.getJSON() as Content;
+			isUpdated = true;
 		} catch (error) {
 			console.error(error);
 		}
@@ -176,7 +178,7 @@
 	<div class="flex size-full flex-col items-center justify-center">
 		<div class="flex items-center gap-4">
 			<Loader class="text-primary animate-spin" />
-			<h4>Loading Local Notes</h4>
+			<h4>Loading Cloud Notes</h4>
 		</div>
 	</div>
 {:else if !isLoading && note !== undefined}

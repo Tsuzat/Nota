@@ -9,7 +9,6 @@
 	import { getLocalWorkspaces, setLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { handleKeydown, ISTAURI } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
-	import { GlobalSettings, setGlobalSettings } from '$lib/components/custom/settings';
 	import { NewUserWorkspace, setNewUserWorkspace } from '$lib/components/custom/user-workspace';
 	import { setRecentsContext } from '$lib/recents.svelte';
 	import { page } from '$app/state';
@@ -50,7 +49,6 @@
 	});
 
 	setGlobalSearch();
-	setGlobalSettings();
 	setNewUserWorkspace();
 	const useRecents = setRecentsContext();
 
@@ -96,7 +94,6 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <GlobalSearch />
-<GlobalSettings />
 <NewUserWorkspace />
 
 <Sidebar.Provider>

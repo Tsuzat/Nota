@@ -26,7 +26,6 @@
 	import { load } from '@tauri-apps/plugin-store';
 	import { dirname, resolve } from '@tauri-apps/api/path';
 	import { beforeNavigate } from '$app/navigation';
-	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 
 	const sidebar = useSidebar();
 
@@ -34,6 +33,7 @@
 	let editor = $state<Editor>();
 	let content = $state<Content>();
 	let pendingContent = $state<Content>();
+	let isUpdated = $state(false);
 
 	const localNotes = getLocalNotes();
 	let note = $state<LocalNote>();
@@ -74,9 +74,10 @@
 	}
 
 	onMount(() => {
-		const saveInterval = setInterval(() => {
-			if (pendingContent !== undefined && pendingContent !== null) {
-				saveToStore('content', pendingContent);
+		const saveInterval = setInterval(async () => {
+			if (pendingContent !== undefined && pendingContent !== null && isUpdated) {
+				isUpdated = false;
+				await saveToStore('content', pendingContent);
 			}
 		}, 1000);
 		return () => clearInterval(saveInterval);
@@ -110,6 +111,7 @@
 	async function onUpdate() {
 		try {
 			pendingContent = editor?.getJSON();
+			isUpdated = true;
 		} catch (error) {
 			console.error(error);
 		}
