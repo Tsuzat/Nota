@@ -14,6 +14,8 @@
 	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
 	import { ISTAURI } from '$lib/utils';
+	import { signOut } from '$lib/supabase/auth';
+	import { goto } from '$app/navigation';
 
 	const user = $derived(getSessionAndUserContext().getUser());
 
@@ -46,18 +48,11 @@
 					<Dropdown.Label class="text-xs">
 						{user.email}
 					</Dropdown.Label>
-					<Dropdown.Item>
+					<Dropdown.Item onclick={() => goto('/profile')}>
 						<UserRound />
 						<span>Profile</span>
 					</Dropdown.Item>
-					<Dropdown.Item
-						onclick={() =>
-							toast.promise(auth.signOut(), {
-								loading: 'Signing you out...',
-								success: 'Signed out successfully.',
-								error: 'Something went wrong'
-							})}
-					>
+					<Dropdown.Item onclick={signOut}>
 						<LogOut />
 						Sign Out
 					</Dropdown.Item>

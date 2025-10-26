@@ -10,3 +10,14 @@ export const signInWithEmailAndPassword = async (email: string, password: string
 		});
 	}
 };
+
+export const signOut = () => {
+	toast.promise(auth.signOut(), {
+		loading: 'Signing you out...',
+		success: 'Signed Out Successfully',
+		error: (err) => {
+			console.error(err);
+			return 'Something went wrong.';
+		}
+	});
+};
