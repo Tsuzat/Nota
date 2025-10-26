@@ -7,8 +7,8 @@ export async function setAppMenu() {
 	APPMENU = await Menu.default();
 	const firstItem = (await APPMENU.items())[0] as Submenu;
 	const settingsMenuItem = await MenuItem.new({
-		id: 'Settings',
-		text: 'Settings',
+		id: 'settings',
+		text: 'Settings...',
 		accelerator: 'CommandOrControl+,',
 		action: openSettings
 	});
