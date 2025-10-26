@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { Button } from '../ui/button';
-	import { Menu } from '@tauri-apps/api/menu';
 	import src from '$lib/assets/static/icon.png';
+	import { APPMENU } from '$lib/appMenu';
 
 	async function showMenu() {
-		const appMenu = await Menu.default();
-		await appMenu.popup();
+		await APPMENU.popup();
 	}
 </script>
 

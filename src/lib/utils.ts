@@ -174,3 +174,17 @@ export function timeAgo(date: string): string {
 	];
 	return `${months[then.getMonth()]}, ${then.getDate()}`;
 }
+
+export function getUserIntials(name?: string) {
+	if (!name) return 'U';
+	const names = name.split(' ');
+	if (names.length > 1) {
+		return names[0][0] + names[1][0];
+	} else {
+		if (names[0].length > 1) {
+			return names[0][0] + names[0][1];
+		} else {
+			return names[0][0];
+		}
+	}
+}

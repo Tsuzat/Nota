@@ -19,6 +19,8 @@
 	import Trash from '$lib/components/icons/moving-icons/trash.svelte';
 	import Download from '$lib/components/icons/moving-icons/download.svelte';
 	import Login from '$lib/components/icons/moving-icons/login.svelte';
+	import { getUserIntials } from '$lib/utils';
+	import { signOut } from '$lib/supabase/auth';
 
 	let isTrashHovered = $state(false);
 	let isDownloadHovered = $state(false);
@@ -42,20 +44,6 @@
 	const globalSignInContext = getGlobalSignInContext();
 	const session = $derived(getSessionAndUserContext().getSession());
 	const user = $derived(getSessionAndUserContext().getUser());
-
-	function getUserIntials(name?: string) {
-		if (!name) return 'U';
-		const names = name.split(' ');
-		if (names.length > 1) {
-			return names[0][0] + names[1][0];
-		} else {
-			if (names[0].length > 1) {
-				return names[0][0] + names[0][1];
-			} else {
-				return names[0][0];
-			}
-		}
-	}
 </script>
 
 <Sidebar.Group class="mt-auto">
@@ -184,17 +172,7 @@
 								</DropdownMenu.Item>
 							</DropdownMenu.Group>
 							<DropdownMenu.Separator />
-							<DropdownMenu.Item
-								onclick={() =>
-									toast.promise(auth.signOut(), {
-										loading: 'Signing you out...',
-										success: 'Signed Out Successfully',
-										error: (err) => {
-											console.error(err);
-											return 'Something went wrong.';
-										}
-									})}
-							>
+							<DropdownMenu.Item onclick={signOut}>
 								<LogOut />
 								Sign Out
 							</DropdownMenu.Item>
