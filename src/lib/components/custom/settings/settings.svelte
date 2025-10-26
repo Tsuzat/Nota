@@ -1,0 +1,30 @@
+<script lang="ts">
+	import * as Tabs from '$lib/components/ui/tabs';
+	import Settings from '@lucide/svelte/icons/settings';
+	import User from '@lucide/svelte/icons/user';
+</script>
+
+<Tabs.Root value="tab-1">
+	<Tabs.List class="bg-background z-50 mx-auto h-auto rounded-none p-0">
+		<Tabs.Trigger
+			value="tab-1"
+			class="relative flex-col rounded border-1 px-4 py-2 text-xs data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+		>
+			<Settings class="mb-1.5 opacity-60" size={14} aria-hidden="true" />
+			General
+		</Tabs.Trigger>
+		<Tabs.Trigger
+			value="tab-2"
+			class="relative flex-col rounded border-1 px-4 py-2 text-xs data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+		>
+			<User class="mb-1.5 opacity-60" size={14} aria-hidden="true" />
+			Profile
+		</Tabs.Trigger>
+	</Tabs.List>
+	<Tabs.Content value="tab-1" class="mx-auto h-full max-w-3xl overflow-y-auto"
+		>Make changes to your account here.</Tabs.Content
+	>
+	<Tabs.Content value="tab-2" class="mx-auto h-full max-w-3xl overflow-y-auto"
+		>Hello World</Tabs.Content
+	>
+</Tabs.Root>
