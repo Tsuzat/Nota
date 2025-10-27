@@ -70,7 +70,7 @@ export const Audio = (onDrop?: (file: File) => Promise<string>) =>
 					(src: string) =>
 					({ commands }) =>
 						commands.insertContent(
-							`<audio controls autoplay="false" style="width: 100%;" src="${src}"/>`
+							`<audio preload="none" controls autoplay="false" style="width: 100%;" src="${src}"/>`
 						),
 
 				toggleAudio:

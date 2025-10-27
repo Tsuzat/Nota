@@ -2,7 +2,7 @@
 	import { NodeViewWrapper, NodeViewContent } from 'svelte-tiptap';
 	import type { NodeViewProps } from '@tiptap/core';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-	const { editor, node, updateAttributes, extension, deleteNode }: NodeViewProps = $props();
+	const { editor, node, updateAttributes, extension }: NodeViewProps = $props();
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Check from '@lucide/svelte/icons/check';
 	import Copy from '@lucide/svelte/icons/copy';
@@ -53,7 +53,7 @@
 							<Command.Item
 								contenteditable="false"
 								data-current={defaultLanguage === language}
-								class="data-[current=true]:bg-muted"
+								class="data-[current=true]:bg-muted capitalize"
 								onclick={() => {
 									defaultLanguage = language;
 									updateAttributes({ language: defaultLanguage });
