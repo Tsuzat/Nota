@@ -23,10 +23,8 @@
 	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
 	import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
-	import { load } from '@tauri-apps/plugin-store';
-	import { dirname, resolve } from '@tauri-apps/api/path';
 	import { beforeNavigate } from '$app/navigation';
-	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
+	import { DB } from '$lib/local/db.js';
 
 	const sidebar = useSidebar();
 
@@ -35,9 +33,8 @@
 	let content = $state<Content>();
 	let pendingContent = $state<Content>();
 
-	const localNotes = getLocalNotes();
 	let note = $state<LocalNote>();
-	let assetsPath = $state<string>();
+	const localNotes = getLocalNotes();
 	let pageSettings = $state(DEFAULT_SETTINGS);
 
 	const { data } = $props();
@@ -47,27 +44,22 @@
 	});
 
 	async function loadData(id: string) {
+		note = undefined;
 		isLoading = true;
 		try {
-			pendingContent = undefined;
-			note = localNotes.getNotes().find((n) => n.id === id);
-			if (note === undefined) {
-				toast.error('Note not found');
-				isLoading = false;
+			note = localNotes.getNotes().find((n) => String(n.id) === id);
+			const data = await DB.select<{ content: string }[]>(
+				'SELECT content FROM notes WHERE id = $1',
+				[id]
+			);
+			if (data.length === 0) {
+				toast.error(`Notes with id ${id} not found`);
 				return;
 			}
-			const dirPath = await dirname(note.path);
-			assetsPath = await resolve(dirPath, 'assets');
-			const store = await load(note.path);
-			content = await store.get<Content>('content');
+			content = JSON.parse(data[0].content) as Content;
 		} catch (error) {
 			console.error(error);
-			toast.error('Something went wrong when loading notes data', {
-				action: {
-					label: 'Retry',
-					onClick: () => loadData(id)
-				}
-			});
+			toast.error('Something went wrong when loading notes');
 		} finally {
 			isLoading = false;
 		}
@@ -76,31 +68,30 @@
 	onMount(() => {
 		const saveInterval = setInterval(() => {
 			if (pendingContent !== undefined && pendingContent !== null) {
-				saveToStore('content', pendingContent);
+				saveContent(pendingContent);
 			}
 		}, 1000);
 		return () => clearInterval(saveInterval);
 	});
 
-	const onFileSelect = $derived.by(() => {
-		if (assetsPath !== undefined) return;
-		return async (file: string) => moveFileToAssets(file, assetsPath!);
-	});
+	async function saveContent(content: Content) {
+		if (note === undefined) return;
+		await DB.execute('UPDATE notes SET content = $1 WHERE id = $2', [
+			JSON.stringify(content),
+			note.id
+		]);
+	}
 
-	const onDropOrPaste = $derived.by(() => {
-		if (assetsPath === undefined) return;
-		return async (file: File) => createFile(file, assetsPath!);
-	});
+	const onFileSelect = async (file: string) => moveFileToAssets(file);
 
-	const getAssets = $derived.by(() => {
-		if (assetsPath === undefined) return;
-		return async (fileType: FileType) => getAssetsByFileType(fileType, assetsPath!);
-	});
+	const onDropOrPaste = async (file: File) => createFile(file);
+
+	const getAssets = async (fileType: FileType) => getAssetsByFileType(fileType);
 
 	let isLoading = $state(false);
 
 	async function updatePageSettings(settings: NotePageSettingsType) {
-		await saveToStore('settings', settings);
+		// await saveToStore('settings', settings);
 	}
 
 	$effect(() => {
@@ -118,7 +109,7 @@
 	beforeNavigate(() => {
 		/// Save before changing the route
 		if (pendingContent !== undefined && pendingContent !== null) {
-			saveToStore('content', pendingContent);
+			// saveToStore('content', pendingContent);
 		}
 		pendingContent = undefined;
 	});
@@ -127,27 +118,10 @@
 		editor?.destroy();
 	});
 
-	async function saveToStore(key: string, value: any) {
-		if (note === undefined) {
-			console.log('Can not save to a undefined store');
-			return;
-		}
-		try {
-			const store = await load(note.path);
-			await store.set(key, value);
-			await store.save();
-			await store.close();
-		} catch (e) {
-			console.error(e);
-			toast.error(`Unable to save ${key}`);
-		}
-	}
-
 	async function updateIcon(icon: string) {
 		if (note === undefined) return;
 		try {
 			note = { ...note, icon };
-			await saveToStore('icon', icon);
 			await localNotes.updateNote(note);
 		} catch (e) {
 			toast.error('Could not update note icon');
@@ -159,7 +133,7 @@
 		if (note === undefined) return;
 		try {
 			note = { ...note, name };
-			await saveToStore('name', name);
+			// await saveToStore('name', name);
 			await localNotes.updateNote(note);
 		} catch (e) {
 			toast.error('Could not update note name');
@@ -185,8 +159,8 @@
 		}
 		if ((event.ctrlKey || event.metaKey) && event.key === 's') {
 			event.preventDefault();
-			const content = editor?.getJSON();
-			toast.promise(saveToStore('content', content), {
+			const content = editor?.getJSON() as Content;
+			toast.promise(saveContent(content), {
 				loading: 'Saving to local store',
 				success: 'Note saved',
 				error: (err) => {
