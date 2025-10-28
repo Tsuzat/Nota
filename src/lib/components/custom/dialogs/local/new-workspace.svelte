@@ -5,13 +5,9 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { type Snippet } from 'svelte';
-	import { open as openDialog } from '@tauri-apps/plugin-dialog';
-	import { appDataDir, resolve } from '@tauri-apps/api/path';
-	import { ISTAURI } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { Loader } from '@lucide/svelte';
-	import { exists } from '@tauri-apps/plugin-fs';
 	import { useCurrentUserWorkspaceContext } from '../../user-workspace/userworkspace.svelte';
 	import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
@@ -24,7 +20,6 @@
 
 	let { open = $bindable(false), type = 'local', children }: Props = $props();
 
-	let dir: string | undefined = $state<string>();
 	let name: string | undefined = $state<string>();
 	let icon: string = $state('emoji:📂');
 
@@ -40,47 +35,20 @@
 		else type = 'cloud';
 	});
 
-	async function getWorkspaceDirectory() {
-		const defaultPath = await appDataDir();
-		const directory = await openDialog({
-			multiple: false,
-			directory: true,
-			title: 'Select Workspace Location',
-			canCreateDirectories: true,
-			defaultPath
-		});
-		if (directory) {
-			const path = await resolve(directory, '.workspace.nota');
-			const has = await exists(path);
-			if (has) {
-				toast.error('Workspace already exists', {
-					description:
-						'This location is already in use by another workspace. Please select a different location.'
-				});
-				return;
-			}
-			dir = directory;
-		}
-	}
-
 	async function createLocalWorkspace() {
-		if (currentUserWorkspace === null) {
+		if (currentUserWorkspace === null || 'owner' in currentUserWorkspace) {
 			toast.error('Can find current user workspace. Please select one user workspace.');
 			return;
 		}
 		// verify icon, name, dir
-		if (!icon || !name || !dir) {
-			toast.error('Please select an icon, name, and directory');
-			return;
-		}
-		if (dir.trim() === '') {
-			toast.error('Please select a valid directory');
+		if (!icon || !name) {
+			toast.error('Please select an icon and name');
 			return;
 		}
 
 		try {
 			loading = true;
-			await localWorspaces.createWorkspace(icon, name, dir, currentUserWorkspace.id);
+			await localWorspaces.createWorkspace(icon, name, currentUserWorkspace.id);
 			open = false;
 		} catch (e) {
 			loading = false;
@@ -174,21 +142,6 @@
 				</IconPicker>
 				<Input bind:value={name} placeholder="Workspace Name" type="text" required />
 			</div>
-			{#if type === 'local' && ISTAURI}
-				<div class="flex w-full items-center gap-2">
-					<Button
-						variant="outline"
-						class="text-muted-foreground w-full truncate"
-						onclick={getWorkspaceDirectory}
-					>
-						{#if dir && dir.trim() !== ''}
-							<span>{dir}</span>
-						{:else}
-							<span>Workspace Directory...</span>
-						{/if}
-					</Button>
-				</div>
-			{/if}
 			<Button type="submit">
 				{#if loading}
 					<Loader class="animate-spin" />

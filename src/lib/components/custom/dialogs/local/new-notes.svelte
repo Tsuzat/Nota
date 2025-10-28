@@ -47,7 +47,7 @@
 		}
 		try {
 			loading = true;
-			if (!('owner' in workspace))
+			if (!('owner' in workspace) && !('owner' in currentUserWorkspace))
 				await localNotes.createNote(name, icon, isFavorite, workspace, currentUserWorkspace.id);
 			else {
 				if (user === null) {
@@ -58,8 +58,8 @@
 					name,
 					icon,
 					favorite: isFavorite,
-					workspace: workspace.id,
-					userworkspace: currentUserWorkspace.id,
+					workspace: String(workspace.id),
+					userworkspace: String(currentUserWorkspace.id),
 					owner: user.id
 				});
 			}
