@@ -3,7 +3,7 @@ import { DB } from './db';
 import { setContext, getContext } from 'svelte';
 
 export interface LocalUserWorkspace {
-	id: string;
+	id: number;
 	name: string;
 	icon: string;
 }
@@ -35,17 +35,16 @@ class UserWorkspaces {
 
 	async createUserWorkspace(name: string, icon: string) {
 		try {
-			const id = crypto.randomUUID();
-			const newUserWorkspaces: LocalUserWorkspace = {
-				id,
+			const res = await DB.execute('INSERT INTO userworkspaces (name, icon) VALUES ($1, $2)', [
 				name,
 				icon
-			};
-			const res = await DB.execute(
-				'INSERT INTO userworkspaces (id, name, icon) VALUES ($1, $2, $3)',
-				[id, name, icon]
-			);
-			if (res.rowsAffected > 0) {
+			]);
+			if (res.lastInsertId) {
+				const newUserWorkspaces: LocalUserWorkspace = {
+					id: res.lastInsertId as number,
+					name,
+					icon
+				};
 				this.setUserWorkspaces([...this.getUserWorkspaces(), newUserWorkspaces]);
 			} else {
 				toast.error('Something went wrong when creating the user workspace');

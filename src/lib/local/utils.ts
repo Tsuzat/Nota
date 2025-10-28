@@ -1,40 +1,39 @@
 import { FileType, getFileTypeExtensions, ISWINDOWS } from '$lib/utils';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { resolve } from '@tauri-apps/api/path';
-import { copyFile, exists, readDir, writeFile } from '@tauri-apps/plugin-fs';
+import { appDataDir, resolve } from '@tauri-apps/api/path';
+import { exists, readDir, writeFile } from '@tauri-apps/plugin-fs';
 import { toast } from 'svelte-sonner';
 
 /**
  * Helping function to copy assets to the workspace
  * @param files - files to be moved
- * @param assetsPath - path to the assets folder
  * @returns - Array of copied files
  */
-export const moveFileToAssets = async (file: string, assetsPath: string) => {
+export const moveFileToAssets = async (file: string) => {
+	const assetsPath = await resolve(await appDataDir(), 'assets');
 	const fileName = file.split(ISWINDOWS ? '\\' : '/').pop();
 	if (fileName === undefined) throw new Error('Assets file is not supported');
 	const finalPath = await resolve(assetsPath, fileName);
-	await copyFile(file, finalPath);
 	const fileExists = await exists(finalPath);
 	if (!fileExists) throw new Error('Failed to move file to assets folder');
 	return finalPath;
 };
 
-export const createFile = async (file: File, path: string): Promise<string> => {
+export const createFile = async (file: File): Promise<string> => {
 	const id = toast.loading(`Saving ${file.name} of ${file.size} bytes...`);
 	const fileReader = new FileReader();
 
 	// Construct the asset path
-	const assetsPath = await resolve(path, file.name);
+	const assetsPath = await resolve(await appDataDir(), 'assets', file.name);
 
 	// Create a promise to handle the asynchronous file writing
-	return new Promise((resolve, reject) => {
+	return new Promise((res, reject) => {
 		fileReader.onload = async () => {
 			if (fileReader.result instanceof ArrayBuffer) {
 				const binary = new Uint8Array(fileReader.result);
 				try {
 					await writeFile(assetsPath, binary);
-					resolve(convertFileSrc(assetsPath));
+					res(convertFileSrc(assetsPath));
 					toast.success('File saved successfully!', { id });
 				} catch (err) {
 					toast.error('Error saving image!', { id });
@@ -50,7 +49,8 @@ export const createFile = async (file: File, path: string): Promise<string> => {
 	});
 };
 
-export const getAssetsByFileType = async (fileType: FileType, path: string): Promise<string[]> => {
+export const getAssetsByFileType = async (fileType: FileType): Promise<string[]> => {
+	const path = await resolve(await appDataDir(), 'assets');
 	const dirEntries = await readDir(path);
 	const extensions = getFileTypeExtensions(fileType);
 	const files: string[] = [];

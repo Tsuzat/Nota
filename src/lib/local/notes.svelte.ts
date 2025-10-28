@@ -1,27 +1,22 @@
 import { toast } from 'svelte-sonner';
 import { DB } from './db';
 import { getContext, setContext } from 'svelte';
-import { getNewUUID } from '$lib/utils';
 import type { LocalWorkSpace } from './workspaces.svelte';
-import { resolve } from '@tauri-apps/api/path';
 import { goto } from '$app/navigation';
-import { load } from '@tauri-apps/plugin-store';
-import { copyFile, remove } from '@tauri-apps/plugin-fs';
 import { page } from '$app/state';
-import { DEFAULT_SETTINGS } from '$lib/types';
 import { ask } from '@tauri-apps/plugin-dialog';
+import { resolve } from '$app/paths';
 
 export interface LocalNote {
-	id: string;
+	id: number;
 	name: string;
 	icon: string;
-	path: string;
-	workspace: string;
-	userworkspace: string;
+	workspace: number;
+	userworkspace: number;
 	favorite: boolean | string;
 	trashed: boolean | string;
-	created_at: string;
-	updated_at: string;
+	created_at: number;
+	updated_at: number;
 }
 
 class Notes {
@@ -39,11 +34,12 @@ class Notes {
 		this.#notes = notes;
 	}
 
-	async fetchNotes(userWorkspaceId: string) {
+	async fetchNotes(userWorkspaceId: number) {
 		try {
-			let res = await DB.select<LocalNote[]>('SELECT * FROM notes WHERE userworkspace = $1', [
-				userWorkspaceId
-			]);
+			let res = await DB.select<LocalNote[]>(
+				'SELECT id, name, icon, workspace, userworkspace, favorite, trashed, created_at, updated_at FROM notes WHERE userworkspace = $1',
+				[userWorkspaceId]
+			);
 			res = res.map((r) => {
 				return { ...r, favorite: r.favorite === 'true', trashed: r.trashed === 'true' };
 			});
@@ -59,50 +55,30 @@ class Notes {
 		icon: string,
 		favorite: boolean | string,
 		workspace: LocalWorkSpace,
-		userworkspace: string
+		userworkspace: number
 	) {
 		try {
-			const id = getNewUUID(this.getNotes().map((n) => n.id));
-			const path = await resolve(workspace.path, `${id}.nota`);
-			const store = await load(path, { autoSave: true });
-			await store.set('id', id);
-			await store.set('name', name);
-			await store.set('icon', icon);
-			await store.set('created_at', new Date().toISOString());
-			await store.set('updated_at', new Date().toISOString());
-			await store.set('content', null);
-			await store.set('settings', DEFAULT_SETTINGS);
-			await store.save();
-			await store.close();
-
-			const newNotes: LocalNote = {
-				id,
-				name,
-				icon,
-				path,
-				workspace: workspace.id,
-				userworkspace,
-				favorite,
-				trashed: false,
-				created_at: new Date().toISOString(),
-				updated_at: new Date().toISOString()
-			};
 			const res = await DB.execute(
-				'INSERT INTO notes (id, name, icon, path, workspace, userworkspace, favorite, trashed, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-				Object.values(newNotes)
+				'INSERT INTO notes (name, icon, workspace, userworkspace, favorite) VALUES ($1, $2, $3, $4, $5)',
+				[name, icon, workspace.id, userworkspace, favorite]
 			);
-			if (res.rowsAffected === 1) {
-				this.setNotes([...this.getNotes(), newNotes]);
+			if (res.lastInsertId) {
+				const notes = await DB.select<LocalNote[]>(
+					'SELECT id, name, icon, workspace, userworkspace, favorite, trashed, created_at, updated_at FROM notes WHERE id = $1',
+					[res.lastInsertId]
+				);
 
+				const newNotes = notes[0];
+				this.setNotes([...this.getNotes(), newNotes]);
+				const resolved = resolve('/(nota)/(local)/local-note-[id]', { id: String(newNotes.id) });
 				toast.success('Note created successfully', {
 					action: {
 						label: 'Open',
-						onClick: () => goto(`local-note-${newNotes.id}`)
+						onClick: () => goto(resolved)
 					}
 				});
 				return newNotes;
 			} else {
-				await remove(path);
 				toast.error('Something went wrong when creating the note');
 			}
 		} catch (e) {
@@ -113,8 +89,8 @@ class Notes {
 	async updateNote(note: LocalNote) {
 		try {
 			const res = await DB.execute(
-				'UPDATE notes SET name = $1, icon = $2, favorite = $3, trashed = $4, updated_at = $5 WHERE id = $6',
-				[note.name, note.icon, note.favorite, note.trashed, new Date().toISOString(), note.id]
+				'UPDATE notes SET name = $1, icon = $2, favorite = $3, trashed = $4 WHERE id = $5',
+				[note.name, note.icon, note.favorite, note.trashed, note.id]
 			);
 			if (res.rowsAffected === 1) {
 				this.setNotes(this.getNotes().map((n) => (n.id === note.id ? note : n)));
@@ -128,21 +104,11 @@ class Notes {
 	}
 
 	async deleteNote(note: LocalNote) {
-		const permission = await ask(
-			'This note will be deleted permanently and all data will be erased.',
-			{
-				title: `Delete Note - ${note.name}`,
-				okLabel: 'Yes, Delete',
-				kind: 'warning'
-			}
-		);
-		if (!permission) return;
 		try {
-			if (page.url.pathname.endsWith(`local-note-${note.id}`)) goto('/home');
+			if (page.url.pathname.endsWith(`local-note-${note.id}`)) goto(resolve('/home'));
 			const res = await DB.execute('DELETE FROM notes WHERE id = $1', [note.id]);
 			if (res.rowsAffected === 1) {
 				this.setNotes(this.getNotes().filter((n) => n.id !== note.id));
-				await remove(note.path);
 			} else {
 				toast.error('Something went wrong when deleting the note');
 			}
@@ -172,17 +138,13 @@ class Notes {
 	}
 
 	async duplicateNote(workspace: LocalWorkSpace, note: LocalNote) {
-		const newNote = await this.createNote(
+		await this.createNote(
 			note.name + '(Copy)',
 			note.icon,
 			note.favorite,
 			workspace,
 			note.userworkspace
 		);
-		if (newNote === undefined) return;
-		const from = await resolve(note.path);
-		const to = await resolve(newNote.path);
-		await copyFile(from, to);
 	}
 
 	// export the note with it's assets
