@@ -47,7 +47,7 @@
 			"identifier": "fs:allow-mkdir",
 			"allow": [
 				{
-					"path": "**"
+					"path": "$APPDATA/*"
 				}
 			]
 		},
@@ -55,15 +55,7 @@
 			"identifier": "fs:allow-remove",
 			"allow": [
 				{
-					"path": "**"
-				}
-			]
-		},
-		{
-			"identifier": "fs:allow-size",
-			"allow": [
-				{
-					"path": "**"
+					"path": "$APPDATA/*"
 				}
 			]
 		},
@@ -87,7 +79,7 @@
 			"identifier": "fs:allow-read-dir",
 			"allow": [
 				{
-					"path": "**"
+					"path": "$APPDATA/*"
 				}
 			]
 		},
@@ -103,15 +95,7 @@
 			"identifier": "fs:allow-read-file",
 			"allow": [
 				{
-					"path": "**"
-				}
-			]
-		},
-		{
-			"identifier": "core:path:allow-basename",
-			"allow": [
-				{
-					"path": "*"
+					"path": "$APPDATA/*"
 				}
 			]
 		},

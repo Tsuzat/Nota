@@ -27,7 +27,6 @@
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
-	import { migrateMathStrings } from '@tiptap/extension-mathematics';
 
 	const { data } = $props();
 
