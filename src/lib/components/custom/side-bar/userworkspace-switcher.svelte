@@ -22,6 +22,7 @@
 	import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 	import { ISTAURI } from '$lib/utils';
+	import { resolve } from '$app/paths';
 
 	const localUserWorkspaces = getLocalUserWorkspaces();
 	const localWorkspaces = getLocalWorkspaces();
@@ -44,7 +45,7 @@
 			currentUserWorkspace.setCurrentUserWorkspace(workspace);
 			await localWorkspaces.fetchWorkspaces(workspace.id);
 			await localNotes.fetchNotes(workspace.id);
-			goto('/home');
+			goto(resolve('/home'));
 			toast.success('Changed User Workspace to ' + workspace.name, { id });
 			cloudWorkspaces.setWorkspaces([]);
 			cloudNotes.setNotes([]);
@@ -66,7 +67,7 @@
 			toast.loading('Loading Notes', { id });
 			await cloudNotes.fetchNotes(workspace);
 			toast.dismiss(id);
-			goto('/home');
+			goto(resolve('/home'));
 			toast.success('Changed User Workspace to ' + workspace.name, { id });
 			localWorkspaces.setWorkspaces([]);
 			localNotes.setNotes([]);

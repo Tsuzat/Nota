@@ -12,21 +12,20 @@
 		ArrowDownFromLine,
 		ArrowUpFromLine,
 		CopyIcon,
-		ExternalLink,
 		Pencil,
 		StarIcon,
 		Trash2Icon
 	} from '@lucide/svelte';
 	import { ask } from '@tauri-apps/plugin-dialog';
-	import { openPath } from '@tauri-apps/plugin-opener';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { cn, getKeyboardShortcut, ISMACOS } from '$lib/utils';
+	import { cn, getKeyboardShortcut } from '$lib/utils';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import NewWorkspace from '../dialogs/local/new-workspace.svelte';
 	import NewNotes from '../dialogs/local/new-notes.svelte';
+	import { resolve } from '$app/paths';
 
 	let showMore = $state(false);
 
@@ -54,7 +53,7 @@
 				loading: 'Deleting workspace...',
 				success: () => {
 					if (page.url.pathname === `local-workspace-${workspace.id}`) {
-						goto('/home');
+						goto(resolve('/home'));
 					}
 					return `Workspace ${workspace.name} deleted successfully`;
 				},
@@ -131,14 +130,6 @@
 									>
 										<PlusIcon />
 										<span>Create Notes</span>
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onclick={async () => {
-											await openPath(workspace.path);
-										}}
-									>
-										<ExternalLink />
-										<span>Reveal in {ISMACOS ? 'Finder' : 'File Explorer'}</span>
 									</DropdownMenu.Item>
 									<DropdownMenu.Item>
 										<Pencil />

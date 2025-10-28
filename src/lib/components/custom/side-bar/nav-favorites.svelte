@@ -5,17 +5,16 @@
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { useSidebar } from '$lib/components/ui/sidebar';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-	import { ISMACOS, ISTAURI } from '$lib/utils';
+	import { ISTAURI } from '$lib/utils';
 	import ArrowUpRightIcon from '@lucide/svelte/icons/arrow-up-right';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import LinkIcon from '@lucide/svelte/icons/link';
 	import StarOffIcon from '@lucide/svelte/icons/star-off';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
-	import { openUrl, openPath as reveal } from '@tauri-apps/plugin-opener';
+	import { openUrl } from '@tauri-apps/plugin-opener';
 	import { toast } from 'svelte-sonner';
 	import { linear } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
-	import { dirname } from '@tauri-apps/api/path';
 	import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
@@ -42,11 +41,6 @@
 			toast.error('Could not update note starred');
 			console.error(e);
 		}
-	}
-
-	async function openPath(note: LocalNote) {
-		const dir = await dirname(note.path);
-		await reveal(dir);
 	}
 
 	async function trashNote(note: LocalNote | CloudNote) {
@@ -124,18 +118,6 @@
 									Unfavorites
 								</DropdownMenu.Item>
 								<DropdownMenu.Separator />
-								{#if !isCloud}
-									<DropdownMenu.Item
-										onclick={() => window.navigator.clipboard.writeText(note.path)}
-									>
-										<LinkIcon />
-										Copy Path
-									</DropdownMenu.Item>
-									<DropdownMenu.Item onclick={() => openPath(note)}>
-										<ArrowUpRightIcon />
-										Open in {ISMACOS ? 'Finder' : 'File Explorer'}
-									</DropdownMenu.Item>
-								{/if}
 								{#if isCloud}
 									<DropdownMenu.Item
 										onclick={() =>

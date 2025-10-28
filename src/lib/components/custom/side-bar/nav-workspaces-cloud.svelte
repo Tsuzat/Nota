@@ -20,6 +20,7 @@
 	import { useCloudWorkspaces, type CloudWorkspace } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+	import { resolve } from '$app/paths';
 
 	let showMore = $state(false);
 
@@ -47,7 +48,7 @@
 				loading: 'Deleting workspace...',
 				success: () => {
 					if (page.url.pathname === `workspace-${workspace.id}`) {
-						goto('/home');
+						goto(resolve('/home'));
 					}
 					return `Workspace ${workspace.name} deleted successfully`;
 				},
