@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 import { DB } from '$lib/local/db';
 import type { LocalNote } from '$lib/local/notes.svelte';
 import type { LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
@@ -11,19 +12,12 @@ async function loadLocalUserWorkspaces(): Promise<LocalUserWorkspace[] | null> {
 	try {
 		localUserWorkspaces = await DB.select<LocalUserWorkspace[]>('SELECT * FROM userworkspaces');
 		if (localUserWorkspaces.length === 0) {
-			const id = crypto.randomUUID();
-			const name = 'Personal';
-			const icon = 'lucide:User';
-			const res = await DB.execute(
-				'INSERT INTO userworkspaces (id, name, icon) VALUES ($1, $2, $3)',
-				[crypto.randomUUID(), 'Personal', 'lucide:User']
-			);
-			if (res.rowsAffected > 0) {
-				localUserWorkspaces.push({
-					id,
-					name,
-					icon
-				});
+			const res = await DB.execute('INSERT INTO userworkspaces (name, icon) VALUES ($1, $2)', [
+				'Personal',
+				'lucide:User'
+			]);
+			if (res.lastInsertId) {
+				localUserWorkspaces = await DB.select<LocalUserWorkspace[]>('SELECT * FROM userworkspaces');
 				return localUserWorkspaces;
 			} else {
 				return null;
@@ -44,14 +38,16 @@ async function loadCurrentUserWorkspace(
 	try {
 		const currentUserWorkspaceId = localStorage.getItem('currentUserWorkspaceId');
 		if (currentUserWorkspaceId) {
-			const currentUserWorkspace = localWorkspaces.find((w) => w.id === currentUserWorkspaceId);
+			const currentUserWorkspace = localWorkspaces.find(
+				(w) => String(w.id) === currentUserWorkspaceId
+			);
 			if (currentUserWorkspace) return currentUserWorkspace;
 			else {
-				localStorage.setItem('currentUserWorkspaceId', localWorkspaces[0].id);
+				localStorage.setItem('currentUserWorkspaceId', localWorkspaces[0].id.toString());
 				return localWorkspaces[0];
 			}
 		} else {
-			localStorage.setItem('currentUserWorkspaceId', localWorkspaces[0].id);
+			localStorage.setItem('currentUserWorkspaceId', localWorkspaces[0].id.toString());
 			return localWorkspaces[0];
 		}
 	} catch (e) {
@@ -61,7 +57,7 @@ async function loadCurrentUserWorkspace(
 }
 
 async function loadLocalWorkspaces(
-	currentUserWorkspaceId: string
+	currentUserWorkspaceId: number
 ): Promise<LocalWorkSpace[] | null> {
 	try {
 		const res = await DB.select<LocalWorkSpace[]>(
@@ -75,7 +71,7 @@ async function loadLocalWorkspaces(
 	}
 }
 
-async function loadLocalNotes(currentUserWorkspaceId: string): Promise<LocalNote[] | null> {
+async function loadLocalNotes(currentUserWorkspaceId: number): Promise<LocalNote[] | null> {
 	try {
 		let res = await DB.select<LocalNote[]>('SELECT * FROM notes WHERE userworkspace = $1', [
 			currentUserWorkspaceId
@@ -99,27 +95,27 @@ export const load = async () => {
 	const localUserWorkspaces = await loadLocalUserWorkspaces();
 	if (localUserWorkspaces === null) {
 		toast.error('Something went wrong when loading the user workspaces');
-		return goto('/');
+		return goto(resolve('/'));
 	}
 	const currentUserWorkspace = await loadCurrentUserWorkspace(localUserWorkspaces);
 
 	if (currentUserWorkspace === null) {
 		toast.error('Something went wrong when loading the current user workspace');
-		return goto('/');
+		return goto(resolve('/'));
 	}
 
 	const localWorkspaces = await loadLocalWorkspaces(currentUserWorkspace.id);
 
 	if (localWorkspaces === null) {
 		toast.error('Something went wrong when loading the workspaces');
-		return goto('/');
+		return goto(resolve('/'));
 	}
 
 	const localNotes = await loadLocalNotes(currentUserWorkspace.id);
 
 	if (localNotes === null) {
 		toast.error('Something went wrong when loading the notes');
-		return goto('/');
+		return goto(resolve('/'));
 	}
 
 	return {

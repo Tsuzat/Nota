@@ -30,20 +30,11 @@
 	let store = $derived(data.store);
 	let content = $derived(data.content);
 
-	const onFileSelect = $derived.by(() => {
-		if (data.assetsPath === undefined) return;
-		return async (file: string) => moveFileToAssets(file, data.assetsPath);
-	});
+	const onFileSelect = async (file: string) => moveFileToAssets(file);
 
-	const onDropOrPaste = $derived.by(() => {
-		if (data.assetsPath === undefined) return;
-		return async (file: File) => createFile(file, data.assetsPath);
-	});
+	const onDropOrPaste = async (file: File) => createFile(file);
 
-	const getAssets = $derived.by(() => {
-		if (data.assetsPath === undefined) return;
-		return async (fileType: FileType) => getAssetsByFileType(fileType, data.assetsPath);
-	});
+	const getAssets = async (fileType: FileType) => getAssetsByFileType(fileType);
 
 	$effect(() => {
 		untrack(() => editor)?.commands.setContent(data.content ?? null);

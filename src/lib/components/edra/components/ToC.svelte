@@ -7,6 +7,7 @@
 	import { cn } from '$lib/utils';
 	import { TextSelection } from '@tiptap/pm/state';
 	import { pushState } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	interface Props {
 		editor: Editor;
@@ -30,7 +31,7 @@
 		tr.setSelection(new TextSelection(tr.doc.resolve(pos)));
 		editor.view.dispatch(tr);
 		editor.view.focus();
-		pushState(`#${id}`, {
+		pushState('', {
 			showModal: true
 		});
 		element.scrollIntoView({
@@ -52,7 +53,7 @@
 		{#if items === undefined || items.length === 0}
 			<div>No contents</div>
 		{:else}
-			{#each items as item}
+			{#each items as item (item.id)}
 				<a
 					href={`#${item.id}`}
 					onclick={(e) => onItemClick(e, item.id)}

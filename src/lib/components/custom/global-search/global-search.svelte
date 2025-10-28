@@ -10,6 +10,7 @@
 	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 	import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+	import { resolve } from '$app/paths';
 
 	const search = getGlobalSearch();
 	const isLocal = $derived(useCurrentUserWorkspaceContext().getIsLocal());
@@ -50,7 +51,13 @@
 		>
 			{#each workspaces as workspace (workspace.id)}
 				{@const onselect = () => {
-					goto(`${isLocal ? 'local-' : ''}workspace-${workspace.id}`);
+					goto(
+						resolve(
+							isLocal ? '/(nota)/(local)/local-workspace-[id]' : '/(nota)/(cloud)/note-[id]',
+							{ id: String(workspace.id) }
+						)
+					);
+
 					search.open = false;
 				}}
 				<Command.Item value={workspace.name} {onselect} onclick={onselect}>
@@ -63,7 +70,11 @@
 		<Command.Group value="Notes" heading={isLocal ? 'Local' : '' + ' Notes : ' + notes.length}>
 			{#each notes as note (note.id)}
 				{@const onselect = () => {
-					goto(`${isLocal ? 'local-' : ''}note-${note.id}`);
+					goto(
+						resolve(isLocal ? '/(nota)/(local)/local-note-[id]' : '/(nota)/(cloud)/note-[id]', {
+							id: String(note.id)
+						})
+					);
 					search.open = false;
 				}}
 				<Command.Item value={note.name} {onselect} onclick={onselect}>

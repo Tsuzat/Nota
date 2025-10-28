@@ -28,6 +28,7 @@
 
 	function getSelectionText(): string {
 		const slice = editor.state.selection.content();
+		//@ts-ignore
 		return editor.storage.markdown.serializer.serialize(slice.content);
 	}
 

@@ -18,6 +18,7 @@
 	import { setCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 	import { setCurrentUserWorkspaceContext } from '$lib/components/custom/user-workspace/userworkspace.svelte.js';
+	import { resolve } from '$app/paths';
 
 	// Local Workspaces and Notes
 	setLocalUserWorkspaces();
@@ -72,7 +73,7 @@
 				data.localNotes === undefined)
 		) {
 			toast.error('Something went wrong when loading the local data');
-			goto('/');
+			goto(resolve('/'));
 		}
 	});
 

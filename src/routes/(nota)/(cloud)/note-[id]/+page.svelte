@@ -27,6 +27,7 @@
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
+	import { resolve } from '$app/paths';
 
 	const { data } = $props();
 
@@ -108,7 +109,7 @@
 		} catch (error) {
 			console.error(error);
 			toast.error('Something went wrong when loading notes');
-			goto('/home');
+			goto(resolve('/home'));
 		} finally {
 			isLoading = false;
 		}

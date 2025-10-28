@@ -36,7 +36,7 @@
 	import { getHandleDropImage, getHandlePasteImage } from '../utils';
 	import Math from './menus/Math.svelte';
 	import MathInline from './menus/MathInline.svelte';
-	import Mathematics, { migrateMathStrings } from '@tiptap/extension-mathematics';
+	import Mathematics from '@tiptap/extension-mathematics';
 	import TableOfContents, {
 		getHierarchicalIndexes,
 		type TableOfContentData
