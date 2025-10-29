@@ -1,34 +1,89 @@
 <script lang="ts">
-	import { beforeNavigate } from '$app/navigation';
 	import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
-	import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '$lib/components/edra/shadcn';
+	import {
+		EdraBubbleMenu,
+		EdraDragHandleExtended,
+		EdraEditor,
+		EdraToolBar
+	} from '$lib/components/edra/shadcn';
 	import IconPicker from '$lib/components/icons/icon-picker.svelte';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-	import { buttonVariants } from '$lib/components/ui/button';
+	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import { Loader } from '@lucide/svelte';
-	import type { Editor } from '@tiptap/core';
-	import { onDestroy, untrack } from 'svelte';
+	import { type Content, type Editor } from '@tiptap/core';
+	import { onDestroy, onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { DEFAULT_SETTINGS } from '$lib/types';
+	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
 	import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
-	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte.js';
-	import * as Tabs from '$lib/components/ui/tabs';
+	import { beforeNavigate } from '$app/navigation';
+	import { DB } from '$lib/local/db.js';
+	import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte.js';
 
 	const sidebar = useSidebar();
 
+	// editor related
 	let editor = $state<Editor>();
+	let content = $state<Content>();
+	let pendingContent = $state<Content>();
+
+	let workspace = $state<LocalWorkSpace>();
+	const localWorkspaces = getLocalWorkspaces();
+	let pageSettings = $state(DEFAULT_SETTINGS);
+
 	const { data } = $props();
 
-	const localWorkspace = getLocalWorkspaces();
-	let workspace = $derived(data.workspace);
-	let store = $derived(data.store);
-	let content = $derived(data.content);
+	$effect(() => {
+		if (data.id) loadData(data.id);
+	});
+
+	async function loadData(id: string) {
+		workspace = undefined;
+		isLoading = true;
+		try {
+			workspace = localWorkspaces.getWorkspaces().find((w) => String(w.id) === id);
+			if (workspace === undefined) {
+				toast.error(`Workspace with id ${id} not found`);
+				return;
+			}
+			const data = await DB.select<{ content: string }[]>(
+				'SELECT content FROM workspaces WHERE id = $1',
+				[id]
+			);
+			if (data.length === 0) {
+				toast.error(`Workspace content with id ${id} not found`);
+				return;
+			}
+			content = JSON.parse(data[0].content) as Content;
+		} catch (error) {
+			console.error(error);
+			toast.error('Something went wrong when loading notes');
+		} finally {
+			isLoading = false;
+		}
+	}
+
+	onMount(() => {
+		const saveInterval = setInterval(() => {
+			if (pendingContent !== undefined && pendingContent !== null) {
+				saveContent(pendingContent);
+			}
+		}, 1000);
+		return () => clearInterval(saveInterval);
+	});
+
+	async function saveContent(content: Content) {
+		if (workspace === undefined) return;
+		await DB.execute('UPDATE workspaces SET content = $1 WHERE id = $2', [
+			JSON.stringify(content),
+			workspace.id
+		]);
+	}
 
 	const onFileSelect = async (file: string) => moveFileToAssets(file);
 
@@ -36,55 +91,42 @@
 
 	const getAssets = async (fileType: FileType) => getAssetsByFileType(fileType);
 
-	$effect(() => {
-		untrack(() => editor)?.commands.setContent(data.content ?? null);
-	});
-
 	let isLoading = $state(false);
 
-	let pageSettings = $derived(data.settings ?? DEFAULT_SETTINGS);
+	async function updatePageSettings(settings: NotePageSettingsType) {
+		// await saveToStore('settings', settings);
+	}
 
 	$effect(() => {
-		untrack(() => store)
-			?.set('settings', pageSettings)
-			.then(() => {
-				store?.save();
-			});
-	});
-
-	$effect(() => {
-		untrack(() => editor)?.setEditable(!pageSettings.locked);
+		updatePageSettings(pageSettings);
 	});
 
 	async function onUpdate() {
 		try {
-			const content = editor?.getJSON();
-			await store?.set('content', content);
-			await store?.save();
+			pendingContent = editor?.getJSON();
 		} catch (error) {
 			console.error(error);
 		}
 	}
 
-	beforeNavigate(async () => {
-		// editor?.destroy();
-		await store?.save();
-		await store?.close();
+	beforeNavigate(() => {
+		if (pendingContent !== undefined && pendingContent !== null) {
+			saveContent(pendingContent);
+		}
+		pendingContent = undefined;
 	});
+
 	onDestroy(() => {
 		editor?.destroy();
-		store?.close();
 	});
 
 	async function updateIcon(icon: string) {
 		if (workspace === undefined) return;
 		try {
-			await store?.set('icon', icon);
-			await store?.save();
 			workspace = { ...workspace, icon };
-			await localWorkspace.updateWorkspace(workspace);
+			await localWorkspaces.updateWorkspace(workspace);
 		} catch (e) {
-			toast.error('Could not update workspace icon');
+			toast.error('Could not update note icon');
 			console.error(e);
 		}
 	}
@@ -92,34 +134,45 @@
 	async function updateName(name: string) {
 		if (workspace === undefined) return;
 		try {
-			await store?.set('name', name);
-			await store?.save();
 			workspace = { ...workspace, name };
-			await localWorkspace.updateWorkspace(workspace);
+			await localWorkspaces.updateWorkspace(workspace);
 		} catch (e) {
-			toast.error('Could not update workspace name');
+			toast.error('Could not update note name');
 			console.error(e);
 		}
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.metaKey && event.key === 'l') {
+		if ((event.ctrlKey || event.metaKey) && event.key === 'l') {
 			event.preventDefault();
 			pageSettings = { ...pageSettings, locked: !pageSettings.locked };
+		}
+		if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+			event.preventDefault();
+			const content = editor?.getJSON() as Content;
+			toast.promise(saveContent(content), {
+				loading: 'Saving the content to local DB',
+				success: 'Content saved',
+				error: (err) => {
+					console.error(err);
+					return 'Could not save content';
+				},
+				duration: 1000
+			});
 		}
 	}
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
 
-{#if workspace === undefined && isLoading}
+{#if isLoading}
 	<div class="flex size-full flex-col items-center justify-center">
 		<div class="flex items-center gap-4">
 			<Loader class="text-primary animate-spin" />
-			<h4>Loading Local Notes</h4>
+			<h4>Loading Local Workspace</h4>
 		</div>
 	</div>
-{:else if workspace !== undefined}
+{:else if !isLoading && workspace !== undefined}
 	<header class="flex h-12 shrink-0 items-center gap-2">
 		<div
 			class={cn(
@@ -142,7 +195,7 @@
 			</IconPicker>
 			<input
 				value={workspace.name}
-				class="truncate text-lg font-bold focus:outline-none"
+				class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
 				onchange={(e) => {
 					const target = e.target as HTMLInputElement;
 					const value = target.value;
@@ -154,6 +207,9 @@
 
 		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', ISWINDOWS && 'mr-30')}>
 			{#if editor && !editor?.isDestroyed}
+				<div class="text-muted-foreground truncate text-xs">
+					{editor.storage.characterCount.words()} Words
+				</div>
 				<SearchAndReplace {editor} />
 			{/if}
 		</div>
@@ -161,10 +217,9 @@
 			<WindowsButtons />
 		{/if}
 	</header>
-	<!-- {#if pageSettings.showtoolbar && editor}
+	{#if pageSettings.showtoolbar && editor}
 		<EdraToolBar {editor} />
-	{/if} -->
-	<Tabs.Root></Tabs.Root>
+	{/if}
 	{#if editor && !editor?.isDestroyed}
 		{#if pageSettings.showbubblemenu}
 			<EdraBubbleMenu {editor} />
@@ -173,6 +228,7 @@
 	{/if}
 	<EdraEditor
 		bind:editor
+		{content}
 		class="flex-1 flex-grow flex-col overflow-auto !p-8"
 		{onUpdate}
 		{onFileSelect}

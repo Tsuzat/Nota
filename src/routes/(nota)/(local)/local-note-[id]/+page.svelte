@@ -48,12 +48,16 @@
 		isLoading = true;
 		try {
 			note = localNotes.getNotes().find((n) => String(n.id) === id);
+			if (note === undefined) {
+				toast.error(`Notes with id ${id} not found`);
+				return;
+			}
 			const data = await DB.select<{ content: string }[]>(
 				'SELECT content FROM notes WHERE id = $1',
 				[id]
 			);
 			if (data.length === 0) {
-				toast.error(`Notes with id ${id} not found`);
+				toast.error(`Notes content with id ${id} not found`);
 				return;
 			}
 			content = JSON.parse(data[0].content) as Content;
