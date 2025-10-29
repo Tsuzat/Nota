@@ -14,7 +14,7 @@
 	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
-	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+	import { getLocalNotes } from '$lib/local/notes.svelte';
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import { Loader } from '@lucide/svelte';
 	import { type Content, type Editor } from '@tiptap/core';
@@ -23,8 +23,9 @@
 	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
 	import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
-	import { beforeNavigate } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import { DB } from '$lib/local/db.js';
+	import { resolve } from '$app/paths';
 
 	const sidebar = useSidebar();
 
@@ -33,7 +34,6 @@
 	let content = $state<Content>();
 	let pendingContent = $state<Content>();
 
-	let note = $state<LocalNote>();
 	const localNotes = getLocalNotes();
 	let pageSettings = $state(DEFAULT_SETTINGS);
 
@@ -43,14 +43,14 @@
 		if (data.id) loadData(data.id);
 	});
 
+	let note = $derived(localNotes.getNotes().find((n) => n.id.toString() === data.id));
+
 	async function loadData(id: string) {
-		note = undefined;
 		isLoading = true;
 		try {
-			note = localNotes.getNotes().find((n) => String(n.id) === id);
 			if (note === undefined) {
 				toast.error(`Notes with id ${id} not found`);
-				return;
+				return goto(resolve('/home'));
 			}
 			const data = await DB.select<{ content: string }[]>(
 				'SELECT content FROM notes WHERE id = $1',
@@ -58,7 +58,7 @@
 			);
 			if (data.length === 0) {
 				toast.error(`Notes content with id ${id} not found`);
-				return;
+				return goto(resolve('/home'));
 			}
 			content = JSON.parse(data[0].content) as Content;
 		} catch (error) {
@@ -113,7 +113,7 @@
 	beforeNavigate(() => {
 		/// Save before changing the route
 		if (pendingContent !== undefined && pendingContent !== null) {
-			// saveToStore('content', pendingContent);
+			saveContent(pendingContent);
 		}
 		pendingContent = undefined;
 	});
@@ -258,6 +258,6 @@
 {:else}
 	<div class="flex size-full flex-col items-center justify-center gap-4">
 		<h4>Something went wrong.</h4>
-		<a href="/home">Got to Home</a>
+		<a href={resolve('/home')}>Got to Home</a>
 	</div>
 {/if}

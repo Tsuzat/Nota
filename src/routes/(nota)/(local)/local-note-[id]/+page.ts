@@ -10,7 +10,8 @@ export const load: PageLoad = async ({ params }) => {
 		goto(resolve('/home'));
 		return;
 	}
+	const id = params.id;
 	return {
-		id: params.id
+		id
 	};
 };

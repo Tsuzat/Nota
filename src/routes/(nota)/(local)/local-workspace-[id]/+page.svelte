@@ -23,7 +23,8 @@
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { DB } from '$lib/local/db.js';
-	import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte.js';
+	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte.js';
+	import { resolve } from '$app/paths';
 
 	const sidebar = useSidebar();
 
@@ -32,7 +33,6 @@
 	let content = $state<Content>();
 	let pendingContent = $state<Content>();
 
-	let workspace = $state<LocalWorkSpace>();
 	const localWorkspaces = getLocalWorkspaces();
 	let pageSettings = $state(DEFAULT_SETTINGS);
 
@@ -42,11 +42,10 @@
 		if (data.id) loadData(data.id);
 	});
 
+	let workspace = $derived(localWorkspaces.getWorkspaces().find((w) => String(w.id) === id));
 	async function loadData(id: string) {
-		workspace = undefined;
 		isLoading = true;
 		try {
-			workspace = localWorkspaces.getWorkspaces().find((w) => String(w.id) === id);
 			if (workspace === undefined) {
 				toast.error(`Workspace with id ${id} not found`);
 				return;
@@ -62,7 +61,7 @@
 			content = JSON.parse(data[0].content) as Content;
 		} catch (error) {
 			console.error(error);
-			toast.error('Something went wrong when loading notes');
+			toast.error('Something went wrong when loading workspace');
 		} finally {
 			isLoading = false;
 		}
@@ -238,6 +237,6 @@
 {:else}
 	<div class="flex size-full flex-col items-center justify-center gap-4">
 		<h4>Something went wrong.</h4>
-		<a href="/home">Got to Home</a>
+		<a href={resolve('/home')}>Got to Home</a>
 	</div>
 {/if}

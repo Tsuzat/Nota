@@ -260,6 +260,6 @@
 {:else}
 	<div class="flex size-full flex-col items-center justify-center gap-4">
 		<h4>Something went wrong.</h4>
-		<a href="/home">Got to Home</a>
+		<a href={resolve('/home')}>Got to Home</a>
 	</div>
 {/if}
