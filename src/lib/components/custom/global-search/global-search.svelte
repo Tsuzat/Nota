@@ -2,7 +2,7 @@
 	import * as Command from '$lib/components/ui/command';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import { HomeIcon, StarIcon, Trash2Icon } from '@lucide/svelte';
+	import { House, StarIcon, Trash2Icon } from '@lucide/svelte';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { getGlobalSearch } from './constants.svelte';
 	import { goto } from '$app/navigation';
@@ -40,7 +40,7 @@
 		<Command.Empty>No results found.</Command.Empty>
 		<Command.Group heading="Suggestions">
 			<Command.Item>
-				<HomeIcon class="mr-2 size-4" />
+				<House class="mr-2 size-4" />
 				<span>Home</span>
 			</Command.Item>
 		</Command.Group>
