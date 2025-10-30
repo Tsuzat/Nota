@@ -230,6 +230,7 @@
 				starred={note.favorite as boolean}
 				{toggleStar}
 				bind:settings={pageSettings}
+				{editor}
 				{note}
 			/>
 		</div>

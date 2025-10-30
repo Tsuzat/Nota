@@ -11,10 +11,10 @@ import SearchAndReplace from './extensions/FindAndReplace';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Table, TableCell, TableRow, TableHeader } from './extensions/table';
 import { CharacterCount, Placeholder } from '@tiptap/extensions';
-import { Markdown } from 'tiptap-markdown';
 import AutoJoiner from 'tiptap-extension-auto-joiner';
 import 'katex/dist/katex.min.css';
 import { InlineMathReplacer } from './extensions/InlineMathReplacer';
+import { Markdown } from '@tiptap/markdown';
 
 export default (
 	element?: HTMLElement,
@@ -89,16 +89,7 @@ export default (
 			TableRow,
 			TableCell,
 			InlineMathReplacer,
-			Markdown.configure({
-				html: true,
-				tightLists: true,
-				tightListClass: 'tight',
-				bulletListMarker: '-',
-				linkify: true,
-				breaks: true,
-				transformPastedText: true,
-				transformCopiedText: true
-			}),
+			Markdown,
 
 			...(extensions ?? [])
 		],
