@@ -3,6 +3,12 @@ import { type } from '@tauri-apps/plugin-os';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { isMac } from './components/edra/utils';
+import { open } from '@tauri-apps/plugin-dialog';
+import { downloadDir, resolve } from '@tauri-apps/api/path';
+import { writeFile } from '@tauri-apps/plugin-fs';
+import { toast } from 'svelte-sonner';
+import type { Editor } from '@tiptap/core';
+import { openPath } from '@tauri-apps/plugin-opener';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -173,4 +179,58 @@ export function timeAgo(date: string): string {
 		'Dec'
 	];
 	return `${months[then.getMonth()]}, ${then.getDate()}`;
+}
+
+export async function writeStringToFile(data: string, name: string) {
+	const path = await open({
+		directory: true,
+		multiple: false,
+		canCreateDirectories: true,
+		defaultPath: await downloadDir()
+	});
+	if (path === null) return;
+	const encoder = new TextEncoder();
+	const fileData = encoder.encode(data);
+	const resolvedPath = await resolve(path, name);
+	toast.promise(writeFile(resolvedPath, fileData), {
+		loading: 'Exporting data...',
+		success: 'Exported Successfully',
+		error: (err) => {
+			console.error(err);
+			return 'Something went wrong when exporting';
+		},
+		action: {
+			label: 'Open',
+			onClick: () => openPath(path)
+		}
+	});
+}
+
+export async function exportContent(
+	editor: Editor,
+	name: string,
+	type: 'JSON' | 'HTML' | 'TEXT' | 'MD'
+) {
+	let content: string;
+	switch (type) {
+		case 'JSON':
+			content = JSON.stringify(editor.getJSON(), undefined, 2);
+			await writeStringToFile(content, name + '.json');
+			break;
+		case 'HTML':
+			content = editor.getHTML();
+			await writeStringToFile(content, name + '.html');
+			break;
+		case 'TEXT':
+			content = editor.getText();
+			await writeStringToFile(content, name + '.text');
+			break;
+		case 'MD':
+			content = editor.getMarkdown();
+			await writeStringToFile(content, name + '.md');
+			break;
+		default:
+			toast.error('Invalid export type');
+			return;
+	}
 }
