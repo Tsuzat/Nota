@@ -4,8 +4,9 @@
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import StarIcon from '@lucide/svelte/icons/star';
 	import { type NotePageSettingsType } from '$lib/types';
-	import { cn, getKeyboardShortcut } from '$lib/utils';
+	import { cn, exportContent, getKeyboardShortcut } from '$lib/utils';
 	import {
+		ArrowRightFromLine,
 		Bubbles,
 		CopyIcon,
 		Film,
@@ -20,15 +21,17 @@
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { useCloudNotes, type CloudNote } from '$lib/supabase/db/cloudnotes.svelte';
 	import { ask } from '@tauri-apps/plugin-dialog';
+	import type { Editor } from '@tiptap/core';
 
 	interface Props {
 		settings: NotePageSettingsType;
 		starred?: boolean;
 		toggleStar?: () => void;
 		note: LocalNote | CloudNote;
+		editor?: Editor;
 	}
 
-	let { settings = $bindable(), starred, toggleStar, note }: Props = $props();
+	let { settings = $bindable(), starred, toggleStar, note, editor }: Props = $props();
 
 	const localNotes = getLocalNotes();
 	const cloudNotes = useCloudNotes();
@@ -145,6 +148,34 @@
 					<ArrowUp />
 					Export
 				</Dropdown.Item> -->
+				<Dropdown.Sub>
+					<Dropdown.SubTrigger>
+						<ArrowRightFromLine />
+						Export As
+					</Dropdown.SubTrigger>
+					<Dropdown.SubContent>
+						<Dropdown.Item
+							onclick={() => {
+								if (editor) exportContent(editor, 'data', 'JSON');
+							}}>JSON</Dropdown.Item
+						>
+						<Dropdown.Item
+							onclick={() => {
+								if (editor) exportContent(editor, 'data', 'HTML');
+							}}>HTML</Dropdown.Item
+						>
+						<Dropdown.Item
+							onclick={() => {
+								if (editor) exportContent(editor, 'data', 'TEXT');
+							}}>Text</Dropdown.Item
+						>
+						<Dropdown.Item
+							onclick={() => {
+								if (editor) exportContent(editor, 'data', 'MD');
+							}}>Markdown</Dropdown.Item
+						>
+					</Dropdown.SubContent>
+				</Dropdown.Sub>
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
