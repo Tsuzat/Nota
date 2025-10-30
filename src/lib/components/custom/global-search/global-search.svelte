@@ -47,7 +47,7 @@
 		<Command.Separator />
 		<Command.Group
 			value="Workspaces"
-			heading={isLocal ? 'Local' : 'Cloud' + ' Workspaces : ' + workspaces.length}
+			heading={(isLocal ? 'Local' : 'Cloud') + ' Workspaces : ' + workspaces.length}
 		>
 			{#each workspaces as workspace (workspace.id)}
 				{@const onselect = () => {
@@ -67,7 +67,10 @@
 			{/each}
 		</Command.Group>
 		<Command.Separator />
-		<Command.Group value="Notes" heading={isLocal ? 'Local' : '' + ' Notes : ' + notes.length}>
+		<Command.Group
+			value="Notes"
+			heading={(isLocal ? 'Local' : 'Cloud') + ' Notes : ' + notes.length}
+		>
 			{#each notes as note (note.id)}
 				{@const onselect = () => {
 					goto(

@@ -42,7 +42,7 @@
 		if (data.id) loadData(data.id);
 	});
 
-	let workspace = $derived(localWorkspaces.getWorkspaces().find((w) => String(w.id) === id));
+	let workspace = $derived(localWorkspaces.getWorkspaces().find((w) => String(w.id) === data.id));
 	async function loadData(id: string) {
 		isLoading = true;
 		try {

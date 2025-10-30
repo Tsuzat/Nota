@@ -11,6 +11,7 @@
 	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
 	import { ISTAURI } from '$lib/utils';
+	import { resolve } from '$app/paths';
 
 	const user = $derived(getSessionAndUserContext().getUser());
 
@@ -22,7 +23,7 @@
 </script>
 
 <header class="sticky top-1 mx-auto flex max-w-4xl items-center justify-between gap-4 p-4">
-	<a class="flex items-center gap-4" href="/">
+	<a class="flex items-center gap-4" href={resolve('/')}>
 		<img src="/favicon.webp" alt="Nota" class="size-10" />
 		<h3 class="font-bold">Nota</h3>
 	</a>
