@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import {
-		ArrowDownWideNarrow,
-		CheckCheck,
-		ChevronDown,
-		RefreshCcwDot,
-		TextWrap
-	} from '@lucide/svelte';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import ArrowDownWideNarrow from '@lucide/svelte/icons/arrow-down-wide-narrow';
+	import TextWrap from '@lucide/svelte/icons/text-wrap';
+	import RefreshCcwDot from '@lucide/svelte/icons/refresh-ccw-dot';
+	import CheckCheck from '@lucide/svelte/icons/check-check';
 	import EdraToolTip from '../EdraToolTip.svelte';
 	import { toast } from 'svelte-sonner';
 	import type { Editor } from '@tiptap/core';
@@ -19,6 +17,7 @@
 		MAKE_SHORTED_PROMPT,
 		SUMMARIZE_PROMPT
 	} from '$lib/supabase/ai/prompt';
+	import { M } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js';
 
 	interface Props {
 		editor: Editor;

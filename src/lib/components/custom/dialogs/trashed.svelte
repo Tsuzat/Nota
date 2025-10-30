@@ -3,7 +3,8 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Popover from '$lib/components/ui/popover';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-	import { RotateCcw, Trash2Icon } from '@lucide/svelte';
+	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 	import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 	import { toast } from 'svelte-sonner';

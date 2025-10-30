@@ -5,17 +5,14 @@
 	import StarIcon from '@lucide/svelte/icons/star';
 	import { type NotePageSettingsType } from '$lib/types';
 	import { cn, exportContent, getKeyboardShortcut } from '$lib/utils';
-	import {
-		ArrowRightFromLine,
-		Bubbles,
-		CopyIcon,
-		Film,
-		Lock,
-		PenTool,
-		Settings2Icon,
-		SpellCheck,
-		Trash2Icon
-	} from '@lucide/svelte';
+	import Lock from '@lucide/svelte/icons/lock';
+	import PenTool from '@lucide/svelte/icons/pen-tool';
+	import SpellCheck from '@lucide/svelte/icons/spell-check';
+	import Bubbles from '@lucide/svelte/icons/bubbles';
+	import Film from '@lucide/svelte/icons/film';
+	import CopyIcon from '@lucide/svelte/icons/copy';
+	import ArrowRightFromLine from '@lucide/svelte/icons/arrow-right-from-line';
+	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';

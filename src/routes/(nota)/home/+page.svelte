@@ -20,7 +20,7 @@
 		type CloudUserWorkspace
 	} from '$lib/supabase/db/clouduserworkspaces.svelte';
 	import { cn, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
-	import { PlusIcon } from '@lucide/svelte';
+	import PlusIcon from '@lucide/svelte/icons/plus';
 
 	const sidebar = useSidebar();
 	const localUserWorkspaces = getLocalUserWorkspaces();

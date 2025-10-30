@@ -4,7 +4,9 @@
 	import EdraToolTip from '../EdraToolTip.svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
-	import { Check, ChevronDown, Link } from '@lucide/svelte';
+	import Link from '@lucide/svelte/icons/link';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import Check from '@lucide/svelte/icons/check';
 	import { Input } from '$lib/components/ui/input';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';

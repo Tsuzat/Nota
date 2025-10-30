@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { SunMoon } from '@lucide/svelte';
+	import SunMoon from '@lucide/svelte/icons/sun-moon';
 	import { getGlobalSettings } from './constants.svelte';
 	import ToggleMode from '../toggle-mode.svelte';
 

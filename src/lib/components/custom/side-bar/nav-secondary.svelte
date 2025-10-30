@@ -1,7 +1,10 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import { CreditCard, EllipsisVertical, LogOut, CircleUser } from '@lucide/svelte';
+	import CreditCard from '@lucide/svelte/icons/credit-card';
+	import CircleUser from '@lucide/svelte/icons/circle-user';
+	import EllipsisVertical from '@lucide/svelte/icons/ellipsis-vertical';
+	import LogOut from '@lucide/svelte/icons/log-out';
 	import Trashed from '../dialogs/trashed.svelte';
 	import { downloadAndInstall } from '$lib/updater';
 	import { check } from '@tauri-apps/plugin-updater';

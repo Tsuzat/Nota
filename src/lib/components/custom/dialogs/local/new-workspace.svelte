@@ -7,7 +7,7 @@
 	import { type Snippet } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-	import { Loader } from '@lucide/svelte';
+	import Loader from '@lucide/svelte/icons/loader';
 	import { useCurrentUserWorkspaceContext } from '../../user-workspace/userworkspace.svelte';
 	import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';

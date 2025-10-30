@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { MoonStar, Sun } from '@lucide/svelte';
+	import Sun from '@lucide/svelte/icons/sun';
+	import MoonStar from '@lucide/svelte/icons/moon-star';
 	import { Button } from '../ui/button';
 	import SimpleTooltip from './simple-tooltip.svelte';
 	import { toggleMode } from 'mode-watcher';

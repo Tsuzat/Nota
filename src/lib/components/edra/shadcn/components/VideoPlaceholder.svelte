@@ -14,7 +14,7 @@
 	import { FileType, ISTAURI } from '$lib/utils';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { isURL } from '../../utils';
-	import { Loader } from '@lucide/svelte';
+	import Loader from '@lucide/svelte/icons/loader';
 
 	let open = $state(false);
 	let videoUrl = $state('');

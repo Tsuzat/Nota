@@ -5,7 +5,9 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
-	import { Cloud, Loader, Monitor } from '@lucide/svelte';
+	import Cloud from '@lucide/svelte/icons/cloud';
+	import Monitor from '@lucide/svelte/icons/monitor';
+	import Loader from '@lucide/svelte/icons/loader';
 	import { toast } from 'svelte-sonner';
 	import { getNewUserWorkspace } from '.';
 	import { Label } from '$lib/components/ui/label';
