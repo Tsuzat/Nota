@@ -188,7 +188,7 @@
 			<BackAndForthButtons />
 			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
 			<IconPicker onSelect={updateIcon}>
-				<div class={buttonVariants({ variant: 'ghost', class: '!size-7 p-1' })}>
+				<div class={buttonVariants({ variant: 'ghost', class: 'size-7! p-1' })}>
 					<IconRenderer icon={workspace.icon} />
 				</div>
 			</IconPicker>
@@ -228,7 +228,7 @@
 	<EdraEditor
 		bind:editor
 		{content}
-		class="flex-1 flex-grow flex-col overflow-auto !p-8"
+		class="flex-1 grow flex-col overflow-auto p-8!"
 		{onUpdate}
 		{onFileSelect}
 		{onDropOrPaste}

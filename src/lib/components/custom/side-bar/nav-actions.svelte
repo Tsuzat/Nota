@@ -11,6 +11,7 @@
 	import Bubbles from '@lucide/svelte/icons/bubbles';
 	import Film from '@lucide/svelte/icons/film';
 	import CopyIcon from '@lucide/svelte/icons/copy';
+	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import ArrowRightFromLine from '@lucide/svelte/icons/arrow-right-from-line';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import SimpleTooltip from '../simple-tooltip.svelte';
@@ -153,22 +154,22 @@
 					<Dropdown.SubContent>
 						<Dropdown.Item
 							onclick={() => {
-								if (editor) exportContent(editor, 'data', 'JSON');
+								if (editor) exportContent(editor, note.name, 'JSON');
 							}}>JSON</Dropdown.Item
 						>
 						<Dropdown.Item
 							onclick={() => {
-								if (editor) exportContent(editor, 'data', 'HTML');
+								if (editor) exportContent(editor, note.name, 'HTML');
 							}}>HTML</Dropdown.Item
 						>
 						<Dropdown.Item
 							onclick={() => {
-								if (editor) exportContent(editor, 'data', 'TEXT');
+								if (editor) exportContent(editor, note.name, 'TEXT');
 							}}>Text</Dropdown.Item
 						>
 						<Dropdown.Item
 							onclick={() => {
-								if (editor) exportContent(editor, 'data', 'MD');
+								if (editor) exportContent(editor, note.name, 'MD');
 							}}>Markdown</Dropdown.Item
 						>
 					</Dropdown.SubContent>

@@ -104,7 +104,7 @@
 	<NewWorkspace />
 	<AppSidebar />
 	<Sidebar.Inset class="flex h-screen w-full flex-col overflow-hidden">
-		<div data-tauri-drag-region class="absolute top-0 !z-10 h-12 w-full"></div>
+		<div data-tauri-drag-region class="absolute top-0 z-10! h-12 w-full"></div>
 		{@render children()}
 	</Sidebar.Inset>
 </Sidebar.Provider>
