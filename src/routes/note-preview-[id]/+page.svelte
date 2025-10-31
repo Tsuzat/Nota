@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import ToggleMode from '$lib/components/custom/toggle-mode.svelte';
 	import { EdraEditor } from '$lib/components/edra/shadcn/index.js';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-	import { buttonVariants } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { supabase } from '$lib/supabase';
 	import type { CloudNote } from '$lib/supabase/db/cloudnotes.svelte';
 	import Loader from '@lucide/svelte/icons/loader';
+	import Printer from '@lucide/svelte/icons/printer';
 	import type { Content } from '@tiptap/core';
 	import { toast } from 'svelte-sonner';
 
@@ -48,10 +50,16 @@
 {#if note !== undefined}
 	<header class="mx-auto flex h-12 w-full shrink-0 items-center justify-center gap-2 text-center">
 		<div class="flex items-center gap-2">
-			<div class={buttonVariants({ variant: 'ghost', class: 'size-7! p-1' })}>
-				<IconRenderer icon={note.icon} class="size-8" />
+			<div class={buttonVariants({ variant: 'ghost', class: 'size-8 p-0' })}>
+				<IconRenderer icon={note.icon} />
 			</div>
 			<h2>{note.name}</h2>
+		</div>
+		<div class="ml-auto flex items-center gap-2 print:hidden">
+			<ToggleMode />
+			<Button onclick={() => window.print()}>
+				<Printer />
+			</Button>
 		</div>
 	</header>
 	<EdraEditor class="flex-1 grow flex-col overflow-auto p-8!" editable={false} {content} />
