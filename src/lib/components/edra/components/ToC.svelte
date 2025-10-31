@@ -43,12 +43,12 @@
 	<Popover.Trigger
 		class={buttonVariants({
 			variant: 'outline',
-			class: 'fixed right-4 bottom-4 size-8 rounded-full'
+			class: 'fixed right-4 bottom-4 size-8 rounded-full print:hidden'
 		})}
 	>
 		<Menu />
 	</Popover.Trigger>
-	<Popover.Content class="flex max-h-96 max-w-56 flex-col gap-1.5 overflow-auto !p-2">
+	<Popover.Content class="flex max-h-96 max-w-56 flex-col gap-1.5 overflow-auto p-2!">
 		{#if items === undefined || items.length === 0}
 			<div>No contents</div>
 		{:else}
