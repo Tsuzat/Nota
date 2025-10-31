@@ -2,7 +2,6 @@ import { getContext, setContext } from 'svelte';
 import { supabase } from '..';
 import { toast } from 'svelte-sonner';
 import type { CloudUserWorkspace } from './clouduserworkspaces.svelte';
-import type { Content } from '@tiptap/core';
 
 export interface CloudNote {
 	id: string;
@@ -15,7 +14,6 @@ export interface CloudNote {
 	trashed: boolean;
 	created_at: string;
 	updated_at: string;
-	content: Content;
 }
 
 class CloudNotes {
@@ -57,7 +55,9 @@ class CloudNotes {
 		try {
 			const { data, error } = await supabase
 				.from('notes')
-				.select('*')
+				.select(
+					'id, name, icon, workspace, userworkspace, owner, favorite, trashed, created_at, updated_at'
+				)
 				.eq('userworkspace', userworkspace.id)
 				.order('created_at', { ascending: true });
 
@@ -109,24 +109,34 @@ class CloudNotes {
 
 	/**
 	 * Duplicate a note in Supabase & update local state
-	 * @param note - Note to be duplicated
+	 * @param note - Note to be duplicated (its id will be used to fetch the original)
 	 */
 	async duplicate(note: CloudNote) {
 		try {
-			const { data, error } = await supabase
+			// First, fetch the original note details from Supabase using its ID
+			const { data: originalNote, error: fetchError } = await supabase
 				.from('notes')
-				.insert({
-					name: `${note.name} (Copy)`,
-					icon: note.icon,
-					workspace: note.workspace,
-					userworkspace: note.userworkspace,
-					owner: note.owner,
-					favorite: note.favorite,
-					trashed: note.trashed,
-					content: note.content
-				})
-				.select()
+				.select('*') // Select relevant fields for duplication
+				.eq('id', note.id)
 				.single();
+
+			if (fetchError) {
+				console.error('Error fetching original note:', fetchError);
+				toast.error(`Error fetching original note: ${fetchError.message}`);
+				return;
+			}
+
+			if (!originalNote) {
+				toast.error('Original note not found for duplication.');
+				return;
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { id, created_at, updated_at, ...rest } = originalNote;
+			rest.name = rest.name + ' (Copy)';
+
+			// Now, insert a new row with the fetched details, modifying the name
+			const { data, error } = await supabase.from('notes').insert(rest).select().single();
 			if (error) {
 				console.error(error);
 				toast.error(error.message);
