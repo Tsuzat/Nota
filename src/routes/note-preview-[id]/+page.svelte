@@ -48,18 +48,18 @@
 </script>
 
 {#if note !== undefined}
+	<div class="fixed top-2 right-2 ml-auto flex items-center gap-2 print:hidden">
+		<ToggleMode />
+		<Button variant="ghost" onclick={() => window.print()}>
+			<Printer />
+		</Button>
+	</div>
 	<header class="mx-auto flex h-12 w-full shrink-0 items-center justify-center gap-2 text-center">
 		<div class="flex items-center gap-2">
 			<div class={buttonVariants({ variant: 'ghost', class: 'size-8 p-0' })}>
 				<IconRenderer icon={note.icon} />
 			</div>
-			<h2>{note.name}</h2>
-		</div>
-		<div class="ml-auto flex items-center gap-2 print:hidden">
-			<ToggleMode />
-			<Button onclick={() => window.print()}>
-				<Printer />
-			</Button>
+			<span>{note.name}</span>
 		</div>
 	</header>
 	<EdraEditor class="flex-1 grow flex-col overflow-auto p-8!" editable={false} {content} />
