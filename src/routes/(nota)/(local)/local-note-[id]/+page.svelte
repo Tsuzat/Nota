@@ -14,7 +14,7 @@
 	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
-	import { getLocalNotes } from '$lib/local/notes.svelte';
+	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import Loader from '@lucide/svelte/icons/loader';
 	import { type Content, type Editor } from '@tiptap/core';
@@ -43,10 +43,11 @@
 		if (data.id) loadData(data.id);
 	});
 
-	let note = $derived(localNotes.getNotes().find((n) => n.id.toString() === data.id));
+	let note = $state<LocalNote>();
 
 	async function loadData(id: string) {
 		isLoading = true;
+		note = localNotes.getNotes().find((n) => n.id.toString() === data.id);
 		try {
 			if (note === undefined) {
 				toast.error(`Notes with id ${id} not found`);
@@ -137,7 +138,6 @@
 		if (note === undefined) return;
 		try {
 			note = { ...note, name };
-			// await saveToStore('name', name);
 			await localNotes.updateNote(note);
 		} catch (e) {
 			toast.error('Could not update note name');
@@ -210,11 +210,12 @@
 			<input
 				value={note.name}
 				class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
-				onchange={(e) => {
+				onchange={async (e) => {
 					const target = e.target as HTMLInputElement;
 					const value = target.value;
 					if (value.trim() === '') return;
-					updateName(target.value);
+					e.preventDefault();
+					await updateName(target.value);
 				}}
 			/>
 		</div>
