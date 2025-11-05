@@ -17,7 +17,6 @@
 		MAKE_SHORTED_PROMPT,
 		SUMMARIZE_PROMPT
 	} from '$lib/supabase/ai/prompt';
-	import { M } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js';
 
 	interface Props {
 		editor: Editor;
@@ -87,11 +86,11 @@
 		<EdraToolTip tooltip="AI Assistant">
 			<Button variant="ghost" class="h-8 w-fit gap-0.5 p-2">
 				<span
-					class="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+					class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
 				>
 					Ask AI</span
 				>
-				<ChevronDown class="text-muted-foreground !size-2" />
+				<ChevronDown class="text-muted-foreground size-2!" />
 			</Button>
 		</EdraToolTip>
 	</DropdownMenu.Trigger>
