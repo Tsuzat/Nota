@@ -5,9 +5,9 @@ import { twMerge } from 'tailwind-merge';
 import { isMac } from './components/edra/utils';
 import { open } from '@tauri-apps/plugin-dialog';
 import { downloadDir, resolve } from '@tauri-apps/api/path';
-import { writeFile } from '@tauri-apps/plugin-fs';
+import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { toast } from 'svelte-sonner';
-import type { Editor } from '@tiptap/core';
+import type { Content, Editor } from '@tiptap/core';
 import { openPath } from '@tauri-apps/plugin-opener';
 
 export function cn(...inputs: ClassValue[]) {
@@ -232,5 +232,53 @@ export async function exportContent(
 		default:
 			toast.error('Invalid export type');
 			return;
+	}
+}
+
+export async function importNotes(editor?: Editor) {
+	if (!editor || editor.isDestroyed) {
+		console.error('Editor is not initialized or destroyed\n Editor = ', editor);
+		toast.error('Can not intialize import. Try to restart.');
+		return;
+	}
+	const path = await open({
+		multiple: false,
+		filters: [
+			{
+				name: 'Nota Notes',
+				extensions: ['json', 'html', 'text', 'md']
+			}
+		],
+		defaultPath: await downloadDir()
+	});
+	if (path) {
+		try {
+			const extension = path.split('.').pop();
+			if (!extension || !['json', 'html', 'text', 'md'].includes(extension)) {
+				toast.error('Only JSON, HTML, TEXT and Markdown files are supported.');
+				return;
+			}
+			let content: Content;
+			const data = await readFile(path);
+			const decoder = new TextDecoder();
+			const fileData = decoder.decode(data);
+			switch (extension) {
+				case 'json':
+					content = JSON.parse(fileData);
+					editor.commands.insertContent(content, { contentType: 'json' });
+					break;
+				case 'html':
+					content = fileData;
+					editor.commands.insertContent(content, { contentType: 'html' });
+					break;
+				default:
+					content = fileData;
+					editor.commands.insertContent(content, { contentType: 'markdown' });
+					break;
+			}
+		} catch (error) {
+			console.error(error);
+			toast.error('Something went wrong when importing the file.');
+		}
 	}
 }

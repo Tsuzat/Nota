@@ -4,7 +4,7 @@
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import StarIcon from '@lucide/svelte/icons/star';
 	import { type NotePageSettingsType } from '$lib/types';
-	import { cn, exportContent, getKeyboardShortcut } from '$lib/utils';
+	import { cn, exportContent, getKeyboardShortcut, importNotes } from '$lib/utils';
 	import Lock from '@lucide/svelte/icons/lock';
 	import PenTool from '@lucide/svelte/icons/pen-tool';
 	import SpellCheck from '@lucide/svelte/icons/spell-check';
@@ -14,6 +14,7 @@
 	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import ArrowRightFromLine from '@lucide/svelte/icons/arrow-right-from-line';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import ArrowDown from '@lucide/svelte/icons/arrow-down';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
@@ -138,14 +139,11 @@
 					<CopyIcon />
 					Duplicate
 				</Dropdown.Item>
-				<!-- <Dropdown.Item onclick={() => localNotes.importNote()}>
+				<Dropdown.Item onclick={() => importNotes(editor)}>
 					<ArrowDown />
 					Import
 				</Dropdown.Item>
-				<Dropdown.Item onclick={() => localNotes.exportNote(note)}>
-					<ArrowUp />
-					Export
-				</Dropdown.Item> -->
+
 				<Dropdown.Sub>
 					<Dropdown.SubTrigger>
 						<ArrowRightFromLine />
