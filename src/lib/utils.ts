@@ -7,7 +7,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { downloadDir, resolve } from '@tauri-apps/api/path';
 import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { toast } from 'svelte-sonner';
-import type { Content, Editor } from '@tiptap/core';
+import type { Editor } from '@tiptap/core';
 import { openPath } from '@tauri-apps/plugin-opener';
 
 export function cn(...inputs: ClassValue[]) {
@@ -236,7 +236,7 @@ export async function exportContent(
 }
 
 export async function importNotes(editor?: Editor) {
-	if (!editor || editor.isDestroyed) {
+	if (!editor || editor.isDestroyed || !editor.markdown) {
 		console.error('Editor is not initialized or destroyed\n Editor = ', editor);
 		toast.error('Can not intialize import. Try to restart.');
 		return;
@@ -246,7 +246,7 @@ export async function importNotes(editor?: Editor) {
 		filters: [
 			{
 				name: 'Nota Notes',
-				extensions: ['json', 'html', 'text', 'md']
+				extensions: ['json']
 			}
 		],
 		defaultPath: await downloadDir()
@@ -254,28 +254,29 @@ export async function importNotes(editor?: Editor) {
 	if (path) {
 		try {
 			const extension = path.split('.').pop();
-			if (!extension || !['json', 'html', 'text', 'md'].includes(extension)) {
-				toast.error('Only JSON, HTML, TEXT and Markdown files are supported.');
+			if (!extension || !['json'].includes(extension)) {
+				toast.error('Only JSON files are supported.');
 				return;
 			}
-			let content: Content;
 			const data = await readFile(path);
 			const decoder = new TextDecoder();
 			const fileData = decoder.decode(data);
-			switch (extension) {
-				case 'json':
-					content = JSON.parse(fileData);
-					editor.commands.insertContent(content, { contentType: 'json' });
-					break;
-				case 'html':
-					content = fileData;
-					editor.commands.insertContent(content, { contentType: 'html' });
-					break;
-				default:
-					content = fileData;
-					editor.commands.insertContent(content, { contentType: 'markdown' });
-					break;
-			}
+			const content = JSON.parse(fileData);
+			editor.commands.insertContent(content, { contentType: 'json' });
+			// switch (extension) {
+			// 	case 'json':
+			// 		content = JSON.parse(fileData);
+			// 		editor.commands.insertContent(content, { contentType: 'json' });
+			// 		break;
+			// 	case 'html':
+			// 		content = fileData;
+			// 		editor.commands.insertContent(content, { contentType: 'html' });
+			// 		break;
+			// 	default:
+			// 		content = editor.markdown.parse(fileData);
+			// 		editor.commands.insertContent(content, { contentType: 'json' });
+			// 		break;
+			// }
 		} catch (error) {
 			console.error(error);
 			toast.error('Something went wrong when importing the file.');
