@@ -151,9 +151,6 @@ class Notes {
 	async exportNote(note: LocalNote) {
 		toast.loading(`Exporting note ${note.name}...`);
 	}
-
-	// import a note
-	async importNote() {}
 }
 
 const NOTESKEY = Symbol('NOTESID');
