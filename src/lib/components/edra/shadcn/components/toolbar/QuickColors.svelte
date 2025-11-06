@@ -14,15 +14,15 @@
 
 	const colors = [
 		{ label: 'Default', value: '' },
-		{ label: 'Blue', value: '#0000FF' },
-		{ label: 'Brown', value: '#A52A2A' },
-		{ label: 'Green', value: '#008000' },
-		{ label: 'Grey', value: '#808080' },
-		{ label: 'Orange', value: '#FFA500' },
-		{ label: 'Pink', value: '#FFC0CB' },
-		{ label: 'Purple', value: '#800080' },
-		{ label: 'Red', value: '#FF0000' },
-		{ label: 'Yellow', value: '#FFFF00' }
+		{ label: 'Blue', value: '#A8C5FF' },
+		{ label: 'Brown', value: '#C9A589' },
+		{ label: 'Green', value: '#A7D7A9' },
+		{ label: 'Grey', value: '#BFC5CA' },
+		{ label: 'Orange', value: '#FFD1A6' },
+		{ label: 'Pink', value: '#F8BBD0' },
+		{ label: 'Purple', value: '#C7B3F2' },
+		{ label: 'Red', value: '#F5A6A6' },
+		{ label: 'Yellow', value: '#FFF5A6' }
 	];
 
 	const currentColor = $derived.by(() => editor.getAttributes('textStyle').color);
@@ -41,7 +41,7 @@
 				style={`color: ${currentColor}; background-color: ${currentHighlight}50;`}
 			>
 				<span>A</span>
-				<ChevronDown class="text-muted-foreground !size-2" />
+				<ChevronDown class="text-muted-foreground size-2!" />
 			</div>
 		</EdraToolTip>
 	</Popover.Trigger>

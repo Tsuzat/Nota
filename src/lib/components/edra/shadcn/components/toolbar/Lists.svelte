@@ -4,8 +4,8 @@
 	import commands from '$lib/components/edra/commands/toolbar-commands';
 	import { cn } from '$lib/utils';
 	import EdraToolTip from '../EdraToolTip.svelte';
-	import AlignLeft from '@lucide/svelte/icons/align-left';
 	import { buttonVariants } from '$lib/components/ui/button';
+	import Minus from '@lucide/svelte/icons/minus';
 
 	interface Props {
 		editor: Editor;
@@ -13,15 +13,15 @@
 
 	const { editor }: Props = $props();
 
-	const alignments = commands['alignment'];
+	const lists = commands['lists'];
 
 	const isActive = $derived.by(() => {
-		return alignments.find((h) => h.isActive?.(editor)) !== undefined;
+		return lists.find((h) => h.isActive?.(editor)) !== undefined;
 	});
 
-	const AlignmentIcon = $derived.by(() => {
-		const h = alignments.find((h) => h.isActive?.(editor));
-		return h ? h.icon : AlignLeft;
+	const ListIcon = $derived.by(() => {
+		const h = lists.find((h) => h.isActive?.(editor));
+		return h ? h.icon : Minus;
 	});
 </script>
 
@@ -34,16 +34,16 @@
 				class: cn('gap-0 p-0', 'border-0 ring-0 [&_svg]:size-2', isActive && 'bg-muted')
 			})}
 		>
-			<AlignmentIcon class="stroke-primary size-4!" />
+			<ListIcon class="stroke-primary size-4!" />
 		</Select.Trigger>
 	</EdraToolTip>
 	<Select.Content class="w-fit">
-		{#each alignments as alignment (alignment)}
-			{@const Icon = alignment.icon}
-			<Select.Item value={alignment.name} onclick={() => alignment.onClick?.(editor)}>
+		{#each lists as list (list)}
+			{@const Icon = list.icon}
+			<Select.Item value={list.name} onclick={() => list.onClick?.(editor)}>
 				<Icon />
-				{alignment.tooltip}
-				<small class="text-muted-foreground ml-auto text-xs">{alignment.shortCut}</small>
+				{list.tooltip}
+				<small class="text-muted-foreground ml-auto text-xs">{list.shortCut}</small>
 			</Select.Item>
 		{/each}
 	</Select.Content>

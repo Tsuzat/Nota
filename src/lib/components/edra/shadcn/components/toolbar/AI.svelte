@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Select from '$lib/components/ui/select';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import ArrowDownWideNarrow from '@lucide/svelte/icons/arrow-down-wide-narrow';
 	import TextWrap from '@lucide/svelte/icons/text-wrap';
@@ -17,6 +16,7 @@
 		MAKE_SHORTED_PROMPT,
 		SUMMARIZE_PROMPT
 	} from '$lib/supabase/ai/prompt';
+	import { buttonVariants } from '$lib/components/ui/button';
 
 	interface Props {
 		editor: Editor;
@@ -81,35 +81,33 @@
 	const checkGrammer = () => processText('grammer');
 </script>
 
-<DropdownMenu.Root>
-	<DropdownMenu.Trigger>
-		<EdraToolTip tooltip="AI Assistant">
-			<Button variant="ghost" class="h-8 w-fit gap-0.5 p-2">
-				<span
-					class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
-				>
-					Ask AI</span
-				>
-				<ChevronDown class="text-muted-foreground size-2!" />
-			</Button>
-		</EdraToolTip>
-	</DropdownMenu.Trigger>
-	<DropdownMenu.Content class="" portalProps={{ disabled: true, to: undefined }}>
-		<DropdownMenu.Item onclick={makeTextShorter}>
+<Select.Root type="single">
+	<EdraToolTip tooltip="AI Assistant">
+		<Select.Trigger class={buttonVariants({ variant: 'ghost', class: 'h-8 w-fit gap-0.5 p-2' })}>
+			<span
+				class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+			>
+				Ask AI</span
+			>
+			<ChevronDown class="text-muted-foreground size-2!" />
+		</Select.Trigger>
+	</EdraToolTip>
+	<Select.Content class="w-fit">
+		<Select.Item value="shorter" onclick={makeTextShorter}>
 			<ArrowDownWideNarrow />
 			<span>Make Shorter</span>
-		</DropdownMenu.Item>
-		<DropdownMenu.Item onclick={makeTextLonger}>
+		</Select.Item>
+		<Select.Item value="longer" onclick={makeTextLonger}>
 			<TextWrap />
 			<span>Make Longer</span>
-		</DropdownMenu.Item>
-		<DropdownMenu.Item onclick={summarizeText}>
+		</Select.Item>
+		<Select.Item value="summarize" onclick={summarizeText}>
 			<RefreshCcwDot />
 			<span>Summarize</span>
-		</DropdownMenu.Item>
-		<DropdownMenu.Item onclick={checkGrammer}>
+		</Select.Item>
+		<Select.Item value="grammer" onclick={checkGrammer}>
 			<CheckCheck />
 			<span>Fix Grammer</span>
-		</DropdownMenu.Item>
-	</DropdownMenu.Content>
-</DropdownMenu.Root>
+		</Select.Item>
+	</Select.Content>
+</Select.Root>

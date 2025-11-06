@@ -1,10 +1,9 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/button/button.svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import * as Select from '$lib/components/ui/select';
 	import { Editor } from '@tiptap/core';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import { cn } from '$lib/utils.js';
 	import EdraToolTip from '../EdraToolTip.svelte';
+	import { buttonVariants } from '$lib/components/ui/button';
 
 	interface Props {
 		class?: string;
@@ -31,23 +30,28 @@
 	});
 </script>
 
-<DropdownMenu.Root>
-	<DropdownMenu.Trigger>
-		<EdraToolTip tooltip="Font Size">
-			<Button variant="ghost" class={cn('gap-0.5 !px-2', className)}>
-				<span>{currentLabel}</span>
-				<ChevronDown class="text-muted-foreground !size-2" />
-			</Button>
-		</EdraToolTip>
-	</DropdownMenu.Trigger>
-	<DropdownMenu.Content class="h-fit w-fit" portalProps={{ disabled: true, to: undefined }}>
+<Select.Root type="single">
+	<EdraToolTip tooltip="Font Size">
+		<Select.Trigger
+			class={buttonVariants({
+				variant: 'ghost',
+				size: 'sm',
+				class: cn('gap-0 p-0', 'text-primary! border-0 bg-transparent! ring-0 [&_svg]:size-2')
+			})}
+		>
+			<span>{currentLabel}</span>
+		</Select.Trigger>
+	</EdraToolTip>
+	<Select.Content class="h-fit w-fit">
 		{#each FONT_SIZE as fontSize (fontSize)}
-			<DropdownMenu.Item
+			<Select.Item
+				class="w-fit"
+				value={fontSize.label}
 				onclick={() => {
 					editor.chain().focus().setFontSize(fontSize.value).run();
 				}}
-				style={`font-size: ${fontSize.value}`}>{fontSize.label}</DropdownMenu.Item
+				style={`font-size: ${fontSize.value}`}>{fontSize.label}</Select.Item
 			>
 		{/each}
-	</DropdownMenu.Content>
-</DropdownMenu.Root>
+	</Select.Content>
+</Select.Root>
