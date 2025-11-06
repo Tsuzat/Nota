@@ -96,16 +96,16 @@
 
 	async function loadData(id: string) {
 		isLoading = true;
-		note = undefined;
+		note = cloudNotes.getNotes().find((n) => n.id === id);
 		try {
-			const { data, error } = await supabase.from('notes').select().eq('id', id).single();
+			const { data, error } = await supabase.from('notes').select('content').eq('id', id).single();
 			if (error) {
 				console.error(error);
 				toast.error(error.message);
+				goto(resolve('/home'));
 			}
 			if (data) {
-				note = data;
-				if (note) content = note.content;
+				content = data.content as Content;
 			}
 		} catch (error) {
 			console.error(error);
@@ -177,7 +177,7 @@
 	<div class="flex size-full flex-col items-center justify-center">
 		<div class="flex items-center gap-4">
 			<Loader class="text-primary animate-spin" />
-			<h4>Loading Local Notes</h4>
+			<h4>Loading Cloud Notes</h4>
 		</div>
 	</div>
 {:else if !isLoading && note !== undefined}
