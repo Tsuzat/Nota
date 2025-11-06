@@ -1,13 +1,11 @@
 <script lang="ts">
 	import type { Editor } from '@tiptap/core';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import Heading from '@lucide/svelte/icons/heading';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import commands from '../../../commands/toolbar-commands.js';
-	import { cn } from '$lib/utils.js';
+	import * as Select from '$lib/components/ui/select';
+	import commands from '../../../commands/toolbar-commands';
+	import { cn } from '$lib/utils';
 	import EdraToolTip from '../EdraToolTip.svelte';
 	import Paragraph from '@lucide/svelte/icons/pilcrow';
-	import { buttonVariants } from '$lib/components/ui/button/index.js';
+	import { buttonVariants } from '$lib/components/ui/button';
 
 	interface Props {
 		editor: Editor;
@@ -23,37 +21,33 @@
 
 	const HeadingIcon = $derived.by(() => {
 		const h = headings.find((h) => h.isActive?.(editor));
-		return h ? h.icon : Heading;
+		return h ? h.icon : Paragraph;
 	});
 </script>
 
-<DropdownMenu.Root>
-	<DropdownMenu.Trigger>
-		<EdraToolTip tooltip="Headings">
-			<div
-				class={buttonVariants({
-					variant: 'ghost',
-					size: 'icon',
-					class: cn('gap-0')
-				})}
-				class:bg-muted={isActive}
-			>
-				<HeadingIcon />
-				<ChevronDown class="text-muted-foreground !size-2" />
-			</div>
-		</EdraToolTip>
-	</DropdownMenu.Trigger>
-	<DropdownMenu.Content portalProps={{ to: undefined, disabled: true }}>
-		<DropdownMenu.Item onclick={() => editor.chain().focus().setParagraph().run()}>
+<Select.Root type="single">
+	<EdraToolTip tooltip="Headings">
+		<Select.Trigger
+			class={buttonVariants({
+				variant: 'ghost',
+				size: 'icon',
+				class: cn('gap-0 p-0', 'border-0 ring-0 [&_svg]:size-2', isActive && 'bg-muted')
+			})}
+		>
+			<HeadingIcon class="stroke-primary size-4!" />
+		</Select.Trigger>
+	</EdraToolTip>
+	<Select.Content>
+		<Select.Item value="paragraph" onclick={() => editor.chain().focus().setParagraph().run()}>
 			<Paragraph />
 			<span>Paragraph</span>
-		</DropdownMenu.Item>
+		</Select.Item>
 		{#each headings as heading (heading)}
 			{@const Icon = heading.icon}
-			<DropdownMenu.Item onclick={() => heading.onClick?.(editor)}>
+			<Select.Item value={heading.name} onclick={() => heading.onClick?.(editor)}>
 				<Icon />
-				<span>{heading.tooltip}</span>
-			</DropdownMenu.Item>
+				{heading.tooltip}
+			</Select.Item>
 		{/each}
-	</DropdownMenu.Content>
-</DropdownMenu.Root>
+	</Select.Content>
+</Select.Root>
