@@ -125,6 +125,7 @@
 				{/each}
 			{/if}
 		{/each}
+		<ToolBarIcon {editor} command={commands.math[0]} />
 		<FontSize {editor} />
 		<QuickColors {editor} />
 	{/if}

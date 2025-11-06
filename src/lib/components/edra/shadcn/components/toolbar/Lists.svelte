@@ -31,7 +31,11 @@
 			class={buttonVariants({
 				variant: 'ghost',
 				size: 'icon',
-				class: cn('gap-0 p-0', 'border-0 ring-0 [&_svg]:size-2', isActive && 'bg-muted')
+				class: cn(
+					'gap-0 p-0',
+					'border-0 bg-transparent! ring-0 [&_svg]:size-2',
+					isActive && 'bg-muted!'
+				)
 			})}
 		>
 			<ListIcon class="stroke-primary size-4!" />
