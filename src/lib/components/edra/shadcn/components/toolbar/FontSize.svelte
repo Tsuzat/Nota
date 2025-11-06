@@ -38,7 +38,7 @@
 				size: 'sm',
 				class: cn(
 					'gap-0 p-0',
-					'text-primary! border-0 bg-transparent! ring-0 [&_svg]:size-2',
+					'text-primary! hover:bg-accent dark:hover:bg-accent/50! border-0 bg-transparent! ring-0 [&_svg]:size-2',
 					className
 				)
 			})}

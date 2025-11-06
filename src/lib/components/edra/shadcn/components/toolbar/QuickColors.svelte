@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import * as Popover from '$lib/components/ui/popover';
 	import type { Editor } from '@tiptap/core';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import { cn } from '$lib/utils.js';
 	import EdraToolTip from '../EdraToolTip.svelte';
+	import * as Select from '$lib/components/ui/select';
 
 	interface Props {
 		class?: string;
@@ -14,50 +15,42 @@
 
 	const colors = [
 		{ label: 'Default', value: '' },
-		{ label: 'Blue', value: '#A8C5FF' },
-		{ label: 'Brown', value: '#C9A589' },
-		{ label: 'Green', value: '#A7D7A9' },
-		{ label: 'Grey', value: '#BFC5CA' },
-		{ label: 'Orange', value: '#FFD1A6' },
-		{ label: 'Pink', value: '#F8BBD0' },
-		{ label: 'Purple', value: '#C7B3F2' },
-		{ label: 'Red', value: '#F5A6A6' },
-		{ label: 'Yellow', value: '#FFF5A6' }
+		{ label: 'Blue', value: '#06328A' },
+		{ label: 'Brown', value: '#AD4F07' },
+		{ label: 'Green', value: '#027306' },
+		{ label: 'Grey', value: '#035699' },
+		{ label: 'Orange', value: '#944801' },
+		{ label: 'Pink', value: '#910032' },
+		{ label: 'Purple', value: '#3E188F' },
+		{ label: 'Red', value: '#940909' },
+		{ label: 'Yellow', value: '#827305' }
 	];
 
 	const currentColor = $derived.by(() => editor.getAttributes('textStyle').color);
 	const currentHighlight = $derived.by(() => editor.getAttributes('highlight').color);
 </script>
 
-<Popover.Root>
-	<Popover.Trigger>
+<Select.Root type="multiple">
+	<Select.Trigger
+		class={buttonVariants({
+			variant: 'ghost',
+			size: 'icon',
+			class: cn('gap-0 border-0 p-0 ring-0 [&_svg]:size-2', className)
+		})}
+	>
 		<EdraToolTip tooltip="Quick Colors">
-			<div
-				class={buttonVariants({
-					variant: 'ghost',
-					size: 'icon',
-					class: cn('gap-0.5', className)
-				})}
-				style={`color: ${currentColor}; background-color: ${currentHighlight}50;`}
-			>
+			<div style={`color: ${currentColor}; background-color: ${currentHighlight}50;`}>
 				<span>A</span>
-				<ChevronDown class="text-muted-foreground size-2!" />
 			</div>
 		</EdraToolTip>
-	</Popover.Trigger>
-	<Popover.Content class="size-fit shadow-lg" portalProps={{ disabled: true, to: undefined }}>
-		<div class="text-muted-foreground my-2 text-xs">Text Colors</div>
-		<div class="grid grid-cols-5 gap-2">
+	</Select.Trigger>
+	<Select.Content class="max-h-96">
+		<Select.Group>
+			<Select.GroupHeading>Text Colors</Select.GroupHeading>
 			{#each colors as color (color)}
-				<Button
-					variant="ghost"
-					class={cn(
-						`size-6 border-0 p-0 font-normal`,
-						editor.isActive('textStyle', { color: color.value }) && 'border-2 font-extrabold',
-						color.value === '' && 'border'
-					)}
-					style={`color: ${color.value}; background-color: ${color.value}50; border-color: ${color.value};`}
-					title={color.label}
+				<Select.Item
+					class={cn(editor.isActive('highlight', { color: color.value }) && 'font-semibold')}
+					value={color.value + 'F'}
 					onclick={() => {
 						if (color.value === '' || color.label === 'Default')
 							editor.chain().focus().unsetColor().run();
@@ -69,29 +62,25 @@
 								.run();
 					}}
 				>
-					A
-				</Button>
+					{color.label}
+				</Select.Item>
 			{/each}
-		</div>
-		<div class="text-muted-foreground my-2 text-xs">Highlight Colors</div>
-		<div class="grid grid-cols-5 gap-2">
+		</Select.Group>
+		<Select.Group>
+			<Select.GroupHeading>Highlight Colors</Select.GroupHeading>
 			{#each colors as color (color)}
-				<Button
-					variant="ghost"
-					class={cn(
-						`size-6 border-0 p-0 font-normal`,
-						editor.isActive('highlight', { color: color.value }) && 'border-2',
-						color.value === '' && 'border'
-					)}
-					style={`background-color: ${color.value}50; border-color: ${color.value};`}
-					title={color.label}
+				<Select.Item
+					class={cn(editor.isActive('highlight', { color: color.value }) && 'font-semibold')}
+					value={color.value + 'B'}
 					onclick={() => {
 						if (color.value === '' || color.label === 'Default')
 							editor.chain().focus().unsetHighlight().run();
 						else editor.chain().focus().toggleHighlight({ color: color.value }).run();
-					}}>A</Button
+					}}
 				>
+					{color.label}
+				</Select.Item>
 			{/each}
-		</div>
-	</Popover.Content>
-</Popover.Root>
+		</Select.Group>
+	</Select.Content>
+</Select.Root>
