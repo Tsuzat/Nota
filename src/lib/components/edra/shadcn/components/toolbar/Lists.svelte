@@ -26,14 +26,14 @@
 </script>
 
 <Select.Root type="single">
-	<EdraToolTip tooltip="Alignment">
+	<EdraToolTip tooltip="Lists">
 		<Select.Trigger
 			class={buttonVariants({
 				variant: 'ghost',
 				size: 'icon',
 				class: cn(
 					'gap-0 p-0',
-					'border-0 bg-transparent! ring-0 [&_svg]:size-2',
+					'hover:bg-accent dark:hover:bg-accent/50! border-0 bg-transparent! ring-0 [&_svg]:size-2',
 					isActive && 'bg-muted!'
 				)
 			})}

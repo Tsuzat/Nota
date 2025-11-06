@@ -101,7 +101,7 @@
 	pluginKey="edra-bubble-menu"
 	{shouldShow}
 	class={cn(
-		'edra-bubble-menu bg-popover/75! z-50! flex h-fit w-fit items-center gap-0.5 rounded-lg border p-0 backdrop-blur-2xl',
+		'edra-bubble-menu bg-popover z-50! flex h-fit w-fit items-center gap-0.5 rounded-lg border p-0',
 		className
 	)}
 >

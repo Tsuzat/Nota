@@ -42,7 +42,7 @@
 				class:bg-muted={isActive}
 			>
 				<Link />
-				<ChevronDown class="text-muted-foreground !size-2" />
+				<ChevronDown class="text-muted-foreground size-2!" />
 			</div>
 		</EdraToolTip>
 	</Popover.Trigger>
