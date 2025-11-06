@@ -1,11 +1,11 @@
-import { PUBLIC_SUPABASE_API_ENDURL } from '$env/static/public';
+import { PUBLIC_SUPABASE_AI_ENDURL } from '$env/static/public';
 import { fetch } from '@tauri-apps/plugin-http';
 
 export async function callAI(
 	prompt: string,
 	token: string
 ): Promise<{ text: string | null; error: string | null }> {
-	const res = await fetch(PUBLIC_SUPABASE_API_ENDURL, {
+	const res = await fetch(PUBLIC_SUPABASE_AI_ENDURL, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
