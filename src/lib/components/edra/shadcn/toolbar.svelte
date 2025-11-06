@@ -9,6 +9,7 @@
 	import QuickColors from './components/toolbar/QuickColors.svelte';
 	import ToolBarIcon from './components/ToolBarIcon.svelte';
 	import Link from './components/toolbar/Link.svelte';
+	import Lists from './components/toolbar/Lists.svelte';
 
 	const { editor, class: className, excludedCommands, children }: EdraToolbarProps = $props();
 
@@ -16,7 +17,10 @@
 </script>
 
 <div
-	class={cn('edra-toolbar bg-muted/25 mx-auto flex items-center rounded-lg', className)}
+	class={cn(
+		'edra-toolbar bg-muted/25 mx-auto flex items-center rounded-lg border border-dashed',
+		className
+	)}
 	transition:slide
 >
 	{#if children}
@@ -27,7 +31,9 @@
 				<Headings {editor} />
 			{:else if cmd === 'alignment'}
 				<Alignment {editor} />
-			{:else if ['lists', 'media', 'table'].includes(cmd)}
+			{:else if cmd === 'lists'}
+				<Lists {editor} />
+			{:else if ['media', 'table'].includes(cmd)}
 				<span></span>
 			{:else}
 				{@const commandGroup = commands[cmd]}

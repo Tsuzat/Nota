@@ -11,11 +11,12 @@
 	import QuickColors from '../components/toolbar/QuickColors.svelte';
 	import ToolBarIcon from '../components/ToolBarIcon.svelte';
 	import Link from '../components/toolbar/Link.svelte';
+	import Lists from '../components/toolbar/Lists.svelte';
 
 	const {
 		editor,
 		class: className,
-		excludedCommands = ['undo-redo', 'media', 'lists', 'table', 'math'],
+		excludedCommands = ['undo-redo', 'media', 'table', 'math'],
 		children
 	}: EdraToolbarProps = $props();
 
@@ -99,7 +100,7 @@
 	pluginKey="edra-bubble-menu"
 	{shouldShow}
 	class={cn(
-		'edra-bubble-menu bg-popover flex h-fit w-fit items-center rounded-lg border p-0',
+		'edra-bubble-menu bg-popover/75! z-50! flex h-fit w-fit items-center gap-0.5 rounded-lg border p-0 backdrop-blur-2xl',
 		className
 	)}
 >
@@ -111,6 +112,8 @@
 				<Headings {editor} />
 			{:else if cmd === 'alignment'}
 				<Alignment {editor} />
+			{:else if cmd === 'lists'}
+				<Lists {editor} />
 			{:else}
 				{@const commandGroup = commands[cmd]}
 				{#each commandGroup as command (command)}
