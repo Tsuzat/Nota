@@ -29,6 +29,7 @@
 	import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 	import { resolve } from '$app/paths';
+	import { derived } from 'svelte/store';
 
 	const { data } = $props();
 
@@ -50,7 +51,7 @@
 	// notes related
 	let isLoading = $state(false);
 	let note = $state<CloudNote>();
-	let pageSettings = $state(DEFAULT_SETTINGS);
+	let pageSettings = $derived(data.settings ?? DEFAULT_SETTINGS);
 	let syncing = $state(false);
 
 	const onFileSelect = $derived.by(() => {
@@ -90,8 +91,17 @@
 			if (pendingContent !== null) {
 				saveNoteContent();
 			}
-		}, 5000);
+		}, 10000);
 		return () => clearInterval(saveInterval);
+	});
+
+	function updatePageSettings() {
+		toast.info('Updating page settings');
+		localStorage.setItem('pageSettings', JSON.stringify(pageSettings));
+	}
+
+	$effect(() => {
+		if (pageSettings) updatePageSettings();
 	});
 
 	async function loadData(id: string) {

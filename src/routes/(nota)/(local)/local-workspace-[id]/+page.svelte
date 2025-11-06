@@ -34,9 +34,10 @@
 	let pendingContent = $state<Content>();
 
 	const localWorkspaces = getLocalWorkspaces();
-	let pageSettings = $state(DEFAULT_SETTINGS);
 
 	const { data } = $props();
+
+	let pageSettings = $derived(data.settings ?? DEFAULT_SETTINGS);
 
 	$effect(() => {
 		if (data.id) loadData(data.id);
@@ -92,12 +93,13 @@
 
 	let isLoading = $state(false);
 
-	async function updatePageSettings(settings: NotePageSettingsType) {
-		// await saveToStore('settings', settings);
+	function updatePageSettings() {
+		toast.info('Updating page settings');
+		localStorage.setItem('pageSettings', JSON.stringify(pageSettings));
 	}
 
 	$effect(() => {
-		updatePageSettings(pageSettings);
+		if (pageSettings) updatePageSettings();
 	});
 
 	async function onUpdate() {

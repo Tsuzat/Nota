@@ -18,7 +18,7 @@
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import Loader from '@lucide/svelte/icons/loader';
 	import { type Content, type Editor } from '@tiptap/core';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
 	import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
@@ -35,13 +35,14 @@
 	let pendingContent = $state<Content>();
 
 	const localNotes = getLocalNotes();
-	let pageSettings = $state(DEFAULT_SETTINGS);
 
 	const { data } = $props();
 
 	$effect(() => {
 		if (data.id) loadData(data.id);
 	});
+
+	let pageSettings = $derived(data.settings ?? DEFAULT_SETTINGS);
 
 	let note = $state<LocalNote>();
 
@@ -95,12 +96,13 @@
 
 	let isLoading = $state(false);
 
-	async function updatePageSettings(settings: NotePageSettingsType) {
-		// await saveToStore('settings', settings);
+	function updatePageSettings() {
+		toast.info('Updating page settings');
+		localStorage.setItem('pageSettings', JSON.stringify(pageSettings));
 	}
 
 	$effect(() => {
-		updatePageSettings(pageSettings);
+		if (pageSettings) updatePageSettings();
 	});
 
 	async function onUpdate() {

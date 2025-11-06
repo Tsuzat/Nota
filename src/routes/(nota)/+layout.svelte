@@ -19,6 +19,7 @@
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 	import { setCurrentUserWorkspaceContext } from '$lib/components/custom/user-workspace/userworkspace.svelte.js';
 	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
 
 	// Local Workspaces and Notes
 	setLocalUserWorkspaces();
@@ -56,6 +57,12 @@
 	const useRecents = setRecentsContext();
 
 	const { children, data } = $props();
+
+	let open = $state(false);
+
+	onMount(() => {
+		open = localStorage.getItem('sidebar-state') === 'open';
+	});
 
 	$effect(() => {
 		if (page.url.pathname.includes('local-note')) {
@@ -100,7 +107,12 @@
 <GlobalSettings />
 <NewUserWorkspace />
 
-<Sidebar.Provider>
+<Sidebar.Provider
+	bind:open
+	onOpenChange={(value) => {
+		localStorage.setItem('sidebar-state', value ? 'open' : 'closed');
+	}}
+>
 	<NewWorkspace />
 	<AppSidebar />
 	<Sidebar.Inset class="flex h-screen w-full flex-col overflow-hidden">
