@@ -171,7 +171,7 @@
 										.getNotes()
 										.filter((n) => n.workspace === workspace.id && !n.trashed)}
 									{#each notes as note (note.id)}
-										{@const href = `note-${note.id}`}
+										{@const href = resolve('/(nota)/(cloud)/note-[id]', { id: note.id })}
 										{@const isActive = page.url.pathname.endsWith(href)}
 										<Sidebar.MenuSubItem>
 											<Sidebar.MenuSubButton {isActive}>

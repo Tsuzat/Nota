@@ -19,6 +19,7 @@
 	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 	import { ask } from '@tauri-apps/plugin-dialog';
+	import { resolve } from '$app/paths';
 
 	const sidebar = useSidebar();
 	let showMore = $state(false);
@@ -87,7 +88,9 @@
 		<Sidebar.Menu>
 			{#each notes.filter((n) => n.favorite && !n.trashed) as note (note.id)}
 				{@const isCloud = 'owner' in note}
-				{@const href = `${isCloud ? '' : 'local-'}note-${note.id}`}
+				{@const href = isCloud
+					? resolve('/(nota)/(cloud)/note-[id]', { id: note.id })
+					: resolve('/(nota)/(local)/local-note-[id]', { id: note.id.toString() })}
 				{@const isActive = page.url.pathname.endsWith(href)}
 				<div transition:slide={{ easing: linear, duration: 200 }}>
 					<Sidebar.MenuItem>

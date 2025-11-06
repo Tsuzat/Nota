@@ -154,7 +154,9 @@
 										.getNotes()
 										.filter((n) => n.workspace === workspace.id && !n.trashed)}
 									{#each notes as note (note.id)}
-										{@const href = `local-note-${note.id}`}
+										{@const href = resolve('/(nota)/(local)/local-note-[id]', {
+											id: note.id.toString()
+										})}
 										{@const isActive = page.url.pathname.endsWith(href)}
 										<Sidebar.MenuSubItem>
 											<Sidebar.MenuSubButton {isActive}>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
@@ -38,7 +39,7 @@
 		const recents = useRecents.getRecents();
 		const rn = [];
 		for (const note of notes) {
-			if (recents.has(note.id)) {
+			if (recents.has(note.id.toString())) {
 				rn.push(note);
 			}
 		}
@@ -72,9 +73,7 @@
 			<WindowsButtons />
 		{/if}
 	</header>
-	<div
-		class="mx-auto flex h-[calc(100vh-3rem)] w-3xl flex-1 flex-grow flex-col gap-8 overflow-auto"
-	>
+	<div class="mx-auto flex h-[calc(100vh-3rem)] w-3xl flex-1 grow flex-col gap-8 overflow-auto">
 		<section class="my-2 flex w-full flex-col items-start gap-4 p-2">
 			<div class="text-muted-foreground flex w-full items-center gap-2">
 				<h4>User Workspaces</h4>
@@ -94,7 +93,7 @@
 					<Button
 						variant="secondary"
 						class={cn(
-							'w-fit rounded-lg !p-6',
+							'w-fit rounded-lg p-6!',
 							currentUserWorkspace?.id === workspace.id && 'border-primary border'
 						)}
 					>
@@ -117,7 +116,7 @@
 				{#each recentNotes as recent (recent.id)}
 					<a
 						class="bg-card group relative flex w-fit items-center gap-2 rounded-lg p-4"
-						href="/local-note-{recent.id}"
+						href={resolve('/(nota)/(local)/local-note-[id]', { id: recent.id.toString() })}
 					>
 						<IconRenderer icon={recent.icon} class="mr-2 size-4" />
 						<span class="text-muted-foreground">{recent.name}</span>
