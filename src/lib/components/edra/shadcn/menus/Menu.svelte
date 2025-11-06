@@ -96,6 +96,7 @@
 	};
 </script>
 
+<!-- !ISSUE: APPLYING BACKDROP FILTER MESSES WITH POPOVERS IN LINK AND QUICKCOLORS, SO DO NOT APPLY IT -->
 <BubbleMenu
 	{editor}
 	pluginKey="edra-bubble-menu"
