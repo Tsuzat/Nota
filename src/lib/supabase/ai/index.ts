@@ -1,7 +1,10 @@
 import { PUBLIC_SUPABASE_API_ENDURL } from '$env/static/public';
 import { fetch } from '@tauri-apps/plugin-http';
 
-export async function callAI(prompt: string, token: string) {
+export async function callAI(
+	prompt: string,
+	token: string
+): Promise<{ text: string | null; error: string | null }> {
 	const res = await fetch(PUBLIC_SUPABASE_API_ENDURL, {
 		method: 'POST',
 		headers: {
@@ -12,8 +15,8 @@ export async function callAI(prompt: string, token: string) {
 	});
 	const data = await res.json();
 	if (res.ok) {
-		return data.text;
+		return { text: data.text, error: null };
 	} else {
-		throw new Error('Somthing went wrong when calling AI');
+		return { error: data.error, text: null };
 	}
 }

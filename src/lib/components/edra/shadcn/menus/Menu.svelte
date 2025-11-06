@@ -12,6 +12,7 @@
 	import ToolBarIcon from '../components/ToolBarIcon.svelte';
 	import Link from '../components/toolbar/Link.svelte';
 	import Lists from '../components/toolbar/Lists.svelte';
+	import AI from '../components/toolbar/AI.svelte';
 
 	const {
 		editor,
@@ -107,6 +108,7 @@
 	{#if children}
 		{@render children()}
 	{:else}
+		<AI {editor} />
 		{#each toolbarCommands.filter((c) => !excludedCommands?.includes(c)) as cmd (cmd)}
 			{#if cmd === 'headings'}
 				<Headings {editor} />

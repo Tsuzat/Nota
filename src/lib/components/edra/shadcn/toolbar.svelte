@@ -10,6 +10,7 @@
 	import ToolBarIcon from './components/ToolBarIcon.svelte';
 	import Link from './components/toolbar/Link.svelte';
 	import Lists from './components/toolbar/Lists.svelte';
+	import AI from './components/toolbar/AI.svelte';
 
 	const { editor, class: className, excludedCommands, children }: EdraToolbarProps = $props();
 
@@ -18,7 +19,7 @@
 
 <div
 	class={cn(
-		'edra-toolbar bg-muted/25 mx-auto flex items-center gap-0.5 rounded-lg border border-dashed',
+		'edra-toolbar bg-muted/25 mx-auto flex items-center gap-0.5 rounded-lg border-[0.5px] border-dashed',
 		className
 	)}
 	transition:slide
@@ -26,6 +27,7 @@
 	{#if children}
 		{@render children()}
 	{:else}
+		<AI {editor} />
 		{#each toolbarCommands as cmd (cmd)}
 			{#if cmd === 'headings'}
 				<Headings {editor} />

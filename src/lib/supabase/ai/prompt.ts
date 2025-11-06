@@ -17,3 +17,8 @@ export const FIX_GRAMMER_PROMPT = (text: string) => `
 	Please fix the grammar in the following text:\n
 	${text}
 `;
+
+export const CONTINUE_WRITING = (text: string) => `
+	Please continue the following text:\n
+	${text}
+`;
