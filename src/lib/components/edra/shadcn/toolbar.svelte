@@ -11,10 +11,22 @@
 	import Link from './components/toolbar/Link.svelte';
 	import Lists from './components/toolbar/Lists.svelte';
 	import AI from './components/toolbar/AI.svelte';
+	import { getGlobalSettings } from '$lib/components/custom/settings/constants.svelte.js';
+	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 
 	const { editor, class: className, excludedCommands, children }: EdraToolbarProps = $props();
 
 	const toolbarCommands = Object.keys(commands).filter((key) => !excludedCommands?.includes(key));
+
+	const useSettings = getGlobalSettings();
+	const useSessionAndUser = getSessionAndUserContext();
+	const showAI = $derived.by(() => {
+		return (
+			useSettings.useAI &&
+			useSessionAndUser.getSession() !== undefined &&
+			useSessionAndUser.getUser() !== undefined
+		);
+	});
 </script>
 
 <div
@@ -27,7 +39,9 @@
 	{#if children}
 		{@render children()}
 	{:else}
-		<AI {editor} />
+		{#if showAI}
+			<AI {editor} />
+		{/if}
 		{#each toolbarCommands as cmd (cmd)}
 			{#if cmd === 'headings'}
 				<Headings {editor} />

@@ -97,7 +97,6 @@
 	let isLoading = $state(false);
 
 	function updatePageSettings() {
-		toast.info('Updating page settings');
 		localStorage.setItem('pageSettings', JSON.stringify(pageSettings));
 	}
 

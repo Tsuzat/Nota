@@ -96,7 +96,6 @@
 	});
 
 	function updatePageSettings() {
-		toast.info('Updating page settings');
 		localStorage.setItem('pageSettings', JSON.stringify(pageSettings));
 	}
 

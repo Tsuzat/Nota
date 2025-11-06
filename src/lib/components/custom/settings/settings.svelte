@@ -1,10 +1,18 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
 	import SunMoon from '@lucide/svelte/icons/sun-moon';
+	import Sparkle from '@lucide/svelte/icons/sparkle';
 	import { getGlobalSettings } from './constants.svelte';
 	import ToggleMode from '../toggle-mode.svelte';
+	import { Switch } from '$lib/components/ui/switch';
+	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 
 	const useSettings = getGlobalSettings();
+	const useSessionAndUser = getSessionAndUserContext();
+
+	let disableAIToggle = $derived.by(() => {
+		return useSessionAndUser.getSession() === null && useSessionAndUser.getUser() === null;
+	});
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === ',' && (e.metaKey || e.ctrlKey)) {
@@ -34,6 +42,18 @@
 			</div>
 			<div class="right flex items-center gap-2">
 				<ToggleMode />
+			</div>
+		</div>
+		<div id="user" class="setting-tile" title="Window Preferences">
+			<div class="left">
+				<div class="title">
+					<Sparkle class="size-4" />
+					<span>Use AI</span>
+				</div>
+				<div class="description">Pro members can use AI in Notes. You need to be logged in.</div>
+			</div>
+			<div class="right flex items-center gap-2">
+				<Switch bind:checked={useSettings.useAI} disabled={disableAIToggle} />
 			</div>
 		</div>
 	</Dialog.Content>
