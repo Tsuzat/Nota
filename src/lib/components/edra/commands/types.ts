@@ -1,4 +1,5 @@
 import type { Editor } from '@tiptap/core';
+import type { Node } from '@tiptap/pm/model';
 import { Icon } from '@lucide/svelte';
 
 export interface EdraToolBarCommands {
@@ -7,6 +8,7 @@ export interface EdraToolBarCommands {
 	tooltip?: string;
 	shortCut?: string;
 	onClick?: (editor: Editor) => void;
+	turnInto?: (editor: Editor, node: Node, pos: number) => void;
 	isActive?: (editor: Editor) => boolean;
 	clickable?: (editor: Editor) => boolean;
 }

@@ -2,7 +2,7 @@
 	import type { Editor } from '@tiptap/core';
 	import { onMount } from 'svelte';
 	import GripVertical from '@lucide/svelte/icons/grip-vertical';
-	import { DragHandlePlugin } from '../extensions/drag-handle/index.js';
+	import { DragHandlePlugin } from '@tiptap/extension-drag-handle';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import type { Node } from '@tiptap/pm/model';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
@@ -12,6 +12,9 @@
 	import Delete from '@lucide/svelte/icons/trash-2';
 	import { NodeSelection } from '@tiptap/pm/state';
 	import Plus from '@lucide/svelte/icons/plus';
+	import { offset, size } from '@floating-ui/dom';
+	import Repeat2 from '@lucide/svelte/icons/repeat-2';
+	import commands from '../commands/toolbar-commands';
 
 	interface Props {
 		editor: Editor;
@@ -24,22 +27,29 @@
 	let open = $state(false);
 
 	const pluginKey = 'globalDragHandle';
+	let element = $state(document.createElement('div'));
+
+	const turnIntoCommand = Object.values(commands)
+		.flat()
+		.filter((c) => c.turnInto !== undefined);
 
 	onMount(() => {
 		const plugin = DragHandlePlugin({
-			pluginKey: pluginKey,
-			dragHandleWidth: 20,
-			scrollTreshold: 100,
-			dragHandleSelector: '.drag-handle',
-			excludedTags: ['pre', 'code', 'table p'],
-			customNodes: [],
-			onMouseMove: onMouseMove
+			element,
+			pluginKey,
+			editor,
+			computePositionConfig: {
+				strategy: 'absolute',
+				placement: 'left-start',
+				middleware: [offset({ mainAxis: 0, crossAxis: 4, alignmentAxis: -4 })]
+			},
+			onNodeChange
 		});
-		editor.registerPlugin(plugin);
+		editor.registerPlugin(plugin.plugin);
 		return () => editor.unregisterPlugin(pluginKey);
 	});
 
-	const onMouseMove = (data: { node: Node; pos: number }) => {
+	const onNodeChange = (data: { editor: Editor; node: Node | null; pos: number }) => {
 		if (data.node) currentNode = data.node;
 		currentNodePos = data.pos;
 	};
@@ -109,8 +119,18 @@
 	};
 </script>
 
-<div class="drag-handle">
-	<Button variant="ghost" class="!size-6 rounded-sm p-0" onclick={() => (open = true)}>
+<div bind:this={element} class="flex items-center gap-0 pr-2 transition-all duration-300">
+	<Button variant="ghost" class="size-7! rounded-sm" onclick={insertNode}>
+		<Plus />
+	</Button>
+	<Button
+		variant="ghost"
+		class="size-7! rounded-sm"
+		onclick={() => {
+			open = !open;
+			if (open) editor.commands.selectNodeForward();
+		}}
+	>
 		<GripVertical />
 	</Button>
 	<DropdownMenu.Root bind:open>
@@ -118,21 +138,44 @@
 			<span>Drag Handle</span>
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
-			<DropdownMenu.Item onclick={insertNode}>
-				<Plus />
-				Insert Node
-			</DropdownMenu.Item>
+			<DropdownMenu.Group>
+				<DropdownMenu.GroupHeading class="capitalize">
+					{currentNode?.type.name}
+					{console.log('CURRENT NODE DATA = ', currentNode?.content.toJSON())}
+				</DropdownMenu.GroupHeading>
+				<DropdownMenu.Sub>
+					<DropdownMenu.SubTrigger>
+						<Repeat2 />
+						Turn Into
+					</DropdownMenu.SubTrigger>
+					<DropdownMenu.SubContent class="h-56 overflow-auto">
+						{#each turnIntoCommand as command (command)}
+							{@const Icon = command.icon}
+							<DropdownMenu.Item
+								onclick={() => {
+									if (currentNode && currentNodePos)
+										command.turnInto?.(editor, currentNode, currentNodePos);
+								}}
+							>
+								<Icon />
+								<span>{command.tooltip}</span>
+								<DropdownMenu.Shortcut>{command.shortCut}</DropdownMenu.Shortcut>
+							</DropdownMenu.Item>
+						{/each}
+					</DropdownMenu.SubContent>
+				</DropdownMenu.Sub>
+			</DropdownMenu.Group>
 			<DropdownMenu.Item onclick={handleRemoveFormatting}>
 				<RemoveFormatting />
 				Remove Formatting
 			</DropdownMenu.Item>
 			<DropdownMenu.Item onclick={handleDuplicate}>
 				<Duplicate />
-				Duplicate Node
+				Duplicate
 			</DropdownMenu.Item>
 			<DropdownMenu.Item onclick={handleCopyToClipboard}>
 				<Clipboard />
-				Copy to clipboard
+				Copy Content
 			</DropdownMenu.Item>
 			<DropdownMenu.Item onclick={handleDelete}>
 				<Delete class="text-destructive" />

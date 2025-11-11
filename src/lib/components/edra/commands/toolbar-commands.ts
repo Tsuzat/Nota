@@ -30,6 +30,7 @@ import Table from '@lucide/svelte/icons/table';
 import Radical from '@lucide/svelte/icons/radical';
 import SquareRadical from '@lucide/svelte/icons/square-radical';
 import { isTextSelection } from '@tiptap/core';
+import Pilcrow from '@lucide/svelte/icons/pilcrow';
 
 const commands: Record<string, EdraToolBarCommands[]> = {
 	'undo-redo': [
@@ -67,6 +68,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleHeading({ level: 1 }).run();
 			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).setHeading({ level: 1 }).run();
+			},
 			clickable: (editor) => {
 				return editor.can().toggleHeading({ level: 1 });
 			},
@@ -81,6 +85,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			shortCut: `${isMac ? '⌘⌥' : 'Ctrl+Alt+'}2`,
 			onClick: (editor) => {
 				editor.chain().focus().toggleHeading({ level: 2 }).run();
+			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).setHeading({ level: 2 }).run();
 			},
 			clickable: (editor) => {
 				return editor.can().toggleHeading({ level: 2 });
@@ -97,6 +104,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleHeading({ level: 3 }).run();
 			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).setHeading({ level: 3 }).run();
+			},
 			clickable: (editor) => {
 				return editor.can().toggleHeading({ level: 3 });
 			},
@@ -111,6 +121,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			shortCut: `${isMac ? '⌘⌥' : 'Ctrl+Alt+'}4`,
 			onClick: (editor) => {
 				editor.chain().focus().toggleHeading({ level: 4 }).run();
+			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).setHeading({ level: 4 }).run();
 			},
 			clickable: (editor) => {
 				return editor.can().toggleHeading({ level: 4 });
@@ -140,12 +153,33 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			}
 		},
 		{
+			icon: Pilcrow,
+			name: 'paragraph',
+			tooltip: 'Paragraph',
+			shortCut: `${isMac ? '⌘⇧' : 'Ctrl+Shift+'}0`,
+			onClick: (editor) => {
+				editor.chain().focus().setParagraph().run();
+			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).setParagraph().run();
+			},
+			clickable: (editor) => {
+				return editor.can().setParagraph();
+			},
+			isActive: (editor) => {
+				return editor.isActive('paragraph');
+			}
+		},
+		{
 			icon: Bold,
 			name: 'bold',
 			tooltip: 'Bold',
 			shortCut: `${isMac ? '⌘' : 'Ctrl+'}B`,
 			onClick: (editor) => {
 				editor.chain().focus().toggleBold().run();
+			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).setMark('bold').run();
 			},
 			clickable: (editor) => {
 				return editor.can().toggleBold();
@@ -162,6 +196,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleItalic().run();
 			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).setMark('italic').run();
+			},
 			clickable: (editor) => {
 				return editor.can().toggleItalic();
 			},
@@ -176,6 +213,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			shortCut: `${isMac ? '⌘' : 'Ctrl+'}U`,
 			onClick: (editor) => {
 				editor.chain().focus().toggleUnderline().run();
+			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).setMark('underline').run();
 			},
 			clickable: (editor) => {
 				return editor.can().toggleUnderline();
@@ -192,6 +232,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleStrike().run();
 			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).setMark('strike').run();
+			},
 			clickable: (editor) => {
 				return editor.can().toggleStrike();
 			},
@@ -207,6 +250,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleBlockquote().run();
 			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).toggleBlockquote().run();
+			},
 			clickable: (editor) => {
 				return editor.can().toggleBlockquote();
 			},
@@ -221,6 +267,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			shortCut: `${isMac ? '⌘' : 'Ctrl+'}E`,
 			onClick: (editor) => {
 				editor.chain().focus().toggleCode().run();
+			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).toggleCodeBlock().run();
 			},
 			clickable: (editor) => {
 				return editor.can().toggleCode();
@@ -323,6 +372,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleBulletList().run();
 			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).toggleBulletList().run();
+			},
 			isActive: (editor) => editor.isActive('bulletList')
 		},
 		{
@@ -333,7 +385,15 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleOrderedList().run();
 			},
-			isActive: (editor) => editor.isActive('orderedList')
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).toggleOrderedList().run();
+			},
+			clickable: (editor) => {
+				return editor.can().toggleOrderedList();
+			},
+			isActive: (editor) => {
+				return editor.isActive('orderedList');
+			}
 		},
 		{
 			icon: ListChecks,
@@ -343,7 +403,15 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleTaskList().run();
 			},
-			isActive: (editor) => editor.isActive('taskList')
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).toggleTaskList().run();
+			},
+			clickable: (editor) => {
+				return editor.can().toggleTaskList();
+			},
+			isActive: (editor) => {
+				return editor.isActive('taskList');
+			}
 		}
 	],
 	media: [

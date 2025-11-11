@@ -261,45 +261,6 @@ input[type='checkbox']:checked::before {
 	color: inherit;
 }
 
-/* Drag Handle Styling */
-.drag-handle {
-	position: fixed;
-	z-index: 50;
-	width: 1.5rem;
-	height: 1.5rem;
-	display: flex;
-	padding-right: 0.5rem;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	cursor: grab;
-	opacity: 100;
-	transition-property: opacity;
-	transition-duration: 200ms;
-	transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
-	color: var(--border-color-hover);
-}
-
-.drag-handle:active {
-	cursor: grabbing;
-}
-
-.drag-handle.hide {
-	opacity: 0;
-	pointer-events: none;
-}
-
-@media screen and (max-width: 600px) {
-	.drag-handle {
-		display: none;
-		pointer-events: none;
-	}
-}
-
-.drag-handle svg {
-	height: 1rem;
-	width: 1rem;
-}
 /* Math Equations (KaTeX) */
 .katex:hover {
 	background-color: var(--code-bg);
