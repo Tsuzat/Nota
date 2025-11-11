@@ -117,3 +117,16 @@ export const isURL = (str: string): boolean => {
 	}
 	return isUrl;
 };
+
+export const quickcolors = [
+	{ label: 'Default', value: '' },
+	{ label: 'Blue', value: '#0E0E99' },
+	{ label: 'Brown', value: '#7D0404' },
+	{ label: 'Green', value: '#077507' },
+	{ label: 'Grey', value: '#636262' },
+	{ label: 'Orange', value: '#A34603' },
+	{ label: 'Pink', value: '#DB0762' },
+	{ label: 'Purple', value: '#83069C' },
+	{ label: 'Red', value: '#B30707' },
+	{ label: 'Yellow', value: '#C4C404' }
+];

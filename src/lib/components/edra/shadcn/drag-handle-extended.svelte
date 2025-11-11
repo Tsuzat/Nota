@@ -12,9 +12,11 @@
 	import Delete from '@lucide/svelte/icons/trash-2';
 	import { NodeSelection } from '@tiptap/pm/state';
 	import Plus from '@lucide/svelte/icons/plus';
-	import { offset, size } from '@floating-ui/dom';
+	import { offset } from '@floating-ui/dom';
 	import Repeat2 from '@lucide/svelte/icons/repeat-2';
 	import commands from '../commands/toolbar-commands';
+	import { Palette } from '@lucide/svelte';
+	import { quickcolors } from '../utils';
 
 	interface Props {
 		editor: Editor;
@@ -125,7 +127,6 @@
 		class="size-7! rounded-sm"
 		onclick={() => {
 			open = !open;
-			if (open) editor.commands.selectNodeForward();
 		}}
 	>
 		<GripVertical />
@@ -138,14 +139,13 @@
 			<DropdownMenu.Group>
 				<DropdownMenu.GroupHeading class="capitalize">
 					{currentNode?.type.name}
-					{console.log('CURRENT NODE DATA = ', currentNode?.content.toJSON())}
 				</DropdownMenu.GroupHeading>
 				<DropdownMenu.Sub>
-					<DropdownMenu.SubTrigger>
+					<DropdownMenu.SubTrigger openDelay={300}>
 						<Repeat2 />
 						Turn Into
 					</DropdownMenu.SubTrigger>
-					<DropdownMenu.SubContent class="h-56 overflow-auto">
+					<DropdownMenu.SubContent class="max-h-96 overflow-auto duration-300">
 						{#each turnIntoCommand as command (command)}
 							{@const Icon = command.icon}
 							<DropdownMenu.Item
@@ -156,12 +156,69 @@
 							>
 								<Icon />
 								<span>{command.tooltip}</span>
-								<DropdownMenu.Shortcut>{command.shortCut}</DropdownMenu.Shortcut>
+								<DropdownMenu.Shortcut class="bg-background rounded border p-0.5"
+									>{command.shortCut}</DropdownMenu.Shortcut
+								>
 							</DropdownMenu.Item>
 						{/each}
 					</DropdownMenu.SubContent>
 				</DropdownMenu.Sub>
 			</DropdownMenu.Group>
+			<DropdownMenu.Sub>
+				<DropdownMenu.SubTrigger openDelay={300}>
+					<Palette />
+					Colors
+				</DropdownMenu.SubTrigger>
+				<DropdownMenu.Content side="right" class="max-h-96 overflow-auto duration-300">
+					<DropdownMenu.Group>
+						<DropdownMenu.Label class="text-muted-foreground text-sm"
+							>Text Colors</DropdownMenu.Label
+						>
+						{@const currentColor = editor.getAttributes('textStyle').color as string}
+						{#each quickcolors as color (color.label)}
+							<DropdownMenu.CheckboxItem
+								checked={currentColor === color.value}
+								title={color.label}
+								onclick={() => {
+									if (color.value === '' || color.label === 'Default')
+										editor.chain().setNodeSelection(currentNodePos).unsetColor().run();
+									else editor.chain().setNodeSelection(currentNodePos).setColor(color.value).run();
+								}}
+							>
+								<span style={`color: ${color.value};`}>A</span>
+								<span class="capitalize">{color.label}</span>
+							</DropdownMenu.CheckboxItem>
+						{/each}
+					</DropdownMenu.Group>
+					<DropdownMenu.Separator />
+					<DropdownMenu.Group>
+						<DropdownMenu.Label class="text-muted-foreground text-sm"
+							>Highlight Color</DropdownMenu.Label
+						>
+						{@const currentHighlight = editor.getAttributes('highlight').color as string}
+						{#each quickcolors as color (color.label)}
+							<DropdownMenu.CheckboxItem
+								checked={currentHighlight === color.value}
+								title={color.label}
+								onclick={() => {
+									if (color.value === '' || color.label === 'Default')
+										editor.chain().setNodeSelection(currentNodePos).unsetHighlight().run();
+									else
+										editor
+											.chain()
+											.setNodeSelection(currentNodePos)
+											.setHighlight({ color: color.value })
+											.run();
+								}}
+							>
+								<span class="size-4 rounded-full border" style={`background-color: ${color.value};`}
+								></span>
+								<span class="capitalize">{color.label}</span>
+							</DropdownMenu.CheckboxItem>
+						{/each}
+					</DropdownMenu.Group>
+				</DropdownMenu.Content>
+			</DropdownMenu.Sub>
 			<DropdownMenu.Separator />
 			<DropdownMenu.Item onclick={insertNode}>
 				<Plus />

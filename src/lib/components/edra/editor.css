@@ -461,12 +461,12 @@ input[type='checkbox']:checked::before {
 	display: flex;
 	position: absolute;
 	padding: 0 0.25rem;
-	top: 0;
+	top: 2px;
 	right: 0;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: end;
 	gap: 1rem;
-	transition: opacity 0.2s ease-in-out;
+	transition: opacity 300ms ease-in-out;
 }
 
 .tiptap iframe {

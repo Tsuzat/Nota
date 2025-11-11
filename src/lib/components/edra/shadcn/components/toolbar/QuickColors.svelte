@@ -5,25 +5,13 @@
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import { cn } from '$lib/utils.js';
 	import EdraToolTip from '../EdraToolTip.svelte';
+	import { quickcolors } from '$lib/components/edra/utils';
 
 	interface Props {
 		class?: string;
 		editor: Editor;
 	}
 	const { class: className = '', editor }: Props = $props();
-
-	const colors = [
-		{ label: 'Default', value: '' },
-		{ label: 'Blue', value: '#06328A' },
-		{ label: 'Brown', value: '#AD4F07' },
-		{ label: 'Green', value: '#027306' },
-		{ label: 'Grey', value: '#035699' },
-		{ label: 'Orange', value: '#944801' },
-		{ label: 'Pink', value: '#910032' },
-		{ label: 'Purple', value: '#3E188F' },
-		{ label: 'Red', value: '#940909' },
-		{ label: 'Yellow', value: '#827305' }
-	];
 
 	const currentColor = $derived.by(() => editor.getAttributes('textStyle').color);
 	const currentHighlight = $derived.by(() => editor.getAttributes('highlight').color);
@@ -38,7 +26,7 @@
 					size: 'icon',
 					class: cn('gap-0.5', className)
 				})}
-				style={`color: ${currentColor}; background-color: ${currentHighlight}50;`}
+				style={`color: ${currentColor}; background-color: ${currentHighlight}75;`}
 			>
 				<span>A</span>
 				<ChevronDown class="text-muted-foreground size-2!" />
@@ -48,7 +36,7 @@
 	<Popover.Content class="size-fit shadow-lg" portalProps={{ disabled: true, to: undefined }}>
 		<div class="text-muted-foreground my-2 text-xs">Text Colors</div>
 		<div class="grid grid-cols-5 gap-2">
-			{#each colors as color (color)}
+			{#each quickcolors as color (color)}
 				<Button
 					variant="ghost"
 					class={cn(
@@ -75,7 +63,7 @@
 		</div>
 		<div class="text-muted-foreground my-2 text-xs">Highlight Colors</div>
 		<div class="grid grid-cols-5 gap-2">
-			{#each colors as color (color)}
+			{#each quickcolors as color (color)}
 				<Button
 					variant="ghost"
 					class={cn(
