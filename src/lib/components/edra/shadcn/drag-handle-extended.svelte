@@ -120,9 +120,6 @@
 </script>
 
 <div bind:this={element} class="flex items-center gap-0 pr-2 transition-all duration-300">
-	<Button variant="ghost" class="size-7! rounded-sm" onclick={insertNode}>
-		<Plus />
-	</Button>
 	<Button
 		variant="ghost"
 		class="size-7! rounded-sm"
@@ -165,10 +162,16 @@
 					</DropdownMenu.SubContent>
 				</DropdownMenu.Sub>
 			</DropdownMenu.Group>
+			<DropdownMenu.Separator />
+			<DropdownMenu.Item onclick={insertNode}>
+				<Plus />
+				Insert Next
+			</DropdownMenu.Item>
 			<DropdownMenu.Item onclick={handleRemoveFormatting}>
 				<RemoveFormatting />
 				Remove Formatting
 			</DropdownMenu.Item>
+			<DropdownMenu.Separator />
 			<DropdownMenu.Item onclick={handleDuplicate}>
 				<Duplicate />
 				Duplicate
@@ -177,6 +180,7 @@
 				<Clipboard />
 				Copy Content
 			</DropdownMenu.Item>
+			<DropdownMenu.Separator />
 			<DropdownMenu.Item onclick={handleDelete}>
 				<Delete class="text-destructive" />
 				Delete Node
