@@ -42,12 +42,12 @@
 				<span class="capitalize">
 					{defaultLanguage}
 				</span>
-				<ChevronDown class="!size-2 opacity-0 group-hover:opacity-100" />
+				<ChevronDown class="size-2! opacity-0 group-hover:opacity-100" />
 			</Popover.Trigger>
 			<Popover.Content class="h-96 w-40 p-0 transition-all duration-500" contenteditable="false">
 				<Command.Root>
 					<Command.Input placeholder="Search..." />
-					<Command.List class="!max-h-full">
+					<Command.List class="max-h-full!">
 						<Command.Empty>No language found.</Command.Empty>
 						{#each languages as language (language)}
 							<Command.Item
@@ -69,7 +69,7 @@
 				</Command.Root>
 			</Popover.Content>
 		</Popover.Root>
-		<Button variant="ghost" class="!size-6 p-0" onclick={copyCode}>
+		<Button variant="ghost" class="size-6! p-0" onclick={copyCode}>
 			{#if isCopying}
 				<Check class="size-3 text-green-500" />
 			{:else}
