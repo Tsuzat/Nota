@@ -50,7 +50,7 @@
 			editor,
 			computePositionConfig: {
 				strategy: 'fixed',
-				middleware: [autoPlacement({ allowedPlacements: ['left', 'left-start'] })]
+				middleware: [autoPlacement({ allowedPlacements: ['left', 'left-start', 'left-end'] })]
 			},
 			onNodeChange
 		});

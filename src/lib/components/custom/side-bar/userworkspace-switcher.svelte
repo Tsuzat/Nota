@@ -43,10 +43,10 @@
 		}
 		const id = toast.loading('Changing User Workspace to ' + workspace.name);
 		try {
+			goto(resolve('/home'));
 			currentUserWorkspace.setCurrentUserWorkspace(workspace);
 			await localWorkspaces.fetchWorkspaces(workspace.id);
 			await localNotes.fetchNotes(workspace.id);
-			goto(resolve('/home'));
 			toast.success('Changed User Workspace to ' + workspace.name, { id });
 			cloudWorkspaces.setWorkspaces([]);
 			cloudNotes.setNotes([]);
@@ -62,13 +62,13 @@
 		}
 		const id = toast.loading('Switching to cloud workspace');
 		try {
+			goto(resolve('/home'));
 			currentUserWorkspace.setCurrentUserWorkspace(workspace);
 			toast.loading('Loading Workspaces', { id });
 			await cloudWorkspaces.fetchWorkspaces(workspace);
 			toast.loading('Loading Notes', { id });
 			await cloudNotes.fetchNotes(workspace);
 			toast.dismiss(id);
-			goto(resolve('/home'));
 			toast.success('Changed User Workspace to ' + workspace.name, { id });
 			localWorkspaces.setWorkspaces([]);
 			localNotes.setNotes([]);
