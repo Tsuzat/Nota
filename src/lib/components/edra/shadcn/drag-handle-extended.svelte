@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Editor } from '@tiptap/core';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import GripVertical from '@lucide/svelte/icons/grip-vertical';
 	import { DragHandlePlugin } from '@tiptap/extension-drag-handle';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -18,7 +18,6 @@
 	import { LinkIcon, Palette } from '@lucide/svelte';
 	import { quickcolors } from '../utils';
 	import { page } from '$app/state';
-	import { toast } from 'svelte-sonner';
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 
 	interface Props {
@@ -42,6 +41,7 @@
 	const turnIntoCommand = Object.values(commands)
 		.flat()
 		.filter((c) => c.turnInto !== undefined);
+	const editorElement = document.getElementById('nota-editor');
 
 	onMount(() => {
 		const plugin = DragHandlePlugin({
@@ -55,13 +55,30 @@
 			onNodeChange
 		});
 		editor.registerPlugin(plugin.plugin);
+		element.addEventListener('drag', onDragHandleDrag);
+		element.addEventListener('dragstart', onDragHandleDrag);
 		return () => editor.unregisterPlugin(pluginKey);
+	});
+
+	onDestroy(() => {
+		element.removeEventListener('drag', onDragHandleDrag);
+		element.removeEventListener('dragstart', onDragHandleDrag);
 	});
 
 	const onNodeChange = (data: { editor: Editor; node: Node | null; pos: number }) => {
 		if (data.node) currentNode = data.node;
 		currentNodePos = data.pos;
 	};
+
+	function onDragHandleDrag(e: DragEvent) {
+		if (editorElement === null) return;
+		const scrollY = editorElement.scrollTop;
+		if (e.clientY < 50) {
+			editorElement.scrollTo({ top: scrollY - 30, behavior: 'smooth' });
+		} else if (editorElement.clientHeight - e.clientY < 50) {
+			editorElement.scrollTo({ top: scrollY + 30, behavior: 'smooth' });
+		}
+	}
 
 	const handleRemoveFormatting = () => {
 		const chain = editor.chain();
@@ -133,7 +150,11 @@
 	};
 </script>
 
-<div bind:this={element} class="flex items-center gap-0 pr-2 transition-all">
+<div
+	bind:this={element}
+	class="flex items-center gap-0 pr-2 transition-all duration-300"
+	style="visibility: hidden;"
+>
 	<Button
 		variant="ghost"
 		class="size-7! rounded-sm opacity-60 hover:opacity-100 focus-visible:opacity-100 active:opacity-100"

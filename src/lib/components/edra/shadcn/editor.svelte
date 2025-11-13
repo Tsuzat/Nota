@@ -167,6 +167,7 @@
 
 <div
 	bind:this={element}
+	id="nota-editor"
 	class={cn('edra-editor h-full w-full cursor-auto *:outline-none', className)}
 	{spellcheck}
 ></div>
