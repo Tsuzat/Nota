@@ -117,6 +117,12 @@
 		'edra-bubble-menu bg-popover z-50! flex h-fit w-fit items-center gap-0.5 rounded-lg border p-0',
 		className
 	)}
+	options={{
+		shift: true,
+		autoPlacement: {
+			allowedPlacements: ['top', 'top-end', 'top-start']
+		}
+	}}
 >
 	{#if children}
 		{@render children()}
@@ -136,6 +142,8 @@
 				{#each commandGroup as command (command)}
 					{#if command.name === 'link'}
 						<Link {editor} />
+					{:else if command.name === 'paragraph'}
+						<span></span>
 					{:else}
 						<ToolBarIcon {editor} {command} />
 					{/if}

@@ -1,12 +1,11 @@
 <script lang="ts">
 	import type { Editor } from '@tiptap/core';
 	import { type TableOfContentData } from '@tiptap/extension-table-of-contents';
-	import * as Popover from '$lib/components/ui/popover';
-	import { buttonVariants } from '$lib/components/ui/button';
-	import Menu from '@lucide/svelte/icons/menu';
 	import { cn } from '$lib/utils';
 	import { TextSelection } from '@tiptap/pm/state';
 	import { pushState } from '$app/navigation';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { flip } from 'svelte/animate';
 
 	interface Props {
 		editor: Editor;
@@ -14,6 +13,18 @@
 	}
 
 	const { editor, items }: Props = $props();
+
+	let highlighedIndex = $derived.by(() => {
+		if (!items || items.length === 0) {
+			return -1;
+		}
+		for (let i = 0; i < items.length; i++) {
+			if (!items[i].isScrolledOver) {
+				return i + 1;
+			}
+		}
+		return -1;
+	});
 
 	const onItemClick = (e: Event, id: string) => {
 		e.preventDefault();
@@ -39,7 +50,7 @@
 	};
 </script>
 
-<Popover.Root>
+<!-- <Popover.Root>
 	<Popover.Trigger
 		class={buttonVariants({
 			variant: 'outline',
@@ -69,4 +80,41 @@
 			{/each}
 		{/if}
 	</Popover.Content>
-</Popover.Root>
+</Popover.Root> -->
+
+<Tooltip.Provider>
+	<Tooltip.Root delayDuration={100}>
+		<Tooltip.Trigger class="fixed top-1/3 right-4 flex h-full max-h-96 flex-col gap-3 ">
+			{#each items as item (item)}
+				<div class={cn('bg-muted h-[2px] w-4 rounded', item.isActive && 'bg-foreground')}></div>
+			{/each}
+		</Tooltip.Trigger>
+		<Tooltip.Content
+			side="left"
+			sideOffset={-24}
+			align="start"
+			alignOffset={48}
+			class="bg-popover data-[side=left]:slide-in-from-right-56 fade-in-100 flex max-h-120 max-w-56 flex-col gap-1.5 overflow-auto border duration-300"
+			arrowClasses="hidden"
+			strategy="absolute"
+		>
+			{#if items === undefined || items.length === 0}
+				<div>No contents</div>
+			{:else}
+				{#each items as item (item.id)}
+					<a
+						href={`#${item.id}`}
+						onclick={(e) => onItemClick(e, item.id)}
+						class={cn(
+							'text-foreground text-sm text-wrap transition-all duration-500',
+							item.isScrolledOver && 'text-muted-foreground font-thin'
+						)}
+						style={`padding-left: calc(1rem * ${item.level - 1});`}
+					>
+						{item.textContent}
+					</a>
+				{/each}
+			{/if}
+		</Tooltip.Content>
+	</Tooltip.Root>
+</Tooltip.Provider>

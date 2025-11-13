@@ -31,7 +31,8 @@
 		return editor.isActive('blockMath');
 	}}
 	options={{
-		strategy: 'fixed'
+		strategy: 'absolute',
+		placement: 'top'
 	}}
 	class="bg-popover h-fit w-fit flex-col items-center gap-1 rounded-lg border shadow-lg"
 >
