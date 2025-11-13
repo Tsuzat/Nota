@@ -12,11 +12,14 @@
 	import Delete from '@lucide/svelte/icons/trash-2';
 	import { NodeSelection } from '@tiptap/pm/state';
 	import Plus from '@lucide/svelte/icons/plus';
-	import { offset } from '@floating-ui/dom';
+	import { autoPlacement } from '@floating-ui/dom';
 	import Repeat2 from '@lucide/svelte/icons/repeat-2';
 	import commands from '../commands/toolbar-commands';
-	import { Palette } from '@lucide/svelte';
+	import { LinkIcon, Palette } from '@lucide/svelte';
 	import { quickcolors } from '../utils';
+	import { page } from '$app/state';
+	import { toast } from 'svelte-sonner';
+	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 
 	interface Props {
 		editor: Editor;
@@ -27,6 +30,11 @@
 	let currentNode: Node | null = $state(null);
 	let currentNodePos: number = $state(-1);
 	let open = $state(false);
+
+	let currentNodeId = $derived.by(() => {
+		if (page.url.pathname.includes('local') || currentNode === null) return null;
+		return currentNode.attrs['id'] as string;
+	});
 
 	const pluginKey = 'globalDragHandle';
 	let element = $state(document.createElement('div'));
@@ -41,9 +49,8 @@
 			pluginKey,
 			editor,
 			computePositionConfig: {
-				strategy: 'absolute',
-				placement: 'left-start',
-				middleware: [offset({ mainAxis: 0, crossAxis: 4, alignmentAxis: -4 })]
+				strategy: 'fixed',
+				middleware: [autoPlacement({ allowedPlacements: ['left', 'left-start'] })]
 			},
 			onNodeChange
 		});
@@ -91,6 +98,11 @@
 			.run();
 	};
 
+	const handleCopyNodeLink = () => {
+		const pathName = PUBLIC_NOTA_FRONTEND_URL + page.url.pathname + `#${currentNodeId}`;
+		navigator.clipboard.writeText(pathName);
+	};
+
 	const insertNode = () => {
 		if (currentNodePos === -1) return;
 		const currentNodeSize = currentNode?.nodeSize || 0;
@@ -121,13 +133,11 @@
 	};
 </script>
 
-<div bind:this={element} class="flex items-center gap-0 pr-2 transition-all duration-300">
+<div bind:this={element} class="flex items-center gap-0 pr-2 transition-all">
 	<Button
 		variant="ghost"
-		class="size-7! rounded-sm"
-		onclick={() => {
-			open = !open;
-		}}
+		class="size-7! rounded-sm opacity-60 hover:opacity-100 focus-visible:opacity-100 active:opacity-100"
+		onclick={() => (open = !open)}
 	>
 		<GripVertical />
 	</Button>
@@ -229,6 +239,12 @@
 				Remove Formatting
 			</DropdownMenu.Item>
 			<DropdownMenu.Separator />
+			{#if currentNodeId}
+				<DropdownMenu.Item onclick={handleCopyNodeLink}>
+					<LinkIcon />
+					Copy Node Link
+				</DropdownMenu.Item>
+			{/if}
 			<DropdownMenu.Item onclick={handleDuplicate}>
 				<Duplicate />
 				Duplicate
