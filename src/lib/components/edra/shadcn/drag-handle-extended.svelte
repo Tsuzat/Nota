@@ -49,7 +49,7 @@
 			pluginKey,
 			editor,
 			computePositionConfig: {
-				strategy: 'fixed',
+				strategy: 'absolute',
 				middleware: [autoPlacement({ allowedPlacements: ['left', 'left-start', 'left-end'] })]
 			},
 			onNodeChange
@@ -152,12 +152,12 @@
 
 <div
 	bind:this={element}
-	class="flex items-center gap-0 pr-2 transition-all duration-300"
+	class="z-0! flex items-center gap-0 pr-2 transition-all duration-300"
 	style="visibility: hidden;"
 >
 	<Button
 		variant="ghost"
-		class="size-7! rounded-sm opacity-60 hover:opacity-100 focus-visible:opacity-100 active:opacity-100"
+		class="z-0! size-7! rounded-sm opacity-60 hover:opacity-100 focus-visible:opacity-100 active:opacity-100"
 		onclick={() => (open = !open)}
 	>
 		<GripVertical />
@@ -168,7 +168,7 @@
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>
-				<DropdownMenu.GroupHeading class="capitalize">
+				<DropdownMenu.GroupHeading class="text-muted-foreground capitalize">
 					{currentNode?.type.name}
 				</DropdownMenu.GroupHeading>
 				<DropdownMenu.Sub>

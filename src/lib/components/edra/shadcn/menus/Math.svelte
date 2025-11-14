@@ -40,6 +40,6 @@
 		bind:value={latex}
 		oninput={updateLatex}
 		placeholder="Enter Math Expression"
-		class="h-24 w-56"
+		class="h-48 w-96"
 	/>
 </BubbleMenu>

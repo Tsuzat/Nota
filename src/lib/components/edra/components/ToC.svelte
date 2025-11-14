@@ -5,7 +5,6 @@
 	import { TextSelection } from '@tiptap/pm/state';
 	import { pushState } from '$app/navigation';
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { flip } from 'svelte/animate';
 
 	interface Props {
 		editor: Editor;
@@ -13,18 +12,6 @@
 	}
 
 	const { editor, items }: Props = $props();
-
-	let highlighedIndex = $derived.by(() => {
-		if (!items || items.length === 0) {
-			return -1;
-		}
-		for (let i = 0; i < items.length; i++) {
-			if (!items[i].isScrolledOver) {
-				return i + 1;
-			}
-		}
-		return -1;
-	});
 
 	const onItemClick = (e: Event, id: string) => {
 		e.preventDefault();
@@ -56,6 +43,7 @@
 			variant: 'outline',
 			class: 'fixed right-4 bottom-4 size-8 rounded-full print:hidden'
 		})}
+		title=""
 	>
 		<Menu />
 	</Popover.Trigger>
@@ -84,17 +72,22 @@
 
 <Tooltip.Provider>
 	<Tooltip.Root delayDuration={100}>
-		<Tooltip.Trigger class="fixed top-1/3 right-4 flex h-full max-h-96 flex-col gap-3 ">
-			{#each items as item (item)}
-				<div class={cn('bg-muted h-[2px] w-4 rounded', item.isActive && 'bg-foreground')}></div>
+		<Tooltip.Trigger class="fixed top-1/3 right-2 my-auto flex flex-col gap-2">
+			{#each items as item (item.id)}
+				<span
+					class={cn(
+						'bg-muted block! h-0.5! w-4 rounded!',
+						item.isActive && 'bg-primary',
+						item.level === 1 ? 'w-6' : 'w-4'
+					)}
+				></span>
 			{/each}
 		</Tooltip.Trigger>
 		<Tooltip.Content
 			side="left"
 			sideOffset={-24}
 			align="start"
-			alignOffset={48}
-			class="bg-popover data-[side=left]:slide-in-from-right-56 fade-in-100 flex max-h-120 max-w-56 flex-col gap-1.5 overflow-auto border duration-300"
+			class="data-[side=left]:slide-in-from-right-56 fade-in-50 bg-popover flex max-h-120 max-w-56 flex-col gap-1.5 overflow-auto border duration-300"
 			arrowClasses="hidden"
 			strategy="absolute"
 		>
