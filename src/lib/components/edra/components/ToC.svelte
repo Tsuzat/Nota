@@ -76,7 +76,7 @@
 			{#each items as item (item.id)}
 				<span
 					class={cn(
-						'bg-muted block! h-0.5! w-4 rounded!',
+						'dark:bg-muted bg-muted-foreground/50 block! h-0.5! w-4 rounded!',
 						item.isActive && 'bg-primary',
 						item.level === 1 ? 'w-6' : 'w-4'
 					)}
@@ -100,7 +100,7 @@
 						onclick={(e) => onItemClick(e, item.id)}
 						class={cn(
 							'text-foreground text-sm text-wrap transition-all duration-500',
-							item.isScrolledOver && 'text-muted-foreground font-thin'
+							item.isScrolledOver && 'text-muted-foreground italic'
 						)}
 						style={`padding-left: calc(1rem * ${item.level - 1});`}
 					>
