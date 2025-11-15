@@ -29,7 +29,7 @@
 	import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 	import { resolve } from '$app/paths';
-	import { derived } from 'svelte/store';
+	import { compare } from 'fast-json-patch';
 
 	const { data } = $props();
 
@@ -42,7 +42,8 @@
 	// editor related
 	let editor = $state<Editor>();
 	let content = $state<Content>();
-	let pendingContent = $state<Content | null>(null);
+	let syncedContent = $state<Content>();
+	let isDirty = $state(false);
 
 	// cloud related
 	const cloudNotes = useCloudNotes();
@@ -53,6 +54,7 @@
 	let note = $state<CloudNote>();
 	let pageSettings = $derived(data.settings ?? DEFAULT_SETTINGS);
 	let syncing = $state(false);
+	let syncingText = $state('');
 
 	const onFileSelect = $derived.by(() => {
 		if (user) return (file: string) => uploadFileByPath(user.id, file);
@@ -67,18 +69,34 @@
 	});
 
 	async function saveNoteContent() {
-		if (pendingContent === null || note === undefined) return;
+		if (!isDirty || note === undefined || editor === undefined) return;
+
+		const currentContent = editor.getJSON();
+		if (syncedContent === undefined) {
+			syncedContent = currentContent;
+		}
+		const patch = compare(syncedContent as Object, currentContent);
+
+		if (patch.length === 0) {
+			isDirty = false;
+			return;
+		}
+
 		syncing = true;
+		syncingText = `Syncing ${patch.length} changes`;
 		try {
-			const { error } = await supabase
-				.from('notes')
-				.update({ content: pendingContent })
-				.eq('id', note.id);
+			const { error } = await supabase.rpc('apply_note_patch', {
+				note_id: note.id,
+				patch: patch
+			});
+
 			if (error) {
 				console.error(error);
 				toast.error(error.message);
+			} else {
+				syncedContent = currentContent;
+				isDirty = false;
 			}
-			pendingContent = null;
 		} catch (error) {
 			console.error(error);
 			toast.error('Something went wrong when saving content to cloud');
@@ -90,9 +108,7 @@
 	onMount(() => {
 		// auto save is called in every 2 mins
 		const saveInterval = setInterval(() => {
-			if (pendingContent !== null) {
-				saveNoteContent();
-			}
+			saveNoteContent();
 		}, 120000);
 		return () => clearInterval(saveInterval);
 	});
@@ -116,7 +132,10 @@
 				goto(resolve('/home'));
 			}
 			if (data) {
-				content = data.content as Content;
+				const dbContent = data.content as Content;
+				content = dbContent;
+				syncedContent = dbContent;
+				isDirty = false;
 			}
 		} catch (error) {
 			console.error(error);
@@ -127,12 +146,8 @@
 		}
 	}
 
-	async function onUpdate() {
-		try {
-			pendingContent = editor?.getJSON() as Content;
-		} catch (error) {
-			console.error(error);
-		}
+	function onUpdate() {
+		isDirty = true;
 	}
 
 	async function updateIcon(icon: string) {
@@ -178,7 +193,7 @@
 	}
 
 	beforeNavigate(async () => {
-		if (pendingContent !== null) {
+		if (isDirty) {
 			await saveNoteContent();
 		}
 	});
@@ -240,7 +255,7 @@
 				</div>
 				<SearchAndReplace {editor} />
 			{/if}
-			<SimpleTooltip content={syncing ? 'Syncing' : 'Synced'}>
+			<SimpleTooltip content={syncing ? syncingText : 'Synced'}>
 				<Button variant="ghost" size="icon" class="size-7">
 					{#if syncing}
 						<Loader class="text-primary animate-spin" />
