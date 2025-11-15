@@ -87,11 +87,12 @@
 	}
 
 	onMount(() => {
+		// auto save is called in every 2 mins
 		const saveInterval = setInterval(() => {
 			if (pendingContent !== null) {
 				saveNoteContent();
 			}
-		}, 10000);
+		}, 120000);
 		return () => clearInterval(saveInterval);
 	});
 
@@ -180,7 +181,16 @@
 			await saveNoteContent();
 		}
 	});
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+			e.preventDefault();
+			saveNoteContent();
+		}
+	}
 </script>
+
+<svelte:document onkeydown={handleKeydown} />
 
 {#if isLoading}
 	<div class="flex size-full flex-col items-center justify-center">
