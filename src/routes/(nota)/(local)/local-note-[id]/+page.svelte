@@ -18,9 +18,9 @@
 	import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import Loader from '@lucide/svelte/icons/loader';
 	import { type Content, type Editor } from '@tiptap/core';
-	import { onDestroy, onMount, untrack } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { DEFAULT_SETTINGS, type NotePageSettingsType } from '$lib/types';
+	import { DEFAULT_SETTINGS } from '$lib/types';
 	import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
@@ -74,18 +74,19 @@
 	onMount(() => {
 		const saveInterval = setInterval(() => {
 			if (pendingContent !== undefined && pendingContent !== null) {
-				saveContent(pendingContent);
+				saveContent();
 			}
 		}, 1000);
 		return () => clearInterval(saveInterval);
 	});
 
-	async function saveContent(content: Content) {
-		if (note === undefined) return;
+	async function saveContent() {
+		if (note === undefined || pendingContent === undefined || pendingContent === null) return;
 		await DB.execute('UPDATE notes SET content = $1 WHERE id = $2', [
-			JSON.stringify(content),
+			JSON.stringify(pendingContent),
 			note.id
 		]);
+		pendingContent = null;
 	}
 
 	const onFileSelect = async (file: string) => moveFileToAssets(file);
@@ -113,9 +114,8 @@
 	}
 
 	beforeNavigate(() => {
-		/// Save before changing the route
 		if (pendingContent !== undefined && pendingContent !== null) {
-			saveContent(pendingContent);
+			saveContent();
 		}
 		pendingContent = undefined;
 	});
@@ -164,8 +164,8 @@
 		}
 		if ((event.ctrlKey || event.metaKey) && event.key === 's') {
 			event.preventDefault();
-			const content = editor?.getJSON() as Content;
-			toast.promise(saveContent(content), {
+			pendingContent = editor?.getJSON() as Content;
+			toast.promise(saveContent(), {
 				loading: 'Saving to local store',
 				success: 'Note saved',
 				error: (err) => {

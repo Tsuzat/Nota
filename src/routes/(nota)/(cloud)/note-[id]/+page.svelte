@@ -78,6 +78,7 @@
 				console.error(error);
 				toast.error(error.message);
 			}
+			pendingContent = null;
 		} catch (error) {
 			console.error(error);
 			toast.error('Something went wrong when saving content to cloud');

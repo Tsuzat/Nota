@@ -71,18 +71,19 @@
 	onMount(() => {
 		const saveInterval = setInterval(() => {
 			if (pendingContent !== undefined && pendingContent !== null) {
-				saveContent(pendingContent);
+				saveContent();
 			}
 		}, 1000);
 		return () => clearInterval(saveInterval);
 	});
 
-	async function saveContent(content: Content) {
-		if (workspace === undefined) return;
+	async function saveContent() {
+		if (workspace === undefined || pendingContent === undefined || pendingContent === null) return;
 		await DB.execute('UPDATE workspaces SET content = $1 WHERE id = $2', [
-			JSON.stringify(content),
+			JSON.stringify(pendingContent),
 			workspace.id
 		]);
+		pendingContent = null;
 	}
 
 	const onFileSelect = async (file: string) => moveFileToAssets(file);
@@ -111,9 +112,9 @@
 
 	beforeNavigate(() => {
 		if (pendingContent !== undefined && pendingContent !== null) {
-			saveContent(pendingContent);
+			saveContent();
 		}
-		pendingContent = undefined;
+		pendingContent = null;
 	});
 
 	onDestroy(() => {
@@ -149,8 +150,8 @@
 		}
 		if ((event.ctrlKey || event.metaKey) && event.key === 's') {
 			event.preventDefault();
-			const content = editor?.getJSON() as Content;
-			toast.promise(saveContent(content), {
+			pendingContent = editor?.getJSON() as Content;
+			toast.promise(saveContent(), {
 				loading: 'Saving the content to local DB',
 				success: 'Content saved',
 				error: (err) => {
