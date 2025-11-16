@@ -37,42 +37,9 @@
 	};
 </script>
 
-<!-- <Popover.Root>
-	<Popover.Trigger
-		class={buttonVariants({
-			variant: 'outline',
-			class: 'fixed right-4 bottom-4 size-8 rounded-full print:hidden'
-		})}
-		title=""
-	>
-		<Menu />
-	</Popover.Trigger>
-	<Popover.Content class="flex max-h-96 max-w-56 flex-col gap-1.5 overflow-auto p-2!">
-		{#if items === undefined || items.length === 0}
-			<div>No contents</div>
-		{:else}
-			{#each items as item (item.id)}
-				<a
-					href={`#${item.id}`}
-					onclick={(e) => onItemClick(e, item.id)}
-					data-item-index={item.itemIndex}
-					class={cn(
-						'text-foreground text-sm text-wrap transition-all duration-500',
-						item.isScrolledOver && 'text-muted-foreground font-thin'
-					)}
-					class:is-active={item.isActive && !item.isScrolledOver}
-					style={`padding-left: calc(1rem * ${item.level - 1});`}
-				>
-					{item.textContent}
-				</a>
-			{/each}
-		{/if}
-	</Popover.Content>
-</Popover.Root> -->
-
 <Tooltip.Provider>
 	<Tooltip.Root delayDuration={100}>
-		<Tooltip.Trigger class="fixed top-1/3 right-2 my-auto flex flex-col gap-2">
+		<Tooltip.Trigger class="fixed top-1/3 right-2 my-auto flex flex-col gap-2 print:hidden">
 			{#each items as item (item.id)}
 				<span
 					class={cn(
@@ -87,7 +54,7 @@
 			side="left"
 			sideOffset={-24}
 			align="start"
-			class="data-[side=left]:slide-in-from-right-56 fade-in-50 bg-popover flex max-h-120 max-w-56 flex-col gap-1.5 overflow-auto border duration-300"
+			class="data-[side=left]:slide-in-from-right-56 fade-in-50 bg-popover flex max-h-120 min-h-8 max-w-56 flex-col gap-1.5 overflow-auto border duration-300"
 			arrowClasses="hidden"
 			strategy="absolute"
 		>

@@ -56,6 +56,8 @@
 				{#each commandGroup as command (command)}
 					{#if command.name === 'link'}
 						<Link {editor} />
+					{:else if command.name === 'paragraph'}
+						<span></span>
 					{:else}
 						<ToolBarIcon {editor} {command} />
 					{/if}
