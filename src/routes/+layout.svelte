@@ -9,6 +9,7 @@
 	import { invalidate } from '$app/navigation';
 	import { setGlobalSignInContext, GlobalSignIn } from '$lib/components/custom/global-signin';
 	import { useDeepLinkAuth } from '$lib/handleOAuth';
+	import { toast } from 'svelte-sonner';
 
 	useDeepLinkAuth();
 	setGlobalSignInContext();
@@ -17,27 +18,25 @@
 	let { children } = $props();
 
 	onMount(() => {
-		const { data } = supabase.auth.onAuthStateChange((event, newSession) => {
-			const session = sessionAndUser.getSession();
-			if (newSession?.expires_at !== session?.expires_at) {
-				invalidate('supabase:auth');
-				sessionAndUser.setSession(null);
-				sessionAndUser.setUser(null);
-			} else if (newSession?.user !== session?.user) {
-				invalidate('supabase:auth');
-				sessionAndUser.setSession(null);
-				sessionAndUser.setUser(null);
+		const id = toast.loading('Authenticating...');
+		const { data } = supabase.auth.onAuthStateChange((event, session) => {
+			if (event === 'INITIAL_SESSION') {
+				if (session) {
+					toast.success('Signed in successfully!', { id });
+				} else {
+					toast.dismiss(id);
+				}
 			}
-			if (event === 'INITIAL_SESSION' && newSession) {
-				sessionAndUser.setSession(newSession);
-				sessionAndUser.setUser(newSession?.user);
-			} else if (event === 'SIGNED_IN' && newSession) {
-				sessionAndUser.setSession(newSession);
-				sessionAndUser.setUser(newSession?.user);
-			} else if (event === 'SIGNED_OUT' && newSession) {
-				invalidate('supabase:auth');
+			if (event === 'SIGNED_OUT') {
 				sessionAndUser.setSession(null);
 				sessionAndUser.setUser(null);
+				invalidate('supabase:auth');
+			} else if (session) {
+				sessionAndUser.setSession(session);
+				sessionAndUser.setUser(session.user);
+				if (event === 'SIGNED_IN') {
+					invalidate('supabase:auth');
+				}
 			}
 		});
 		return () => data.subscription.unsubscribe();
