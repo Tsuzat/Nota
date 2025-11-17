@@ -15,6 +15,7 @@
 	import { onMount } from 'svelte';
 	import { ISTAURI } from '$lib/utils';
 	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
 
 	const user = $derived(getSessionAndUserContext().getUser());
 
@@ -47,7 +48,7 @@
 					<Dropdown.Label class="text-xs">
 						{user.email}
 					</Dropdown.Label>
-					<Dropdown.Item>
+					<Dropdown.Item onclick={() => goto(resolve('/profile'))}>
 						<UserRound />
 						<span>Profile</span>
 					</Dropdown.Item>

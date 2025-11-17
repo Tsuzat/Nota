@@ -19,6 +19,7 @@
 	import Trash from '$lib/components/icons/moving-icons/trash.svelte';
 	import Download from '$lib/components/icons/moving-icons/download.svelte';
 	import Login from '$lib/components/icons/moving-icons/login.svelte';
+	import { openUrl } from '@tauri-apps/plugin-opener';
 
 	let isTrashHovered = $state(false);
 	let isDownloadHovered = $state(false);
@@ -81,7 +82,7 @@
 					<Trash size={18} isHovered={isTrashHovered} />
 					<span>Trash</span>
 				</Sidebar.MenuButton>
-				<Sidebar.MenuBadge class="bg-muted !text-primary rounded-full p-1.5">
+				<Sidebar.MenuBadge class="bg-muted text-primary! rounded-full p-1.5">
 					{trashedNotes}
 				</Sidebar.MenuBadge>
 				<Trashed bind:open />
@@ -97,7 +98,7 @@
 							<Download size={18} isHovered={isDownloadHovered} />
 							<span>Click to Update</span>
 						</Sidebar.MenuButton>
-						<Sidebar.MenuBadge class="bg-muted !text-primary rounded-full p-1.5">
+						<Sidebar.MenuBadge class="bg-muted text-primary! rounded-full p-1.5">
 							{update.version}
 						</Sidebar.MenuBadge>
 					</Sidebar.MenuItem>
@@ -171,8 +172,7 @@
 							<DropdownMenu.Group>
 								<DropdownMenu.Item
 									onclick={async () => {
-										let token = session?.access_token;
-										await navigator.clipboard.writeText(token ?? 'Hello');
+										await openUrl('https://nota.tsuzat.com/profile');
 									}}
 								>
 									<CircleUser />
