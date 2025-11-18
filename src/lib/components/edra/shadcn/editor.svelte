@@ -43,6 +43,7 @@
 	} from '@tiptap/extension-table-of-contents';
 	import ToC from '../components/ToC.svelte';
 	import { toast } from 'svelte-sonner';
+	import AI from './menus/AI.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -162,6 +163,7 @@
 	<TableRow {editor} />
 	<Math {editor} mathPos={blockMathPos} mathLatex={blockMathLatex} />
 	<MathInline {editor} mathPos={inlineMathPos} mathLatex={inlineMathLatex} />
+	<AI {editor} />
 	<ToC {editor} items={tocItems} />
 {/if}
 

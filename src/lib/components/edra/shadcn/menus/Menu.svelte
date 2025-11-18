@@ -12,9 +12,10 @@
 	import ToolBarIcon from '../components/ToolBarIcon.svelte';
 	import Link from '../components/toolbar/Link.svelte';
 	import Lists from '../components/toolbar/Lists.svelte';
-	import AI from '../components/toolbar/AI.svelte';
 	import { getGlobalSettings } from '$lib/components/custom/settings/constants.svelte.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import { addAIHighlight } from '../../extensions/AIHighLight.js';
 
 	const {
 		editor,
@@ -67,6 +68,7 @@
 		if (editor.isActive('iframe')) return false;
 		if (editor.isActive('audio')) return false;
 		if (editor.isActive('blockMath') || editor.isActive('inlineMath')) return false;
+		if (editor.isActive('ai-highlight')) return false;
 		const {
 			state: {
 				doc,
@@ -128,7 +130,13 @@
 		{@render children()}
 	{:else}
 		{#if showAI}
-			<AI {editor} />
+			<Button variant="ghost" onclick={() => addAIHighlight(editor)}>
+				<span
+					class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+				>
+					Ask AI</span
+				>
+			</Button>
 		{/if}
 		{#each toolbarCommands.filter((c) => !excludedCommands?.includes(c)) as cmd (cmd)}
 			{#if cmd === 'headings'}

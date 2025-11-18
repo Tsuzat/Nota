@@ -15,7 +15,7 @@
 	import { autoPlacement } from '@floating-ui/dom';
 	import Repeat2 from '@lucide/svelte/icons/repeat-2';
 	import commands from '../commands/toolbar-commands';
-	import { LinkIcon, Palette } from '@lucide/svelte';
+	import { LinkIcon, Palette, Sparkle } from '@lucide/svelte';
 	import { quickcolors } from '../utils';
 	import { page } from '$app/state';
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
@@ -148,6 +148,11 @@
 			.focus(focusPos)
 			.run();
 	};
+
+	function handleAIHighlight() {
+		if (currentNodePos === -1) return;
+		editor.chain().setNodeSelection(currentNodePos).setAIHighlight({ color: '#c1ecf970' }).run();
+	}
 </script>
 
 <div
@@ -266,6 +271,10 @@
 					Copy Node Link
 				</DropdownMenu.Item>
 			{/if}
+			<DropdownMenu.Item onclick={handleAIHighlight}>
+				<Sparkle />
+				Ask AI
+			</DropdownMenu.Item>
 			<DropdownMenu.Item onclick={handleDuplicate}>
 				<Duplicate />
 				Duplicate

@@ -15,6 +15,7 @@ import AutoJoiner from 'tiptap-extension-auto-joiner';
 import 'katex/dist/katex.min.css';
 import { InlineMathReplacer } from './extensions/InlineMathReplacer';
 import { Markdown } from '@tiptap/markdown';
+import { AIHighlight } from './extensions/AIHighLight';
 
 export default (
 	element?: HTMLElement,
@@ -68,6 +69,7 @@ export default (
 					return '';
 				}
 			}),
+			AIHighlight,
 			Color,
 			Subscript,
 			Superscript,

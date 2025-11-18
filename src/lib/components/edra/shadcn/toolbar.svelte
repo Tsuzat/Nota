@@ -13,6 +13,8 @@
 	import AI from './components/toolbar/AI.svelte';
 	import { getGlobalSettings } from '$lib/components/custom/settings/constants.svelte.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import { addAIHighlight } from '../extensions/AIHighLight.js';
 
 	const { editor, class: className, excludedCommands, children }: EdraToolbarProps = $props();
 
@@ -40,7 +42,13 @@
 		{@render children()}
 	{:else}
 		{#if showAI}
-			<AI {editor} />
+			<Button variant="ghost" onclick={() => addAIHighlight(editor)}>
+				<span
+					class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+				>
+					Ask AI</span
+				>
+			</Button>
 		{/if}
 		{#each toolbarCommands as cmd (cmd)}
 			{#if cmd === 'headings'}
