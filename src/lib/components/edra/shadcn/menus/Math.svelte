@@ -8,9 +8,10 @@
 		editor: Editor;
 		mathPos: number;
 		mathLatex: string;
+		parentElement?: HTMLElement;
 	}
 
-	const { editor, mathPos, mathLatex }: Props = $props();
+	const { editor, mathPos, mathLatex, parentElement }: Props = $props();
 
 	let latex = $derived(mathLatex);
 
@@ -31,8 +32,14 @@
 		return editor.isActive('blockMath');
 	}}
 	options={{
-		strategy: 'absolute',
-		placement: 'top'
+		shift: {
+			crossAxis: true
+		},
+		autoPlacement: {
+			allowedPlacements: ['top', 'bottom']
+		},
+		strategy: 'fixed',
+		scrollTarget: parentElement
 	}}
 	class="bg-popover h-fit w-fit flex-col items-center gap-1 rounded-lg border shadow-lg"
 >

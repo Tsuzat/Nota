@@ -123,7 +123,9 @@
 		shift: true,
 		autoPlacement: {
 			allowedPlacements: ['top', 'top-end', 'top-start']
-		}
+		},
+		strategy: 'fixed',
+		scrollTarget: document.getElementById('nota-editor') ?? undefined
 	}}
 >
 	{#if children}

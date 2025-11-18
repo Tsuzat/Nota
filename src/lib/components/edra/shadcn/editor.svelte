@@ -158,12 +158,17 @@
 </script>
 
 {#if editor && !editor.isDestroyed}
-	<Link {editor} />
-	<AI {editor} {element} />
+	<Link {editor} parentElement={element} />
+	<AI {editor} parentElement={element} />
 	<TableCol {editor} />
 	<TableRow {editor} />
-	<Math {editor} mathPos={blockMathPos} mathLatex={blockMathLatex} />
-	<MathInline {editor} mathPos={inlineMathPos} mathLatex={inlineMathLatex} />
+	<Math {editor} mathPos={blockMathPos} mathLatex={blockMathLatex} parentElement={element} />
+	<MathInline
+		{editor}
+		mathPos={inlineMathPos}
+		mathLatex={inlineMathLatex}
+		parentElement={element}
+	/>
 	<ToC {editor} items={tocItems} />
 {/if}
 

@@ -14,9 +14,9 @@
 
 	interface Props {
 		editor: Editor;
+		parentElement?: HTMLElement;
 	}
-
-	const { editor }: Props = $props();
+	const { editor, parentElement }: Props = $props();
 
 	let link = $derived.by(() => editor.getAttributes('link').href);
 
@@ -45,7 +45,12 @@
 		}
 	}}
 	options={{
-		strategy: 'fixed'
+		shift: true,
+		autoPlacement: {
+			allowedPlacements: ['top', 'top-end', 'top-start']
+		},
+		strategy: 'fixed',
+		scrollTarget: parentElement
 	}}
 	class="bg-popover flex h-fit w-fit items-center gap-1 rounded-lg border p-1 shadow-lg"
 >

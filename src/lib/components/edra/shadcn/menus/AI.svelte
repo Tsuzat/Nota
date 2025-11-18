@@ -31,9 +31,9 @@
 
 	interface Props {
 		editor: Editor;
-		element?: HTMLElement;
+		parentElement?: HTMLElement;
 	}
-	const { editor, element }: Props = $props();
+	const { editor, parentElement }: Props = $props();
 
 	function shouldShow(props: ShouldShowProps) {
 		if (!props.editor.isEditable || props.editor.isDestroyed) return false;
@@ -184,6 +184,7 @@
 	}
 </script>
 
+<!-- BubbleMenu usage -->
 <BubbleMenu
 	{editor}
 	pluginKey="edra-bubble-menu"
@@ -197,7 +198,7 @@
 		autoPlacement: {
 			allowedPlacements: ['bottom', 'top']
 		},
-		scrollTarget: element
+		scrollTarget: parentElement
 	}}
 >
 	{#if aiState === AIState.Idle}
