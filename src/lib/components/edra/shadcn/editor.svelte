@@ -159,11 +159,11 @@
 
 {#if editor && !editor.isDestroyed}
 	<Link {editor} />
+	<AI {editor} {element} />
 	<TableCol {editor} />
 	<TableRow {editor} />
 	<Math {editor} mathPos={blockMathPos} mathLatex={blockMathLatex} />
 	<MathInline {editor} mathPos={inlineMathPos} mathLatex={inlineMathLatex} />
-	<AI {editor} />
 	<ToC {editor} items={tocItems} />
 {/if}
 

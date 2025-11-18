@@ -2,7 +2,6 @@
 	import { type Editor } from '@tiptap/core';
 	import type { ShouldShowProps } from '../../types';
 	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import { cn } from '$lib/utils';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import ArrowUp from '@lucide/svelte/icons/arrow-up';
@@ -12,10 +11,13 @@
 	import TextWrap from '@lucide/svelte/icons/text-wrap';
 	import CheckCheck from '@lucide/svelte/icons/check-check';
 	import Sparkle from '@lucide/svelte/icons/sparkle';
+	import ArrowDown from '@lucide/svelte/icons/arrow-down';
+	import X from '@lucide/svelte/icons/x';
 	import { toast } from 'svelte-sonner';
 	import { removeAIHighlight } from '../../extensions/AIHighLight';
 	import { Separator } from '$lib/components/ui/separator';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
+	import { Streamdown } from 'svelte-streamdown';
 	import {
 		CONTINUE_WRITING,
 		FIX_GRAMMER_PROMPT,
@@ -24,29 +26,40 @@
 		SUMMARIZE_PROMPT
 	} from '$lib/supabase/ai/prompt';
 	import { callAI } from '$lib/supabase/ai';
+	import { mode } from 'mode-watcher';
+	import { migrateMathStrings } from '@tiptap/extension-mathematics';
 
 	interface Props {
 		editor: Editor;
-		className?: string;
+		element?: HTMLElement;
 	}
-	const { editor, className }: Props = $props();
+	const { editor, element }: Props = $props();
 
 	function shouldShow(props: ShouldShowProps) {
-		if (!props.editor.isEditable) return false;
+		if (!props.editor.isEditable || props.editor.isDestroyed) return false;
 		const { view, editor } = props;
 		if (!view || editor.view.dragging) {
 			return false;
 		}
-		if (props.editor.isActive('ai-highlight') && !editor.state.selection.empty) {
+		if (editor.isActive('ai-highlight') && !editor.state.selection.empty) {
 			return true;
 		} else {
 			removeAIHighlight(editor);
+			aiState = AIState.Idle;
+			aiResponse = '';
 			return false;
 		}
 	}
 
+	enum AIState {
+		Idle = 'Idle',
+		Thinking = 'Thinking',
+		Confirmation = 'Confirmation'
+	}
+
 	let inputValue = $state('');
-	let aiThinking = $state(false);
+	let aiState = $state(AIState.Idle);
+	let aiResponse = $state('');
 
 	const session = $derived(getSessionAndUserContext().getSession());
 
@@ -56,11 +69,6 @@
 		if (editor.markdown) return editor.markdown.serialize(slice.toJSON());
 	}
 
-	function insertMD(text: string) {
-		const { from, to } = editor.view.state.selection;
-		editor.chain().focus().insertContentAt({ from, to }, text, { contentType: 'markdown' }).run();
-	}
-
 	async function processText(type: 'shorter' | 'longer' | 'summarize' | 'grammer' | 'continue') {
 		const id = Symbol('AI_THINKING_TOAST').toString();
 		const selectedText = getSelectionText();
@@ -68,7 +76,7 @@
 			toast.error('Can not get the selected content from editor', { id });
 			return;
 		}
-		aiThinking = true;
+		aiState = AIState.Thinking;
 		try {
 			let prompt = '';
 			switch (type) {
@@ -96,17 +104,17 @@
 			const data = await callAI(prompt, token);
 			if (data.error) {
 				toast.error(data.error, { id });
+				aiState = AIState.Idle;
 				return;
 			}
 			if (data.text) {
-				insertMD(data.text);
-				toast.success('AI Changes are done!', { id });
+				aiResponse = data.text;
+				aiState = AIState.Confirmation;
 			}
 		} catch (error) {
+			aiState = AIState.Idle;
 			console.error(error);
 			toast.error('Something went wrong! Check console.', { id });
-		} finally {
-			aiThinking = false;
 		}
 	}
 
@@ -125,6 +133,7 @@
 		if (!inputValue) return;
 		const text = getSelectionText();
 		if (!text) return;
+		aiState = AIState.Thinking;
 		try {
 			const token = session?.access_token;
 			const prompt = `${text}\n\n\n${inputValue}`;
@@ -135,16 +144,43 @@
 			const data = await callAI(prompt, token);
 			if (data.error) {
 				toast.error(data.error);
+				aiState = AIState.Idle;
 				return;
 			}
 			if (data.text) {
-				insertMD(data.text);
-				toast.success('AI Changes are done!');
+				aiResponse = data.text;
+				aiState = AIState.Confirmation;
 			}
 		} catch (error) {
+			aiState = AIState.Idle;
 			console.error(error);
 			toast.error('Something went wrong! Check console.');
+		} finally {
+			inputValue = '';
 		}
+	}
+
+	function replaceSelection() {
+		const { from, to } = editor.view.state.selection;
+		editor
+			.chain()
+			.focus()
+			.insertContentAt({ from, to }, aiResponse, { contentType: 'markdown' })
+			.run();
+	}
+
+	function insertNext() {
+		const { to } = editor.view.state.selection;
+		editor
+			.chain()
+			.focus()
+			.insertContentAt(to + 1, aiResponse, { contentType: 'markdown' })
+			.run();
+	}
+
+	function discardChanges() {
+		aiResponse = '';
+		aiState = AIState.Idle;
 	}
 </script>
 
@@ -152,16 +188,19 @@
 	{editor}
 	pluginKey="edra-bubble-menu"
 	{shouldShow}
-	class={cn('bg-popover h-fit rounded-lg border p-0 transition-all duration-500', className)}
+	class="bg-popover flex max-h-120 max-w-3xl flex-col rounded-lg border p-0 transition-[height] duration-500"
 	options={{
-		shift: true,
+		shift: {
+			crossAxis: true
+		},
+		strategy: 'fixed',
 		autoPlacement: {
-			allowedPlacements: ['bottom'],
-			autoAlignment: true
-		}
+			allowedPlacements: ['bottom', 'top']
+		},
+		scrollTarget: element
 	}}
 >
-	{#if !aiThinking}
+	{#if aiState === AIState.Idle}
 		<form onsubmit={handleSubmit} class="flex items-center justify-between gap-2 p-2">
 			<Input
 				bind:value={inputValue}
@@ -173,7 +212,7 @@
 				<ArrowUp />
 			</Button>
 		</form>
-		<div class="flex max-h-56 flex-col gap-1 overflow-auto">
+		<div class="flex flex-col gap-1 overflow-auto">
 			<Separator orientation="horizontal" />
 			<small class="text-muted-foreground ml-4 p-1 text-start">Quick Actions</small>
 			<button
@@ -216,19 +255,63 @@
 				<span>Fix Grammer</span>
 			</button>
 		</div>
-	{:else}
-		<div class="inline-flex min-w-56 items-center gap-2 p-2">
-			<Sparkle class="size-4!" />
-			<div>AI is thinking</div>
-			<div class="flex h-5 items-center space-x-1">
-				{#each Array(3) as _, i}
-					<div
-						class="bg-primary h-2 w-2 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
-						style:animation-delay="{i * 160}ms"
-					></div>
-				{/each}
-				<span class="sr-only">Loading</span>
+	{:else if aiState === AIState.Thinking}
+		<div class="animated-gradient-border rounded-lg p-0.25">
+			<div class="bg-popover inline-flex items-center gap-2 rounded p-2">
+				<Sparkle class="size-4!" />
+				<div>AI is thinking</div>
+				<div class="flex h-5 items-center space-x-1">
+					{#each Array(3) as _, i}
+						<div
+							class="bg-primary h-2 w-2 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
+							style:animation-delay="{i * 160}ms"
+						></div>
+					{/each}
+					<span class="sr-only">Loading</span>
+				</div>
 			</div>
 		</div>
+	{:else if aiState === AIState.Confirmation}
+		<div class="flex items-center justify-between gap-2 px-2 py-1">
+			<small>Actions:</small>
+			<Button size="sm" onclick={replaceSelection}>
+				<CheckCheck />
+				Replace Selection
+			</Button>
+			<Button size="sm" onclick={insertNext}>
+				<ArrowDown />
+				Insert Next
+			</Button>
+			<Button variant="destructive" size="sm" onclick={discardChanges}>
+				<X />
+				Discard Changes
+			</Button>
+		</div>
+		<Separator />
+		<Streamdown
+			content={aiResponse}
+			class="w-full max-w-xl flex-1 grow overflow-auto px-4 py-2 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+			shikiTheme={mode.current === 'dark' ? 'one-dark-pro' : 'one-light'}
+			shikiPreloadThemes={['one-dark-pro', 'one-light']}
+			baseTheme="shadcn"
+		/>
 	{/if}
 </BubbleMenu>
+
+<style>
+	@property --angle {
+		syntax: '<angle>';
+		inherits: false;
+		initial-value: 0deg;
+	}
+	@keyframes rotate {
+		to {
+			--angle: 360deg;
+		}
+	}
+	.animated-gradient-border {
+		background: conic-gradient(from var(--angle), #a855f7, #06b6d4, #22c55e, #f59e0b, #ef4444);
+		animation: rotate 2s linear infinite;
+		border-radius: 4px !important;
+	}
+</style>
