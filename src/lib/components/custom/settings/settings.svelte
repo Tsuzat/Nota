@@ -1,18 +1,23 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
-	import SunMoon from '@lucide/svelte/icons/sun-moon';
-	import Sparkle from '@lucide/svelte/icons/sparkle';
 	import { getGlobalSettings } from './constants.svelte';
-	import ToggleMode from '../toggle-mode.svelte';
-	import { Switch } from '$lib/components/ui/switch';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
+	import PaintbrushIcon from '@lucide/svelte/icons/paintbrush';
+	import { Pen, Sparkles, User } from '@lucide/svelte';
+	import * as Tabs from '$lib/components/ui/tabs';
+	import Account from './components/account.svelte';
+	import Editor from './components/editor.svelte';
+	import AI from './components/ai.svelte';
+	import Appearance from './components/appearance.svelte';
 
 	const useSettings = getGlobalSettings();
-	const useSessionAndUser = getSessionAndUserContext();
 
-	let disableAIToggle = $derived.by(() => {
-		return useSessionAndUser.getSession() === null && useSessionAndUser.getUser() === null;
-	});
+	const nav = [
+		{ name: 'Account', icon: User, component: Account },
+		{ name: 'Editor', icon: Pen, component: Editor },
+		{ name: 'AI', icon: Sparkles, component: AI },
+		{ name: 'Appearance', icon: PaintbrushIcon, component: Appearance }
+	];
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === ',' && (e.metaKey || e.ctrlKey)) {
@@ -27,69 +32,25 @@
 <Dialog.Root bind:open={useSettings.open}>
 	<Dialog.Trigger class="sr-only">Open</Dialog.Trigger>
 	<Dialog.Content
-		class="mx-auto flex min-h-[80vh] min-w-[50vw] flex-col gap-4"
-		portalProps={{ disabled: true, to: undefined }}
+		class="overflow-hidden p-2 transition-all duration-500 md:max-h-[500px] md:max-w-[700px] lg:max-w-[800px]"
+		trapFocus={false}
 		showCloseButton={false}
 	>
-		<h3>Settings</h3>
-		<div id="user" class="setting-tile" title="Window Preferences">
-			<div class="left">
-				<div class="title">
-					<SunMoon class="size-4" />
-					<span>Theme</span>
-				</div>
-				<div class="description">Toggle theme between light and dark</div>
-			</div>
-			<div class="right flex items-center gap-2">
-				<ToggleMode />
-			</div>
-		</div>
-		<div id="user" class="setting-tile" title="Window Preferences">
-			<div class="left">
-				<div class="title">
-					<Sparkle class="size-4" />
-					<span>Use AI</span>
-				</div>
-				<div class="description">Pro members can use AI in Notes. You need to be logged in.</div>
-			</div>
-			<div class="right flex items-center gap-2">
-				<Switch bind:checked={useSettings.useAI} disabled={disableAIToggle} />
-			</div>
-		</div>
+		<Tabs.Root value="account">
+			<Tabs.List class="mx-auto inline-flex items-center justify-between">
+				{#each nav as item}
+					<Tabs.Trigger value={item.name.toLowerCase()}>
+						<svelte:component this={item.icon} class="h-4 w-4" />
+						<span>{item.name}</span>
+					</Tabs.Trigger>
+				{/each}
+			</Tabs.List>
+
+			{#each nav as item}
+				<Tabs.Content class="w-full" value={item.name.toLowerCase()}>
+					<svelte:component this={item.component} />
+				</Tabs.Content>
+			{/each}
+		</Tabs.Root>
 	</Dialog.Content>
 </Dialog.Root>
-
-<style>
-	.setting-tile {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.5rem;
-		border-radius: 0.5rem;
-		background-color: var(--background-secondary);
-		border: 1px solid var(--border-color);
-		margin-bottom: 0.5rem;
-	}
-
-	.setting-tile .left {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.setting-tile .left .title {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-	}
-
-	.setting-tile .left .description {
-		color: var(--color-muted-foreground);
-	}
-
-	.setting-tile .right {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-</style>
