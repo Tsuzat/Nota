@@ -47,6 +47,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{note?.name || 'Preview Note'}</title>
+</svelte:head>
+
 {#if note !== undefined}
 	<div class="fixed top-2 right-2 ml-auto flex items-center gap-2 print:hidden">
 		<ToggleMode />
