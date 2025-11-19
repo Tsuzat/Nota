@@ -10,14 +10,18 @@
 	import { setGlobalSignInContext, GlobalSignIn } from '$lib/components/custom/global-signin';
 	import { useDeepLinkAuth } from '$lib/handleOAuth';
 	import { toast } from 'svelte-sonner';
+	import { setGlobalSettings } from '$lib/components/custom/settings';
+	import { setTheme } from '$lib/theme';
 
 	useDeepLinkAuth();
 	setGlobalSignInContext();
+	const useSettings = setGlobalSettings();
 	const sessionAndUser = setSessionAndUserContext();
 
 	let { children } = $props();
 
 	onMount(() => {
+		setTheme(useSettings.themeColor);
 		const id = toast.loading('Authenticating...');
 		const { data } = supabase.auth.onAuthStateChange((event, session) => {
 			if (event === 'INITIAL_SESSION') {
