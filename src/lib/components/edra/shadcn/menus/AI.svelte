@@ -190,7 +190,7 @@
 		shift: {
 			crossAxis: true
 		},
-		strategy: 'fixed',
+		strategy: 'absolute',
 		autoPlacement: {
 			allowedPlacements: ['bottom', 'top']
 		},
@@ -276,7 +276,7 @@
 		{:else}
 			<div transition:fade class="flex items-center justify-between gap-2 px-2 py-1">
 				<small>Actions:</small>
-				<Button size="sm" onclick={replaceSelection}>
+				<Button variant="secondary" size="sm" onclick={replaceSelection}>
 					<CheckCheck />
 					Replace Selection
 				</Button>

@@ -66,16 +66,16 @@
 <Sidebar.Group class="mt-auto">
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
-			<Sidebar.MenuItem
-				onclick={() => (useSettings.open = !useSettings.open)}
-				onmouseenter={() => (isSettingsHovered = true)}
-				onmouseleave={() => (isSettingsHovered = false)}
-			>
-				<Sidebar.MenuButton>
+			<Sidebar.MenuItem>
+				<Sidebar.MenuButton
+					onclick={() => (useSettings.open = !useSettings.open)}
+					onmouseenter={() => (isSettingsHovered = true)}
+					onmouseleave={() => (isSettingsHovered = false)}
+				>
 					<Settings size={18} isHovered={isSettingsHovered} />
 					<span>Settings</span>
 				</Sidebar.MenuButton>
-				<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded-md p-1.5">
+				<Sidebar.MenuBadge class="bg-muted text-primary! rounded-md p-1.5">
 					{getKeyboardShortcut(',', true)}
 				</Sidebar.MenuBadge>
 			</Sidebar.MenuItem>

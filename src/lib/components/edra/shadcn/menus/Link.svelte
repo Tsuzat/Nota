@@ -49,7 +49,7 @@
 		autoPlacement: {
 			allowedPlacements: ['top', 'top-end', 'top-start']
 		},
-		strategy: 'fixed',
+		strategy: 'absolute',
 		scrollTarget: parentElement
 	}}
 	class="bg-popover flex h-fit w-fit items-center gap-1 rounded-lg border p-1 shadow-lg"

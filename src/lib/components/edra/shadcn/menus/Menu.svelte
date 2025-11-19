@@ -124,7 +124,7 @@
 		autoPlacement: {
 			allowedPlacements: ['top', 'top-end', 'top-start']
 		},
-		strategy: 'fixed',
+		strategy: 'absolute',
 		scrollTarget: document.getElementById('nota-editor') ?? undefined
 	}}
 >

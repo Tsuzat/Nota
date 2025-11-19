@@ -66,7 +66,6 @@
 		searchText = '';
 		replaceText = '';
 		caseSensitive = false;
-		editor.commands.resetIndex();
 	};
 
 	const replaceAll = () => editor.commands.replaceAll();

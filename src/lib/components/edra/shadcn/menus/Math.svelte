@@ -38,7 +38,7 @@
 		autoPlacement: {
 			allowedPlacements: ['top', 'bottom']
 		},
-		strategy: 'fixed',
+		strategy: 'absolute',
 		scrollTarget: parentElement
 	}}
 	class="bg-popover h-fit w-fit flex-col items-center gap-1 rounded-lg border shadow-lg"
