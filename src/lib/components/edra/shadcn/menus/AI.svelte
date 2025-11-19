@@ -94,9 +94,20 @@
 					break;
 			}
 			aiState = AIState.Confirmation;
-			await callGeminiAI(prompt, (chunk) => {
-				aiResponse += chunk;
-			});
+			await callGeminiAI(
+				prompt,
+				(chunk) => {
+					aiResponse += chunk;
+				},
+				(error) => {
+					toast.error('Something went wrong when calling AI.', {
+						description: error.message
+					});
+					console.error(error);
+					aiState = AIState.Idle;
+					aiResponse = '';
+				}
+			);
 		} catch (error) {
 			aiState = AIState.Idle;
 			console.error(error);

@@ -20,10 +20,14 @@
 	import Download from '$lib/components/icons/moving-icons/download.svelte';
 	import Login from '$lib/components/icons/moving-icons/login.svelte';
 	import { openUrl } from '@tauri-apps/plugin-opener';
+	import { getKeyboardShortcut } from '$lib/utils';
+	import { setGlobalSettings } from '../settings';
+	import Settings from '$lib/components/icons/moving-icons/settings.svelte';
 
 	let isTrashHovered = $state(false);
 	let isDownloadHovered = $state(false);
 	let isLoginHovered = $state(false);
+	let isSettingsHovered = $state(false);
 
 	const currentUserWorkspace = useCurrentUserWorkspaceContext();
 	const trashedNotes = $derived.by(() => {
@@ -41,8 +45,8 @@
 	const sidebar = Sidebar.useSidebar();
 
 	const globalSignInContext = getGlobalSignInContext();
-	const session = $derived(getSessionAndUserContext().getSession());
 	const user = $derived(getSessionAndUserContext().getUser());
+	const useSettings = setGlobalSettings();
 
 	function getUserIntials(name?: string) {
 		if (!name) return 'U';
@@ -62,17 +66,19 @@
 <Sidebar.Group class="mt-auto">
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
-			<!-- <Sidebar.MenuItem>
-				<Sidebar.MenuButton class="group/settings" onclick={() => (useSettings.open = true)}>
-					<Settings
-						class="rotate-0 transition-transform duration-700 group-hover/settings:rotate-180"
-					/>
+			<Sidebar.MenuItem
+				onclick={() => (useSettings.open = !useSettings.open)}
+				onmouseenter={() => (isSettingsHovered = true)}
+				onmouseleave={() => (isSettingsHovered = false)}
+			>
+				<Sidebar.MenuButton>
+					<Settings size={18} isHovered={isSettingsHovered} />
 					<span>Settings</span>
 				</Sidebar.MenuButton>
 				<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded-md p-1.5">
 					{getKeyboardShortcut(',', true)}
 				</Sidebar.MenuBadge>
-			</Sidebar.MenuItem> -->
+			</Sidebar.MenuItem>
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton
 					onclick={() => (open = true)}

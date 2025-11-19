@@ -26,11 +26,7 @@ export async function callGeminiAI(
 	try {
 		const apiKey = localStorage.getItem('gemini_api_key');
 		if (apiKey === null) {
-			onError?.(
-				new Error(
-					'Gemini API key not configured. Please set it in your settings/AI to use this feature.'
-				)
-			);
+			onError?.(new Error('Please set it in your settings/AI to use this feature.'));
 			return;
 		}
 		const genai = new GoogleGenAI({ apiKey });
