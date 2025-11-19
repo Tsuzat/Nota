@@ -5,9 +5,8 @@
 	import * as Avatar from '$lib/components/ui/avatar';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Card from '$lib/components/ui/card';
-	import { Separator } from '$lib/components/ui/separator';
-	import { LogOut, Trash2 } from '@lucide/svelte';
-	import { onMount } from 'svelte';
+	import LogOut from '@lucide/svelte/icons/log-out';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 
@@ -21,7 +20,7 @@
 
 	function handleDeleteAccount() {
 		// TODO: Implement proper account deletion with confirmation
-		alert('Account deletion is not implemented yet.');
+		toast.warning('Account Deletion is coming soon.');
 	}
 </script>
 

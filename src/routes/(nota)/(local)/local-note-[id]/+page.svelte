@@ -20,12 +20,12 @@
 	import { type Content, type Editor } from '@tiptap/core';
 	import { onDestroy, onMount, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { DEFAULT_SETTINGS } from '$lib/types';
 	import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
 	import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { DB } from '$lib/local/db.js';
 	import { resolve } from '$app/paths';
+	import { getGlobalSettings } from '$lib/components/custom/settings/constants.svelte.js';
 
 	const sidebar = useSidebar();
 
@@ -35,14 +35,13 @@
 	let pendingContent = $state<Content>();
 
 	const localNotes = getLocalNotes();
+	const globalSettings = getGlobalSettings();
 
 	const { data } = $props();
 
 	$effect(() => {
 		if (data.id) loadData(data.id);
 	});
-
-	let pageSettings = $derived(data.settings ?? DEFAULT_SETTINGS);
 
 	let note = $state<LocalNote>();
 
@@ -97,14 +96,6 @@
 
 	let isLoading = $state(false);
 
-	function updatePageSettings() {
-		localStorage.setItem('pageSettings', JSON.stringify(pageSettings));
-	}
-
-	$effect(() => {
-		if (pageSettings) updatePageSettings();
-	});
-
 	async function onUpdate() {
 		try {
 			pendingContent = editor?.getJSON();
@@ -158,10 +149,6 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if ((event.ctrlKey || event.metaKey) && event.key === 'l') {
-			event.preventDefault();
-			pageSettings = { ...pageSettings, locked: !pageSettings.locked };
-		}
 		if ((event.ctrlKey || event.metaKey) && event.key === 's') {
 			event.preventDefault();
 			pendingContent = editor?.getJSON() as Content;
@@ -228,26 +215,22 @@
 				</div>
 				<SearchAndReplace {editor} />
 			{/if}
-			<NavActions
-				starred={note.favorite as boolean}
-				{toggleStar}
-				bind:settings={pageSettings}
-				{editor}
-				{note}
-			/>
+			<NavActions starred={note.favorite as boolean} {toggleStar} {editor} {note} />
 		</div>
 		{#if ISWINDOWS}
 			<WindowsButtons />
 		{/if}
 	</header>
-	{#if pageSettings.showtoolbar && editor}
+	{#if globalSettings.useToolBar && editor}
 		<EdraToolBar {editor} />
 	{/if}
 	{#if editor && !editor?.isDestroyed}
-		{#if pageSettings.showbubblemenu}
+		{#if globalSettings.useBubbleMenu}
 			<EdraBubbleMenu {editor} />
 		{/if}
-		<EdraDragHandleExtended {editor} />
+		{#if globalSettings.useDragHandle}
+			<EdraDragHandleExtended {editor} />
+		{/if}
 	{/if}
 	<EdraEditor
 		bind:editor

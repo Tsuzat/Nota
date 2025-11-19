@@ -3,37 +3,34 @@
 	import * as Dropdown from '$lib/components/ui/dropdown-menu';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import StarIcon from '@lucide/svelte/icons/star';
-	import { type NotePageSettingsType } from '$lib/types';
-	import { cn, exportContent, getKeyboardShortcut, importNotes } from '$lib/utils';
-	import Lock from '@lucide/svelte/icons/lock';
+	import { cn, exportContent, importNotes } from '$lib/utils';
 	import PenTool from '@lucide/svelte/icons/pen-tool';
-	import SpellCheck from '@lucide/svelte/icons/spell-check';
 	import Bubbles from '@lucide/svelte/icons/bubbles';
-	import Film from '@lucide/svelte/icons/film';
 	import CopyIcon from '@lucide/svelte/icons/copy';
-	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import ArrowRightFromLine from '@lucide/svelte/icons/arrow-right-from-line';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import ArrowDown from '@lucide/svelte/icons/arrow-down';
+	import GripVertical from '@lucide/svelte/icons/grip-vertical';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { useCloudNotes, type CloudNote } from '$lib/supabase/db/cloudnotes.svelte';
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import type { Editor } from '@tiptap/core';
+	import { getGlobalSettings } from '../settings';
 
 	interface Props {
-		settings: NotePageSettingsType;
 		starred?: boolean;
 		toggleStar?: () => void;
 		note: LocalNote | CloudNote;
 		editor?: Editor;
 	}
 
-	let { settings = $bindable(), starred, toggleStar, note, editor }: Props = $props();
+	let { starred, toggleStar, note, editor }: Props = $props();
 
 	const localNotes = getLocalNotes();
 	const cloudNotes = useCloudNotes();
+	const globalSettings = getGlobalSettings();
 	const workspace = $derived(
 		getLocalWorkspaces()
 			.getWorkspaces()
@@ -44,29 +41,6 @@
 </script>
 
 <div class="flex items-center gap-2 text-sm">
-	{#if settings.locked}
-		<SimpleTooltip>
-			<Button
-				variant="ghost"
-				size="icon"
-				class="size-7"
-				onclick={() => (settings = { ...settings, locked: !settings.locked })}
-			>
-				<Lock />
-			</Button>
-			{#snippet child()}
-				<div class="flex flex-col">
-					<span class="font-semibold">Content Read-only</span>
-					<span>
-						Click to unlock
-						<span class="bg-background text-primary rounded p-0.5"
-							>{getKeyboardShortcut('L', true)}</span
-						>
-					</span>
-				</div>
-			{/snippet}
-		</SimpleTooltip>
-	{/if}
 	<SimpleTooltip content="Toggle Favorite">
 		<Button variant="ghost" size="icon" class="size-7" onclick={toggleStar}>
 			<StarIcon class={cn(starred && 'fill-yellow-500 text-yellow-500')} />
@@ -84,49 +58,21 @@
 		</Dropdown.Trigger>
 		<Dropdown.Content class="bg-popover h-full w-fit overflow-auto" align="end">
 			<Dropdown.Group>
-				<Dropdown.Sub>
-					<Dropdown.SubTrigger>
-						<Settings2Icon />
-						Settings
-					</Dropdown.SubTrigger>
-					<Dropdown.SubContent>
-						<Dropdown.CheckboxItem
-							checked={settings.locked}
-							onclick={() => (settings = { ...settings, locked: !settings.locked })}
-						>
-							<Lock />
-							{settings.locked ? 'Unlock' : 'Lock'}
-						</Dropdown.CheckboxItem>
-						<Dropdown.CheckboxItem
-							checked={settings.showtoolbar}
-							onclick={() => (settings = { ...settings, showtoolbar: !settings.showtoolbar })}
-						>
-							<PenTool />
-							Toolbar
-						</Dropdown.CheckboxItem>
-						<Dropdown.CheckboxItem
-							checked={settings.spellcheck}
-							onclick={() => (settings = { ...settings, spellcheck: !settings.spellcheck })}
-						>
-							<SpellCheck />
-							Spell Check
-						</Dropdown.CheckboxItem>
-						<Dropdown.CheckboxItem
-							checked={settings.showbubblemenu}
-							onclick={() => (settings = { ...settings, showbubblemenu: !settings.showbubblemenu })}
-						>
-							<Bubbles />
-							Bubble Menu
-						</Dropdown.CheckboxItem>
-						<Dropdown.CheckboxItem
-							checked={settings.compressmedia}
-							onclick={() => (settings = { ...settings, compressmedia: !settings.compressmedia })}
-						>
-							<Film />
-							Compress Media
-						</Dropdown.CheckboxItem>
-					</Dropdown.SubContent>
-				</Dropdown.Sub>
+				<Dropdown.GroupHeading class="text-muted-foreground text-sm"
+					>Page Settings
+				</Dropdown.GroupHeading>
+				<Dropdown.CheckboxItem bind:checked={globalSettings.useToolBar}>
+					<PenTool />
+					Toolbar
+				</Dropdown.CheckboxItem>
+				<Dropdown.CheckboxItem bind:checked={globalSettings.useBubbleMenu}>
+					<Bubbles />
+					Bubble Menu
+				</Dropdown.CheckboxItem>
+				<Dropdown.CheckboxItem bind:checked={globalSettings.useDragHandle}>
+					<GripVertical />
+					Drag Handle
+				</Dropdown.CheckboxItem>
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
@@ -143,7 +89,6 @@
 					<ArrowDown />
 					Import
 				</Dropdown.Item>
-
 				<Dropdown.Sub>
 					<Dropdown.SubTrigger>
 						<ArrowRightFromLine />

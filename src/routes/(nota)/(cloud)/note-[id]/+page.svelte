@@ -23,13 +23,13 @@
 	} from '$lib/components/edra/shadcn/index.js';
 	import Cloud from '@lucide/svelte/icons/cloud';
 	import Loader from '@lucide/svelte/icons/loader';
-	import { DEFAULT_SETTINGS } from '$lib/types.js';
 	import { onMount } from 'svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 	import { resolve } from '$app/paths';
 	import { compare } from 'fast-json-patch';
+	import { getGlobalSettings } from '$lib/components/custom/settings/index.js';
 
 	const { data } = $props();
 
@@ -48,11 +48,11 @@
 	// cloud related
 	const cloudNotes = useCloudNotes();
 	const user = $derived(getSessionAndUserContext().getUser());
+	const useGlobalSettings = getGlobalSettings();
 
 	// notes related
 	let isLoading = $state(false);
 	let note = $state<CloudNote>();
-	let pageSettings = $derived(data.settings ?? DEFAULT_SETTINGS);
 	let syncing = $state(false);
 	let syncingText = $state('');
 
@@ -111,14 +111,6 @@
 			saveNoteContent();
 		}, 120000);
 		return () => clearInterval(saveInterval);
-	});
-
-	function updatePageSettings() {
-		localStorage.setItem('pageSettings', JSON.stringify(pageSettings));
-	}
-
-	$effect(() => {
-		if (pageSettings) updatePageSettings();
 	});
 
 	async function loadData(id: string) {
@@ -264,26 +256,22 @@
 					{/if}
 				</Button>
 			</SimpleTooltip>
-			<NavActions
-				starred={note.favorite as boolean}
-				{toggleStar}
-				bind:settings={pageSettings}
-				{editor}
-				{note}
-			/>
+			<NavActions starred={note.favorite as boolean} {toggleStar} {editor} {note} />
 		</div>
 		{#if ISWINDOWS}
 			<WindowsButtons />
 		{/if}
 	</header>
-	{#if pageSettings.showtoolbar && editor}
+	{#if useGlobalSettings.useToolBar && editor}
 		<EdraToolBar {editor} />
 	{/if}
 	{#if editor && !editor?.isDestroyed}
-		{#if pageSettings.showbubblemenu}
+		{#if useGlobalSettings.useBubbleMenu}
 			<EdraBubbleMenu {editor} />
 		{/if}
-		<EdraDragHandleExtended {editor} />
+		{#if useGlobalSettings.useDragHandle}
+			<EdraDragHandleExtended {editor} />
+		{/if}
 	{/if}
 	<EdraEditor
 		bind:editor
