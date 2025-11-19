@@ -31,7 +31,7 @@
 	}
 </script>
 
-<div class="mx-auto w-fit p-6">
+<div class="mx-auto w-120 p-6">
 	{#if user}
 		<div class="flex items-center space-x-4">
 			<Avatar.Root class="h-16 w-16">
@@ -59,6 +59,8 @@
 		<p class="text-muted-foreground mb-4">
 			Sign in to sync your notes and access them from anywhere.
 		</p>
-		<OAuth />
+		<div class="flex flex-col gap-4">
+			<OAuth />
+		</div>
 	{/if}
 </div>

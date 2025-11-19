@@ -6,7 +6,7 @@
 	const useSettings = getGlobalSettings();
 </script>
 
-<div class="mx-auto w-fit space-y-6 p-6">
+<div class="mx-auto w-120 space-y-6 p-6">
 	<div>
 		<h3 class="text-lg font-medium">Editor</h3>
 		<p class="text-muted-foreground text-sm">Customize the editor experience.</p>

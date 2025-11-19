@@ -37,7 +37,7 @@
 	}
 </script>
 
-<div class="space-y-6 p-6">
+<div class="mx-auto w-120 space-y-6 p-6">
 	<div>
 		<h3 class="text-lg font-medium">AI</h3>
 		<p class="text-muted-foreground text-sm">Configure AI features.</p>
