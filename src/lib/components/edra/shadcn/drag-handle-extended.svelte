@@ -15,7 +15,9 @@
 	import { autoPlacement } from '@floating-ui/dom';
 	import Repeat2 from '@lucide/svelte/icons/repeat-2';
 	import commands from '../commands/toolbar-commands';
-	import { LinkIcon, Palette, Sparkle } from '@lucide/svelte';
+	import LinkIcon from '@lucide/svelte/icons/link';
+	import Palette from '@lucide/svelte/icons/palette';
+	import Sparkles from '@lucide/svelte/icons/sparkles';
 	import { quickcolors } from '../utils';
 	import { page } from '$app/state';
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
@@ -176,6 +178,14 @@
 				<DropdownMenu.GroupHeading class="text-muted-foreground capitalize">
 					{currentNode?.type.name}
 				</DropdownMenu.GroupHeading>
+				<DropdownMenu.Item onclick={handleAIHighlight}>
+					<Sparkles />
+					<span
+						class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+					>
+						Edit With AI</span
+					>
+				</DropdownMenu.Item>
 				<DropdownMenu.Sub>
 					<DropdownMenu.SubTrigger openDelay={300}>
 						<Repeat2 />
@@ -271,10 +281,6 @@
 					Copy Node Link
 				</DropdownMenu.Item>
 			{/if}
-			<DropdownMenu.Item onclick={handleAIHighlight}>
-				<Sparkle />
-				Ask AI
-			</DropdownMenu.Item>
 			<DropdownMenu.Item onclick={handleDuplicate}>
 				<Duplicate />
 				Duplicate

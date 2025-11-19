@@ -25,9 +25,9 @@
 		MAKE_SHORTED_PROMPT,
 		SUMMARIZE_PROMPT
 	} from '$lib/supabase/ai/prompt';
-	import { callAI } from '$lib/supabase/ai';
 	import { mode } from 'mode-watcher';
-	import { migrateMathStrings } from '@tiptap/extension-mathematics';
+	import { callGeminiAI } from '$lib/gemini';
+	import { fade } from 'svelte/transition';
 
 	interface Props {
 		editor: Editor;
@@ -61,8 +61,6 @@
 	let aiState = $state(AIState.Idle);
 	let aiResponse = $state('');
 
-	const session = $derived(getSessionAndUserContext().getSession());
-
 	function getSelectionText(): string | undefined {
 		const { from, to } = editor.view.state.selection;
 		const slice = editor.view.state.doc.cut(from, to);
@@ -76,7 +74,6 @@
 			toast.error('Can not get the selected content from editor', { id });
 			return;
 		}
-		aiState = AIState.Thinking;
 		try {
 			let prompt = '';
 			switch (type) {
@@ -96,21 +93,10 @@
 					prompt = CONTINUE_WRITING(selectedText);
 					break;
 			}
-			const token = session?.access_token;
-			if (!token) {
-				toast.error('Please login to use AI features.', { id });
-				return;
-			}
-			const data = await callAI(prompt, token);
-			if (data.error) {
-				toast.error(data.error, { id });
-				aiState = AIState.Idle;
-				return;
-			}
-			if (data.text) {
-				aiResponse = data.text;
-				aiState = AIState.Confirmation;
-			}
+			aiState = AIState.Confirmation;
+			await callGeminiAI(prompt, (chunk) => {
+				aiResponse += chunk;
+			});
 		} catch (error) {
 			aiState = AIState.Idle;
 			console.error(error);
@@ -133,24 +119,23 @@
 		if (!inputValue) return;
 		const text = getSelectionText();
 		if (!text) return;
-		aiState = AIState.Thinking;
 		try {
-			const token = session?.access_token;
 			const prompt = `${text}\n\n\n${inputValue}`;
-			if (!token) {
-				toast.error('Please login to use AI features.');
-				return;
-			}
-			const data = await callAI(prompt, token);
-			if (data.error) {
-				toast.error(data.error);
-				aiState = AIState.Idle;
-				return;
-			}
-			if (data.text) {
-				aiResponse = data.text;
-				aiState = AIState.Confirmation;
-			}
+
+			await callGeminiAI(
+				prompt,
+				(chunk) => {
+					aiResponse += chunk;
+				},
+				(error) => {
+					toast.error('Something went wrong when calling AI.', {
+						description: error.message
+					});
+					console.error(error);
+					aiState = AIState.Idle;
+					aiResponse = '';
+				}
+			);
 		} catch (error) {
 			aiState = AIState.Idle;
 			console.error(error);
@@ -256,46 +241,52 @@
 				<span>Fix Grammer</span>
 			</button>
 		</div>
-	{:else if aiState === AIState.Thinking}
-		<div class="animated-gradient-border rounded-lg p-0.25">
-			<div class="bg-popover inline-flex items-center gap-2 rounded p-2">
-				<Sparkle class="size-4!" />
-				<div>AI is thinking</div>
-				<div class="flex h-5 items-center space-x-1">
-					{#each Array(3) as _, i}
-						<div
-							class="bg-primary h-2 w-2 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
-							style:animation-delay="{i * 160}ms"
-						></div>
-					{/each}
-					<span class="sr-only">Loading</span>
+	{:else if aiState === AIState.Confirmation}
+		{#if aiResponse === ''}
+			<div transition:fade class="animated-gradient-border rounded-lg p-0.25">
+				<div class="bg-popover inline-flex items-center gap-2 rounded p-2">
+					<Sparkle class="size-4!" />
+					<span
+						class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+					>
+						AI is thinking</span
+					>
+					<div class="flex h-5 items-center space-x-1">
+						{#each Array(3) as _, i}
+							<div
+								class="bg-primary h-2 w-2 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
+								style:animation-delay="{i * 160}ms"
+							></div>
+						{/each}
+						<span class="sr-only">Loading</span>
+					</div>
 				</div>
 			</div>
-		</div>
-	{:else if aiState === AIState.Confirmation}
-		<div class="flex items-center justify-between gap-2 px-2 py-1">
-			<small>Actions:</small>
-			<Button size="sm" onclick={replaceSelection}>
-				<CheckCheck />
-				Replace Selection
-			</Button>
-			<Button size="sm" onclick={insertNext}>
-				<ArrowDown />
-				Insert Next
-			</Button>
-			<Button variant="destructive" size="sm" onclick={discardChanges}>
-				<X />
-				Discard Changes
-			</Button>
-		</div>
-		<Separator />
-		<Streamdown
-			content={aiResponse}
-			class="w-full max-w-xl flex-1 grow overflow-auto px-4 py-2 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
-			shikiTheme={mode.current === 'dark' ? 'one-dark-pro' : 'one-light'}
-			shikiPreloadThemes={['one-dark-pro', 'one-light']}
-			baseTheme="shadcn"
-		/>
+		{:else}
+			<div transition:fade class="flex items-center justify-between gap-2 px-2 py-1">
+				<small>Actions:</small>
+				<Button size="sm" onclick={replaceSelection}>
+					<CheckCheck />
+					Replace Selection
+				</Button>
+				<Button size="sm" onclick={insertNext}>
+					<ArrowDown />
+					Insert Next
+				</Button>
+				<Button variant="destructive" size="sm" onclick={discardChanges}>
+					<X />
+					Discard Changes
+				</Button>
+			</div>
+			<Separator />
+			<Streamdown
+				content={aiResponse}
+				class="w-full max-w-xl flex-1 grow overflow-auto px-4 py-2 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+				shikiTheme={mode.current === 'dark' ? 'one-dark-pro' : 'one-light'}
+				shikiPreloadThemes={['one-dark-pro', 'one-light']}
+				baseTheme="shadcn"
+			/>
+		{/if}
 	{/if}
 </BubbleMenu>
 
