@@ -131,6 +131,7 @@
 		const text = getSelectionText();
 		if (!text) return;
 		try {
+			aiState = AIState.Confirmation;
 			const prompt = `${text}\n\n\n${inputValue}`;
 
 			await callGeminiAI(
