@@ -72,8 +72,12 @@
 		if (!isDirty || note === undefined || editor === undefined) return;
 
 		const currentContent = editor.getJSON();
-		if (syncedContent === undefined) {
-			syncedContent = currentContent;
+		if (
+			syncedContent === undefined ||
+			syncedContent === null ||
+			typeof syncedContent === 'string'
+		) {
+			syncedContent = {};
 		}
 		const patch = compare(syncedContent as Object, currentContent);
 
