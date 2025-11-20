@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { NodeViewWrapper, NodeViewContent } from 'svelte-tiptap';
 	import type { NodeViewProps } from '@tiptap/core';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button } from '$lib/components/ui/button';
 	const { editor, node, updateAttributes, extension }: NodeViewProps = $props();
 	import Check from '@lucide/svelte/icons/check';
 	import Copy from '@lucide/svelte/icons/copy';
@@ -30,10 +30,7 @@
 </script>
 
 <NodeViewWrapper class="code-wrapper" draggable={false} spellcheck={false}>
-	<div
-		class="code-wrapper-tile flex items-center justify-end print:justify-start"
-		contenteditable="false"
-	>
+	<div class="code-wrapper-tile justify-end print:justify-start" contenteditable="false">
 		<Select.Root type="single" name="Languages" bind:value={defaultLanguage}>
 			<Select.Trigger
 				contenteditable="false"
