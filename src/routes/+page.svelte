@@ -16,6 +16,8 @@
 	import { ISTAURI } from '$lib/utils';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
+	import Spotlight from '$lib/components/custom/utils/spotlight.svelte';
+	import Particles from '$lib/components/custom/utils/particles.svelte';
 
 	const user = $derived(getSessionAndUserContext().getUser());
 
@@ -25,6 +27,9 @@
 		if (ISTAURI) window.location.replace('/home');
 	});
 </script>
+
+<Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
+<Spotlight />
 
 <header class="sticky top-1 mx-auto flex max-w-4xl items-center justify-between gap-4 p-4">
 	<a class="flex items-center gap-4" href={resolve('/')}>
@@ -76,12 +81,35 @@
 		A fast, modern, feature rich, lightweight and local first note taking desktop application
 	</p>
 	<div class="flex flex-col items-center gap-4 sm:flex-row">
-		<Button variant="secondary" href="https://github.com/Tsuzat/Nota" target="_blank">
+		<Button variant="outline" href="https://github.com/Tsuzat/Nota" target="_blank">
 			<Github />
 			Star us on Github
 		</Button>
 		<ArtifactDownloader />
 	</div>
-	<img class="hidden aspect-auto h-auto w-full dark:block" src="/previews/dark.webp" alt="nota" />
-	<img class="block aspect-auto h-auto w-full dark:hidden" src="/previews/light.webp" alt="nota" />
+	<img
+		class="z-10 hidden aspect-auto h-auto w-full dark:block"
+		src="/previews/dark.webp"
+		alt="nota"
+	/>
+	<img
+		class="z-10 block aspect-auto h-auto w-full dark:hidden"
+		src="/previews/light.webp"
+		alt="nota"
+	/>
 </main>
+
+<style>
+	.animate-shine {
+		animation: shine 1s linear infinite;
+	}
+
+	@keyframes shine {
+		0% {
+			background-position: 0 0;
+		}
+		100% {
+			background-position: -200% 0;
+		}
+	}
+</style>

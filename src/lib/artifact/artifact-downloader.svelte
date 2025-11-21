@@ -21,7 +21,7 @@
 </script>
 
 <div
-	class="divide-primary-foreground/30 inline-flex divide-x rounded-md shadow-2xs rtl:space-x-reverse"
+	class="divide-primary-foreground/30 bg-background/50 z-50 inline-flex divide-x rounded-md shadow-2xs backdrop-blur-sm rtl:space-x-reverse"
 >
 	<Button
 		variant="outline"
