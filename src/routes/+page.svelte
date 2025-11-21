@@ -19,6 +19,9 @@
 	import Spotlight from '$lib/components/custom/utils/spotlight.svelte';
 	import Particles from '$lib/components/custom/utils/particles.svelte';
 	import Reveal from '$lib/components/custom/utils/reveal.svelte';
+	import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
+	import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svelte';
+	import MockAiDialog from '$lib/components/custom/landing/mock-ai-dialog.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
 	import Code from '@lucide/svelte/icons/code';
@@ -27,6 +30,8 @@
 	import Terminal from '@lucide/svelte/icons/terminal';
 	import BookOpen from '@lucide/svelte/icons/book-open';
 	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
+	import GripVertical from '@lucide/svelte/icons/grip-vertical';
+	import MousePointerClick from '@lucide/svelte/icons/mouse-pointer-click';
 
 	const user = $derived(getSessionAndUserContext().getUser());
 
@@ -107,59 +112,62 @@
 		alt="nota"
 	/>
 	<Reveal>
-		<section class="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-			<Card.Root class="bg-background/60 backdrop-blur-sm">
-				<Card.Header>
-					<Card.Title class="flex items-center gap-2">
-						<Sparkles class="size-5 text-yellow-500" />
-						AI Powered
-					</Card.Title>
-					<Card.Description>Intelligent writing assistance</Card.Description>
-				</Card.Header>
-				<Card.Content>
-					Seamlessly integrate AI into your workflow. Edit with AI, Ask AI, generate text, fix
-					grammar, and summarize notes instantly.
-				</Card.Content>
-			</Card.Root>
-			<Card.Root class="bg-background/60 backdrop-blur-sm">
-				<Card.Header>
-					<Card.Title class="flex items-center gap-2">
-						<Code class="size-5 text-blue-500" />
-						Developer Friendly
-					</Card.Title>
-					<Card.Description>Built for code</Card.Description>
-				</Card.Header>
-				<Card.Content>
-					First-class support for code blocks, syntax highlighting, and developer-focused features
-					like slash commands.
-				</Card.Content>
-			</Card.Root>
-			<Card.Root class="bg-background/60 backdrop-blur-sm">
-				<Card.Header>
-					<Card.Title class="flex items-center gap-2">
-						<Zap class="size-5 text-orange-500" />
-						Lightning Fast
-					</Card.Title>
-					<Card.Description>Local-first architecture</Card.Description>
-				</Card.Header>
-				<Card.Content>
-					Experience zero latency with our local-first approach. Your notes are stored on your
-					device for instant access.
-				</Card.Content>
-			</Card.Root>
-			<Card.Root class="bg-background/60 backdrop-blur-sm">
-				<Card.Header>
-					<Card.Title class="flex items-center gap-2">
-						<PenTool class="size-5 text-purple-500" />
-						Rich Formatting
-					</Card.Title>
-					<Card.Description>Express yourself</Card.Description>
-				</Card.Header>
-				<Card.Content>
-					Full support for markdown, rich text, images, and more. Customize your notes with colors
-					and highlights.
-				</Card.Content>
-			</Card.Root>
+		<section class="flex w-full flex-col gap-8 py-12">
+			<h2 class="text-center text-3xl font-bold">Features for Everyone</h2>
+			<div class="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+				<Card.Root class="bg-background/60 backdrop-blur-sm">
+					<Card.Header>
+						<Card.Title class="flex items-center gap-2">
+							<Sparkles class="size-5 text-yellow-500" />
+							AI Powered
+						</Card.Title>
+						<Card.Description>Intelligent writing assistance</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						Seamlessly integrate AI into your workflow. Edit with AI, Ask AI, generate text, fix
+						grammar, and summarize notes instantly.
+					</Card.Content>
+				</Card.Root>
+				<Card.Root class="bg-background/60 backdrop-blur-sm">
+					<Card.Header>
+						<Card.Title class="flex items-center gap-2">
+							<Code class="size-5 text-blue-500" />
+							Developer Friendly
+						</Card.Title>
+						<Card.Description>Built for code</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						First-class support for code blocks, syntax highlighting, and developer-focused features
+						like slash commands.
+					</Card.Content>
+				</Card.Root>
+				<Card.Root class="bg-background/60 backdrop-blur-sm">
+					<Card.Header>
+						<Card.Title class="flex items-center gap-2">
+							<Zap class="size-5 text-orange-500" />
+							Lightning Fast
+						</Card.Title>
+						<Card.Description>Local-first architecture</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						Experience zero latency with our local-first approach. Your notes are stored on your
+						device for instant access.
+					</Card.Content>
+				</Card.Root>
+				<Card.Root class="bg-background/60 backdrop-blur-sm">
+					<Card.Header>
+						<Card.Title class="flex items-center gap-2">
+							<PenTool class="size-5 text-purple-500" />
+							Rich Formatting
+						</Card.Title>
+						<Card.Description>Express yourself</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						Full support for markdown, rich text, images, and more. Customize your notes with colors
+						and highlights.
+					</Card.Content>
+				</Card.Root>
+			</div>
 		</section>
 	</Reveal>
 
@@ -201,14 +209,81 @@
 		</section>
 	</Reveal>
 
+	<Reveal delay={400}>
+		<section class="flex w-full flex-col gap-24 py-24">
+			<h2 class="text-center text-4xl font-bold tracking-tight">Powerful Editor Features</h2>
+
+			<!-- Feature 1: Drag Handle -->
+			<div class="flex flex-col items-center gap-12 md:flex-row">
+				<div class="flex flex-1 flex-col gap-4">
+					<div class="flex size-12 items-center justify-center rounded-lg bg-purple-500/10">
+						<GripVertical class="size-6 text-purple-500" />
+					</div>
+					<h3 class="text-2xl font-bold">Smart Drag Handle</h3>
+					<p class="text-muted-foreground text-lg">
+						Organize your thoughts effortlessly. Drag and drop blocks to rearrange content, or click
+						to access quick actions like "Edit with AI" and "Turn Into".
+					</p>
+				</div>
+				<div
+					class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-gradient-to-br p-8 backdrop-blur-sm"
+				>
+					<MockDragHandle />
+				</div>
+			</div>
+
+			<!-- Feature 2: Bubble Menu -->
+			<div class="flex flex-col items-center gap-12 md:flex-row-reverse">
+				<div class="flex flex-1 flex-col gap-4">
+					<div class="flex size-12 items-center justify-center rounded-lg bg-blue-500/10">
+						<MousePointerClick class="size-6 text-blue-500" />
+					</div>
+					<h3 class="text-2xl font-bold">Contextual Menu</h3>
+					<p class="text-muted-foreground text-lg">
+						Everything you need, right where you need it. Highlight text to format, add links, or
+						ask AI to improve your writing without losing flow.
+					</p>
+				</div>
+				<div
+					class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-gradient-to-br p-8 backdrop-blur-sm"
+				>
+					<MockBubbleMenu />
+				</div>
+			</div>
+
+			<!-- Feature 3: AI Dialog -->
+			<div class="flex flex-col items-center gap-12 md:flex-row">
+				<div class="flex flex-1 flex-col gap-4">
+					<div class="flex size-12 items-center justify-center rounded-lg bg-orange-500/10">
+						<Sparkles class="size-6 text-orange-500" />
+					</div>
+					<h3 class="text-2xl font-bold">Native AI Integration</h3>
+					<p class="text-muted-foreground text-lg">
+						Bring your own API key for secure, unlimited AI assistance. Summarize notes, fix
+						grammar, or generate new content directly in your editor.
+					</p>
+				</div>
+				<div
+					class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-gradient-to-br p-8 backdrop-blur-sm"
+				>
+					<MockAiDialog />
+				</div>
+			</div>
+		</section>
+	</Reveal>
+
 	<footer
 		class="text-muted-foreground flex w-full flex-col items-center justify-between gap-4 border-t py-8 text-sm md:flex-row"
 	>
 		<p>&copy; {new Date().getFullYear()} Nota. All rights reserved.</p>
 		<div class="flex gap-4">
-			<a href="/" class="hover:text-foreground">Privacy</a>
-			<a href="/" class="hover:text-foreground">Terms</a>
-			<a href="https://github.com/Tsuzat/Nota" class="hover:text-foreground">GitHub</a>
+			<a href="/privacy" class="hover:text-foreground transition-colors">Privacy</a>
+			<a href="/terms" class="hover:text-foreground transition-colors">Terms</a>
+			<a
+				href="https://github.com/tsuzat/nota"
+				target="_blank"
+				class="hover:text-foreground transition-colors">GitHub</a
+			>
 		</div>
 	</footer>
 </main>
