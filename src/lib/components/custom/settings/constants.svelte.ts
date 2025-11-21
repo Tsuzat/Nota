@@ -2,10 +2,10 @@ import { getContext, setContext } from 'svelte';
 
 class GlobalSettings {
 	#open = $state(false);
-	#useAI = $state(localStorage.getItem('useAI') === 'true');
+	#useAI = $state(localStorage.getItem('useAI') ?? 'true');
 	#useToolBar = $state(localStorage.getItem('useToolBar') === 'true');
-	#useBubbleMenu = $state(localStorage.getItem('useBubbleMenu') === 'true');
-	#useDragHandle = $state(localStorage.getItem('useDragHandle') === 'true');
+	#useBubbleMenu = $state(localStorage.getItem('useBubbleMenu') ?? 'true');
+	#useDragHandle = $state(localStorage.getItem('useDragHandle') ?? 'true');
 	#themeColor = $state(localStorage.getItem('themeColor') || 'default');
 
 	constructor(open: boolean = false) {
