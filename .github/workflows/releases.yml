@@ -17,12 +17,6 @@ jobs:
             args: '--target aarch64-apple-darwin'
           - platform: 'macos-26'
             args: '--target x86_64-apple-darwin'
-          - platform: 'ubuntu-22.04'
-            args: ''
-          - platform: 'windows-latest'
-            args: ''
-          - platform: 'windows-latest'
-            args: '--target aarch64-pc-windows-msvc'
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v5
@@ -46,7 +40,7 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-26' && 'aarch64-apple-darwin,x86_64-apple-darwin' || matrix.args == '--target aarch64-pc-windows-msvc' && 'aarch64-pc-windows-msvc' || '' }}
+          targets: ${{ matrix.platform == 'macos-26' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
