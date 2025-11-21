@@ -15,7 +15,7 @@
 		<GripVertical class="size-6" />
 	</div>
 	<div
-		class="bg-popover text-popover-foreground animate-in fade-in zoom-in-95 w-64 overflow-hidden rounded-lg border shadow-md duration-300"
+		class="bg-popover text-popover-foreground animate-in fade-in zoom-in-95 w-full max-w-[16rem] overflow-hidden rounded-lg border shadow-md duration-300"
 	>
 		<div class="text-muted-foreground px-2 py-1.5 text-sm font-semibold">OrderedList</div>
 		<div class="p-1">

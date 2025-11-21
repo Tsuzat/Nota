@@ -8,7 +8,7 @@
 </script>
 
 <div
-	class="bg-popover text-popover-foreground animate-in fade-in zoom-in-95 w-80 overflow-hidden rounded-xl border shadow-2xl duration-300"
+	class="bg-popover text-popover-foreground animate-in fade-in zoom-in-95 w-full max-w-xs overflow-hidden rounded-xl border shadow-2xl duration-300"
 >
 	<div class="flex items-center gap-2 border-b p-3">
 		<input

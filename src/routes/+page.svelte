@@ -89,7 +89,7 @@
 </header>
 
 <main
-	class="mx-auto flex size-full max-w-4xl flex-col items-center justify-between gap-8 overflow-auto pt-8"
+	class="mx-auto flex size-full max-w-4xl flex-col items-center justify-between gap-8 overflow-auto px-4 pt-8"
 >
 	<p class="animate-bounce">
 		A fast, modern, feature rich, lightweight and local first note taking desktop application
@@ -210,8 +210,10 @@
 	</Reveal>
 
 	<Reveal delay={400}>
-		<section class="flex w-full flex-col gap-24 py-24">
-			<h2 class="text-center text-4xl font-bold tracking-tight">Powerful Editor Features</h2>
+		<section class="flex w-full flex-col gap-12 py-12 md:gap-24 md:py-24">
+			<h2 class="text-center text-3xl font-bold tracking-tight md:text-4xl">
+				Powerful Editor Features
+			</h2>
 
 			<!-- Feature 1: Drag Handle -->
 			<div class="flex flex-col items-center gap-12 md:flex-row">
