@@ -8,7 +8,6 @@ html {
 	-webkit-text-size-adjust: 100%;
 	-ms-overflow-style: -ms-autohiding-scrollbar;
 	scroll-behavior: auto;
-	user-select: none;
 	overscroll-behavior: none;
 	-webkit-overflow-scrolling: auto;
 }

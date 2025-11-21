@@ -119,3 +119,9 @@
 		{@render children()}
 	</Sidebar.Inset>
 </Sidebar.Provider>
+
+<style>
+	:global(html) {
+		user-select: none !important;
+	}
+</style>
