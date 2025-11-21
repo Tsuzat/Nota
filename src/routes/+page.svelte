@@ -18,6 +18,15 @@
 	import { goto } from '$app/navigation';
 	import Spotlight from '$lib/components/custom/utils/spotlight.svelte';
 	import Particles from '$lib/components/custom/utils/particles.svelte';
+	import Reveal from '$lib/components/custom/utils/reveal.svelte';
+	import * as Card from '$lib/components/ui/card';
+	import Sparkles from '@lucide/svelte/icons/sparkles';
+	import Code from '@lucide/svelte/icons/code';
+	import Zap from '@lucide/svelte/icons/zap';
+	import PenTool from '@lucide/svelte/icons/pen-tool';
+	import Terminal from '@lucide/svelte/icons/terminal';
+	import BookOpen from '@lucide/svelte/icons/book-open';
+	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
 
 	const user = $derived(getSessionAndUserContext().getUser());
 
@@ -31,7 +40,7 @@
 <Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
 <Spotlight />
 
-<header class="sticky top-1 mx-auto flex max-w-4xl items-center justify-between gap-4 p-4">
+<header class="mx-auto flex max-w-4xl items-center justify-between gap-4 p-4">
 	<a class="flex items-center gap-4" href={resolve('/')}>
 		<img src="/favicon.webp" alt="Nota" class="size-10" />
 		<h3 class="font-bold">Nota</h3>
@@ -97,4 +106,109 @@
 		src="/previews/light.webp"
 		alt="nota"
 	/>
+	<Reveal>
+		<section class="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+			<Card.Root class="bg-background/60 backdrop-blur-sm">
+				<Card.Header>
+					<Card.Title class="flex items-center gap-2">
+						<Sparkles class="size-5 text-yellow-500" />
+						AI Powered
+					</Card.Title>
+					<Card.Description>Intelligent writing assistance</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					Seamlessly integrate AI into your workflow. Edit with AI, Ask AI, generate text, fix
+					grammar, and summarize notes instantly.
+				</Card.Content>
+			</Card.Root>
+			<Card.Root class="bg-background/60 backdrop-blur-sm">
+				<Card.Header>
+					<Card.Title class="flex items-center gap-2">
+						<Code class="size-5 text-blue-500" />
+						Developer Friendly
+					</Card.Title>
+					<Card.Description>Built for code</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					First-class support for code blocks, syntax highlighting, and developer-focused features
+					like slash commands.
+				</Card.Content>
+			</Card.Root>
+			<Card.Root class="bg-background/60 backdrop-blur-sm">
+				<Card.Header>
+					<Card.Title class="flex items-center gap-2">
+						<Zap class="size-5 text-orange-500" />
+						Lightning Fast
+					</Card.Title>
+					<Card.Description>Local-first architecture</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					Experience zero latency with our local-first approach. Your notes are stored on your
+					device for instant access.
+				</Card.Content>
+			</Card.Root>
+			<Card.Root class="bg-background/60 backdrop-blur-sm">
+				<Card.Header>
+					<Card.Title class="flex items-center gap-2">
+						<PenTool class="size-5 text-purple-500" />
+						Rich Formatting
+					</Card.Title>
+					<Card.Description>Express yourself</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					Full support for markdown, rich text, images, and more. Customize your notes with colors
+					and highlights.
+				</Card.Content>
+			</Card.Root>
+		</section>
+	</Reveal>
+
+	<Reveal delay={200}>
+		<section class="flex w-full flex-col gap-8 py-12">
+			<h2 class="text-center text-3xl font-bold">Solutions for Everyone</h2>
+			<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+				<div class="flex flex-col items-center gap-4 text-center">
+					<div class="rounded-full bg-blue-500/10 p-4 text-blue-500">
+						<Terminal class="size-8" />
+					</div>
+					<h3 class="text-xl font-semibold">For Developers</h3>
+					<p class="text-muted-foreground">
+						Manage snippets, document APIs, and keep your technical notes organized with syntax
+						highlighting.
+					</p>
+				</div>
+				<div class="flex flex-col items-center gap-4 text-center">
+					<div class="rounded-full bg-green-500/10 p-4 text-green-500">
+						<BookOpen class="size-8" />
+					</div>
+					<h3 class="text-xl font-semibold">For Writers</h3>
+					<p class="text-muted-foreground">
+						Distraction-free writing environment with AI assistance to help you overcome writer's
+						block.
+					</p>
+				</div>
+				<div class="flex flex-col items-center gap-4 text-center">
+					<div class="rounded-full bg-pink-500/10 p-4 text-pink-500">
+						<GraduationCap class="size-8" />
+					</div>
+					<h3 class="text-xl font-semibold">For Students</h3>
+					<p class="text-muted-foreground">
+						Take organized lecture notes, summarize complex topics with AI, and study more
+						effectively.
+					</p>
+				</div>
+			</div>
+		</section>
+	</Reveal>
+
+	<footer
+		class="text-muted-foreground flex w-full flex-col items-center justify-between gap-4 border-t py-8 text-sm md:flex-row"
+	>
+		<p>&copy; {new Date().getFullYear()} Nota. All rights reserved.</p>
+		<div class="flex gap-4">
+			<a href="/" class="hover:text-foreground">Privacy</a>
+			<a href="/" class="hover:text-foreground">Terms</a>
+			<a href="https://github.com/Tsuzat/Nota" class="hover:text-foreground">GitHub</a>
+		</div>
+	</footer>
 </main>
