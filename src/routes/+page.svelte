@@ -32,10 +32,13 @@
 	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
 	import GripVertical from '@lucide/svelte/icons/grip-vertical';
 	import MousePointerClick from '@lucide/svelte/icons/mouse-pointer-click';
+	import { Settings } from '@lucide/svelte';
+	import { getGlobalSettings } from '$lib/components/custom/settings';
 
 	const user = $derived(getSessionAndUserContext().getUser());
 
 	const globalSignInContext = getGlobalSignInContext();
+	const useGlobalSettings = getGlobalSettings();
 
 	onMount(() => {
 		if (ISTAURI) window.location.replace('/home');
@@ -70,6 +73,10 @@
 					<Dropdown.Item onclick={() => goto(resolve('/profile'))}>
 						<UserRound />
 						<span>Profile</span>
+					</Dropdown.Item>
+					<Dropdown.Item onclick={() => (useGlobalSettings.open = !useGlobalSettings.open)}>
+						<Settings />
+						<span>Settings</span>
 					</Dropdown.Item>
 					<Dropdown.Item
 						onclick={() =>

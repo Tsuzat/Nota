@@ -21,7 +21,7 @@
 	import Login from '$lib/components/icons/moving-icons/login.svelte';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import { getKeyboardShortcut } from '$lib/utils';
-	import { setGlobalSettings } from '../settings';
+	import { getGlobalSettings } from '../settings';
 	import Settings from '$lib/components/icons/moving-icons/settings.svelte';
 
 	let isTrashHovered = $state(false);
@@ -46,7 +46,7 @@
 
 	const globalSignInContext = getGlobalSignInContext();
 	const user = $derived(getSessionAndUserContext().getUser());
-	const useSettings = setGlobalSettings();
+	const useSettings = getGlobalSettings();
 
 	function getUserIntials(name?: string) {
 		if (!name) return 'U';

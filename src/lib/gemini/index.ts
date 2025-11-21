@@ -6,6 +6,25 @@ export enum GeminiModel {
 	Pro = 'gemini-2.5-pro'
 }
 
+export function getUserPreferedAIModel() {
+	const model = localStorage.getItem("nota-user-ai-model") ?? GeminiModel.FlashLite;
+	switch (model) {
+		case GeminiModel.Pro:
+			return GeminiModel.Pro
+		case GeminiModel.Flash:
+			return GeminiModel.Flash
+		case GeminiModel.FlashLite:
+			return GeminiModel.FlashLite
+		default:
+			localStorage.setItem("nota-user-ai-model", GeminiModel.FlashLite)
+			return GeminiModel.FlashLite
+	}
+}
+
+export function setUserPreferedAIModel(model: GeminiModel) {
+	localStorage.setItem("nota-user-ai-model", model);
+}
+
 /**
  * Calls the Gemini AI model to generate a streaming response.
  *
@@ -21,7 +40,6 @@ export async function callGeminiAI(
 	prompt: string,
 	onChunck: (chunk: string) => void,
 	onError?: (error: Error) => void,
-	model: GeminiModel = GeminiModel.FlashLite
 ) {
 	try {
 		const apiKey = localStorage.getItem('gemini_api_key');
@@ -31,7 +49,7 @@ export async function callGeminiAI(
 		}
 		const genai = new GoogleGenAI({ apiKey });
 		const responseStream = await genai.models.generateContentStream({
-			model,
+			model: getUserPreferedAIModel(),
 			contents: prompt,
 			config: {
 				systemInstruction: `You are an expert Note Optimizer designed to 
