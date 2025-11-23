@@ -247,12 +247,12 @@
 
 		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', ISWINDOWS && 'mr-30')}>
 			{#if note.isPublic}
-				<SimpleTooltip content="Pulic and can be seen by anyone with the link">
+				<SimpleTooltip>
 					<Button variant="ghost" size="icon" class="size-7">
 						<Globe />
 					</Button>
 					{#snippet child()}
-						<div>
+						<div class="flex flex-col items-center">
 							<span class="font-semibold"> This is a public note </span>
 							<small>Anyone with the link can view this note</small>
 						</div>
