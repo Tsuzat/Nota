@@ -1,11 +1,20 @@
 import { getContext, setContext } from 'svelte';
 
+function getLocalStorageValue<T>(key: string, defaultValue: T): T {
+	const data = localStorage.getItem(key);
+	if (!data) {
+		localStorage.setItem(key, String(defaultValue));
+		return defaultValue;
+	}
+	return data as T;
+}
+
 class GlobalSettings {
 	#open = $state(false);
-	#useAI = $state(localStorage.getItem('useAI') ?? 'true');
-	#useToolBar = $state(localStorage.getItem('useToolBar') === 'true');
-	#useBubbleMenu = $state(localStorage.getItem('useBubbleMenu') ?? 'true');
-	#useDragHandle = $state(localStorage.getItem('useDragHandle') ?? 'true');
+	#useAI = $state(getLocalStorageValue('useAI', true));
+	#useToolBar = $state(getLocalStorageValue('useToolBar', false));
+	#useBubbleMenu = $state(getLocalStorageValue('useBubbleMenu', true));
+	#useDragHandle = $state(getLocalStorageValue('useDragHandle', true));
 	#themeColor = $state(localStorage.getItem('themeColor') || 'default');
 
 	constructor(open: boolean = false) {
@@ -22,28 +31,28 @@ class GlobalSettings {
 	}
 	set useAI(value) {
 		this.#useAI = value;
-		localStorage.setItem('useAI', value.toString());
+		localStorage.setItem('useAI', String(value));
 	}
 	get useToolBar() {
 		return this.#useToolBar;
 	}
 	set useToolBar(value) {
 		this.#useToolBar = value;
-		localStorage.setItem('useToolBar', value.toString());
+		localStorage.setItem('useToolBar', String(value));
 	}
 	get useBubbleMenu() {
 		return this.#useBubbleMenu;
 	}
 	set useBubbleMenu(value) {
 		this.#useBubbleMenu = value;
-		localStorage.setItem('useBubbleMenu', value.toString());
+		localStorage.setItem('useBubbleMenu', String(value));
 	}
 	get useDragHandle() {
 		return this.#useDragHandle;
 	}
 	set useDragHandle(value) {
 		this.#useDragHandle = value;
-		localStorage.setItem('useDragHandle', value.toString());
+		localStorage.setItem('useDragHandle', String(value));
 	}
 	get themeColor() {
 		return this.#themeColor;
