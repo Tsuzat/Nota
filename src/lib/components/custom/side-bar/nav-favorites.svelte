@@ -20,6 +20,7 @@
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import { resolve } from '$app/paths';
+	import { Globe } from '@lucide/svelte';
 
 	const sidebar = useSidebar();
 	let showMore = $state(false);
@@ -120,7 +121,12 @@
 									<StarOffIcon />
 									Unfavorites
 								</DropdownMenu.Item>
-								<DropdownMenu.Separator />
+								{#if isCloud}
+									<DropdownMenu.Item onclick={() => cloudNotes.togglePublic(note)}>
+										<Globe />
+										{note.isPublic ? 'Make Private' : 'Make Public'}
+									</DropdownMenu.Item>
+								{/if}
 								{#if isCloud}
 									<DropdownMenu.Item
 										onclick={() =>

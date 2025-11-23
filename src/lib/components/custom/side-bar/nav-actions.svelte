@@ -11,6 +11,7 @@
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import ArrowDown from '@lucide/svelte/icons/arrow-down';
 	import GripVertical from '@lucide/svelte/icons/grip-vertical';
+	import Globe from '@lucide/svelte/icons/globe';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
@@ -76,6 +77,13 @@
 			</Dropdown.Group>
 			<Dropdown.Separator />
 			<Dropdown.Group>
+				{#if 'owner' in note}
+					<Dropdown.Item onclick={() => cloudNotes.togglePublic(note)}>
+						<Globe />
+						{note.isPublic ? 'Make Private' : 'Make Public'}
+					</Dropdown.Item>
+				{/if}
+
 				<Dropdown.Item
 					onclick={() => {
 						if ('owner' in note) cloudNotes.duplicate(note);

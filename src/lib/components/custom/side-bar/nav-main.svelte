@@ -29,12 +29,6 @@
 			</Sidebar.MenuBadge>
 		</Sidebar.MenuButton>
 	</Sidebar.MenuItem>
-	<!-- <Sidebar.MenuItem>
-		<Sidebar.MenuButton>
-			<Sparkle />
-			<span>Ask AI</span>
-		</Sidebar.MenuButton>
-	</Sidebar.MenuItem> -->
 	<Sidebar.MenuItem>
 		<Sidebar.MenuButton
 			isActive={page.url.pathname.endsWith('/home')}

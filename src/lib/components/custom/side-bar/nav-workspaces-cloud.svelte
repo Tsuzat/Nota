@@ -12,6 +12,7 @@
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import StarIcon from '@lucide/svelte/icons/star';
+	import Globe from '@lucide/svelte/icons/globe';
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -88,7 +89,6 @@
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}
-									<!-- <a href="local-workspace-{workspace.id}" {...props}> -->
 									<span {...props}>
 										<IconRenderer icon={workspace.icon} />
 										<span>{workspace.name}</span>
@@ -196,6 +196,10 @@
 														{@const favorite = note.favorite}
 														<StarIcon class={cn(favorite && 'fill-yellow-500 text-yellow-500')} />
 														{favorite ? 'Unfavorite' : 'Favorite'}
+													</DropdownMenu.Item>
+													<DropdownMenu.Item onclick={() => cloudNotes.togglePublic(note)}>
+														<Globe />
+														{note.isPublic ? 'Make Private' : 'Make Public'}
 													</DropdownMenu.Item>
 													<DropdownMenu.Item onclick={() => cloudNotes.duplicate(note)}>
 														<CopyIcon />
