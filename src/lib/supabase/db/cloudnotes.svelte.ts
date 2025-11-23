@@ -14,6 +14,7 @@ export interface CloudNote {
 	trashed: boolean;
 	created_at: string;
 	updated_at: string;
+	isPublic: boolean;
 }
 
 class CloudNotes {
@@ -56,7 +57,7 @@ class CloudNotes {
 			const { data, error } = await supabase
 				.from('notes')
 				.select(
-					'id, name, icon, workspace, userworkspace, owner, favorite, trashed, created_at, updated_at'
+					'id, name, icon, workspace, userworkspace, owner, favorite, trashed, created_at, updated_at, isPublic'
 				)
 				.eq('userworkspace', userworkspace.id)
 				.order('created_at', { ascending: true });
@@ -161,7 +162,8 @@ class CloudNotes {
 					name: note.name,
 					icon: note.icon,
 					favorite: note.favorite,
-					trashed: note.trashed
+					trashed: note.trashed,
+					isPublic: note.isPublic
 				})
 				.eq('id', note.id)
 				.select()
@@ -178,6 +180,11 @@ class CloudNotes {
 			console.error('Error updating note:', err);
 			toast.error('Error updating note.');
 		}
+	}
+
+	async togglePublic(note: CloudNote) {
+		const updatedNote = { ...note, isPublic: !note.isPublic };
+		await this.updateNote(updatedNote);
 	}
 
 	/**

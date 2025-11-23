@@ -30,6 +30,7 @@
 	import { resolve } from '$app/paths';
 	import { compare } from 'fast-json-patch';
 	import { getGlobalSettings } from '$lib/components/custom/settings/index.js';
+	import { Globe } from '@lucide/svelte';
 
 	const { data } = $props();
 
@@ -245,6 +246,19 @@
 		</div>
 
 		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', ISWINDOWS && 'mr-30')}>
+			{#if note.isPublic}
+				<SimpleTooltip content="Pulic and can be seen by anyone with the link">
+					<Button variant="ghost" size="icon" class="size-7">
+						<Globe />
+					</Button>
+					{#snippet child()}
+						<div>
+							<span class="font-semibold"> This is a public note </span>
+							<small>Anyone with the link can view this note</small>
+						</div>
+					{/snippet}
+				</SimpleTooltip>
+			{/if}
 			{#if editor && !editor?.isDestroyed}
 				<div class="text-muted-foreground truncate text-xs">
 					{editor.storage.characterCount.words()} Words
