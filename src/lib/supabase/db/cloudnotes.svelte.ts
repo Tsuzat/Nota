@@ -184,7 +184,11 @@ class CloudNotes {
 
 	async togglePublic(note: CloudNote) {
 		const updatedNote = { ...note, isPublic: !note.isPublic };
-		await this.updateNote(updatedNote);
+		toast.promise(this.updateNote(updatedNote), {
+			loading: `Making note ${updatedNote.isPublic ? 'public' : 'private'}`,
+			success: `Note visibility updated to ${updatedNote.isPublic ? 'public' : 'private'}`,
+			error: 'Error updating note visibility'
+		});
 	}
 
 	/**
