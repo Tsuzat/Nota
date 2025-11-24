@@ -235,7 +235,7 @@
 					</p>
 				</div>
 				<div
-					class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-gradient-to-br p-8 backdrop-blur-sm"
+					class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-linear-to-br p-8 backdrop-blur-sm"
 				>
 					<MockDragHandle />
 				</div>
@@ -254,7 +254,7 @@
 					</p>
 				</div>
 				<div
-					class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-gradient-to-br p-8 backdrop-blur-sm"
+					class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-linear-to-br p-8 backdrop-blur-sm"
 				>
 					<MockBubbleMenu />
 				</div>
@@ -273,7 +273,7 @@
 					</p>
 				</div>
 				<div
-					class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-gradient-to-br p-8 backdrop-blur-sm"
+					class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-linear-to-br p-8 backdrop-blur-sm"
 				>
 					<MockAiDialog />
 				</div>
