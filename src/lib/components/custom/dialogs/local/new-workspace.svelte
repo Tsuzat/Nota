@@ -40,12 +40,11 @@
 			toast.error('Can find current user workspace. Please select one user workspace.');
 			return;
 		}
-		// verify icon, name, dir
+		// verify icon, name
 		if (!icon || !name) {
 			toast.error('Please select an icon and name');
 			return;
 		}
-
 		try {
 			loading = true;
 			await localWorspaces.createWorkspace(icon, name, currentUserWorkspace.id);

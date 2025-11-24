@@ -75,7 +75,7 @@
 			</svg>
 		{/if}
 	</Button>
-	<Button variant="ghost" class="h-12 rounded-none hover:!bg-red-500" title="Close" onclick={close}>
+	<Button variant="ghost" class="h-12 rounded-none hover:bg-red-500!" title="Close" onclick={close}>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			x="0px"

@@ -9,6 +9,6 @@
 	}
 </script>
 
-<Button variant="ghost" size="icon" class="z-10 !size-6 p-0.5" onclick={showMenu}>
+<Button variant="ghost" size="icon" class="z-10 size-6! p-0.5" onclick={showMenu}>
 	<img {src} alt="AppLogo" class="aspect-square" />
 </Button>

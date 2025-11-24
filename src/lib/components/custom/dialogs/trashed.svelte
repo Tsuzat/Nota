@@ -64,7 +64,7 @@
 							title="Restore Note"
 							variant="ghost"
 							onclick={() => restoreNote(note)}
-							class="!size-7"
+							class="size-7!"
 						>
 							<RotateCcw />
 						</Button>
@@ -74,7 +74,7 @@
 							title="Delete Permanently"
 							variant="ghost"
 							onclick={() => deleteNote(note)}
-							class="!size-7"
+							class="size-7!"
 						>
 							<Trash2Icon />
 						</Button>
