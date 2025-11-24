@@ -4,7 +4,7 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import { onMount } from 'svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
-	import { supabase } from '$lib/supabase';
+	import { auth } from '$lib/supabase';
 	import { setSessionAndUserContext } from '$lib/supabase/user.svelte';
 	import { invalidate } from '$app/navigation';
 	import { setGlobalSignInContext, GlobalSignIn } from '$lib/components/custom/global-signin';
@@ -23,7 +23,7 @@
 	onMount(() => {
 		setTheme(useSettings.themeColor);
 		const id = toast.loading('Authenticating...');
-		const { data } = supabase.auth.onAuthStateChange((event, session) => {
+		const { data } = auth.onAuthStateChange((event, session) => {
 			if (event === 'INITIAL_SESSION') {
 				if (session) {
 					toast.success('Signed in successfully!', { id });
