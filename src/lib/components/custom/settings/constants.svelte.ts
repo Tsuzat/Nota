@@ -1,12 +1,12 @@
 import { getContext, setContext } from 'svelte';
 
-function getLocalStorageValue<T>(key: string, defaultValue: T): T {
+function getLocalStorageValue(key: string, defaultValue: boolean): boolean {
 	const data = localStorage.getItem(key);
 	if (!data) {
 		localStorage.setItem(key, String(defaultValue));
 		return defaultValue;
 	}
-	return data as T;
+	return data === 'true';
 }
 
 class GlobalSettings {

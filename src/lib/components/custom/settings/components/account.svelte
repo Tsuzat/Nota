@@ -3,7 +3,7 @@
 	import OAuth from '$lib/components/custom/global-signin/oauth.svelte';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { supabase } from '$lib/supabase';
+	import { auth } from '$lib/supabase';
 	import { toast } from 'svelte-sonner';
 
 	const useSessionAndUser = getSessionAndUserContext();
@@ -12,7 +12,7 @@
 	const session = $derived(useSessionAndUser.getSession());
 
 	async function handleSignout() {
-		const { error } = await supabase.auth.signOut();
+		const { error } = await auth.signOut();
 		if (error) {
 			toast.error(error.message);
 		} else {
