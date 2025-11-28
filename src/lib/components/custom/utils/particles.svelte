@@ -20,7 +20,7 @@
 		quantity = 200,
 		staticity = 50,
 		ease = 50,
-		size = 0.4,
+		size = 1,
 		refresh = true,
 		color = '#808080',
 		vx = 0,
@@ -104,7 +104,10 @@
 			context.translate(translateX, translateY);
 			context.beginPath();
 			context.arc(x, y, size, 0, 2 * Math.PI);
-			context.fillStyle = `rgba(${rgb.join(', ')}, ${alpha})`;
+			const randomR = Math.floor(Math.random() * 256);
+			const randomG = Math.floor(Math.random() * 256);
+			const randomB = Math.floor(Math.random() * 256);
+			context.fillStyle = `rgba(${randomR}, ${randomG}, ${randomB}, ${alpha})`;
 			context.fill();
 			context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
