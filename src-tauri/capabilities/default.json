@@ -31,7 +31,7 @@
 			"identifier": "opener:allow-open-url",
 			"allow": [
 				{
-					"url": "https://nota.tsuzat.com/*"
+					"url": "https://nota.ink/*"
 				}
 			]
 		},
