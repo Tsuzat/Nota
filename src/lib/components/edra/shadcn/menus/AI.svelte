@@ -16,8 +16,7 @@
 	import { toast } from 'svelte-sonner';
 	import { removeAIHighlight } from '../../extensions/AIHighLight';
 	import { Separator } from '$lib/components/ui/separator';
-	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
-	import { Streamdown } from 'svelte-streamdown';
+
 	import {
 		CONTINUE_WRITING,
 		FIX_GRAMMER_PROMPT,
@@ -25,9 +24,9 @@
 		MAKE_SHORTED_PROMPT,
 		SUMMARIZE_PROMPT
 	} from '$lib/supabase/ai/prompt';
-	import { mode } from 'mode-watcher';
 	import { callGeminiAI } from '$lib/gemini';
 	import { fade } from 'svelte/transition';
+	import RenderMarkdown from '$lib/components/custom/render-markdown.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -181,7 +180,6 @@
 	}
 </script>
 
-<!-- BubbleMenu usage -->
 <BubbleMenu
 	{editor}
 	pluginKey="edra-bubble-menu"
@@ -291,12 +289,9 @@
 				</Button>
 			</div>
 			<Separator />
-			<Streamdown
-				content={aiResponse}
+			<RenderMarkdown
+				data={aiResponse}
 				class="w-full max-w-xl flex-1 grow overflow-auto px-4 py-2 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
-				shikiTheme={mode.current === 'dark' ? 'one-dark-pro' : 'one-light'}
-				shikiPreloadThemes={['one-dark-pro', 'one-light']}
-				baseTheme="shadcn"
 			/>
 		{/if}
 	{/if}
@@ -314,7 +309,7 @@
 		}
 	}
 	.animated-gradient-border {
-		background: conic-gradient(from var(--angle), #a855f7, #06b6d4, #22c55e, #f59e0b, #ef4444);
+		background: conic-gradient(from var(--angle), #9229f3, #004cff, #00a930, #f7a312, #ff0a0a);
 		animation: rotate 2s linear infinite;
 		border-radius: 4px !important;
 	}
