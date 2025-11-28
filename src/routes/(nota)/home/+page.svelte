@@ -7,7 +7,7 @@
 	import { useCurrentUserWorkspaceContext } from '$lib/components/custom/user-workspace/userworkspace.svelte';
 	import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
@@ -22,6 +22,10 @@
 	} from '$lib/supabase/db/clouduserworkspaces.svelte';
 	import { cn, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
 	import PlusIcon from '@lucide/svelte/icons/plus';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { ChevronDown, Trash } from '@lucide/svelte';
+	import { ask } from '@tauri-apps/plugin-dialog';
+	import { toast } from 'svelte-sonner';
 
 	const sidebar = useSidebar();
 	const localUserWorkspaces = getLocalUserWorkspaces();
@@ -45,6 +49,30 @@
 		}
 		return rn;
 	});
+
+	async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) {
+		if (currentUserWorkspace?.id === workspace.id) {
+			return;
+		}
+		const shouldDelete = await ask(
+			`Are you sure you want to delete the workspace ${workspace.name}?`,
+			{ title: 'Delete User Workspace', okLabel: 'Yes, Delete', kind: 'warning' }
+		);
+		if (!shouldDelete) {
+			return;
+		}
+		if ('owner' in workspace) await cloudUserWorkspaces.deleteWorkspace(workspace.id);
+		else {
+			if (localUserWorkspaces.getUserWorkspaces().length === 1) {
+				toast.error('Can not delete last local user workspace', {
+					description:
+						'You need at least one local user workspace. Create a new local workspace if you want to delete this one.'
+				});
+				return;
+			}
+			await localUserWorkspaces.deleteUserWorkspace(workspace.id);
+		}
+	}
 </script>
 
 {#if currentUserWorkspace === null}
@@ -90,16 +118,28 @@
 			</div>
 			<div class="flex w-full items-center gap-2 overflow-x-auto">
 				{#each userWorkspaces as workspace (workspace.id)}
-					<Button
-						variant="secondary"
-						class={cn(
-							'w-fit rounded-lg p-6!',
-							currentUserWorkspace?.id === workspace.id && 'border-primary border'
-						)}
-					>
-						<IconRenderer icon={workspace.icon} class="mr-2 size-4" />
-						<span class="text-muted-foreground">{workspace.name}</span>
-					</Button>
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger
+							class={buttonVariants({
+								variant: 'secondary',
+								class: cn(
+									'w-fit rounded-lg p-6!',
+									currentUserWorkspace?.id === workspace.id && 'border-primary border'
+								)
+							})}
+							disabled={currentUserWorkspace?.id === workspace.id}
+						>
+							<IconRenderer icon={workspace.icon} class="mr-2 size-4" />
+							<span class="text-muted-foreground">{workspace.name}</span>
+							<ChevronDown class="text-muted-foreground size-2!" />
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content>
+							<DropdownMenu.Item variant="destructive" onclick={() => handleDelete(workspace)}>
+								<Trash />
+								Delete
+							</DropdownMenu.Item>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
 				{/each}
 				{#if userWorkspaces.length === 0}
 					<span class="text-muted-foreground">No Userworkspaces are found.</span>

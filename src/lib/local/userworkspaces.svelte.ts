@@ -54,6 +54,16 @@ class UserWorkspaces {
 			console.error(e);
 		}
 	}
+
+	async deleteUserWorkspace(id: number) {
+		try {
+			await DB.execute('DELETE FROM userworkspaces WHERE id = $1', [id]);
+			this.setUserWorkspaces(this.getUserWorkspaces().filter((w) => w.id !== id));
+		} catch (e) {
+			toast.error('Something went wrong when deleting the user workspace');
+			console.error(e);
+		}
+	}
 }
 
 const USERWORKSPACESKEY = Symbol('USERWORKSPACESID');
