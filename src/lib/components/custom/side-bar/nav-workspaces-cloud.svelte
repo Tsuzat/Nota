@@ -87,10 +87,13 @@
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}
-									<span {...props}>
+									<a
+										{...props}
+										href={resolve('/(nota)/(cloud)/workspace-[id]', { id: workspace.id })}
+									>
 										<IconRenderer icon={workspace.icon} />
 										<span>{workspace.name}</span>
-									</span>
+									</a>
 								{/snippet}
 							</Sidebar.MenuButton>
 							<Collapsible.Trigger>

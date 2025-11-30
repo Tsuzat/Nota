@@ -86,11 +86,10 @@
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}
-									<!-- <a href="local-workspace-{workspace.id}" {...props}> -->
-									<span {...props}>
+									<a href="local-workspace-{workspace.id}" {...props}>
 										<IconRenderer icon={workspace.icon} />
 										<span>{workspace.name}</span>
-									</span>
+									</a>
 								{/snippet}
 							</Sidebar.MenuButton>
 							<Collapsible.Trigger>

@@ -197,7 +197,6 @@ class CloudNotes {
 	async deleteNote(id: string) {
 		try {
 			const { error } = await supabase.from('notes').delete().eq('id', id);
-
 			if (error) {
 				console.error(error);
 				toast.error(error.message);
