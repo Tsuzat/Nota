@@ -113,9 +113,10 @@ export const getFileTypeFromExtension = (fileName: string): FileType => {
 	} else return FileType.UNKNOWN;
 };
 
-export function timeAgo(date: string): string {
+export function timeAgo(date: string | number): string {
 	const now = new Date();
-	const then = new Date(date);
+	// If date is a number, assume it's Unix timestamp in seconds and convert to milliseconds
+	const then = typeof date === 'number' ? new Date(date * 1000) : new Date(date);
 	const diffInSeconds = Math.floor((now.getTime() - then.getTime()) / 1000);
 
 	// Just now: less than 60 seconds ago

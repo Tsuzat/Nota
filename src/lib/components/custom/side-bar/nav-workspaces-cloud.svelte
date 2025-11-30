@@ -15,7 +15,7 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { cn, getKeyboardShortcut } from '$lib/utils';
+	import { cn, getKeyboardShortcut, timeAgo } from '$lib/utils';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import NewWorkspace from '../dialogs/local/new-workspace.svelte';
@@ -204,6 +204,11 @@
 														<Trash2Icon />
 														Delete
 													</DropdownMenu.Item>
+													<DropdownMenu.Separator />
+													<DropdownMenu.Label class="text-muted-foreground text-sm">
+														Last Edited:
+														{timeAgo(note.updated_at)}
+													</DropdownMenu.Label>
 												</DropdownMenu.Content>
 											</DropdownMenu.Root>
 										</Sidebar.MenuSubItem>

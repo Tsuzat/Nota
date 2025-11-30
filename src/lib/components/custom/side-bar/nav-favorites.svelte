@@ -5,7 +5,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { useSidebar } from '$lib/components/ui/sidebar';
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-	import { ISTAURI } from '$lib/utils';
+	import { ISTAURI, timeAgo } from '$lib/utils';
 	import ArrowUpRightIcon from '@lucide/svelte/icons/arrow-up-right';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import LinkIcon from '@lucide/svelte/icons/link';
@@ -157,6 +157,11 @@
 									<Trash2Icon />
 									Delete
 								</DropdownMenu.Item>
+								<DropdownMenu.Separator />
+								<DropdownMenu.Label class="text-muted-foreground text-sm">
+									Last Edited:
+									{timeAgo(note.updated_at)}
+								</DropdownMenu.Label>
 							</DropdownMenu.Content>
 						</DropdownMenu.Root>
 					</Sidebar.MenuItem>

@@ -146,11 +146,6 @@ class Notes {
 			note.userworkspace
 		);
 	}
-
-	// export the note with it's assets
-	async exportNote(note: LocalNote) {
-		toast.loading(`Exporting note ${note.name}...`);
-	}
 }
 
 const NOTESKEY = Symbol('NOTESID');
