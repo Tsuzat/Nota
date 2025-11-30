@@ -23,6 +23,7 @@
 	import { getKeyboardShortcut } from '$lib/utils';
 	import { getGlobalSettings } from '../settings';
 	import Settings from '$lib/components/icons/moving-icons/settings.svelte';
+	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 
 	let isTrashHovered = $state(false);
 	let isDownloadHovered = $state(false);
@@ -178,13 +179,17 @@
 							<DropdownMenu.Group>
 								<DropdownMenu.Item
 									onclick={async () => {
-										await openUrl('https://nota.tsuzat.com/profile');
+										await openUrl(PUBLIC_NOTA_FRONTEND_URL + '/profile');
 									}}
 								>
 									<CircleUser />
 									Account
 								</DropdownMenu.Item>
-								<DropdownMenu.Item>
+								<DropdownMenu.Item
+									onclick={async () => {
+										await openUrl(PUBLIC_NOTA_FRONTEND_URL + '/profile');
+									}}
+								>
 									<CreditCard />
 									Billing
 								</DropdownMenu.Item>

@@ -8,8 +8,6 @@
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import ArrowDownFromLine from '@lucide/svelte/icons/arrow-down-from-line';
-	import ArrowUpFromLine from '@lucide/svelte/icons/arrow-up-from-line';
 	import CopyIcon from '@lucide/svelte/icons/copy';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import StarIcon from '@lucide/svelte/icons/star';
@@ -20,10 +18,11 @@
 	import { toast } from 'svelte-sonner';
 	import { cn, getKeyboardShortcut } from '$lib/utils';
 	import SimpleTooltip from '../simple-tooltip.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import NewWorkspace from '../dialogs/local/new-workspace.svelte';
 	import NewNotes from '../dialogs/local/new-notes.svelte';
 	import { resolve } from '$app/paths';
+	import Plus from '@lucide/svelte/icons/plus';
 
 	let showMore = $state(false);
 
@@ -72,7 +71,7 @@
 				<PlusIcon />
 			</Button>
 			{#snippet child()}
-				<div class="flex flex-col items-center gap-1">
+				<div class="inline-flex items-center gap-1">
 					<span>Create Workspace</span>
 					<span class="bg-muted text-primary rounded p-0.5">{getKeyboardShortcut('N', true)}</span>
 				</div>
@@ -105,49 +104,51 @@
 									</Sidebar.MenuAction>
 								{/snippet}
 							</Collapsible.Trigger>
-							<DropdownMenu.Root>
-								<DropdownMenu.Trigger>
-									{#snippet child({ props })}
-										<Sidebar.MenuAction showOnHover {...props}>
-											<EllipsisIcon />
-											<span class="sr-only">More</span>
-										</Sidebar.MenuAction>
-									{/snippet}
-								</DropdownMenu.Trigger>
-								<DropdownMenu.Content
-									class="bg-popover w-fit"
-									side={sidebar.isMobile ? 'bottom' : 'right'}
-									align={sidebar.isMobile ? 'end' : 'start'}
-									portalProps={{ disabled: true, children: undefined }}
-								>
-									<DropdownMenu.Item
+							<Sidebar.MenuAction
+								showOnHover
+								class="mr-3! inline-flex gap-0.25! hover:bg-transparent!"
+							>
+								<SimpleTooltip content="Add Notes">
+									<Button
+										variant="ghost"
+										class="size-6"
 										onclick={() => {
 											currentLocalWorkspace = workspace;
 											openNewNotes = true;
 										}}
 									>
-										<PlusIcon />
-										<span>Create Notes</span>
-									</DropdownMenu.Item>
-									<DropdownMenu.Item>
-										<Pencil />
-										<span>Rename</span>
-									</DropdownMenu.Item>
-									<DropdownMenu.Separator />
-									<DropdownMenu.Item>
-										<ArrowUpFromLine />
-										<span>Export Workspace</span>
-									</DropdownMenu.Item>
-									<DropdownMenu.Item>
-										<ArrowDownFromLine />
-										<span>Import Notes</span>
-									</DropdownMenu.Item>
-									<DropdownMenu.Item variant="destructive" onclick={() => handleDelete(workspace)}>
-										<Trash2Icon />
-										<span>Delete Workspace</span>
-									</DropdownMenu.Item>
-								</DropdownMenu.Content>
-							</DropdownMenu.Root>
+										<Plus />
+									</Button>
+								</SimpleTooltip>
+								<DropdownMenu.Root>
+									<SimpleTooltip content="More Options">
+										<DropdownMenu.Trigger
+											class={buttonVariants({ variant: 'ghost', class: 'size-6!' })}
+										>
+											<EllipsisIcon />
+										</DropdownMenu.Trigger>
+									</SimpleTooltip>
+									<DropdownMenu.Content
+										class="bg-popover w-fit"
+										side={sidebar.isMobile ? 'bottom' : 'right'}
+										align={sidebar.isMobile ? 'end' : 'start'}
+										portalProps={{ disabled: true, children: undefined }}
+									>
+										<DropdownMenu.Item>
+											<Pencil />
+											<span>Rename</span>
+										</DropdownMenu.Item>
+										<DropdownMenu.Separator />
+										<DropdownMenu.Item
+											variant="destructive"
+											onclick={() => handleDelete(workspace)}
+										>
+											<Trash2Icon />
+											<span>Delete Workspace</span>
+										</DropdownMenu.Item>
+									</DropdownMenu.Content>
+								</DropdownMenu.Root>
+							</Sidebar.MenuAction>
 							<Collapsible.Content>
 								<Sidebar.MenuSub>
 									{@const notes = localNotes

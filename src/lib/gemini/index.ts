@@ -7,22 +7,22 @@ export enum GeminiModel {
 }
 
 export function getUserPreferedAIModel() {
-	const model = localStorage.getItem("nota-user-ai-model") ?? GeminiModel.FlashLite;
+	const model = localStorage.getItem('nota-user-ai-model') ?? GeminiModel.FlashLite;
 	switch (model) {
 		case GeminiModel.Pro:
-			return GeminiModel.Pro
+			return GeminiModel.Pro;
 		case GeminiModel.Flash:
-			return GeminiModel.Flash
+			return GeminiModel.Flash;
 		case GeminiModel.FlashLite:
-			return GeminiModel.FlashLite
+			return GeminiModel.FlashLite;
 		default:
-			localStorage.setItem("nota-user-ai-model", GeminiModel.FlashLite)
-			return GeminiModel.FlashLite
+			localStorage.setItem('nota-user-ai-model', GeminiModel.FlashLite);
+			return GeminiModel.FlashLite;
 	}
 }
 
 export function setUserPreferedAIModel(model: GeminiModel) {
-	localStorage.setItem("nota-user-ai-model", model);
+	localStorage.setItem('nota-user-ai-model', model);
 }
 
 /**
@@ -39,7 +39,7 @@ export function setUserPreferedAIModel(model: GeminiModel) {
 export async function callGeminiAI(
 	prompt: string,
 	onChunck: (chunk: string) => void,
-	onError?: (error: Error) => void,
+	onError?: (error: Error) => void
 ) {
 	try {
 		const apiKey = localStorage.getItem('gemini_api_key');
