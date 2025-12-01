@@ -23,7 +23,7 @@
 	} from '$lib/components/edra/shadcn/index.js';
 	import Cloud from '@lucide/svelte/icons/cloud';
 	import Loader from '@lucide/svelte/icons/loader';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
@@ -121,6 +121,10 @@
 	async function loadData(id: string) {
 		isLoading = true;
 		note = cloudNotes.getNotes().find((n) => n.id === id);
+		if (note === undefined) {
+			toast.error(`Notes with id ${id} not found`);
+			return goto(resolve('/home'));
+		}
 		try {
 			const { data, error } = await supabase.from('notes').select('content').eq('id', id).single();
 			if (error) {
@@ -191,6 +195,7 @@
 
 	beforeNavigate(async () => {
 		if (isDirty) {
+			toast.info('Saving current note content');
 			await saveNoteContent();
 		}
 	});

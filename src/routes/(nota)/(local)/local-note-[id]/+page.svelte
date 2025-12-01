@@ -47,12 +47,12 @@
 
 	async function loadData(id: string) {
 		isLoading = true;
-		note = localNotes.getNotes().find((n) => n.id.toString() === data.id);
+		note = localNotes.getNotes().find((n) => n.id.toString() === id);
+		if (note === undefined) {
+			toast.error(`Notes with id ${id} not found`);
+			return goto(resolve('/home'));
+		}
 		try {
-			if (note === undefined) {
-				toast.error(`Notes with id ${id} not found`);
-				return goto(resolve('/home'));
-			}
 			const data = await DB.select<{ content: string }[]>(
 				'SELECT content FROM notes WHERE id = $1',
 				[id]
@@ -75,7 +75,7 @@
 			if (pendingContent !== undefined && pendingContent !== null) {
 				saveContent();
 			}
-		}, 1000);
+		}, 5000);
 		return () => clearInterval(saveInterval);
 	});
 
