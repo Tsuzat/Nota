@@ -7,7 +7,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { downloadDir, resolve } from '@tauri-apps/api/path';
 import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { toast } from 'svelte-sonner';
-import type { Editor } from '@tiptap/core';
+import type { Content, Editor } from '@tiptap/core';
 import { openPath } from '@tauri-apps/plugin-opener';
 
 export function cn(...inputs: ClassValue[]) {
@@ -236,8 +236,8 @@ export async function exportContent(
 	}
 }
 
-export async function importNotes(editor?: Editor) {
-	if (!editor || editor.isDestroyed || !editor.markdown) {
+export async function importNotes(editor?: Editor, returnData?: boolean) {
+	if ((!editor || editor.isDestroyed || !editor.markdown) && !returnData) {
 		console.error('Editor is not initialized or destroyed\n Editor = ', editor);
 		toast.error('Can not intialize import. Try to restart.');
 		return;
@@ -262,8 +262,16 @@ export async function importNotes(editor?: Editor) {
 			const data = await readFile(path);
 			const decoder = new TextDecoder();
 			const fileData = decoder.decode(data);
-			const content = JSON.parse(fileData);
-			editor.commands.insertContent(content, { contentType: 'json' });
+			const content = JSON.parse(fileData) as Content;
+			if (returnData) {
+				// file name
+				const fileName = path
+					.split(ISMACOS ? '/' : '\\')
+					.pop()
+					?.split('.')[0];
+				if (fileName) return { name: fileName, content };
+			}
+			editor?.commands.insertContent(content, { contentType: 'json' });
 			// switch (extension) {
 			// 	case 'json':
 			// 		content = JSON.parse(fileData);

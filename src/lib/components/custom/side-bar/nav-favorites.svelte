@@ -18,7 +18,6 @@
 	import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-	import { ask } from '@tauri-apps/plugin-dialog';
 	import { resolve } from '$app/paths';
 	import { Globe } from '@lucide/svelte';
 
@@ -46,17 +45,8 @@
 	}
 
 	async function trashNote(note: LocalNote | CloudNote) {
-		const shouldDelete = await ask(
-			'This action will put the note in Trash. You can still access it and restore it later.',
-			{
-				title: `Trash ${note.name}`,
-				okLabel: 'Trash',
-				cancelLabel: 'Cancel'
-			}
-		);
-		if (!shouldDelete) return;
 		try {
-			if ('owner' in note) await cloudNotes.moveToTrash(note.id);
+			if ('owner' in note) await cloudNotes.moveToTrash(note);
 			else await localNotes.trashNote(note);
 		} catch (e) {
 			toast.error('Could not update note starred');
@@ -64,20 +54,11 @@
 		}
 	}
 	async function deleteNote(note: LocalNote | CloudNote) {
-		const shouldDelete = await ask(
-			'This action will permanently delete the note. Are you sure you want to continue?',
-			{
-				title: `Delete ${note.name}`,
-				okLabel: 'Delete',
-				cancelLabel: 'Cancel'
-			}
-		);
-		if (!shouldDelete) return;
 		try {
-			if ('owner' in note) await cloudNotes.deleteNote(note.id);
+			if ('owner' in note) await cloudNotes.deleteNote(note);
 			else await localNotes.deleteNote(note);
 		} catch (e) {
-			toast.error('Could not update note starred');
+			toast.error('Could not delete note');
 			console.error(e);
 		}
 	}

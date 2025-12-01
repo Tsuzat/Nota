@@ -44,7 +44,7 @@
 				<span
 					class={cn(
 						'dark:bg-muted bg-muted-foreground/50 block! h-0.5! w-4 rounded!',
-						item.isActive && 'bg-primary',
+						item.isActive && 'bg-primary!',
 						item.level === 1 ? 'w-6' : 'w-4'
 					)}
 				></span>

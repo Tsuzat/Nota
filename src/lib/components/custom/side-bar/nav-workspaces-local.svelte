@@ -177,7 +177,7 @@
 													{/snippet}
 												</DropdownMenu.Trigger>
 												<DropdownMenu.Content>
-													<DropdownMenu.Item>
+													<DropdownMenu.Item onclick={() => localNotes.toggleFavorite(note)}>
 														{@const favorite = note.favorite}
 														<StarIcon class={cn(favorite && 'fill-yellow-500 text-yellow-500')} />
 														{favorite ? 'Unfavorite' : 'Favorite'}

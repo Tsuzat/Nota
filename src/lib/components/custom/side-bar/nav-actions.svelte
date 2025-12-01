@@ -130,7 +130,7 @@
 			<Dropdown.Group>
 				<Dropdown.Item
 					onclick={() => {
-						if ('owner' in note) cloudNotes.moveToTrash(note.id);
+						if ('owner' in note) cloudNotes.moveToTrash(note);
 						else localNotes.trashNote(note);
 					}}
 				>
@@ -149,7 +149,7 @@
 							}
 						);
 						if (!shouldDelete) return;
-						if ('owner' in note) cloudNotes.deleteNote(note.id);
+						if ('owner' in note) cloudNotes.deleteNote(note);
 						else localNotes.deleteNote(note);
 						window.location.replace('/home');
 					}}

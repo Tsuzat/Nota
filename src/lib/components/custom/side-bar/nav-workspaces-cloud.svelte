@@ -179,7 +179,7 @@
 													{/snippet}
 												</DropdownMenu.Trigger>
 												<DropdownMenu.Content>
-													<DropdownMenu.Item>
+													<DropdownMenu.Item onclick={() => cloudNotes.toggleFavorite(note)}>
 														{@const favorite = note.favorite}
 														<StarIcon class={cn(favorite && 'fill-yellow-500 text-yellow-500')} />
 														{favorite ? 'Unfavorite' : 'Favorite'}
@@ -195,14 +195,14 @@
 													<DropdownMenu.Separator />
 													<DropdownMenu.Item
 														variant="destructive"
-														onclick={() => cloudNotes.moveToTrash(note.id)}
+														onclick={() => cloudNotes.moveToTrash(note)}
 													>
 														<Trash2Icon />
 														Move to Trash
 													</DropdownMenu.Item>
 													<DropdownMenu.Item
 														variant="destructive"
-														onclick={() => cloudNotes.deleteNote(note.id)}
+														onclick={() => cloudNotes.deleteNote(note)}
 													>
 														<Trash2Icon />
 														Delete
