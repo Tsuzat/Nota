@@ -83,13 +83,16 @@
 			<Sidebar.Menu>
 				{#each workspaces as workspace (workspace.id)}
 					<Collapsible.Root>
-						<Sidebar.MenuItem>
+						{@const href = resolve('/(nota)/(local)/local-workspace-[id]', {
+							id: String(workspace.id)
+						})}
+						<Sidebar.MenuItem onclick={() => goto(href)}>
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}
-									<a href="local-workspace-{workspace.id}" {...props}>
+									<span {...props}>
 										<IconRenderer icon={workspace.icon} />
 										<span>{workspace.name}</span>
-									</a>
+									</span>
 								{/snippet}
 							</Sidebar.MenuButton>
 							<Collapsible.Trigger>
@@ -155,16 +158,16 @@
 										.filter((n) => n.workspace === workspace.id && !n.trashed)}
 									{#each notes as note (note.id)}
 										{@const href = resolve('/(nota)/(local)/local-note-[id]', {
-											id: note.id.toString()
+											id: String(note.id)
 										})}
 										{@const isActive = page.url.pathname.endsWith(href)}
-										<Sidebar.MenuSubItem>
+										<Sidebar.MenuSubItem onclick={() => goto(href)}>
 											<Sidebar.MenuSubButton {isActive}>
 												{#snippet child({ props })}
-													<a {href} {...props}>
+													<span {...props}>
 														<IconRenderer icon={note.icon} />
 														<span>{note.name}</span>
-													</a>
+													</span>
 												{/snippet}
 											</Sidebar.MenuSubButton>
 											<DropdownMenu.Root>

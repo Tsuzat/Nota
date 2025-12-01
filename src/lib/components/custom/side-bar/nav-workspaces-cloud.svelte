@@ -84,16 +84,15 @@
 			<Sidebar.Menu>
 				{#each workspaces as workspace (workspace.id)}
 					<Collapsible.Root>
-						<Sidebar.MenuItem>
+						<Sidebar.MenuItem
+							onclick={() => goto(resolve('/(nota)/(cloud)/workspace-[id]', { id: workspace.id }))}
+						>
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}
-									<a
-										{...props}
-										href={resolve('/(nota)/(cloud)/workspace-[id]', { id: workspace.id })}
-									>
+									<span {...props}>
 										<IconRenderer icon={workspace.icon} />
 										<span>{workspace.name}</span>
-									</a>
+									</span>
 								{/snippet}
 							</Sidebar.MenuButton>
 							<Collapsible.Trigger>
@@ -160,13 +159,13 @@
 									{#each notes as note (note.id)}
 										{@const href = resolve('/(nota)/(cloud)/note-[id]', { id: note.id })}
 										{@const isActive = page.url.pathname.endsWith(href)}
-										<Sidebar.MenuSubItem>
+										<Sidebar.MenuSubItem onclick={() => goto(href)}>
 											<Sidebar.MenuSubButton {isActive}>
 												{#snippet child({ props })}
-													<a {href} {...props}>
+													<span {...props}>
 														<IconRenderer icon={note.icon} />
 														<span>{note.name}</span>
-													</a>
+													</span>
 												{/snippet}
 											</Sidebar.MenuSubButton>
 											<DropdownMenu.Root>

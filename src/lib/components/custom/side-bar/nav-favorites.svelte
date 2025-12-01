@@ -20,6 +20,7 @@
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 	import { resolve } from '$app/paths';
 	import { Globe } from '@lucide/svelte';
+	import { goto } from '$app/navigation';
 
 	const sidebar = useSidebar();
 	let showMore = $state(false);
@@ -75,13 +76,13 @@
 					: resolve('/(nota)/(local)/local-note-[id]', { id: note.id.toString() })}
 				{@const isActive = page.url.pathname.endsWith(href)}
 				<div transition:slide={{ easing: linear, duration: 200 }}>
-					<Sidebar.MenuItem>
+					<Sidebar.MenuItem onclick={() => goto(href)}>
 						<Sidebar.MenuButton {isActive}>
 							{#snippet child({ props })}
-								<a {href} title={note.name} {...props}>
+								<span title={note.name} {...props}>
 									<IconRenderer icon={note.icon} />
 									<span>{note.name}</span>
-								</a>
+								</span>
 							{/snippet}
 						</Sidebar.MenuButton>
 						<DropdownMenu.Root>
