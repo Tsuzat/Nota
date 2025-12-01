@@ -180,7 +180,7 @@
 		syncing = true;
 		try {
 			note = { ...note, favorite: !note.favorite };
-			await cloudNotes.toggleFavorite(note.id);
+			await cloudNotes.toggleFavorite(note);
 		} catch (e) {
 			toast.error('Could not update note starred');
 			console.error(e);
