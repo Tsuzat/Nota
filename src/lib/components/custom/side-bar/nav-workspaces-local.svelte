@@ -86,8 +86,8 @@
 						{@const href = resolve('/(nota)/(local)/local-workspace-[id]', {
 							id: String(workspace.id)
 						})}
-						<Sidebar.MenuItem onclick={() => goto(href)}>
-							<Sidebar.MenuButton>
+						<Sidebar.MenuItem>
+							<Sidebar.MenuButton onclick={() => goto(href)}>
 								{#snippet child({ props })}
 									<span {...props}>
 										<IconRenderer icon={workspace.icon} />
@@ -106,10 +106,7 @@
 									</Sidebar.MenuAction>
 								{/snippet}
 							</Collapsible.Trigger>
-							<Sidebar.MenuAction
-								showOnHover
-								class="mr-3! inline-flex gap-0.25! hover:bg-transparent!"
-							>
+							<Sidebar.MenuAction showOnHover>
 								<SimpleTooltip content="Add Notes">
 									<Button
 										variant="ghost"
@@ -122,34 +119,6 @@
 										<Plus />
 									</Button>
 								</SimpleTooltip>
-								<DropdownMenu.Root>
-									<SimpleTooltip content="More Options">
-										<DropdownMenu.Trigger
-											class={buttonVariants({ variant: 'ghost', class: 'size-6!' })}
-										>
-											<EllipsisIcon />
-										</DropdownMenu.Trigger>
-									</SimpleTooltip>
-									<DropdownMenu.Content
-										class="bg-popover w-fit"
-										side={sidebar.isMobile ? 'bottom' : 'right'}
-										align={sidebar.isMobile ? 'end' : 'start'}
-										portalProps={{ disabled: true, children: undefined }}
-									>
-										<DropdownMenu.Item>
-											<Pencil />
-											<span>Rename</span>
-										</DropdownMenu.Item>
-										<DropdownMenu.Separator />
-										<DropdownMenu.Item
-											variant="destructive"
-											onclick={() => handleDelete(workspace)}
-										>
-											<Trash2Icon />
-											<span>Delete Workspace</span>
-										</DropdownMenu.Item>
-									</DropdownMenu.Content>
-								</DropdownMenu.Root>
 							</Sidebar.MenuAction>
 							<Collapsible.Content>
 								<Sidebar.MenuSub>
@@ -161,8 +130,8 @@
 											id: String(note.id)
 										})}
 										{@const isActive = page.url.pathname.endsWith(href)}
-										<Sidebar.MenuSubItem onclick={() => goto(href)}>
-											<Sidebar.MenuSubButton {isActive}>
+										<Sidebar.MenuSubItem>
+											<Sidebar.MenuSubButton {isActive} onclick={() => goto(href)}>
 												{#snippet child({ props })}
 													<span {...props}>
 														<IconRenderer icon={note.icon} />
