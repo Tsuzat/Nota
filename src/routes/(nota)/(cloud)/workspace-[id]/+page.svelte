@@ -4,14 +4,23 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { cn, ISMACOS, ISTAURI, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
+	import {
+		cn,
+		importNotes,
+		ISMACOS,
+		ISTAURI,
+		ISWINDOWS,
+		timeAgo,
+		writeStringToFile
+	} from '$lib/utils';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { goto } from '$app/navigation';
 	import Plus from '@lucide/svelte/icons/plus';
 	import MoreVertical from '@lucide/svelte/icons/more-vertical';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import Clock from '@lucide/svelte/icons/clock';
-	import Calendar from '@lucide/svelte/icons/calendar';
+	import ArrowDownToLine from '@lucide/svelte/icons/arrow-down-to-line';
+	import CalendarDays from '@lucide/svelte/icons/calendar-days';
 	import { resolve } from '$app/paths';
 	import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
@@ -21,9 +30,10 @@
 	import { useSidebar, SidebarTrigger } from '$lib/components/ui/sidebar';
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import NewNotes from '$lib/components/custom/dialogs/local/new-notes.svelte';
-	import { ArrowDownToLine } from '@lucide/svelte';
 	import { supabase } from '$lib/supabase/index.js';
 	import { toast } from 'svelte-sonner';
+	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
+	import Download from '@lucide/svelte/icons/download';
 
 	let { data } = $props();
 
@@ -36,26 +46,6 @@
 		cloudNotes.getNotes().filter((n) => n.workspace === data.id && !n.trashed)
 	);
 	let openNewNote = $state(false);
-
-	async function deleteNote(note: CloudNote) {
-		const ok = await ask(`Permanently delete note ${note.name}?`, {
-			title: 'Delete Note',
-			kind: 'warning',
-			okLabel: 'Yes, Delete'
-		});
-		if (!ok) return;
-		await cloudNotes.deleteNote(note.id);
-	}
-
-	async function trashNote(note: CloudNote) {
-		const ok = await ask(`Move note ${note.name} to trash?`, {
-			title: 'Trash Note',
-			kind: 'warning',
-			okLabel: 'Yes, Move to Trash'
-		});
-		if (!ok) return;
-		await cloudNotes.moveToTrash(note.id);
-	}
 
 	function openNote(note: CloudNote) {
 		goto(resolve('/(nota)/(cloud)/note-[id]', { id: note.id }));
@@ -107,6 +97,28 @@
 			toast.dismiss(id);
 		}
 	}
+
+	async function importNote() {
+		const id = toast.loading('Importing note...');
+		const data = await importNotes(undefined, true);
+		if (!data) {
+			toast.error('Something went wrong. We could not import the note.', { id });
+			return;
+		}
+		if (!workspace) {
+			toast.error('Workspace not found.', { id });
+			return;
+		}
+		toast.info('Pushing note to cloud...', { id });
+		await cloudNotes.createNote({
+			name: data.name,
+			workspace: workspace.id,
+			userworkspace: workspace.userworkspace,
+			owner: workspace.owner,
+			icon: 'lucide:FileText',
+			content: data.content
+		});
+	}
 </script>
 
 {#if workspace}
@@ -133,8 +145,8 @@
 			<WindowsButtons />
 		{/if}
 	</header>
-	<main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto">
-		<div class="mb-4 inline-flex items-center gap-2">
+	<main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
+		<div class="mb-4 flex items-center gap-2">
 			<IconPicker onSelect={updateIcon}>
 				<div
 					class={buttonVariants({
@@ -156,16 +168,28 @@
 						updateName(target.value);
 					}}
 				/>
-				<div class="text-muted-foreground inline-flex items-center justify-between">
-					<span class="inline-flex items-center gap-1 text-xs">
-						<Calendar size={12} />
-						<span>{timeAgo(workspace.created_at)}</span>
-					</span>
-					<span class="inline-flex items-center gap-1 text-xs">
-						<Clock size={12} />
-						<span>{timeAgo(workspace.updated_at)}</span>
-					</span>
+				<div class="text-muted-foreground flex items-center gap-4">
+					<SimpleTooltip content="Created At">
+						<Button variant="ghost" size="sm">
+							<CalendarDays />
+							{timeAgo(workspace.created_at)}
+						</Button>
+					</SimpleTooltip>
+					<SimpleTooltip content="Last Updated At">
+						<Button variant="ghost" size="sm">
+							<Clock />
+							{timeAgo(workspace.updated_at)}
+						</Button>
+					</SimpleTooltip>
 				</div>
+			</div>
+			<div class="ml-auto">
+				<SimpleTooltip content="Import Note from JSON file">
+					<Button variant="outline" onclick={importNote}>
+						<Download />
+						<span class="hidden sm:block">Import Note</span>
+					</Button>
+				</SimpleTooltip>
 			</div>
 		</div>
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -228,11 +252,17 @@
 										</DropdownMenu.SubContent>
 									</DropdownMenu.Sub>
 									<DropdownMenu.Separator />
-									<DropdownMenu.Item variant="destructive" onclick={() => trashNote(note)}>
+									<DropdownMenu.Item
+										variant="destructive"
+										onclick={() => cloudNotes.moveToTrash(note)}
+									>
 										<Trash2 class="mr-2 size-4" />
 										Trash Note
 									</DropdownMenu.Item>
-									<DropdownMenu.Item variant="destructive" onclick={() => deleteNote(note)}>
+									<DropdownMenu.Item
+										variant="destructive"
+										onclick={() => cloudNotes.deleteNote(note)}
+									>
 										<Trash2 class="mr-2 size-4" />
 										Delete Note
 									</DropdownMenu.Item>
