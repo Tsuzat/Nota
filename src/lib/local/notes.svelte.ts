@@ -6,6 +6,7 @@ import { goto } from '$app/navigation';
 import { page } from '$app/state';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { resolve } from '$app/paths';
+import type { Content } from '@tiptap/core';
 
 export interface LocalNote {
 	id: number;
@@ -55,12 +56,13 @@ class Notes {
 		icon: string,
 		favorite: boolean | string,
 		workspace: LocalWorkSpace,
-		userworkspace: number
+		userworkspace: number,
+		content?: Content
 	) {
 		try {
 			const res = await DB.execute(
-				'INSERT INTO notes (name, icon, workspace, userworkspace, favorite) VALUES ($1, $2, $3, $4, $5)',
-				[name, icon, workspace.id, userworkspace, favorite]
+				'INSERT INTO notes (name, icon, workspace, userworkspace, favorite, content) VALUES ($1, $2, $3, $4, $5, $6)',
+				[name, icon, workspace.id, userworkspace, favorite, JSON.stringify(content ?? {})]
 			);
 			if (res.lastInsertId) {
 				const notes = await DB.select<LocalNote[]>(
@@ -102,8 +104,21 @@ class Notes {
 			console.error(e);
 		}
 	}
+	async toggleFavorite(note: LocalNote) {
+		const updatedNote = { ...note, favorite: !note.favorite };
+		await this.updateNote(updatedNote);
+	}
 
 	async deleteNote(note: LocalNote) {
+		const permission = await ask(
+			`You will still be able to access the note from the trash. Do you want to continue?`,
+			{
+				title: `Move ${note.name} to trash?`,
+				kind: 'info',
+				okLabel: 'Trash it'
+			}
+		);
+		if (!permission) return;
 		try {
 			if (page.url.pathname.endsWith(`local-note-${note.id}`)) goto(resolve('/home'));
 			const res = await DB.execute('DELETE FROM notes WHERE id = $1', [note.id]);

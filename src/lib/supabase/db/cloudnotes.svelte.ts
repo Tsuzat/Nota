@@ -2,6 +2,8 @@ import { getContext, setContext } from 'svelte';
 import { supabase } from '..';
 import { toast } from 'svelte-sonner';
 import type { CloudUserWorkspace } from './clouduserworkspaces.svelte';
+import type { Content } from '@tiptap/core';
+import { ask } from '@tauri-apps/plugin-dialog';
 
 export interface CloudNote {
 	id: string;
@@ -78,7 +80,12 @@ class CloudNotes {
 	 * Create a new note in Supabase & update local state
 	 */
 	async createNote(
-		note: Partial<CloudNote> & { owner: string; workspace: string; userworkspace: string }
+		note: Partial<CloudNote> & {
+			owner: string;
+			workspace: string;
+			userworkspace: string;
+			content?: Content;
+		}
 	) {
 		try {
 			const { data, error } = await supabase
@@ -194,15 +201,24 @@ class CloudNotes {
 	/**
 	 * Delete a note from Supabase & update local state
 	 */
-	async deleteNote(id: string) {
+	async deleteNote(note: CloudNote) {
+		const permission = await ask(
+			`You will still be able to access the note from the trash. Do you want to continue?`,
+			{
+				title: `Move ${note.name} to trash?`,
+				kind: 'info',
+				okLabel: 'Trash it'
+			}
+		);
+		if (!permission) return;
 		try {
-			const { error } = await supabase.from('notes').delete().eq('id', id);
+			const { error } = await supabase.from('notes').delete().eq('id', note.id);
 			if (error) {
 				console.error(error);
 				toast.error(error.message);
 				return;
 			}
-			this.#notes = this.#notes.filter((n) => n.id !== id);
+			this.#notes = this.#notes.filter((n) => n.id !== note.id);
 		} catch (err) {
 			console.error('Error deleting note:', err);
 			throw err;
@@ -212,10 +228,7 @@ class CloudNotes {
 	/**
 	 * Toggle favorite status of a note
 	 */
-	async toggleFavorite(id: string) {
-		const note = this.#notes.find((n) => n.id === id);
-		if (!note) return;
-
+	async toggleFavorite(note: CloudNote) {
 		const updatedNote = { ...note, favorite: !note.favorite };
 		await this.updateNote(updatedNote);
 	}
@@ -223,10 +236,16 @@ class CloudNotes {
 	/**
 	 * Move note to trash
 	 */
-	async moveToTrash(id: string) {
-		const note = this.#notes.find((n) => n.id === id);
-		if (!note) return;
-
+	async moveToTrash(note: CloudNote) {
+		const permission = await ask(
+			`You will still be able to access the note from the trash. Do you want to continue?`,
+			{
+				title: `Move ${note.name} to trash?`,
+				kind: 'info',
+				okLabel: 'Trash it'
+			}
+		);
+		if (!permission) return;
 		const updatedNote = { ...note, trashed: true };
 		await this.updateNote(updatedNote);
 	}
@@ -237,7 +256,6 @@ class CloudNotes {
 	async restoreFromTrash(id: string) {
 		const note = this.#notes.find((n) => n.id === id);
 		if (!note) return;
-
 		const updatedNote = { ...note, trashed: false };
 		await this.updateNote(updatedNote);
 	}
