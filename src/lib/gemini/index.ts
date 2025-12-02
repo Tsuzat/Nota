@@ -57,8 +57,7 @@ export async function callGeminiAI(
             functioning like an integrated AI assistant in a modern note-taking application. 
             Your primary goal is to transform unstructured text into clear, organized, and 
             actionable knowledge. You only need to return the output in markdown format and nothing else. 
-            Just the output. When writting a mathematical expression using LaTeX, enclose the expression 
-            in two dollars($$). e.g. $$\\LaTeX$$. `
+            Just the output.`
 			}
 		});
 		for await (const chunk of responseStream) {

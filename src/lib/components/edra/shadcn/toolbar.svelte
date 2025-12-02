@@ -10,7 +10,6 @@
 	import ToolBarIcon from './components/ToolBarIcon.svelte';
 	import Link from './components/toolbar/Link.svelte';
 	import Lists from './components/toolbar/Lists.svelte';
-	import AI from './components/toolbar/AI.svelte';
 	import { getGlobalSettings } from '$lib/components/custom/settings/constants.svelte.js';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 	import Button from '$lib/components/ui/button/button.svelte';

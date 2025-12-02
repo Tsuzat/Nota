@@ -16,6 +16,10 @@
 	import { toast } from 'svelte-sonner';
 	import { removeAIHighlight } from '../../extensions/AIHighLight';
 	import { Separator } from '$lib/components/ui/separator';
+	import { Streamdown } from 'svelte-streamdown';
+	import Code from 'svelte-streamdown/code';
+	import Mermaid from 'svelte-streamdown/mermaid';
+	import Math from 'svelte-streamdown/math';
 
 	import {
 		CONTINUE_WRITING,
@@ -26,7 +30,7 @@
 	} from '$lib/supabase/ai/prompt';
 	import { callGeminiAI } from '$lib/gemini';
 	import { fade } from 'svelte/transition';
-	import RenderMarkdown from '$lib/components/custom/render-markdown.svelte';
+	import { Clipboard } from '@lucide/svelte';
 
 	interface Props {
 		editor: Editor;
@@ -158,20 +162,30 @@
 
 	function replaceSelection() {
 		const { from, to } = editor.view.state.selection;
-		editor
-			.chain()
-			.focus()
-			.insertContentAt({ from, to }, aiResponse, { contentType: 'markdown' })
-			.run();
+		try {
+			editor
+				.chain()
+				.focus()
+				.insertContentAt({ from, to }, aiResponse, { contentType: 'markdown' })
+				.run();
+		} catch (error) {
+			console.error(error);
+			toast.error('Unable to insert the data. Copy content and paste manually.');
+		}
 	}
 
 	function insertNext() {
 		const { to } = editor.view.state.selection;
-		editor
-			.chain()
-			.focus()
-			.insertContentAt(to + 1, aiResponse, { contentType: 'markdown' })
-			.run();
+		try {
+			editor
+				.chain()
+				.focus()
+				.insertContentAt(to + 1, aiResponse, { contentType: 'markdown' })
+				.run();
+		} catch (error) {
+			console.error(error);
+			toast.error('Unable to insert the data. Copy content and paste manually.');
+		}
 	}
 
 	function discardChanges() {
@@ -253,7 +267,7 @@
 		</div>
 	{:else if aiState === AIState.Confirmation}
 		{#if aiResponse === ''}
-			<div transition:fade class="animated-gradient-border rounded-lg p-0.25">
+			<div transition:fade class="animated-gradient-border rounded-2xl p-px">
 				<div class="bg-popover inline-flex items-center gap-2 rounded p-2">
 					<Sparkle class="size-4!" />
 					<span
@@ -262,7 +276,7 @@
 						AI is thinking</span
 					>
 					<div class="flex h-5 items-center space-x-1">
-						{#each Array(3) as _, i}
+						{#each Array(3) as _, i (i)}
 							<div
 								class="bg-primary h-2 w-2 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
 								style:animation-delay="{i * 160}ms"
@@ -275,6 +289,10 @@
 		{:else}
 			<div transition:fade class="flex items-center justify-between gap-2 px-2 py-1">
 				<small>Actions:</small>
+				<Button size="sm" onclick={() => window.navigator.clipboard.writeText(aiResponse)}>
+					<Clipboard />
+					Copy
+				</Button>
 				<Button variant="secondary" size="sm" onclick={replaceSelection}>
 					<CheckCheck />
 					Replace Selection
@@ -289,9 +307,18 @@
 				</Button>
 			</div>
 			<Separator />
-			<RenderMarkdown
-				data={aiResponse}
-				class="w-full max-w-xl flex-1 grow overflow-auto px-4 py-2 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+
+			<Streamdown
+				content={aiResponse}
+				class="w-full max-w-xl overflow-auto px-4 py-2"
+				components={{ code: Code, mermaid: Mermaid, math: Math }}
+				katexConfig={{
+					throwOnError: true,
+					macros: {
+						'\\R': '\\mathbb{R}',
+						'\\N': '\\mathbb{N}'
+					}
+				}}
 			/>
 		{/if}
 	{/if}
