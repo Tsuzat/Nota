@@ -88,7 +88,35 @@ export const AIHighlight = Mark.create<AIHighlightOptions>({
 
 	addKeyboardShortcuts() {
 		return {
-			'Mod-Shift-h': () => this.editor.commands.toggleAIHighlight()
+			'Mod-Shift-h': () => this.editor.commands.toggleAIHighlight(),
+			// Space bar activation on new line
+			Space: () => {
+				const { state } = this.editor;
+				const { selection } = state;
+				const { $from } = selection;
+
+				// Check if we're at the start of a line
+				const isAtStart = $from.parentOffset === 0;
+
+				// Check if the line is empty (only contains this position)
+				const isEmpty = $from.parent.textContent.length === 0;
+
+				if (isAtStart && isEmpty) {
+					// Insert a space character first
+					this.editor.commands.insertContent(' ');
+					// Select the space we just inserted
+					const pos = this.editor.state.selection.$from.pos;
+					this.editor.commands.setTextSelection({ from: pos - 1, to: pos });
+					// Apply transparent highlight
+					this.editor.commands.setAIHighlight({ color: 'transparent' });
+					// Move cursor to the end of the selection
+					this.editor.commands.focus();
+					return true;
+				}
+
+				// Return false to allow default space behavior
+				return false;
+			}
 		};
 	},
 

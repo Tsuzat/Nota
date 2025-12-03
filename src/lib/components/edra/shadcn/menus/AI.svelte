@@ -44,7 +44,7 @@
 		if (!view || editor.view.dragging) {
 			return false;
 		}
-		if (editor.isActive('ai-highlight') && !editor.state.selection.empty) {
+		if (editor.isActive('ai-highlight')) {
 			return true;
 		} else {
 			removeAIHighlight(editor);

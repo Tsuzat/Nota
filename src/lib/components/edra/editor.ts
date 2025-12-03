@@ -64,7 +64,7 @@ export default (
 					if (node.type.name === 'heading') {
 						return 'What’s the title?';
 					} else if (node.type.name === 'paragraph') {
-						return 'Press / or write something ...';
+						return 'Write, press space for AI or / for commands';
 					}
 					return '';
 				}
