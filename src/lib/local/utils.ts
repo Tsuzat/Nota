@@ -1,19 +1,20 @@
 import { FileType, getFileTypeExtensions, ISWINDOWS } from '$lib/utils';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { appDataDir, resolve } from '@tauri-apps/api/path';
-import { exists, readDir, writeFile } from '@tauri-apps/plugin-fs';
+import { copyFile, exists, readDir, writeFile } from '@tauri-apps/plugin-fs';
 import { toast } from 'svelte-sonner';
 
 /**
  * Helping function to copy assets to the workspace
  * @param files - files to be moved
- * @returns - Array of copied files
+ * @returns - copied files
  */
 export const moveFileToAssets = async (file: string) => {
 	const assetsPath = await resolve(await appDataDir(), 'assets');
 	const fileName = file.split(ISWINDOWS ? '\\' : '/').pop();
 	if (fileName === undefined) throw new Error('Assets file is not supported');
 	const finalPath = await resolve(assetsPath, fileName);
+	await copyFile(file, finalPath);
 	const fileExists = await exists(finalPath);
 	if (!fileExists) throw new Error('Failed to move file to assets folder');
 	return finalPath;
