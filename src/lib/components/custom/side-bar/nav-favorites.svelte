@@ -81,7 +81,7 @@
 							{#snippet child({ props })}
 								<span title={note.name} {...props}>
 									<IconRenderer icon={note.icon} />
-									<span>{note.name}</span>
+									<span class="cursor-default">{note.name}</span>
 								</span>
 							{/snippet}
 						</Sidebar.MenuButton>

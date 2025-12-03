@@ -91,7 +91,7 @@
 								{#snippet child({ props })}
 									<span {...props}>
 										<IconRenderer icon={workspace.icon} />
-										<span>{workspace.name}</span>
+										<span class="cursor-default">{workspace.name}</span>
 									</span>
 								{/snippet}
 							</Sidebar.MenuButton>
@@ -133,7 +133,7 @@
 												{#snippet child({ props })}
 													<span {...props}>
 														<IconRenderer icon={note.icon} />
-														<span>{note.name}</span>
+														<span class="cursor-default">{note.name}</span>
 													</span>
 												{/snippet}
 											</Sidebar.MenuSubButton>
