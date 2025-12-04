@@ -129,8 +129,7 @@
 	const continueWriting = () => processText('continue');
 
 	async function handleSubmit(e: Event) {
-		e.preventDefault();
-		if (!inputValue) return;
+		if (!inputValue || inputValue.trim().length === 0) return;
 		const text = getSelectionText();
 		if (!text) return;
 		try {
@@ -307,10 +306,9 @@
 				</Button>
 			</div>
 			<Separator />
-
 			<Streamdown
 				content={aiResponse}
-				class="w-full max-w-xl overflow-auto px-4 py-2"
+				class="w-full max-w-xl overflow-auto p-1"
 				components={{ code: Code, mermaid: Mermaid, math: Math }}
 				katexConfig={{
 					throwOnError: true,
