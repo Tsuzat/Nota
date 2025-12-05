@@ -15,39 +15,43 @@
 		getLocalUserWorkspaces,
 		type LocalUserWorkspace
 	} from '$lib/local/userworkspaces.svelte';
-	import { getRecentsContext } from '$lib/recents.svelte';
 	import {
 		useCloudUserWorkspaces,
 		type CloudUserWorkspace
 	} from '$lib/supabase/db/clouduserworkspaces.svelte';
-	import { cn, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
+	import { cn, ISMACOS, ISTAURI, ISWINDOWS, timeAgo } from '$lib/utils';
+	import Clock from '@lucide/svelte/icons/clock';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { ChevronDown, Trash } from '@lucide/svelte';
 	import { ask } from '@tauri-apps/plugin-dialog';
 	import { toast } from 'svelte-sonner';
+	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+	import * as Card from '$lib/components/ui/card';
+	import { goto } from '$app/navigation';
 
 	const sidebar = useSidebar();
 	const localUserWorkspaces = getLocalUserWorkspaces();
 	const cloudUserWorkspaces = useCloudUserWorkspaces();
 	const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
-	const localNotes = getLocalNotes();
-	const useRecents = getRecentsContext();
+	const localNotes = $derived(getLocalNotes().getNotes());
+	const cloudNotes = $derived(useCloudNotes().getNotes());
+
 	const useNewUserWorkspace = getNewUserWorkspace();
 	const userWorkspaces: (LocalUserWorkspace | CloudUserWorkspace)[] = $derived.by(() => {
 		return [...localUserWorkspaces.getUserWorkspaces(), ...cloudUserWorkspaces.getWorkspaces()];
 	});
 
 	const recentNotes = $derived.by(() => {
-		const notes = localNotes.getNotes();
-		const recents = useRecents.getRecents();
-		const rn = [];
-		for (const note of notes) {
-			if (recents.has(note.id.toString())) {
-				rn.push(note);
-			}
-		}
-		return rn;
+		if (currentUserWorkspace === null) return [];
+		if ('owner' in currentUserWorkspace) {
+			return cloudNotes
+				.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+				.slice(0, 5);
+		} else
+			return localNotes
+				.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+				.slice(0, 5);
 	});
 
 	async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) {
@@ -152,15 +156,41 @@
 				Recents
 				<span class="text-muted-foreground text-sm">{recentNotes.length}</span>
 			</h4>
-			<div class="flex w-full items-center gap-2 overflow-x-auto">
+			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{#each recentNotes as recent (recent.id)}
-					<a
-						class="bg-card group relative flex w-fit items-center gap-2 rounded-lg p-4"
-						href={resolve('/(nota)/(local)/local-note-[id]', { id: recent.id.toString() })}
+					{@const href =
+						'owner' in recent
+							? resolve('/(nota)/(cloud)/note-[id]', { id: recent.id })
+							: resolve('/(nota)/(local)/local-note-[id]', { id: recent.id.toString() })}
+					<Card.Root
+						onclick={() => goto(href)}
+						class="hover:bg-accent group relative flex h-40 w-48 cursor-pointer flex-col justify-between overflow-hidden transition-all hover:shadow-md"
 					>
-						<IconRenderer icon={recent.icon} class="mr-2 size-4" />
-						<span class="text-muted-foreground">{recent.name}</span>
-					</a>
+						<Card.Header class="pb-2">
+							<div class="flex items-start justify-between gap-2">
+								<div class="flex items-center gap-2">
+									<div
+										class="bg-secondary/50 flex size-8 shrink-0 items-center justify-center rounded-md"
+									>
+										<IconRenderer icon={recent.icon} class="size-4" />
+									</div>
+									<Card.Title class="line-clamp-1 text-base font-medium">
+										{recent.name}
+									</Card.Title>
+								</div>
+							</div>
+						</Card.Header>
+						<Card.Content>
+							<div class="absolute right-4 bottom-4 left-4">
+								<div class="text-muted-foreground flex items-center justify-between text-xs">
+									<div class="flex items-center gap-1">
+										<Clock class="size-3" />
+										{timeAgo(recent.updated_at)}
+									</div>
+								</div>
+							</div>
+						</Card.Content>
+					</Card.Root>
 				{/each}
 				{#if recentNotes.length === 0}
 					<span class="text-muted-foreground">No recent notes are found.</span>

@@ -4,15 +4,13 @@
 	import NewWorkspace from '$lib/components/custom/dialogs/local/new-workspace.svelte';
 	import AppSidebar from '$lib/components/custom/side-bar/app-sidebar.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { getLocalNotes, setLocalNotes } from '$lib/local/notes.svelte';
-	import { getLocalUserWorkspaces, setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
-	import { getLocalWorkspaces, setLocalWorkspaces } from '$lib/local/workspaces.svelte';
+	import { setLocalNotes } from '$lib/local/notes.svelte';
+	import { setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
+	import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import { handleKeydown, ISTAURI } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import { GlobalSettings } from '$lib/components/custom/settings';
 	import { NewUserWorkspace, setNewUserWorkspace } from '$lib/components/custom/user-workspace';
-	import { setRecentsContext } from '$lib/recents.svelte';
-	import { page } from '$app/state';
 	import { setCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
 	import { setCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { setCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
@@ -22,9 +20,9 @@
 	import { onMount } from 'svelte';
 
 	// Local Workspaces and Notes
-	setLocalUserWorkspaces();
-	setLocalWorkspaces();
-	setLocalNotes();
+	const localUserWorkspaces = setLocalUserWorkspaces();
+	const localWorkspaces = setLocalWorkspaces();
+	const localNotes = setLocalNotes();
 
 	// Cloud Workspaces and Notes
 	const cloudUserWorkspaces = setCloudUserWorkspaces();
@@ -42,18 +40,10 @@
 			cloudNotes.setNotes([]);
 		} else {
 			cloudUserWorkspaces.fetchWorkspaces(user);
-			if (
-				currentUserWorkspace.getCurrentUserWorkspace() === null &&
-				cloudUserWorkspaces.getWorkspaces().length > 0
-			) {
-				currentUserWorkspace.setCurrentUserWorkspace(cloudUserWorkspaces.getWorkspaces()[0]);
-			}
 		}
 	});
-
 	setGlobalSearch();
 	setNewUserWorkspace();
-	const useRecents = setRecentsContext();
 
 	const { children, data } = $props();
 
@@ -61,13 +51,6 @@
 
 	onMount(() => {
 		open = localStorage.getItem('sidebar-state') === 'open';
-	});
-
-	$effect(() => {
-		if (page.url.pathname.includes('local-note')) {
-			const id = page.url.pathname.split('-').splice(2).join('-');
-			useRecents.add(id);
-		}
 	});
 
 	$effect(() => {
@@ -80,24 +63,13 @@
 		) {
 			toast.error('Something went wrong when loading the local data');
 			goto(resolve('/'));
+		} else {
+			currentUserWorkspace.setCurrentUserWorkspace(data.currentUserWorkspace!);
+			localUserWorkspaces.setUserWorkspaces(data.localUserWorkspaces!);
+			localWorkspaces.setWorkspaces(data.localWorkspaces!);
+			localNotes.setNotes(data.localNotes!);
 		}
 	});
-
-	if (
-		ISTAURI &&
-		data.currentUserWorkspace &&
-		data.localUserWorkspaces &&
-		data.localWorkspaces &&
-		data.localNotes
-	) {
-		const localUserWorkspaces = getLocalUserWorkspaces();
-		const localWorkspaces = getLocalWorkspaces();
-		const localNotes = getLocalNotes();
-		localUserWorkspaces.setUserWorkspaces(data.localUserWorkspaces);
-		currentUserWorkspace.setCurrentUserWorkspace(data.currentUserWorkspace);
-		localWorkspaces.setWorkspaces(data.localWorkspaces);
-		localNotes.setNotes(data.localNotes);
-	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />

@@ -195,7 +195,6 @@
 
 	beforeNavigate(async () => {
 		if (isDirty) {
-			toast.info('Saving current note content');
 			await saveNoteContent();
 		}
 	});

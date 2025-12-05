@@ -5,8 +5,10 @@
 
 	type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
-	interface Props
-		extends Optional<Omit<Optional<BubbleMenuPluginProps, 'pluginKey'>, 'element'>, 'editor'> {
+	interface Props extends Optional<
+		Omit<Optional<BubbleMenuPluginProps, 'pluginKey'>, 'element'>,
+		'editor'
+	> {
 		editor?: Editor;
 		children?: Snippet<[]>;
 		class?: string;
