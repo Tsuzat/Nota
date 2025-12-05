@@ -1,9 +1,11 @@
 import { GoogleGenAI } from '@google/genai';
+import { systemInstruction } from './prompts';
 
 export enum GeminiModel {
 	FlashLite = 'gemini-2.5-flash-lite',
 	Flash = 'gemini-2.5-flash',
-	Pro = 'gemini-2.5-pro'
+	Pro = 'gemini-2.5-pro',
+	Pro3Preview = 'gemini-3-pro-preview'
 }
 
 export function getUserPreferedAIModel() {
@@ -52,12 +54,7 @@ export async function callGeminiAI(
 			model: getUserPreferedAIModel(),
 			contents: prompt,
 			config: {
-				systemInstruction: `You are an expert Note Optimizer designed to 
-            analyze, enhance, and structure a user's raw input or existing notes, 
-            functioning like an integrated AI assistant in a modern note-taking application. 
-            Your primary goal is to transform unstructured text into clear, organized, and 
-            actionable knowledge. You only need to return the output in markdown format and nothing else. 
-            Just the output.`
+				systemInstruction: systemInstruction
 			}
 		});
 		for await (const chunk of responseStream) {

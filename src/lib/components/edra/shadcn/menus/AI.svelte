@@ -12,6 +12,8 @@
 	import CheckCheck from '@lucide/svelte/icons/check-check';
 	import Sparkle from '@lucide/svelte/icons/sparkle';
 	import ArrowDown from '@lucide/svelte/icons/arrow-down';
+	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+	import Clipboard from '@lucide/svelte/icons/clipboard';
 	import X from '@lucide/svelte/icons/x';
 	import { toast } from 'svelte-sonner';
 	import { removeAIHighlight } from '../../extensions/AIHighLight';
@@ -27,10 +29,10 @@
 		MAKE_LONGER_PROMPT,
 		MAKE_SHORTED_PROMPT,
 		SUMMARIZE_PROMPT
-	} from '$lib/supabase/ai/prompt';
+	} from '$lib/gemini/prompts';
 	import { callGeminiAI } from '$lib/gemini';
 	import { fade } from 'svelte/transition';
-	import { Clipboard } from '@lucide/svelte';
+	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -191,6 +193,12 @@
 		aiResponse = '';
 		aiState = AIState.Idle;
 	}
+
+	function closeAI() {
+		removeAIHighlight(editor);
+		aiState = AIState.Idle;
+		aiResponse = '';
+	}
 </script>
 
 <BubbleMenu
@@ -288,27 +296,45 @@
 		{:else}
 			<div transition:fade class="flex items-center justify-between gap-2 px-2 py-1">
 				<small>Actions:</small>
-				<Button size="sm" onclick={() => window.navigator.clipboard.writeText(aiResponse)}>
-					<Clipboard />
-					Copy
-				</Button>
-				<Button variant="secondary" size="sm" onclick={replaceSelection}>
-					<CheckCheck />
-					Replace Selection
-				</Button>
-				<Button size="sm" onclick={insertNext}>
-					<ArrowDown />
-					Insert Next
-				</Button>
-				<Button variant="destructive" size="sm" onclick={discardChanges}>
-					<X />
-					Discard Changes
-				</Button>
+				<SimpleTooltip content="Go Back to Options">
+					<Button variant="secondary" size="sm" onclick={discardChanges}>
+						<ArrowLeft />
+						Go Back
+					</Button>
+				</SimpleTooltip>
+				<SimpleTooltip content="Copy Content to Clipboard">
+					<Button
+						variant="secondary"
+						size="sm"
+						onclick={() => window.navigator.clipboard.writeText(aiResponse)}
+					>
+						<Clipboard />
+						Copy
+					</Button>
+				</SimpleTooltip>
+				<SimpleTooltip content="Replace Editor Selection">
+					<Button variant="secondary" size="sm" onclick={replaceSelection}>
+						<CheckCheck />
+						Replace Selection
+					</Button>
+				</SimpleTooltip>
+				<SimpleTooltip content="Insert Content After Selection">
+					<Button variant="secondary" size="sm" onclick={insertNext}>
+						<ArrowDown />
+						Insert Next
+					</Button>
+				</SimpleTooltip>
+				<SimpleTooltip content="Close AI Menu">
+					<Button variant="destructive" size="sm" onclick={closeAI}>
+						<X />
+						Close
+					</Button>
+				</SimpleTooltip>
 			</div>
 			<Separator />
 			<Streamdown
 				content={aiResponse}
-				class="w-full max-w-xl overflow-auto p-1"
+				class="w-full overflow-auto px-4 py-2"
 				components={{ code: Code, mermaid: Mermaid, math: Math }}
 				katexConfig={{
 					throwOnError: true,
