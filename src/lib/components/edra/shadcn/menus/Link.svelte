@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ShouldShowProps } from '../../types.js';
+	import type { ShouldShowProps } from '../../types';
 	import BubbleMenu from '../../components/BubbleMenu.svelte';
 	import type { Editor } from '@tiptap/core';
 	import { Button } from '$lib/components/ui/button';
@@ -9,7 +9,7 @@
 	import Check from '@lucide/svelte/icons/check';
 	import Edit from '@lucide/svelte/icons/edit';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
-	import { ISTAURI } from '$lib/utils.js';
+	import { ISTAURI } from '$lib/utils';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 
 	interface Props {
@@ -52,18 +52,13 @@
 		strategy: 'absolute',
 		scrollTarget: parentElement
 	}}
-	class="bg-popover flex h-fit w-fit items-center gap-1 rounded-lg border p-1 shadow-lg"
+	class="bg-popover flex h-fit w-fit items-center gap-1 rounded-lg border p-0!"
 >
 	{#if !isEditing}
 		<Button
 			variant="link"
 			href={link}
-			onclick={async () => {
-				if (ISTAURI) {
-					await openUrl(link);
-				}
-			}}
-			class="max-w-80 truncate overflow-hidden p-1 text-ellipsis underline"
+			class="max-w-120 truncate overflow-hidden p-1 text-ellipsis underline"
 			target="_blank"
 		>
 			{link}
@@ -72,7 +67,6 @@
 			<Button
 				variant="ghost"
 				size="icon"
-				class="size-7"
 				onclick={() => {
 					isEditing = true;
 					editor.commands.blur();
@@ -86,7 +80,6 @@
 				variant="ghost"
 				title="Copy Link"
 				size="icon"
-				class="size-7"
 				onclick={() => {
 					window.navigator.clipboard.writeText(link);
 				}}
@@ -99,14 +92,13 @@
 				variant="ghost"
 				title="Remove Link"
 				size="icon"
-				class="size-7"
 				onclick={() => editor.chain().focus().extendMarkRange('link').unsetLink().run()}
 			>
 				<Trash />
 			</Button>
 		</SimpleTooltip>
 	{:else}
-		<form onsubmit={handleSubmit} class="flex w-80 items-center gap-2">
+		<form onsubmit={handleSubmit} class="flex max-w-120 items-center gap-0.5">
 			<Input bind:value={linkInput} required type="url" placeholder="Type or paste a link" />
 			<SimpleTooltip content="Set new link">
 				<Button type="submit" size="icon">

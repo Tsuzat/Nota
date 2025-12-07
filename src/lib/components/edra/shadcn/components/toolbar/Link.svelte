@@ -46,8 +46,11 @@
 			</div>
 		</EdraToolTip>
 	</Popover.Trigger>
-	<Popover.Content portalProps={{ to: undefined, disabled: true }} class="h-fit w-80 p-1">
-		<form class="flex items-center gap-2" onsubmit={handleSubmit}>
+	<Popover.Content
+		portalProps={{ to: document.getElementById('nota-editor') ?? undefined }}
+		class="h-fit w-80 rounded-lg p-0!"
+	>
+		<form class="flex items-center gap-0.5" onsubmit={handleSubmit}>
 			<Input placeholder="Type or paste a link" bind:value required type="url" />
 			<SimpleTooltip content="Insert link">
 				<Button type="submit" size="icon">

@@ -20,7 +20,7 @@
 	let audioUrl = $state('');
 	let isUploading = $state(false);
 
-	const assetsFiles = editor.commands.getAssets(FileType.AUDIO);
+	const assetsFiles = $derived(editor.commands.getAssets(FileType.AUDIO));
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();

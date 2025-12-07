@@ -1,9 +1,9 @@
 <script lang="ts">
-	import commands from '../../commands/toolbar-commands.js';
+	import commands from '../../commands/toolbar-commands';
 	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import type { EdraToolbarProps, ShouldShowProps } from '../../types.js';
+	import type { EdraToolbarProps, ShouldShowProps } from '../../types';
 
-	import { cn } from '$lib/utils.js';
+	import { cn } from '$lib/utils';
 	import { isTextSelection } from '@tiptap/core';
 	import Alignment from '../components/toolbar/Alignment.svelte';
 	import FontSize from '../components/toolbar/FontSize.svelte';
@@ -12,10 +12,10 @@
 	import ToolBarIcon from '../components/ToolBarIcon.svelte';
 	import Link from '../components/toolbar/Link.svelte';
 	import Lists from '../components/toolbar/Lists.svelte';
-	import { getGlobalSettings } from '$lib/components/custom/settings/constants.svelte.js';
-	import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
+	import { getGlobalSettings } from '$lib/components/custom/settings/constants.svelte';
+	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { addAIHighlight } from '../../extensions/AIHighLight.js';
+	import { addAIHighlight } from '../../extensions/AIHighLight';
 
 	const {
 		editor,
@@ -34,21 +34,6 @@
 			useSessionAndUser.getSession() !== undefined &&
 			useSessionAndUser.getUser() !== undefined
 		);
-	});
-
-	let isDragging = $state(false);
-
-	editor.view.dom.addEventListener('dragstart', () => {
-		isDragging = true;
-	});
-
-	editor.view.dom.addEventListener('drop', () => {
-		isDragging = true;
-
-		// Allow some time for the drop action to complete before re-enabling
-		setTimeout(() => {
-			isDragging = false;
-		}, 100); // Adjust delay if needed
 	});
 
 	function shouldShow(props: ShouldShowProps) {
@@ -91,7 +76,7 @@
 		if (empty || isEmptyTextBlock || !editor.isEditable) {
 			return false;
 		}
-		return !isDragging && !editor.state.selection.empty;
+		return !editor.state.selection.empty;
 	}
 
 	const isTableGripSelected = (node: HTMLElement) => {

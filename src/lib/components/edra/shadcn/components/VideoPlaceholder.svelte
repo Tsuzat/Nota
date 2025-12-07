@@ -20,7 +20,7 @@
 	let videoUrl = $state('');
 	let isUploading = $state(false);
 
-	const assetsFiles = editor.commands.getAssets(FileType.VIDEO);
+	const assetsFiles = $derived(editor.commands.getAssets(FileType.VIDEO));
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();

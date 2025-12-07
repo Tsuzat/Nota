@@ -26,7 +26,7 @@
 		editor.chain().focus().setImage({ src: imageUrl }).run();
 	}
 
-	const assetsFiles = editor.commands.getAssets(FileType.IMAGE);
+	const assetsFiles = $derived(editor.commands.getAssets(FileType.IMAGE));
 
 	async function openFileDialog() {
 		const file = await openDialog({

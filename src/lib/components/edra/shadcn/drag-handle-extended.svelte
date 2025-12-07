@@ -21,7 +21,6 @@
 	import { quickcolors } from '../utils';
 	import { page } from '$app/state';
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-	import { cn } from '$lib/utils';
 	import { TextAlignCenter } from '@lucide/svelte';
 
 	interface Props {
