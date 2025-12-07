@@ -7,7 +7,7 @@
 	import EdraToolTip from '../EdraToolTip.svelte';
 	import AlignLeft from '@lucide/svelte/icons/align-left';
 	import { buttonVariants } from '$lib/components/ui/button';
-	import { ChevronDown } from '@lucide/svelte';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 
 	interface Props {
 		editor: Editor;
@@ -33,11 +33,11 @@
 			class={buttonVariants({
 				variant: 'ghost',
 				size: 'icon',
-				class: cn('gap-0 p-0', 'border-0 ring-0 [&_svg]:size-2', isActive && 'bg-muted')
+				class: cn('gap-0 p-0', 'border-0 ring-0', isActive && 'bg-muted')
 			})}
 		>
 			<AlignmentIcon class="stroke-primary size-4!" />
-			<ChevronDown />
+			<ChevronDown class="text-muted-foreground size-2!" />
 		</DropdownMenu.Trigger>
 	</EdraToolTip>
 	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>

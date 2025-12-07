@@ -5,6 +5,7 @@
 	import { cn } from '$lib/utils';
 	import EdraToolTip from '../EdraToolTip.svelte';
 	import Paragraph from '@lucide/svelte/icons/pilcrow';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import { buttonVariants } from '$lib/components/ui/button';
 
 	interface Props {
@@ -31,10 +32,11 @@
 			class={buttonVariants({
 				variant: 'ghost',
 				size: 'icon',
-				class: cn('gap-0 p-0', 'border-0 ring-0 [&_svg]:size-2', isActive && 'bg-muted')
+				class: cn('gap-0 p-0', 'border-0 ring-0', isActive && 'bg-muted')
 			})}
 		>
 			<HeadingIcon class="stroke-primary size-4!" />
+			<ChevronDown class="text-muted-foreground size-2!" />
 		</DropdownMenu.Trigger>
 	</EdraToolTip>
 	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>

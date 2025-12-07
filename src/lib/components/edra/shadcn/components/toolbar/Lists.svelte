@@ -6,6 +6,7 @@
 	import EdraToolTip from '../EdraToolTip.svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import Minus from '@lucide/svelte/icons/minus';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 
 	interface Props {
 		editor: Editor;
@@ -39,6 +40,7 @@
 			})}
 		>
 			<ListIcon class="stroke-primary size-4!" />
+			<ChevronDown class="text-muted-foreground size-2!" />
 		</DropdownMenu.Trigger>
 	</EdraToolTip>
 	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
