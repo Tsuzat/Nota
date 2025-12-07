@@ -5,6 +5,8 @@
 	import House from '@lucide/svelte/icons/house';
 	import StarIcon from '@lucide/svelte/icons/star';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import Monitor from '@lucide/svelte/icons/monitor';
+	import Cloud from '@lucide/svelte/icons/cloud';
 	import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
 	import { getGlobalSearch } from './constants.svelte';
 	import { goto } from '$app/navigation';
@@ -13,9 +15,29 @@
 	import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 	import { resolve } from '$app/paths';
+	import {
+		getLocalUserWorkspaces,
+		type LocalUserWorkspace
+	} from '$lib/local/userworkspaces.svelte';
+	import {
+		useCloudUserWorkspaces,
+		type CloudUserWorkspace
+	} from '$lib/supabase/db/clouduserworkspaces.svelte';
+	import { toast } from 'svelte-sonner';
+	import { CircleCheck } from '@lucide/svelte';
 
 	const search = getGlobalSearch();
-	const isLocal = $derived(useCurrentUserWorkspaceContext().getIsLocal());
+	const currentUserWorkspace = useCurrentUserWorkspaceContext();
+	const isLocal = $derived(currentUserWorkspace.getIsLocal());
+	const activeWorkspace = $derived(currentUserWorkspace.getCurrentUserWorkspace());
+	const localUserWorkspaces = getLocalUserWorkspaces();
+	const localWorkspaces = getLocalWorkspaces();
+	const localNotes = getLocalNotes();
+
+	const cloudUserWorkspaces = useCloudUserWorkspaces();
+	const cloudWorkspaces = useCloudWorkspaces();
+	const cloudNotes = useCloudNotes();
+
 	const workspaces = $derived.by(() => {
 		if (isLocal) return getLocalWorkspaces().getWorkspaces();
 		else return useCloudWorkspaces().getWorkspaces();
@@ -32,12 +54,53 @@
 			search.open = true;
 		}
 	}
+
+	async function selectLocalUserWorkspace(workspace: LocalUserWorkspace) {
+		if (activeWorkspace?.id === workspace.id) {
+			return toast.info("You're already in this workspace");
+		}
+		const id = toast.loading('Changing User Workspace to ' + workspace.name);
+		try {
+			goto(resolve('/home'));
+			currentUserWorkspace.setCurrentUserWorkspace(workspace);
+			await localWorkspaces.fetchWorkspaces(workspace.id);
+			await localNotes.fetchNotes(workspace.id);
+			toast.success('Changed User Workspace to ' + workspace.name, { id });
+			cloudWorkspaces.setWorkspaces([]);
+			cloudNotes.setNotes([]);
+		} catch (error) {
+			console.error(error);
+			toast.error('Something went wrong when changing the user workspace', { id });
+		}
+	}
+
+	async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
+		if (activeWorkspace?.id === workspace.id) {
+			return toast.info("You're already in this workspace");
+		}
+		const id = toast.loading('Switching to cloud workspace');
+		try {
+			goto(resolve('/home'));
+			currentUserWorkspace.setCurrentUserWorkspace(workspace);
+			toast.loading('Loading Workspaces', { id });
+			await cloudWorkspaces.fetchWorkspaces(workspace);
+			toast.loading('Loading Notes', { id });
+			await cloudNotes.fetchNotes(workspace);
+			toast.dismiss(id);
+			toast.success('Changed User Workspace to ' + workspace.name, { id });
+			localWorkspaces.setWorkspaces([]);
+			localNotes.setNotes([]);
+		} catch (error) {
+			console.error(error);
+			toast.error('Something went wrong.');
+		}
+	}
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
 
-<Command.Dialog bind:open={search.open} class="rounded-lg">
-	<Command.Input class="p-2" placeholder="Type a something to search..." />
+<Command.Dialog bind:open={search.open} class="rounded-lg border">
+	<Command.Input class="h-10 p-2 transition-colors" placeholder="Type a something to search..." />
 	<Command.List>
 		<Command.Empty>No results found.</Command.Empty>
 		<Command.Group heading="Suggestions">
@@ -47,6 +110,52 @@
 			</Command.Item>
 		</Command.Group>
 		<Command.Separator />
+		<Command.Group value="User Workspaces" heading="User Workspaces">
+			{#each localUserWorkspaces.getUserWorkspaces() as localUserWorkspace (localUserWorkspace.id)}
+				{@const onselect = () => selectLocalUserWorkspace(localUserWorkspace)}
+				<Command.Item
+					itemid={localUserWorkspace.id.toString()}
+					value={localUserWorkspace.name}
+					{onselect}
+					onclick={onselect}
+				>
+					<IconRenderer icon={localUserWorkspace.icon} class="mr-2 size-4" />
+					<span>{localUserWorkspace.name}</span>
+					<Command.Shortcut class="flex gap-1">
+						{#if activeWorkspace?.id === localUserWorkspace.id}
+							<SimpleTooltip content="Current Active Workspace">
+								<CircleCheck class="text-primary size-4" />
+							</SimpleTooltip>
+						{/if}
+						<SimpleTooltip content="Local User Workspace">
+							<Monitor class="size-4" />
+						</SimpleTooltip>
+					</Command.Shortcut>
+				</Command.Item>
+			{/each}
+			{#each cloudUserWorkspaces.getWorkspaces() as cloudUserWorkspace (cloudUserWorkspace.id)}
+				{@const onselect = () => selectCloudUserWorkspace(cloudUserWorkspace)}
+				<Command.Item
+					itemid={cloudUserWorkspace.id}
+					value={cloudUserWorkspace.name}
+					{onselect}
+					onclick={onselect}
+				>
+					<IconRenderer icon={cloudUserWorkspace.icon} class="mr-2 size-4" />
+					<span>{cloudUserWorkspace.name}</span>
+					<Command.Shortcut class="flex gap-1">
+						{#if activeWorkspace?.id === cloudUserWorkspace.id}
+							<SimpleTooltip content="Current Active Workspace">
+								<CircleCheck class="text-primary size-4" />
+							</SimpleTooltip>
+						{/if}
+						<SimpleTooltip content="Cloud User Workspace">
+							<Cloud class="size-4" />
+						</SimpleTooltip>
+					</Command.Shortcut>
+				</Command.Item>
+			{/each}
+		</Command.Group>
 		<Command.Group
 			value="Workspaces"
 			heading={(isLocal ? 'Local' : 'Cloud') + ' Workspaces : ' + workspaces.length}
@@ -55,14 +164,21 @@
 				{@const onselect = () => {
 					goto(
 						resolve(
-							isLocal ? '/(nota)/(local)/local-workspace-[id]' : '/(nota)/(cloud)/note-[id]',
-							{ id: String(workspace.id) }
+							isLocal ? '/(nota)/(local)/local-workspace-[id]' : '/(nota)/(cloud)/workspace-[id]',
+							{
+								id: String(workspace.id)
+							}
 						)
 					);
 
 					search.open = false;
 				}}
-				<Command.Item value={workspace.name} {onselect} onclick={onselect}>
+				<Command.Item
+					itemid={workspace.id.toString()}
+					value={workspace.name}
+					{onselect}
+					onclick={onselect}
+				>
 					<IconRenderer icon={workspace.icon} class="mr-2 size-4" />
 					<span>{workspace.name}</span>
 				</Command.Item>
@@ -82,7 +198,7 @@
 					);
 					search.open = false;
 				}}
-				<Command.Item value={note.name} {onselect} onclick={onselect}>
+				<Command.Item itemid={note.id.toString()} value={note.name} {onselect} onclick={onselect}>
 					<IconRenderer icon={note.icon} class="mr-2 size-4" />
 					<span>{note.name}</span>
 					<Command.Shortcut class="flex gap-1">
