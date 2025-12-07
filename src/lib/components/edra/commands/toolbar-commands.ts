@@ -318,6 +318,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleTextAlign('left').run();
 			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).toggleTextAlign('left').run();
+			},
 			clickable: (editor) => {
 				return editor.can().toggleTextAlign('left');
 			},
@@ -330,6 +333,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			shortCut: `${isMac ? '⌘⇧' : 'Ctrl+Shift+'}E`,
 			onClick: (editor) => {
 				editor.chain().focus().toggleTextAlign('center').run();
+			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).toggleTextAlign('center').run();
 			},
 			clickable: (editor) => {
 				return editor.can().toggleTextAlign('center');
@@ -344,6 +350,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleTextAlign('right').run();
 			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).toggleTextAlign('right').run();
+			},
 			clickable: (editor) => {
 				return editor.can().toggleTextAlign('right');
 			},
@@ -356,6 +365,9 @@ const commands: Record<string, EdraToolBarCommands[]> = {
 			shortCut: `${isMac ? '⌘⇧' : 'Ctrl+Shift+'}J`,
 			onClick: (editor) => {
 				editor.chain().focus().toggleTextAlign('justify').run();
+			},
+			turnInto: (editor, node, pos) => {
+				editor.chain().setNodeSelection(pos).toggleTextAlign('justify').run();
 			},
 			clickable: (editor) => {
 				return editor.can().toggleTextAlign('justify');

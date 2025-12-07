@@ -21,12 +21,16 @@
 	import { quickcolors } from '../utils';
 	import { page } from '$app/state';
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
+	import { cn } from '$lib/utils';
+	import { TextAlignCenter } from '@lucide/svelte';
 
 	interface Props {
 		editor: Editor;
 	}
 
 	const { editor }: Props = $props();
+
+	const alignments = commands['alignment'];
 
 	let currentNode: Node | null = $state(null);
 	let currentNodePos: number = $state(-1);
@@ -173,7 +177,7 @@
 		<DropdownMenu.Trigger class="sr-only">
 			<span>Drag Handle</span>
 		</DropdownMenu.Trigger>
-		<DropdownMenu.Content>
+		<DropdownMenu.Content portalProps={{ to: editorElement ?? undefined }}>
 			<DropdownMenu.Group>
 				<DropdownMenu.GroupHeading class="text-muted-foreground capitalize">
 					{currentNode?.type.name}
@@ -220,10 +224,8 @@
 						<DropdownMenu.Label class="text-muted-foreground text-sm"
 							>Text Colors</DropdownMenu.Label
 						>
-						{@const currentColor = editor.getAttributes('textStyle').color as string}
 						{#each quickcolors as color (color.label)}
-							<DropdownMenu.CheckboxItem
-								checked={currentColor === color.value}
+							<DropdownMenu.Item
 								title={color.label}
 								onclick={() => {
 									if (color.value === '' || color.label === 'Default')
@@ -233,7 +235,7 @@
 							>
 								<span style={`color: ${color.value};`}>A</span>
 								<span class="capitalize">{color.label}</span>
-							</DropdownMenu.CheckboxItem>
+							</DropdownMenu.Item>
 						{/each}
 					</DropdownMenu.Group>
 					<DropdownMenu.Separator />
@@ -241,10 +243,9 @@
 						<DropdownMenu.Label class="text-muted-foreground text-sm"
 							>Highlight Color</DropdownMenu.Label
 						>
-						{@const currentHighlight = editor.getAttributes('highlight').color as string}
+						<!-- {@const currentHighlight = editor.getAttributes('highlight').color as string} -->
 						{#each quickcolors as color (color.label)}
-							<DropdownMenu.CheckboxItem
-								checked={currentHighlight === color.value}
+							<DropdownMenu.Item
 								title={color.label}
 								onclick={() => {
 									if (color.value === '' || color.label === 'Default')
@@ -260,10 +261,34 @@
 								<span class="size-4 rounded-full border" style={`background-color: ${color.value};`}
 								></span>
 								<span class="capitalize">{color.label}</span>
-							</DropdownMenu.CheckboxItem>
+							</DropdownMenu.Item>
 						{/each}
 					</DropdownMenu.Group>
 				</DropdownMenu.Content>
+			</DropdownMenu.Sub>
+			<DropdownMenu.Sub>
+				<DropdownMenu.SubTrigger openDelay={300}>
+					<TextAlignCenter />
+					AlignMent
+				</DropdownMenu.SubTrigger>
+				<DropdownMenu.SubContent>
+					<DropdownMenu.Label>Alignments</DropdownMenu.Label>
+					{#each alignments as alignment (alignment)}
+						{@const Icon = alignment.icon}
+						<DropdownMenu.Item
+							onclick={() => {
+								if (currentNode && currentNodePos)
+									alignment.turnInto?.(editor, currentNode, currentNodePos);
+							}}
+						>
+							<Icon />
+							{alignment.tooltip}
+							<DropdownMenu.Shortcut>
+								{alignment.shortCut}
+							</DropdownMenu.Shortcut>
+						</DropdownMenu.Item>
+					{/each}
+				</DropdownMenu.SubContent>
 			</DropdownMenu.Sub>
 			<DropdownMenu.Separator />
 			<DropdownMenu.Item onclick={insertNode}>
