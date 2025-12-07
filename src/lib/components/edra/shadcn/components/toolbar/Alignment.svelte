@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { Editor } from '@tiptap/core';
-	import * as Select from '$lib/components/ui/select';
+	// import * as Select from '$lib/components/ui/select';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import commands from '$lib/components/edra/commands/toolbar-commands';
 	import { cn } from '$lib/utils';
 	import EdraToolTip from '../EdraToolTip.svelte';
 	import AlignLeft from '@lucide/svelte/icons/align-left';
 	import { buttonVariants } from '$lib/components/ui/button';
+	import { ChevronDown } from '@lucide/svelte';
 
 	interface Props {
 		editor: Editor;
@@ -25,9 +27,9 @@
 	});
 </script>
 
-<Select.Root type="single">
+<DropdownMenu.Root>
 	<EdraToolTip tooltip="Alignment">
-		<Select.Trigger
+		<DropdownMenu.Trigger
 			class={buttonVariants({
 				variant: 'ghost',
 				size: 'icon',
@@ -35,16 +37,20 @@
 			})}
 		>
 			<AlignmentIcon class="stroke-primary size-4!" />
-		</Select.Trigger>
+			<ChevronDown />
+		</DropdownMenu.Trigger>
 	</EdraToolTip>
-	<Select.Content class="w-fit">
+	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
+		<DropdownMenu.Label>Alignments</DropdownMenu.Label>
 		{#each alignments as alignment (alignment)}
 			{@const Icon = alignment.icon}
-			<Select.Item value={alignment.name} onclick={() => alignment.onClick?.(editor)}>
+			<DropdownMenu.Item onclick={() => alignment.onClick?.(editor)}>
 				<Icon />
 				{alignment.tooltip}
-				<small class="text-muted-foreground ml-auto text-xs">{alignment.shortCut}</small>
-			</Select.Item>
+				<DropdownMenu.Shortcut>
+					{alignment.shortCut}
+				</DropdownMenu.Shortcut>
+			</DropdownMenu.Item>
 		{/each}
-	</Select.Content>
-</Select.Root>
+	</DropdownMenu.Content>
+</DropdownMenu.Root>

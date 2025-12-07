@@ -1,9 +1,10 @@
 <script lang="ts">
-	import * as Select from '$lib/components/ui/select';
 	import { Editor } from '@tiptap/core';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { cn } from '$lib/utils.js';
 	import EdraToolTip from '../EdraToolTip.svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
+	import { ChevronDown } from '@lucide/svelte';
 
 	interface Props {
 		class?: string;
@@ -30,9 +31,9 @@
 	});
 </script>
 
-<Select.Root type="single">
+<DropdownMenu.Root>
 	<EdraToolTip tooltip="Font Size">
-		<Select.Trigger
+		<DropdownMenu.Trigger
 			class={buttonVariants({
 				variant: 'ghost',
 				size: 'sm',
@@ -44,18 +45,21 @@
 			})}
 		>
 			<span>{currentLabel}</span>
-		</Select.Trigger>
+			<ChevronDown />
+		</DropdownMenu.Trigger>
 	</EdraToolTip>
-	<Select.Content class="h-fit w-fit">
+	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
+		<DropdownMenu.Label>Font Size</DropdownMenu.Label>
 		{#each FONT_SIZE as fontSize (fontSize)}
-			<Select.Item
-				class="w-fit"
-				value={fontSize.label}
+			<DropdownMenu.Item
 				onclick={() => {
 					editor.chain().focus().setFontSize(fontSize.value).run();
 				}}
-				style={`font-size: ${fontSize.value}`}>{fontSize.label}</Select.Item
-			>
+				>{fontSize.label}
+				<DropdownMenu.Shortcut>
+					{fontSize.value}
+				</DropdownMenu.Shortcut>
+			</DropdownMenu.Item>
 		{/each}
-	</Select.Content>
-</Select.Root>
+	</DropdownMenu.Content>
+</DropdownMenu.Root>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Editor } from '@tiptap/core';
-	import * as Select from '$lib/components/ui/select';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import commands from '$lib/components/edra/commands/toolbar-commands';
 	import { cn } from '$lib/utils';
 	import EdraToolTip from '../EdraToolTip.svelte';
@@ -25,9 +25,9 @@
 	});
 </script>
 
-<Select.Root type="single">
+<DropdownMenu.Root>
 	<EdraToolTip tooltip="Lists">
-		<Select.Trigger
+		<DropdownMenu.Trigger
 			class={buttonVariants({
 				variant: 'ghost',
 				size: 'icon',
@@ -39,16 +39,17 @@
 			})}
 		>
 			<ListIcon class="stroke-primary size-4!" />
-		</Select.Trigger>
+		</DropdownMenu.Trigger>
 	</EdraToolTip>
-	<Select.Content class="w-fit">
+	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
+		<DropdownMenu.Label>Lists</DropdownMenu.Label>
 		{#each lists as list (list)}
 			{@const Icon = list.icon}
-			<Select.Item value={list.name} onclick={() => list.onClick?.(editor)}>
+			<DropdownMenu.Item onclick={() => list.onClick?.(editor)}>
 				<Icon />
 				{list.tooltip}
-				<small class="text-muted-foreground ml-auto text-xs">{list.shortCut}</small>
-			</Select.Item>
+				<DropdownMenu.Shortcut>{list.shortCut}</DropdownMenu.Shortcut>
+			</DropdownMenu.Item>
 		{/each}
-	</Select.Content>
-</Select.Root>
+	</DropdownMenu.Content>
+</DropdownMenu.Root>

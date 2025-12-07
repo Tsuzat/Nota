@@ -11,9 +11,9 @@
 
 	let isCopying = $state(false);
 
-	const languages: string[] = extension.options.lowlight.listLanguages().sort();
+	const languages: string[] = $derived(extension.options.lowlight.listLanguages().sort());
 
-	let defaultLanguage = $state(node.attrs.language);
+	let defaultLanguage = $derived(node.attrs.language);
 
 	$effect(() => {
 		updateAttributes({ language: defaultLanguage });

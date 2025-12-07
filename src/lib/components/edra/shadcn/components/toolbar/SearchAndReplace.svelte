@@ -117,6 +117,7 @@
 				<Input
 					placeholder="Search..."
 					bind:value={searchText}
+					bind:ref={searchInputRef}
 					oninput={() => updateSearchTerm()}
 					class="w-48"
 				/>

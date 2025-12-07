@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Editor } from '@tiptap/core';
-	import * as Select from '$lib/components/ui/select';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import commands from '../../../commands/toolbar-commands';
 	import { cn } from '$lib/utils';
 	import EdraToolTip from '../EdraToolTip.svelte';
@@ -25,9 +25,9 @@
 	});
 </script>
 
-<Select.Root type="single">
+<DropdownMenu.Root>
 	<EdraToolTip tooltip="Headings">
-		<Select.Trigger
+		<DropdownMenu.Trigger
 			class={buttonVariants({
 				variant: 'ghost',
 				size: 'icon',
@@ -35,19 +35,19 @@
 			})}
 		>
 			<HeadingIcon class="stroke-primary size-4!" />
-		</Select.Trigger>
+		</DropdownMenu.Trigger>
 	</EdraToolTip>
-	<Select.Content>
-		<Select.Item value="paragraph" onclick={() => editor.chain().focus().setParagraph().run()}>
+	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
+		<DropdownMenu.Item onclick={() => editor.chain().focus().setParagraph().run()}>
 			<Paragraph />
 			<span>Paragraph</span>
-		</Select.Item>
+		</DropdownMenu.Item>
 		{#each headings as heading (heading)}
 			{@const Icon = heading.icon}
-			<Select.Item value={heading.name} onclick={() => heading.onClick?.(editor)}>
+			<DropdownMenu.Item onclick={() => heading.onClick?.(editor)}>
 				<Icon />
 				{heading.tooltip}
-			</Select.Item>
+			</DropdownMenu.Item>
 		{/each}
-	</Select.Content>
-</Select.Root>
+	</DropdownMenu.Content>
+</DropdownMenu.Root>
