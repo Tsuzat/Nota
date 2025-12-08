@@ -14,6 +14,7 @@
 	import ArrowDown from '@lucide/svelte/icons/arrow-down';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import Clipboard from '@lucide/svelte/icons/clipboard';
+	import Brain from '@lucide/svelte/icons/brain';
 	import X from '@lucide/svelte/icons/x';
 	import { toast } from 'svelte-sonner';
 	import { removeAIHighlight } from '../../extensions/AIHighLight';
@@ -23,16 +24,17 @@
 	import Mermaid from 'svelte-streamdown/mermaid';
 	import Math from 'svelte-streamdown/math';
 
-	import {
-		CONTINUE_WRITING,
-		FIX_GRAMMER_PROMPT,
-		MAKE_LONGER_PROMPT,
-		MAKE_SHORTED_PROMPT,
-		SUMMARIZE_PROMPT
-	} from '$lib/gemini/prompts';
 	import { callGeminiAI } from '$lib/gemini';
-	import { fade } from 'svelte/transition';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
+	import {
+		CONTINUE_WRITING_PROMPT,
+		FIX_GRAMMAR_PROMPT,
+		MAKE_LONGER_PROMPT,
+		MAKE_SHORTER_PROMPT,
+		SOLVE_PROBLEM_PROMPT,
+		SUMMARIZE_PROMPT
+	} from '$lib/gemini/commands';
+	import { fade } from 'svelte/transition';
 
 	interface Props {
 		editor: Editor;
@@ -72,7 +74,9 @@
 		if (editor.markdown) return editor.markdown.serialize(slice.toJSON());
 	}
 
-	async function processText(type: 'shorter' | 'longer' | 'summarize' | 'grammer' | 'continue') {
+	async function processText(
+		type: 'shorter' | 'longer' | 'summarize' | 'grammer' | 'continue' | 'solve'
+	) {
 		const id = Symbol('AI_THINKING_TOAST').toString();
 		const selectedText = getSelectionText();
 		if (!selectedText || selectedText.trim().length === 0) {
@@ -83,7 +87,7 @@
 			let prompt = '';
 			switch (type) {
 				case 'shorter':
-					prompt = MAKE_SHORTED_PROMPT(selectedText);
+					prompt = MAKE_SHORTER_PROMPT(selectedText);
 					break;
 				case 'longer':
 					prompt = MAKE_LONGER_PROMPT(selectedText);
@@ -92,10 +96,13 @@
 					prompt = SUMMARIZE_PROMPT(selectedText);
 					break;
 				case 'grammer':
-					prompt = FIX_GRAMMER_PROMPT(selectedText);
+					prompt = FIX_GRAMMAR_PROMPT(selectedText);
 					break;
 				case 'continue':
-					prompt = CONTINUE_WRITING(selectedText);
+					prompt = CONTINUE_WRITING_PROMPT(selectedText);
+					break;
+				case 'solve':
+					prompt = SOLVE_PROBLEM_PROMPT(selectedText);
 					break;
 			}
 			aiState = AIState.Confirmation;
@@ -129,6 +136,8 @@
 	const checkGrammer = () => processText('grammer');
 
 	const continueWriting = () => processText('continue');
+
+	const solveProblem = () => processText('solve');
 
 	async function handleSubmit(e: Event) {
 		if (!inputValue || inputValue.trim().length === 0) return;
@@ -270,6 +279,14 @@
 			>
 				<CheckCheck />
 				<span>Fix Grammer</span>
+			</button>
+			<button
+				title=""
+				onclick={solveProblem}
+				class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+			>
+				<Brain />
+				<span>Solve Problem</span>
 			</button>
 		</div>
 	{:else if aiState === AIState.Confirmation}
