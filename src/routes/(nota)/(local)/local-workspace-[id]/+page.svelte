@@ -19,6 +19,7 @@
 	import Clock from '@lucide/svelte/icons/clock';
 	import ArrowDownToLine from '@lucide/svelte/icons/arrow-down-to-line';
 	import CalendarDays from '@lucide/svelte/icons/calendar-days';
+	import Download from '@lucide/svelte/icons/download';
 	import { resolve } from '$app/paths';
 	import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
@@ -33,7 +34,6 @@
 	import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 	import { DB } from '$lib/local/db';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
-	import { Download, Import } from '@lucide/svelte';
 
 	let { data } = $props();
 
