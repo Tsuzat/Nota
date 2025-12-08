@@ -292,7 +292,7 @@ input[type='checkbox']:checked::before {
 .ProseMirror table th {
 	position: relative;
 	min-width: 100px;
-	border: 1px solid var(--table-border);
+	border: 0.5px solid var(--table-border);
 	padding: 0.5rem;
 	text-align: left;
 	vertical-align: top;
@@ -336,8 +336,7 @@ input[type='checkbox']:checked::before {
 }
 
 .ProseMirror table .selectedCell {
-	border-style: double;
-	border-color: var(--table-border);
+	border: 1px solid var(--color-primary);
 	background-color: var(--table-bg-selected);
 }
 
@@ -353,12 +352,12 @@ input[type='checkbox']:checked::before {
 }
 
 .ProseMirror table .grip-column {
-	top: -0.75rem;
+	top: -1rem;
 	left: 0;
 	margin-left: -1px;
 	height: 0.75rem;
-	width: calc(100% + 1px);
-	border-left: 1px solid var(--table-border);
+	width: 100%;
+	border-radius: 1rem;
 }
 
 .ProseMirror table .grip-column:hover::before,
@@ -375,15 +374,6 @@ input[type='checkbox']:checked::before {
 	border-bottom: 2px dotted var(--border-color-hover);
 }
 
-.ProseMirror table .grip-column.first {
-	border-top-left-radius: 0.125rem;
-	border-color: transparent;
-}
-
-.ProseMirror table .grip-column.last {
-	border-top-right-radius: 0.125rem;
-}
-
 .ProseMirror table .grip-column.selected {
 	border-color: var(--table-border);
 	background-color: var(--table-bg-hover);
@@ -395,12 +385,12 @@ input[type='checkbox']:checked::before {
 }
 
 .ProseMirror table .grip-row {
-	left: -0.75rem;
+	left: -1rem;
 	top: 0;
 	margin-top: -1px;
-	height: calc(100% + 1px);
+	height: calc(100%);
 	width: 0.75rem;
-	border-top: 1px solid var(--table-border);
+	border-radius: 1rem;
 }
 
 .ProseMirror table .grip-row:hover::before,
@@ -415,15 +405,6 @@ input[type='checkbox']:checked::before {
 
 .ProseMirror table .grip-row:hover::before {
 	border-left: 2px dotted var(--border-color-hover);
-}
-
-.ProseMirror table .grip-row.first {
-	border-top-left-radius: 0.125rem;
-	border-color: transparent;
-}
-
-.ProseMirror table .grip-row.last {
-	border-bottom-left-radius: 0.125rem;
 }
 
 .ProseMirror table .grip-row.selected {
