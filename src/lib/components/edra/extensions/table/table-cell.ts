@@ -1,9 +1,9 @@
 import { mergeAttributes, Node } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
-import { CellSelection } from '@tiptap/pm/tables';
+// import { CellSelection } from '@tiptap/pm/tables';
 
-import { getCellsInColumn, getCellsInTable, isRowSelected, selectRow } from './utils.js';
+import { getCellsInColumn, isRowSelected, selectRow } from './utils.js';
 
 export interface TableCellOptions {
 	HTMLAttributes: Record<string, unknown>;
@@ -80,7 +80,7 @@ export const TableCell = Node.create<TableCellOptions>({
 						const { doc, selection } = state;
 						const decorations: Decoration[] = [];
 						const firstColCells = getCellsInColumn(0)(selection);
-						const allCells = getCellsInTable(selection);
+						// const allCells = getCellsInTable(selection);
 
 						// Row grips (left edge) — appear for first column cells
 						if (firstColCells) {
@@ -107,6 +107,8 @@ export const TableCell = Node.create<TableCellOptions>({
 										grip.className = className;
 										grip.setAttribute('role', 'button');
 										grip.setAttribute('aria-label', 'Select row');
+										grip.setAttribute('tabindex', '0');
+										grip.dataset.rowIndex = String(index);
 										grip.addEventListener('mousedown', (event) => {
 											event.preventDefault();
 											event.stopImmediatePropagation();
@@ -121,30 +123,31 @@ export const TableCell = Node.create<TableCellOptions>({
 						}
 
 						// Cell grips — small handles inside each cell for single-cell selection
-						if (allCells) {
-							allCells.forEach(({ pos }: { pos: number }) => {
-								decorations.push(
-									Decoration.widget(pos + 1, () => {
-										const grip = document.createElement('a');
-										grip.className = 'grip-cell';
-										grip.setAttribute('role', 'button');
-										grip.setAttribute('aria-label', 'Select cell');
-										grip.addEventListener('mousedown', (event) => {
-											event.preventDefault();
-											event.stopImmediatePropagation();
+						// if (allCells) {
+						// 	allCells.forEach(({ pos }: { pos: number }) => {
+						// 		decorations.push(
+						// 			Decoration.widget(pos + 1, () => {
+						// 				const grip = document.createElement('a');
+						// 				grip.className = 'grip-cell';
+						// 				grip.setAttribute('role', 'button');
+						// 				grip.setAttribute('aria-label', 'Select cell');
+						// 				grip.setAttribute('tabindex', '0');
+						// 				grip.addEventListener('mousedown', (event) => {
+						// 					event.preventDefault();
+						// 					event.stopImmediatePropagation();
 
-											const tr = this.editor.state.tr;
-											const $cell = tr.doc.resolve(pos);
-											// Select just this cell
-											tr.setSelection(new CellSelection($cell, $cell));
-											this.editor.view.dispatch(tr);
-										});
+						// 					const tr = this.editor.state.tr;
+						// 					const $cell = tr.doc.resolve(pos);
+						// 					// Select just this cell
+						// 					tr.setSelection(new CellSelection($cell, $cell));
+						// 					this.editor.view.dispatch(tr);
+						// 				});
 
-										return grip;
-									})
-								);
-							});
-						}
+						// 				return grip;
+						// 			})
+						// 		);
+						// 	});
+						// }
 
 						// Add-row "+" button — anchored to the last row (first column)
 						if (firstColCells && firstColCells.length > 0) {
@@ -155,6 +158,7 @@ export const TableCell = Node.create<TableCellOptions>({
 									btn.className = 'add-row-btn';
 									btn.type = 'button';
 									btn.setAttribute('aria-label', 'Add row');
+									btn.setAttribute('title', 'Add Row After');
 									btn.textContent = '+';
 									btn.addEventListener('mousedown', (event) => {
 										event.preventDefault();
@@ -171,6 +175,96 @@ export const TableCell = Node.create<TableCellOptions>({
 						}
 
 						return DecorationSet.create(doc, decorations);
+					}
+				}
+			}),
+			// Interaction plugin to toggle visibility of row grips based on hover/click
+			new Plugin({
+				props: {
+					handleDOMEvents: {
+						mousemove: (view, event) => {
+							const target = event.target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							return false;
+						},
+						focusin: (view, event) => {
+							const target = event.target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							return false;
+						},
+						mousedown: (view, event) => {
+							const target = event.target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							return false;
+						},
+						mouseleave: (view, event) => {
+							const table = (event.target as HTMLElement).closest('table');
+							if (!table) return false;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g) => g.classList.remove('show-row-grip'));
+							return false;
+						},
+						mouseout: (view, event) => {
+							const target = event.target as HTMLElement;
+							const table = target.closest('table');
+							const to = (event as MouseEvent).relatedTarget as HTMLElement | null;
+							if (!table) return false;
+							if (!to || !to.closest('table') || to.closest('table') !== table) {
+								const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+								grips.forEach((g) => g.classList.remove('show-row-grip'));
+							}
+							return false;
+						},
+						touchstart: (view, event) => {
+							const target = (event as TouchEvent).target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							return false;
+						},
+						touchmove: (view, event) => {
+							const target = (event as TouchEvent).target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							return false;
+						}
 					}
 				}
 			})

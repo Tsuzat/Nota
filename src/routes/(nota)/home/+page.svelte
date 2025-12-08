@@ -105,7 +105,9 @@
 			<WindowsButtons />
 		{/if}
 	</header>
-	<div class="mx-auto flex h-[calc(100vh-3rem)] w-3xl flex-1 grow flex-col gap-8 overflow-auto">
+	<div
+		class="mx-auto flex h-[calc(100vh-3rem)] w-full max-w-3xl flex-1 grow flex-col gap-8 overflow-auto"
+	>
 		<section class="my-2 flex w-full flex-col items-start gap-4 p-2">
 			<div class="text-muted-foreground flex w-full items-center gap-2">
 				<h4>User Workspaces</h4>

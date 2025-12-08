@@ -341,8 +341,8 @@ input[type='checkbox']:checked::before {
 	background-color: var(--table-bg-selected);
 }
 
-.ProseMirror table .grip-column,
-.ProseMirror table .grip-row {
+.ProseMirror .tableWrapper .grip-column,
+.ProseMirror .tableWrapper .grip-row {
 	position: absolute;
 	z-index: 10;
 	display: flex;
@@ -350,10 +350,14 @@ input[type='checkbox']:checked::before {
 	align-items: center;
 	justify-content: center;
 	background-color: var(--table-bg-selected);
+	/* Hidden by default; enabled via show-* classes */
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 150ms ease-in-out;
 }
 
 .ProseMirror table .grip-column {
-	top: -1rem;
+	top: -0.8rem;
 	left: 0;
 	margin-left: -1px;
 	height: 0.75rem;
@@ -386,11 +390,11 @@ input[type='checkbox']:checked::before {
 }
 
 .ProseMirror table .grip-row {
-	left: -1rem;
+	left: -0.75rem;
 	top: 0;
 	margin-top: -1px;
 	height: calc(100%);
-	width: 0.75rem;
+	width: 0.7rem;
 	border-radius: 1rem;
 }
 
@@ -439,6 +443,13 @@ input[type='checkbox']:checked::before {
 .ProseMirror table th:hover .grip-cell,
 .ProseMirror table .grip-cell.selected {
 	opacity: 1;
+}
+
+/* Dynamic visibility classes for row/column grips */
+.ProseMirror .tableWrapper .grip-row.show-row-grip,
+.ProseMirror .tableWrapper .grip-column.show-col-grip {
+	opacity: 1;
+	pointer-events: auto;
 }
 
 /* Edge add buttons (Notion-like) */

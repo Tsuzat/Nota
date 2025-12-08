@@ -67,6 +67,8 @@ export const TableHeader = TiptapTableHeader.extend({
 										grip.className = className;
 										grip.setAttribute('role', 'button');
 										grip.setAttribute('aria-label', 'Select column');
+										grip.setAttribute('tabindex', '0');
+										grip.dataset.colIndex = String(index);
 										grip.addEventListener('mousedown', (event) => {
 											event.preventDefault();
 											event.stopImmediatePropagation();
@@ -87,6 +89,7 @@ export const TableHeader = TiptapTableHeader.extend({
 									btn.className = 'add-column-btn';
 									btn.type = 'button';
 									btn.setAttribute('aria-label', 'Add column');
+									btn.setAttribute('title', 'Add Column After');
 									btn.textContent = '+';
 									btn.addEventListener('mousedown', (event) => {
 										event.preventDefault();
@@ -102,6 +105,96 @@ export const TableHeader = TiptapTableHeader.extend({
 						}
 
 						return DecorationSet.create(doc, decorations);
+					}
+				}
+			}),
+			// Interaction plugin to toggle visibility of column grips based on hover/click
+			new Plugin({
+				props: {
+					handleDOMEvents: {
+						mousemove: (view, event) => {
+							const target = event.target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const colIndex = (cell as HTMLTableCellElement).cellIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-column');
+							grips.forEach((g, idx) => {
+								if (idx === colIndex) g.classList.add('show-col-grip');
+								else g.classList.remove('show-col-grip');
+							});
+							return false;
+						},
+						focusin: (view, event) => {
+							const target = event.target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const colIndex = (cell as HTMLTableCellElement).cellIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-column');
+							grips.forEach((g, idx) => {
+								if (idx === colIndex) g.classList.add('show-col-grip');
+								else g.classList.remove('show-col-grip');
+							});
+							return false;
+						},
+						mousedown: (view, event) => {
+							const target = event.target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const colIndex = (cell as HTMLTableCellElement).cellIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-column');
+							grips.forEach((g, idx) => {
+								if (idx === colIndex) g.classList.add('show-col-grip');
+								else g.classList.remove('show-col-grip');
+							});
+							return false;
+						},
+						mouseleave: (view, event) => {
+							const table = (event.target as HTMLElement).closest('table');
+							if (!table) return false;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-column');
+							grips.forEach((g) => g.classList.remove('show-col-grip'));
+							return false;
+						},
+						mouseout: (view, event) => {
+							const target = event.target as HTMLElement;
+							const table = target.closest('table');
+							const to = (event as MouseEvent).relatedTarget as HTMLElement | null;
+							if (!table) return false;
+							if (!to || !to.closest('table') || to.closest('table') !== table) {
+								const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-column');
+								grips.forEach((g) => g.classList.remove('show-col-grip'));
+							}
+							return false;
+						},
+						touchstart: (view, event) => {
+							const target = (event as TouchEvent).target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const colIndex = (cell as HTMLTableCellElement).cellIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-column');
+							grips.forEach((g, idx) => {
+								if (idx === colIndex) g.classList.add('show-col-grip');
+								else g.classList.remove('show-col-grip');
+							});
+							return false;
+						},
+						touchmove: (view, event) => {
+							const target = (event as TouchEvent).target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const colIndex = (cell as HTMLTableCellElement).cellIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-column');
+							grips.forEach((g, idx) => {
+								if (idx === colIndex) g.classList.add('show-col-grip');
+								else g.classList.remove('show-col-grip');
+							});
+							return false;
+						}
 					}
 				}
 			})
