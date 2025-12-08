@@ -1,8 +1,9 @@
 import { mergeAttributes, Node } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
+import { CellSelection } from '@tiptap/pm/tables';
 
-import { getCellsInColumn, isRowSelected, selectRow } from './utils.js';
+import { getCellsInColumn, getCellsInTable, isRowSelected, selectRow } from './utils.js';
 
 export interface TableCellOptions {
 	HTMLAttributes: Record<string, unknown>;
@@ -78,10 +79,12 @@ export const TableCell = Node.create<TableCellOptions>({
 
 						const { doc, selection } = state;
 						const decorations: Decoration[] = [];
-						const cells = getCellsInColumn(0)(selection);
+						const firstColCells = getCellsInColumn(0)(selection);
+						const allCells = getCellsInTable(selection);
 
-						if (cells) {
-							cells.forEach(({ pos }: { pos: number }, index: number) => {
+						// Row grips (left edge) — appear for first column cells
+						if (firstColCells) {
+							firstColCells.forEach(({ pos }: { pos: number }, index: number) => {
 								decorations.push(
 									Decoration.widget(pos + 1, () => {
 										const rowSelected = isRowSelected(index)(selection);
@@ -95,13 +98,15 @@ export const TableCell = Node.create<TableCellOptions>({
 											className += ' first';
 										}
 
-										if (index === cells.length - 1) {
+										if (index === firstColCells.length - 1) {
 											className += ' last';
 										}
 
 										const grip = document.createElement('a');
 
 										grip.className = className;
+										grip.setAttribute('role', 'button');
+										grip.setAttribute('aria-label', 'Select row');
 										grip.addEventListener('mousedown', (event) => {
 											event.preventDefault();
 											event.stopImmediatePropagation();
@@ -113,6 +118,56 @@ export const TableCell = Node.create<TableCellOptions>({
 									})
 								);
 							});
+						}
+
+						// Cell grips — small handles inside each cell for single-cell selection
+						if (allCells) {
+							allCells.forEach(({ pos }: { pos: number }) => {
+								decorations.push(
+									Decoration.widget(pos + 1, () => {
+										const grip = document.createElement('a');
+										grip.className = 'grip-cell';
+										grip.setAttribute('role', 'button');
+										grip.setAttribute('aria-label', 'Select cell');
+										grip.addEventListener('mousedown', (event) => {
+											event.preventDefault();
+											event.stopImmediatePropagation();
+
+											const tr = this.editor.state.tr;
+											const $cell = tr.doc.resolve(pos);
+											// Select just this cell
+											tr.setSelection(new CellSelection($cell, $cell));
+											this.editor.view.dispatch(tr);
+										});
+
+										return grip;
+									})
+								);
+							});
+						}
+
+						// Add-row "+" button — anchored to the last row (first column)
+						if (firstColCells && firstColCells.length > 0) {
+							const lastRowCell = firstColCells[firstColCells.length - 1];
+							decorations.push(
+								Decoration.widget(lastRowCell.pos + 1, () => {
+									const btn = document.createElement('button');
+									btn.className = 'add-row-btn';
+									btn.type = 'button';
+									btn.setAttribute('aria-label', 'Add row');
+									btn.textContent = '+';
+									btn.addEventListener('mousedown', (event) => {
+										event.preventDefault();
+										event.stopImmediatePropagation();
+										// Select last row, then add after
+										this.editor.view.dispatch(
+											selectRow(firstColCells.length - 1)(this.editor.state.tr)
+										);
+										this.editor.chain().focus().addRowAfter().run();
+									});
+									return btn;
+								})
+							);
 						}
 
 						return DecorationSet.create(doc, decorations);

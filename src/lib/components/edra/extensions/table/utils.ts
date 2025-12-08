@@ -320,3 +320,93 @@ export const isRowGripSelected = ({
 
 	return !!gripRow;
 };
+
+// Show row menu when a cell in that row is selected (DOM-based)
+export const isRowActiveFromSelection = ({
+	editor,
+	view,
+	state,
+	from
+}: {
+	editor: Editor;
+	view: EditorView;
+	state: EditorState;
+	from: number;
+}) => {
+	if (!editor.isActive(Table.name)) return false;
+
+	// Container at the BubbleMenu anchor
+	const domAtPos = view.domAtPos(from).node as HTMLElement;
+	const nodeDOM = view.nodeDOM(from) as HTMLElement;
+	let container = nodeDOM || domAtPos;
+
+	while (container && !['TD', 'TH'].includes(container.tagName)) {
+		container = container.parentElement!;
+	}
+	if (!container) return false;
+
+	const rowEl = container.closest('tr');
+	if (!rowEl) return false;
+
+	// Current selection anchor cell
+	const anchorDom = view.domAtPos(state.selection.$from.pos).node as HTMLElement;
+	let anchorCell = anchorDom;
+	while (anchorCell && !['TD', 'TH'].includes(anchorCell.tagName)) {
+		anchorCell = anchorCell.parentElement!;
+	}
+	if (!anchorCell) return false;
+
+	const anchorRow = anchorCell.closest('tr');
+	return !!anchorRow && anchorRow === rowEl;
+};
+
+// Show column menu when a cell in that column is selected (DOM-based)
+export const isColumnActiveFromSelection = ({
+	editor,
+	view,
+	state,
+	from
+}: {
+	editor: Editor;
+	view: EditorView;
+	state: EditorState;
+	from: number;
+}) => {
+	if (!editor.isActive(Table.name)) return false;
+
+	// Container at the BubbleMenu anchor (header cell)
+	const domAtPos = view.domAtPos(from).node as HTMLElement;
+	const nodeDOM = view.nodeDOM(from) as HTMLElement;
+	let container = nodeDOM || domAtPos;
+
+	while (container && !['TD', 'TH'].includes(container.tagName)) {
+		container = container.parentElement!;
+	}
+	if (!container) return false;
+
+	const headerRow = container.closest('tr');
+	if (!headerRow) return false;
+
+	const headerCells = Array.from(headerRow.children).filter(
+		(el) => (el as HTMLElement).tagName === 'TD' || (el as HTMLElement).tagName === 'TH'
+	);
+	const containerIndex = headerCells.indexOf(container);
+	if (containerIndex < 0) return false;
+
+	// Current selection anchor cell DOM index in its row
+	const anchorDom = view.domAtPos(state.selection.$from.pos).node as HTMLElement;
+	let anchorCell = anchorDom;
+	while (anchorCell && !['TD', 'TH'].includes(anchorCell.tagName)) {
+		anchorCell = anchorCell.parentElement!;
+	}
+	if (!anchorCell) return false;
+
+	const anchorRow = anchorCell.closest('tr');
+	if (!anchorRow) return false;
+	const anchorCells = Array.from(anchorRow.children).filter(
+		(el) => (el as HTMLElement).tagName === 'TD' || (el as HTMLElement).tagName === 'TH'
+	);
+	const anchorIndex = anchorCells.indexOf(anchorCell);
+
+	return anchorIndex === containerIndex;
+};
