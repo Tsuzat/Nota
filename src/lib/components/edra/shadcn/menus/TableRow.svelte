@@ -3,8 +3,10 @@
 	import { type Editor } from '@tiptap/core';
 	import ArrowDownFromLine from '@lucide/svelte/icons/arrow-down-from-line';
 	import ArrowUpFromLine from '@lucide/svelte/icons/arrow-up-from-line';
+	import ArrowDown from '@lucide/svelte/icons/arrow-down';
+	import ArrowUp from '@lucide/svelte/icons/arrow-up';
 	import Trash from '@lucide/svelte/icons/trash';
-	import { isRowGripSelected } from '../../extensions/table/utils';
+	import { isRowGripSelected, moveRowUp, moveRowDown } from '../../extensions/table/utils';
 	import BubbleMenu from '../../components/BubbleMenu.svelte';
 	import { Sheet, TextAlignJustify } from '@lucide/svelte';
 	import { Separator } from '$lib/components/ui/separator';
@@ -54,6 +56,23 @@
 	>
 		<ArrowUpFromLine />
 		Add Row Before
+	</button>
+	<Separator />
+	<button
+		class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+		title="Move Row Up"
+		onclick={() => editor.view.dispatch(moveRowUp(editor.state.tr))}
+	>
+		<ArrowUp />
+		Move Row Up
+	</button>
+	<button
+		class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+		title="Move Row Down"
+		onclick={() => editor.view.dispatch(moveRowDown(editor.state.tr))}
+	>
+		<ArrowDown />
+		Move Row Down
 	</button>
 	<Separator />
 	<button
