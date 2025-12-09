@@ -9,8 +9,6 @@
 	import Check from '@lucide/svelte/icons/check';
 	import Edit from '@lucide/svelte/icons/edit';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
-	import { ISTAURI } from '$lib/utils';
-	import { openUrl } from '@tauri-apps/plugin-opener';
 
 	interface Props {
 		editor: Editor;
