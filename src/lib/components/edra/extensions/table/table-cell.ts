@@ -181,128 +181,128 @@ export const TableCell = Node.create<TableCellOptions>({
 			// Interaction plugin to toggle visibility of row grips based on hover/click
 			new Plugin({
 				props: {
-							handleDOMEvents: {
-								mousemove: (view, event) => {
-									const target = event.target as HTMLElement;
-									const cell = target.closest('td, th');
-									const table = target.closest('table');
-									if (!cell || !table) return false;
-									const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
-									const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
-									grips.forEach((g, idx) => {
-										if (idx === rowIndex) g.classList.add('show-row-grip');
-										else g.classList.remove('show-row-grip');
-									});
-									// Toggle add-row visibility only for last row hover
-									const wrapper = table.closest('.tableWrapper');
-									if (wrapper) {
-										const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
-										if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
-										else wrapper.classList.remove('last-row-hover');
-									}
-									return false;
-								},
-								focusin: (view, event) => {
-									const target = event.target as HTMLElement;
-									const cell = target.closest('td, th');
-									const table = target.closest('table');
-									if (!cell || !table) return false;
-									const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
-									const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
-									grips.forEach((g, idx) => {
-										if (idx === rowIndex) g.classList.add('show-row-grip');
-										else g.classList.remove('show-row-grip');
-									});
-									const wrapper = table.closest('.tableWrapper');
-									if (wrapper) {
-										const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
-										if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
-										else wrapper.classList.remove('last-row-hover');
-									}
-									return false;
-								},
-								mousedown: (view, event) => {
-									const target = event.target as HTMLElement;
-									const cell = target.closest('td, th');
-									const table = target.closest('table');
-									if (!cell || !table) return false;
-									const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
-									const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
-									grips.forEach((g, idx) => {
-										if (idx === rowIndex) g.classList.add('show-row-grip');
-										else g.classList.remove('show-row-grip');
-									});
-									const wrapper = table.closest('.tableWrapper');
-									if (wrapper) {
-										const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
-										if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
-										else wrapper.classList.remove('last-row-hover');
-									}
-									return false;
-								},
-								mouseleave: (view, event) => {
-									const table = (event.target as HTMLElement).closest('table');
-									if (!table) return false;
-									const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
-									grips.forEach((g) => g.classList.remove('show-row-grip'));
-									const wrapper = table.closest('.tableWrapper');
-									if (wrapper) wrapper.classList.remove('last-row-hover');
-									return false;
-								},
-								mouseout: (view, event) => {
-									const target = event.target as HTMLElement;
-									const table = target.closest('table');
-									const to = (event as MouseEvent).relatedTarget as HTMLElement | null;
-									if (!table) return false;
-									if (!to || !to.closest('table') || to.closest('table') !== table) {
-										const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
-										grips.forEach((g) => g.classList.remove('show-row-grip'));
-										const wrapper = table.closest('.tableWrapper');
-										if (wrapper) wrapper.classList.remove('last-row-hover');
-									}
-									return false;
-								},
-								touchstart: (view, event) => {
-									const target = (event as TouchEvent).target as HTMLElement;
-									const cell = target.closest('td, th');
-									const table = target.closest('table');
-									if (!cell || !table) return false;
-									const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
-									const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
-									grips.forEach((g, idx) => {
-										if (idx === rowIndex) g.classList.add('show-row-grip');
-										else g.classList.remove('show-row-grip');
-									});
-									const wrapper = table.closest('.tableWrapper');
-									if (wrapper) {
-										const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
-										if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
-										else wrapper.classList.remove('last-row-hover');
-									}
-									return false;
-								},
-								touchmove: (view, event) => {
-									const target = (event as TouchEvent).target as HTMLElement;
-									const cell = target.closest('td, th');
-									const table = target.closest('table');
-									if (!cell || !table) return false;
-									const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
-									const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
-									grips.forEach((g, idx) => {
-										if (idx === rowIndex) g.classList.add('show-row-grip');
-										else g.classList.remove('show-row-grip');
-									});
-									const wrapper = table.closest('.tableWrapper');
-									if (wrapper) {
-										const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
-										if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
-										else wrapper.classList.remove('last-row-hover');
-									}
-									return false;
-								}
+					handleDOMEvents: {
+						mousemove: (view, event) => {
+							const target = event.target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							// Toggle add-row visibility only for last row hover
+							const wrapper = table.closest('.tableWrapper');
+							if (wrapper) {
+								const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
+								if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
+								else wrapper.classList.remove('last-row-hover');
+							}
+							return false;
+						},
+						focusin: (view, event) => {
+							const target = event.target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							const wrapper = table.closest('.tableWrapper');
+							if (wrapper) {
+								const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
+								if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
+								else wrapper.classList.remove('last-row-hover');
+							}
+							return false;
+						},
+						mousedown: (view, event) => {
+							const target = event.target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							const wrapper = table.closest('.tableWrapper');
+							if (wrapper) {
+								const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
+								if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
+								else wrapper.classList.remove('last-row-hover');
+							}
+							return false;
+						},
+						mouseleave: (view, event) => {
+							const table = (event.target as HTMLElement).closest('table');
+							if (!table) return false;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g) => g.classList.remove('show-row-grip'));
+							const wrapper = table.closest('.tableWrapper');
+							if (wrapper) wrapper.classList.remove('last-row-hover');
+							return false;
+						},
+						mouseout: (view, event) => {
+							const target = event.target as HTMLElement;
+							const table = target.closest('table');
+							const to = (event as MouseEvent).relatedTarget as HTMLElement | null;
+							if (!table) return false;
+							if (!to || !to.closest('table') || to.closest('table') !== table) {
+								const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+								grips.forEach((g) => g.classList.remove('show-row-grip'));
+								const wrapper = table.closest('.tableWrapper');
+								if (wrapper) wrapper.classList.remove('last-row-hover');
+							}
+							return false;
+						},
+						touchstart: (view, event) => {
+							const target = (event as TouchEvent).target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							const wrapper = table.closest('.tableWrapper');
+							if (wrapper) {
+								const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
+								if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
+								else wrapper.classList.remove('last-row-hover');
+							}
+							return false;
+						},
+						touchmove: (view, event) => {
+							const target = (event as TouchEvent).target as HTMLElement;
+							const cell = target.closest('td, th');
+							const table = target.closest('table');
+							if (!cell || !table) return false;
+							const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+							const grips = table.querySelectorAll<HTMLAnchorElement>('a.grip-row');
+							grips.forEach((g, idx) => {
+								if (idx === rowIndex) g.classList.add('show-row-grip');
+								else g.classList.remove('show-row-grip');
+							});
+							const wrapper = table.closest('.tableWrapper');
+							if (wrapper) {
+								const lastIndex = table.rows.length ? table.rows.length - 1 : -1;
+								if (rowIndex === lastIndex) wrapper.classList.add('last-row-hover');
+								else wrapper.classList.remove('last-row-hover');
+							}
+							return false;
 						}
 					}
-				})
+				}
+			})
 		];
 	}
 });

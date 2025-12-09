@@ -284,7 +284,8 @@ input[type='checkbox']:checked::before {
 .ProseMirror .tableWrapper {
 	margin: 0;
 	overflow: auto;
-	padding: 2rem 1rem;
+	padding: 1rem;
+	margin: 1.5rem 0;
 }
 
 .ProseMirror table {
@@ -332,31 +333,9 @@ input[type='checkbox']:checked::before {
 	top: 0;
 	right: -2px;
 	bottom: -2px;
-	display: flex;
-	width: 0.5rem;
+	width: 2px;
 	cursor: col-resize;
-	opacity: 0;
-	transition: opacity var(--table-hover-transition);
-	/* Let the plugin receive events when visible */
-	pointer-events: none;
-}
-
-.ProseMirror table .column-resize-handle::before {
-	content: '';
-	margin-left: auto;
-	height: 100%;
-	width: var(--table-resize-handle-thickness);
 	background-color: var(--color-primary);
-	border-radius: 1px;
-}
-
-/* Show resize handle on cell hover/focus, ensure it’s clickable */
-.ProseMirror table td:hover .column-resize-handle,
-.ProseMirror table th:hover .column-resize-handle,
-.ProseMirror table td:focus-within .column-resize-handle,
-.ProseMirror table th:focus-within .column-resize-handle {
-	opacity: 1;
-	pointer-events: auto;
 }
 
 .ProseMirror table .selectedCell {
@@ -375,14 +354,13 @@ input[type='checkbox']:checked::before {
 	align-items: center;
 	justify-content: center;
 	background-color: var(--table-bg-selected);
-	/* Hidden by default; enabled via show-* classes */
 	opacity: 0;
 	pointer-events: none;
 	transition: opacity 150ms ease-in-out;
 }
 
 .ProseMirror table .grip-column {
-	top: -0.8rem;
+	top: -0.9rem;
 	left: 0;
 	margin-left: -1px;
 	height: 0.75rem;
@@ -390,7 +368,7 @@ input[type='checkbox']:checked::before {
 	border-radius: 1rem;
 }
 
-.ProseMirror table .grip-column:hover::before,
+.ProseMirror table .grip-column::before,
 .ProseMirror table .grip-column.selected::before {
 	content: '';
 	width: 0.625rem;
@@ -400,7 +378,7 @@ input[type='checkbox']:checked::before {
 	background-color: var(--table-bg-hover);
 }
 
-.ProseMirror table .grip-column:hover::before {
+.ProseMirror table .grip-column::before {
 	border-bottom: 2px dotted var(--border-color-hover);
 }
 
@@ -410,12 +388,8 @@ input[type='checkbox']:checked::before {
 	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.ProseMirror table .grip-column.selected::before {
-	border-bottom: 2px dotted var(--border-color-hover);
-}
-
 .ProseMirror table .grip-row {
-	left: -0.75rem;
+	left: -0.85rem;
 	top: 0;
 	margin-top: -1px;
 	height: calc(100%);
@@ -423,28 +397,20 @@ input[type='checkbox']:checked::before {
 	border-radius: 1rem;
 }
 
-.ProseMirror table .grip-row:hover::before,
-.ProseMirror table .grip-row.selected::before {
+.ProseMirror table .grip-row::before {
 	content: '';
 	height: 0.625rem;
+	border-left: 2px dotted var(--border-color-hover);
 }
 
 .ProseMirror table .grip-row:hover {
 	background-color: var(--table-bg-hover);
 }
 
-.ProseMirror table .grip-row:hover::before {
-	border-left: 2px dotted var(--border-color-hover);
-}
-
 .ProseMirror table .grip-row.selected {
 	border-color: var(--table-border);
 	background-color: var(--table-bg-hover);
 	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.ProseMirror table .grip-row.selected::before {
-	border-left: 2px dotted var(--border-color-hover);
 }
 
 /* Cell grip — appears on cell hover or when selected */
@@ -515,7 +481,7 @@ input[type='checkbox']:checked::before {
 /* Positioning: column button flush right, full height. Row button flush bottom, full width */
 .ProseMirror .add-column-btn {
 	top: 0;
-	right: -0.8rem;
+	right: -0.85rem;
 	height: 100%;
 	width: 0.75rem;
 }
