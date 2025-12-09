@@ -360,10 +360,10 @@ input[type='checkbox']:checked::before {
 }
 
 .ProseMirror table .grip-column {
-	top: -0.9rem;
+	top: -0.8rem;
 	left: 0;
 	margin-left: -1px;
-	height: 0.75rem;
+	height: 0.8rem;
 	width: 100%;
 	border-radius: 1rem;
 }
@@ -389,11 +389,11 @@ input[type='checkbox']:checked::before {
 }
 
 .ProseMirror table .grip-row {
-	left: -0.85rem;
+	left: -0.8rem;
 	top: 0;
 	margin-top: -1px;
 	height: calc(100%);
-	width: 0.7rem;
+	width: 0.8rem;
 	border-radius: 1rem;
 }
 
@@ -414,11 +414,7 @@ input[type='checkbox']:checked::before {
 }
 
 /* Cell grip — appears on cell hover or when selected */
-.ProseMirror table .grip-cell {
-	/**
-	 *! Hide the grip cell by default
-	 */
-	display: none;
+/* .ProseMirror table .grip-cell {
 	position: absolute;
 	right: -0.125rem;
 	translate: 0 calc(50% - 0.25rem);
@@ -428,7 +424,7 @@ input[type='checkbox']:checked::before {
 	background-color: var(--color-primary);
 	opacity: 0;
 	transition: all 200ms ease-in-out;
-}
+} */
 
 .ProseMirror table td:hover .grip-cell,
 .ProseMirror table th:hover .grip-cell,

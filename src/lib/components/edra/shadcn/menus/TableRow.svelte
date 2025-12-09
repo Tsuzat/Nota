@@ -6,11 +6,10 @@
 	import ArrowDown from '@lucide/svelte/icons/arrow-down';
 	import ArrowUp from '@lucide/svelte/icons/arrow-up';
 	import Trash from '@lucide/svelte/icons/trash';
+	import Sheet from '@lucide/svelte/icons/sheet';
 	import { isRowGripSelected, moveRowUp, moveRowDown } from '../../extensions/table/utils';
 	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import { Sheet, TextAlignJustify } from '@lucide/svelte';
 	import { Separator } from '$lib/components/ui/separator';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 
 	interface Props {
 		editor: Editor;

@@ -6,10 +6,14 @@
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
 	import Trash from '@lucide/svelte/icons/trash';
-	import { isColumnGripSelected, moveColumnLeft, moveColumnRight } from '../../extensions/table/utils';
+	import Sheet from '@lucide/svelte/icons/sheet';
+	import {
+		isColumnGripSelected,
+		moveColumnLeft,
+		moveColumnRight
+	} from '../../extensions/table/utils';
 	import BubbleMenu from '../../components/BubbleMenu.svelte';
 	import { Separator } from '$lib/components/ui/separator';
-	import Sheet from '@lucide/svelte/icons/sheet';
 
 	interface Props {
 		editor: Editor;
