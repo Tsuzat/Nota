@@ -272,10 +272,19 @@ input[type='checkbox']:checked::before {
 }
 
 /* Table Styling */
+.tiptap,
+.ProseMirror {
+	/* New CSS variables for easy theming */
+	--table-border-size: 1px;
+	--table-selected-border-size: 2px;
+	--table-resize-handle-thickness: 2px;
+	--table-hover-transition: 200ms ease-in-out;
+	--table-focus-ring: 2px;
+}
 .ProseMirror .tableWrapper {
 	margin: 0;
 	overflow: auto;
-	padding: 1rem;
+	padding: 2rem 1rem;
 }
 
 .ProseMirror table {
@@ -285,14 +294,14 @@ input[type='checkbox']:checked::before {
 	width: 100%;
 	border-collapse: collapse;
 	border-radius: 0.25rem;
-	border: 0.5px solid var(--table-border);
+	border: var(--table-border-size) solid var(--table-border);
 }
 
 .ProseMirror table td,
 .ProseMirror table th {
 	position: relative;
 	min-width: 100px;
-	border: 0.5px solid var(--table-border);
+	border: var(--table-border-size) solid var(--table-border);
 	padding: 0.5rem;
 	text-align: left;
 	vertical-align: top;
@@ -319,25 +328,41 @@ input[type='checkbox']:checked::before {
 }
 
 .ProseMirror table .column-resize-handle {
-	pointer-events: none;
 	position: absolute;
 	top: 0;
-	right: -0.25rem;
+	right: -2px;
 	bottom: -2px;
 	display: flex;
 	width: 0.5rem;
+	cursor: col-resize;
+	opacity: 0;
+	transition: opacity var(--table-hover-transition);
+	/* Let the plugin receive events when visible */
+	pointer-events: none;
 }
 
 .ProseMirror table .column-resize-handle::before {
 	content: '';
-	margin-left: 0.5rem;
+	margin-left: auto;
 	height: 100%;
-	width: 1px;
-	background-color: var(--table-border);
+	width: var(--table-resize-handle-thickness);
+	background-color: var(--color-primary);
+	border-radius: 1px;
+}
+
+/* Show resize handle on cell hover/focus, ensure it’s clickable */
+.ProseMirror table td:hover .column-resize-handle,
+.ProseMirror table th:hover .column-resize-handle,
+.ProseMirror table td:focus-within .column-resize-handle,
+.ProseMirror table th:focus-within .column-resize-handle {
+	opacity: 1;
+	pointer-events: auto;
 }
 
 .ProseMirror table .selectedCell {
-	border: 1px solid var(--color-primary);
+	/* Stronger visual, avoids collapse issues */
+	outline: 1px solid var(--color-primary);
+	z-index: 1;
 	background-color: var(--table-bg-selected);
 }
 
@@ -459,24 +484,24 @@ input[type='checkbox']:checked::before {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 1rem;
-	height: 1rem;
-	border-radius: 50%;
+	border-radius: 0.5rem;
 	background-color: var(--color-muted);
 	color: var(--color-foreground);
-	border: 1px solid var(--table-border);
+	border: var(--table-border-size) solid var(--table-border);
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 	opacity: 0;
 	transition:
-		opacity 150ms ease-in-out,
-		transform 150ms ease-in-out,
-		background-color 150ms ease-in-out;
+		opacity var(--table-hover-transition),
+		transform var(--table-hover-transition),
+		background-color var(--table-hover-transition);
 	transform: scale(0.95);
 	cursor: pointer;
+	z-index: 20;
 }
 
-.ProseMirror table:hover .add-column-btn,
-.ProseMirror table:hover .add-row-btn {
+/* Only show add buttons when flagged by wrapper classes */
+.ProseMirror .tableWrapper.last-column-hover .add-column-btn,
+.ProseMirror .tableWrapper.last-row-hover .add-row-btn {
 	opacity: 1;
 	transform: scale(1);
 }
@@ -484,17 +509,37 @@ input[type='checkbox']:checked::before {
 .ProseMirror .add-column-btn:hover,
 .ProseMirror .add-row-btn:hover {
 	background-color: var(--table-bg-hover);
+	opacity: 0.95;
 }
 
-/* Positioning: column button on the right edge, row button on the bottom edge */
+/* Positioning: column button flush right, full height. Row button flush bottom, full width */
 .ProseMirror .add-column-btn {
-	top: -1rem;
-	right: -1rem;
+	top: 0;
+	right: -0.8rem;
+	height: 100%;
+	width: 0.75rem;
 }
 
 .ProseMirror .add-row-btn {
-	bottom: -1rem;
-	left: -1rem;
+	left: 0;
+	bottom: -0.9rem;
+	width: 100%;
+	height: 0.75rem;
+}
+
+/* Improve button hit areas via padding for better accessibility */
+.ProseMirror .add-column-btn {
+	padding: 0.25rem 0.125rem;
+}
+.ProseMirror .add-row-btn {
+	padding: 0.125rem 0.25rem;
+}
+
+/* Focus states for accessibility */
+.ProseMirror .add-column-btn:focus-visible,
+.ProseMirror .add-row-btn:focus-visible {
+	outline: var(--table-focus-ring) solid var(--color-primary);
+	outline-offset: 2px;
 }
 
 .tiptap .search-result {
