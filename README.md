@@ -1,3 +1,5 @@
+![nota](https://waka-api.dev-tsuzat.workers.dev/Nota)
+
 <h1>
   <img src="https://nota.ink/favicon.png" style="width: 2rem; height: 2rem" />
   Nota - Fast, Lightweight, Feauture Rich Note taking app (WIP)
