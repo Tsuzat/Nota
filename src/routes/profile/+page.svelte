@@ -15,7 +15,7 @@
 
 	async function handleSignOut() {
 		await supabase.auth.signOut();
-		goto('/');
+		goto(resolve('/'));
 	}
 
 	function handleDeleteAccount() {

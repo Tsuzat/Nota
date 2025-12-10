@@ -22,15 +22,15 @@
 		localStorage.setItem('nota-playground-content', JSON.stringify(editor?.getJSON()));
 	}
 
-	const onFileSelect = async (file: string) => {
+	const onFileSelect = async (_file: string) => {
 		throw new Error('This is not available for Playground');
 	};
 
-	const onDropOrPaste = async (file: File) => {
+	const onDropOrPaste = async (_file: File) => {
 		throw new Error('This is not available for Playground');
 	};
 
-	const getAssets = async (fileType: FileType) => {
+	const getAssets = async (_fileType: FileType) => {
 		throw new Error('This is not available for Playground');
 	};
 

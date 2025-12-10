@@ -3,7 +3,7 @@
 	import * as Collapsible from '$lib/components/ui/collapsible';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { getLocalNotes } from '$lib/local/notes.svelte';
-	import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
+	import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import PlusIcon from '@lucide/svelte/icons/plus';
@@ -11,10 +11,8 @@
 	import CopyIcon from '@lucide/svelte/icons/copy';
 	import StarIcon from '@lucide/svelte/icons/star';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
-	import { ask } from '@tauri-apps/plugin-dialog';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { toast } from 'svelte-sonner';
 	import { cn, getKeyboardShortcut, timeAgo } from '$lib/utils';
 	import SimpleTooltip from '../simple-tooltip.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -27,36 +25,12 @@
 
 	const localWorkspaces = getLocalWorkspaces();
 	const workspaces = $derived(localWorkspaces.getWorkspaces().slice(0, showMore ? undefined : 5));
-	const sidebar = Sidebar.useSidebar();
 	const localNotes = getLocalNotes();
 
 	let open = $state(false);
 	let openNewNotes = $state(false);
 
 	let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
-
-	async function handleDelete(workspace: LocalWorkSpace) {
-		const allowed = await ask(
-			'This workspace will be deleted permanently and all data will be erased.',
-			{
-				title: `Delete Workspace - ${workspace.name}`,
-				kind: 'warning',
-				okLabel: 'Yes, Delete'
-			}
-		);
-		if (allowed) {
-			toast.promise(localWorkspaces.deleteWorkspace(workspace), {
-				loading: 'Deleting workspace...',
-				success: () => {
-					if (page.url.pathname === `local-workspace-${workspace.id}`) {
-						goto(resolve('/home'));
-					}
-					return `Workspace ${workspace.name} deleted successfully`;
-				},
-				error: `Could not delete workspace ${workspace.name}`
-			});
-		}
-	}
 </script>
 
 <NewWorkspace bind:open />

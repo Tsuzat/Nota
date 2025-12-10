@@ -29,7 +29,7 @@
 			<h4 class="font-medium">Theme</h4>
 			<p class="text-muted-foreground text-xs">Select a primary color for the application.</p>
 			<div class="mt-4 grid grid-cols-4 gap-4">
-				{#each themes as theme}
+				{#each themes as theme (theme.name)}
 					<button
 						class="flex flex-col items-center space-y-2"
 						onclick={() => handleThemeChange(theme.name)}

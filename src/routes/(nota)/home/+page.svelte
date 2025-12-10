@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { resolve } from '$app/paths';
 	import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
 	import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';

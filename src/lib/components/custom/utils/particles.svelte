@@ -9,7 +9,6 @@
 		staticity?: number;
 		ease?: number;
 		size?: number;
-		refresh?: boolean;
 		color?: string;
 		vx?: number;
 		vy?: number;
@@ -21,7 +20,6 @@
 		staticity = 50,
 		ease = 50,
 		size = 1,
-		refresh = true,
 		color = '#808080',
 		vx = 0,
 		vy = 0
@@ -30,6 +28,7 @@
 	let canvasRef: HTMLCanvasElement = $state(document.createElement('canvas'));
 	let canvasContainerRef: HTMLDivElement = $state(document.createElement('div'));
 	let context: CanvasRenderingContext2D | null = null;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let circles: any[] = [];
 	let mouse = { x: 0, y: 0 };
 	let canvasSize = { w: 0, h: 0 };

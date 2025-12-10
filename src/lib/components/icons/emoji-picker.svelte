@@ -55,6 +55,7 @@
 
 	let { searchTerm = $bindable(''), onSelect }: Props = $props();
 
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	const filteredEmojiCache = new Map<string, EmojiItem[]>();
 	const MAX_CACHE_SIZE = 50;
 

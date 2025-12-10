@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import ArtifactDownloader from '$lib/artifact/artifact-downloader.svelte';
 	import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
 	import ToggleMode from '$lib/components/custom/toggle-mode.svelte';
@@ -102,7 +103,7 @@
 		A fast, modern, feature rich, lightweight and local first note taking desktop application
 	</p>
 	<div class="flex flex-col items-center gap-4 sm:flex-row">
-		<Button variant="outline" href="/playground">
+		<Button variant="outline" href={resolve('/playground')}>
 			<Pen />
 			Playground
 		</Button>

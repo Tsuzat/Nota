@@ -76,6 +76,7 @@
 					: resolve('/(nota)/(local)/local-note-[id]', { id: note.id.toString() })}
 				{@const isActive = page.url.pathname.endsWith(href)}
 				<div transition:slide={{ easing: linear, duration: 200 }}>
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<Sidebar.MenuItem onclick={() => goto(href)}>
 						<Sidebar.MenuButton {isActive}>
 							{#snippet child({ props })}

@@ -8,3 +8,4 @@ src-tauri/target
 src-tauri/src
 src-tauri/icons
 src-tauri/gen
+src/lib/components/ui/

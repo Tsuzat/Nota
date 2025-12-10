@@ -80,7 +80,7 @@
 		) {
 			syncedContent = {};
 		}
-		const patch = compare(syncedContent as Object, currentContent);
+		const patch = compare(syncedContent as object, currentContent);
 
 		if (patch.length === 0) {
 			isDirty = false;

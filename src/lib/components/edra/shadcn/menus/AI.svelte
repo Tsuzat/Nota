@@ -139,7 +139,7 @@
 
 	const solveProblem = () => processText('solve');
 
-	async function handleSubmit(e: Event) {
+	async function handleSubmit() {
 		if (!inputValue || inputValue.trim().length === 0) return;
 		const text = getSelectionText();
 		if (!text) return;
@@ -300,7 +300,7 @@
 						AI is thinking</span
 					>
 					<div class="flex h-5 items-center space-x-1">
-						{#each Array(3) as _, i (i)}
+						{#each Array(3) as _unused, i (i)}
 							<div
 								class="bg-primary h-2 w-2 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
 								style:animation-delay="{i * 160}ms"
