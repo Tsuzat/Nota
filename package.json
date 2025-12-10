@@ -70,7 +70,7 @@
 		"@eslint/compat": "^1.4.1",
 		"@eslint/js": "^9.39.1",
 		"@internationalized/date": "^3.10.0",
-		"@lucide/svelte": "^0.548.0",
+		"@lucide/svelte": "^0.544.0",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.49.1",
 		"@sveltejs/vite-plugin-svelte": "^5.1.1",
