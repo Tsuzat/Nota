@@ -68,9 +68,9 @@
 					{selectedModel}
 				</Select.Trigger>
 				<Select.Content>
-					<Select.Item value={GeminiModel.FlashLite} label="Flash Lite" />
-					<Select.Item value={GeminiModel.Flash} label="Flash" />
-					<Select.Item value={GeminiModel.Pro} label="Pro" />
+					{#each Object.values(GeminiModel) as model}
+						<Select.Item value={model} label={model} />
+					{/each}
 				</Select.Content>
 			</Select.Root>
 		</div>
