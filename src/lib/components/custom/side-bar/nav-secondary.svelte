@@ -6,8 +6,6 @@
 	import EllipsisVertical from '@lucide/svelte/icons/ellipsis-vertical';
 	import LogOut from '@lucide/svelte/icons/log-out';
 	import Trashed from '../dialogs/trashed.svelte';
-	import { downloadAndInstall } from '$lib/updater';
-	import { check } from '@tauri-apps/plugin-updater';
 	import { getGlobalSignInContext } from '../global-signin';
 	import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 	import { auth } from '$lib/supabase';
@@ -17,7 +15,6 @@
 	import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 	import Trash from '$lib/components/icons/moving-icons/trash.svelte';
-	import Download from '$lib/components/icons/moving-icons/download.svelte';
 	import Login from '$lib/components/icons/moving-icons/login.svelte';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import { getKeyboardShortcut } from '$lib/utils';
@@ -26,7 +23,6 @@
 	import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 
 	let isTrashHovered = $state(false);
-	let isDownloadHovered = $state(false);
 	let isLoginHovered = $state(false);
 	let isSettingsHovered = $state(false);
 
@@ -94,23 +90,6 @@
 				</Sidebar.MenuBadge>
 				<Trashed bind:open />
 			</Sidebar.MenuItem>
-			{#await check() then update}
-				{#if update !== null && update !== undefined}
-					<Sidebar.MenuItem>
-						<Sidebar.MenuButton
-							onclick={() => downloadAndInstall(update)}
-							onmouseenter={() => (isDownloadHovered = true)}
-							onmouseleave={() => (isDownloadHovered = false)}
-						>
-							<Download size={18} isHovered={isDownloadHovered} />
-							<span>Click to Update</span>
-						</Sidebar.MenuButton>
-						<Sidebar.MenuBadge class="bg-muted text-primary! rounded-full p-1.5">
-							{update.version}
-						</Sidebar.MenuBadge>
-					</Sidebar.MenuItem>
-				{/if}
-			{/await}
 			{#if user === null}
 				<Sidebar.MenuItem>
 					<Sidebar.MenuButton

@@ -18,6 +18,8 @@
 	import { setCurrentUserWorkspaceContext } from '$lib/components/custom/user-workspace/userworkspace.svelte.js';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
+	import { check } from '@tauri-apps/plugin-updater';
+	import { downloadAndInstall } from '$lib/updater.js';
 
 	// Local Workspaces and Notes
 	const localUserWorkspaces = setLocalUserWorkspaces();
@@ -49,8 +51,23 @@
 
 	let open = $state(false);
 
-	onMount(() => {
+	onMount(async () => {
 		open = localStorage.getItem('sidebar-state') === 'open';
+		const update = await check();
+		if (update) {
+			const id = Symbol('CheckForNotaUpdate').toString();
+			toast.info(`New Version available`, {
+				description: `Update to latest version ${update.version}, this will take less than a minute`,
+				id,
+				action: {
+					label: 'Install',
+					onClick: () => {
+						toast.dismiss(id);
+						downloadAndInstall(update);
+					}
+				}
+			});
+		}
 	});
 
 	$effect(() => {

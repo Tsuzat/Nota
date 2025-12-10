@@ -39,7 +39,9 @@
 		{#if !currentUserWorkspace.getIsLocal()}
 			<NavWorkspacesCloud />
 		{/if}
-		<NavSecondary />
 	</Sidebar.Content>
+	<Sidebar.Footer class="p-0">
+		<NavSecondary />
+	</Sidebar.Footer>
 	<Sidebar.Rail />
 </Sidebar.Root>

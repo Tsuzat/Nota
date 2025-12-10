@@ -3,7 +3,7 @@ import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'svelte-sonner';
 
 export async function downloadAndInstall(update: Update) {
-	const id = toast.info(`Update ${update.version} is available. Downloading...`);
+	const id = toast.info(`Downloading version ${update.version} `);
 	let downloaded = 0;
 	let contentLength = 0;
 	await update.downloadAndInstall((event) => {
