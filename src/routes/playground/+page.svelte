@@ -7,8 +7,9 @@
 	import { Key, Trash } from '@lucide/svelte';
 	import type { Editor } from '@tiptap/core';
 	import { onMount } from 'svelte';
+	import defalutContent from './demo';
 
-	let content = $state('');
+	let content = $state(defalutContent);
 	let editor = $state<Editor>();
 	let hasAPIKEY = $state(localStorage.getItem('gemini_api_key') !== null);
 

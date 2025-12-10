@@ -32,7 +32,7 @@
 	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
 	import GripVertical from '@lucide/svelte/icons/grip-vertical';
 	import MousePointerClick from '@lucide/svelte/icons/mouse-pointer-click';
-	import { Settings } from '@lucide/svelte';
+	import { Pen, Settings } from '@lucide/svelte';
 	import { getGlobalSettings } from '$lib/components/custom/settings';
 
 	const user = $derived(getSessionAndUserContext().getUser());
@@ -102,6 +102,10 @@
 		A fast, modern, feature rich, lightweight and local first note taking desktop application
 	</p>
 	<div class="flex flex-col items-center gap-4 sm:flex-row">
+		<Button variant="outline" href="/playground">
+			<Pen />
+			Playground
+		</Button>
 		<Button variant="outline" href="https://github.com/Tsuzat/Nota" target="_blank">
 			<Github />
 			Star us on Github
