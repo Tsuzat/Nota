@@ -68,7 +68,7 @@
 					{selectedModel}
 				</Select.Trigger>
 				<Select.Content>
-					{#each Object.values(GeminiModel) as model}
+					{#each Object.values(GeminiModel) as model (model)}
 						<Select.Item value={model} label={model} />
 					{/each}
 				</Select.Content>
