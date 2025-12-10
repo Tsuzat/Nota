@@ -17,9 +17,10 @@
 
 	interface Props {
 		editor: Editor;
+		parentElement?: HTMLElement;
 	}
 
-	const { editor }: Props = $props();
+	const { editor, parentElement }: Props = $props();
 </script>
 
 <BubbleMenu
@@ -31,6 +32,17 @@
 			return false;
 		}
 		return isColumnGripSelected({ editor, view: props.view, state: props.state, from: props.from });
+	}}
+	options={{
+		shift: {
+			crossAxis: true,
+			mainAxis: true
+		},
+		strategy: 'absolute',
+		autoPlacement: {
+			allowedPlacements: ['bottom', 'top']
+		},
+		scrollTarget: parentElement
 	}}
 	class="bg-popover! z-50 flex h-fit w-fit flex-col gap-1 rounded-lg border"
 >

@@ -160,8 +160,8 @@
 {#if editor && !editor.isDestroyed}
 	<Link {editor} parentElement={element} />
 	<AI {editor} parentElement={element} />
-	<TableCol {editor} />
-	<TableRow {editor} />
+	<TableCol {editor} parentElement={element} />
+	<TableRow {editor} parentElement={element} />
 	<Math {editor} mathPos={blockMathPos} mathLatex={blockMathLatex} parentElement={element} />
 	<MathInline
 		{editor}

@@ -283,9 +283,9 @@ input[type='checkbox']:checked::before {
 }
 .ProseMirror .tableWrapper {
 	margin: 0;
-	overflow: auto;
-	padding: 1rem;
-	margin: 1.5rem 0;
+	overflow-x: auto;
+	padding: 1.25rem 1rem;
+	margin: 0.5rem 0;
 }
 
 .ProseMirror table {
@@ -360,10 +360,11 @@ input[type='checkbox']:checked::before {
 }
 
 .ProseMirror table .grip-column {
-	top: -0.8rem;
+	top: -0.9rem;
 	left: 0;
 	margin-left: -1px;
 	height: 0.8rem;
+	border: 0.25px solid var(--table-border);
 	width: 100%;
 	border-radius: 1rem;
 }
@@ -389,8 +390,9 @@ input[type='checkbox']:checked::before {
 }
 
 .ProseMirror table .grip-row {
-	left: -0.8rem;
+	left: -0.9rem;
 	top: 0;
+	border: 0.5px solid var(--table-border);
 	margin-top: -1px;
 	height: calc(100%);
 	width: 0.8rem;

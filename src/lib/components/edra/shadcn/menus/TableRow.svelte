@@ -29,6 +29,17 @@
 		}
 		return isRowGripSelected({ editor, view: props.view, state: props.state, from: props.from });
 	}}
+	options={{
+		shift: {
+			crossAxis: true,
+			mainAxis: true
+		},
+		strategy: 'absolute',
+		autoPlacement: {
+			allowedPlacements: ['bottom', 'top']
+		},
+		scrollTarget: parentElement
+	}}
 	class="bg-popover! z-50 flex h-fit w-fit flex-col gap-1 rounded-lg border"
 >
 	<button
