@@ -29,7 +29,6 @@
 		sidebar.toggle();
 	}}
 	{...restProps}
-	title="Toggle Sidebar"
 >
 	<PanelLeftIcon />
 	<span class="sr-only">Toggle Sidebar</span>
