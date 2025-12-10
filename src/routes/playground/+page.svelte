@@ -6,21 +6,11 @@
 	import type { FileType } from '$lib/utils';
 	import { Key, Trash } from '@lucide/svelte';
 	import type { Editor } from '@tiptap/core';
-	import { onMount } from 'svelte';
 	import defalutContent from './demo';
 
 	let content = $state(defalutContent);
 	let editor = $state<Editor>();
 	let hasAPIKEY = $state(localStorage.getItem('gemini_api_key') !== null);
-
-	onMount(() => {
-		content = JSON.parse(localStorage.getItem('nota-playground-content') ?? '{}');
-		editor?.commands.setContent(content);
-	});
-
-	function onUpdate() {
-		localStorage.setItem('nota-playground-content', JSON.stringify(editor?.getJSON()));
-	}
 
 	const onFileSelect = async (_file: string) => {
 		throw new Error('This is not available for Playground');
@@ -80,7 +70,6 @@
 		bind:editor
 		{content}
 		class="flex-1 grow flex-col overflow-auto p-8!"
-		{onUpdate}
 		{onFileSelect}
 		{onDropOrPaste}
 		{getAssets}
