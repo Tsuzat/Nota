@@ -7,20 +7,17 @@
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import CopyIcon from '@lucide/svelte/icons/copy';
-	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import StarIcon from '@lucide/svelte/icons/star';
 	import Globe from '@lucide/svelte/icons/globe';
-	import { ask } from '@tauri-apps/plugin-dialog';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { toast } from 'svelte-sonner';
 	import { cn, getKeyboardShortcut, timeAgo } from '$lib/utils';
 	import SimpleTooltip from '../simple-tooltip.svelte';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import NewWorkspace from '../dialogs/local/new-workspace.svelte';
 	import NewNotes from '../dialogs/local/new-notes.svelte';
-	import { useCloudWorkspaces, type CloudWorkspace } from '$lib/supabase/db/cloudworkspace.svelte';
+	import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 	import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 	import { resolve } from '$app/paths';
 	import Plus from '@lucide/svelte/icons/plus';
@@ -29,36 +26,12 @@
 
 	const cloudWorkspaces = useCloudWorkspaces();
 	const workspaces = $derived(cloudWorkspaces.getWorkspaces().slice(0, showMore ? undefined : 5));
-	const sidebar = Sidebar.useSidebar();
 	const cloudNotes = useCloudNotes();
 
 	let open = $state(false);
 	let openNewNotes = $state(false);
 
 	let currentCloudWorkspace = $derived(cloudWorkspaces.getWorkspaces()[0]);
-
-	async function handleDelete(workspace: CloudWorkspace) {
-		const allowed = await ask(
-			'This workspace will be deleted permanently and all data will be erased.',
-			{
-				title: `Delete Workspace - ${workspace.name}`,
-				kind: 'warning',
-				okLabel: 'Yes, Delete'
-			}
-		);
-		if (allowed) {
-			toast.promise(cloudWorkspaces.deleteWorkspace(workspace.id), {
-				loading: 'Deleting workspace...',
-				success: () => {
-					if (page.url.pathname === `workspace-${workspace.id}`) {
-						goto(resolve('/home'));
-					}
-					return `Workspace ${workspace.name} deleted successfully`;
-				},
-				error: `Could not delete workspace ${workspace.name}`
-			});
-		}
-	}
 </script>
 
 <NewWorkspace bind:open />
@@ -84,10 +57,11 @@
 			<Sidebar.Menu>
 				{#each workspaces as workspace (workspace.id)}
 					<Collapsible.Root>
-						<Sidebar.MenuItem
-							onclick={() => goto(resolve('/(nota)/(cloud)/workspace-[id]', { id: workspace.id }))}
-						>
-							<Sidebar.MenuButton>
+						{@const href = resolve('/(nota)/(cloud)/workspace-[id]', {
+							id: workspace.id
+						})}
+						<Sidebar.MenuItem>
+							<Sidebar.MenuButton onclick={() => goto(href)}>
 								{#snippet child({ props })}
 									<span {...props}>
 										<IconRenderer icon={workspace.icon} />

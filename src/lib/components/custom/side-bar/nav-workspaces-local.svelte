@@ -9,7 +9,6 @@
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import CopyIcon from '@lucide/svelte/icons/copy';
-	import Pencil from '@lucide/svelte/icons/pencil';
 	import StarIcon from '@lucide/svelte/icons/star';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import { ask } from '@tauri-apps/plugin-dialog';
@@ -18,7 +17,7 @@
 	import { toast } from 'svelte-sonner';
 	import { cn, getKeyboardShortcut, timeAgo } from '$lib/utils';
 	import SimpleTooltip from '../simple-tooltip.svelte';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import NewWorkspace from '../dialogs/local/new-workspace.svelte';
 	import NewNotes from '../dialogs/local/new-notes.svelte';
 	import { resolve } from '$app/paths';
