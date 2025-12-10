@@ -25,12 +25,18 @@ export const ISTAURI = isTauri();
 export const ISMACOS = ISTAURI ? type() === 'macos' : isMac;
 export const ISWINDOWS = ISTAURI ? type() === 'windows' : false;
 
+/**
+ * Generates a new UUID that is not in the given array of UUIDs
+ * @param uuids - Array of UUIDs
+ * @returns - New UUID
+ */
 export const getNewUUID = (uuids: string[]) => {
 	const threshold = 1000;
-	const i = 0;
-	while (i < threshold) {
+	const uuidsSet = new Set(uuids);
+	let i = 0;
+	while (i++ < threshold) {
 		const uuid = crypto.randomUUID();
-		if (!uuids.includes(uuid)) {
+		if (!uuidsSet.has(uuid)) {
 			return uuid;
 		}
 	}
