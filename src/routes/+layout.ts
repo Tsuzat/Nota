@@ -4,9 +4,3 @@
 export const ssr = false;
 export const prerender = false;
 export const csr = true;
-
-import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
-import { injectAnalytics } from '@vercel/analytics/sveltekit';
-
-injectSpeedInsights();
-injectAnalytics();
