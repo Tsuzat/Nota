@@ -6,7 +6,6 @@
 	import Code from '@lucide/svelte/icons/code';
 	import Link from '@lucide/svelte/icons/link';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import AlignLeft from '@lucide/svelte/icons/align-left';
 </script>
 
 <div
@@ -15,13 +14,17 @@
 	<button
 		class="hover:bg-accent hover:text-accent-foreground flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-purple-500"
 	>
-		<span>Ask AI</span>
+		<span
+			class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+		>
+			Ask AI</span
+		>
 	</button>
 	<div class="bg-border mx-1 h-4 w-px"></div>
 	<button
 		class="hover:bg-accent hover:text-accent-foreground flex items-center gap-1 rounded-md px-1 py-1 text-sm"
 	>
-		<span>Paragraph</span>
+		<span>H</span>
 		<ChevronDown class="size-3" />
 	</button>
 	<div class="bg-border mx-1 h-4 w-px"></div>

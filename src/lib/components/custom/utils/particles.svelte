@@ -104,10 +104,7 @@
 			context.translate(translateX, translateY);
 			context.beginPath();
 			context.arc(x, y, size, 0, 2 * Math.PI);
-			const randomR = Math.floor(Math.random() * 256);
-			const randomG = Math.floor(Math.random() * 256);
-			const randomB = Math.floor(Math.random() * 256);
-			context.fillStyle = `rgba(${randomR}, ${randomG}, ${randomB}, ${alpha})`;
+			context.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
 			context.fill();
 			context.setTransform(dpr, 0, 0, dpr, 0, 0);
 

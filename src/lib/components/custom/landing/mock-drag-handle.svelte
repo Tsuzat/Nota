@@ -8,11 +8,13 @@
 	import Clipboard from '@lucide/svelte/icons/clipboard';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import GripVertical from '@lucide/svelte/icons/grip-vertical';
+	import TextAlignCenter from '@lucide/svelte/icons/text-align-center';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 </script>
 
 <div class="relative flex items-start gap-2">
-	<div class="text-muted-foreground/50 mt-1">
-		<GripVertical class="size-6" />
+	<div class="hover:bg-accent hover:text-accent-foreground mt-1 size-8 rounded-md p-2">
+		<GripVertical class="size-4" />
 	</div>
 	<div
 		class="bg-popover text-popover-foreground animate-in fade-in zoom-in-95 w-full max-w-[16rem] overflow-hidden rounded-lg border shadow-md duration-300"
@@ -22,23 +24,38 @@
 			<div
 				class="hover:bg-accent hover:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none"
 			>
-				<Sparkles class="size-4 text-purple-500" />
-				<span class="font-medium text-purple-500">Edit With AI</span>
+				<Sparkles class="size-4" />
+				<span
+					class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+				>
+					Edit With AI</span
+				>
 			</div>
 			<div
 				class="hover:bg-accent hover:text-accent-foreground relative flex cursor-default items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none select-none"
 			>
-				<div class="flex items-center gap-2">
+				<div class="flex w-full items-center gap-2">
 					<RefreshCw class="size-4" />
 					<span>Turn Into</span>
+					<ChevronRight class="text-muted-foreground ml-auto size-3" />
 				</div>
 			</div>
 			<div
 				class="hover:bg-accent hover:text-accent-foreground relative flex cursor-default items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none select-none"
 			>
-				<div class="flex items-center gap-2">
+				<div class="flex w-full items-center gap-2">
 					<Palette class="size-4" />
 					<span>Colors</span>
+					<ChevronRight class="text-muted-foreground ml-auto size-3" />
+				</div>
+			</div>
+			<div
+				class="hover:bg-accent hover:text-accent-foreground relative flex cursor-default items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none select-none"
+			>
+				<div class="flex w-full items-center gap-2">
+					<TextAlignCenter class="size-4" />
+					<span>Alignments</span>
+					<ChevronRight class="text-muted-foreground ml-auto size-3" />
 				</div>
 			</div>
 		</div>
