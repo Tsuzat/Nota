@@ -15,6 +15,7 @@
     "**/*.css"
   ],
   "exports": {
+    ".": "./src/lib/index.js",
     "./shadcn/*": "./src/lib/components/ui/*/index.js",
     "./edra/*": "./src/lib/components/edra/*",
     "./utils": "./src/lib/utils.ts",
@@ -45,9 +46,11 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
+    "@fontsource-variable/fira-code": "^5.2.7",
     "@tiptap/core": "^3.13.0",
     "@tiptap/extension-bubble-menu": "^3.13.0",
     "@tiptap/extension-code-block-lowlight": "^3.13.0",
+    "@tiptap/extension-drag-handle": "^3.13.0",
     "@tiptap/extension-highlight": "^3.13.0",
     "@tiptap/extension-image": "^3.13.0",
     "@tiptap/extension-list": "^3.13.0",
@@ -55,6 +58,7 @@
     "@tiptap/extension-subscript": "^3.13.0",
     "@tiptap/extension-superscript": "^3.13.0",
     "@tiptap/extension-table": "^3.13.0",
+    "@tiptap/extension-table-of-contents": "^3.13.0",
     "@tiptap/extension-text-align": "^3.13.0",
     "@tiptap/extension-text-style": "^3.13.0",
     "@tiptap/extension-typography": "^3.13.0",
@@ -65,6 +69,7 @@
     "@tiptap/suggestion": "^3.13.0",
     "katex": "^0.16.27",
     "lowlight": "^3.3.0",
+    "svelte-streamdown": "^3.0.1",
     "svelte-tiptap": "^3.0.1",
     "tiptap-extension-auto-joiner": "^0.1.3"
   }

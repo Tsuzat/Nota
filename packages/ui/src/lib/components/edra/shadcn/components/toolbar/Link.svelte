@@ -9,7 +9,7 @@
 	import Check from '@lucide/svelte/icons/check';
 	import { Input } from '@lib/components/ui/input';
 	import Button from '@lib/components/ui/button/button.svelte';
-	import SimpleTooltip from '@lib/components/custom/simple-tooltip.svelte';
+	import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
 
 	interface Props {
 		editor: Editor;
@@ -52,11 +52,11 @@
 	>
 		<form class="flex items-center gap-0.5" onsubmit={handleSubmit}>
 			<Input placeholder="Type or paste a link" bind:value required type="url" />
-			<SimpleTooltip content="Insert link">
+			<SimpleToolTip content="Insert link">
 				<Button type="submit" size="icon">
 					<Check />
 				</Button>
-			</SimpleTooltip>
+			</SimpleToolTip>
 		</form>
 	</Popover.Content>
 </Popover.Root>

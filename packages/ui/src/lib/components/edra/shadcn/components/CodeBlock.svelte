@@ -1,20 +1,23 @@
 <script lang="ts">
 	import { NodeViewWrapper, NodeViewContent } from 'svelte-tiptap';
 	import type { NodeViewProps } from '@tiptap/core';
-	import { Button, buttonVariants } from '@lib/components/ui/button/index.js';
-	const { node, updateAttributes, extension }: NodeViewProps = $props();
-	import * as DropdownMenu from '@lib/components/ui/dropdown-menu/index.js';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import { Button } from '@lib/components/ui/button';
+	const { editor, node, updateAttributes, extension }: NodeViewProps = $props();
 	import Check from '@lucide/svelte/icons/check';
 	import Copy from '@lucide/svelte/icons/copy';
+	import * as Select from '@lib/components/ui/select';
 
 	let preRef = $state<HTMLPreElement>();
 
 	let isCopying = $state(false);
 
-	const languages: string[] = extension.options.lowlight.listLanguages().sort();
+	const languages: string[] = $derived(extension.options.lowlight.listLanguages().sort());
 
-	let defaultLanguage = $state(node.attrs.language);
+	let defaultLanguage = $derived(node.attrs.language);
+
+	$effect(() => {
+		updateAttributes({ language: defaultLanguage });
+	});
 
 	function copyCode() {
 		if (!preRef) return;
@@ -27,43 +30,36 @@
 </script>
 
 <NodeViewWrapper class="code-wrapper" draggable={false} spellcheck={false}>
-	<div class="code-wrapper-tile" contenteditable="false">
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger
+	<div class="code-wrapper-tile justify-end print:justify-start" contenteditable="false">
+		<Select.Root type="single" name="Languages" bind:value={defaultLanguage}>
+			<Select.Trigger
 				contenteditable="false"
-				class={buttonVariants({
-					variant: 'ghost',
-					size: 'sm',
-					class: 'text-muted-foreground h-4 rounded px-1 py-2 text-xs'
-				})}
-				>{defaultLanguage}
-				<ChevronDown class="!size-2" />
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content class="h-96 w-40 overflow-auto" contenteditable="false">
+				disabled={!editor.isEditable}
+				class="dark:hover:bg-muted/50! hover:text-foreground hover:bg-muted text-muted-foreground h-6! gap-0! border-0! bg-transparent! px-1! py-0! capitalize ring-0! [&_svg]:size-2"
+			>
+				{defaultLanguage}
+			</Select.Trigger>
+			<Select.Content class="duration-300">
 				{#each languages as language (language)}
-					<DropdownMenu.Item
+					<Select.Item
+						label={language}
+						value={language}
 						contenteditable="false"
 						data-current={defaultLanguage === language}
-						class="data-[current=true]:bg-muted"
-						textValue={language}
-						onclick={() => {
-							defaultLanguage = language;
-							updateAttributes({ language: defaultLanguage });
-						}}
-					>
-						<span>{language}</span>
-						{#if defaultLanguage === language}
-							<Check class="ml-auto" />
-						{/if}
-					</DropdownMenu.Item>
+						class="data-[current=true]:bg-muted capitalize"
+					/>
 				{/each}
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
-		<Button variant="ghost" class="text-muted-foreground size-4 p-0" onclick={copyCode}>
+			</Select.Content>
+		</Select.Root>
+		<Button
+			variant="ghost"
+			class="text-muted-foreground size-6! rounded-sm p-0.5 print:hidden"
+			onclick={copyCode}
+		>
 			{#if isCopying}
-				<Check class="size-3 text-green-500" />
+				<Check class="size-4 text-green-500" />
 			{:else}
-				<Copy class="size-3" />
+				<Copy class="size-4" />
 			{/if}
 		</Button>
 	</div>

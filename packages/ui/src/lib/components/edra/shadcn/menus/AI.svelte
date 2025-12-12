@@ -24,16 +24,16 @@
 	import Mermaid from 'svelte-streamdown/mermaid';
 	import Math from 'svelte-streamdown/math';
 
-	import { callGeminiAI } from '@lib/gemini';
-	import SimpleTooltip from '@lib/components/custom/simple-tooltip.svelte';
-	import {
-		CONTINUE_WRITING_PROMPT,
-		FIX_GRAMMAR_PROMPT,
-		MAKE_LONGER_PROMPT,
-		MAKE_SHORTER_PROMPT,
-		SOLVE_PROBLEM_PROMPT,
-		SUMMARIZE_PROMPT
-	} from '@lib/gemini/commands';
+	// import { callGeminiAI } from '@lib/gemini';
+	import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
+	// import {
+	// 	CONTINUE_WRITING_PROMPT,
+	// 	FIX_GRAMMAR_PROMPT,
+	// 	MAKE_LONGER_PROMPT,
+	// 	MAKE_SHORTER_PROMPT,
+	// 	SOLVE_PROBLEM_PROMPT,
+	// 	SUMMARIZE_PROMPT
+	// } from '@lib/gemini/commands';
 	import { fade } from 'svelte/transition';
 
 	interface Props {
@@ -84,42 +84,42 @@
 			return;
 		}
 		try {
-			let prompt = '';
-			switch (type) {
-				case 'shorter':
-					prompt = MAKE_SHORTER_PROMPT(selectedText);
-					break;
-				case 'longer':
-					prompt = MAKE_LONGER_PROMPT(selectedText);
-					break;
-				case 'summarize':
-					prompt = SUMMARIZE_PROMPT(selectedText);
-					break;
-				case 'grammer':
-					prompt = FIX_GRAMMAR_PROMPT(selectedText);
-					break;
-				case 'continue':
-					prompt = CONTINUE_WRITING_PROMPT(selectedText);
-					break;
-				case 'solve':
-					prompt = SOLVE_PROBLEM_PROMPT(selectedText);
-					break;
-			}
-			aiState = AIState.Confirmation;
-			await callGeminiAI(
-				prompt,
-				(chunk) => {
-					aiResponse += chunk;
-				},
-				(error) => {
-					toast.error('Something went wrong when calling AI.', {
-						description: error.message
-					});
-					console.error(error);
-					aiState = AIState.Idle;
-					aiResponse = '';
-				}
-			);
+			// let prompt = '';
+			// switch (type) {
+			// 	case 'shorter':
+			// 		prompt = MAKE_SHORTER_PROMPT(selectedText);
+			// 		break;
+			// 	case 'longer':
+			// 		prompt = MAKE_LONGER_PROMPT(selectedText);
+			// 		break;
+			// 	case 'summarize':
+			// 		prompt = SUMMARIZE_PROMPT(selectedText);
+			// 		break;
+			// 	case 'grammer':
+			// 		prompt = FIX_GRAMMAR_PROMPT(selectedText);
+			// 		break;
+			// 	case 'continue':
+			// 		prompt = CONTINUE_WRITING_PROMPT(selectedText);
+			// 		break;
+			// 	case 'solve':
+			// 		prompt = SOLVE_PROBLEM_PROMPT(selectedText);
+			// 		break;
+			// }
+			// aiState = AIState.Confirmation;
+			// await callGeminiAI(
+			// 	prompt,
+			// 	(chunk) => {
+			// 		aiResponse += chunk;
+			// 	},
+			// 	(error) => {
+			// 		toast.error('Something went wrong when calling AI.', {
+			// 			description: error.message
+			// 		});
+			// 		console.error(error);
+			// 		aiState = AIState.Idle;
+			// 		aiResponse = '';
+			// 	}
+			// );
 		} catch (error) {
 			aiState = AIState.Idle;
 			console.error(error);
@@ -147,20 +147,20 @@
 			aiState = AIState.Confirmation;
 			const prompt = `${text}\n\n\n${inputValue}`;
 
-			await callGeminiAI(
-				prompt,
-				(chunk) => {
-					aiResponse += chunk;
-				},
-				(error) => {
-					toast.error('Something went wrong when calling AI.', {
-						description: error.message
-					});
-					console.error(error);
-					aiState = AIState.Idle;
-					aiResponse = '';
-				}
-			);
+			// await callGeminiAI(
+			// 	prompt,
+			// 	(chunk) => {
+			// 		aiResponse += chunk;
+			// 	},
+			// 	(error) => {
+			// 		toast.error('Something went wrong when calling AI.', {
+			// 			description: error.message
+			// 		});
+			// 		console.error(error);
+			// 		aiState = AIState.Idle;
+			// 		aiResponse = '';
+			// 	}
+			// );
 		} catch (error) {
 			aiState = AIState.Idle;
 			console.error(error);

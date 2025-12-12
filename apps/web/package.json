@@ -13,8 +13,7 @@
   },
   "dependencies": {
     "@lucide/svelte": "^0.561.0",
-    "@nota/ui": "workspace:*",
-    "mode-watcher": "^1.1.0"
+    "@nota/ui": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.0",

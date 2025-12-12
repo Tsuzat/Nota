@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
-    import { ModeWatcher } from 'mode-watcher';
     import {Toaster} from '@nota/ui/shadcn/sonner'
+    import {ModeWatcher} from "@nota/ui"
 	let { children } = $props();
 </script>
 

@@ -1,10 +1,8 @@
 <script lang="ts">
 	import type { Editor } from '@tiptap/core';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import GripVertical from '@lucide/svelte/icons/grip-vertical';
-	import Repeat2 from '@lucide/svelte/icons/repeat-2';
-	import Plus from '@lucide/svelte/icons/plus';
-	import { DragHandlePlugin } from '../extensions/drag-handle/index.js';
+	import { DragHandlePlugin } from '@tiptap/extension-drag-handle';
 	import { Button } from '@lib/components/ui/button/index.js';
 	import type { Node } from '@tiptap/pm/model';
 	import * as DropdownMenu from '@lib/components/ui/dropdown-menu/index.js';
@@ -13,41 +11,81 @@
 	import Clipboard from '@lucide/svelte/icons/clipboard';
 	import Delete from '@lucide/svelte/icons/trash-2';
 	import { NodeSelection } from '@tiptap/pm/state';
-	import commands from '../commands/toolbar-commands.js';
+	import Plus from '@lucide/svelte/icons/plus';
+	import { autoPlacement } from '@floating-ui/dom';
+	import Repeat2 from '@lucide/svelte/icons/repeat-2';
+	import commands from '../commands/toolbar-commands';
+	import LinkIcon from '@lucide/svelte/icons/link';
+	import Palette from '@lucide/svelte/icons/palette';
+	import Sparkles from '@lucide/svelte/icons/sparkles';
+	import { quickcolors } from '../utils';
+	import { page } from '$app/state';
+	// import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
+	import { TextAlignCenter } from '@lucide/svelte';
 
 	interface Props {
 		editor: Editor;
 	}
 
+	const PUBLIC_NOTA_FRONTEND_URL = process.env.PUBLIC_NOTA_FRONTEND_URL ?? "";
+
 	const { editor }: Props = $props();
+
+	const alignments = commands['alignment'];
 
 	let currentNode: Node | null = $state(null);
 	let currentNodePos: number = $state(-1);
 	let open = $state(false);
+
+	let currentNodeId = $derived.by(() => {
+		if (page.url.pathname.includes('local') || currentNode === null) return null;
+		return currentNode.attrs['id'] as string;
+	});
+
+	const pluginKey = 'globalDragHandle';
+	let element = $state(document.createElement('div'));
+
 	const turnIntoCommand = Object.values(commands)
 		.flat()
 		.filter((c) => c.turnInto !== undefined);
-
-	const pluginKey = 'globalDragHandle';
+	const editorElement = document.getElementById('nota-editor');
 
 	onMount(() => {
 		const plugin = DragHandlePlugin({
-			pluginKey: pluginKey,
-			dragHandleWidth: 20,
-			scrollTreshold: 100,
-			dragHandleSelector: '.drag-handle',
-			excludedTags: ['pre', 'code', 'table p'],
-			customNodes: [],
-			onMouseMove: onMouseMove
+			element,
+			pluginKey,
+			editor,
+			computePositionConfig: {
+				strategy: 'absolute',
+				middleware: [autoPlacement({ allowedPlacements: ['left', 'left-start', 'left-end'] })]
+			},
+			onNodeChange
 		});
-		editor.registerPlugin(plugin);
+		editor.registerPlugin(plugin.plugin);
+		element.addEventListener('drag', onDragHandleDrag);
+		element.addEventListener('dragstart', onDragHandleDrag);
 		return () => editor.unregisterPlugin(pluginKey);
 	});
 
-	const onMouseMove = (data: { node: Node; pos: number }) => {
+	onDestroy(() => {
+		element.removeEventListener('drag', onDragHandleDrag);
+		element.removeEventListener('dragstart', onDragHandleDrag);
+	});
+
+	const onNodeChange = (data: { editor: Editor; node: Node | null; pos: number }) => {
 		if (data.node) currentNode = data.node;
 		currentNodePos = data.pos;
 	};
+
+	function onDragHandleDrag(e: DragEvent) {
+		if (editorElement === null) return;
+		const scrollY = editorElement.scrollTop;
+		if (e.clientY < 50) {
+			editorElement.scrollTo({ top: scrollY - 30, behavior: 'smooth' });
+		} else if (editorElement.clientHeight - e.clientY < 50) {
+			editorElement.scrollTo({ top: scrollY + 30, behavior: 'smooth' });
+		}
+	}
 
 	const handleRemoveFormatting = () => {
 		const chain = editor.chain();
@@ -84,7 +122,12 @@
 			.run();
 	};
 
-	const handleAddNodeNext = () => {
+	const handleCopyNodeLink = () => {
+		const pathName = PUBLIC_NOTA_FRONTEND_URL + page.url.pathname + `#${currentNodeId}`;
+		navigator.clipboard.writeText(pathName);
+	};
+
+	const insertNode = () => {
 		if (currentNodePos === -1) return;
 		const currentNodeSize = currentNode?.nodeSize || 0;
 		const insertPos = currentNodePos + currentNodeSize;
@@ -112,21 +155,42 @@
 			.focus(focusPos)
 			.run();
 	};
+
+	function handleAIHighlight() {
+		if (currentNodePos === -1) return;
+		editor.chain().setNodeSelection(currentNodePos).setAIHighlight({ color: '#c1ecf970' }).run();
+	}
 </script>
 
-<div class="drag-handle">
-	<Button variant="ghost" class="size-6! rounded-sm p-0" onclick={() => (open = true)}>
+<div
+	bind:this={element}
+	class="z-0! flex items-center gap-0 pr-2 transition-all duration-300"
+	style="visibility: hidden;"
+>
+	<Button
+		variant="ghost"
+		class="z-0! size-7! rounded-sm opacity-60 hover:opacity-100 focus-visible:opacity-100 active:opacity-100"
+		onclick={() => (open = !open)}
+	>
 		<GripVertical />
 	</Button>
 	<DropdownMenu.Root bind:open>
 		<DropdownMenu.Trigger class="sr-only">
 			<span>Drag Handle</span>
 		</DropdownMenu.Trigger>
-		<DropdownMenu.Content>
+		<DropdownMenu.Content portalProps={{ to: editorElement ?? undefined }}>
 			<DropdownMenu.Group>
 				<DropdownMenu.GroupHeading class="text-muted-foreground capitalize">
 					{currentNode?.type.name}
 				</DropdownMenu.GroupHeading>
+				<DropdownMenu.Item onclick={handleAIHighlight}>
+					<Sparkles />
+					<span
+						class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+					>
+						Edit With AI</span
+					>
+				</DropdownMenu.Item>
 				<DropdownMenu.Sub>
 					<DropdownMenu.SubTrigger openDelay={300}>
 						<Repeat2 />
@@ -137,7 +201,8 @@
 							{@const Icon = command.icon}
 							<DropdownMenu.Item
 								onclick={() => {
-									if (currentNode && currentNodePos) command.turnInto?.(editor, currentNodePos);
+									if (currentNode && currentNodePos)
+										command.turnInto?.(editor, currentNode, currentNodePos);
 								}}
 							>
 								<Icon />
@@ -150,23 +215,105 @@
 					</DropdownMenu.SubContent>
 				</DropdownMenu.Sub>
 			</DropdownMenu.Group>
+			<DropdownMenu.Sub>
+				<DropdownMenu.SubTrigger openDelay={300}>
+					<Palette />
+					Colors
+				</DropdownMenu.SubTrigger>
+				<DropdownMenu.Content side="right" class="max-h-96 overflow-auto duration-300">
+					<DropdownMenu.Group>
+						<DropdownMenu.Label class="text-muted-foreground text-sm"
+							>Text Colors</DropdownMenu.Label
+						>
+						{#each quickcolors as color (color.label)}
+							<DropdownMenu.Item
+								title={color.label}
+								onclick={() => {
+									if (color.value === '' || color.label === 'Default')
+										editor.chain().setNodeSelection(currentNodePos).unsetColor().run();
+									else editor.chain().setNodeSelection(currentNodePos).setColor(color.value).run();
+								}}
+							>
+								<span style={`color: ${color.value};`}>A</span>
+								<span class="capitalize">{color.label}</span>
+							</DropdownMenu.Item>
+						{/each}
+					</DropdownMenu.Group>
+					<DropdownMenu.Separator />
+					<DropdownMenu.Group>
+						<DropdownMenu.Label class="text-muted-foreground text-sm"
+							>Highlight Color</DropdownMenu.Label
+						>
+						<!-- {@const currentHighlight = editor.getAttributes('highlight').color as string} -->
+						{#each quickcolors as color (color.label)}
+							<DropdownMenu.Item
+								title={color.label}
+								onclick={() => {
+									if (color.value === '' || color.label === 'Default')
+										editor.chain().setNodeSelection(currentNodePos).unsetHighlight().run();
+									else
+										editor
+											.chain()
+											.setNodeSelection(currentNodePos)
+											.setHighlight({ color: color.value })
+											.run();
+								}}
+							>
+								<span class="size-4 rounded-full border" style={`background-color: ${color.value};`}
+								></span>
+								<span class="capitalize">{color.label}</span>
+							</DropdownMenu.Item>
+						{/each}
+					</DropdownMenu.Group>
+				</DropdownMenu.Content>
+			</DropdownMenu.Sub>
+			<DropdownMenu.Sub>
+				<DropdownMenu.SubTrigger openDelay={300}>
+					<TextAlignCenter />
+					AlignMent
+				</DropdownMenu.SubTrigger>
+				<DropdownMenu.SubContent>
+					<DropdownMenu.Label>Alignments</DropdownMenu.Label>
+					{#each alignments as alignment (alignment)}
+						{@const Icon = alignment.icon}
+						<DropdownMenu.Item
+							onclick={() => {
+								if (currentNode && currentNodePos)
+									alignment.turnInto?.(editor, currentNode, currentNodePos);
+							}}
+						>
+							<Icon />
+							{alignment.tooltip}
+							<DropdownMenu.Shortcut>
+								{alignment.shortCut}
+							</DropdownMenu.Shortcut>
+						</DropdownMenu.Item>
+					{/each}
+				</DropdownMenu.SubContent>
+			</DropdownMenu.Sub>
 			<DropdownMenu.Separator />
-			<DropdownMenu.Item onclick={handleAddNodeNext}>
+			<DropdownMenu.Item onclick={insertNode}>
 				<Plus />
-				Add Node
+				Insert Next
 			</DropdownMenu.Item>
 			<DropdownMenu.Item onclick={handleRemoveFormatting}>
 				<RemoveFormatting />
 				Remove Formatting
 			</DropdownMenu.Item>
 			<DropdownMenu.Separator />
+			{#if currentNodeId}
+				<DropdownMenu.Item onclick={handleCopyNodeLink}>
+					<LinkIcon />
+					Copy Node Link
+				</DropdownMenu.Item>
+			{/if}
 			<DropdownMenu.Item onclick={handleDuplicate}>
 				<Duplicate />
-				Duplicate Node
+				Duplicate
 			</DropdownMenu.Item>
 			<DropdownMenu.Item onclick={handleCopyToClipboard}>
 				<Clipboard />
-				Copy to clipboard
+				Copy Content
 			</DropdownMenu.Item>
 			<DropdownMenu.Separator />
 			<DropdownMenu.Item onclick={handleDelete}>

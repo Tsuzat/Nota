@@ -1,39 +1,28 @@
 <script lang="ts">
-	import commands from '../../commands/toolbar-commands.js';
+	import commands from '../../commands/toolbar-commands';
 	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import type { EdraToolbarProps, ShouldShowProps } from '../../types.js';
+	import type { EdraToolbarProps, ShouldShowProps } from '../../types';
 
-	import { cn } from '@lib/utils.js';
+	import { cn } from '@lib/utils';
 	import { isTextSelection } from '@tiptap/core';
 	import Alignment from '../components/toolbar/Alignment.svelte';
 	import FontSize from '../components/toolbar/FontSize.svelte';
 	import Headings from '../components/toolbar/Headings.svelte';
 	import QuickColors from '../components/toolbar/QuickColors.svelte';
 	import ToolBarIcon from '../components/ToolBarIcon.svelte';
+	import Link from '../components/toolbar/Link.svelte';
+	import Lists from '../components/toolbar/Lists.svelte';
+	import Button from '@lib/components/ui/button/button.svelte';
+	import { addAIHighlight } from '../../extensions/AIHighLight';
 
 	const {
 		editor,
 		class: className,
-		excludedCommands = ['undo-redo', 'media', 'lists', 'table'],
+		excludedCommands = ['undo-redo', 'media', 'table', 'math'],
 		children
 	}: EdraToolbarProps = $props();
 
 	const toolbarCommands = Object.keys(commands).filter((key) => !excludedCommands?.includes(key));
-
-	let isDragging = $state(false);
-
-	editor.view.dom.addEventListener('dragstart', () => {
-		isDragging = true;
-	});
-
-	editor.view.dom.addEventListener('drop', () => {
-		isDragging = true;
-
-		// Allow some time for the drop action to complete before re-enabling
-		setTimeout(() => {
-			isDragging = false;
-		}, 100); // Adjust delay if needed
-	});
 
 	function shouldShow(props: ShouldShowProps) {
 		if (!props.editor.isEditable) return false;
@@ -47,6 +36,12 @@
 		if (editor.isActive('video-placeholder')) return false;
 		if (editor.isActive('audio-placeholder')) return false;
 		if (editor.isActive('iframe-placeholder')) return false;
+		if (editor.isActive('image')) return false;
+		if (editor.isActive('video')) return false;
+		if (editor.isActive('iframe')) return false;
+		if (editor.isActive('audio')) return false;
+		if (editor.isActive('blockMath') || editor.isActive('inlineMath')) return false;
+		if (editor.isActive('ai-highlight')) return false;
 		const {
 			state: {
 				doc,
@@ -69,7 +64,7 @@
 		if (empty || isEmptyTextBlock || !editor.isEditable) {
 			return false;
 		}
-		return !isDragging && !editor.state.selection.empty;
+		return !editor.state.selection.empty;
 	}
 
 	const isTableGripSelected = (node: HTMLElement) => {
@@ -88,27 +83,47 @@
 	};
 </script>
 
+<!-- !ISSUE: APPLYING BACKDROP FILTER MESSES WITH POPOVERS IN LINK AND QUICKCOLORS, SO DO NOT APPLY IT -->
 <BubbleMenu
 	{editor}
-	pluginKey="link-bubble-menu"
+	pluginKey="edra-bubble-menu"
 	{shouldShow}
 	class={cn(
-		'edra-bubble-menu bg-popover flex h-fit w-fit items-center rounded-lg p-0.5',
+		'edra-bubble-menu bg-popover z-50! flex h-fit w-fit items-center gap-0.5 rounded-lg border p-0',
 		className
 	)}
+	options={{
+		shift: true,
+		autoPlacement: {
+			allowedPlacements: ['top', 'top-end', 'top-start']
+		},
+		strategy: 'absolute',
+		scrollTarget: document.getElementById('nota-editor') ?? undefined
+	}}
 >
 	{#if children}
 		{@render children()}
 	{:else}
+			<Button variant="ghost" onclick={() => addAIHighlight(editor)}>
+				<span
+					class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+				>
+					Ask AI</span
+				>
+			</Button>
 		{#each toolbarCommands.filter((c) => !excludedCommands?.includes(c)) as cmd (cmd)}
 			{#if cmd === 'headings'}
 				<Headings {editor} />
 			{:else if cmd === 'alignment'}
 				<Alignment {editor} />
+			{:else if cmd === 'lists'}
+				<Lists {editor} />
 			{:else}
 				{@const commandGroup = commands[cmd]}
 				{#each commandGroup as command (command)}
-					{#if command.name === 'paragraph'}
+					{#if command.name === 'link'}
+						<Link {editor} />
+					{:else if command.name === 'paragraph'}
 						<span></span>
 					{:else}
 						<ToolBarIcon {editor} {command} />
@@ -116,6 +131,7 @@
 				{/each}
 			{/if}
 		{/each}
+		<ToolBarIcon {editor} command={commands.math[0]} />
 		<FontSize {editor} />
 		<QuickColors {editor} />
 	{/if}

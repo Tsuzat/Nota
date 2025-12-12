@@ -1,10 +1,10 @@
 <script lang="ts">
-	import Button from '@lib/components/ui/button/button.svelte';
-	import * as DropdownMenu from '@lib/components/ui/dropdown-menu/index.js';
 	import { Editor } from '@tiptap/core';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import * as DropdownMenu from '@lib/components/ui/dropdown-menu';
 	import { cn } from '@lib/utils.js';
 	import EdraToolTip from '../EdraToolTip.svelte';
+	import { buttonVariants } from '@lib/components/ui/button';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 
 	interface Props {
 		class?: string;
@@ -32,22 +32,34 @@
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger>
-		<EdraToolTip tooltip="Font Size">
-			<Button variant="ghost" class={cn('gap-0.5 !px-2', className)}>
-				<span>{currentLabel}</span>
-				<ChevronDown class="text-muted-foreground !size-2" />
-			</Button>
-		</EdraToolTip>
-	</DropdownMenu.Trigger>
-	<DropdownMenu.Content class="h-fit w-fit" portalProps={{ disabled: true, to: undefined }}>
+	<EdraToolTip tooltip="Font Size">
+		<DropdownMenu.Trigger
+			class={buttonVariants({
+				variant: 'ghost',
+				size: 'sm',
+				class: cn(
+					'gap-0 p-0',
+					'text-primary! hover:bg-accent dark:hover:bg-accent/50! border-0 bg-transparent! ring-0 [&_svg]:size-2',
+					className
+				)
+			})}
+		>
+			<span>{currentLabel}</span>
+			<ChevronDown class="text-muted-foreground size-2!" />
+		</DropdownMenu.Trigger>
+	</EdraToolTip>
+	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
+		<DropdownMenu.Label>Font Size</DropdownMenu.Label>
 		{#each FONT_SIZE as fontSize (fontSize)}
 			<DropdownMenu.Item
 				onclick={() => {
 					editor.chain().focus().setFontSize(fontSize.value).run();
 				}}
-				style={`font-size: ${fontSize.value}`}>{fontSize.label}</DropdownMenu.Item
-			>
+				>{fontSize.label}
+				<DropdownMenu.Shortcut>
+					{fontSize.value}
+				</DropdownMenu.Shortcut>
+			</DropdownMenu.Item>
 		{/each}
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

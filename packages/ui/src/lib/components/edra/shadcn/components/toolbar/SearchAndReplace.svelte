@@ -6,12 +6,11 @@
 	import { Input } from '@lib/components/ui/input/index.js';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import CaseSensitive from '@lucide/svelte/icons/case-sensitive';
 	import Replace from '@lucide/svelte/icons/replace';
 	import ReplaceAll from '@lucide/svelte/icons/replace-all';
-	import { cn } from '@lib/utils.js';
+	import { cn, getKeyboardShortcut } from '@lib/utils.js';
 	import { slide } from 'svelte/transition';
 	import EdraToolTip from '../EdraToolTip.svelte';
 
@@ -67,11 +66,22 @@
 		searchText = '';
 		replaceText = '';
 		caseSensitive = false;
-		editor.commands.resetIndex();
 	};
 
 	const replaceAll = () => editor.commands.replaceAll();
+
+	function handleKeyDown(e: KeyboardEvent) {
+		if (e.key === 'Escape' && open) {
+			e.preventDefault();
+			open = false;
+		} else if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+			e.preventDefault();
+			open = true;
+		}
+	}
 </script>
+
+<svelte:document onkeydown={handleKeyDown} />
 
 <Popover.Root
 	bind:open
@@ -83,10 +93,9 @@
 	}}
 >
 	<Popover.Trigger>
-		<EdraToolTip tooltip="Search and Replace">
-			<Button variant="ghost" size="icon" class="gap-0.5">
+		<EdraToolTip tooltip="Search and Replace" shortCut={getKeyboardShortcut('F', true)}>
+			<Button variant="ghost" size="icon" class="size-7">
 				<Search />
-				<ChevronDown class="text-muted-foreground !size-2" />
 			</Button>
 		</EdraToolTip>
 	</Popover.Trigger>
@@ -97,7 +106,7 @@
 		<Button
 			variant="ghost"
 			size="icon"
-			class={cn('transition-transform', showMore && 'bg-muted rotate-90')}
+			class={cn('size-7 transition-transform', showMore && 'bg-muted rotate-90')}
 			onclick={() => (showMore = !showMore)}
 			title="Show More"
 		>
@@ -109,7 +118,7 @@
 					placeholder="Search..."
 					bind:value={searchText}
 					oninput={() => updateSearchTerm()}
-					class="w-40"
+					class="w-48"
 				/>
 				<span class="text-muted-foreground text-sm"
 					>{searchCount > 0 ? searchIndex + 1 : 0}/{searchCount}
@@ -118,7 +127,7 @@
 					<Button
 						variant="ghost"
 						size="icon"
-						class={cn(caseSensitive && 'bg-muted')}
+						class={cn('size-7', caseSensitive && 'bg-muted')}
 						onclick={() => {
 							caseSensitive = !caseSensitive;
 							updateSearchTerm();
@@ -128,12 +137,12 @@
 					</Button>
 				</EdraToolTip>
 				<EdraToolTip tooltip="Go to previous">
-					<Button variant="ghost" size="icon" onclick={previous} title="Previous">
+					<Button variant="ghost" size="icon" class="size-7" onclick={previous} title="Previous">
 						<ArrowLeft />
 					</Button>
 				</EdraToolTip>
 				<EdraToolTip tooltip="Go to next">
-					<Button variant="ghost" size="icon" onclick={next} title="Next">
+					<Button variant="ghost" size="icon" class="size-7" onclick={next} title="Next">
 						<ArrowRight />
 					</Button>
 				</EdraToolTip>
@@ -144,15 +153,15 @@
 						placeholder="Replace..."
 						bind:value={replaceText}
 						oninput={() => updateSearchTerm()}
-						class="w-40"
+						class="w-48"
 					/>
 					<EdraToolTip tooltip="Replace">
-						<Button variant="ghost" size="icon" onclick={replace}>
+						<Button variant="ghost" size="icon" class="size-7" onclick={replace}>
 							<Replace />
 						</Button>
 					</EdraToolTip>
 					<EdraToolTip tooltip="Replace All">
-						<Button variant="ghost" size="icon" onclick={replaceAll}>
+						<Button variant="ghost" size="icon" class="size-7" onclick={replaceAll}>
 							<ReplaceAll />
 						</Button>
 					</EdraToolTip>
