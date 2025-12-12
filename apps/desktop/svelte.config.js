@@ -23,6 +23,7 @@ const config = {
   alias: {
     "@lib": "../../packages/ui/src/lib",
     "@lib/*": "../../packages/ui/src/lib/*",
+    "$lib/*": "./src/lib/*",
   },
 };
 

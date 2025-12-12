@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "nota",
-  "version": "0.1.0",
-  "identifier": "com.tsuzat.nota",
+  "productName": "Nota",
+  "version": "0.9.40-beta",
+  "identifier": "nota.tsuzat.com",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -12,24 +12,58 @@
   "app": {
     "windows": [
       {
-        "title": "nota",
+        "title": "Nota - A note taking app",
+        "url": "home",
+        "label": "main",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "minHeight": 400,
+        "minWidth": 500,
+        "visible": true,
+        "dragDropEnabled": false,
+        "zoomHotkeysEnabled": true,
+        "hiddenTitle": true,
+        "titleBarStyle": "Overlay",
+        "trafficLightPosition": {
+          "x": 14,
+          "y": 24
+        }
       }
     ],
     "security": {
-      "csp": null
+      "csp": "asset: http://asset.localhost",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      }
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["app", "dmg", "appimage", "nsis", "rpm", "deb"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVDMkVBM0Y1MjBFMDBBODcKUldTSEN1QWc5YU11N0I5NmxIclFXWTlBc1dBR0cyKzdVSnV4N002TVgxKzNjb0Y4bkR1eHl6ek8K",
+      "endpoints": [
+        "https://github.com/Tsuzat/Nota/releases/latest/download/latest.json"
+      ]
+    },
+    "fs": {
+      "requireLiteralLeadingDot": false
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": ["nota", "app.nota.ink"]
+      }
+    }
   }
 }

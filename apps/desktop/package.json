@@ -16,9 +16,19 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@google/genai": "^1.33.0",
+    "@nota/ui": "workspace:*",
+    "@supabase/supabase-js": "^2.87.1",
     "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-deep-link": "~2",
+    "@tauri-apps/plugin-dialog": "~2",
+    "@tauri-apps/plugin-fs": "~2",
     "@tauri-apps/plugin-opener": "^2",
-    "@nota/ui": "workspace:*"
+    "@tauri-apps/plugin-os": "~2",
+    "@tauri-apps/plugin-process": "~2",
+    "@tauri-apps/plugin-sql": "~2",
+    "@tauri-apps/plugin-updater": "~2",
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",

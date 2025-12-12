@@ -19,6 +19,8 @@
   ],
   "exports": {
     ".": "./src/lib/index.js",
+    "./custom/*": "./src/lib/components/custom/*",
+    "./icons/*": "./src/lib/icons/*",
     "./shadcn/*": "./src/lib/components/ui/*/index.js",
     "./edra/*": "./src/lib/components/edra/*",
     "./utils": "./src/lib/utils.ts",
