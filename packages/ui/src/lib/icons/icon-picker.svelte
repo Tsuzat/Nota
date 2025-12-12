@@ -1,6 +1,6 @@
 <script lang="ts">
-import * as Popover from '$lib/components/ui/popover';
-import * as Tabs from '$lib/components/ui/tabs';
+import * as Popover from '@lib/components/ui/popover';
+import * as Tabs from '@lib/components/ui/tabs';
 import type { Snippet } from 'svelte';
 import EmojiPicker from './emoji-picker.svelte';
 import LucideIcons from './lucide-icons.svelte';

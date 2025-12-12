@@ -1,21 +1,20 @@
 <script lang="ts">
-import * as Dialog from '$lib/components/ui/dialog';
+import * as Dialog from '@nota/ui/shadcn/dialog';
 import { getGlobalSettings } from './constants.svelte';
-import PaintbrushIcon from '@lucide/svelte/icons/paintbrush';
-import { Pen, Sparkles, User } from '@lucide/svelte';
-import * as Tabs from '$lib/components/ui/tabs';
+import * as Tabs from '@nota/ui/shadcn/tabs';
 import Account from './components/account.svelte';
 import Editor from './components/editor.svelte';
 import AI from './components/ai.svelte';
 import Appearance from './components/appearance.svelte';
+import { icons } from '@nota/ui/icons/index.js';
 
 const useSettings = getGlobalSettings();
 
 const nav = [
-  { name: 'Account', icon: User, component: Account },
-  { name: 'Editor', icon: Pen, component: Editor },
-  { name: 'AI', icon: Sparkles, component: AI },
-  { name: 'Appearance', icon: PaintbrushIcon, component: Appearance },
+  { name: 'Account', icon: icons.User, component: Account },
+  { name: 'Editor', icon: icons.Pen, component: Editor },
+  { name: 'AI', icon: icons.Sparkles, component: AI },
+  { name: 'Appearance', icon: icons.Paintbrush, component: Appearance },
 ];
 
 function handleKeydown(e: KeyboardEvent) {

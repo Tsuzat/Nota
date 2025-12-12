@@ -1,16 +1,14 @@
 <script lang="ts">
-import IconPicker from '$lib/components/icons/icon-picker.svelte';
-import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-import { Button, buttonVariants } from '$lib/components/ui/button';
-import * as Dialog from '$lib/components/ui/dialog';
-import { Input } from '$lib/components/ui/input';
+import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import * as Dialog from '@nota/ui/shadcn/dialog';
+import { Input } from '@nota/ui/shadcn/input';
 import { type Snippet } from 'svelte';
-import { toast } from 'svelte-sonner';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import Loader from '@lucide/svelte/icons/loader';
-import { useCurrentUserWorkspaceContext } from '../../user-workspace/userworkspace.svelte';
+import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
+import { toast } from '@lib/components/ui/sonner';
 
 interface Props {
   open?: boolean;
@@ -143,7 +141,7 @@ function handleKeydown(event: KeyboardEvent) {
 			</div>
 			<Button type="submit">
 				{#if loading}
-					<Loader class="animate-spin" />
+					<icons.Loader class="animate-spin" />
 				{/if}
 				Create Workspace
 			</Button>

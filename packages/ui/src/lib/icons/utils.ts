@@ -1,29 +1,29 @@
 export interface IconData {
-  iconType: "emoji" | "lucide" | "url";
+  iconType: 'emoji' | 'lucide' | 'url';
   iconData: string;
 }
 
 export const getIconData = (icon: string): IconData => {
-  switch (icon.split(":")[0]) {
-    case "emoji":
+  switch (icon.split(':')[0]) {
+    case 'emoji':
       return {
-        iconType: "emoji",
-        iconData: icon.split(":")[1],
+        iconType: 'emoji',
+        iconData: icon.split(':')[1],
       };
-    case "lucide":
+    case 'lucide':
       return {
-        iconType: "lucide",
-        iconData: icon.split(":")[1],
+        iconType: 'lucide',
+        iconData: icon.split(':')[1],
       };
-    case "url":
+    case 'url':
       return {
-        iconType: "url",
-        iconData: icon.replace("url:", ""),
+        iconType: 'url',
+        iconData: icon.replace('url:', ''),
       };
     default:
       return {
-        iconType: "emoji",
-        iconData: "😊",
+        iconType: 'emoji',
+        iconData: '😊',
       };
   }
 };

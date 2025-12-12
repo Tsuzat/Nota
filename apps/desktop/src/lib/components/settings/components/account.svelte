@@ -1,10 +1,10 @@
 <script lang="ts">
 import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
-import OAuth from '$lib/components/custom/global-signin/oauth.svelte';
-import * as Avatar from '$lib/components/ui/avatar';
-import Button from '$lib/components/ui/button/button.svelte';
+import OAuth from '$lib/components/global-signin/oauth.svelte';
+import * as Avatar from '@nota/ui/shadcn/avatar';
+import { Button } from '@nota/ui/shadcn/button';
 import { auth } from '$lib/supabase';
-import { toast } from 'svelte-sonner';
+import { toast } from '@lib/components/ui/sonner';
 
 const useSessionAndUser = getSessionAndUserContext();
 

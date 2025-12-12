@@ -62,7 +62,7 @@ async function restoreNote(note: LocalNote | CloudNote) {
 							title="Restore Note"
 							variant="ghost"
 							onclick={() => restoreNote(note)}
-							class="size-7!"
+							size="icon-sm"
 						>
 							<icons.RotateCcw />
 						</Button>
@@ -72,7 +72,7 @@ async function restoreNote(note: LocalNote | CloudNote) {
 							title="Delete Permanently"
 							variant="ghost"
 							onclick={() => deleteNote(note)}
-							class="size-7!"
+							size="icon-sm"
 						>
 							<icons.Trash2 />
 						</Button>

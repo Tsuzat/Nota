@@ -1,31 +1,24 @@
 <script lang="ts">
-import { Button, buttonVariants } from '$lib/components/ui/button';
-import * as Card from '$lib/components/ui/card';
-import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-import { cn, importNotes, ISMACOS, ISTAURI, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
-import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import * as Card from '@nota/ui/shadcn/card';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import {  importNotes, ISMACOS, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
+import {IconRenderer,IconPicker, icons} from '@nota/ui/icons/index.js';
 import { goto } from '$app/navigation';
-import Plus from '@lucide/svelte/icons/plus';
-import MoreVertical from '@lucide/svelte/icons/more-vertical';
-import Trash2 from '@lucide/svelte/icons/trash-2';
-import Clock from '@lucide/svelte/icons/clock';
-import ArrowDownToLine from '@lucide/svelte/icons/arrow-down-to-line';
-import CalendarDays from '@lucide/svelte/icons/calendar-days';
-import Download from '@lucide/svelte/icons/download';
 import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
-import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
-import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
-import IconPicker from '$lib/components/icons/icon-picker.svelte';
-import Separator from '$lib/components/ui/separator/separator.svelte';
-import { useSidebar, SidebarTrigger } from '$lib/components/ui/sidebar';
+import AppLogoMenu from '$lib/components/app-menu.svelte';
+import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
+import WindowsButtons from '$lib/components/windows-buttons.svelte';
+import {Separator} from '@nota/ui/shadcn/separator'
+import { useSidebar, SidebarTrigger } from '@nota/ui/shadcn/sidebar';
 import { ask } from '@tauri-apps/plugin-dialog';
-import NewNotes from '$lib/components/custom/dialogs/local/new-notes.svelte';
-import { toast } from 'svelte-sonner';
+import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { DB } from '$lib/local/db';
-import SimpleTooltip from '$lib/components/custom/simple-tooltip.svelte';
+import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+  import { toast } from '@lib/components/ui/sonner/index.js';
+  import { cn } from '@lib/utils.js';
 
 let { data } = $props();
 
@@ -38,7 +31,7 @@ const notes = $derived(localNotes.getNotes().filter((n) => String(n.workspace) =
 let openNewNote = $state(false);
 
 function openNote(note: LocalNote) {
-  goto(resolve('/(nota)/(local)/local-note-[id]', { id: String(note.id) }));
+  goto(resolve('/(local)/local-note-[id]', { id: note.id }));
 }
 
 async function updateIcon(icon: string) {
@@ -105,7 +98,7 @@ async function importNote() {
 				'z-20 ml-18 flex items-center gap-2 px-3',
 				ISMACOS && !useSidebar().open && 'ml-18',
 				ISWINDOWS && !useSidebar().open && 'ml-0',
-				(ISMACOS || ISWINDOWS) && ISTAURI && useSidebar().open && 'md:ml-0'
+				useSidebar().open && 'md:ml-0'
 			)}
 		>
 			{#if ISWINDOWS && !useSidebar().open}
@@ -146,13 +139,13 @@ async function importNote() {
 				<div class="text-muted-foreground flex items-center gap-4">
 					<SimpleTooltip content="Created At">
 						<Button variant="ghost" size="sm">
-							<CalendarDays />
+							<icons.CalendarDays />
 							{timeAgo(workspace.created_at)}
 						</Button>
 					</SimpleTooltip>
 					<SimpleTooltip content="Last Updated At">
 						<Button variant="ghost" size="sm">
-							<Clock />
+							<icons.Clock />
 							{timeAgo(workspace.updated_at)}
 						</Button>
 					</SimpleTooltip>
@@ -161,7 +154,7 @@ async function importNote() {
 			<div class="ml-auto">
 				<SimpleTooltip content="Import Note from JSON file">
 					<Button variant="outline" onclick={importNote}>
-						<Download />
+						<icons.Download />
 						<span class="hidden sm:block">Import Note</span>
 					</Button>
 				</SimpleTooltip>
@@ -175,7 +168,7 @@ async function importNote() {
 				<div
 					class="bg-background mb-2 flex size-10 items-center justify-center rounded-full shadow-sm transition-all duration-500 group-hover:scale-110"
 				>
-					<Plus class="text-primary size-5" />
+					<icons.Plus class="text-primary size-5" />
 				</div>
 				<span class="text-muted-foreground font-medium">Create New Note</span>
 			</Button>
@@ -204,12 +197,12 @@ async function importNote() {
 										size="icon"
 										class="size-8 opacity-0 transition-opacity group-hover:opacity-100"
 									>
-										<MoreVertical class="size-4" />
+										<icons.MoveVertical class="size-4" />
 									</Button>
 								</DropdownMenu.Trigger>
 								<DropdownMenu.Content>
 									<DropdownMenu.Item onclick={() => exportNote(note)}>
-										<ArrowDownToLine />
+										<icons.ArrowDownToLine />
 										Export Notes
 									</DropdownMenu.Item>
 									<DropdownMenu.Sub>
@@ -231,14 +224,14 @@ async function importNote() {
 										variant="destructive"
 										onclick={() => localNotes.trashNote(note)}
 									>
-										<Trash2 class="mr-2 size-4" />
+										<icons.Trash2 class="mr-2 size-4" />
 										Trash Note
 									</DropdownMenu.Item>
 									<DropdownMenu.Item
 										variant="destructive"
 										onclick={() => localNotes.deleteNote(note)}
 									>
-										<Trash2 class="mr-2 size-4" />
+										<icons.Trash2 class="mr-2 size-4" />
 										Delete Note
 									</DropdownMenu.Item>
 								</DropdownMenu.Content>
@@ -249,7 +242,7 @@ async function importNote() {
 						<div class="absolute right-4 bottom-4 left-4">
 							<div class="text-muted-foreground flex items-center justify-between text-xs">
 								<div class="flex items-center gap-1">
-									<Clock class="size-3" />
+									<icons.Clock class="size-3" />
 									{timeAgo(note.updated_at)}
 								</div>
 							</div>

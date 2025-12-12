@@ -1,6 +1,5 @@
 <script lang="ts">
-  import  { icons } from ".";
-
+import { icons } from '.';
 
 interface Props {
   icon: keyof typeof icons;

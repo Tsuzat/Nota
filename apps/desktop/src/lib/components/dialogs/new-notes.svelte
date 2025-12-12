@@ -1,20 +1,18 @@
 <script lang="ts">
-import IconPicker from '$lib/components/icons/icon-picker.svelte';
-import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-import { Button, buttonVariants } from '$lib/components/ui/button';
-import * as Dialog from '$lib/components/ui/dialog';
-import { Input } from '$lib/components/ui/input';
+import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import * as Dialog from '@nota/ui/shadcn/dialog';
+import { Input } from '@nota/ui/shadcn/input';
 import { type Snippet } from 'svelte';
-import { toast } from 'svelte-sonner';
 import { type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import Loader from '@lucide/svelte/icons/loader';
-import { Checkbox } from '$lib/components/ui/checkbox';
-import { Label } from '$lib/components/ui/label';
+import { Checkbox } from '@nota/ui/shadcn/checkbox';
+import { Label } from '@nota/ui/shadcn/label';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import type { CloudWorkspace } from '$lib/supabase/db/cloudworkspace.svelte';
-import { useCurrentUserWorkspaceContext } from '../../user-workspace/userworkspace.svelte';
+import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
+import { toast } from '@lib/components/ui/sonner';
 
 interface Props {
   open?: boolean;
@@ -94,7 +92,6 @@ function handleKeydown(event: KeyboardEvent) {
 	<Dialog.Content
 		class="w-96"
 		showCloseButton={false}
-		portalProps={{ disabled: true, children: undefined }}
 	>
 		<Dialog.Header>
 			<Dialog.Title>New Notes</Dialog.Title>
@@ -120,7 +117,7 @@ function handleKeydown(event: KeyboardEvent) {
 			</div>
 			<Button type="submit">
 				{#if loading}
-					<Loader class="animate-spin" />
+					<icons.Loader class="animate-spin" />
 				{/if}
 				Create Note
 			</Button>

@@ -1,24 +1,18 @@
 <script lang="ts">
-import * as Command from '$lib/components/ui/command';
+import * as Command from '@nota/ui/shadcn/command';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
-import House from '@lucide/svelte/icons/house';
-import StarIcon from '@lucide/svelte/icons/star';
-import Trash2Icon from '@lucide/svelte/icons/trash-2';
-import Monitor from '@lucide/svelte/icons/monitor';
-import Cloud from '@lucide/svelte/icons/cloud';
-import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { getGlobalSearch } from './constants.svelte';
 import { goto } from '$app/navigation';
-import SimpleTooltip from '../simple-tooltip.svelte';
+import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { resolve } from '$app/paths';
 import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import { useCloudUserWorkspaces, type CloudUserWorkspace } from '$lib/supabase/db/clouduserworkspaces.svelte';
-import { toast } from 'svelte-sonner';
-import { CircleCheck } from '@lucide/svelte';
+import { toast } from '@lib/components/ui/sonner';
 
 const search = getGlobalSearch();
 const currentUserWorkspace = useCurrentUserWorkspaceContext();
@@ -55,7 +49,7 @@ async function selectLocalUserWorkspace(workspace: LocalUserWorkspace) {
   }
   const id = toast.loading('Changing User Workspace to ' + workspace.name);
   try {
-    goto(resolve('/home'));
+    goto(resolve('/'));
     currentUserWorkspace.setCurrentUserWorkspace(workspace);
     await localWorkspaces.fetchWorkspaces(workspace.id);
     await localNotes.fetchNotes(workspace.id);
@@ -74,7 +68,7 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
   }
   const id = toast.loading('Switching to cloud workspace');
   try {
-    goto(resolve('/home'));
+    goto(resolve('/'));
     currentUserWorkspace.setCurrentUserWorkspace(workspace);
     toast.loading('Loading Workspaces', { id });
     await cloudWorkspaces.fetchWorkspaces(workspace);
@@ -99,7 +93,7 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 		<Command.Empty>No results found.</Command.Empty>
 		<Command.Group heading="Suggestions">
 			<Command.Item>
-				<House class="mr-2 size-4" />
+				<icons.House class="mr-2 size-4" />
 				<span>Home</span>
 			</Command.Item>
 		</Command.Group>
@@ -118,11 +112,11 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 					<Command.Shortcut class="flex gap-1">
 						{#if activeWorkspace?.id === localUserWorkspace.id}
 							<SimpleTooltip content="Current Active Workspace">
-								<CircleCheck class="text-primary size-4" />
+								<icons.CircleCheck class="text-primary size-4" />
 							</SimpleTooltip>
 						{/if}
 						<SimpleTooltip content="Local User Workspace">
-							<Monitor class="size-4" />
+							<icons.Monitor class="size-4" />
 						</SimpleTooltip>
 					</Command.Shortcut>
 				</Command.Item>
@@ -140,11 +134,11 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 					<Command.Shortcut class="flex gap-1">
 						{#if activeWorkspace?.id === cloudUserWorkspace.id}
 							<SimpleTooltip content="Current Active Workspace">
-								<CircleCheck class="text-primary size-4" />
+								<icons.CircleCheck class="text-primary size-4" />
 							</SimpleTooltip>
 						{/if}
 						<SimpleTooltip content="Cloud User Workspace">
-							<Cloud class="size-4" />
+							<icons.Cloud class="size-4" />
 						</SimpleTooltip>
 					</Command.Shortcut>
 				</Command.Item>
@@ -158,9 +152,9 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 				{@const onselect = () => {
 					goto(
 						resolve(
-							isLocal ? '/(nota)/(local)/local-workspace-[id]' : '/(nota)/(cloud)/workspace-[id]',
+							isLocal ? '/(local)/local-workspace-[id]' : '/(cloud)/workspace-[id]',
 							{
-								id: String(workspace.id)
+								id: workspace.id
 							}
 						)
 					);
@@ -186,8 +180,8 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 			{#each notes as note (note.id)}
 				{@const onselect = () => {
 					goto(
-						resolve(isLocal ? '/(nota)/(local)/local-note-[id]' : '/(nota)/(cloud)/note-[id]', {
-							id: String(note.id)
+						resolve(isLocal ? '/(local)/local-note-[id]' : '/(cloud)/note-[id]', {
+							id: note.id
 						})
 					);
 					search.open = false;
@@ -198,12 +192,12 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 					<Command.Shortcut class="flex gap-1">
 						{#if note.favorite}
 							<SimpleTooltip content="Favorite">
-								<StarIcon class="size-3 fill-amber-500 text-amber-500" />
+								<icons.Star class="size-3 fill-amber-500 text-amber-500" />
 							</SimpleTooltip>
 						{/if}
 						{#if note.trashed}
 							<SimpleTooltip content="Trash">
-								<Trash2Icon class="size-3" />
+								<icons.Trash2 class="size-3" />
 							</SimpleTooltip>
 						{/if}
 					</Command.Shortcut>

@@ -1,8 +1,8 @@
 <script lang="ts">
 import LucideRenderer from './lucide-renderer.svelte';
 import { getIconData, type IconData } from './utils';
-import { cn } from '$lib/utils';
-  import { icons } from '.';
+import { cn } from '@lib/utils';
+import { icons } from '.';
 
 const { icon, class: className }: { icon: string; class?: string } = $props();
 

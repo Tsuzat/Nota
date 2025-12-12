@@ -1,26 +1,26 @@
 <script lang="ts">
-import AppLogoMenu from '$lib/components/custom/app-logo-menu.svelte';
-import BackAndForthButtons from '$lib/components/custom/back-and-forth-buttons.svelte';
-import NavActions from '$lib/components/custom/side-bar/nav-actions.svelte';
-import WindowsButtons from '$lib/components/custom/windows-buttons.svelte';
-import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '$lib/components/edra/shadcn';
-import IconPicker from '$lib/components/icons/icon-picker.svelte';
-import IconRenderer from '$lib/components/icons/icon-renderer.svelte';
-import { buttonVariants } from '$lib/components/ui/button/button.svelte';
-import { Separator } from '$lib/components/ui/separator';
-import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
+import AppLogoMenu from '$lib/components/app-menu.svelte';
+import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
+import NavActions from '$lib/components/sidebar/nav-actions.svelte';
+import WindowsButtons from '$lib/components/windows-buttons.svelte';
+import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
+import {IconPicker, IconRenderer, icons} from '@nota/ui/icons/index.js';
+import { buttonVariants } from '@nota/ui/shadcn/button';
+import { Separator } from '@nota/ui/shadcn/separator';
+import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-import { cn, FileType, ISMACOS, ISTAURI, ISWINDOWS } from '$lib/utils';
-import Loader from '@lucide/svelte/icons/loader';
-import { type Content, type Editor } from '@tiptap/core';
+import { ISMACOS, ISWINDOWS } from '$lib/utils';
+import { type Content, type Editor } from '@nota/ui/edra/types.js';
 import { onDestroy, onMount } from 'svelte';
-import { toast } from 'svelte-sonner';
-import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/utils';
-import SearchAndReplace from '$lib/components/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
+import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/util.js';
+import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { beforeNavigate, goto } from '$app/navigation';
 import { DB } from '$lib/local/db.js';
 import { resolve } from '$app/paths';
-import { getGlobalSettings } from '$lib/components/custom/settings/constants.svelte.js';
+import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js';
+  import { toast } from '@lib/components/ui/sonner/index.js';
+  import type { FileType } from '@lib/components/edra/utils.js';
+  import { cn } from '@lib/utils.js';
 
 const sidebar = useSidebar();
 
@@ -45,13 +45,13 @@ async function loadData(id: string) {
   note = localNotes.getNotes().find((n) => n.id.toString() === id);
   if (note === undefined) {
     toast.error(`Notes with id ${id} not found`);
-    return goto(resolve('/home'));
+    return goto(resolve('/'));
   }
   try {
     const data = await DB.select<{ content: string }[]>('SELECT content FROM notes WHERE id = $1', [id]);
     if (data.length === 0) {
       toast.error(`Notes content with id ${id} not found`);
-      return goto(resolve('/home'));
+      return goto(resolve('/'));
     }
     content = JSON.parse(data[0].content) as Content;
   } catch (error) {
@@ -159,7 +159,7 @@ function handleKeydown(event: KeyboardEvent) {
 {#if isLoading}
 	<div class="flex size-full flex-col items-center justify-center">
 		<div class="flex items-center gap-4">
-			<Loader class="text-primary animate-spin" />
+			<icons.Loader class="text-primary animate-spin" />
 			<h4>Loading Local Notes</h4>
 		</div>
 	</div>
@@ -170,7 +170,7 @@ function handleKeydown(event: KeyboardEvent) {
 				'z-20 ml-18 flex items-center gap-2 px-3',
 				ISMACOS && !sidebar.open && 'ml-18',
 				ISWINDOWS && !sidebar.open && 'ml-0',
-				(ISMACOS || ISWINDOWS) && ISTAURI && sidebar.open && 'md:ml-0'
+				sidebar.open && 'md:ml-0'
 			)}
 		>
 			{#if ISWINDOWS && !sidebar.open}
@@ -233,6 +233,6 @@ function handleKeydown(event: KeyboardEvent) {
 {:else}
 	<div class="flex size-full flex-col items-center justify-center gap-4">
 		<h4>Something went wrong.</h4>
-		<a href={resolve('/home')}>Got to Home</a>
+		<a href={resolve('/')}>Got to Home</a>
 	</div>
 {/if}

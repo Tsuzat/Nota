@@ -143,7 +143,7 @@ let open = $state(false);
 						if (!shouldDelete) return;
 						if ('owner' in note) cloudNotes.deleteNote(note);
 						else localNotes.deleteNote(note);
-						window.location.replace('/home');
+						window.location.replace('/');
 					}}
 				>
 					<icons.Trash2 />

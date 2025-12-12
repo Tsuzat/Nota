@@ -1,7 +1,7 @@
 <script lang="ts">
 import { themes, setTheme } from '$lib/theme';
-import ToggleMode from '$lib/components/custom/toggle-mode.svelte';
-import Check from '@lucide/svelte/icons/check';
+import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
+import { icons } from '@nota/ui/icons/index.js';
 import { getGlobalSettings } from '../constants.svelte';
 
 const globalSettings = getGlobalSettings();
@@ -39,7 +39,7 @@ function handleThemeChange(themeName: string) {
 							style:background-color={theme.color.light}
 						>
 							{#if globalSettings.themeColor === theme.name}
-								<Check class="size-4" />
+								<icons.Check class="size-4" />
 							{/if}
 						</div>
 						<span class="text-xs">{theme.label}</span>

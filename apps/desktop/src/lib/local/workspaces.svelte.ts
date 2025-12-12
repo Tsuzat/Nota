@@ -39,7 +39,7 @@ class WorkSpaces {
     }
   }
 
-  async createWorkspace(icon: string, name: string, userWorkspaceId: number) {
+  async createWorkspace(icon: string, name: string, userWorkspaceId: string) {
     try {
       // insert into database
       const res = await DB.execute('INSERT INTO workspaces (name, icon, userworkspace) VALUES ($1, $2, $3)', [

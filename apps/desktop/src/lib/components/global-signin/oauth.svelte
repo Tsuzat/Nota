@@ -1,20 +1,19 @@
 <script lang="ts">
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-import Google from '$lib/components/icons/customs/google.svelte';
-import { Button } from '$lib/components/ui/button';
+import Google from '@nota/ui/icons/customs/google.svelte';
+import { Button } from '@nota/ui/shadcn/button';
 import { auth } from '$lib/supabase';
-import { ISTAURI } from '$lib/utils';
 import { invoke } from '@tauri-apps/api/core';
-import { toast } from 'svelte-sonner';
 import { getGlobalSignInContext } from './constants.svelte';
-import Github from '$lib/components/icons/customs/github.svelte';
+import Github from '@nota/ui/icons/customs/github.svelte';
 import type { Provider } from '@supabase/supabase-js';
+import { toast } from '@lib/components/ui/sonner';
 
 const useGlobalSignIn = getGlobalSignInContext();
 
 async function signInWithOAuth(provider: Provider) {
   try {
-    const redirectTo = PUBLIC_NOTA_FRONTEND_URL + '/auth-success' + (ISTAURI ? '?desktop=true' : '');
+    const redirectTo = PUBLIC_NOTA_FRONTEND_URL + '/auth-success?desktop=true';
     const { data, error } = await auth.signInWithOAuth({
       provider: provider,
       options: {
@@ -28,12 +27,8 @@ async function signInWithOAuth(provider: Provider) {
     });
     if (error) toast.error(error.message);
     if (!data?.url) throw new Error('No auth URL returned');
-    if (!ISTAURI) {
-      window.location.href = data.url;
-    } else {
-      await invoke('plugin:shell|open', { path: data.url });
-      useGlobalSignIn.open = false;
-    }
+    await invoke('plugin:shell|open', { path: data.url });
+    useGlobalSignIn.open = false;
   } catch (error) {
     console.error(error);
     toast.error('Failed to login with Google.');

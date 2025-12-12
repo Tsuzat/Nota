@@ -1,12 +1,12 @@
 <script lang="ts">
 import { getGlobalSettings } from '../constants.svelte';
-import * as Switch from '$lib/components/ui/switch';
-import * as Label from '$lib/components/ui/label';
-import { Input } from '$lib/components/ui/input';
-import Button from '$lib/components/ui/button/button.svelte';
+import * as Switch from '@nota/ui/shadcn/switch';
+import * as Label from '@nota/ui/shadcn/label';
+import { Input } from '@nota/ui/shadcn/input';
+import { Button } from '@nota/ui/shadcn/button';
 import { onMount } from 'svelte';
-import { toast } from 'svelte-sonner';
-import * as Select from '$lib/components/ui/select';
+import { toast } from '@nota/ui/shadcn/sonner';
+import * as Select from '@nota/ui/shadcn/select';
 import { getUserPreferedAIModel, setUserPreferedAIModel, GeminiModel } from '$lib/gemini';
 
 const useSettings = getGlobalSettings();

@@ -1,58 +1,58 @@
 <script lang="ts">
-  import type { NodeViewProps } from "@tiptap/core";
+import type { NodeViewProps } from '@tiptap/core';
 
-  const { editor }: NodeViewProps = $props();
+const { editor }: NodeViewProps = $props();
 
-  import SimpleTooltip from "@lib/components/custom/SimpleToolTip.svelte";
-  import { Button, buttonVariants } from "@lib/components/ui/button";
-  import { Input } from "@lib/components/ui/input"; 
-  import * as Popover from "@lib/components/ui/popover";
-  import * as Tabs from "@lib/components/ui/tabs";
-  import Loader from "@lucide/svelte/icons/loader";
-  import Video from "@lucide/svelte/icons/video";
-  import { NodeViewWrapper } from "svelte-tiptap";
-  import { FileType } from "../../utils";
+import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
+import { Button, buttonVariants } from '@lib/components/ui/button';
+import { Input } from '@lib/components/ui/input';
+import * as Popover from '@lib/components/ui/popover';
+import * as Tabs from '@lib/components/ui/tabs';
+import Loader from '@lucide/svelte/icons/loader';
+import Video from '@lucide/svelte/icons/video';
+import { NodeViewWrapper } from 'svelte-tiptap';
+import { FileType } from '../../utils';
 
-  let open = $state(false);
-  let videoUrl = $state("");
-  let isUploading = $state(false);
+let open = $state(false);
+let videoUrl = $state('');
+let isUploading = $state(false);
 
-  const assetsFiles = $derived(editor.commands.getAssets(FileType.VIDEO));
+const assetsFiles = $derived(editor.commands.getAssets(FileType.VIDEO));
 
-  function handleSubmit(e: Event) {
-    e.preventDefault();
-    open = false;
-    editor.chain().focus().setVideo(videoUrl).run();
-  }
+function handleSubmit(e: Event) {
+  e.preventDefault();
+  open = false;
+  editor.chain().focus().setVideo(videoUrl).run();
+}
 
-  async function openFileDialog() {
-    // const file = await openDialog({
-    // 	title: 'Select Videos',
-    // 	multiple: false,
-    // 	directory: false,
-    // 	filters: [
-    // 		{
-    // 			name: 'Select Videos',
-    // 			extensions: ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv']
-    // 		}
-    // 	]
-    // });
-    // if (!file) return;
-    // if (ISTAURI) {
-    // 	isUploading = true;
-    // 	try {
-    // 		const uploadedFile = await editor?.commands.handleFileDrop(file);
-    // 		const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(file);
-    // 		editor.chain().focus().setVideo(src).run();
-    // 		open = true;
-    // 	} catch (e) {
-    // 		console.error(e);
-    // 		toast.error('Could not process video.');
-    // 	} finally {
-    // 		isUploading = false;
-    // 	}
-    // }
-  }
+async function openFileDialog() {
+  // const file = await openDialog({
+  // 	title: 'Select Videos',
+  // 	multiple: false,
+  // 	directory: false,
+  // 	filters: [
+  // 		{
+  // 			name: 'Select Videos',
+  // 			extensions: ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv']
+  // 		}
+  // 	]
+  // });
+  // if (!file) return;
+  // if (ISTAURI) {
+  // 	isUploading = true;
+  // 	try {
+  // 		const uploadedFile = await editor?.commands.handleFileDrop(file);
+  // 		const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(file);
+  // 		editor.chain().focus().setVideo(src).run();
+  // 		open = true;
+  // 	} catch (e) {
+  // 		console.error(e);
+  // 		toast.error('Could not process video.');
+  // 	} finally {
+  // 		isUploading = false;
+  // 	}
+  // }
+}
 </script>
 
 <NodeViewWrapper

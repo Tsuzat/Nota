@@ -1,5 +1,5 @@
 <script lang="ts">
-import * as Dialog from '$lib/components/ui/dialog';
+import * as Dialog from '@nota/ui/shadcn/dialog';
 import { getGlobalSignInContext } from '.';
 import OAuth from './oauth.svelte';
 
