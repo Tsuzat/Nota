@@ -31,7 +31,7 @@ async function signInWithOAuth(provider: Provider) {
     useGlobalSignIn.open = false;
   } catch (error) {
     console.error(error);
-    toast.error('Failed to login with Google.');
+    toast.error(`Failed to login with ${provider}.`);
   }
 }
 </script>

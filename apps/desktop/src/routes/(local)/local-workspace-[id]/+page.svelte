@@ -197,7 +197,7 @@ async function importNote() {
 										size="icon"
 										class="size-8 opacity-0 transition-opacity group-hover:opacity-100"
 									>
-										<icons.MoveVertical class="size-4" />
+										<icons.EllipsisVertical class="size-4" />
 									</Button>
 								</DropdownMenu.Trigger>
 								<DropdownMenu.Content>

@@ -17,10 +17,15 @@ import { setCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 import { setCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { useDeepLinkAuth } from '$lib/handleOAuth';
 import { setGlobalSignInContext } from '$lib/components/global-signin';
-import { setGlobalSettings } from '$lib/components/settings';
+import { GlobalSettings, setGlobalSettings } from '$lib/components/settings';
 import { setTheme } from '$lib/theme';
 import { auth } from '$lib/supabase';
 import { invalidate } from '$app/navigation';
+  import { check } from '@tauri-apps/plugin-updater';
+  import { downloadAndInstall } from '$lib/updater';
+  import GlobalSignin from '$lib/components/global-signin/global-signin.svelte';
+  import GlobalSearch from '$lib/components/global-search/global-search.svelte';
+  import { setGlobalSearch } from '$lib/components/global-search';
 
 // Local Workspaces and Notes
 const localUserWorkspaces = setLocalUserWorkspaces();
@@ -50,50 +55,51 @@ $effect(() => {
 
 useDeepLinkAuth();
 setGlobalSignInContext();
+setGlobalSearch();
 const useSettings = setGlobalSettings();
 const sessionAndUser = setSessionAndUserContext();
 
 onMount(() => {
   open = localStorage.getItem('sidebar-state') === 'open';
   setTheme(useSettings.themeColor);
-  // const id = toast.loading('Authenticating...');
-  // const { data } = auth.onAuthStateChange((event, session) => {
-  //   if (event === 'INITIAL_SESSION') {
-  //     if (session) {
-  //       toast.success('Signed in successfully!', { id });
-  //     } else {
-  //       toast.dismiss(id);
-  //     }
-  //   }
-  //   if (event === 'SIGNED_OUT') {
-  //     sessionAndUser.setSession(null);
-  //     sessionAndUser.setUser(null);
-  //     invalidate('supabase:auth');
-  //   } else if (session) {
-  //     sessionAndUser.setSession(session);
-  //     sessionAndUser.setUser(session.user);
-  //     if (event === 'SIGNED_IN') {
-  //       invalidate('supabase:auth');
-  //     }
-  //   }
-  // });
-  // check().then((update) => {
-  //   if (update) {
-  //     const id = Symbol('CheckForNotaUpdate').toString();
-  //     toast.info(`New Version available`, {
-  //       description: `Update to latest version ${update.version}, this will take less than a minute`,
-  //       id,
-  //       action: {
-  //         label: 'Install',
-  //         onClick: () => {
-  //           toast.dismiss(id);
-  //           downloadAndInstall(update);
-  //         },
-  //       },
-  //     });
-  //   }
-  // });
-  // return () => data.subscription.unsubscribe();
+  const id = toast.loading('Authenticating...');
+  const { data } = auth.onAuthStateChange((event, session) => {
+    if (event === 'INITIAL_SESSION') {
+      if (session) {
+        toast.success('Signed in successfully!', { id });
+      } else {
+        toast.dismiss(id);
+      }
+    }
+    if (event === 'SIGNED_OUT') {
+      sessionAndUser.setSession(null);
+      sessionAndUser.setUser(null);
+      invalidate('supabase:auth');
+    } else if (session) {
+      sessionAndUser.setSession(session);
+      sessionAndUser.setUser(session.user);
+      if (event === 'SIGNED_IN') {
+        invalidate('supabase:auth');
+      }
+    }
+  });
+  check().then((update) => {
+    if (update) {
+      const id = Symbol('CheckForNotaUpdate').toString();
+      toast.info(`New Version available`, {
+        description: `Update to latest version ${update.version}, this will take less than a minute`,
+        id,
+        action: {
+          label: 'Install',
+          onClick: () => {
+            toast.dismiss(id);
+            downloadAndInstall(update);
+          },
+        },
+      });
+    }
+  });
+  return () => data.subscription.unsubscribe();
 });
 
 $effect(() => {
@@ -115,6 +121,10 @@ $effect(() => {
 
 <ModeWatcher />
 <Toaster richColors closeButton />
+
+<GlobalSignin />
+<GlobalSearch />
+<GlobalSettings />
 
 <Sidebar.Provider
 	bind:open

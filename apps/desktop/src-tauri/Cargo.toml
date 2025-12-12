@@ -1,8 +1,8 @@
 [package]
 name = "nota"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+version = "0.9.41-beta"
+description = "Nota - Best Note taking ap"
+authors = ["Tsuzat"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -38,6 +38,7 @@ tauri-plugin-os = "2"
 tauri-plugin-deep-link = "2"
 tauri-plugin-process = "2"
 tauri-plugin-dialog = "2"
+tauri-plugin-shell = "2"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"
