@@ -1,14 +1,14 @@
 import Database from "@tauri-apps/plugin-sql";
 import type { LocalUserWorkspace } from "./userworkspaces.svelte";
 import { BaseDirectory, exists, mkdir } from "@tauri-apps/plugin-fs";
-import query from "./schema";
+import query from "./schema-new";
 import { toast } from "@nota/ui/shadcn/sonner";
 
 export let DB: Database;
 
 export async function initializeLocalDB() {
   try {
-    DB = await Database.load("sqlite:nota-new.db");
+    DB = await Database.load("sqlite:nota.db");
     console.log("Sqlite database loaded successfully");
     await createTables();
   } catch (e) {

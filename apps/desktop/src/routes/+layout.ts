@@ -115,11 +115,6 @@ export const load = async () => {
     return goto(resolve("/"));
   }
 
-  console.log("CurrentUserWorkspace", currentUserWorkspace);
-  console.log("LocalWorkspaces", localWorkspaces);
-  console.log("LocalNotes", localNotes);
-  console.log("LocalUserWorkspaces", localUserWorkspaces);
-
   return {
     localUserWorkspaces,
     currentUserWorkspace,
