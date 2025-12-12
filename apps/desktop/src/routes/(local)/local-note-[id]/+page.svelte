@@ -4,7 +4,7 @@ import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
-import {IconPicker, IconRenderer, icons} from '@nota/ui/icons/index.js';
+import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { buttonVariants } from '@nota/ui/shadcn/button';
 import { Separator } from '@nota/ui/shadcn/separator';
 import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
@@ -18,9 +18,9 @@ import { beforeNavigate, goto } from '$app/navigation';
 import { DB } from '$lib/local/db.js';
 import { resolve } from '$app/paths';
 import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js';
-  import { toast } from '@lib/components/ui/sonner/index.js';
-  import type { FileType } from '@lib/components/edra/utils.js';
-  import { cn } from '@lib/utils.js';
+import { toast } from '@lib/components/ui/sonner/index.js';
+import type { FileType } from '@lib/components/edra/utils.js';
+import { cn } from '@lib/utils.js';
 
 const sidebar = useSidebar();
 

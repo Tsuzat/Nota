@@ -1,37 +1,37 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { cn } from '@lib/utils';
+import { onMount } from 'svelte';
+import { cn } from '@lib/utils';
 
-	let { children, class: className = undefined, threshold = 0.1, delay = 0 } = $props();
+let { children, class: className = undefined, threshold = 0.1, delay = 0 } = $props();
 
-	let element: HTMLElement;
-	let isVisible = $state(false);
+let element: HTMLElement;
+let isVisible = $state(false);
 
-	onMount(() => {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting) {
-						isVisible = true;
-						observer.unobserve(entry.target);
-					}
-				});
-			},
-			{
-				threshold
-			}
-		);
+onMount(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          isVisible = true;
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold,
+    }
+  );
 
-		if (element) {
-			observer.observe(element);
-		}
+  if (element) {
+    observer.observe(element);
+  }
 
-		return () => {
-			if (element) {
-				observer.unobserve(element);
-			}
-		};
-	});
+  return () => {
+    if (element) {
+      observer.unobserve(element);
+    }
+  };
+});
 </script>
 
 <div

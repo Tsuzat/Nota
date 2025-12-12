@@ -1,45 +1,38 @@
 <script lang="ts">
-  import {
-    EdraBubbleMenu,
-    EdraDragHandleExtended,
-    EdraEditor,
-    type Editor,
-  } from "@nota/ui/edra/shadcn/index.ts";
-  import { Button } from "@nota/ui/shadcn/button";
-  import type { FileType } from "@nota/ui/edra/utils.ts";
-  import { Key, Trash } from "@lucide/svelte";
-  import defalutContent from "./demo";
-  import SimpleToolTip from "@lib/components/custom/SimpleToolTip.svelte";
-  import ToggleMode from "@lib/components/custom/ToggleMode.svelte";
-  import { browser } from "$app/environment";
+import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, type Editor } from '@nota/ui/edra/shadcn/index.ts';
+import { Button } from '@nota/ui/shadcn/button';
+import type { FileType } from '@nota/ui/edra/utils.ts';
+import { Key, Trash } from '@lucide/svelte';
+import defalutContent from './demo';
+import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
+import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
+import { browser } from '$app/environment';
 
-  let content = $state(defalutContent);
-  let editor = $state<Editor>();
-  let hasAPIKEY = $state(
-    browser ? localStorage.getItem("gemini_api_key") !== null : false
+let content = $state(defalutContent);
+let editor = $state<Editor>();
+let hasAPIKEY = $state(browser ? localStorage.getItem('gemini_api_key') !== null : false);
+
+const onFileSelect = async (_file: string) => {
+  throw new Error('This is not available for Playground');
+};
+
+const onDropOrPaste = async (_file: File) => {
+  throw new Error('This is not available for Playground');
+};
+
+const getAssets = async (_fileType: FileType) => {
+  throw new Error('This is not available for Playground');
+};
+
+const setGeminiAPIKey = () => {
+  const key = prompt(
+    'To use AI features, please input your Gemini API Key. This will be stored in your localStore so you might want to delete the key later on'
   );
-
-  const onFileSelect = async (_file: string) => {
-    throw new Error("This is not available for Playground");
-  };
-
-  const onDropOrPaste = async (_file: File) => {
-    throw new Error("This is not available for Playground");
-  };
-
-  const getAssets = async (_fileType: FileType) => {
-    throw new Error("This is not available for Playground");
-  };
-
-  const setGeminiAPIKey = () => {
-    const key = prompt(
-      "To use AI features, please input your Gemini API Key. This will be stored in your localStore so you might want to delete the key later on"
-    );
-    if (key) {
-      localStorage.setItem("gemini_api_key", key);
-      hasAPIKEY = true;
-    }
-  };
+  if (key) {
+    localStorage.setItem('gemini_api_key', key);
+    hasAPIKEY = true;
+  }
+};
 </script>
 
 <main class="flex h-screen w-full flex-col overflow-hidden">

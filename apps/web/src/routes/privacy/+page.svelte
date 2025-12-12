@@ -1,5 +1,5 @@
 <script>
-	import * as Card from '@nota/ui/shadcn/card';
+import * as Card from '@nota/ui/shadcn/card';
 </script>
 
 <div class="container mx-auto max-w-4xl py-12 md:py-24">

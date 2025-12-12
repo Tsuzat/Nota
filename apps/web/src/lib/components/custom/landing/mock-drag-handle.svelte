@@ -1,15 +1,15 @@
 <script lang="ts">
-	import Sparkles from '@lucide/svelte/icons/sparkles';
-	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
-	import Palette from '@lucide/svelte/icons/palette';
-	import Plus from '@lucide/svelte/icons/plus';
-	import RemoveFormatting from '@lucide/svelte/icons/remove-formatting';
-	import Copy from '@lucide/svelte/icons/copy';
-	import Clipboard from '@lucide/svelte/icons/clipboard';
-	import Trash2 from '@lucide/svelte/icons/trash-2';
-	import GripVertical from '@lucide/svelte/icons/grip-vertical';
-	import TextAlignCenter from '@lucide/svelte/icons/text-align-center';
-	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+import Sparkles from '@lucide/svelte/icons/sparkles';
+import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+import Palette from '@lucide/svelte/icons/palette';
+import Plus from '@lucide/svelte/icons/plus';
+import RemoveFormatting from '@lucide/svelte/icons/remove-formatting';
+import Copy from '@lucide/svelte/icons/copy';
+import Clipboard from '@lucide/svelte/icons/clipboard';
+import Trash2 from '@lucide/svelte/icons/trash-2';
+import GripVertical from '@lucide/svelte/icons/grip-vertical';
+import TextAlignCenter from '@lucide/svelte/icons/text-align-center';
+import ChevronRight from '@lucide/svelte/icons/chevron-right';
 </script>
 
 <div class="relative flex items-start gap-2">

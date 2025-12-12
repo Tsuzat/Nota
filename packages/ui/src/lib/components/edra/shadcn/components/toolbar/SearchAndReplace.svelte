@@ -13,7 +13,7 @@ import Search from '@lucide/svelte/icons/search';
 import type { Editor } from '@tiptap/core';
 import { slide } from 'svelte/transition';
 import EdraToolTip from '../EdraToolTip.svelte';
-  import { getKeyboardShortcut } from '@lib/components/edra/utils';
+import { getKeyboardShortcut } from '@lib/components/edra/utils';
 
 interface Props {
   editor: Editor;

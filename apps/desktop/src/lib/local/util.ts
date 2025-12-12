@@ -1,12 +1,9 @@
-import { ISWINDOWS } from "$lib/utils";
-import {
-  getFileTypeExtensions,
-  type FileType,
-} from "@lib/components/edra/utils";
-import { toast } from "@lib/components/ui/sonner";
-import { convertFileSrc } from "@tauri-apps/api/core";
-import { appDataDir, resolve } from "@tauri-apps/api/path";
-import { copyFile, exists, readDir, writeFile } from "@tauri-apps/plugin-fs";
+import { ISWINDOWS } from '$lib/utils';
+import { getFileTypeExtensions, type FileType } from '@lib/components/edra/utils';
+import { toast } from '@lib/components/ui/sonner';
+import { convertFileSrc } from '@tauri-apps/api/core';
+import { appDataDir, resolve } from '@tauri-apps/api/path';
+import { copyFile, exists, readDir, writeFile } from '@tauri-apps/plugin-fs';
 
 /**
  * Helping function to copy assets to the workspace
@@ -14,13 +11,13 @@ import { copyFile, exists, readDir, writeFile } from "@tauri-apps/plugin-fs";
  * @returns - copied files
  */
 export const moveFileToAssets = async (file: string) => {
-  const assetsPath = await resolve(await appDataDir(), "assets");
-  const fileName = file.split(ISWINDOWS ? "\\" : "/").pop();
-  if (fileName === undefined) throw new Error("Assets file is not supported");
+  const assetsPath = await resolve(await appDataDir(), 'assets');
+  const fileName = file.split(ISWINDOWS ? '\\' : '/').pop();
+  if (fileName === undefined) throw new Error('Assets file is not supported');
   const finalPath = await resolve(assetsPath, fileName);
   await copyFile(file, finalPath);
   const fileExists = await exists(finalPath);
-  if (!fileExists) throw new Error("Failed to move file to assets folder");
+  if (!fileExists) throw new Error('Failed to move file to assets folder');
   return finalPath;
 };
 
@@ -29,7 +26,7 @@ export const createFile = async (file: File): Promise<string> => {
   const fileReader = new FileReader();
 
   // Construct the asset path
-  const assetsPath = await resolve(await appDataDir(), "assets", file.name);
+  const assetsPath = await resolve(await appDataDir(), 'assets', file.name);
 
   // Create a promise to handle the asynchronous file writing
   return new Promise((res, reject) => {
@@ -39,32 +36,30 @@ export const createFile = async (file: File): Promise<string> => {
         try {
           await writeFile(assetsPath, binary);
           res(convertFileSrc(assetsPath));
-          toast.success("File saved successfully!", { id });
+          toast.success('File saved successfully!', { id });
         } catch (err) {
-          toast.error("Error saving image!", { id });
+          toast.error('Error saving image!', { id });
           reject(`Error saving file: ${err}`);
         }
       }
     };
     fileReader.onerror = (err) => {
-      toast.error("Error saving image!", { id });
+      toast.error('Error saving image!', { id });
       reject(`Error reading file: ${err}`);
     };
     fileReader.readAsArrayBuffer(file);
   });
 };
 
-export const getAssetsByFileType = async (
-  fileType: FileType
-): Promise<string[]> => {
-  const path = await resolve(await appDataDir(), "assets");
+export const getAssetsByFileType = async (fileType: FileType): Promise<string[]> => {
+  const path = await resolve(await appDataDir(), 'assets');
   const dirEntries = await readDir(path);
   const extensions = getFileTypeExtensions(fileType);
   const files: string[] = [];
   for (const dirEntry of dirEntries) {
     if (!dirEntry.isFile) continue;
     const fileName = dirEntry.name;
-    const fileExtension = fileName.split(".").pop();
+    const fileExtension = fileName.split('.').pop();
     if (fileExtension !== undefined && extensions.includes(fileExtension)) {
       const filePath = await resolve(path, fileName);
       const src = convertFileSrc(filePath);

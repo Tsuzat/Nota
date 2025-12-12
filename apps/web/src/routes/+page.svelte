@@ -1,33 +1,33 @@
 <script lang="ts">
-  /* eslint-disable svelte/no-navigation-without-resolve */
-  // import ArtifactDownloader from '$lib/artifact/artifact-downloader.svelte';
-  import ToggleMode from "@lib/components/custom/ToggleMode.svelte";
-  import { Button } from "@nota/ui/shadcn/button";
-  import Github from "@lucide/svelte/icons/github";
-  import LogOut from "@lucide/svelte/icons/log-out";
-  import User from "@lucide/svelte/icons/user";
-  import UserRound from "@lucide/svelte/icons/user-round";
-  import * as Dropdown from "@nota/ui/shadcn/dropdown-menu";
-  import { resolve } from "$app/paths";
-  import { goto } from "$app/navigation";
-  import Spotlight from "$lib/components/custom/utils/spotlight.svelte";
-  // import Particles from '$lib/components/custom/utils/particles.svelte';
-  import Reveal from "$lib/components/custom/utils/reveal.svelte";
-  import MockDragHandle from "$lib/components/custom/landing/mock-drag-handle.svelte";
-  import MockBubbleMenu from "$lib/components/custom/landing/mock-bubble-menu.svelte";
-  import MockAiDialog from "$lib/components/custom/landing/mock-ai-dialog.svelte";
-  import * as Card from "@nota/ui/shadcn/card";
-  import Sparkles from "@lucide/svelte/icons/sparkles";
-  import Code from "@lucide/svelte/icons/code";
-  import Zap from "@lucide/svelte/icons/zap";
-  import PenTool from "@lucide/svelte/icons/pen-tool";
-  import Terminal from "@lucide/svelte/icons/terminal";
-  import BookOpen from "@lucide/svelte/icons/book-open";
-  import GraduationCap from "@lucide/svelte/icons/graduation-cap";
-  import GripVertical from "@lucide/svelte/icons/grip-vertical";
-  import MousePointerClick from "@lucide/svelte/icons/mouse-pointer-click";
-  import Pen from "@lucide/svelte/icons/pen";
-  import SimpleToolTip from "@lib/components/custom/SimpleToolTip.svelte";
+/* eslint-disable svelte/no-navigation-without-resolve */
+// import ArtifactDownloader from '$lib/artifact/artifact-downloader.svelte';
+import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
+import { Button } from '@nota/ui/shadcn/button';
+import Github from '@lucide/svelte/icons/github';
+import LogOut from '@lucide/svelte/icons/log-out';
+import User from '@lucide/svelte/icons/user';
+import UserRound from '@lucide/svelte/icons/user-round';
+import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
+import { resolve } from '$app/paths';
+import { goto } from '$app/navigation';
+import Spotlight from '$lib/components/custom/utils/spotlight.svelte';
+// import Particles from '$lib/components/custom/utils/particles.svelte';
+import Reveal from '$lib/components/custom/utils/reveal.svelte';
+import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
+import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svelte';
+import MockAiDialog from '$lib/components/custom/landing/mock-ai-dialog.svelte';
+import * as Card from '@nota/ui/shadcn/card';
+import Sparkles from '@lucide/svelte/icons/sparkles';
+import Code from '@lucide/svelte/icons/code';
+import Zap from '@lucide/svelte/icons/zap';
+import PenTool from '@lucide/svelte/icons/pen-tool';
+import Terminal from '@lucide/svelte/icons/terminal';
+import BookOpen from '@lucide/svelte/icons/book-open';
+import GraduationCap from '@lucide/svelte/icons/graduation-cap';
+import GripVertical from '@lucide/svelte/icons/grip-vertical';
+import MousePointerClick from '@lucide/svelte/icons/mouse-pointer-click';
+import Pen from '@lucide/svelte/icons/pen';
+import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
 </script>
 
 <!-- <Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" /> -->

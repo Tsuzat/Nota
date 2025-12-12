@@ -21,11 +21,11 @@ import { GlobalSettings, setGlobalSettings } from '$lib/components/settings';
 import { setTheme } from '$lib/theme';
 import { auth } from '$lib/supabase';
 import { invalidate } from '$app/navigation';
-  import { check } from '@tauri-apps/plugin-updater';
-  import { downloadAndInstall } from '$lib/updater';
-  import GlobalSignin from '$lib/components/global-signin/global-signin.svelte';
-  import GlobalSearch from '$lib/components/global-search/global-search.svelte';
-  import { setGlobalSearch } from '$lib/components/global-search';
+import { check } from '@tauri-apps/plugin-updater';
+import { downloadAndInstall } from '$lib/updater';
+import GlobalSignin from '$lib/components/global-signin/global-signin.svelte';
+import GlobalSearch from '$lib/components/global-search/global-search.svelte';
+import { setGlobalSearch } from '$lib/components/global-search';
 
 // Local Workspaces and Notes
 const localUserWorkspaces = setLocalUserWorkspaces();
