@@ -94,27 +94,31 @@ function handleKeyDown(e: KeyboardEvent) {
 <svelte:window onkeydown={handleKeyDown} />
 
 {#if items.length}
-	<div
-		bind:this={scrollContainer}
-		class="bg-popover/75 flex max-h-80 w-fit flex-col gap-1 overflow-y-auto scroll-smooth rounded-lg border backdrop-blur-2xl"
-	>
-		{#each items as grp, groupIndex (groupIndex)}
-			<span class="text-muted-foreground p-2 text-xs">{grp.title}</span>
+  <div
+    bind:this={scrollContainer}
+    class="bg-popover/75 flex max-h-80 w-fit flex-col gap-1 overflow-y-auto scroll-smooth rounded-lg border backdrop-blur-2xl"
+  >
+    {#each items as grp, groupIndex (groupIndex)}
+      <span class="text-muted-foreground p-2 text-xs">{grp.title}</span>
 
-			{#each grp.commands as command, commandIndex (commandIndex)}
-				{@const Icon = command.icon}
-				{@const isActive =
-					selectedGroupIndex === groupIndex && selectedCommandIndex === commandIndex}
-				<Button
-					id={`${groupIndex}-${commandIndex}`}
-					variant="ghost"
-					class={cn('h-8 w-full justify-start gap-2 rounded-sm', isActive && 'bg-muted')}
-					onclick={() => selectItem(groupIndex, commandIndex)}
-				>
-					<Icon />
-					<span>{command.tooltip}</span>
-				</Button>
-			{/each}
-		{/each}
-	</div>
+      {#each grp.commands as command, commandIndex (commandIndex)}
+        {@const Icon = command.icon}
+        {@const isActive =
+          selectedGroupIndex === groupIndex &&
+          selectedCommandIndex === commandIndex}
+        <Button
+          id={`${groupIndex}-${commandIndex}`}
+          variant="ghost"
+          class={cn(
+            "h-8 w-full justify-start gap-2 rounded-sm",
+            isActive && "bg-muted"
+          )}
+          onclick={() => selectItem(groupIndex, commandIndex)}
+        >
+          <Icon />
+          <span>{command.tooltip}</span>
+        </Button>
+      {/each}
+    {/each}
+  </div>
 {/if}

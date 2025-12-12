@@ -10,7 +10,7 @@
     "ui:add": "bun --filter @nota/ui shadcn",
     "ci:root": "biome ci",
     "lint:root": "biome check .",
-    "format:root": "biome check . --write"
+    "format:root": "biome format . --write"
   },
   "private": true,
   "workspaces": [
