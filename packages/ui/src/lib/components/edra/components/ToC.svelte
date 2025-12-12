@@ -1,40 +1,40 @@
 <script lang="ts">
-	import type { Editor } from '@tiptap/core';
-	import { type TableOfContentData } from '@tiptap/extension-table-of-contents';
-	import { cn } from '@lib/utils';
-	import { TextSelection } from '@tiptap/pm/state';
-	import { pushState } from '$app/navigation';
-	import * as Tooltip from '@lib/components/ui/tooltip';
+import * as Tooltip from '@lib/components/ui/tooltip';
+import { cn } from '@lib/utils';
+import type { Editor } from '@tiptap/core';
+import { type TableOfContentData } from '@tiptap/extension-table-of-contents';
+import { TextSelection } from '@tiptap/pm/state';
+import { pushState } from '$app/navigation';
 
-	interface Props {
-		editor: Editor;
-		items?: TableOfContentData;
-	}
+interface Props {
+  editor: Editor;
+  items?: TableOfContentData;
+}
 
-	const { editor, items }: Props = $props();
+const { editor, items }: Props = $props();
 
-	const onItemClick = (e: Event, id: string) => {
-		e.preventDefault();
+const onItemClick = (e: Event, id: string) => {
+  e.preventDefault();
 
-		const element = editor.view.dom.querySelector(`[data-toc-id="${id}"`);
+  const element = editor.view.dom.querySelector(`[data-toc-id="${id}"`);
 
-		if (!element) {
-			return;
-		}
-		const pos = editor.view.posAtDOM(element, 0);
+  if (!element) {
+    return;
+  }
+  const pos = editor.view.posAtDOM(element, 0);
 
-		// set focus
-		const tr = editor.view.state.tr;
-		tr.setSelection(new TextSelection(tr.doc.resolve(pos)));
-		editor.view.dispatch(tr);
-		editor.view.focus();
-		pushState('', {
-			showModal: true
-		});
-		element.scrollIntoView({
-			behavior: 'smooth'
-		});
-	};
+  // set focus
+  const tr = editor.view.state.tr;
+  tr.setSelection(new TextSelection(tr.doc.resolve(pos)));
+  editor.view.dispatch(tr);
+  editor.view.focus();
+  pushState('', {
+    showModal: true,
+  });
+  element.scrollIntoView({
+    behavior: 'smooth',
+  });
+};
 </script>
 
 <Tooltip.Provider>

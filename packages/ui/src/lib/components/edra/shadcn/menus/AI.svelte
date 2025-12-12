@@ -1,213 +1,205 @@
 <script lang="ts">
-	import { type Editor } from '@tiptap/core';
-	import type { ShouldShowProps } from '../../types';
-	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import { Input } from '@lib/components/ui/input';
-	import { Button } from '@lib/components/ui/button';
-	import ArrowUp from '@lucide/svelte/icons/arrow-up';
-	import ArrowDownWideNarrow from '@lucide/svelte/icons/arrow-down-wide-narrow';
-	import PenLine from '@lucide/svelte/icons/pen-line';
-	import RefreshCcwDot from '@lucide/svelte/icons/refresh-ccw-dot';
-	import TextWrap from '@lucide/svelte/icons/text-wrap';
-	import CheckCheck from '@lucide/svelte/icons/check-check';
-	import Sparkle from '@lucide/svelte/icons/sparkle';
-	import ArrowDown from '@lucide/svelte/icons/arrow-down';
-	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
-	import Clipboard from '@lucide/svelte/icons/clipboard';
-	import Brain from '@lucide/svelte/icons/brain';
-	import X from '@lucide/svelte/icons/x';
-	import { toast } from 'svelte-sonner';
-	import { removeAIHighlight } from '../../extensions/AIHighLight';
-	import { Separator } from '@lib/components/ui/separator';
-	import { Streamdown } from 'svelte-streamdown';
-	import Code from 'svelte-streamdown/code';
-	import Mermaid from 'svelte-streamdown/mermaid';
-	import Math from 'svelte-streamdown/math';
+// import { callGeminiAI } from '@lib/gemini';
+import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
+import { Button } from '@lib/components/ui/button';
+import { Input } from '@lib/components/ui/input';
+import { Separator } from '@lib/components/ui/separator';
+import ArrowDown from '@lucide/svelte/icons/arrow-down';
+import ArrowDownWideNarrow from '@lucide/svelte/icons/arrow-down-wide-narrow';
+import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+import ArrowUp from '@lucide/svelte/icons/arrow-up';
+import Brain from '@lucide/svelte/icons/brain';
+import CheckCheck from '@lucide/svelte/icons/check-check';
+import Clipboard from '@lucide/svelte/icons/clipboard';
+import PenLine from '@lucide/svelte/icons/pen-line';
+import RefreshCcwDot from '@lucide/svelte/icons/refresh-ccw-dot';
+import Sparkle from '@lucide/svelte/icons/sparkle';
+import TextWrap from '@lucide/svelte/icons/text-wrap';
+import X from '@lucide/svelte/icons/x';
+import { type Editor } from '@tiptap/core';
+// import {
+// 	CONTINUE_WRITING_PROMPT,
+// 	FIX_GRAMMAR_PROMPT,
+// 	MAKE_LONGER_PROMPT,
+// 	MAKE_SHORTER_PROMPT,
+// 	SOLVE_PROBLEM_PROMPT,
+// 	SUMMARIZE_PROMPT
+// } from '@lib/gemini/commands';
+import { fade } from 'svelte/transition';
+import { toast } from 'svelte-sonner';
+import { Streamdown } from 'svelte-streamdown';
+import Code from 'svelte-streamdown/code';
+import Math from 'svelte-streamdown/math';
+import Mermaid from 'svelte-streamdown/mermaid';
+import BubbleMenu from '../../components/BubbleMenu.svelte';
+import { removeAIHighlight } from '../../extensions/AIHighLight';
+import type { ShouldShowProps } from '../../types';
 
-	// import { callGeminiAI } from '@lib/gemini';
-	import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
-	// import {
-	// 	CONTINUE_WRITING_PROMPT,
-	// 	FIX_GRAMMAR_PROMPT,
-	// 	MAKE_LONGER_PROMPT,
-	// 	MAKE_SHORTER_PROMPT,
-	// 	SOLVE_PROBLEM_PROMPT,
-	// 	SUMMARIZE_PROMPT
-	// } from '@lib/gemini/commands';
-	import { fade } from 'svelte/transition';
+interface Props {
+  editor: Editor;
+  parentElement?: HTMLElement;
+}
+const { editor, parentElement }: Props = $props();
 
-	interface Props {
-		editor: Editor;
-		parentElement?: HTMLElement;
-	}
-	const { editor, parentElement }: Props = $props();
+function shouldShow(props: ShouldShowProps) {
+  if (!props.editor.isEditable || props.editor.isDestroyed) return false;
+  const { view, editor } = props;
+  if (!view || editor.view.dragging) {
+    return false;
+  }
+  if (editor.isActive('ai-highlight')) {
+    return true;
+  }
+  removeAIHighlight(editor);
+  aiState = AIState.Idle;
+  aiResponse = '';
+  return false;
+}
 
-	function shouldShow(props: ShouldShowProps) {
-		if (!props.editor.isEditable || props.editor.isDestroyed) return false;
-		const { view, editor } = props;
-		if (!view || editor.view.dragging) {
-			return false;
-		}
-		if (editor.isActive('ai-highlight')) {
-			return true;
-		} else {
-			removeAIHighlight(editor);
-			aiState = AIState.Idle;
-			aiResponse = '';
-			return false;
-		}
-	}
+enum AIState {
+  Idle = 'Idle',
+  Thinking = 'Thinking',
+  Confirmation = 'Confirmation',
+}
 
-	enum AIState {
-		Idle = 'Idle',
-		Thinking = 'Thinking',
-		Confirmation = 'Confirmation'
-	}
+let inputValue = $state('');
+let aiState = $state(AIState.Idle);
+let aiResponse = $state('');
 
-	let inputValue = $state('');
-	let aiState = $state(AIState.Idle);
-	let aiResponse = $state('');
+function getSelectionText(): string | undefined {
+  const { from, to } = editor.view.state.selection;
+  const slice = editor.view.state.doc.cut(from, to);
+  if (editor.markdown) return editor.markdown.serialize(slice.toJSON());
+}
 
-	function getSelectionText(): string | undefined {
-		const { from, to } = editor.view.state.selection;
-		const slice = editor.view.state.doc.cut(from, to);
-		if (editor.markdown) return editor.markdown.serialize(slice.toJSON());
-	}
+async function processText(type: 'shorter' | 'longer' | 'summarize' | 'grammer' | 'continue' | 'solve') {
+  const id = Symbol('AI_THINKING_TOAST').toString();
+  const selectedText = getSelectionText();
+  if (!selectedText || selectedText.trim().length === 0) {
+    toast.error('Can not get the selected content from editor', { id });
+    return;
+  }
+  try {
+    // let prompt = '';
+    // switch (type) {
+    // 	case 'shorter':
+    // 		prompt = MAKE_SHORTER_PROMPT(selectedText);
+    // 		break;
+    // 	case 'longer':
+    // 		prompt = MAKE_LONGER_PROMPT(selectedText);
+    // 		break;
+    // 	case 'summarize':
+    // 		prompt = SUMMARIZE_PROMPT(selectedText);
+    // 		break;
+    // 	case 'grammer':
+    // 		prompt = FIX_GRAMMAR_PROMPT(selectedText);
+    // 		break;
+    // 	case 'continue':
+    // 		prompt = CONTINUE_WRITING_PROMPT(selectedText);
+    // 		break;
+    // 	case 'solve':
+    // 		prompt = SOLVE_PROBLEM_PROMPT(selectedText);
+    // 		break;
+    // }
+    // aiState = AIState.Confirmation;
+    // await callGeminiAI(
+    // 	prompt,
+    // 	(chunk) => {
+    // 		aiResponse += chunk;
+    // 	},
+    // 	(error) => {
+    // 		toast.error('Something went wrong when calling AI.', {
+    // 			description: error.message
+    // 		});
+    // 		console.error(error);
+    // 		aiState = AIState.Idle;
+    // 		aiResponse = '';
+    // 	}
+    // );
+  } catch (error) {
+    aiState = AIState.Idle;
+    console.error(error);
+    toast.error('Something went wrong! Check console.', { id });
+  }
+}
 
-	async function processText(
-		type: 'shorter' | 'longer' | 'summarize' | 'grammer' | 'continue' | 'solve'
-	) {
-		const id = Symbol('AI_THINKING_TOAST').toString();
-		const selectedText = getSelectionText();
-		if (!selectedText || selectedText.trim().length === 0) {
-			toast.error('Can not get the selected content from editor', { id });
-			return;
-		}
-		try {
-			// let prompt = '';
-			// switch (type) {
-			// 	case 'shorter':
-			// 		prompt = MAKE_SHORTER_PROMPT(selectedText);
-			// 		break;
-			// 	case 'longer':
-			// 		prompt = MAKE_LONGER_PROMPT(selectedText);
-			// 		break;
-			// 	case 'summarize':
-			// 		prompt = SUMMARIZE_PROMPT(selectedText);
-			// 		break;
-			// 	case 'grammer':
-			// 		prompt = FIX_GRAMMAR_PROMPT(selectedText);
-			// 		break;
-			// 	case 'continue':
-			// 		prompt = CONTINUE_WRITING_PROMPT(selectedText);
-			// 		break;
-			// 	case 'solve':
-			// 		prompt = SOLVE_PROBLEM_PROMPT(selectedText);
-			// 		break;
-			// }
-			// aiState = AIState.Confirmation;
-			// await callGeminiAI(
-			// 	prompt,
-			// 	(chunk) => {
-			// 		aiResponse += chunk;
-			// 	},
-			// 	(error) => {
-			// 		toast.error('Something went wrong when calling AI.', {
-			// 			description: error.message
-			// 		});
-			// 		console.error(error);
-			// 		aiState = AIState.Idle;
-			// 		aiResponse = '';
-			// 	}
-			// );
-		} catch (error) {
-			aiState = AIState.Idle;
-			console.error(error);
-			toast.error('Something went wrong! Check console.', { id });
-		}
-	}
+const makeTextShorter = () => processText('shorter');
 
-	const makeTextShorter = () => processText('shorter');
+const makeTextLonger = () => processText('longer');
 
-	const makeTextLonger = () => processText('longer');
+const summarizeText = () => processText('summarize');
 
-	const summarizeText = () => processText('summarize');
+const checkGrammer = () => processText('grammer');
 
-	const checkGrammer = () => processText('grammer');
+const continueWriting = () => processText('continue');
 
-	const continueWriting = () => processText('continue');
+const solveProblem = () => processText('solve');
 
-	const solveProblem = () => processText('solve');
+async function handleSubmit() {
+  if (!inputValue || inputValue.trim().length === 0) return;
+  const text = getSelectionText();
+  if (!text) return;
+  try {
+    aiState = AIState.Confirmation;
+    const prompt = `${text}\n\n\n${inputValue}`;
 
-	async function handleSubmit() {
-		if (!inputValue || inputValue.trim().length === 0) return;
-		const text = getSelectionText();
-		if (!text) return;
-		try {
-			aiState = AIState.Confirmation;
-			const prompt = `${text}\n\n\n${inputValue}`;
+    // await callGeminiAI(
+    // 	prompt,
+    // 	(chunk) => {
+    // 		aiResponse += chunk;
+    // 	},
+    // 	(error) => {
+    // 		toast.error('Something went wrong when calling AI.', {
+    // 			description: error.message
+    // 		});
+    // 		console.error(error);
+    // 		aiState = AIState.Idle;
+    // 		aiResponse = '';
+    // 	}
+    // );
+  } catch (error) {
+    aiState = AIState.Idle;
+    console.error(error);
+    toast.error('Something went wrong! Check console.');
+  } finally {
+    inputValue = '';
+  }
+}
 
-			// await callGeminiAI(
-			// 	prompt,
-			// 	(chunk) => {
-			// 		aiResponse += chunk;
-			// 	},
-			// 	(error) => {
-			// 		toast.error('Something went wrong when calling AI.', {
-			// 			description: error.message
-			// 		});
-			// 		console.error(error);
-			// 		aiState = AIState.Idle;
-			// 		aiResponse = '';
-			// 	}
-			// );
-		} catch (error) {
-			aiState = AIState.Idle;
-			console.error(error);
-			toast.error('Something went wrong! Check console.');
-		} finally {
-			inputValue = '';
-		}
-	}
+function replaceSelection() {
+  const { from, to } = editor.view.state.selection;
+  try {
+    editor.chain().focus().insertContentAt({ from, to }, aiResponse, { contentType: 'markdown' }).run();
+  } catch (error) {
+    console.error(error);
+    toast.error('Unable to insert the data. Copy content and paste manually.');
+  }
+}
 
-	function replaceSelection() {
-		const { from, to } = editor.view.state.selection;
-		try {
-			editor
-				.chain()
-				.focus()
-				.insertContentAt({ from, to }, aiResponse, { contentType: 'markdown' })
-				.run();
-		} catch (error) {
-			console.error(error);
-			toast.error('Unable to insert the data. Copy content and paste manually.');
-		}
-	}
+function insertNext() {
+  const { to } = editor.view.state.selection;
+  try {
+    editor
+      .chain()
+      .focus()
+      .insertContentAt(to + 1, aiResponse, { contentType: 'markdown' })
+      .run();
+  } catch (error) {
+    console.error(error);
+    toast.error('Unable to insert the data. Copy content and paste manually.');
+  }
+}
 
-	function insertNext() {
-		const { to } = editor.view.state.selection;
-		try {
-			editor
-				.chain()
-				.focus()
-				.insertContentAt(to + 1, aiResponse, { contentType: 'markdown' })
-				.run();
-		} catch (error) {
-			console.error(error);
-			toast.error('Unable to insert the data. Copy content and paste manually.');
-		}
-	}
+function discardChanges() {
+  aiResponse = '';
+  aiState = AIState.Idle;
+}
 
-	function discardChanges() {
-		aiResponse = '';
-		aiState = AIState.Idle;
-	}
-
-	function closeAI() {
-		removeAIHighlight(editor);
-		aiState = AIState.Idle;
-		aiResponse = '';
-	}
+function closeAI() {
+  removeAIHighlight(editor);
+  aiState = AIState.Idle;
+  aiResponse = '';
+}
 </script>
 
 <BubbleMenu

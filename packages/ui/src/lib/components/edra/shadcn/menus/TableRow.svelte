@@ -1,22 +1,22 @@
 <script lang="ts">
-	import type { ShouldShowProps } from '../../types';
-	import { type Editor } from '@tiptap/core';
-	import ArrowDownFromLine from '@lucide/svelte/icons/arrow-down-from-line';
-	import ArrowUpFromLine from '@lucide/svelte/icons/arrow-up-from-line';
-	import ArrowDown from '@lucide/svelte/icons/arrow-down';
-	import ArrowUp from '@lucide/svelte/icons/arrow-up';
-	import Trash from '@lucide/svelte/icons/trash';
-	import Sheet from '@lucide/svelte/icons/sheet';
-	import { isRowGripSelected, moveRowUp, moveRowDown } from '../../extensions/table/utils';
-	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import { Separator } from '@lib/components/ui/separator';
+import { Separator } from '@lib/components/ui/separator';
+import ArrowDown from '@lucide/svelte/icons/arrow-down';
+import ArrowDownFromLine from '@lucide/svelte/icons/arrow-down-from-line';
+import ArrowUp from '@lucide/svelte/icons/arrow-up';
+import ArrowUpFromLine from '@lucide/svelte/icons/arrow-up-from-line';
+import Sheet from '@lucide/svelte/icons/sheet';
+import Trash from '@lucide/svelte/icons/trash';
+import { type Editor } from '@tiptap/core';
+import BubbleMenu from '../../components/BubbleMenu.svelte';
+import { isRowGripSelected, moveRowDown, moveRowUp } from '../../extensions/table/utils';
+import type { ShouldShowProps } from '../../types';
 
-	interface Props {
-		editor: Editor;
-		parentElement?: HTMLElement;
-	}
+interface Props {
+  editor: Editor;
+  parentElement?: HTMLElement;
+}
 
-	const { editor, parentElement }: Props = $props();
+const { editor, parentElement }: Props = $props();
 </script>
 
 <BubbleMenu

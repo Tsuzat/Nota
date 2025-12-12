@@ -1,29 +1,29 @@
 <script lang="ts">
-	import type { Editor } from '@tiptap/core';
-	import * as DropdownMenu from '@lib/components/ui/dropdown-menu';
-	import commands from '../../../commands/toolbar-commands';
-	import { cn } from '@lib/utils';
-	import EdraToolTip from '../EdraToolTip.svelte';
-	import Paragraph from '@lucide/svelte/icons/pilcrow';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import { buttonVariants } from '@lib/components/ui/button';
+import { buttonVariants } from '@lib/components/ui/button';
+import * as DropdownMenu from '@lib/components/ui/dropdown-menu';
+import { cn } from '@lib/utils';
+import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import Paragraph from '@lucide/svelte/icons/pilcrow';
+import type { Editor } from '@tiptap/core';
+import commands from '../../../commands/toolbar-commands';
+import EdraToolTip from '../EdraToolTip.svelte';
 
-	interface Props {
-		editor: Editor;
-	}
+interface Props {
+  editor: Editor;
+}
 
-	const { editor }: Props = $props();
+const { editor }: Props = $props();
 
-	const headings = commands['headings'];
+const headings = commands['headings'];
 
-	const isActive = $derived.by(() => {
-		return headings.find((h) => h.isActive?.(editor)) !== undefined;
-	});
+const isActive = $derived.by(() => {
+  return headings.find((h) => h.isActive?.(editor)) !== undefined;
+});
 
-	const HeadingIcon = $derived.by(() => {
-		const h = headings.find((h) => h.isActive?.(editor));
-		return h ? h.icon : Paragraph;
-	});
+const HeadingIcon = $derived.by(() => {
+  const h = headings.find((h) => h.isActive?.(editor));
+  return h ? h.icon : Paragraph;
+});
 </script>
 
 <DropdownMenu.Root>

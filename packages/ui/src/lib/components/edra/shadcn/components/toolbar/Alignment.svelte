@@ -1,30 +1,30 @@
 <script lang="ts">
-	import type { Editor } from '@tiptap/core';
-	// import * as Select from '@lib/components/ui/select';
-	import * as DropdownMenu from '@lib/components/ui/dropdown-menu';
-	import commands from '@lib/components/edra/commands/toolbar-commands';
-	import { cn } from '@lib/utils';
-	import EdraToolTip from '../EdraToolTip.svelte';
-	import AlignLeft from '@lucide/svelte/icons/align-left';
-	import { buttonVariants } from '@lib/components/ui/button';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import commands from '@lib/components/edra/commands/toolbar-commands';
+import { buttonVariants } from '@lib/components/ui/button';
+// import * as Select from '@lib/components/ui/select';
+import * as DropdownMenu from '@lib/components/ui/dropdown-menu';
+import { cn } from '@lib/utils';
+import AlignLeft from '@lucide/svelte/icons/align-left';
+import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import type { Editor } from '@tiptap/core';
+import EdraToolTip from '../EdraToolTip.svelte';
 
-	interface Props {
-		editor: Editor;
-	}
+interface Props {
+  editor: Editor;
+}
 
-	const { editor }: Props = $props();
+const { editor }: Props = $props();
 
-	const alignments = commands['alignment'];
+const alignments = commands['alignment'];
 
-	const isActive = $derived.by(() => {
-		return alignments.find((h) => h.isActive?.(editor)) !== undefined;
-	});
+const isActive = $derived.by(() => {
+  return alignments.find((h) => h.isActive?.(editor)) !== undefined;
+});
 
-	const AlignmentIcon = $derived.by(() => {
-		const h = alignments.find((h) => h.isActive?.(editor));
-		return h ? h.icon : AlignLeft;
-	});
+const AlignmentIcon = $derived.by(() => {
+  const h = alignments.find((h) => h.isActive?.(editor));
+  return h ? h.icon : AlignLeft;
+});
 </script>
 
 <DropdownMenu.Root>

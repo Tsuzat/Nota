@@ -1,22 +1,22 @@
 <script lang="ts">
-	import type { NodeViewProps } from '@tiptap/core';
+import type { NodeViewProps } from '@tiptap/core';
 
-	const { editor }: NodeViewProps = $props();
-	import CodeXml from '@lucide/svelte/icons/code-xml';
+const { editor }: NodeViewProps = $props();
 
-	import Button, { buttonVariants } from '@lib/components/ui/button/button.svelte';
-	import * as Popover from '@lib/components/ui/popover';
-	import { Input } from '@lib/components/ui/input';
-	import { NodeViewWrapper } from 'svelte-tiptap';
+import Button, { buttonVariants } from '@lib/components/ui/button/button.svelte';
+import { Input } from '@lib/components/ui/input';
+import * as Popover from '@lib/components/ui/popover';
+import CodeXml from '@lucide/svelte/icons/code-xml';
+import { NodeViewWrapper } from 'svelte-tiptap';
 
-	let open = $state(false);
-	let iframUrl = $state('');
+let open = $state(false);
+let iframUrl = $state('');
 
-	function handleSubmit(e: Event) {
-		e.preventDefault();
-		open = false;
-		editor.chain().focus().setIframe({ src: iframUrl }).run();
-	}
+function handleSubmit(e: Event) {
+  e.preventDefault();
+  open = false;
+  editor.chain().focus().setIframe({ src: iframUrl }).run();
+}
 </script>
 
 <NodeViewWrapper

@@ -1,33 +1,33 @@
 <script lang="ts">
-	import type { ShouldShowProps } from '../../types';
-	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import type { Editor } from '@tiptap/core';
-	import { Button } from '@lib/components/ui/button';
-	import Copy from '@lucide/svelte/icons/copy';
-	import Trash from '@lucide/svelte/icons/trash';
-	import { Input } from '@lib/components/ui/input';
-	import Check from '@lucide/svelte/icons/check';
-	import Edit from '@lucide/svelte/icons/edit';
-	import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
+import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
+import { Button } from '@lib/components/ui/button';
+import { Input } from '@lib/components/ui/input';
+import Check from '@lucide/svelte/icons/check';
+import Copy from '@lucide/svelte/icons/copy';
+import Edit from '@lucide/svelte/icons/edit';
+import Trash from '@lucide/svelte/icons/trash';
+import type { Editor } from '@tiptap/core';
+import BubbleMenu from '../../components/BubbleMenu.svelte';
+import type { ShouldShowProps } from '../../types';
 
-	interface Props {
-		editor: Editor;
-		parentElement?: HTMLElement;
-	}
-	const { editor, parentElement }: Props = $props();
+interface Props {
+  editor: Editor;
+  parentElement?: HTMLElement;
+}
+const { editor, parentElement }: Props = $props();
 
-	let link = $derived.by(() => editor.getAttributes('link').href);
+let link = $derived.by(() => editor.getAttributes('link').href);
 
-	let isEditing = $state(false);
+let isEditing = $state(false);
 
-	let linkInput = $derived(link);
+let linkInput = $derived(link);
 
-	function handleSubmit(e: Event) {
-		e.preventDefault();
-		if (!linkInput || linkInput.trim() === '') return;
-		isEditing = false;
-		editor.chain().focus().extendMarkRange('link').setLink({ href: linkInput }).run();
-	}
+function handleSubmit(e: Event) {
+  e.preventDefault();
+  if (!linkInput || linkInput.trim() === '') return;
+  isEditing = false;
+  editor.chain().focus().extendMarkRange('link').setLink({ href: linkInput }).run();
+}
 </script>
 
 <BubbleMenu

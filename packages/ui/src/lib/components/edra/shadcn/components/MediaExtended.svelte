@@ -1,136 +1,134 @@
 <script lang="ts">
-	import { onDestroy, onMount, type Snippet } from 'svelte';
-	import { NodeViewWrapper } from 'svelte-tiptap';
-	import type { NodeViewProps } from '@tiptap/core';
-	import { cn } from '@lib/utils.js';
-	import { Button, buttonVariants } from '@lib/components/ui/button/index.js';
+import { Button, buttonVariants } from '@lib/components/ui/button/index.js';
+import * as DropdownMenu from '@lib/components/ui/dropdown-menu/index.js';
+import { cn } from '@lib/utils.js';
+import AlignCenter from '@lucide/svelte/icons/align-center';
+import AlignLeft from '@lucide/svelte/icons/align-left';
+import AlignRight from '@lucide/svelte/icons/align-right';
+import Captions from '@lucide/svelte/icons/captions';
+import CopyIcon from '@lucide/svelte/icons/copy';
+import EllipsisVertical from '@lucide/svelte/icons/ellipsis-vertical';
+import Fullscreen from '@lucide/svelte/icons/fullscreen';
+import Trash from '@lucide/svelte/icons/trash';
+import type { NodeViewProps } from '@tiptap/core';
+import { onDestroy, onMount, type Snippet } from 'svelte';
+import { NodeViewWrapper } from 'svelte-tiptap';
+import { duplicateContent } from '../../utils.js';
 
-	import AlignCenter from '@lucide/svelte/icons/align-center';
-	import AlignLeft from '@lucide/svelte/icons/align-left';
-	import AlignRight from '@lucide/svelte/icons/align-right';
-	import EllipsisVertical from '@lucide/svelte/icons/ellipsis-vertical';
-	import CopyIcon from '@lucide/svelte/icons/copy';
-	import Fullscreen from '@lucide/svelte/icons/fullscreen';
-	import Trash from '@lucide/svelte/icons/trash';
-	import Captions from '@lucide/svelte/icons/captions';
+interface MediaExtendedProps extends NodeViewProps {
+  children: Snippet<[]>;
+  mediaRef?: HTMLElement;
+}
 
-	import * as DropdownMenu from '@lib/components/ui/dropdown-menu/index.js';
-	import { duplicateContent } from '../../utils.js';
+const {
+  node,
+  editor,
+  selected,
+  deleteNode,
+  updateAttributes,
+  children,
+  mediaRef = $bindable(),
+}: MediaExtendedProps = $props();
 
-	interface MediaExtendedProps extends NodeViewProps {
-		children: Snippet<[]>;
-		mediaRef?: HTMLElement;
-	}
+const minWidthPercent = 20;
+const maxWidthPercent = 100;
 
-	const {
-		node,
-		editor,
-		selected,
-		deleteNode,
-		updateAttributes,
-		children,
-		mediaRef = $bindable()
-	}: MediaExtendedProps = $props();
+let nodeRef = $state<HTMLElement>();
 
-	const minWidthPercent = 20;
-	const maxWidthPercent = 100;
+let resizing = $state(false);
+let resizingInitialWidthPercent = $state(0);
+let resizingInitialMouseX = $state(0);
+let resizingPosition = $state<'left' | 'right'>('left');
+let openedMore = $state(false);
 
-	let nodeRef = $state<HTMLElement>();
+function handleResizingPosition(e: MouseEvent, position: 'left' | 'right') {
+  startResize(e);
+  resizingPosition = position;
+}
 
-	let resizing = $state(false);
-	let resizingInitialWidthPercent = $state(0);
-	let resizingInitialMouseX = $state(0);
-	let resizingPosition = $state<'left' | 'right'>('left');
-	let openedMore = $state(false);
+function startResize(e: MouseEvent) {
+  e.preventDefault();
+  resizing = true;
+  resizingInitialMouseX = e.clientX;
+  if (mediaRef && nodeRef?.parentElement) {
+    const currentWidth = mediaRef.offsetWidth;
+    const parentWidth = nodeRef.parentElement.offsetWidth;
+    resizingInitialWidthPercent = (currentWidth / parentWidth) * 100;
+  }
+}
 
-	function handleResizingPosition(e: MouseEvent, position: 'left' | 'right') {
-		startResize(e);
-		resizingPosition = position;
-	}
+function resize(e: MouseEvent) {
+  if (!resizing || !nodeRef?.parentElement) return;
+  let dx = e.clientX - resizingInitialMouseX;
+  if (resizingPosition === 'left') {
+    dx = resizingInitialMouseX - e.clientX;
+  }
+  const parentWidth = nodeRef.parentElement.offsetWidth;
+  const deltaPercent = (dx / parentWidth) * 100;
+  const newWidthPercent = Math.max(
+    Math.min(resizingInitialWidthPercent + deltaPercent, maxWidthPercent),
+    minWidthPercent
+  );
+  updateAttributes({ width: `${newWidthPercent}%` });
+}
 
-	function startResize(e: MouseEvent) {
-		e.preventDefault();
-		resizing = true;
-		resizingInitialMouseX = e.clientX;
-		if (mediaRef && nodeRef?.parentElement) {
-			const currentWidth = mediaRef.offsetWidth;
-			const parentWidth = nodeRef.parentElement.offsetWidth;
-			resizingInitialWidthPercent = (currentWidth / parentWidth) * 100;
-		}
-	}
+function endResize() {
+  resizing = false;
+  resizingInitialMouseX = 0;
+  resizingInitialWidthPercent = 0;
+}
 
-	function resize(e: MouseEvent) {
-		if (!resizing || !nodeRef?.parentElement) return;
-		let dx = e.clientX - resizingInitialMouseX;
-		if (resizingPosition === 'left') {
-			dx = resizingInitialMouseX - e.clientX;
-		}
-		const parentWidth = nodeRef.parentElement.offsetWidth;
-		const deltaPercent = (dx / parentWidth) * 100;
-		const newWidthPercent = Math.max(
-			Math.min(resizingInitialWidthPercent + deltaPercent, maxWidthPercent),
-			minWidthPercent
-		);
-		updateAttributes({ width: `${newWidthPercent}%` });
-	}
+function handleTouchStart(e: TouchEvent, position: 'left' | 'right') {
+  e.preventDefault();
+  resizing = true;
+  resizingPosition = position;
+  resizingInitialMouseX = e.touches[0].clientX;
+  if (mediaRef && nodeRef?.parentElement) {
+    const currentWidth = mediaRef.offsetWidth;
+    const parentWidth = nodeRef.parentElement.offsetWidth;
+    resizingInitialWidthPercent = (currentWidth / parentWidth) * 100;
+  }
+}
 
-	function endResize() {
-		resizing = false;
-		resizingInitialMouseX = 0;
-		resizingInitialWidthPercent = 0;
-	}
+function handleTouchMove(e: TouchEvent) {
+  if (!resizing || !nodeRef?.parentElement) return;
+  let dx = e.touches[0].clientX - resizingInitialMouseX;
+  if (resizingPosition === 'left') {
+    dx = resizingInitialMouseX - e.touches[0].clientX;
+  }
+  const parentWidth = nodeRef.parentElement.offsetWidth;
+  const deltaPercent = (dx / parentWidth) * 100;
+  const newWidthPercent = Math.max(
+    Math.min(resizingInitialWidthPercent + deltaPercent, maxWidthPercent),
+    minWidthPercent
+  );
+  updateAttributes({ width: `${newWidthPercent}%` });
+}
 
-	function handleTouchStart(e: TouchEvent, position: 'left' | 'right') {
-		e.preventDefault();
-		resizing = true;
-		resizingPosition = position;
-		resizingInitialMouseX = e.touches[0].clientX;
-		if (mediaRef && nodeRef?.parentElement) {
-			const currentWidth = mediaRef.offsetWidth;
-			const parentWidth = nodeRef.parentElement.offsetWidth;
-			resizingInitialWidthPercent = (currentWidth / parentWidth) * 100;
-		}
-	}
+function handleTouchEnd() {
+  resizing = false;
+  resizingInitialMouseX = 0;
+  resizingInitialWidthPercent = 0;
+}
 
-	function handleTouchMove(e: TouchEvent) {
-		if (!resizing || !nodeRef?.parentElement) return;
-		let dx = e.touches[0].clientX - resizingInitialMouseX;
-		if (resizingPosition === 'left') {
-			dx = resizingInitialMouseX - e.touches[0].clientX;
-		}
-		const parentWidth = nodeRef.parentElement.offsetWidth;
-		const deltaPercent = (dx / parentWidth) * 100;
-		const newWidthPercent = Math.max(
-			Math.min(resizingInitialWidthPercent + deltaPercent, maxWidthPercent),
-			minWidthPercent
-		);
-		updateAttributes({ width: `${newWidthPercent}%` });
-	}
+onMount(() => {
+  // Attach id to nodeRef
+  nodeRef = document.getElementById('resizable-container-media') as HTMLDivElement;
 
-	function handleTouchEnd() {
-		resizing = false;
-		resizingInitialMouseX = 0;
-		resizingInitialWidthPercent = 0;
-	}
+  // Mouse events
+  window.addEventListener('mousemove', resize);
+  window.addEventListener('mouseup', endResize);
+  // Touch events
+  window.addEventListener('touchmove', handleTouchMove);
+  window.addEventListener('touchend', handleTouchEnd);
+});
 
-	onMount(() => {
-		// Attach id to nodeRef
-		nodeRef = document.getElementById('resizable-container-media') as HTMLDivElement;
-
-		// Mouse events
-		window.addEventListener('mousemove', resize);
-		window.addEventListener('mouseup', endResize);
-		// Touch events
-		window.addEventListener('touchmove', handleTouchMove);
-		window.addEventListener('touchend', handleTouchEnd);
-	});
-
-	onDestroy(() => {
-		window.removeEventListener('mousemove', resize);
-		window.removeEventListener('mouseup', endResize);
-		window.removeEventListener('touchmove', handleTouchMove);
-		window.removeEventListener('touchend', handleTouchEnd);
-	});
+onDestroy(() => {
+  window.removeEventListener('mousemove', resize);
+  window.removeEventListener('mouseup', endResize);
+  window.removeEventListener('touchmove', handleTouchMove);
+  window.removeEventListener('touchend', handleTouchEnd);
+});
 </script>
 
 <NodeViewWrapper

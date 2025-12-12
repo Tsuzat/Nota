@@ -1,59 +1,59 @@
 <script lang="ts">
-	import type { NodeViewProps } from '@tiptap/core';
+import type { NodeViewProps } from '@tiptap/core';
 
-	const { editor }: NodeViewProps = $props();
-	import Image from '@lucide/svelte/icons/image';
-	import { Button, buttonVariants } from '@lib/components/ui/button';
-	import * as Popover from '@lib/components/ui/popover';
-	import { Input } from '@lib/components/ui/input';
-	import { NodeViewWrapper } from 'svelte-tiptap';
-	import * as Tabs from '@lib/components/ui/tabs';
-	import { FileType } from '../../utils';
-	import { toast } from 'svelte-sonner';
-	import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
-	import Loader from '@lucide/svelte/icons/loader';
-	import { isURL } from '../../utils';
+const { editor }: NodeViewProps = $props();
 
-	let open = $state(false);
-	let imageUrl = $state('');
-	let isUploading = $state(false);
+import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
+import { Button, buttonVariants } from '@lib/components/ui/button';
+import { Input } from '@lib/components/ui/input';
+import * as Popover from '@lib/components/ui/popover';
+import * as Tabs from '@lib/components/ui/tabs';
+import Image from '@lucide/svelte/icons/image';
+import Loader from '@lucide/svelte/icons/loader';
+import { toast } from 'svelte-sonner';
+import { NodeViewWrapper } from 'svelte-tiptap';
+import { FileType, isURL } from '../../utils';
 
-	function handleSubmit(e: Event) {
-		e.preventDefault();
-		open = false;
-		editor.chain().focus().setImage({ src: imageUrl }).run();
-	}
+let open = $state(false);
+let imageUrl = $state('');
+let isUploading = $state(false);
 
-	const assetsFiles = $derived(editor.commands.getAssets(FileType.IMAGE));
+function handleSubmit(e: Event) {
+  e.preventDefault();
+  open = false;
+  editor.chain().focus().setImage({ src: imageUrl }).run();
+}
 
-	async function openFileDialog() {
-		// const file = await openDialog({
-		// 	title: 'Select Images',
-		// 	multiple: false,
-		// 	directory: false,
-		// 	filters: [
-		// 		{
-		// 			name: 'Images',
-		// 			extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico', 'raw', 'tga']
-		// 		}
-		// 	]
-		// });
-		// if (!file) return;
-		// if (ISTAURI) {
-		// 	isUploading = true;
-		// 	try {
-		// 		const uploadedFile = await editor?.commands.handleFileDrop(file);
-		// 		const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(uploadedFile);
-		// 		editor.chain().focus().setImage({ src }).run();
-		// 		open = true;
-		// 	} catch (e) {
-		// 		console.error(e);
-		// 		toast.error('Could not process images.');
-		// 	} finally {
-		// 		isUploading = false;
-		// 	}
-		// }
-	}
+const assetsFiles = $derived(editor.commands.getAssets(FileType.IMAGE));
+
+async function openFileDialog() {
+  // const file = await openDialog({
+  // 	title: 'Select Images',
+  // 	multiple: false,
+  // 	directory: false,
+  // 	filters: [
+  // 		{
+  // 			name: 'Images',
+  // 			extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico', 'raw', 'tga']
+  // 		}
+  // 	]
+  // });
+  // if (!file) return;
+  // if (ISTAURI) {
+  // 	isUploading = true;
+  // 	try {
+  // 		const uploadedFile = await editor?.commands.handleFileDrop(file);
+  // 		const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(uploadedFile);
+  // 		editor.chain().focus().setImage({ src }).run();
+  // 		open = true;
+  // 	} catch (e) {
+  // 		console.error(e);
+  // 		toast.error('Could not process images.');
+  // 	} finally {
+  // 		isUploading = false;
+  // 	}
+  // }
+}
 </script>
 
 <NodeViewWrapper

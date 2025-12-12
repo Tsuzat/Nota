@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { Button, buttonVariants } from '@lib/components/ui/button/index.js';
-	import * as Popover from '@lib/components/ui/popover/index.js';
-	import type { Editor } from '@tiptap/core';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import { cn } from '@lib/utils.js';
-	import EdraToolTip from '../EdraToolTip.svelte';
-	import { quickcolors } from '@lib/components/edra/utils';
+import { quickcolors } from '@lib/components/edra/utils';
+import { Button, buttonVariants } from '@lib/components/ui/button/index.js';
+import * as Popover from '@lib/components/ui/popover/index.js';
+import { cn } from '@lib/utils.js';
+import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import type { Editor } from '@tiptap/core';
+import EdraToolTip from '../EdraToolTip.svelte';
 
-	interface Props {
-		class?: string;
-		editor: Editor;
-	}
-	const { class: className = '', editor }: Props = $props();
+interface Props {
+  class?: string;
+  editor: Editor;
+}
+const { class: className = '', editor }: Props = $props();
 
-	const currentColor = $derived.by(() => editor.getAttributes('textStyle').color);
-	const currentHighlight = $derived.by(() => editor.getAttributes('highlight').color);
+const currentColor = $derived.by(() => editor.getAttributes('textStyle').color);
+const currentHighlight = $derived.by(() => editor.getAttributes('highlight').color);
 </script>
 
 <Popover.Root>

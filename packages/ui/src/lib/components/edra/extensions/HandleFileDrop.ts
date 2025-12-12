@@ -1,5 +1,5 @@
-import type { FileType } from "@lib/utils";
-import { Extension } from "@tiptap/core";
+import type { FileType } from '@lib/utils';
+import { Extension } from '@tiptap/core';
 
 export interface FileDropOptions {
   /**
@@ -12,16 +12,14 @@ export interface FileDropOptions {
   assetsGetter: (fileType: FileType) => Promise<string[]>;
 }
 
-declare module "@tiptap/core" {
+declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     fileDrop: {
       /**
        * Set the handler that takes an array of local file paths
        * and returns a Promise of the uploaded URLs.
        */
-      setHandleFileDrop: (
-        handler: (file: string) => Promise<string>
-      ) => ReturnType;
+      setHandleFileDrop: (handler: (file: string) => Promise<string>) => ReturnType;
       /**
        * Call the handler you registered above,
        * returns a Promise<string[]> of the uploaded URLs.
@@ -31,9 +29,7 @@ declare module "@tiptap/core" {
        * Set the assets getter that takes a file type
        * and returns a Promise of the asset URLs.
        */
-      setGetAssets: (
-        getter: (fileType: string) => Promise<string[]>
-      ) => ReturnType;
+      setGetAssets: (getter: (fileType: string) => Promise<string[]>) => ReturnType;
       /**
        * Get assets for a specific file type,
        * returns a Promise<string[]> of the asset URLs.
@@ -51,7 +47,7 @@ declare module "@tiptap/core" {
 }
 
 export const FileDrop = Extension.create<FileDropOptions>({
-  name: "fileDrop",
+  name: 'fileDrop',
 
   // initial default handlers
   addOptions() {

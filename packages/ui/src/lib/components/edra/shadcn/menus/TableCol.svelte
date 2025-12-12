@@ -1,26 +1,22 @@
 <script lang="ts">
-	import type { ShouldShowProps } from '../../types';
-	import { type Editor } from '@tiptap/core';
-	import ArrowLeftFromLine from '@lucide/svelte/icons/arrow-left-from-line';
-	import ArrowRightFromLine from '@lucide/svelte/icons/arrow-right-from-line';
-	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
-	import ArrowRight from '@lucide/svelte/icons/arrow-right';
-	import Trash from '@lucide/svelte/icons/trash';
-	import Sheet from '@lucide/svelte/icons/sheet';
-	import {
-		isColumnGripSelected,
-		moveColumnLeft,
-		moveColumnRight
-	} from '../../extensions/table/utils';
-	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import { Separator } from '@lib/components/ui/separator';
+import { Separator } from '@lib/components/ui/separator';
+import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+import ArrowLeftFromLine from '@lucide/svelte/icons/arrow-left-from-line';
+import ArrowRight from '@lucide/svelte/icons/arrow-right';
+import ArrowRightFromLine from '@lucide/svelte/icons/arrow-right-from-line';
+import Sheet from '@lucide/svelte/icons/sheet';
+import Trash from '@lucide/svelte/icons/trash';
+import { type Editor } from '@tiptap/core';
+import BubbleMenu from '../../components/BubbleMenu.svelte';
+import { isColumnGripSelected, moveColumnLeft, moveColumnRight } from '../../extensions/table/utils';
+import type { ShouldShowProps } from '../../types';
 
-	interface Props {
-		editor: Editor;
-		parentElement?: HTMLElement;
-	}
+interface Props {
+  editor: Editor;
+  parentElement?: HTMLElement;
+}
 
-	const { editor, parentElement }: Props = $props();
+const { editor, parentElement }: Props = $props();
 </script>
 
 <BubbleMenu

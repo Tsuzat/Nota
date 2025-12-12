@@ -1,32 +1,34 @@
 <script lang="ts">
-	import { NodeViewWrapper, NodeViewContent } from 'svelte-tiptap';
-	import type { NodeViewProps } from '@tiptap/core';
-	import { Button } from '@lib/components/ui/button';
-	const { editor, node, updateAttributes, extension }: NodeViewProps = $props();
-	import Check from '@lucide/svelte/icons/check';
-	import Copy from '@lucide/svelte/icons/copy';
-	import * as Select from '@lib/components/ui/select';
+import { Button } from '@lib/components/ui/button';
+import type { NodeViewProps } from '@tiptap/core';
+import { NodeViewContent, NodeViewWrapper } from 'svelte-tiptap';
 
-	let preRef = $state<HTMLPreElement>();
+const { editor, node, updateAttributes, extension }: NodeViewProps = $props();
 
-	let isCopying = $state(false);
+import * as Select from '@lib/components/ui/select';
+import Check from '@lucide/svelte/icons/check';
+import Copy from '@lucide/svelte/icons/copy';
 
-	const languages: string[] = $derived(extension.options.lowlight.listLanguages().sort());
+let preRef = $state<HTMLPreElement>();
 
-	let defaultLanguage = $derived(node.attrs.language);
+let isCopying = $state(false);
 
-	$effect(() => {
-		updateAttributes({ language: defaultLanguage });
-	});
+const languages: string[] = $derived(extension.options.lowlight.listLanguages().sort());
 
-	function copyCode() {
-		if (!preRef) return;
-		isCopying = true;
-		navigator.clipboard.writeText(preRef.innerText);
-		setTimeout(() => {
-			isCopying = false;
-		}, 1000);
-	}
+let defaultLanguage = $derived(node.attrs.language);
+
+$effect(() => {
+  updateAttributes({ language: defaultLanguage });
+});
+
+function copyCode() {
+  if (!preRef) return;
+  isCopying = true;
+  navigator.clipboard.writeText(preRef.innerText);
+  setTimeout(() => {
+    isCopying = false;
+  }, 1000);
+}
 </script>
 
 <NodeViewWrapper class="code-wrapper" draggable={false} spellcheck={false}>

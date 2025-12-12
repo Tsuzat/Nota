@@ -7,7 +7,10 @@
     "web:build": "bun --filter @nota/web build",
     "web:wrangle:preview": "bun --filter @nota/web wrangle:preview",
     "web:wrangle:deploy": "bun --filter @nota/web wrangle:deploy",
-    "ui:add": "bun --filter @nota/ui shadcn"
+    "ui:add": "bun --filter @nota/ui shadcn",
+    "ci:root": "biome ci",
+    "lint:root": "biome check .",
+    "format:root": "biome check . --write"
   },
   "private": true,
   "workspaces": [

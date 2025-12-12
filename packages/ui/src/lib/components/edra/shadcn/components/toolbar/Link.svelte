@@ -1,32 +1,32 @@
 <script lang="ts">
-	import * as Popover from '@lib/components/ui/popover';
-	import type { Editor } from '@tiptap/core';
-	import EdraToolTip from '../EdraToolTip.svelte';
-	import { buttonVariants } from '@lib/components/ui/button';
-	import { cn } from '@lib/utils';
-	import Link from '@lucide/svelte/icons/link';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import Check from '@lucide/svelte/icons/check';
-	import { Input } from '@lib/components/ui/input';
-	import Button from '@lib/components/ui/button/button.svelte';
-	import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
+import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
+import { buttonVariants } from '@lib/components/ui/button';
+import Button from '@lib/components/ui/button/button.svelte';
+import { Input } from '@lib/components/ui/input';
+import * as Popover from '@lib/components/ui/popover';
+import { cn } from '@lib/utils';
+import Check from '@lucide/svelte/icons/check';
+import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import Link from '@lucide/svelte/icons/link';
+import type { Editor } from '@tiptap/core';
+import EdraToolTip from '../EdraToolTip.svelte';
 
-	interface Props {
-		editor: Editor;
-		open?: boolean;
-	}
+interface Props {
+  editor: Editor;
+  open?: boolean;
+}
 
-	let { editor, open = $bindable(false) }: Props = $props();
+let { editor, open = $bindable(false) }: Props = $props();
 
-	let value = $state<string>();
+let value = $state<string>();
 
-	function handleSubmit(e: Event) {
-		e.preventDefault();
-		if (value === undefined || value.trim() === '') return;
-		editor.chain().focus().setLink({ href: value }).run();
-		value = undefined;
-		open = false;
-	}
+function handleSubmit(e: Event) {
+  e.preventDefault();
+  if (value === undefined || value.trim() === '') return;
+  editor.chain().focus().setLink({ href: value }).run();
+  value = undefined;
+  open = false;
+}
 </script>
 
 <Popover.Root bind:open>

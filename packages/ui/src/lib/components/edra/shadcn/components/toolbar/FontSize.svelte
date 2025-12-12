@@ -1,34 +1,34 @@
 <script lang="ts">
-	import { Editor } from '@tiptap/core';
-	import * as DropdownMenu from '@lib/components/ui/dropdown-menu';
-	import { cn } from '@lib/utils.js';
-	import EdraToolTip from '../EdraToolTip.svelte';
-	import { buttonVariants } from '@lib/components/ui/button';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import { buttonVariants } from '@lib/components/ui/button';
+import * as DropdownMenu from '@lib/components/ui/dropdown-menu';
+import { cn } from '@lib/utils.js';
+import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import { Editor } from '@tiptap/core';
+import EdraToolTip from '../EdraToolTip.svelte';
 
-	interface Props {
-		class?: string;
-		editor: Editor;
-	}
+interface Props {
+  class?: string;
+  editor: Editor;
+}
 
-	const { class: className = '', editor }: Props = $props();
+const { class: className = '', editor }: Props = $props();
 
-	const FONT_SIZE = [
-		{ label: 'Tiny', value: '0.7rem' },
-		{ label: 'Smaller', value: '0.75rem' },
-		{ label: 'Small', value: '0.9rem' },
-		{ label: 'Default', value: '' },
-		{ label: 'Large', value: '1.25rem' },
-		{ label: 'Extra Large', value: '1.5rem' }
-	];
+const FONT_SIZE = [
+  { label: 'Tiny', value: '0.7rem' },
+  { label: 'Smaller', value: '0.75rem' },
+  { label: 'Small', value: '0.9rem' },
+  { label: 'Default', value: '' },
+  { label: 'Large', value: '1.25rem' },
+  { label: 'Extra Large', value: '1.5rem' },
+];
 
-	let currentSize = $derived.by(() => editor.getAttributes('textStyle').fontSize || '');
+let currentSize = $derived.by(() => editor.getAttributes('textStyle').fontSize || '');
 
-	const currentLabel = $derived.by(() => {
-		const l = FONT_SIZE.find((f) => f.value === currentSize);
-		if (l) return l.label.split(' ')[0];
-		return 'Medium';
-	});
+const currentLabel = $derived.by(() => {
+  const l = FONT_SIZE.find((f) => f.value === currentSize);
+  if (l) return l.label.split(' ')[0];
+  return 'Medium';
+});
 </script>
 
 <DropdownMenu.Root>

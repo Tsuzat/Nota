@@ -1,57 +1,58 @@
 <script lang="ts">
-	import type { NodeViewProps } from '@tiptap/core';
+import type { NodeViewProps } from '@tiptap/core';
 
-	const { editor }: NodeViewProps = $props();
-	import Audio from '@lucide/svelte/icons/audio-lines';
-	import Button, { buttonVariants } from '@lib/components/ui/button/button.svelte';
-	import * as Popover from '@lib/components/ui/popover';
-	import { Input } from '@lib/components/ui/input';
-	import { NodeViewWrapper } from 'svelte-tiptap';
-	import * as Tabs from '@lib/components/ui/tabs';
-	import { FileType  } from '../../utils';
-	import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
-	import { Loader } from '@lucide/svelte';
+const { editor }: NodeViewProps = $props();
 
-	let open = $state(false);
-	let audioUrl = $state('');
-	let isUploading = $state(false);
+import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
+import Button, { buttonVariants } from '@lib/components/ui/button/button.svelte';
+import { Input } from '@lib/components/ui/input';
+import * as Popover from '@lib/components/ui/popover';
+import * as Tabs from '@lib/components/ui/tabs';
+import { Loader } from '@lucide/svelte';
+import Audio from '@lucide/svelte/icons/audio-lines';
+import { NodeViewWrapper } from 'svelte-tiptap';
+import { FileType } from '../../utils';
 
-	const assetsFiles = $derived(editor.commands.getAssets(FileType.AUDIO));
+let open = $state(false);
+let audioUrl = $state('');
+let isUploading = $state(false);
 
-	function handleSubmit(e: Event) {
-		e.preventDefault();
-		open = false;
-		editor.chain().focus().setAudio(audioUrl).run();
-	}
+const assetsFiles = $derived(editor.commands.getAssets(FileType.AUDIO));
 
-	// async function openFileDialog() {
-	// 	const file = await openDialog({
-	// 		title: 'Select Audio',
-	// 		multiple: false,
-	// 		directory: false,
-	// 		filters: [
-	// 			{
-	// 				name: 'Select Audio',
-	// 				extensions: ['mp3', 'wav', 'ogg', 'aac', 'flac']
-	// 			}
-	// 		]
-	// 	});
-	// 	if (!file) return;
-	// 	if (ISTAURI) {
-	// 		isUploading = true;
-	// 		try {
-	// 			const uploadedFile = await editor?.commands.handleFileDrop(file);
-	// 			const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(uploadedFile);
-	// 			editor.chain().focus().setAudio(src).run();
-	// 			open = false;
-	// 		} catch (e) {
-	// 			console.error(e);
-	// 			toast.error('Could not process audio.');
-	// 		} finally {
-	// 			isUploading = false;
-	// 		}
-	// 	}
-	// }
+function handleSubmit(e: Event) {
+  e.preventDefault();
+  open = false;
+  editor.chain().focus().setAudio(audioUrl).run();
+}
+
+// async function openFileDialog() {
+// 	const file = await openDialog({
+// 		title: 'Select Audio',
+// 		multiple: false,
+// 		directory: false,
+// 		filters: [
+// 			{
+// 				name: 'Select Audio',
+// 				extensions: ['mp3', 'wav', 'ogg', 'aac', 'flac']
+// 			}
+// 		]
+// 	});
+// 	if (!file) return;
+// 	if (ISTAURI) {
+// 		isUploading = true;
+// 		try {
+// 			const uploadedFile = await editor?.commands.handleFileDrop(file);
+// 			const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(uploadedFile);
+// 			editor.chain().focus().setAudio(src).run();
+// 			open = false;
+// 		} catch (e) {
+// 			console.error(e);
+// 			toast.error('Could not process audio.');
+// 		} finally {
+// 			isUploading = false;
+// 		}
+// 	}
+// }
 </script>
 
 <NodeViewWrapper

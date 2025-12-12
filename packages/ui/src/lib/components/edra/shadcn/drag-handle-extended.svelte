@@ -1,190 +1,157 @@
 <script lang="ts">
-  import type { Editor } from "@tiptap/core";
-  import { onDestroy, onMount } from "svelte";
-  import GripVertical from "@lucide/svelte/icons/grip-vertical";
-  import { DragHandlePlugin } from "@tiptap/extension-drag-handle";
-  import { Button } from "@lib/components/ui/button/index.js";
-  import type { Node } from "@tiptap/pm/model";
-  import * as DropdownMenu from "@lib/components/ui/dropdown-menu/index.js";
-  import RemoveFormatting from "@lucide/svelte/icons/remove-formatting";
-  import Duplicate from "@lucide/svelte/icons/copy";
-  import Clipboard from "@lucide/svelte/icons/clipboard";
-  import Delete from "@lucide/svelte/icons/trash-2";
-  import { NodeSelection } from "@tiptap/pm/state";
-  import Plus from "@lucide/svelte/icons/plus";
-  import { autoPlacement } from "@floating-ui/dom";
-  import Repeat2 from "@lucide/svelte/icons/repeat-2";
-  import commands from "../commands/toolbar-commands";
-  import LinkIcon from "@lucide/svelte/icons/link";
-  import Palette from "@lucide/svelte/icons/palette";
-  import Sparkles from "@lucide/svelte/icons/sparkles";
-  import { quickcolors } from "../utils";
-  import { page } from "$app/state";
-  import { TextAlignCenter } from "@lucide/svelte";
-  import { PUBLIC_NOTA_FRONTEND_URL } from "$env/static/public";
+import { autoPlacement } from '@floating-ui/dom';
+import { Button } from '@lib/components/ui/button/index.js';
+import * as DropdownMenu from '@lib/components/ui/dropdown-menu/index.js';
+import { TextAlignCenter } from '@lucide/svelte';
+import Clipboard from '@lucide/svelte/icons/clipboard';
+import Duplicate from '@lucide/svelte/icons/copy';
+import GripVertical from '@lucide/svelte/icons/grip-vertical';
+import LinkIcon from '@lucide/svelte/icons/link';
+import Palette from '@lucide/svelte/icons/palette';
+import Plus from '@lucide/svelte/icons/plus';
+import RemoveFormatting from '@lucide/svelte/icons/remove-formatting';
+import Repeat2 from '@lucide/svelte/icons/repeat-2';
+import Sparkles from '@lucide/svelte/icons/sparkles';
+import Delete from '@lucide/svelte/icons/trash-2';
+import type { Editor } from '@tiptap/core';
+import { DragHandlePlugin } from '@tiptap/extension-drag-handle';
+import type { Node } from '@tiptap/pm/model';
+import { NodeSelection } from '@tiptap/pm/state';
+import { onDestroy, onMount } from 'svelte';
+import { page } from '$app/state';
+import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
+import commands from '../commands/toolbar-commands';
+import { quickcolors } from '../utils';
 
-  interface Props {
-    editor: Editor;
+interface Props {
+  editor: Editor;
+}
+
+const { editor }: Props = $props();
+
+const alignments = commands['alignment'];
+
+let currentNode: Node | null = $state(null);
+let currentNodePos: number = $state(-1);
+let open = $state(false);
+
+let currentNodeId = $derived.by(() => {
+  if (page.url.pathname.includes('local') || currentNode === null) return null;
+  return currentNode.attrs['id'] as string;
+});
+
+const pluginKey = 'globalDragHandle';
+let element = $state(document.createElement('div'));
+
+const turnIntoCommand = Object.values(commands)
+  .flat()
+  .filter((c) => c.turnInto !== undefined);
+const editorElement = document.getElementById('nota-editor');
+
+onMount(() => {
+  const plugin = DragHandlePlugin({
+    element,
+    pluginKey,
+    editor,
+    computePositionConfig: {
+      strategy: 'absolute',
+      middleware: [
+        autoPlacement({
+          allowedPlacements: ['left', 'left-start', 'left-end'],
+        }),
+      ],
+    },
+    onNodeChange,
+  });
+  editor.registerPlugin(plugin.plugin);
+  element.addEventListener('drag', onDragHandleDrag);
+  element.addEventListener('dragstart', onDragHandleDrag);
+  return () => editor.unregisterPlugin(pluginKey);
+});
+
+onDestroy(() => {
+  element.removeEventListener('drag', onDragHandleDrag);
+  element.removeEventListener('dragstart', onDragHandleDrag);
+});
+
+const onNodeChange = (data: { editor: Editor; node: Node | null; pos: number }) => {
+  if (data.node) currentNode = data.node;
+  currentNodePos = data.pos;
+};
+
+function onDragHandleDrag(e: DragEvent) {
+  if (editorElement === null) return;
+  const scrollY = editorElement.scrollTop;
+  if (e.clientY < 50) {
+    editorElement.scrollTo({ top: scrollY - 30, behavior: 'smooth' });
+  } else if (editorElement.clientHeight - e.clientY < 50) {
+    editorElement.scrollTo({ top: scrollY + 30, behavior: 'smooth' });
   }
+}
 
-  const { editor }: Props = $props();
+const handleRemoveFormatting = () => {
+  const chain = editor.chain();
+  chain.setNodeSelection(currentNodePos).unsetAllMarks();
+  chain.setParagraph();
+  chain.run();
+};
 
-  const alignments = commands["alignment"];
+const handleDuplicate = () => {
+  editor.commands.setNodeSelection(currentNodePos);
+  const selectedNode = editor.state.selection.$anchor.node(1) || (editor.state.selection as NodeSelection).node;
+  editor
+    .chain()
+    .setMeta('hideDragHandle', true)
+    .insertContentAt(currentNodePos + (currentNode?.nodeSize || 0), selectedNode.toJSON())
+    .run();
+};
 
-  let currentNode: Node | null = $state(null);
-  let currentNodePos: number = $state(-1);
-  let open = $state(false);
+const handleCopyToClipboard = () => {
+  editor.chain().setMeta('hideDragHandle', true).setNodeSelection(currentNodePos).run();
+  /**
+   * !FIXME: document.execCommand is deprecated, use navigator.clipboard.writeText instead
+   */
+  document.execCommand('copy');
+};
 
-  let currentNodeId = $derived.by(() => {
-    if (page.url.pathname.includes("local") || currentNode === null)
-      return null;
-    return currentNode.attrs["id"] as string;
-  });
+const handleDelete = () => {
+  editor.chain().setMeta('hideDragHandle', true).setNodeSelection(currentNodePos).deleteSelection().run();
+};
 
-  const pluginKey = "globalDragHandle";
-  let element = $state(document.createElement("div"));
+const handleCopyNodeLink = () => {
+  const pathName = PUBLIC_NOTA_FRONTEND_URL + page.url.pathname + `#${currentNodeId}`;
+  navigator.clipboard.writeText(pathName);
+};
 
-  const turnIntoCommand = Object.values(commands)
-    .flat()
-    .filter((c) => c.turnInto !== undefined);
-  const editorElement = document.getElementById("nota-editor");
-
-  onMount(() => {
-    const plugin = DragHandlePlugin({
-      element,
-      pluginKey,
-      editor,
-      computePositionConfig: {
-        strategy: "absolute",
-        middleware: [
-          autoPlacement({
-            allowedPlacements: ["left", "left-start", "left-end"],
-          }),
-        ],
-      },
-      onNodeChange,
-    });
-    editor.registerPlugin(plugin.plugin);
-    element.addEventListener("drag", onDragHandleDrag);
-    element.addEventListener("dragstart", onDragHandleDrag);
-    return () => editor.unregisterPlugin(pluginKey);
-  });
-
-  onDestroy(() => {
-    element.removeEventListener("drag", onDragHandleDrag);
-    element.removeEventListener("dragstart", onDragHandleDrag);
-  });
-
-  const onNodeChange = (data: {
-    editor: Editor;
-    node: Node | null;
-    pos: number;
-  }) => {
-    if (data.node) currentNode = data.node;
-    currentNodePos = data.pos;
-  };
-
-  function onDragHandleDrag(e: DragEvent) {
-    if (editorElement === null) return;
-    const scrollY = editorElement.scrollTop;
-    if (e.clientY < 50) {
-      editorElement.scrollTo({ top: scrollY - 30, behavior: "smooth" });
-    } else if (editorElement.clientHeight - e.clientY < 50) {
-      editorElement.scrollTo({ top: scrollY + 30, behavior: "smooth" });
-    }
-  }
-
-  const handleRemoveFormatting = () => {
-    const chain = editor.chain();
-    chain.setNodeSelection(currentNodePos).unsetAllMarks();
-    chain.setParagraph();
-    chain.run();
-  };
-
-  const handleDuplicate = () => {
-    editor.commands.setNodeSelection(currentNodePos);
-    const selectedNode =
-      editor.state.selection.$anchor.node(1) ||
-      (editor.state.selection as NodeSelection).node;
-    editor
-      .chain()
-      .setMeta("hideDragHandle", true)
-      .insertContentAt(
-        currentNodePos + (currentNode?.nodeSize || 0),
-        selectedNode.toJSON()
-      )
-      .run();
-  };
-
-  const handleCopyToClipboard = () => {
-    editor
-      .chain()
-      .setMeta("hideDragHandle", true)
-      .setNodeSelection(currentNodePos)
-      .run();
-    /**
-     * !FIXME: document.execCommand is deprecated, use navigator.clipboard.writeText instead
-     */
-    document.execCommand("copy");
-  };
-
-  const handleDelete = () => {
-    editor
-      .chain()
-      .setMeta("hideDragHandle", true)
-      .setNodeSelection(currentNodePos)
-      .deleteSelection()
-      .run();
-  };
-
-  const handleCopyNodeLink = () => {
-    const pathName =
-      PUBLIC_NOTA_FRONTEND_URL + page.url.pathname + `#${currentNodeId}`;
-    navigator.clipboard.writeText(pathName);
-  };
-
-  const insertNode = () => {
-    if (currentNodePos === -1) return;
-    const currentNodeSize = currentNode?.nodeSize || 0;
-    const insertPos = currentNodePos + currentNodeSize;
-    const currentNodeIsEmptyParagraph =
-      currentNode?.type.name === "paragraph" &&
-      currentNode?.content?.size === 0;
-    const focusPos = currentNodeIsEmptyParagraph
-      ? currentNodePos + 2
-      : insertPos + 2;
-    editor
-      .chain()
-      .command(({ dispatch, tr, state }) => {
-        if (dispatch) {
-          if (currentNodeIsEmptyParagraph) {
-            tr.insertText("/", currentNodePos, currentNodePos + 1);
-          } else {
-            tr.insert(
-              insertPos,
-              state.schema.nodes.paragraph.create(null, [
-                state.schema.text("/"),
-              ])
-            );
-          }
-
-          return dispatch(tr);
+const insertNode = () => {
+  if (currentNodePos === -1) return;
+  const currentNodeSize = currentNode?.nodeSize || 0;
+  const insertPos = currentNodePos + currentNodeSize;
+  const currentNodeIsEmptyParagraph = currentNode?.type.name === 'paragraph' && currentNode?.content?.size === 0;
+  const focusPos = currentNodeIsEmptyParagraph ? currentNodePos + 2 : insertPos + 2;
+  editor
+    .chain()
+    .command(({ dispatch, tr, state }) => {
+      if (dispatch) {
+        if (currentNodeIsEmptyParagraph) {
+          tr.insertText('/', currentNodePos, currentNodePos + 1);
+        } else {
+          tr.insert(insertPos, state.schema.nodes.paragraph.create(null, [state.schema.text('/')]));
         }
 
-        return true;
-      })
-      .focus(focusPos)
-      .run();
-  };
+        return dispatch(tr);
+      }
 
-  function handleAIHighlight() {
-    if (currentNodePos === -1) return;
-    editor
-      .chain()
-      .setNodeSelection(currentNodePos)
-      .setAIHighlight({ color: "#c1ecf970" })
-      .run();
-  }
+      return true;
+    })
+    .focus(focusPos)
+    .run();
+};
+
+function handleAIHighlight() {
+  if (currentNodePos === -1) return;
+  editor.chain().setNodeSelection(currentNodePos).setAIHighlight({ color: '#c1ecf970' }).run();
+}
 </script>
 
 <div
