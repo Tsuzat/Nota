@@ -1,0 +1,17 @@
+{
+  "name": "nota",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --filter @nota/web dev",
+    "ui:add": "bun --filter @nota/ui shadcn"
+  },
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
