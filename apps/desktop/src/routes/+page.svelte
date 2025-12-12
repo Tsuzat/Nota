@@ -79,7 +79,7 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
 			class={cn(
 				'z-20 ml-18 flex items-center gap-2 px-3',
 				ISMACOS && !sidebar.open && 'ml-18',
-				ISWINDOWS && !sidebar.open && 'ml-0',
+				ISWINDOWS || sidebar.open && 'ml-0',
 			)}
 		>
 			{#if ISWINDOWS && !sidebar.open}
@@ -152,8 +152,8 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
 				{#each recentNotes as recent (recent.id)}
 					{@const href =
 						'owner' in recent
-							? resolve('/(cloud)/note-[id]', { id: recent.id })
-							: resolve('/(local)/local-note-[id]', { id: recent.id })}
+							? resolve('/(cloud)/note-[id]', { id: String(recent.id) })
+							: resolve('/(local)/local-note-[id]', { id: String(recent.id) })}
 					<Card.Root
 						onclick={() => goto(href)}
 						class="hover:bg-accent group relative flex h-40 w-48 cursor-pointer flex-col justify-between overflow-hidden transition-all hover:shadow-md"

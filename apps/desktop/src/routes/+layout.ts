@@ -20,22 +20,7 @@ async function loadLocalUserWorkspaces(): Promise<LocalUserWorkspace[] | null> {
     localUserWorkspaces = await DB.select<LocalUserWorkspace[]>(
       "SELECT * FROM userworkspaces"
     );
-    if (localUserWorkspaces.length === 0) {
-      const res = await DB.execute(
-        "INSERT INTO userworkspaces (name, icon) VALUES ($1, $2)",
-        ["Personal", "lucide:User"]
-      );
-      if (res.lastInsertId) {
-        localUserWorkspaces = await DB.select<LocalUserWorkspace[]>(
-          "SELECT * FROM userworkspaces"
-        );
-        return localUserWorkspaces;
-      } else {
-        return null;
-      }
-    } else {
-      return localUserWorkspaces;
-    }
+    return localUserWorkspaces;
   } catch (e) {
     console.error(e);
     return null;
@@ -55,20 +40,9 @@ async function loadCurrentUserWorkspace(
         (w) => String(w.id) === currentUserWorkspaceId
       );
       if (currentUserWorkspace) return currentUserWorkspace;
-      else {
-        localStorage.setItem(
-          "currentUserWorkspaceId",
-          localWorkspaces[0].id.toString()
-        );
-        return localWorkspaces[0];
-      }
-    } else {
-      localStorage.setItem(
-        "currentUserWorkspaceId",
-        localWorkspaces[0].id.toString()
-      );
-      return localWorkspaces[0];
     }
+    localStorage.setItem("currentUserWorkspaceId", localWorkspaces[0].id);
+    return localWorkspaces[0];
   } catch (e) {
     console.error(e);
     return null;
@@ -140,6 +114,11 @@ export const load = async () => {
     toast.error("Something went wrong when loading the notes");
     return goto(resolve("/"));
   }
+
+  console.log("CurrentUserWorkspace", currentUserWorkspace);
+  console.log("LocalWorkspaces", localWorkspaces);
+  console.log("LocalNotes", localNotes);
+  console.log("LocalUserWorkspaces", localUserWorkspaces);
 
   return {
     localUserWorkspaces,

@@ -1,14 +1,12 @@
 <script lang="ts">
 import '../app.css';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
-import { check } from '@tauri-apps/plugin-updater';
 
 let { children, data } = $props();
 import { ModeWatcher } from '@nota/ui';
 import { toast, Toaster } from '@nota/ui/shadcn/sonner';
 import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
 import { onMount } from 'svelte';
-import { downloadAndInstall } from '$lib/updater';
 import { setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { setLocalNotes } from '$lib/local/notes.svelte';
@@ -38,7 +36,7 @@ const currentUserWorkspace = setCurrentUserWorkspaceContext();
 
 const user = $derived(getSessionAndUserContext().getUser());
 
-let open = $state(localStorage.getItem('sidebar-state') === 'open');
+let open = $state(true);
 
 $effect(() => {
   if (user === null) {
@@ -57,48 +55,45 @@ const sessionAndUser = setSessionAndUserContext();
 
 onMount(() => {
   open = localStorage.getItem('sidebar-state') === 'open';
-
   setTheme(useSettings.themeColor);
-  const id = toast.loading('Authenticating...');
-  const { data } = auth.onAuthStateChange((event, session) => {
-    if (event === 'INITIAL_SESSION') {
-      if (session) {
-        toast.success('Signed in successfully!', { id });
-      } else {
-        toast.dismiss(id);
-      }
-    }
-    if (event === 'SIGNED_OUT') {
-      sessionAndUser.setSession(null);
-      sessionAndUser.setUser(null);
-      invalidate('supabase:auth');
-    } else if (session) {
-      sessionAndUser.setSession(session);
-      sessionAndUser.setUser(session.user);
-      if (event === 'SIGNED_IN') {
-        invalidate('supabase:auth');
-      }
-    }
-  });
-
-  check().then((update) => {
-    if (update) {
-      const id = Symbol('CheckForNotaUpdate').toString();
-      toast.info(`New Version available`, {
-        description: `Update to latest version ${update.version}, this will take less than a minute`,
-        id,
-        action: {
-          label: 'Install',
-          onClick: () => {
-            toast.dismiss(id);
-            downloadAndInstall(update);
-          },
-        },
-      });
-    }
-  });
-
-  return () => data.subscription.unsubscribe();
+  // const id = toast.loading('Authenticating...');
+  // const { data } = auth.onAuthStateChange((event, session) => {
+  //   if (event === 'INITIAL_SESSION') {
+  //     if (session) {
+  //       toast.success('Signed in successfully!', { id });
+  //     } else {
+  //       toast.dismiss(id);
+  //     }
+  //   }
+  //   if (event === 'SIGNED_OUT') {
+  //     sessionAndUser.setSession(null);
+  //     sessionAndUser.setUser(null);
+  //     invalidate('supabase:auth');
+  //   } else if (session) {
+  //     sessionAndUser.setSession(session);
+  //     sessionAndUser.setUser(session.user);
+  //     if (event === 'SIGNED_IN') {
+  //       invalidate('supabase:auth');
+  //     }
+  //   }
+  // });
+  // check().then((update) => {
+  //   if (update) {
+  //     const id = Symbol('CheckForNotaUpdate').toString();
+  //     toast.info(`New Version available`, {
+  //       description: `Update to latest version ${update.version}, this will take less than a minute`,
+  //       id,
+  //       action: {
+  //         label: 'Install',
+  //         onClick: () => {
+  //           toast.dismiss(id);
+  //           downloadAndInstall(update);
+  //         },
+  //       },
+  //     });
+  //   }
+  // });
+  // return () => data.subscription.unsubscribe();
 });
 
 $effect(() => {
@@ -118,10 +113,8 @@ $effect(() => {
 });
 </script>
 
-
 <ModeWatcher />
-<Toaster richColors />
-{@render children()}
+<Toaster richColors closeButton />
 
 <Sidebar.Provider
 	bind:open
