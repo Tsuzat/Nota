@@ -3,7 +3,10 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --filter @nota/web dev",
+    "web:dev": "bun --filter @nota/web dev",
+    "web:build": "bun --filter @nota/web build",
+    "web:wrangle:preview": "bun --filter @nota/web wrangle:preview",
+    "web:wrangle:deploy": "bun --filter @nota/web wrangle:deploy",
     "ui:add": "bun --filter @nota/ui shadcn"
   },
   "private": true,
