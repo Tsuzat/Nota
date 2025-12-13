@@ -35,7 +35,7 @@ import ImagePlaceholderComp from './components/ImagePlaceholder.svelte';
 import SlashCommandList from './components/SlashCommandList.svelte';
 import VideoExtendedComp from './components/VideoExtended.svelte';
 import VideoPlaceHolderComp from './components/VideoPlaceholder.svelte';
-import AI from './menus/AI.svelte';
+import AI from '../../../../../../../apps/desktop/src/lib/components/editor/AI.svelte';
 import Link from './menus/Link.svelte';
 import Math from './menus/Math.svelte';
 import MathInline from './menus/MathInline.svelte';
@@ -52,14 +52,11 @@ let inlineMathLatex = $state('');
 
 let tocItems = $state<TableOfContentData>();
 
-/**
- * Bind the element to the editor
- */
-let element = $state<HTMLElement>();
 let {
   editor = $bindable(),
   editable = true,
   content,
+  element = $bindable<HTMLElement>(),
   onUpdate,
   autofocus = false,
   class: className,
@@ -67,7 +64,8 @@ let {
   onFileSelect,
   onDropOrPaste,
   getAssets,
-  getLocalFile
+  getLocalFile,
+  useAI = true,
 }: EdraEditorProps = $props();
 
 onMount(() => {
@@ -94,6 +92,7 @@ onMount(() => {
       FileDrop.configure({
         handler: onFileSelect,
         assetsGetter: getAssets,
+        localFileGetter: getLocalFile,
       }),
       Mathematics.configure({
         // Options for the block math node
@@ -157,7 +156,6 @@ onDestroy(() => {
 
 {#if editor && !editor.isDestroyed}
   <Link {editor} parentElement={element} />
-  <!-- <AI {editor} parentElement={element} /> -->
   <TableCol {editor} parentElement={element} />
   <TableRow {editor} parentElement={element} />
   <Math

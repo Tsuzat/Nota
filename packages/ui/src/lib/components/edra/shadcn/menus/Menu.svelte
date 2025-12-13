@@ -17,6 +17,7 @@ import QuickColors from '../components/toolbar/QuickColors.svelte';
 const {
   editor,
   class: className,
+  useAI = true,
   excludedCommands = ['undo-redo', 'media', 'table', 'math'],
   children,
 }: EdraToolbarProps = $props();
@@ -101,6 +102,7 @@ const isTableGripSelected = (node: HTMLElement) => {
 	{#if children}
 		{@render children()}
 	{:else}
+   {#if useAI}
 			<Button variant="ghost" onclick={() => addAIHighlight(editor)}>
 				<span
 					class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
@@ -108,6 +110,7 @@ const isTableGripSelected = (node: HTMLElement) => {
 					Ask AI</span
 				>
 			</Button>
+    {/if}
 		{#each toolbarCommands.filter((c) => !excludedCommands?.includes(c)) as cmd (cmd)}
 			{#if cmd === 'headings'}
 				<Headings {editor} />

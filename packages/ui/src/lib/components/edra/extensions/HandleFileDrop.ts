@@ -1,5 +1,5 @@
-import type { FileType } from '@lib/utils';
-import { Extension } from '@tiptap/core';
+import type { FileType } from '../utils';
+import { Extension, type CommandProps } from '@tiptap/core';
 
 export interface FileDropOptions {
   /**
@@ -10,6 +10,12 @@ export interface FileDropOptions {
    * The assets getter. By default it returns an empty array.
    */
   assetsGetter: (fileType: FileType) => Promise<string[]>;
+  /**
+   * The local file selector/getter. By default it returns an empty string.
+   * This function allows consumers to open a local file picker or otherwise
+   * provide a local file reference for the given file type.
+   */
+  localFileGetter: (fileType: FileType) => Promise<string | null>;
 }
 
 declare module '@tiptap/core' {
@@ -24,7 +30,7 @@ declare module '@tiptap/core' {
        * Call the handler you registered above,
        * returns a Promise<string[]> of the uploaded URLs.
        */
-      handleFileDrop: (file: string) => Promise<string>;
+      handleFileDrop: (file: string) => ReturnType;
       /**
        * Set the assets getter that takes a file type
        * and returns a Promise of the asset URLs.
@@ -34,7 +40,17 @@ declare module '@tiptap/core' {
        * Get assets for a specific file type,
        * returns a Promise<string[]> of the asset URLs.
        */
-      getAssets: (fileType: string) => Promise<string[]>;
+      getAssets: (fileType: string) => ReturnType;
+      /**
+       * Set the local file getter that takes a file type
+       * and returns a Promise of a local file reference or path.
+       */
+      setGetLocalFile: (getter: (fileType: string) => Promise<string | null>) => ReturnType;
+      /**
+       * Get a local file for a specific file type,
+       * returns a Promise<string | File> of the selected file or path.
+       */
+      getLocalFile: (fileType: string) => ReturnType;
     };
   }
 
@@ -42,6 +58,7 @@ declare module '@tiptap/core' {
     fileDrop: {
       handler: (file: string) => Promise<string>;
       assetsGetter: (fileType: string) => Promise<string[]>;
+      localFileGetter: (fileType: string) => Promise<string | null>;
     };
   }
 }
@@ -54,6 +71,7 @@ export const FileDrop = Extension.create<FileDropOptions>({
     return {
       handler: async (file: string) => file,
       assetsGetter: async () => [],
+      localFileGetter: async () => '',
     };
   },
 
@@ -62,6 +80,7 @@ export const FileDrop = Extension.create<FileDropOptions>({
     return {
       handler: this.options.handler,
       assetsGetter: this.options.assetsGetter,
+      localFileGetter: this.options.localFileGetter,
     };
   },
 
@@ -69,30 +88,47 @@ export const FileDrop = Extension.create<FileDropOptions>({
     return {
       setHandleFileDrop:
         (handler) =>
-        ({ editor }) => {
+        ({ editor }: CommandProps) => {
           editor.storage.fileDrop.handler = handler;
           return true;
         },
 
       handleFileDrop:
         (file) =>
-        ({ editor }) => {
+        ({ editor }: CommandProps) => {
           // await the currently-registered handler
-          return editor.storage.fileDrop.handler(file);
+          void editor.storage.fileDrop.handler(file);
+          return true;
         },
 
       setGetAssets:
         (getter) =>
-        ({ editor }) => {
+        ({ editor }: CommandProps) => {
           editor.storage.fileDrop.assetsGetter = getter;
           return true;
         },
 
       getAssets:
         (fileType) =>
-        ({ editor }) => {
+        ({ editor }: CommandProps) => {
           // await the currently-registered assets getter
-          return editor.storage.fileDrop.assetsGetter(fileType);
+          void editor.storage.fileDrop.assetsGetter(fileType);
+          return true;
+        },
+
+      setGetLocalFile:
+        (getter) =>
+        ({ editor }: CommandProps) => {
+          editor.storage.fileDrop.localFileGetter = getter;
+          return true;
+        },
+
+      getLocalFile:
+        (fileType) =>
+        ({ editor }: CommandProps) => {
+          // await the currently-registered local file getter
+          void editor.storage.fileDrop.localFileGetter(fileType);
+          return true;
         },
     };
   },

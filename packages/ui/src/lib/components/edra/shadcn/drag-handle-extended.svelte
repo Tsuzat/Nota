@@ -25,9 +25,10 @@ import { quickcolors } from '../utils';
 
 interface Props {
   editor: Editor;
+  useAI?: boolean;
 }
 
-const { editor }: Props = $props();
+const { editor, useAI = true }: Props = $props();
 
 const alignments = commands['alignment'];
 
@@ -175,6 +176,7 @@ function handleAIHighlight() {
         <DropdownMenu.GroupHeading class="text-muted-foreground capitalize">
           {currentNode?.type.name}
         </DropdownMenu.GroupHeading>
+        {#if useAI}
         <DropdownMenu.Item onclick={handleAIHighlight}>
           <Sparkles />
           <span
@@ -183,6 +185,7 @@ function handleAIHighlight() {
             Edit With AI</span
           >
         </DropdownMenu.Item>
+        {/if}
         <DropdownMenu.Sub>
           <DropdownMenu.SubTrigger openDelay={300}>
             <Repeat2 />

@@ -63,12 +63,17 @@ export interface EdraEditorProps {
    * @param fileType FileType
    * @returns selectedFile - string | File
    */
-  getLocalFile?: (fileType: FileType) => Promise<string | File>;
+  getLocalFile?: (fileType: FileType) => Promise<string | null>;
+  /**
+   * Whether to use AI features or not
+   */
+  useAI?: boolean;
 }
 
 export interface EdraToolbarProps {
   editor: Editor;
   class?: string;
+  useAI?: boolean;
   excludedCommands?: string[];
   children?: Snippet<[]>;
 }

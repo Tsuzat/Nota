@@ -12,12 +12,13 @@ import { Loader } from '@lucide/svelte';
 import Audio from '@lucide/svelte/icons/audio-lines';
 import { NodeViewWrapper } from 'svelte-tiptap';
 import { FileType } from '../../utils';
+import { toast } from '@lib/components/ui/sonner';
 
 let open = $state(false);
 let audioUrl = $state('');
 let isUploading = $state(false);
 
-const assetsFiles = $derived(editor.commands.getAssets(FileType.AUDIO));
+const assetsFiles = $derived(editor.storage.fileDrop.assetsGetter(FileType.AUDIO));
 
 function handleSubmit(e: Event) {
   e.preventDefault();
@@ -25,34 +26,28 @@ function handleSubmit(e: Event) {
   editor.chain().focus().setAudio(audioUrl).run();
 }
 
-// async function openFileDialog() {
-// 	const file = await openDialog({
-// 		title: 'Select Audio',
-// 		multiple: false,
-// 		directory: false,
-// 		filters: [
-// 			{
-// 				name: 'Select Audio',
-// 				extensions: ['mp3', 'wav', 'ogg', 'aac', 'flac']
-// 			}
-// 		]
-// 	});
-// 	if (!file) return;
-// 	if (ISTAURI) {
-// 		isUploading = true;
-// 		try {
-// 			const uploadedFile = await editor?.commands.handleFileDrop(file);
-// 			const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(uploadedFile);
-// 			editor.chain().focus().setAudio(src).run();
-// 			open = false;
-// 		} catch (e) {
-// 			console.error(e);
-// 			toast.error('Could not process audio.');
-// 		} finally {
-// 			isUploading = false;
-// 		}
-// 	}
-// }
+async function openFileDialog() {
+  isUploading = true;
+  try {
+    const file = await editor.storage.fileDrop.localFileGetter(FileType.AUDIO);
+    if (file) {
+      editor.chain().focus().setAudio(file).run();
+    }
+  } catch (e) {
+    isUploading = true;
+    try {
+      const file = await editor.storage.fileDrop.localFileGetter(FileType.AUDIO);
+      if (file) {
+        editor.chain().focus().setAudio(file).run();
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error('Could not process audio files.');
+    } finally {
+      isUploading = false;
+    }
+  }
+}
 </script>
 
 <NodeViewWrapper
@@ -89,7 +84,7 @@ function handleSubmit(e: Event) {
           <Tabs.Trigger value="assets">Assets</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="local" class="py-2">
-          <Button class="w-full">Upload an Audio</Button>
+          <Button class="w-full" onclick={openFileDialog}>Upload an Audio</Button>
         </Tabs.Content>
         <Tabs.Content value="url" class="py-2">
           <form onsubmit={handleSubmit} class="flex flex-col gap-2">

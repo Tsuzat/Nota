@@ -13,7 +13,7 @@ import Link from './components/toolbar/Link.svelte';
 import Lists from './components/toolbar/Lists.svelte';
 import QuickColors from './components/toolbar/QuickColors.svelte';
 
-const { editor, class: className, excludedCommands, children }: EdraToolbarProps = $props();
+const { editor, class: className, useAI = true, excludedCommands, children }: EdraToolbarProps = $props();
 
 const toolbarCommands = Object.keys(commands).filter((key) => !excludedCommands?.includes(key));
 </script>
@@ -28,7 +28,7 @@ const toolbarCommands = Object.keys(commands).filter((key) => !excludedCommands?
 	{#if children}
 		{@render children()}
 	{:else}
-		{#if showAI}
+		{#if useAI}
 			<Button variant="ghost" onclick={() => addAIHighlight(editor)}>
 				<span
 					class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"

@@ -24,35 +24,21 @@ function handleSubmit(e: Event) {
   editor.chain().focus().setImage({ src: imageUrl }).run();
 }
 
-const assetsFiles = $derived(editor.commands.getAssets(FileType.IMAGE));
+const assetsFiles = $derived(editor.storage.fileDrop.assetsGetter(FileType.IMAGE));
 
 async function openFileDialog() {
-  // const file = await openDialog({
-  // 	title: 'Select Images',
-  // 	multiple: false,
-  // 	directory: false,
-  // 	filters: [
-  // 		{
-  // 			name: 'Images',
-  // 			extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico', 'raw', 'tga']
-  // 		}
-  // 	]
-  // });
-  // if (!file) return;
-  // if (ISTAURI) {
-  // 	isUploading = true;
-  // 	try {
-  // 		const uploadedFile = await editor?.commands.handleFileDrop(file);
-  // 		const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(uploadedFile);
-  // 		editor.chain().focus().setImage({ src }).run();
-  // 		open = true;
-  // 	} catch (e) {
-  // 		console.error(e);
-  // 		toast.error('Could not process images.');
-  // 	} finally {
-  // 		isUploading = false;
-  // 	}
-  // }
+  isUploading = true;
+  try {
+    const file = await editor.storage.fileDrop.localFileGetter(FileType.IMAGE);
+    if (file) {
+      editor.chain().focus().setImage({ src: file }).run();
+    }
+  } catch (e) {
+    console.error(e);
+    toast.error('Could not process images.');
+  } finally {
+    isUploading = false;
+  }
 }
 </script>
 

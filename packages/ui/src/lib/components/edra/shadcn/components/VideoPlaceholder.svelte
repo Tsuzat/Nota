@@ -12,12 +12,13 @@ import Loader from '@lucide/svelte/icons/loader';
 import Video from '@lucide/svelte/icons/video';
 import { NodeViewWrapper } from 'svelte-tiptap';
 import { FileType } from '../../utils';
+import { toast } from '@lib/components/ui/sonner';
 
 let open = $state(false);
 let videoUrl = $state('');
 let isUploading = $state(false);
 
-const assetsFiles = $derived(editor.commands.getAssets(FileType.VIDEO));
+const assetsFiles = $derived(editor.storage.fileDrop.assetsGetter(FileType.VIDEO));
 
 function handleSubmit(e: Event) {
   e.preventDefault();
@@ -26,32 +27,18 @@ function handleSubmit(e: Event) {
 }
 
 async function openFileDialog() {
-  // const file = await openDialog({
-  // 	title: 'Select Videos',
-  // 	multiple: false,
-  // 	directory: false,
-  // 	filters: [
-  // 		{
-  // 			name: 'Select Videos',
-  // 			extensions: ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv']
-  // 		}
-  // 	]
-  // });
-  // if (!file) return;
-  // if (ISTAURI) {
-  // 	isUploading = true;
-  // 	try {
-  // 		const uploadedFile = await editor?.commands.handleFileDrop(file);
-  // 		const src = isURL(uploadedFile) ? uploadedFile : convertFileSrc(file);
-  // 		editor.chain().focus().setVideo(src).run();
-  // 		open = true;
-  // 	} catch (e) {
-  // 		console.error(e);
-  // 		toast.error('Could not process video.');
-  // 	} finally {
-  // 		isUploading = false;
-  // 	}
-  // }
+  isUploading = true;
+  try {
+    const file = await editor.storage.fileDrop.localFileGetter(FileType.VIDEO);
+    if (file) {
+      editor.chain().focus().setVideo(file).run();
+    }
+  } catch (e) {
+    console.error(e);
+    toast.error('Could not process videos.');
+  } finally {
+    isUploading = false;
+  }
 }
 </script>
 

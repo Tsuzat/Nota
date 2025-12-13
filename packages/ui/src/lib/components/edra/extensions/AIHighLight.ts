@@ -88,7 +88,7 @@ export const AIHighlight = Mark.create<AIHighlightOptions>({
 
   addKeyboardShortcuts() {
     return {
-      'Mod-Shift-h': () => this.editor.commands.toggleAIHighlight(),
+      'Mod-Shift-ai': () => this.editor.commands.toggleAIHighlight(),
       // Space bar activation on new line
       Space: () => {
         const { state } = this.editor;
