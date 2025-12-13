@@ -1,5 +1,4 @@
 <script lang="ts">
-/* eslint-disable svelte/no-navigation-without-resolve */
 // import ArtifactDownloader from '$lib/artifact/artifact-downloader.svelte';
 import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
 import { Button } from '@nota/ui/shadcn/button';
@@ -11,7 +10,7 @@ import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
 import { resolve } from '$app/paths';
 import { goto } from '$app/navigation';
 import Spotlight from '$lib/components/custom/utils/spotlight.svelte';
-// import Particles from '$lib/components/custom/utils/particles.svelte';
+import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
 import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
 import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svelte';
@@ -28,9 +27,12 @@ import GripVertical from '@lucide/svelte/icons/grip-vertical';
 import MousePointerClick from '@lucide/svelte/icons/mouse-pointer-click';
 import Pen from '@lucide/svelte/icons/pen';
 import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
+const { data } = $props();
+
+const user = $derived(data.session?.user);
 </script>
 
-<!-- <Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" /> -->
+<Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
 <Spotlight />
 
 <header class="mx-auto flex max-w-4xl items-center justify-between gap-4 p-4">
@@ -39,20 +41,17 @@ import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
     <h3 class="font-bold">Nota</h3>
   </a>
   <div class="flex items-center gap-4">
-    <SimpleToolTip content="Hello">
-      <Button>Hello</Button>
-    </SimpleToolTip>
     <ToggleMode />
-    <!-- {#if user === null}
-			<Button onclick={() => (globalSignInContext.open = true)}>Sign In</Button>
+    {#if user === undefined}
+			<Button href={resolve('/login')}>Sign In</Button>
 		{:else}
 			<Dropdown.Root>
 				<Dropdown.Trigger>
-					<SimpleTooltip content={user.email}>
-						<Button onclick={async () => await auth.signOut()} size="icon" variant="ghost">
+					<SimpleToolTip content={user.email}>
+						<Button size="icon" variant="ghost">
 							<User />
 						</Button>
-					</SimpleTooltip>
+					</SimpleToolTip>
 				</Dropdown.Trigger>
 				<Dropdown.Content class="w-fit">
 					<Dropdown.Label class="text-xs">
@@ -61,25 +60,16 @@ import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
 					<Dropdown.Item onclick={() => goto(resolve('/profile'))}>
 						<UserRound />
 						<span>Profile</span>
-					</Dropdown.Item>
-					<Dropdown.Item onclick={() => (useGlobalSettings.open = !useGlobalSettings.open)}>
-						<Settings />
-						<span>Settings</span>
-					</Dropdown.Item>
+					</Dropdown.Item>	
 					<Dropdown.Item
-						onclick={() =>
-							toast.promise(auth.signOut(), {
-								loading: 'Signing you out...',
-								success: 'Signed out successfully.',
-								error: 'Something went wrong'
-							})}
+						onclick={() => goto(resolve('/signout'))}
 					>
 						<LogOut />
 						Sign Out
 					</Dropdown.Item>
 				</Dropdown.Content>
 			</Dropdown.Root>
-		{/if} -->
+		{/if}
   </div>
 </header>
 
