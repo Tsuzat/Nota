@@ -46,7 +46,8 @@ html {
   --sidebar-ring: oklch(0.708 0 0);
 
   font-size: 15px !important;
-  font-family: "Inter Variable", sans-serif, -apple-system, BlinkMacSystemFont,
+  font-family:
+    "Inter Variable", sans-serif, -apple-system, BlinkMacSystemFont,
     "Segoe UI", "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", Times,
     Symbola, Aegyptus, Code2000, Code2001, Code2002, Musica, serif, LastResort;
   line-height: 20px;
@@ -169,8 +170,7 @@ html {
 
 * {
   scrollbar-width: thin !important;
-  scrollbar-color: color-mix(in srgb, var(--muted-foreground) 25%, transparent)
-    transparent !important;
+  scrollbar-color: color-mix(in srgb, var(--muted-foreground) 25%, transparent) transparent !important;
 }
 
 .theme-red {
