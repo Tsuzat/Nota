@@ -37,13 +37,14 @@ const globalSettings = getGlobalSettings();
 const { data } = $props();
 
 $effect(() => {
-  if (data.id) loadData(data.id);
+  if (data.id) loadData();
 });
 
 let note = $state<LocalNote>();
 
-async function loadData(id: string) {
+async function loadData() {
   isLoading = true;
+  const id = data.id;
   note = localNotes.getNotes().find((n) => n.id.toString() === id);
   if (note === undefined) {
     toast.error(`Notes with id ${id} not found`);
