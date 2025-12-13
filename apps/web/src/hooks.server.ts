@@ -1,32 +1,25 @@
-import { sequence } from "@sveltejs/kit/hooks";
-import * as Sentry from "@sentry/sveltekit";
-import {
-  PUBLIC_SUPABASE_ENDPOINT,
-  PUBLIC_SUPABASE_API_KEY,
-} from "$env/static/public";
-import { createServerClient } from "@supabase/ssr";
-import type { Handle } from "@sveltejs/kit";
+import { sequence } from '@sveltejs/kit/hooks';
+import * as Sentry from '@sentry/sveltekit';
+import { PUBLIC_SUPABASE_ENDPOINT, PUBLIC_SUPABASE_API_KEY } from '$env/static/public';
+import { createServerClient } from '@supabase/ssr';
+import type { Handle } from '@sveltejs/kit';
 
 const supabasehandle: Handle = async ({ event, resolve }) => {
-  event.locals.supabase = createServerClient(
-    PUBLIC_SUPABASE_ENDPOINT,
-    PUBLIC_SUPABASE_API_KEY,
-    {
-      cookies: {
-        getAll: () => event.cookies.getAll(),
-        /**
-         * SvelteKit's cookies API requires `path` to be explicitly set in
-         * the cookie options. Setting `path` to `/` replicates previous/
-         * standard behavior.
-         */
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            event.cookies.set(name, value, { ...options, path: "/" });
-          });
-        },
+  event.locals.supabase = createServerClient(PUBLIC_SUPABASE_ENDPOINT, PUBLIC_SUPABASE_API_KEY, {
+    cookies: {
+      getAll: () => event.cookies.getAll(),
+      /**
+       * SvelteKit's cookies API requires `path` to be explicitly set in
+       * the cookie options. Setting `path` to `/` replicates previous/
+       * standard behavior.
+       */
+      setAll: (cookiesToSet) => {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          event.cookies.set(name, value, { ...options, path: '/' });
+        });
       },
-    }
-  );
+    },
+  });
 
   /**
    * Unlike `supabase.auth.getSession()`, which returns the session _without_
@@ -55,7 +48,7 @@ const supabasehandle: Handle = async ({ event, resolve }) => {
 
   return resolve(event, {
     filterSerializedResponseHeaders(name) {
-      return name === "content-range" || name === "x-supabase-api-version";
+      return name === 'content-range' || name === 'x-supabase-api-version';
     },
   });
 };

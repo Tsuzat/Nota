@@ -1,4 +1,4 @@
-import { logger } from "@sentry/sveltekit";
+import { logger } from '@sentry/sveltekit';
 
 export const loginfo = logger.info;
 export const logerror = logger.error;
