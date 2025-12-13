@@ -17,7 +17,7 @@ import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
 import { onMount } from 'svelte';
 import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
-import { getAssetsByFileType, uploadFile, uploadFileByPath } from '$lib/supabase/storage.js';
+import { getAssetsByFileType, uploadFile, uploadFileByPath, uploadLocalFile } from '$lib/supabase/storage.js';
 import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 import { resolve } from '$app/paths';
 import { compare } from 'fast-json-patch';
@@ -60,6 +60,10 @@ const onDropOrPaste = $derived.by(() => {
 
 const getAssets = $derived.by(() => {
   if (user) return async (fileType: FileType) => getAssetsByFileType(user.id, fileType);
+});
+
+const getLocalFile = $derived.by(() => {
+  if (user) return async (fileType: FileType) => uploadLocalFile(user.id, fileType);
 });
 
 async function saveNoteContent() {
@@ -292,6 +296,7 @@ function handleKeydown(e: KeyboardEvent) {
 		{onFileSelect}
 		{onDropOrPaste}
 		{getAssets}
+    {getLocalFile}
 	/>
 {:else}
 	<div class="flex size-full flex-col items-center justify-center gap-4">

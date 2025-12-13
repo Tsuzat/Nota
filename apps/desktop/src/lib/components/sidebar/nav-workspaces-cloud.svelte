@@ -50,9 +50,8 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.getWorkspaces()[0]);
 			<Sidebar.Menu>
 				{#each workspaces as workspace (workspace.id)}
 					<Collapsible.Root>
-						{@const href="/"}
 						<Sidebar.MenuItem>
-							<Sidebar.MenuButton onclick={() => goto(href)}>
+							<Sidebar.MenuButton onclick={() => goto(resolve("/(cloud)/workspace-[id]", {id: workspace.id}))}>
 								{#snippet child({ props })}
 									<span {...props}>
 										<IconRenderer icon={workspace.icon} />

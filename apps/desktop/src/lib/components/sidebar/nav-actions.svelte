@@ -35,7 +35,7 @@ let open = $state(false);
 
 <div class="flex items-center gap-2 text-sm">
 	<SimpleTooltip content="Toggle Favorite">
-		<Button variant="ghost" size="icon" class="size-7" onclick={toggleStar}>
+		<Button variant="ghost" size="icon-sm"  onclick={toggleStar}>
 			<icons.Star class={cn(starred && 'fill-yellow-500 text-yellow-500')} />
 		</Button>
 	</SimpleTooltip>
@@ -43,8 +43,8 @@ let open = $state(false);
 		<Dropdown.Trigger
 			class={buttonVariants({
 				variant: 'ghost',
-				size: 'icon',
-				class: 'data-[state=open]:bg-accent size-7'
+				size: 'icon-sm',
+				class: 'data-[state=open]:bg-accent'
 			})}
 		>
 			<icons.Ellipsis />

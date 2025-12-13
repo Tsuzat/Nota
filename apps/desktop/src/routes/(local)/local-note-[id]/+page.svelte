@@ -45,7 +45,7 @@ let note = $state<LocalNote>();
 async function loadData() {
   isLoading = true;
   const id = data.id;
-  note = localNotes.getNotes().find((n) => n.id.toString() === id);
+  note = localNotes.getNotes().find((n) => n.id === id);
   if (note === undefined) {
     toast.error(`Notes with id ${id} not found`);
     return goto(resolve('/'));
