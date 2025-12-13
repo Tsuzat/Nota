@@ -1,0 +1,183 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!**/.env*",
+      "!**/.secrets*",
+      "!**/.svelte-kit",
+      "!**/test-results",
+      "!**/public",
+      "!**/static",
+      "!**/.vercel",
+      "!**/migrations/**/*",
+      "!**/build/*",
+      "!**/dist/*",
+      "!bun.lock",
+      "!bun.lock",
+      "!apps",
+      "!packages",
+      "!**/nhost/emails/*",
+      "!**/nhost/metadata/actions.graphql"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "useEditorconfig": true,
+    "attributePosition": "auto",
+    "bracketSameLine": false,
+    "bracketSpacing": true,
+    "formatWithErrors": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUndeclaredVariables": "warn"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "style": {
+        // "useNamingConvention": {
+        //   "level": "error",
+        //   "options": {
+        //     "strictCase": false,
+        //     "requireAscii": true,
+        //     "enumMemberCase": "PascalCase",
+        //     "conventions": [
+        //       {
+        //         "selector": {
+        //           "kind": "classMember",
+        //           "modifiers": ["private"]
+        //         },
+        //         "match": "_(.+)",
+        //         "formats": ["camelCase"]
+        //       }
+        //     ]
+        //   }
+        // },
+        "useFilenamingConvention": {
+          "level": "warn",
+          "options": {
+            "filenameCases": ["kebab-case", "export", "camelCase", "PascalCase"]
+          }
+        },
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "error",
+          "options": {
+            "functions": ["cn", "tw", "twMerge"]
+          }
+        }
+      }
+    },
+    "domains": {}
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "recommended": true,
+        "organizeImports": "on",
+        "useSortedProperties": "on",
+        "useSortedAttributes": "on"
+      }
+    }
+  },
+  "html": {
+    "formatter": {
+      "enabled": true,
+      // "indentScriptAndStyle": false,
+      "bracketSameLine": false
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "javascript": {
+    "globals": [
+      "Bun",
+      "Astro",
+      "App",
+      "App.Superforms.Message",
+      "$",
+      "__GIT_TAG__",
+      "__GIT_DATE__",
+      "__APP_VERSION__",
+      "LanguageModel",
+      "LanguageDetector",
+      "Writer",
+      "Rewriter",
+      "Summarizer",
+      "Translator",
+      "Proofreader",
+      "AI"
+    ],
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "es5"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/tsconfig.json", "**/.vscode/*"],
+      "json": {
+        "parser": {
+          "allowComments": true,
+          "allowTrailingCommas": true
+        }
+      }
+    },
+    {
+      "includes": ["package.json"],
+      "json": {
+        "formatter": {
+          "lineWidth": 1
+        }
+      }
+    },
+    {
+      "includes": ["**/*.svelte", "**/*.astro", "**/*.vue"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useConst": "off",
+            "useImportType": "off"
+          },
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    }
+  ]
+}

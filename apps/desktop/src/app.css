@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "@nota/ui/shadcn/css";
+@source "../../../packages/ui/src/**/*.{html,js,svelte,ts}";
+
+*[data-tauri-drag-region] {
+  app-region: drag;
+}
+
+html {
+  user-select: none;
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://biomejs.dev/schemas/latest/schema.json",
+  "extends": ["../../biome.jsonc"],
+  "files": {
+    "includes": ["**", "!build/*", "!dist/*", "!.svelte-kit/*", "!src-tauri/*"]
+  },
+  "overrides": [
+    {
+      "includes": ["src/**/*.svelte"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUndeclaredVariables": "off",
+            "noUnusedVariables": "off"
+          },
+          "suspicious": {
+            "noImplicitAnyLet": "off"
+          },
+          "style": {
+            "useConst": "off",
+            "useImportType": "on"
+          }
+        }
+      }
+    }
+  ]
+}

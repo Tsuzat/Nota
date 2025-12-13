@@ -1,0 +1,85 @@
+import type { Content, Editor } from "@tiptap/core";
+import type { EditorState } from "@tiptap/pm/state";
+import type { EditorView } from "@tiptap/pm/view";
+import type { Snippet } from "svelte";
+import type { FileType } from "./utils";
+export type { Content, Editor };
+
+export interface EdraEditorProps {
+  /**
+   * Initial content to be set for editor
+   */
+  content?: Content;
+  /**
+   * Initial State of the editor
+   */
+  editable?: boolean;
+  /**
+   * Bindable editor instance
+   */
+  editor?: Editor;
+  /**
+   * Bindable Editor HTMLElement instance
+   */
+  element?: HTMLElement;
+  /**
+   * Let's editor have auto focus when Initialed
+   */
+  autofocus?: boolean;
+  /**
+   * Call back when editor content changes
+   * @returns
+   */
+  onUpdate?: () => void;
+  /**
+   * Optional class for editor
+   */
+  class?: string;
+  /**
+   * Should spell check be done
+   */
+  spellcheck?: boolean;
+  /**
+   * Use this to upload or process a file once it's selected
+   * @param file Current File Path from System
+   * @returns Promise<string> - Final Path of file
+   */
+  onFileSelect?: (file: string) => Promise<string>;
+  /**
+   * Runs when a file is dropped or pasted on editor
+   * @param file File
+   * @returns finalPath string
+   */
+  onDropOrPaste?: (file: File) => Promise<string>;
+  /**
+   * Get all the files in related to fileType
+   * @param fileType
+   * @returns files - string[]
+   */
+  getAssets?: (fileType: FileType) => Promise<string[]>;
+
+  /**
+   * Call back to select a local file with filetype
+   * @param fileType FileType
+   * @returns selectedFile - string | File
+   */
+  getLocalFile?: (fileType: FileType) => Promise<string | null>;
+}
+
+export interface EdraToolbarProps {
+  editor: Editor;
+  class?: string;
+  useAI?: boolean;
+  excludedCommands?: string[];
+  children?: Snippet<[]>;
+}
+
+export interface ShouldShowProps {
+  editor: Editor;
+  element: HTMLElement;
+  view: EditorView;
+  state: EditorState;
+  oldState?: EditorState;
+  from: number;
+  to: number;
+}
