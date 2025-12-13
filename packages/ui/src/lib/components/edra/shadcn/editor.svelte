@@ -35,7 +35,6 @@ import ImagePlaceholderComp from './components/ImagePlaceholder.svelte';
 import SlashCommandList from './components/SlashCommandList.svelte';
 import VideoExtendedComp from './components/VideoExtended.svelte';
 import VideoPlaceHolderComp from './components/VideoPlaceholder.svelte';
-import AI from '../../../../../../../apps/desktop/src/lib/components/editor/AI.svelte';
 import Link from './menus/Link.svelte';
 import Math from './menus/Math.svelte';
 import MathInline from './menus/MathInline.svelte';
