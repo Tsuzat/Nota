@@ -5,13 +5,14 @@
   "scripts": {
     "web:dev": "bun --filter @nota/web dev",
     "web:build": "bun --filter @nota/web build",
+    "web:format": "bun --filter @nota/web format",
     "web:wrangle:preview": "bun --filter @nota/web wrangle:preview",
     "web:wrangle:deploy": "bun --filter @nota/web wrangle:deploy",
     "desktop:dev": "bun --filter @nota/desktop dev",
     "desktop:build": "bun --filter @nota/desktop build",
     "desktop:tauri:dev": "bun --filter @nota/desktop tauri dev",
     "desktop:tauri:build": "bun --filter @nota/desktop tauri build",
-    "ui:add": "bun --filter @nota/ui shadcn",
+    "ui:shadcn": "bun --filter @nota/ui shadcn",
     "ci:root": "biome ci",
     "lint:root": "biome check .",
     "format:root": "biome format . --write"

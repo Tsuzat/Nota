@@ -70,9 +70,9 @@
         //   }
         // },
         "useFilenamingConvention": {
-          "level": "error",
+          "level": "warn",
           "options": {
-            "filenameCases": ["kebab-case", "export"]
+            "filenameCases": ["kebab-case", "export", "camelCase", "PascalCase"]
           }
         },
         "noParameterAssign": "error",
