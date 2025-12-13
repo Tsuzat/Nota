@@ -67,6 +67,7 @@ let {
   onFileSelect,
   onDropOrPaste,
   getAssets,
+  getLocalFile
 }: EdraEditorProps = $props();
 
 onMount(() => {
