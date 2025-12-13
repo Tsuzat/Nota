@@ -3,7 +3,7 @@ import type { EditorState } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
 import type { Snippet } from 'svelte';
 import type { FileType } from './utils';
-export { type Content, type Editor };
+export type { Content, Editor };
 
 export interface EdraEditorProps {
   /**

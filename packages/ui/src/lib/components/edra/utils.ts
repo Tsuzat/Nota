@@ -192,11 +192,15 @@ export const getFileTypeFromExtension = (fileName: string): FileType => {
 
   if (imageExtensions.includes(extension)) {
     return FileType.IMAGE;
-  } else if (videoExtensions.includes(extension)) {
+  }
+  if (videoExtensions.includes(extension)) {
     return FileType.VIDEO;
-  } else if (audioExtensions.includes(extension)) {
+  }
+  if (audioExtensions.includes(extension)) {
     return FileType.AUDIO;
-  } else if (docsExtensions.includes(extension)) {
+  }
+  if (docsExtensions.includes(extension)) {
     return FileType.DOCS;
-  } else return FileType.UNKNOWN;
+  }
+  return FileType.UNKNOWN;
 };
