@@ -1,8 +1,8 @@
-import type { Content, Editor } from '@tiptap/core';
-import type { EditorState } from '@tiptap/pm/state';
-import type { EditorView } from '@tiptap/pm/view';
-import type { Snippet } from 'svelte';
-import type { FileType } from './utils';
+import type { Content, Editor } from "@tiptap/core";
+import type { EditorState } from "@tiptap/pm/state";
+import type { EditorView } from "@tiptap/pm/view";
+import type { Snippet } from "svelte";
+import type { FileType } from "./utils";
 export type { Content, Editor };
 
 export interface EdraEditorProps {
@@ -64,10 +64,6 @@ export interface EdraEditorProps {
    * @returns selectedFile - string | File
    */
   getLocalFile?: (fileType: FileType) => Promise<string | null>;
-  /**
-   * Whether to use AI features or not
-   */
-  useAI?: boolean;
 }
 
 export interface EdraToolbarProps {
