@@ -12,7 +12,7 @@ import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
 import { type Content, type Editor } from '@nota/ui/edra/types.js';
 import { onDestroy, onMount } from 'svelte';
-import { createFile, getAssetsByFileType, moveFileToAssets } from '$lib/local/util.js';
+import { createFile, getAssetsByFileType, moveFileToAssets, selectLocalFile } from '$lib/local/util.js';
 import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { beforeNavigate, goto } from '$app/navigation';
 import { DB } from '$lib/local/db.js';
@@ -21,11 +21,13 @@ import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js'
 import { toast } from '@lib/components/ui/sonner/index.js';
 import type { FileType } from '@lib/components/edra/utils.js';
 import { cn } from '@lib/utils.js';
+import AI from '$lib/components/editor/AI.svelte';
 
 const sidebar = useSidebar();
 
 // editor related
 let editor = $state<Editor>();
+let element = $state<HTMLElement>();
 let content = $state<Content>();
 let pendingContent = $state<Content>();
 
@@ -82,6 +84,8 @@ const onFileSelect = async (file: string) => moveFileToAssets(file);
 const onDropOrPaste = async (file: File) => createFile(file);
 
 const getAssets = async (fileType: FileType) => getAssetsByFileType(fileType);
+
+const getLocalFile = async (fileType: FileType) => selectLocalFile(fileType);
 
 let isLoading = $state(false);
 
@@ -180,7 +184,7 @@ function handleKeydown(event: KeyboardEvent) {
 			<BackAndForthButtons />
 			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
 			<IconPicker onSelect={updateIcon}>
-				<div class={buttonVariants({ variant: 'ghost', class: 'size-7! p-1' })}>
+				<div class={buttonVariants({ variant: 'ghost', size: "icon-sm" })}>
 					<IconRenderer icon={note.icon} />
 				</div>
 			</IconPicker>
@@ -220,15 +224,18 @@ function handleKeydown(event: KeyboardEvent) {
 		{#if globalSettings.useDragHandle}
 			<EdraDragHandleExtended {editor} />
 		{/if}
+    <AI {editor} parentElement={element} />
 	{/if}
 	<EdraEditor
 		bind:editor
 		{content}
+    {element}
 		class="flex-1 grow flex-col overflow-auto p-8!"
 		{onUpdate}
 		{onFileSelect}
 		{onDropOrPaste}
 		{getAssets}
+    {getLocalFile}
 	/>
 {:else}
 	<div class="flex size-full flex-col items-center justify-center gap-4">

@@ -3,7 +3,7 @@ import { getContext, setContext } from 'svelte';
 class GlobalSignIn {
   #open = $state(false);
 
-  constructor(open: boolean = false) {
+  constructor(open = false) {
     this.#open = open;
   }
 

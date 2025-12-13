@@ -200,7 +200,7 @@ class CloudNotes {
    * Delete a note from Supabase & update local state
    */
   async deleteNote(note: CloudNote) {
-    const permission = await ask(`You will still be able to access the note from the trash. Do you want to continue?`, {
+    const permission = await ask('You will still be able to access the note from the trash. Do you want to continue?', {
       title: `Move ${note.name} to trash?`,
       kind: 'info',
       okLabel: 'Trash it',
@@ -232,7 +232,7 @@ class CloudNotes {
    * Move note to trash
    */
   async moveToTrash(note: CloudNote) {
-    const permission = await ask(`You will still be able to access the note from the trash. Do you want to continue?`, {
+    const permission = await ask('You will still be able to access the note from the trash. Do you want to continue?', {
       title: `Move ${note.name} to trash?`,
       kind: 'info',
       okLabel: 'Trash it',

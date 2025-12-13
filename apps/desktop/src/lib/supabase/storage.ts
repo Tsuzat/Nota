@@ -17,9 +17,8 @@ export async function uploadFile(id: string, file: File): Promise<string> {
   if (data) {
     const resp = supabase.storage.from('notes media').getPublicUrl(data.path);
     return resp.data.publicUrl;
-  } else {
-    throw new Error('Could not upload');
   }
+  throw new Error('Could not upload');
 }
 
 export async function uploadFileByPath(id: string, path: string): Promise<string> {
@@ -42,14 +41,13 @@ export async function getAssetsByFileType(id: string, fileType: FileType): Promi
       console.error(error);
       toast.error(error.message);
       return [] as string[];
-    } else {
-      const urls = [];
-      for (const file of data) {
-        if (file.name === '.emptyFolderPlaceholder') continue;
-        urls.push(supabase.storage.from('notes media').getPublicUrl(`${path}/${file.name}`).data.publicUrl);
-      }
-      return urls;
     }
+    const urls = [];
+    for (const file of data) {
+      if (file.name === '.emptyFolderPlaceholder') continue;
+      urls.push(supabase.storage.from('notes media').getPublicUrl(`${path}/${file.name}`).data.publicUrl);
+    }
+    return urls;
   } catch (error) {
     console.error(error);
     toast.error('Something went wrong when loading assets.');

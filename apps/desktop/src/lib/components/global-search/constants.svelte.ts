@@ -3,7 +3,7 @@ import { getContext, setContext } from 'svelte';
 class GlobalSearch {
   #open = $state(false);
 
-  constructor(open: boolean = false) {
+  constructor(open = false) {
     this.#open = open;
   }
 

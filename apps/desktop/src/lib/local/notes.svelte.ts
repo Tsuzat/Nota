@@ -88,9 +88,8 @@ class Notes {
           },
         });
         return newNotes;
-      } else {
-        toast.error('Something went wrong when creating the note');
       }
+      toast.error('Something went wrong when creating the note');
     } catch (e) {
       toast.error('Something went wrong when creating the note');
       console.error(e);
@@ -121,7 +120,7 @@ class Notes {
   }
 
   async deleteNote(note: LocalNote) {
-    const permission = await ask(`You will still be able to access the note from the trash. Do you want to continue?`, {
+    const permission = await ask('You will still be able to access the note from the trash. Do you want to continue?', {
       title: `Move ${note.name} to trash?`,
       kind: 'info',
       okLabel: 'Trash it',
@@ -142,7 +141,7 @@ class Notes {
   }
 
   async trashNote(note: LocalNote) {
-    const permission = await ask(`You will still be able to access the note from the trash. Do you want to continue?`, {
+    const permission = await ask('You will still be able to access the note from the trash. Do you want to continue?', {
       title: `Move ${note.name} to trash?`,
       kind: 'info',
       okLabel: 'Trash it',

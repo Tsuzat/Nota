@@ -28,12 +28,12 @@ const cloudNotes = useCloudNotes();
 
 const workspaces = $derived.by(() => {
   if (isLocal) return getLocalWorkspaces().getWorkspaces();
-  else return useCloudWorkspaces().getWorkspaces();
+  return useCloudWorkspaces().getWorkspaces();
 });
 
 const notes = $derived.by(() => {
   if (isLocal) return getLocalNotes().getNotes();
-  else return useCloudNotes().getNotes();
+  return useCloudNotes().getNotes();
 });
 
 function handleKeydown(e: KeyboardEvent) {

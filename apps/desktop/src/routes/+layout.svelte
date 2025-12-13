@@ -86,7 +86,7 @@ onMount(() => {
   check().then((update) => {
     if (update) {
       const id = Symbol('CheckForNotaUpdate').toString();
-      toast.info(`New Version available`, {
+      toast.info('New Version available', {
         description: `Update to latest version ${update.version}, this will take less than a minute`,
         id,
         action: {

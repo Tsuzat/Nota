@@ -39,10 +39,8 @@ const recentNotes = $derived.by(() => {
     return cloudNotes
       .toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
       .slice(0, 5);
-  } else
-    return localNotes
-      .toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-      .slice(0, 5);
+  }
+  return localNotes.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 5);
 });
 
 async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) {

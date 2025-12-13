@@ -20,7 +20,7 @@ const localNotes = getLocalNotes();
 const cloudNotes = useCloudNotes();
 const trashedNotes = $derived.by<LocalNote[] | CloudNote[]>(() => {
   if (currentUserWorkspace.getIsLocal()) return localNotes.getNotes().filter((n) => n.trashed);
-  else return cloudNotes.getTrashedNotes();
+  return cloudNotes.getTrashedNotes();
 });
 
 async function deleteNote(note: LocalNote | CloudNote) {

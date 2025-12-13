@@ -29,10 +29,10 @@ const trashedNotes = $derived.by(() => {
     return getLocalNotes()
       .getNotes()
       .filter((n) => n.trashed).length;
-  else
-    return useCloudNotes()
-      .getNotes()
-      .filter((n) => n.trashed).length;
+
+  return useCloudNotes()
+    .getNotes()
+    .filter((n) => n.trashed).length;
 });
 
 let open = $state(false);
@@ -47,13 +47,11 @@ function getUserIntials(name?: string) {
   const names = name.split(' ');
   if (names.length > 1) {
     return names[0][0] + names[1][0];
-  } else {
-    if (names[0].length > 1) {
-      return names[0][0] + names[0][1];
-    } else {
-      return names[0][0];
-    }
   }
+  if (names[0].length > 1) {
+    return names[0][0] + names[0][1];
+  }
+  return names[0][0];
 }
 </script>
 

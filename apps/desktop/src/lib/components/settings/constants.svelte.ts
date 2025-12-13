@@ -17,7 +17,7 @@ class GlobalSettings {
   #useDragHandle = $state(getLocalStorageValue('useDragHandle', true));
   #themeColor = $state(localStorage.getItem('themeColor') || 'default');
 
-  constructor(open: boolean = false) {
+  constructor(open = false) {
     this.#open = open;
   }
   get open() {
