@@ -6,6 +6,7 @@ import Github from '@nota/ui/icons/customs/github.svelte';
 import { onMount } from 'svelte';
 import { signInWithOAuth } from '$lib/supabase/index.js';
 import { page } from '$app/state';
+import Particles from '$lib/components/custom/utils/particles.svelte';
 
 const { data } = $props();
 
@@ -48,7 +49,7 @@ function handleMouseLeave(e: MouseEvent) {
 }
 
 onMount(() => {
-  ref = document.createElement('div');
+  ref = document.getElementById('login-card') as HTMLDivElement;
   ref.addEventListener('mousemove', handleMouseMove);
   ref.addEventListener('mouseleave', handleMouseLeave);
   return () => {
@@ -58,19 +59,21 @@ onMount(() => {
 });
 </script>
 
+<Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
+
 <div
-	class="inset-0 flex h-screen w-screen flex-col items-center justify-center gap-8 bg-linear-to-b from-primary/30 via-background/50 to-background"
+	class="inset-0 flex h-screen w-screen flex-col items-center justify-center gap-8"
 >
     <a href="/">
         <img src="/favicon.webp" alt="applogo" class="mx-auto size-20 aspect-square" />
     </a>
 	<Card.Root
-		bind:ref
+	 id="login-card"
 		class="w-120 max-w-full border bg-transparent p-4 backdrop-blur-2xl transition-transform duration-500 ease-out"
 		style="transform: perspective(1000px) rotateX({rotateX}deg) rotateY({rotateY}deg); transform-style: preserve-3d;"
 	>
 		<Card.Header class="text-center">
-			<Card.Title class="text-xl">Login to KanFlow</Card.Title>
+			<Card.Title class="text-xl">Login to Nota</Card.Title>
 		</Card.Header>
 		<Card.Content>
 				<div class="grid gap-6">
@@ -106,11 +109,5 @@ onMount(() => {
 		and <a href="/privacy">Privacy Policy</a>.
 	</div>
         </Card.Footer>
-	</Card.Root>
-	<div
-		class="text-center text-xs text-balance text-muted-foreground *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-primary"
-	>
-		By clicking continue, you agree to our <a href="/terms">Terms of Service</a>
-		and <a href="/privacy">Privacy Policy</a>.
-	</div>
+	</Card.Root>	
 </div>

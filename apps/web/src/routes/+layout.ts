@@ -1,16 +1,23 @@
 export const ssr = false;
-export const prerender = true;
+export const prerender = false;
 
-import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
-import { PUBLIC_SUPABASE_API_KEY, PUBLIC_SUPABASE_ENDPOINT } from '$env/static/public';
-import { injectAnalytics } from '@vercel/analytics/sveltekit';
-import { injectSpeedInsights } from '@vercel/speed-insights';
+import {
+  createBrowserClient,
+  createServerClient,
+  isBrowser,
+} from "@supabase/ssr";
+import {
+  PUBLIC_SUPABASE_API_KEY,
+  PUBLIC_SUPABASE_ENDPOINT,
+} from "$env/static/public";
+import { injectAnalytics } from "@vercel/analytics/sveltekit";
+import { injectSpeedInsights } from "@vercel/speed-insights";
 
 injectAnalytics();
 injectSpeedInsights();
 
 export const load = async ({ fetch, data, depends }) => {
-  depends('supabase:auth');
+  depends("supabase:auth");
 
   const supabase = isBrowser()
     ? createBrowserClient(PUBLIC_SUPABASE_ENDPOINT, PUBLIC_SUPABASE_API_KEY, {
