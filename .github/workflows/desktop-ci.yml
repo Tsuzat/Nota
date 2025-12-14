@@ -1,4 +1,4 @@
-name: desktop-ci
+name: "Desktop Biome CI"
 
 on:
   push:
