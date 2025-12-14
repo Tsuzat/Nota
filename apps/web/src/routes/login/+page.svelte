@@ -61,6 +61,7 @@ onMount(() => {
 
 <Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
 
+
 <div
 	class="inset-0 flex h-screen w-screen flex-col items-center justify-center gap-8"
 >
@@ -73,7 +74,7 @@ onMount(() => {
 		style="transform: perspective(1000px) rotateX({rotateX}deg) rotateY({rotateY}deg); transform-style: preserve-3d;"
 	>
 		<Card.Header class="text-center">
-			<Card.Title class="text-xl">Login to Nota</Card.Title>
+			<Card.Title class="text-xl">Login to Nota {fromDesktop ? '(Desktop)' : ''}</Card.Title>
 		</Card.Header>
 		<Card.Content>
 				<div class="grid gap-6">
