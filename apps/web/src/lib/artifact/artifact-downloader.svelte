@@ -13,7 +13,9 @@ interface Props {
 
 const { platforms }: Props = $props();
 
-let artifacts = $state<Artifact[]>([]);
+let artifacts = $derived.by(() => {
+  return getArtifacts(platforms);
+});
 
 let current = $derived.by(() => {
   return artifacts.find((artifact) => artifact.isCurrent);

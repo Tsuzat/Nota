@@ -6,6 +6,7 @@ import Code from '@lucide/svelte/icons/code';
 import Github from '@lucide/svelte/icons/github';
 import GraduationCap from '@lucide/svelte/icons/graduation-cap';
 import GripVertical from '@lucide/svelte/icons/grip-vertical';
+import Loader from '@lucide/svelte/icons/loader';
 import LogOut from '@lucide/svelte/icons/log-out';
 import MousePointerClick from '@lucide/svelte/icons/mouse-pointer-click';
 import Pen from '@lucide/svelte/icons/pen';
@@ -14,6 +15,7 @@ import Sparkles from '@lucide/svelte/icons/sparkles';
 import Terminal from '@lucide/svelte/icons/terminal';
 import User from '@lucide/svelte/icons/user';
 import UserRound from '@lucide/svelte/icons/user-round';
+import X from '@lucide/svelte/icons/x';
 import Zap from '@lucide/svelte/icons/zap';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
@@ -31,8 +33,6 @@ import Spotlight from '$lib/components/custom/utils/spotlight.svelte';
 const { data } = $props();
 
 import { getArtefacts } from './data.remote.js';
-import { onMount } from 'svelte';
-import { Loader, X } from '@lucide/svelte';
 
 const user = $derived(data.session?.user);
 </script>
@@ -48,33 +48,31 @@ const user = $derived(data.session?.user);
   <div class="flex items-center gap-4">
     <ToggleMode />
     {#if user === undefined}
-			<Button href={resolve('/login')}>Sign In</Button>
-		{:else}
-			<Dropdown.Root>
-				<Dropdown.Trigger>
-					<SimpleToolTip content={user.email}>
-						<Button size="icon" variant="ghost">
-							<User />
-						</Button>
-					</SimpleToolTip>
-				</Dropdown.Trigger>
-				<Dropdown.Content class="w-fit">
-					<Dropdown.Label class="text-xs">
-						{user.email}
-					</Dropdown.Label>
-					<Dropdown.Item onclick={() => goto(resolve('/profile'))}>
-						<UserRound />
-						<span>Profile</span>
-					</Dropdown.Item>	
-					<Dropdown.Item
-						onclick={() => goto(resolve('/signout'))}
-					>
-						<LogOut />
-						Sign Out
-					</Dropdown.Item>
-				</Dropdown.Content>
-			</Dropdown.Root>
-		{/if}
+      <Button href={resolve("/login")}>Sign In</Button>
+    {:else}
+      <Dropdown.Root>
+        <Dropdown.Trigger>
+          <SimpleToolTip content={user.email}>
+            <Button size="icon" variant="ghost">
+              <User />
+            </Button>
+          </SimpleToolTip>
+        </Dropdown.Trigger>
+        <Dropdown.Content class="w-fit">
+          <Dropdown.Label class="text-xs">
+            {user.email}
+          </Dropdown.Label>
+          <Dropdown.Item onclick={() => goto(resolve("/profile"))}>
+            <UserRound />
+            <span>Profile</span>
+          </Dropdown.Item>
+          <Dropdown.Item onclick={() => goto(resolve("/signout"))}>
+            <LogOut />
+            Sign Out
+          </Dropdown.Item>
+        </Dropdown.Content>
+      </Dropdown.Root>
+    {/if}
   </div>
 </header>
 
@@ -98,27 +96,21 @@ const user = $derived(data.session?.user);
       <Github />
       Star us on Github
     </Button>
-    {#await getArtefacts() }    
-    <Button
-		variant="outline"
-		class="rounded-none border-r-0 first:rounded-s-md last:rounded-e-md"
-	  >
-      <Loader />
-      Loading 
-    </Button>
-    {:then artefacts}  
-    {#if artefacts}
-    <ArtifactDownloader platforms={artefacts?.platforms} />
-    {:else}
-     
-    <Button
-		variant="outline"
-		class="rounded-none border-r-0 first:rounded-s-md last:rounded-e-md"
-	  >
-      <X />
-      No Downloadables
-    </Button>
-    {/if}
+    {#await getArtefacts()}
+      <Button variant="outline">
+        <Loader />
+        Loading
+      </Button>
+    {:then artefacts}
+      {#if artefacts}
+        {console.log(artefacts.platforms)}
+        <ArtifactDownloader platforms={artefacts.platforms} />
+      {:else}
+        <Button variant="outline">
+          <X />
+          No Downloadables
+        </Button>
+      {/if}
     {/await}
   </div>
   <img

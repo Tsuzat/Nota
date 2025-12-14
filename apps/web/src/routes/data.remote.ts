@@ -1,6 +1,7 @@
 import { query } from '$app/server';
 import { GITHUB_API_TOKEN } from '$env/static/private';
 import type { ReleaseAssetsResponse } from '$lib/artifact/artifacts';
+import { logerror } from '$lib/sentry';
 
 interface ReleaseAsset {
   label: string;
@@ -70,6 +71,7 @@ export const getArtefacts = query(async () => {
       platforms,
     } as ReleaseAssetsResponse;
   } catch (error) {
+    logerror('Failed to fetch artefacts', { error });
     return null;
   }
 });
