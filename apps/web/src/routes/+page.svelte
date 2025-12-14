@@ -30,6 +30,10 @@ import Spotlight from '$lib/components/custom/utils/spotlight.svelte';
 
 const { data } = $props();
 
+import { getArtefacts } from './data.remote.js';
+import { onMount } from 'svelte';
+import { Loader, X } from '@lucide/svelte';
+
 const user = $derived(data.session?.user);
 </script>
 
@@ -94,7 +98,28 @@ const user = $derived(data.session?.user);
       <Github />
       Star us on Github
     </Button>
-    <ArtifactDownloader />
+    {#await getArtefacts() }    
+    <Button
+		variant="outline"
+		class="rounded-none border-r-0 first:rounded-s-md last:rounded-e-md"
+	  >
+      <Loader />
+      Loading 
+    </Button>
+    {:then artefacts}  
+    {#if artefacts}
+    <ArtifactDownloader platforms={artefacts?.platforms} />
+    {:else}
+     
+    <Button
+		variant="outline"
+		class="rounded-none border-r-0 first:rounded-s-md last:rounded-e-md"
+	  >
+      <X />
+      No Downloadables
+    </Button>
+    {/if}
+    {/await}
   </div>
   <img
     class="z-10 hidden aspect-auto h-auto w-full dark:block"

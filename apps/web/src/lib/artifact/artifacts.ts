@@ -1,5 +1,4 @@
 import type { Component } from 'svelte';
-import { PUBLIC_NOTA_ARTIFACT_URL } from '$env/static/public';
 import Linux from './icons/linux.svelte';
 import Mac from './icons/mac.svelte';
 import Windows from './icons/windows.svelte';
@@ -40,13 +39,7 @@ function detectCurrentOS(): keyof typeof osIcons {
 /**
  * Fetch and transform GitHub release artifacts into UI-friendly format
  */
-export async function getArtifacts(): Promise<Artifact[]> {
-  const url = PUBLIC_NOTA_ARTIFACT_URL;
-
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Failed to fetch release assets: ${response.statusText}`);
-
-  const { platforms }: ReleaseAssetsResponse = await response.json();
+export function getArtifacts(platforms: ReleaseAssetsResponse['platforms']): Artifact[] {
   const currentOS = detectCurrentOS();
 
   const artifacts: Artifact[] = [];

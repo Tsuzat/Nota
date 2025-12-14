@@ -4,19 +4,19 @@ import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Select from '@nota/ui/shadcn/select';
 
 import { onMount } from 'svelte';
-import { type Artifact, getArtifacts } from './artifacts';
+import { type Artifact, getArtifacts, type ReleaseAssetsResponse } from './artifacts';
 import Mac from './icons/mac.svelte';
 
+interface Props {
+  platforms: ReleaseAssetsResponse['platforms'];
+}
+
+const { platforms }: Props = $props();
+
 let artifacts = $state<Artifact[]>([]);
-let isLoading = $state(true);
 
 let current = $derived.by(() => {
   return artifacts.find((artifact) => artifact.isCurrent);
-});
-
-onMount(async () => {
-  artifacts = await getArtifacts();
-  isLoading = false;
 });
 </script>
 
@@ -28,14 +28,9 @@ onMount(async () => {
 		class="rounded-none border-r-0 first:rounded-s-md last:rounded-e-md"
 		href={current?.downloadUrl}
 	>
-		{#if isLoading}
-			<Loader class="animate-spin" />
-			<span>Loading...</span>
-		{:else}
 			{@const Icon = current?.icon ?? Mac}
 			<Icon />
 			{current?.osName ?? 'MacOS'}
-		{/if}
 	</Button>
 	<Select.Root type="single">
 		<Select.Trigger

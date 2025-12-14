@@ -15,6 +15,14 @@ const config = {
       '@lib': '../../packages/ui/src/lib',
       '@lib/*': '../../packages/ui/src/lib/*',
     },
+    experimental: {
+      remoteFunctions: true,
+    },
+  },
+  compilerOptions: {
+    experimental: {
+      async: true,
+    },
   },
 };
 
