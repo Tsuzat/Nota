@@ -7,14 +7,15 @@ export const GET = async (event) => {
     locals: { supabase },
   } = event;
   const code = url.searchParams.get('code') as string;
-  const next = url.searchParams.get('next') ?? '/';
+  const nextParam = url.searchParams.get('next') ?? '/';
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      return redirect(307, next);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error && data?.session) {
+      const nextUrl = new URL(nextParam, url.origin);
+      nextUrl.search = '';
+      return redirect(303, nextUrl.toString());
     }
     logerror('Error when exchanging code for session in auth/oauth', { error });
   }
-  // return the user to an error page with instructions
-  return redirect(307, '/auth/auth-error');
+  return redirect(303, '/auth/auth-error');
 };
