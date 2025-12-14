@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'release-v*'
+    paths:
+      - '.github/workflows/desktop-mac-release.yml'
+      - 'package.json'
 
 jobs:
   publish-tauri:
