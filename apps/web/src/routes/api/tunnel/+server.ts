@@ -1,4 +1,4 @@
-import { type RequestHandler } from '@sveltejs/kit';
+import type { RequestHandler } from '@sveltejs/kit';
 import { logerror } from '$lib/sentry';
 
 export const POST: RequestHandler = async ({ request }) => {

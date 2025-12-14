@@ -1,10 +1,10 @@
 <script lang="ts">
-import ArrowUp from '@lucide/svelte/icons/arrow-up';
 import AlignLeft from '@lucide/svelte/icons/align-left';
 import AlignRight from '@lucide/svelte/icons/align-right';
-import RefreshCw from '@lucide/svelte/icons/refresh-cw';
-import PenLine from '@lucide/svelte/icons/pen-line';
+import ArrowUp from '@lucide/svelte/icons/arrow-up';
 import Check from '@lucide/svelte/icons/check';
+import PenLine from '@lucide/svelte/icons/pen-line';
+import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 </script>
 
 <div

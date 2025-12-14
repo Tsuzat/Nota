@@ -1,6 +1,6 @@
 <script lang="ts">
-import { onMount } from 'svelte';
 import { cn } from '@lib/utils';
+import { onMount } from 'svelte';
 
 let { children, class: className = undefined, threshold = 0.1, delay = 0 } = $props();
 

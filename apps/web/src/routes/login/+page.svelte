@@ -1,12 +1,12 @@
 <script lang="ts">
+import Github from '@nota/ui/icons/customs/github.svelte';
+import Google from '@nota/ui/icons/customs/google.svelte';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
-import Google from '@nota/ui/icons/customs/google.svelte';
-import Github from '@nota/ui/icons/customs/github.svelte';
 import { onMount } from 'svelte';
-import { signInWithOAuth } from '$lib/supabase/index.js';
 import { page } from '$app/state';
 import Particles from '$lib/components/custom/utils/particles.svelte';
+import { signInWithOAuth } from '$lib/supabase/index.js';
 
 const { data } = $props();
 

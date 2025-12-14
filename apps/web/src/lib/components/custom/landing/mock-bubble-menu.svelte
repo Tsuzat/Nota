@@ -1,11 +1,11 @@
 <script lang="ts">
 import Bold from '@lucide/svelte/icons/bold';
-import Italic from '@lucide/svelte/icons/italic';
-import Underline from '@lucide/svelte/icons/underline';
-import Strikethrough from '@lucide/svelte/icons/strikethrough';
-import Code from '@lucide/svelte/icons/code';
-import Link from '@lucide/svelte/icons/link';
 import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import Code from '@lucide/svelte/icons/code';
+import Italic from '@lucide/svelte/icons/italic';
+import Link from '@lucide/svelte/icons/link';
+import Strikethrough from '@lucide/svelte/icons/strikethrough';
+import Underline from '@lucide/svelte/icons/underline';
 </script>
 
 <div

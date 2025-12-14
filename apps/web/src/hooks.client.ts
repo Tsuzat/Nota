@@ -1,5 +1,5 @@
-import { handleErrorWithSentry } from '@sentry/sveltekit';
 import * as Sentry from '@sentry/sveltekit';
+import { handleErrorWithSentry } from '@sentry/sveltekit';
 
 Sentry.init({
   dsn: 'https://15eef79e923f96adf8d51ba82c15d84b@o4509331475333120.ingest.de.sentry.io/4510436104798288',

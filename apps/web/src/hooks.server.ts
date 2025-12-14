@@ -1,8 +1,8 @@
-import { sequence } from '@sveltejs/kit/hooks';
 import * as Sentry from '@sentry/sveltekit';
-import { PUBLIC_SUPABASE_ENDPOINT, PUBLIC_SUPABASE_API_KEY } from '$env/static/public';
 import { createServerClient } from '@supabase/ssr';
 import type { Handle } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { PUBLIC_SUPABASE_API_KEY, PUBLIC_SUPABASE_ENDPOINT } from '$env/static/public';
 
 const supabasehandle: Handle = async ({ event, resolve }) => {
   event.locals.supabase = createServerClient(PUBLIC_SUPABASE_ENDPOINT, PUBLIC_SUPABASE_API_KEY, {

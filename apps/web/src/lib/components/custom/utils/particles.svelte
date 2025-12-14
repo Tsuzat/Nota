@@ -1,7 +1,6 @@
 <script lang="ts">
-import { run } from 'svelte/legacy';
-
 import { onMount } from 'svelte';
+import { run } from 'svelte/legacy';
 
 interface Props {
   className?: string;
@@ -34,8 +33,8 @@ let mouse = { x: 0, y: 0 };
 let canvasSize = { w: 0, h: 0 };
 const dpr = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
-function hexToRgb(hex: string): number[] {
-  hex = hex.replace('#', '');
+function hexToRgb(hexData: string): number[] {
+  let hex = hexData.replace('#', '');
 
   if (hex.length === 3) {
     hex = hex
@@ -44,14 +43,14 @@ function hexToRgb(hex: string): number[] {
       .join('');
   }
 
-  const hexInt = parseInt(hex, 16);
+  const hexInt = Number.parseInt(hex, 16);
   const red = (hexInt >> 16) & 255;
   const green = (hexInt >> 8) & 255;
   const blue = hexInt & 255;
   return [red, green, blue];
 }
 
-const rgb = hexToRgb(color);
+const rgb = $derived(hexToRgb(color));
 
 function circleParams() {
   const x = Math.floor(Math.random() * canvasSize.w);
@@ -60,7 +59,7 @@ function circleParams() {
   const translateY = 0;
   const pSize = Math.floor(Math.random() * 2) + size;
   const alpha = 0;
-  const targetAlpha = parseFloat((Math.random() * 0.6 + 0.1).toFixed(1));
+  const targetAlpha = Number.parseFloat((Math.random() * 0.6 + 0.1).toFixed(1));
   const dx = (Math.random() - 0.5) * 0.1;
   const dy = (Math.random() - 0.5) * 0.1;
   const magnetism = 0.1 + Math.random() * 4;
@@ -136,7 +135,7 @@ function animate() {
       canvasSize.h - circle.y - circle.translateY - circle.size,
     ];
     const closestEdge = edge.reduce((a, b) => Math.min(a, b));
-    const remapClosestEdge = parseFloat(remapValue(closestEdge, 0, 20, 0, 1).toFixed(2));
+    const remapClosestEdge = Number.parseFloat(remapValue(closestEdge, 0, 20, 0, 1).toFixed(2));
     if (remapClosestEdge > 1) {
       circle.alpha += 0.02;
       if (circle.alpha > circle.targetAlpha) {

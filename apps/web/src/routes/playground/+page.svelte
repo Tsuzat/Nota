@@ -1,12 +1,12 @@
 <script lang="ts">
-import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, type Editor } from '@nota/ui/edra/shadcn/index.ts';
-import { Button } from '@nota/ui/shadcn/button';
-import type { FileType } from '@nota/ui/edra/utils.ts';
-import { Key, Trash } from '@lucide/svelte';
-import defalutContent from './demo';
 import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
 import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
+import { Key, Trash } from '@lucide/svelte';
+import { type Editor, EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '@nota/ui/edra/shadcn/index.ts';
+import type { FileType } from '@nota/ui/edra/utils.ts';
+import { Button } from '@nota/ui/shadcn/button';
 import { browser } from '$app/environment';
+import defalutContent from './demo';
 
 let content = $state(defalutContent);
 let editor = $state<Editor>();
