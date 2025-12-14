@@ -1,4 +1,4 @@
-name: web-ci
+name: "Web Biome CI"
 
 on:
   push:
