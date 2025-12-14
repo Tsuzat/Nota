@@ -1,17 +1,17 @@
 <script lang="ts">
+import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
+import type * as Sidebar from '@nota/ui/shadcn/sidebar';
+import { type ComponentProps, onMount } from 'svelte';
+import { APPWINDOW } from '$lib/contants';
+import { ISMACOS } from '$lib/utils';
+import AppLogoMenu from '../app-menu.svelte';
+import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 import NavFavorites from './nav-favorites.svelte';
 import NavMain from './nav-main.svelte';
 import NavSecondary from './nav-secondary.svelte';
-import TeamSwitcher from './userworkspace-switcher.svelte';
-import * as Sidebar from '@nota/ui/shadcn/sidebar';
-import { onMount, type ComponentProps } from 'svelte';
-import NavWorkspacesLocal from './nav-workspaces-local.svelte';
-import { ISMACOS } from '$lib/utils';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 import NavWorkspacesCloud from './nav-workspaces-cloud.svelte';
-import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
-import AppLogoMenu from '../app-menu.svelte';
-import { APPWINDOW } from '$lib/contants';
+import NavWorkspacesLocal from './nav-workspaces-local.svelte';
+import TeamSwitcher from './userworkspace-switcher.svelte';
 
 let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext());

@@ -1,8 +1,8 @@
+import { toast } from '@nota/ui/shadcn/sonner';
 import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 import { goto } from '$app/navigation';
-import { auth } from './supabase';
 import { resolve } from '$app/paths';
-import { toast } from '@nota/ui/shadcn/sonner';
+import { auth } from './supabase';
 
 export function useDeepLinkAuth() {
   const handleUrl = async (urls: string[]) => {

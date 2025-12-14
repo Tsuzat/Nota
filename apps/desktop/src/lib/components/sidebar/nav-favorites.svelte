@@ -1,20 +1,20 @@
 <script lang="ts">
-import { page } from '$app/state';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { useSidebar } from '@nota/ui/shadcn/sidebar';
-import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-import { timeAgo } from '$lib/utils';
+import { toast } from '@nota/ui/shadcn/sonner';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { linear } from 'svelte/easing';
 import { slide } from 'svelte/transition';
-import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
-import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-import { resolve } from '$app/paths';
 import { goto } from '$app/navigation';
-import { toast } from '@nota/ui/shadcn/sonner';
+import { resolve } from '$app/paths';
+import { page } from '$app/state';
+import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
+import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+import { timeAgo } from '$lib/utils';
+import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 
 const sidebar = useSidebar();
 let showMore = $state(false);

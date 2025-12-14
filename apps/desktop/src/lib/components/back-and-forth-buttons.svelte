@@ -1,7 +1,7 @@
 <script lang="ts">
-import { Button } from '@nota/ui/shadcn/button';
-import { icons } from '@nota/ui/icons/index.js';
 import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { icons } from '@nota/ui/icons/index.js';
+import { Button } from '@nota/ui/shadcn/button';
 import { getKeyboardShortcut } from '$lib/utils';
 </script>
 

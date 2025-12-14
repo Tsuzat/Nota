@@ -1,10 +1,10 @@
 import type { Content, Editor } from '@nota/ui/edra/types.js';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { downloadDir, resolve } from '@tauri-apps/api/path';
-import { type } from '@tauri-apps/plugin-os';
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { openPath } from '@tauri-apps/plugin-opener';
+import { type } from '@tauri-apps/plugin-os';
 
 export const ISMACOS = type() === 'macos';
 export const ISWINDOWS = type() === 'windows';

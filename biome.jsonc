@@ -72,7 +72,13 @@
         "useFilenamingConvention": {
           "level": "warn",
           "options": {
-            "filenameCases": ["kebab-case", "export", "camelCase", "PascalCase"]
+            "filenameCases": [
+              "kebab-case",
+              "export",
+              "camelCase",
+              "PascalCase"
+            ],
+            "strictCase": false
           }
         },
         "noParameterAssign": "error",

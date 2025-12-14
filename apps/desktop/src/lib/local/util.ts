@@ -1,10 +1,10 @@
-import { ISWINDOWS } from '$lib/utils';
 import { type FileType, getFileTypeExtensions } from '@lib/components/edra/utils';
 import { toast } from '@lib/components/ui/sonner';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { appDataDir, resolve } from '@tauri-apps/api/path';
-import { copyFile, exists, readDir, writeFile } from '@tauri-apps/plugin-fs';
 import { open } from '@tauri-apps/plugin-dialog';
+import { copyFile, exists, readDir, writeFile } from '@tauri-apps/plugin-fs';
+import { ISWINDOWS } from '$lib/utils';
 
 /**
  * Helping function to copy assets to the workspace

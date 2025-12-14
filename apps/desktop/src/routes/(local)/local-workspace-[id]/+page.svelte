@@ -1,24 +1,24 @@
 <script lang="ts">
+import { toast } from '@lib/components/ui/sonner/index.js';
+import { cn } from '@lib/utils.js';
+import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import { importNotes, ISMACOS, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
-import { IconRenderer, IconPicker, icons } from '@nota/ui/icons/index.js';
+import { Separator } from '@nota/ui/shadcn/separator';
+import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
 import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { Separator } from '@nota/ui/shadcn/separator';
-import { useSidebar, SidebarTrigger } from '@nota/ui/shadcn/sidebar';
-import { ask } from '@tauri-apps/plugin-dialog';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
-import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { DB } from '$lib/local/db';
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
-import { toast } from '@lib/components/ui/sonner/index.js';
-import { cn } from '@lib/utils.js';
+import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
+import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
 
 let { data } = $props();
 

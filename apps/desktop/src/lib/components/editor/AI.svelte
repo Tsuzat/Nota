@@ -3,7 +3,14 @@ import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
 import { Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
 import { Separator } from '@lib/components/ui/separator';
-import { type Editor } from '@nota/ui/edra/types.js';
+import StreamDown from '@nota/ui/custom/StreamDown.svelte';
+import BubbleMenu from '@nota/ui/edra/components/BubbleMenu.svelte';
+import { removeAIHighlight } from '@nota/ui/edra/extensions/AIHighLight.js';
+import type { Editor, ShouldShowProps } from '@nota/ui/edra/types.js';
+import { icons } from '@nota/ui/icons/index.js';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { fade } from 'svelte/transition';
+import { callGeminiAI } from '$lib/gemini';
 import {
   CONTINUE_WRITING_PROMPT,
   FIX_GRAMMAR_PROMPT,
@@ -12,15 +19,6 @@ import {
   SOLVE_PROBLEM_PROMPT,
   SUMMARIZE_PROMPT,
 } from '$lib/gemini/commands';
-import { fade } from 'svelte/transition';
-import { toast } from '@nota/ui/shadcn/sonner';
-import StreamDown from '@nota/ui/custom/StreamDown.svelte';
-import { icons } from '@nota/ui/icons/index.js';
-
-import BubbleMenu from '@nota/ui/edra/components/BubbleMenu.svelte';
-import { removeAIHighlight } from '@nota/ui/edra/extensions/AIHighLight.js';
-import type { ShouldShowProps } from '@nota/ui/edra/types.js';
-import { callGeminiAI } from '$lib/gemini';
 
 interface Props {
   editor: Editor;

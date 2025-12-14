@@ -1,8 +1,8 @@
-import { getContext, setContext } from 'svelte';
-import { DB } from './db';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { getLocalNotes } from './notes.svelte';
+import { getContext, setContext } from 'svelte';
 import { getNewUUID } from '$lib/utils';
+import { DB } from './db';
+import { getLocalNotes } from './notes.svelte';
 
 export interface LocalWorkSpace {
   id: string;

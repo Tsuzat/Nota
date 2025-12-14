@@ -1,18 +1,18 @@
 <script lang="ts">
+import { toast } from '@lib/components/ui/sonner';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import { Checkbox } from '@nota/ui/shadcn/checkbox';
 import * as Dialog from '@nota/ui/shadcn/dialog';
 import { Input } from '@nota/ui/shadcn/input';
-import { type Snippet } from 'svelte';
-import { type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import { Checkbox } from '@nota/ui/shadcn/checkbox';
 import { Label } from '@nota/ui/shadcn/label';
+import type { Snippet } from 'svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
-import type { CloudWorkspace } from '$lib/supabase/db/cloudworkspace.svelte';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+import type { LocalWorkSpace } from '$lib/local/workspaces.svelte';
 import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+import type { CloudWorkspace } from '$lib/supabase/db/cloudworkspace.svelte';
 import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
-import { toast } from '@lib/components/ui/sonner';
+import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 
 interface Props {
   open?: boolean;

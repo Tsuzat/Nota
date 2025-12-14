@@ -1,23 +1,23 @@
 <script lang="ts">
+import { icons } from '@nota/ui/icons/index.js';
+import Login from '@nota/ui/icons/moving-icons/login.svelte';
+import Settings from '@nota/ui/icons/moving-icons/settings.svelte';
+import Trash from '@nota/ui/icons/moving-icons/trash.svelte';
+import * as Avatar from '@nota/ui/shadcn/avatar';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { openUrl } from '@tauri-apps/plugin-opener';
+import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { getLocalNotes } from '$lib/local/notes.svelte';
+import { auth } from '$lib/supabase';
+import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
+import { getKeyboardShortcut } from '$lib/utils';
 import Trashed from '../dialogs/trashed.svelte';
 import { getGlobalSignInContext } from '../global-signin';
-import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
-import { auth } from '$lib/supabase';
-import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import * as Avatar from '@nota/ui/shadcn/avatar';
-import { icons } from '@nota/ui/icons/index.js';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
-import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import Trash from '@nota/ui/icons/moving-icons/trash.svelte';
-import Login from '@nota/ui/icons/moving-icons/login.svelte';
-import { openUrl } from '@tauri-apps/plugin-opener';
-import { getKeyboardShortcut } from '$lib/utils';
 import { getGlobalSettings } from '../settings';
-import Settings from '@nota/ui/icons/moving-icons/settings.svelte';
-import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-import { toast } from '@nota/ui/shadcn/sonner';
+import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 
 let isTrashHovered = $state(false);
 let isLoginHovered = $state(false);

@@ -1,7 +1,7 @@
-import type { CloudUserWorkspace } from './clouduserworkspaces.svelte';
+import { toast } from '@nota/ui/shadcn/sonner';
 import { getContext, setContext } from 'svelte';
 import { supabase } from '..';
-import { toast } from '@nota/ui/shadcn/sonner';
+import type { CloudUserWorkspace } from './clouduserworkspaces.svelte';
 
 export type CloudWorkspace = {
   id: string;

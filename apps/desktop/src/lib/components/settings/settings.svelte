@@ -1,12 +1,12 @@
 <script lang="ts">
+import { icons } from '@nota/ui/icons/index.js';
 import * as Dialog from '@nota/ui/shadcn/dialog';
-import { getGlobalSettings } from './constants.svelte';
 import * as Tabs from '@nota/ui/shadcn/tabs';
 import Account from './components/account.svelte';
-import Editor from './components/editor.svelte';
 import AI from './components/ai.svelte';
 import Appearance from './components/appearance.svelte';
-import { icons } from '@nota/ui/icons/index.js';
+import Editor from './components/editor.svelte';
+import { getGlobalSettings } from './constants.svelte';
 
 const useSettings = getGlobalSettings();
 

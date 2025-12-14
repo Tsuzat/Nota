@@ -1,6 +1,6 @@
-import type { Update } from '@tauri-apps/plugin-updater';
-import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { relaunch } from '@tauri-apps/plugin-process';
+import type { Update } from '@tauri-apps/plugin-updater';
 
 export async function downloadAndInstall(update: Update) {
   const id = toast.info(`Downloading version ${update.version} `);

@@ -1,24 +1,24 @@
 <script lang="ts">
-import { useCloudWorkspaces, type CloudWorkspace } from '$lib/supabase/db/cloudworkspace.svelte';
-import { useCloudNotes, type CloudNote } from '$lib/supabase/db/cloudnotes.svelte';
+import { cn } from '@lib/utils.js';
+import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import { importNotes, ISMACOS, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
-import { IconRenderer, IconPicker, icons } from '@nota/ui/icons/index.js';
+import { Separator } from '@nota/ui/shadcn/separator';
+import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
 import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { Separator } from '@nota/ui/shadcn/separator';
-import { useSidebar, SidebarTrigger } from '@nota/ui/shadcn/sidebar';
-import { ask } from '@tauri-apps/plugin-dialog';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
+import WindowsButtons from '$lib/components/windows-buttons.svelte';
+import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+import { type CloudWorkspace, useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 import { supabase } from '$lib/supabase/index.js';
-import { toast } from '@nota/ui/shadcn/sonner';
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
-import { cn } from '@lib/utils.js';
+import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
 
 let { data } = $props();
 

@@ -2,17 +2,17 @@
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
-import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
-import { getNewUserWorkspace } from '../user-workspace';
-import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { getLocalNotes } from '$lib/local/notes.svelte';
-import { goto } from '$app/navigation';
-import { useCloudUserWorkspaces, type CloudUserWorkspace } from '$lib/supabase/db/clouduserworkspaces.svelte';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
-import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
-import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { resolve } from '$app/paths';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { getLocalNotes } from '$lib/local/notes.svelte';
+import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
+import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
+import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+import { type CloudUserWorkspace, useCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
+import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
+import { getNewUserWorkspace } from '../user-workspace';
+import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 
 const localUserWorkspaces = getLocalUserWorkspaces();
 const localWorkspaces = getLocalWorkspaces();
@@ -30,18 +30,18 @@ async function selectLocalUserWorkspace(workspace: LocalUserWorkspace) {
   if (activeWorkspace?.id === workspace.id) {
     return toast.info("You're already in this workspace");
   }
-  const id = toast.loading('Changing User Workspace to ' + workspace.name);
+  const id = toast.loading(`Changing User Workspace to ${workspace.name}`);
   try {
     goto(resolve('/'));
     currentUserWorkspace.setCurrentUserWorkspace(workspace);
     await localWorkspaces.fetchWorkspaces(workspace.id);
     await localNotes.fetchNotes(workspace.id);
-    toast.success('Changed User Workspace to ' + workspace.name, { id });
+    toast.success(`Changed User Workspace to ${workspace.name}`, { id });
     cloudWorkspaces.setWorkspaces([]);
     cloudNotes.setNotes([]);
   } catch (error) {
     console.error(error);
-    toast.error('Something went wrong when changing the user workspace', { id });
+    toast.error(`Something went wrong when changing the user workspace to ${workspace.name}`, { id });
   }
 }
 
@@ -49,7 +49,7 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
   if (activeWorkspace?.id === workspace.id) {
     return toast.info("You're already in this workspace");
   }
-  const id = toast.loading('Switching to cloud workspace');
+  const id = toast.loading(`Switching to cloud workspace ${workspace.name}`);
   try {
     goto(resolve('/'));
     currentUserWorkspace.setCurrentUserWorkspace(workspace);
@@ -58,12 +58,12 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
     toast.loading('Loading Notes', { id });
     await cloudNotes.fetchNotes(workspace);
     toast.dismiss(id);
-    toast.success('Changed User Workspace to ' + workspace.name, { id });
+    toast.success(`Changed User Workspace to ${workspace.name}`, { id });
     localWorkspaces.setWorkspaces([]);
     localNotes.setNotes([]);
   } catch (error) {
     console.error(error);
-    toast.error('Something went wrong.');
+    toast.error(`Something went wrong when switching to cloud workspace ${workspace.name}`, { id });
   }
 }
 </script>

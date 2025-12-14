@@ -1,6 +1,6 @@
+import { getContext, setContext } from 'svelte';
 import type { LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import type { CloudUserWorkspace } from '$lib/supabase/db/clouduserworkspaces.svelte';
-import { getContext, setContext } from 'svelte';
 
 class CurrentUserWorkspace {
   #userworkspace: LocalUserWorkspace | CloudUserWorkspace | null = $state(null);

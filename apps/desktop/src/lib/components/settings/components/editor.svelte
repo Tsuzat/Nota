@@ -1,7 +1,7 @@
 <script lang="ts">
-import { getGlobalSettings } from '../constants.svelte';
-import * as Switch from '@nota/ui/shadcn/switch';
 import * as Label from '@nota/ui/shadcn/label';
+import * as Switch from '@nota/ui/shadcn/switch';
+import { getGlobalSettings } from '../constants.svelte';
 
 const useSettings = getGlobalSettings();
 </script>

@@ -3,29 +3,30 @@ import '../app.css';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 
 let { children, data } = $props();
+
 import { ModeWatcher } from '@nota/ui';
-import { toast, Toaster } from '@nota/ui/shadcn/sonner';
-import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
+import { Toaster, toast } from '@nota/ui/shadcn/sonner';
+import { check } from '@tauri-apps/plugin-updater';
 import { onMount } from 'svelte';
+import { invalidate } from '$app/navigation';
+import { setGlobalSearch } from '$lib/components/global-search';
+import GlobalSearch from '$lib/components/global-search/global-search.svelte';
+import { setGlobalSignInContext } from '$lib/components/global-signin';
+import GlobalSignin from '$lib/components/global-signin/global-signin.svelte';
+import { GlobalSettings, setGlobalSettings } from '$lib/components/settings';
+import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
+import { setCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte';
+import { useDeepLinkAuth } from '$lib/handleOAuth';
+import { setLocalNotes } from '$lib/local/notes.svelte';
 import { setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { setLocalNotes } from '$lib/local/notes.svelte';
-import { getSessionAndUserContext, setSessionAndUserContext } from '$lib/supabase/user.svelte';
-import { setCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte';
+import { auth } from '$lib/supabase';
+import { setCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { setCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
 import { setCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
-import { setCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { useDeepLinkAuth } from '$lib/handleOAuth';
-import { setGlobalSignInContext } from '$lib/components/global-signin';
-import { GlobalSettings, setGlobalSettings } from '$lib/components/settings';
+import { getSessionAndUserContext, setSessionAndUserContext } from '$lib/supabase/user.svelte';
 import { setTheme } from '$lib/theme';
-import { auth } from '$lib/supabase';
-import { invalidate } from '$app/navigation';
-import { check } from '@tauri-apps/plugin-updater';
 import { downloadAndInstall } from '$lib/updater';
-import GlobalSignin from '$lib/components/global-signin/global-signin.svelte';
-import GlobalSearch from '$lib/components/global-search/global-search.svelte';
-import { setGlobalSearch } from '$lib/components/global-search';
 
 // Local Workspaces and Notes
 const localUserWorkspaces = setLocalUserWorkspaces();
@@ -111,10 +112,10 @@ $effect(() => {
   ) {
     toast.error('Something went wrong when loading the local data');
   } else {
-    currentUserWorkspace.setCurrentUserWorkspace(data.currentUserWorkspace!);
-    localUserWorkspaces.setUserWorkspaces(data.localUserWorkspaces!);
-    localWorkspaces.setWorkspaces(data.localWorkspaces!);
-    localNotes.setNotes(data.localNotes!);
+    currentUserWorkspace.setCurrentUserWorkspace(data.currentUserWorkspace);
+    localUserWorkspaces.setUserWorkspaces(data.localUserWorkspaces);
+    localWorkspaces.setWorkspaces(data.localWorkspaces);
+    localNotes.setNotes(data.localNotes);
   }
 });
 </script>

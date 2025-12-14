@@ -1,14 +1,13 @@
-import { DB } from './db';
-import { getContext, setContext } from 'svelte';
-import type { LocalWorkSpace } from './workspaces.svelte';
-import { goto } from '$app/navigation';
-import { page } from '$app/state';
-import { ask } from '@tauri-apps/plugin-dialog';
-import { resolve } from '$app/paths';
-import { toast } from '@nota/ui/shadcn/sonner';
 import type { Content } from '@nota/ui/edra/types.js';
-import { getCurrentWindow } from '@tauri-apps/api/window';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { ask } from '@tauri-apps/plugin-dialog';
+import { getContext, setContext } from 'svelte';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { page } from '$app/state';
 import { getNewUUID } from '$lib/utils';
+import { DB } from './db';
+import type { LocalWorkSpace } from './workspaces.svelte';
 
 export interface LocalNote {
   id: string;
@@ -147,17 +146,17 @@ class Notes {
       okLabel: 'Trash it',
     });
     if (!permission) return;
-    note = { ...note, trashed: true };
-    this.updateNote(note);
+    const updatedNote = { ...note, trashed: true };
+    this.updateNote(updatedNote);
   }
 
   async restoreNote(note: LocalNote) {
-    note = { ...note, trashed: false };
-    this.updateNote(note);
+    const updatedNote = { ...note, trashed: false };
+    this.updateNote(updatedNote);
   }
 
   async duplicateNote(workspace: LocalWorkSpace, note: LocalNote) {
-    await this.createNote(note.name + '(Copy)', note.icon, note.favorite, workspace, note.userworkspace);
+    await this.createNote(`${note.name} (Copy)`, note.icon, note.favorite, workspace, note.userworkspace);
   }
 }
 

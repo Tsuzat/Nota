@@ -1,27 +1,27 @@
 <script lang="ts">
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
-import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
+import type { FileType } from '@lib/components/edra/utils.js';
+import { toast } from '@lib/components/ui/sonner/index.js';
+import { cn } from '@lib/utils.js';
+import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
+import type { Content, Editor } from '@nota/ui/edra/types.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { buttonVariants } from '@nota/ui/shadcn/button';
 import { Separator } from '@nota/ui/shadcn/separator';
 import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
-import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-import { ISMACOS, ISWINDOWS } from '$lib/utils';
-import { type Content, type Editor } from '@nota/ui/edra/types.js';
 import { onDestroy, onMount } from 'svelte';
-import { createFile, getAssetsByFileType, moveFileToAssets, selectLocalFile } from '$lib/local/util.js';
-import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { beforeNavigate, goto } from '$app/navigation';
-import { DB } from '$lib/local/db.js';
 import { resolve } from '$app/paths';
-import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js';
-import { toast } from '@lib/components/ui/sonner/index.js';
-import type { FileType } from '@lib/components/edra/utils.js';
-import { cn } from '@lib/utils.js';
+import AppLogoMenu from '$lib/components/app-menu.svelte';
+import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import AI from '$lib/components/editor/AI.svelte';
+import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js';
+import NavActions from '$lib/components/sidebar/nav-actions.svelte';
+import WindowsButtons from '$lib/components/windows-buttons.svelte';
+import { DB } from '$lib/local/db.js';
+import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+import { createFile, getAssetsByFileType, moveFileToAssets, selectLocalFile } from '$lib/local/util.js';
+import { ISMACOS, ISWINDOWS } from '$lib/utils';
 
 const sidebar = useSidebar();
 

@@ -1,25 +1,25 @@
 <script lang="ts">
+import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import * as Card from '@nota/ui/shadcn/card';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import { Separator } from '@nota/ui/shadcn/separator';
+import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { cn } from '@nota/ui/utils';
+import { ask } from '@tauri-apps/plugin-dialog';
+import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
 import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
 import { getNewUserWorkspace, useCurrentUserWorkspaceContext } from '$lib/components/user-workspace';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { IconRenderer, icons } from '@nota/ui/icons/index.js';
-import { Button, buttonVariants } from '@nota/ui/shadcn/button';
-import { Separator } from '@nota/ui/shadcn/separator';
-import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
-import { useCloudUserWorkspaces, type CloudUserWorkspace } from '$lib/supabase/db/clouduserworkspaces.svelte';
-import { ISMACOS, ISWINDOWS, timeAgo } from '$lib/utils';
-import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import { ask } from '@tauri-apps/plugin-dialog';
 import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import * as Card from '@nota/ui/shadcn/card';
-import { goto } from '$app/navigation';
-import { toast } from '@nota/ui/shadcn/sonner';
-import { cn } from '@nota/ui/utils';
+import { type CloudUserWorkspace, useCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
+import { ISMACOS, ISWINDOWS, timeAgo } from '$lib/utils';
 
 const sidebar = useSidebar();
 const localUserWorkspaces = getLocalUserWorkspaces();

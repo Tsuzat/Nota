@@ -1,19 +1,19 @@
 <script lang="ts">
-import { IconRenderer, icons } from '@nota/ui/icons/index.js';
-import * as Collapsible from '@nota/ui/shadcn/collapsible';
-import * as Sidebar from '@nota/ui/shadcn/sidebar';
-import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import { page } from '$app/state';
-import { goto } from '$app/navigation';
-import { getKeyboardShortcut, timeAgo } from '$lib/utils';
 import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
-import NewWorkspace from '../dialogs/new-workspace.svelte';
-import NewNotes from '../dialogs/new-notes.svelte';
-import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
-import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { resolve } from '$app/paths';
+import * as Collapsible from '@nota/ui/shadcn/collapsible';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { cn } from '@nota/ui/utils';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { page } from '$app/state';
+import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
+import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
+import { getKeyboardShortcut, timeAgo } from '$lib/utils';
+import NewNotes from '../dialogs/new-notes.svelte';
+import NewWorkspace from '../dialogs/new-workspace.svelte';
 
 let showMore = $state(false);
 

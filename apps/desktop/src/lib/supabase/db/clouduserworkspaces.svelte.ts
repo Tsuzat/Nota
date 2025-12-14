@@ -1,7 +1,7 @@
+import { toast } from '@nota/ui/shadcn/sonner';
 import type { User } from '@supabase/supabase-js';
 import { getContext, setContext } from 'svelte';
 import { supabase } from '..';
-import { toast } from '@nota/ui/shadcn/sonner';
 
 export interface CloudUserWorkspace {
   id: string;

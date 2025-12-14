@@ -1,10 +1,10 @@
-import { supabase } from '.';
-import { readFile } from '@tauri-apps/plugin-fs';
-import { basename } from '@tauri-apps/api/path';
 import { FileType, getFileTypeExtensions, getFileTypeFromExtension } from '@nota/ui/edra/utils.js';
-import { nanoid } from 'nanoid';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { basename } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
+import { readFile } from '@tauri-apps/plugin-fs';
+import { nanoid } from 'nanoid';
+import { supabase } from '.';
 
 /**
  * Uploads a file to the storage

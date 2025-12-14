@@ -1,7 +1,7 @@
 import { toast } from '@nota/ui/shadcn/sonner';
-import { DB } from './db';
-import { setContext, getContext } from 'svelte';
+import { getContext, setContext } from 'svelte';
 import { getNewUUID } from '$lib/utils';
+import { DB } from './db';
 
 export interface LocalUserWorkspace {
   id: string;

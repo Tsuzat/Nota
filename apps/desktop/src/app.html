@@ -14,7 +14,9 @@
       if (theme === 'dark' || (!theme && prefersDark)) {
         document.documentElement.classList.add('dark');
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
     </script>
   </head>
   <body data-sveltekit-preload-data="hover">

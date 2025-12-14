@@ -1,6 +1,6 @@
-import Database from '@tauri-apps/plugin-sql';
-import { BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs';
+import Database from '@tauri-apps/plugin-sql';
 import schema from './schema';
 
 export let DB: Database;

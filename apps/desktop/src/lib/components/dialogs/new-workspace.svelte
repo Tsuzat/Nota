@@ -1,14 +1,14 @@
 <script lang="ts">
+import { toast } from '@lib/components/ui/sonner';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Dialog from '@nota/ui/shadcn/dialog';
 import { Input } from '@nota/ui/shadcn/input';
-import { type Snippet } from 'svelte';
+import type { Snippet } from 'svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
-import { toast } from '@lib/components/ui/sonner';
+import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 
 interface Props {
   open?: boolean;

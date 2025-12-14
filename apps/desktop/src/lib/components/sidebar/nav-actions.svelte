@@ -1,16 +1,16 @@
 <script lang="ts">
+import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import type { Editor } from '@nota/ui/edra/types.js';
+import { icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
-import { icons } from '@nota/ui/icons/index.js';
 import { cn } from '@nota/ui/utils';
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { useCloudNotes, type CloudNote } from '$lib/supabase/db/cloudnotes.svelte';
-import { ask } from '@tauri-apps/plugin-dialog';
-import type { Editor } from '@nota/ui/edra/types.js';
-import { getGlobalSettings } from '../settings';
+import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { exportContent, importNotes } from '$lib/utils';
+import { getGlobalSettings } from '../settings';
 
 interface Props {
   starred?: boolean;

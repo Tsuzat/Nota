@@ -1,7 +1,7 @@
 <script lang="ts">
 import { Button } from '@nota/ui/shadcn/button';
-import { APPWINDOW } from '$lib/contants';
 import { onMount } from 'svelte';
+import { APPWINDOW } from '$lib/contants';
 
 let IS_MAXIMUM = $state(false);
 

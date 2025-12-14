@@ -1,9 +1,9 @@
+import type { Content } from '@nota/ui/edra/types.js';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { getContext, setContext } from 'svelte';
 import { supabase } from '..';
 import type { CloudUserWorkspace } from './clouduserworkspaces.svelte';
-import type { Content } from '@nota/ui/edra/types.js';
-import { ask } from '@tauri-apps/plugin-dialog';
-import { toast } from '@nota/ui/shadcn/sonner';
 
 export interface CloudNote {
   id: string;
@@ -119,28 +119,9 @@ class CloudNotes {
    */
   async duplicate(note: CloudNote) {
     try {
-      // First, fetch the original note details from Supabase using its ID
-      const { data: originalNote, error: fetchError } = await supabase
-        .from('notes')
-        .select('*') // Select relevant fields for duplication
-        .eq('id', note.id)
-        .single();
-
-      if (fetchError) {
-        console.error('Error fetching original note:', fetchError);
-        toast.error(`Error fetching original note: ${fetchError.message}`);
-        return;
-      }
-
-      if (!originalNote) {
-        toast.error('Original note not found for duplication.');
-        return;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, created_at, updated_at, ...rest } = originalNote;
-      rest.name = rest.name + ' (Copy)';
-
+      // exclude the id, created_at, updated_at fields
+      const { id, created_at, updated_at, ...rest } = note;
+      rest.name = `${rest.name} (Copy)`;
       // Now, insert a new row with the fetched details, modifying the name
       const { data, error } = await supabase.from('notes').insert(rest).select().single();
       if (error) {

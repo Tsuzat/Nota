@@ -1,12 +1,12 @@
 <script lang="ts">
+import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Popover from '@nota/ui/shadcn/popover';
+import { toast } from '@nota/ui/shadcn/sonner';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
-import { toast } from '@nota/ui/shadcn/sonner';
-import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 
 interface Props {
   open?: boolean;
