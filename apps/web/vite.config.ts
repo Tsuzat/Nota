@@ -10,4 +10,7 @@ export default defineConfig({
   server: {
     allowedHosts: ['emerging-rabbit-solely.ngrok-free.app'],
   },
+  build: {
+    sourcemap: false,
+  },
 });

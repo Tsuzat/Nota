@@ -1,10 +1,8 @@
 <script lang="ts">
-import Loader from '@lucide/svelte/icons/loader';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Select from '@nota/ui/shadcn/select';
 
-import { onMount } from 'svelte';
-import { type Artifact, getArtifacts, type ReleaseAssetsResponse } from './artifacts';
+import { getArtifacts, type ReleaseAssetsResponse } from './artifacts';
 import Mac from './icons/mac.svelte';
 
 interface Props {
