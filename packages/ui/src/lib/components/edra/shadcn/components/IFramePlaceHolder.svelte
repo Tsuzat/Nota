@@ -35,6 +35,7 @@ function handleSubmit(e: Event) {
 	<Popover.Root bind:open>
 		<Popover.Trigger class="sr-only absolute left-1/2">Open</Popover.Trigger>
 		<Popover.Content
+			onCloseAutoFocus={(e) => e.preventDefault()}
 			contenteditable={false}
 			class="bg-popover w-96 p-4 transition-all duration-300"
 			portalProps={{ disabled: true, to: undefined }}

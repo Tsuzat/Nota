@@ -63,6 +63,7 @@ async function openFileDialog() {
 	<Popover.Root bind:open>
 		<Popover.Trigger class="sr-only absolute left-1/2">Open</Popover.Trigger>
 		<Popover.Content
+			onCloseAutoFocus={(e) => e.preventDefault()}
 			contenteditable={false}
 			class="bg-popover z-50 w-96 rounded-lg p-0"
 			portalProps={{ disabled: true, to: undefined }}
