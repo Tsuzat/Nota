@@ -42,5 +42,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Verify Biome installed
+        run: bunx @biomejs/biome --version
+
       - name: Run desktop CI
-        run: bun run desktop:ci
+        working-directory: apps/desktop
+        run: bun run ci
