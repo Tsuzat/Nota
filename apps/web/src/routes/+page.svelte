@@ -1,6 +1,4 @@
 <script lang="ts">
-// import ArtifactDownloader from '$lib/artifact/artifact-downloader.svelte';
-
 import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
 import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
 import BookOpen from '@lucide/svelte/icons/book-open';
@@ -22,6 +20,7 @@ import * as Card from '@nota/ui/shadcn/card';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
+import ArtifactDownloader from '$lib/artifact/artifact-downloader.svelte';
 import MockAiDialog from '$lib/components/custom/landing/mock-ai-dialog.svelte';
 import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svelte';
 import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
@@ -95,7 +94,7 @@ const user = $derived(data.session?.user);
       <Github />
       Star us on Github
     </Button>
-    <!-- <ArtifactDownloader /> -->
+    <ArtifactDownloader />
   </div>
   <img
     class="z-10 hidden aspect-auto h-auto w-full dark:block"

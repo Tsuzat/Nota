@@ -1,0 +1,12 @@
+import { redirect } from '@sveltejs/kit';
+
+export const load = async ({ parent, url }) => {
+  const { session, supabase } = await parent();
+  if (session === null) throw redirect(308, `/login?redirectTo=${url.pathname}`);
+  const { data } = await supabase.auth.getUser();
+  return {
+    session,
+    supabase,
+    user: data.user,
+  };
+};

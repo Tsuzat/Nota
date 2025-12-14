@@ -4,15 +4,12 @@ import Google from '@nota/ui/icons/customs/google.svelte';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { onMount } from 'svelte';
-import { page } from '$app/state';
 import Particles from '$lib/components/custom/utils/particles.svelte';
 import { signInWithOAuth } from '$lib/supabase/index.js';
 
 const { data } = $props();
 
 let ref = $state<HTMLDivElement>();
-
-let fromDesktop = $derived(page.url.searchParams.get('desktop') === 'true');
 
 // variables for animation
 let mouseX = $state(0);
@@ -74,7 +71,7 @@ onMount(() => {
 		style="transform: perspective(1000px) rotateX({rotateX}deg) rotateY({rotateY}deg); transform-style: preserve-3d;"
 	>
 		<Card.Header class="text-center">
-			<Card.Title class="text-xl">Login to Nota {fromDesktop ? '(Desktop)' : ''}</Card.Title>
+			<Card.Title class="text-xl">Login to Nota</Card.Title>
 		</Card.Header>
 		<Card.Content>
 				<div class="grid gap-6">
@@ -83,7 +80,7 @@ onMount(() => {
 							variant="outline"
 							size="lg"
 							class="w-full"
-							onclick={() => signInWithOAuth(data.supabase, 'google', fromDesktop)}
+							onclick={() => signInWithOAuth(data.supabase, 'google')}
 						>
 							<Google class="size-4" />
 							Login with Google
@@ -92,7 +89,7 @@ onMount(() => {
 							variant="outline"
 							size="lg"
 							class="w-full"
-							onclick={() => signInWithOAuth(data.supabase, 'github', fromDesktop)}
+							onclick={() => signInWithOAuth(data.supabase, 'github')}
 						>
 							<Github class="size-4" />
 							Sign up with Github

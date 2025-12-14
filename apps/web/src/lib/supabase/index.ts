@@ -8,11 +8,11 @@ import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
  * @param provider Provider - Provider to use for authentication
  * @param isDesktop boolean - Whether the user is on a desktop or not
  */
-export const signInWithOAuth = async (supabase: SupabaseClient, provider: Provider, isDesktop: boolean) => {
+export const signInWithOAuth = async (supabase: SupabaseClient, provider: Provider) => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${PUBLIC_NOTA_FRONTEND_URL}/auth/oauth${isDesktop ? '?desktop=true' : ''}`,
+      redirectTo: `${PUBLIC_NOTA_FRONTEND_URL}/auth/oauth`,
     },
   });
   if (error) {

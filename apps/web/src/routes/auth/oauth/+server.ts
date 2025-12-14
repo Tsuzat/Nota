@@ -8,14 +8,7 @@ export const GET = async (event) => {
   } = event;
   const code = url.searchParams.get('code') as string;
   const next = url.searchParams.get('next') ?? '/';
-  const desktop = url.searchParams.get('desktop') === 'true';
-  console.log({ code, next, desktop });
-
   if (code) {
-    if (desktop) {
-      const url = `nota://auth/callback?code=${code}`;
-      return redirect(307, url);
-    }
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       return redirect(307, next);
