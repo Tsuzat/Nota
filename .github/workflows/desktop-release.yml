@@ -5,7 +5,7 @@ on:
     tags:
       - 'release-v*'
     paths:
-      - '.github/workflows/desktop-mac-release.yml'
+      - '.github/workflows/desktop-release.yml'
       - 'package.json'
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v6
         with:
-          node-version: latest
+          node-version: 24
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -55,6 +55,7 @@ jobs:
       - name: Build and release
         uses: tauri-apps/tauri-action@v0
         env:
+          NODE_OPTIONS: '--max-old-space-size=8096'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
