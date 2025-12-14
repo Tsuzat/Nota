@@ -1,14 +1,14 @@
 <script lang="ts">
-import { goto } from '$app/navigation';
-import { resolve } from '$app/paths';
+import Printer from '@lucide/svelte/icons/printer';
 import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
 import { EdraEditor } from '@nota/ui/edra/shadcn/index.ts';
+import type { Content } from '@nota/ui/edra/types.js';
 import { IconRenderer } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { Skeleton } from '@nota/ui/shadcn/skeleton';
-import Printer from '@lucide/svelte/icons/printer';
-import { type Content } from '@nota/ui/edra/types.js';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 import { logerror, logwarn } from '$lib/sentry/index.js';
 
 let content = $state<Content>();
