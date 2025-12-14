@@ -5,7 +5,6 @@ import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 
 const { data } = $props();
