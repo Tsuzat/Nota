@@ -1,5 +1,9 @@
 <script lang="ts">
-const { ...rest }: { rest?: Record<string, unknown> } = $props();
+interface Props {
+  class?: string;
+  rest?: Record<string, unknown>;
+}
+const { class: className, ...rest }: Props = $props();
 </script>
 
 <svg
