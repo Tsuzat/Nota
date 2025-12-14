@@ -21,6 +21,7 @@
     "fs:allow-remove",
     "fs:allow-read",
     "fs:allow-create",
+    "fs:allow-open",
     "core:webview:allow-print",
     "process:allow-restart",
     "process:allow-exit",

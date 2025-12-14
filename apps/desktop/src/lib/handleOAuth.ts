@@ -17,6 +17,7 @@ export function useDeepLinkAuth() {
       const searchParams = new URLSearchParams(urlObj.search.substring(1));
 
       const code = searchParams.get('code');
+      console.log({ urlObj, searchParams, code });
       if (code) {
         const { data, error } = await auth.exchangeCodeForSession(code);
         if (error) throw error;
