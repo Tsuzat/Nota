@@ -51,24 +51,6 @@
         "noExplicitAny": "off"
       },
       "style": {
-        // "useNamingConvention": {
-        //   "level": "error",
-        //   "options": {
-        //     "strictCase": false,
-        //     "requireAscii": true,
-        //     "enumMemberCase": "PascalCase",
-        //     "conventions": [
-        //       {
-        //         "selector": {
-        //           "kind": "classMember",
-        //           "modifiers": ["private"]
-        //         },
-        //         "match": "_(.+)",
-        //         "formats": ["camelCase"]
-        //       }
-        //     ]
-        //   }
-        // },
         "useFilenamingConvention": {
           "level": "warn",
           "options": {
@@ -118,7 +100,6 @@
   "html": {
     "formatter": {
       "enabled": true,
-      // "indentScriptAndStyle": false,
       "bracketSameLine": false
     }
   },

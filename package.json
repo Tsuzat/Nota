@@ -12,6 +12,7 @@
     "desktop:build": "bun --filter @nota/desktop build",
     "desktop:tauri:dev": "bun --filter @nota/desktop tauri dev",
     "desktop:tauri:build": "bun --filter @nota/desktop tauri build",
+    "desktop:ci": "bun --filter @nota/desktop ci",
     "ui:shadcn": "bun --filter @nota/ui shadcn",
     "ci:root": "biome ci",
     "lint:root": "biome check .",

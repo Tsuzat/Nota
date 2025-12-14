@@ -130,19 +130,19 @@ export async function exportContent(editor: Editor, name: string, type: 'JSON' |
   switch (type) {
     case 'JSON':
       content = JSON.stringify(editor.getJSON(), undefined, 2);
-      await writeStringToFile(content, name + '.json');
+      await writeStringToFile(content, `${name}.json`);
       break;
     case 'HTML':
       content = editor.getHTML();
-      await writeStringToFile(content, name + '.html');
+      await writeStringToFile(content, `${name}.html`);
       break;
     case 'TEXT':
       content = editor.getText();
-      await writeStringToFile(content, name + '.text');
+      await writeStringToFile(content, `${name}.text`);
       break;
     case 'MD':
       content = editor.getMarkdown();
-      await writeStringToFile(content, name + '.md');
+      await writeStringToFile(content, `${name}.md`);
       break;
     default:
       toast.error('Invalid export type');
