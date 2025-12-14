@@ -1,6 +1,6 @@
 <script lang="ts">
 import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
-import type * as Sidebar from '@nota/ui/shadcn/sidebar';
+import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { type ComponentProps, onMount } from 'svelte';
 import { APPWINDOW } from '$lib/contants';
 import { ISMACOS } from '$lib/utils';
@@ -28,7 +28,7 @@ onMount(async () => {
 
 <Sidebar.Root bind:ref class="border-r-0" {...restProps}>
 	<Sidebar.Header>
-			<div data-tauri-drag-region class="flex h-8 items-center justify-between">
+			<div data-tauri-drag-region class="flex h-10 items-center justify-between">
 				{#if ISMACOS  && !IS_MAXIMUM}
 					<div></div>
 				{:else}

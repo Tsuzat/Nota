@@ -1,6 +1,7 @@
 <script lang="ts">
-import '../app.css';
+import '@fontsource-variable/inter';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
+import '../app.css';
 
 let { children, data } = $props();
 
