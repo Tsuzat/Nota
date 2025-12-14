@@ -13,7 +13,7 @@ const useGlobalSignIn = getGlobalSignInContext();
 
 async function signInWithOAuth(provider: Provider) {
   try {
-    const redirectTo = `${PUBLIC_NOTA_FRONTEND_URL}/auth-success?desktop=true`;
+    const redirectTo = `${PUBLIC_NOTA_FRONTEND_URL}/auth/desktop?desktop=true`;
     const { data, error } = await auth.signInWithOAuth({
       provider: provider,
       options: {

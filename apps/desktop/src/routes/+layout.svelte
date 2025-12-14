@@ -21,7 +21,7 @@ import { useDeepLinkAuth } from '$lib/handleOAuth';
 import { setLocalNotes } from '$lib/local/notes.svelte';
 import { setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { auth } from '$lib/supabase';
+import { supabase } from '$lib/supabase';
 import { setCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { setCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
 import { setCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
@@ -43,7 +43,7 @@ const currentUserWorkspace = setCurrentUserWorkspaceContext();
 
 const user = $derived(getSessionAndUserContext().getUser());
 
-let open = $state(true);
+let open = $state(localStorage.getItem('sidebar-state') === 'open');
 
 $effect(() => {
   if (user === null) {
@@ -62,13 +62,12 @@ const useSettings = setGlobalSettings();
 const sessionAndUser = setSessionAndUserContext();
 
 onMount(() => {
-  open = localStorage.getItem('sidebar-state') === 'open';
   setTheme(useSettings.themeColor);
-  const id = toast.loading('Authenticating...');
-  const { data } = auth.onAuthStateChange((event, session) => {
+  const id = toast.loading('Checking auth status...', { duration: 5000 });
+  const { data } = supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'INITIAL_SESSION') {
       if (session) {
-        toast.success('Signed in successfully!', { id });
+        toast.success('Signed in successfully', { id });
       } else {
         toast.dismiss(id);
       }
