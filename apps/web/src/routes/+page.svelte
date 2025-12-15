@@ -17,7 +17,8 @@ import User from '@lucide/svelte/icons/user';
 import UserRound from '@lucide/svelte/icons/user-round';
 import X from '@lucide/svelte/icons/x';
 import Zap from '@lucide/svelte/icons/zap';
-import { Button } from '@nota/ui/shadcn/button';
+import * as Avatar from '@nota/ui/shadcn/avatar';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
 import { goto } from '$app/navigation';
@@ -53,9 +54,12 @@ const user = $derived(data.session?.user);
       <Dropdown.Root>
         <Dropdown.Trigger>
           <SimpleToolTip content={user.email}>
-            <Button size="icon" variant="ghost">
-              <User />
-            </Button>
+            <Avatar.Root class={buttonVariants({variant: "ghost", size: "icon-sm", class: "rounded-full"})}>
+              <Avatar.Image src={user.user_metadata["avatar_url"]} />
+              <Avatar.Fallback>
+                <User />
+              </Avatar.Fallback>
+            </Avatar.Root>
           </SimpleToolTip>
         </Dropdown.Trigger>
         <Dropdown.Content class="w-fit">
