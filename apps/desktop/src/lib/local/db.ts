@@ -9,6 +9,7 @@ export async function initializeLocalDB() {
   try {
     DB = await Database.load('sqlite:nota.db');
     await DB.execute(schema);
+    await checkAndCreateAssetsDir();
     console.log('Sqlite database loaded successfully');
   } catch (e) {
     console.error(e);

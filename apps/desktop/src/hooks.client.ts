@@ -1,12 +1,5 @@
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { checkAndCreateAssetsDir, initializeLocalDB } from '$lib/local/db';
-import { ISWINDOWS } from '$lib/utils';
+import { initializeLocalDB } from '$lib/local/db';
 
 (async () => {
   await initializeLocalDB();
-  await checkAndCreateAssetsDir();
-  const window = getCurrentWindow();
-  if (ISWINDOWS) {
-    await window.setDecorations(false);
-  }
 })();

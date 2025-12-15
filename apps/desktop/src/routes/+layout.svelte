@@ -7,6 +7,7 @@ let { children, data } = $props();
 
 import { ModeWatcher } from '@nota/ui';
 import { Toaster, toast } from '@nota/ui/shadcn/sonner';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { check } from '@tauri-apps/plugin-updater';
 import { onMount } from 'svelte';
 import { invalidate } from '$app/navigation';
@@ -28,6 +29,7 @@ import { setCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 import { getSessionAndUserContext, setSessionAndUserContext } from '$lib/supabase/user.svelte';
 import { setTheme } from '$lib/theme';
 import { downloadAndInstall } from '$lib/updater';
+import { ISWINDOWS } from '$lib/utils';
 
 // Local Workspaces and Notes
 const localUserWorkspaces = setLocalUserWorkspaces();
@@ -100,6 +102,11 @@ onMount(() => {
       });
     }
   });
+  const window = getCurrentWindow();
+  window.show().then(() => {
+    if (ISWINDOWS) window.setDecorations(false);
+  });
+
   return () => data.subscription.unsubscribe();
 });
 
