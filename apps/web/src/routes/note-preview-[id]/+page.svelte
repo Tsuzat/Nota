@@ -53,15 +53,15 @@ async function loadData(id: string) {
 </svelte:head>
 
 {#if content !== undefined && name !== undefined && icon !== undefined}
-	<div class="fixed top-2 right-2 ml-auto flex items-center gap-2 print:hidden">
+	<div class="fixed top-2 right-2 ml-auto inline-flex items-center gap-2 print:hidden">
 		<ToggleMode />
-		<Button variant="ghost" onclick={() => window.print()}>
+		<Button variant="ghost" size="icon-sm" onclick={() => window.print()}>
 			<Printer />
 		</Button>
 	</div>
 	<header class="mx-auto flex h-12 w-full shrink-0 items-center justify-center gap-2 text-center">
 		<div class="flex items-center gap-2">
-			<div class={buttonVariants({ variant: 'ghost', class: 'size-8 p-0' })}>
+			<div class={buttonVariants({ variant: 'ghost', size: "icon-sm" })}>
 				<IconRenderer icon={icon} />
 			</div>
 			<span>{name}</span>
