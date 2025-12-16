@@ -4,14 +4,13 @@ import { PUBLIC_NOTA_MONTLY_SUB, PUBLIC_NOTA_YEARLY_SUB } from '$env/static/publ
 import { adminClient } from '$lib/supabase/admin';
 import { logerror, loginfo } from '$lib/sentry';
 import type { WebhookPayload } from 'dodopayments/resources';
-import { dodoClient } from '$lib/dodopayments';
 
 interface UserProfile {
   id: string;
   created_at: string;
   storage_used: number;
   storage_allotted: number;
-  user_type: "free" | "pro";
+  subscription_tier: "free" | "pro";
   subscription_type: "monthtly" |"yearly" | null;
   payment_status: string | null;
   subscription_start_date: string | null;
@@ -64,7 +63,6 @@ export const POST = Webhooks({
   
   onPaymentSucceeded: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Payment;
-    console.log("ON PAYMENT SUCCESS", JSON.stringify(payload));
     const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata["nota_user_id"]);
     if (!user) {
       console.log('onPaymentSucceeded: user not found', JSON.stringify(payload));
@@ -72,24 +70,11 @@ export const POST = Webhooks({
       return;
     }
     try {
-    //## If there is a subscription_id, we need to update the user's profile
+    //## If there is a subscription_id, we delegate to onSubscriptionActive
     if (data.subscription_id) {
-    const subscriptionDetails = await dodoClient.subscriptions.retrieve(data.subscription_id);
-    const productId = subscriptionDetails.product_id;
-    const creditsToAdd = getCreditsToAdd(productId);
-    const tier = getSubscriptionTier(productId); 
-      const newCredits = user.ai_credits + creditsToAdd;
-         const patch = {
-        ai_credits: newCredits,
-        subscription_tier: tier === 'pro' ? 'pro' : 'free',
-        payment_status: 'active',
-        next_billing_date: subscriptionDetails.next_billing_date,
-        payment_method_id: subscriptionDetails.payment_method_id,
-        subscription_type: productId === PUBLIC_NOTA_MONTLY_SUB ? 'monthly' : (productId === PUBLIC_NOTA_YEARLY_SUB ? 'yearly' : null)
-      };
-      const { error } = await adminClient.from('profiles').update(patch).eq('id', user.id);
-      if (error) throw error;
-      else return;
+      loginfo('onPaymentSucceeded: subscription payment, handled in onSubscriptionActive', { subscriptionId: data.subscription_id });
+      console.log('onPaymentSucceeded: subscription payment, handled in onSubscriptionActive', { subscriptionId: data.subscription_id });
+      return;
     }
 
     //!! may be later
@@ -115,21 +100,22 @@ export const POST = Webhooks({
 
     const productId = data.product_id;
     const tier = getSubscriptionTier(productId);
+    const creditsToAdd = getCreditsToAdd(productId);
 
     try {
-      // Just update status, don't add credits here (handled in payment succeeded)
+      const newCredits = user.ai_credits + creditsToAdd;
       const patch = {
+        ai_credits: newCredits,
         subscription_tier: tier === 'pro' ? 'pro' : 'free',
         payment_status: data.status,
         next_billing_date: data.next_billing_date,
         payment_method_id: data.payment_method_id,
+        external_customer_id: data.customer.customer_id,
         subscription_type: productId === PUBLIC_NOTA_MONTLY_SUB ? 'monthly' : (productId === PUBLIC_NOTA_YEARLY_SUB ? 'yearly' : null)
       };
 
       const { error } = await adminClient.from('profiles').update(patch).eq('id', user.id);
       if (error) throw error;
-
-      console.log('onSubscriptionActive: payload', payload);
       loginfo('onSubscriptionActive: profile updated', { userId: user.id });
     } catch (e) {
       console.error('onSubscriptionActive failed', { e, userId: user.id });
@@ -139,8 +125,8 @@ export const POST = Webhooks({
 
   onSubscriptionCancelled: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Subscription;
-    const userId = await getUserIdFromPayload(data.customer.customer_id, data.metadata["nota_user_id"]);
-    if (!userId) return;
+    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata["nota_user_id"]);
+    if (!user) return;
 
     try {
       const patch = {
@@ -149,21 +135,21 @@ export const POST = Webhooks({
         next_billing_date: null
       };
 
-      const { error } = await adminClient.from('profiles').update(patch).eq('id', userId);
+      const { error } = await adminClient.from('profiles').update(patch).eq('id', user.id);
       if (error) throw error;
 
       console.log('onSubscriptionCancelled: payload', payload);
-      loginfo('onSubscriptionCancelled: profile set to free', { userId });
+      loginfo('onSubscriptionCancelled: profile set to free', { userId: user.id });
     } catch (e) {
-      console.error('onSubscriptionCancelled failed', { e, userId });
-      logerror('onSubscriptionCancelled failed', { e, userId });
+      console.error('onSubscriptionCancelled failed', { e, userId: user.id });
+      logerror('onSubscriptionCancelled failed', { e, userId: user.id });
     }
   },
 
   onSubscriptionExpired: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Subscription;
-    const userId = await getUserIdFromPayload(data.customer.customer_id, data.metadata["nota_user_id"]);
-    if (!userId) return;
+    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata["nota_user_id"]);
+    if (!user) return;
 
     try {
       const patch = {
@@ -172,22 +158,22 @@ export const POST = Webhooks({
         next_billing_date: null
       };
 
-      const { error } = await adminClient.from('profiles').update(patch).eq('id', userId);
+      const { error } = await adminClient.from('profiles').update(patch).eq('id', user.id);
       if (error) throw error;
       
       console.log('onSubscriptionExpired: payload', payload);
-      loginfo('onSubscriptionExpired: profile set to free', { userId });
+      loginfo('onSubscriptionExpired: profile set to free', { userId: user.id });
     } catch (e) {
-      console.error('onSubscriptionExpired failed', { e, userId });
-      logerror('onSubscriptionExpired failed', { e, userId });
+      console.error('onSubscriptionExpired failed', { e, userId: user.id });
+      logerror('onSubscriptionExpired failed', { e, userId: user.id }); 
     }
   },
   
   onPaymentFailed: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Payment;
-    const userId = await getUserIdFromPayload(data.customer.customer_id, data.metadata["nota_user_id"]);
-    if (!userId) return;
+    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata["nota_user_id"]);
+    if (!user) return;
     console.log('onPaymentFailed: payload', payload);
-    loginfo('onPaymentFailed', { userId, payload });
+    loginfo('onPaymentFailed', { userId: user.id, payload });
   }
 });
