@@ -1,5 +1,5 @@
 <script lang="ts">
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Popover from '@nota/ui/shadcn/popover';
@@ -57,7 +57,7 @@ async function restoreNote(note: LocalNote | CloudNote) {
 					<span class="truncate">{note.name}</span>
 				</div>
 				<div class="ml-auto">
-					<SimpleTooltip content="Restore Note">
+					<SimpleToolTip content="Restore Note">
 						<Button
 							title="Restore Note"
 							variant="ghost"
@@ -66,8 +66,8 @@ async function restoreNote(note: LocalNote | CloudNote) {
 						>
 							<icons.RotateCcw />
 						</Button>
-					</SimpleTooltip>
-					<SimpleTooltip content="Delete Permanently">
+					</SimpleToolTip>
+					<SimpleToolTip content="Delete Permanently">
 						<Button
 							title="Delete Permanently"
 							variant="ghost"
@@ -76,7 +76,7 @@ async function restoreNote(note: LocalNote | CloudNote) {
 						>
 							<icons.Trash2 />
 						</Button>
-					</SimpleTooltip>
+					</SimpleToolTip>
 				</div>
 			</div>
 		{/each}

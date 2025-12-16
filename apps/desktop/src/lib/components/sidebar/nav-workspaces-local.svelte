@@ -1,5 +1,5 @@
 <script lang="ts">
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Collapsible from '@nota/ui/shadcn/collapsible';
@@ -33,7 +33,7 @@ let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
 <Sidebar.Group>
 	<Sidebar.GroupLabel class="justify-between">
 		Local Workspaces
-		<SimpleTooltip>
+		<SimpleToolTip>
 			<Button variant="ghost" class="size-6" onclick={() => (open = true)}>
 				<icons.Plus />
 			</Button>
@@ -43,7 +43,7 @@ let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
 					<span class="bg-muted text-primary rounded p-0.5">{getKeyboardShortcut('N', true)}</span>
 				</div>
 			{/snippet}
-		</SimpleTooltip>
+		</SimpleToolTip>
 	</Sidebar.GroupLabel>
 	<Sidebar.GroupContent>
 		{#if workspaces.length > 0}
@@ -74,7 +74,7 @@ let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
 								{/snippet}
 							</Collapsible.Trigger>
 							<Sidebar.MenuAction showOnHover>
-								<SimpleTooltip content="Add Notes">
+								<SimpleToolTip content="Add Notes">
 									<Button
 										variant="ghost"
 										class="size-6"
@@ -85,7 +85,7 @@ let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
 									>
 										<icons.Plus />
 									</Button>
-								</SimpleTooltip>
+								</SimpleToolTip>
 							</Sidebar.MenuAction>
 							<Collapsible.Content>
 								<Sidebar.MenuSub>

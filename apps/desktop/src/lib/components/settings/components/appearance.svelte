@@ -1,5 +1,5 @@
 <script lang="ts">
-import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
+import { ToggleMode } from '@nota/ui/custom/index.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { setTheme, themes } from '$lib/theme';
 import { getGlobalSettings } from '../constants.svelte';

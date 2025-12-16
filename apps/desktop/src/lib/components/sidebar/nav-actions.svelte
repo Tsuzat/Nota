@@ -1,5 +1,5 @@
 <script lang="ts">
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import type { Editor } from '@nota/ui/edra/types.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
@@ -34,11 +34,11 @@ let open = $state(false);
 </script>
 
 <div class="flex items-center gap-2 text-sm">
-	<SimpleTooltip content="Toggle Favorite">
+	<SimpleToolTip content="Toggle Favorite">
 		<Button variant="ghost" size="icon-sm"  onclick={toggleStar}>
 			<icons.Star class={cn(starred && 'fill-yellow-500 text-yellow-500')} />
 		</Button>
-	</SimpleTooltip>
+	</SimpleToolTip>
 	<Dropdown.Root bind:open>
 		<Dropdown.Trigger
 			class={buttonVariants({

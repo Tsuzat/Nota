@@ -1,9 +1,8 @@
 <script lang="ts">
-import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
+import { SimpleToolTip, StreamDown } from '@lib/components/custom/index.js';
 import { Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
 import { Separator } from '@lib/components/ui/separator';
-import StreamDown from '@nota/ui/custom/StreamDown.svelte';
 import BubbleMenu from '@nota/ui/edra/components/BubbleMenu.svelte';
 import { removeAIHighlight } from '@nota/ui/edra/extensions/AIHighLight.js';
 import type { Editor, ShouldShowProps } from '@nota/ui/edra/types.js';
@@ -289,13 +288,13 @@ function closeAI() {
 		{:else}
 			<div transition:fade class="flex items-center justify-between gap-2 px-2 py-1">
 				<small>Actions:</small>
-				<SimpleTooltip content="Go Back to Options">
+				<SimpleToolTip content="Go Back to Options">
 					<Button variant="secondary" size="sm" onclick={discardChanges}>
 						<icons.ArrowLeft />
 						Go Back
 					</Button>
-				</SimpleTooltip>
-				<SimpleTooltip content="Copy Content to Clipboard">
+				</SimpleToolTip>
+				<SimpleToolTip content="Copy Content to Clipboard">
 					<Button
 						variant="secondary"
 						size="sm"
@@ -304,25 +303,25 @@ function closeAI() {
 						<icons.Clipboard />
 						Copy
 					</Button>
-				</SimpleTooltip>
-				<SimpleTooltip content="Replace Editor Selection">
+				</SimpleToolTip>
+				<SimpleToolTip content="Replace Editor Selection">
 					<Button variant="secondary" size="sm" onclick={replaceSelection}>
 						<icons.CheckCheck />
 						Replace Selection
 					</Button>
-				</SimpleTooltip>
-				<SimpleTooltip content="Insert Content After Selection">
+				</SimpleToolTip>
+				<SimpleToolTip content="Insert Content After Selection">
 					<Button variant="secondary" size="sm" onclick={insertNext}>
 						<icons.ArrowDown />
 						Insert Next
 					</Button>
-				</SimpleTooltip>
-				<SimpleTooltip content="Close AI Menu">
+				</SimpleToolTip>
+				<SimpleToolTip content="Close AI Menu">
 					<Button variant="destructive" size="sm" onclick={closeAI}>
 						<icons.X />
 						Close
 					</Button>
-				</SimpleTooltip>
+				</SimpleToolTip>
 			</div>
 			<Separator />
 			<StreamDown

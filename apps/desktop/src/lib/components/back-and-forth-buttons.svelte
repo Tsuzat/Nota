@@ -1,12 +1,12 @@
 <script lang="ts">
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
 import { getKeyboardShortcut } from '$lib/utils';
 </script>
 
 <div class="flex items-center">
-	<SimpleTooltip>
+	<SimpleToolTip>
 		<Button variant="ghost" size="icon-sm" onclick={() => history.back()}>
 			<icons.ArrowLeft />
 		</Button>
@@ -18,8 +18,8 @@ import { getKeyboardShortcut } from '$lib/utils';
 				</span>
 			</span>
 		{/snippet}
-	</SimpleTooltip>
-	<SimpleTooltip>
+	</SimpleToolTip>
+	<SimpleToolTip>
 		<Button variant="ghost" size="icon-sm" onclick={() => history.forward()}>
 			<icons.ArrowRight />
 		</Button>
@@ -31,5 +31,5 @@ import { getKeyboardShortcut } from '$lib/utils';
 				</span>
 			</span>
 		{/snippet}
-	</SimpleTooltip>
+	</SimpleToolTip>
 </div>

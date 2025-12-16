@@ -1,5 +1,5 @@
 <script lang="ts">
-import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
+import { ToggleMode } from '@nota/ui/custom/index.js';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { type ComponentProps, onMount } from 'svelte';
 import { APPWINDOW } from '$lib/contants';

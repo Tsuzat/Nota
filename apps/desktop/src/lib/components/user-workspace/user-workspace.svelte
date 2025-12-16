@@ -1,5 +1,5 @@
 <script lang="ts">
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Dialog from '@nota/ui/shadcn/dialog';
@@ -72,7 +72,7 @@ async function handlesubmit(e: Event) {
 				<div class="flex items-center gap-2">
 					<Label for="cloud">Use Cloud</Label>
 					<Switch bind:checked={useCloud} id="cloud" />
-					<SimpleTooltip content={useCloud ? 'Create On Cloud' : 'Create Locally'}>
+					<SimpleToolTip content={useCloud ? 'Create On Cloud' : 'Create Locally'}>
 						<Button variant="ghost" size="icon">
 							{#if useCloud}
 								<icons.Cloud />
@@ -80,7 +80,7 @@ async function handlesubmit(e: Event) {
 								<icons.Monitor />
 							{/if}
 						</Button>
-					</SimpleTooltip>
+					</SimpleToolTip>
 				</div>
 			{/if}
 			<Button type="submit" class="w-full">

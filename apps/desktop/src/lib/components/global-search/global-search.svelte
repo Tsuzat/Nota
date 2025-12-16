@@ -1,6 +1,6 @@
 <script lang="ts">
 import { toast } from '@lib/components/ui/sonner';
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import * as Command from '@nota/ui/shadcn/command';
 import { goto } from '$app/navigation';
@@ -111,13 +111,13 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 					<span>{localUserWorkspace.name}</span>
 					<Command.Shortcut class="flex gap-1">
 						{#if activeWorkspace?.id === localUserWorkspace.id}
-							<SimpleTooltip content="Current Active Workspace">
+							<SimpleToolTip content="Current Active Workspace">
 								<icons.CircleCheck class="text-primary size-4" />
-							</SimpleTooltip>
+							</SimpleToolTip>
 						{/if}
-						<SimpleTooltip content="Local User Workspace">
+						<SimpleToolTip content="Local User Workspace">
 							<icons.Monitor class="size-4" />
-						</SimpleTooltip>
+						</SimpleToolTip>
 					</Command.Shortcut>
 				</Command.Item>
 			{/each}
@@ -133,13 +133,13 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 					<span>{cloudUserWorkspace.name}</span>
 					<Command.Shortcut class="flex gap-1">
 						{#if activeWorkspace?.id === cloudUserWorkspace.id}
-							<SimpleTooltip content="Current Active Workspace">
+							<SimpleToolTip content="Current Active Workspace">
 								<icons.CircleCheck class="text-primary size-4" />
-							</SimpleTooltip>
+							</SimpleToolTip>
 						{/if}
-						<SimpleTooltip content="Cloud User Workspace">
+						<SimpleToolTip content="Cloud User Workspace">
 							<icons.Cloud class="size-4" />
-						</SimpleTooltip>
+						</SimpleToolTip>
 					</Command.Shortcut>
 				</Command.Item>
 			{/each}
@@ -191,14 +191,14 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 					<span>{note.name}</span>
 					<Command.Shortcut class="flex gap-1">
 						{#if note.favorite}
-							<SimpleTooltip content="Favorite">
+							<SimpleToolTip content="Favorite">
 								<icons.Star class="size-3 fill-amber-500 text-amber-500" />
-							</SimpleTooltip>
+							</SimpleToolTip>
 						{/if}
 						{#if note.trashed}
-							<SimpleTooltip content="Trash">
+							<SimpleToolTip content="Trash">
 								<icons.Trash2 class="size-3" />
-							</SimpleTooltip>
+							</SimpleToolTip>
 						{/if}
 					</Command.Shortcut>
 				</Command.Item>
