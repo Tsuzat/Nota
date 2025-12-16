@@ -6,6 +6,7 @@ import schema from './schema';
 export let DB: Database;
 
 export async function initializeLocalDB() {
+  if (DB) return;
   try {
     DB = await Database.load('sqlite:nota.db');
     await DB.execute(schema);

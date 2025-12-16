@@ -9,7 +9,7 @@ export const csr = true;
 import { toast } from '@nota/ui/shadcn/sonner';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { DB } from '$lib/local/db';
+import { DB, initializeLocalDB } from '$lib/local/db';
 import type { LocalNote } from '$lib/local/notes.svelte';
 import type { LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import type { LocalWorkSpace } from '$lib/local/workspaces.svelte';
@@ -71,6 +71,7 @@ async function loadLocalNotes(currentUserWorkspaceId: string): Promise<LocalNote
 }
 
 export const load = async () => {
+  await initializeLocalDB();
   const localUserWorkspaces = await loadLocalUserWorkspaces();
   if (localUserWorkspaces === null) {
     toast.error('Something went wrong when loading the user workspaces');
