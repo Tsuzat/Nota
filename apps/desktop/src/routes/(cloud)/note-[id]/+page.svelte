@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { FileType } from '@lib/components/edra/utils.js';
 import { cn } from '@lib/utils.js';
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
 import type { Content, Editor } from '@nota/ui/edra/types.js';
@@ -244,7 +244,7 @@ function handleKeydown(e: KeyboardEvent) {
 
 		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', ISWINDOWS && 'mr-30')}>
 			{#if note.isPublic}
-				<SimpleTooltip>
+				<SimpleToolTip>
 					<Button variant="ghost" size="icon-sm">
 						<icons.Globe />
 					</Button>
@@ -254,7 +254,7 @@ function handleKeydown(e: KeyboardEvent) {
 							<span>Anyone with the link can view this note</span>
 						</div>
 					{/snippet}
-				</SimpleTooltip>
+				</SimpleToolTip>
 			{/if}
 			{#if editor && !editor?.isDestroyed}
 				<div class="text-muted-foreground truncate text-xs">
@@ -262,7 +262,7 @@ function handleKeydown(e: KeyboardEvent) {
 				</div>
 				<SearchAndReplace {editor} />
 			{/if}
-			<SimpleTooltip content={syncing ? syncingText : 'Synced'}>
+			<SimpleToolTip content={syncing ? syncingText : 'Synced'}>
 				<Button variant="ghost" size="icon-sm">
 					{#if syncing}
 						<icons.Loader class="text-primary animate-spin" />
@@ -270,7 +270,7 @@ function handleKeydown(e: KeyboardEvent) {
 						<icons.Cloud />
 					{/if}
 				</Button>
-			</SimpleTooltip>
+			</SimpleToolTip>
 			<NavActions starred={note.favorite as boolean} {toggleStar} {editor} {note} />
 		</div>
 		{#if ISWINDOWS}

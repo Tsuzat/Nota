@@ -1,5 +1,5 @@
 <script lang="ts">
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
@@ -100,7 +100,7 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
 			<div class="text-muted-foreground flex w-full items-center gap-2">
 				<h4>User Workspaces</h4>
 				<span class="text-foreground text-sm">{userWorkspaces.length}</span>
-				<SimpleTooltip content="Add New UserWorkspace">
+				<SimpleToolTip content="Add New UserWorkspace">
 					<Button
 						variant="ghost"
 						class="size-7 rounded-full"
@@ -108,7 +108,7 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
 					>
 						<icons.Plus />
 					</Button>
-				</SimpleTooltip>
+				</SimpleToolTip>
 			</div>
 			<div class="flex w-full items-center gap-2 overflow-x-auto">
 				{#each userWorkspaces as workspace (workspace.id)}

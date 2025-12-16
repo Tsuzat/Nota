@@ -1,7 +1,7 @@
 <script lang="ts">
 import { toast } from '@lib/components/ui/sonner/index.js';
 import { cn } from '@lib/utils.js';
-import SimpleTooltip from '@nota/ui/custom/SimpleToolTip.svelte';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
@@ -137,27 +137,27 @@ async function importNote() {
 					}}
 				/>
 				<div class="text-muted-foreground flex items-center gap-4">
-					<SimpleTooltip content="Created At">
+					<SimpleToolTip content="Created At">
 						<Button variant="ghost" size="sm">
 							<icons.CalendarDays />
 							{timeAgo(workspace.created_at)}
 						</Button>
-					</SimpleTooltip>
-					<SimpleTooltip content="Last Updated At">
+					</SimpleToolTip>
+					<SimpleToolTip content="Last Updated At">
 						<Button variant="ghost" size="sm">
 							<icons.Clock />
 							{timeAgo(workspace.updated_at)}
 						</Button>
-					</SimpleTooltip>
+					</SimpleToolTip>
 				</div>
 			</div>
 			<div class="ml-auto">
-				<SimpleTooltip content="Import Note from JSON file">
+				<SimpleToolTip content="Import Note from JSON file">
 					<Button variant="outline" onclick={importNote}>
 						<icons.Download />
 						<span class="hidden sm:block">Import Note</span>
 					</Button>
-				</SimpleTooltip>
+				</SimpleToolTip>
 			</div>
 		</div>
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
