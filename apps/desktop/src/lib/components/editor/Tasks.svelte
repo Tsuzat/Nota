@@ -1,7 +1,8 @@
 <script lang="ts">
-import type { Editor } from '@nota/ui/edra/types.js';
 import { CircularProgress } from '@nota/ui/custom/index.js';
+import type { Editor } from '@nota/ui/edra/types.js';
 import { onDestroy, onMount } from 'svelte';
+
 interface Props {
   editor: Editor;
 }

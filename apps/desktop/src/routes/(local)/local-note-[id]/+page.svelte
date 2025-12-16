@@ -22,7 +22,6 @@ import { DB } from '$lib/local/db.js';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { createFile, getAssetsByFileType, moveFileToAssets, selectLocalFile } from '$lib/local/util.js';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
-import Tasks from '$lib/components/editor/Tasks.svelte';
 
 const sidebar = useSidebar();
 
@@ -205,7 +204,6 @@ function handleKeydown(event: KeyboardEvent) {
 
 		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', ISWINDOWS && 'mr-30')}>
 			{#if editor && !editor?.isDestroyed}
-        <Tasks {editor} />
 				<div class="text-muted-foreground truncate text-xs">
 					{editor.storage.characterCount.words()} Words
 				</div>
