@@ -40,6 +40,7 @@ import Math from './menus/Math.svelte';
 import MathInline from './menus/MathInline.svelte';
 import TableCol from './menus/TableCol.svelte';
 import TableRow from './menus/TableRow.svelte';
+import { TrackTasks } from '../extensions/TrackTasks';
 
 const lowlight = createLowlight(all);
 
@@ -92,6 +93,7 @@ onMount(() => {
         assetsGetter: getAssets,
         localFileGetter: getLocalFile,
       }),
+      TrackTasks,
       Mathematics.configure({
         // Options for the block math node
         blockOptions: {
