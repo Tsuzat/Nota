@@ -30,14 +30,15 @@
     "svelte": "^5.0.0"
   },
   "devDependencies": {
-    "@internationalized/date": "^3.8.1",
-    "@lucide/svelte": "^0.544.0",
+    "@internationalized/date": "^3.10.0",
+    "@lucide/svelte": "^0.561.0",
     "@sveltejs/adapter-auto": "^7.0.0",
     "@sveltejs/kit": "^2.48.5",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tailwindcss/vite": "^4.1.17",
-    "bits-ui": "^2.11.0",
+    "bits-ui": "^2.14.4",
     "clsx": "^2.1.1",
+    "embla-carousel-svelte": "^8.6.0",
     "mode-watcher": "^1.1.0",
     "svelte": "^5.43.8",
     "svelte-check": "^4.3.4",
