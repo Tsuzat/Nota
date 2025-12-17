@@ -1,4 +1,3 @@
-
 import { json, redirect } from '@sveltejs/kit';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { dodoClient } from '$lib/dodopayments';
