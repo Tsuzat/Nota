@@ -3,7 +3,7 @@ import { adminClient } from '$lib/supabase/admin';
 import { GoogleGenAI } from '@google/genai';
 import { json } from '@sveltejs/kit';
 import { systemInstruction } from './prompts.js';
-import { logerror } from '$lib/sentry/index.js';
+import { logerror, loginfo } from '$lib/sentry/index.js';
 
 const genai = new GoogleGenAI({
   apiKey: GEMINI_API_KEY,
@@ -69,10 +69,15 @@ export const POST = async ({ request, locals }) => {
     return json({ error: "Missing or invalid 'prompt' field." }, { status: 400 });
   }
 
-  // 5. Call Gemini API for streaming
   try {
+    const model = 'gemini-2.5-flash-lite';
+    const inputTokensResp = await genai.models.countTokens({
+      model,
+      contents: prompt,
+    });
+    const inputTokens = inputTokensResp.totalTokens ?? 0;
     const responseStream = await genai.models.generateContentStream({
-      model: 'gemini-2.5-flash-lite',
+      model,
       contents: prompt,
       config: {
         systemInstruction: systemInstruction,
@@ -82,14 +87,36 @@ export const POST = async ({ request, locals }) => {
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
+        let outputText = '';
         try {
           for await (const chunk of responseStream) {
             if (chunk.text) {
               const text = chunk.text;
               if (text) {
                 controller.enqueue(encoder.encode(text));
+                outputText += text;
               }
             }
+          }
+          try {
+            const outputTokensResp = await genai.models.countTokens({
+              model,
+              contents: outputText,
+            });
+            const outputTokens = outputTokensResp.totalTokens ?? 0;
+            const spend = inputTokens + outputTokens;
+            const remaining = Math.max(0, (profile.ai_credits ?? 0) - spend);
+            const { error: updateError } = await adminClient
+              .from('profiles')
+              .update({ ai_credits: remaining })
+              .eq('id', user.id);
+            if (updateError) {
+              logerror('AI credits update failed', { updateError, userId: user.id });
+            } else {
+              loginfo('AI credits updated successfully. AI credits spent: ', { userId: user.id, remaining, spend });
+            }
+          } catch (e) {
+            logerror('Token counting/update failed', { e, userId: user.id });
           }
           controller.close();
         } catch (e) {

@@ -1,0 +1,54 @@
+Nota Non‑Commercial License (NNCL‑1.0)
+
+Copyright (c) 2025 Tsuzat. All rights reserved.
+
+1. Definitions
+“Software” means the source code, binaries, documentation, and other materials
+contained in this repository known as “Nota”.
+“Non‑Commercial Use” means use that is not intended for, or directed toward,
+commercial advantage, monetary compensation, or production services.
+
+2. Grant of Rights
+Subject to the terms below, you are granted a revocable, non‑exclusive,
+non‑transferable license to:
+- download, view, and locally run the Software;
+- modify the Software solely for your personal, private, or internal
+  evaluation purposes; and
+- use the Software for Non‑Commercial Use.
+
+3. Restrictions
+You may NOT:
+- use the Software, or any derivative, for commercial purposes, including
+  without limitation SaaS/hosted services, paid features, consulting deliverables,
+  or production workloads;
+- publicly fork, publish, distribute, or make available the Software or any
+  derivative work (including posting modified versions or copies to public
+  repositories);
+- sublicense, relicense, or redistribute the Software in whole or in part;
+- remove or alter copyright, license, or attribution notices; or
+- use the Software to train, fine‑tune, or evaluate models or systems intended
+  for commercial products or services.
+
+4. Ownership
+All rights, title, and interest in and to the Software are retained by Tsuzat.
+No rights are granted except as expressly stated in this License.
+
+5. Termination
+This License terminates automatically if you breach any term. Upon termination,
+you must cease all use and destroy all copies and derivatives of the Software.
+
+6. Disclaimer of Warranty
+THE SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, AND NON‑INFRINGEMENT.
+
+7. Limitation of Liability
+IN NO EVENT SHALL TSUZAT OR CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING
+FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+
+8. Commercial Licensing
+Commercial use, redistribution, or public forks require a separate commercial
+license from Tsuzat. For inquiries, contact support@tsuzat.com.
+
