@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import type { User } from '@supabase/supabase-js';
 import { json } from '@sveltejs/kit';
 import { GEMINI_API_KEY } from '$env/static/private';
 import { logerror, loginfo } from '$lib/sentry/index.js';
@@ -13,22 +14,28 @@ const genai = new GoogleGenAI({
 export const POST = async ({ request, locals }) => {
   // 1. Get the authenticated user
   // Check standard SvelteKit session first (cookies)
-  let { user } = await locals.safeGetSession();
+  let user: User | null = null;
 
-  // If no session via cookies, check Authorization header (Edge Function style)
-  if (!user) {
-    const authHeader = request.headers.get('Authorization');
-    const token = authHeader?.replace('Bearer ', '');
+  const authHeader = request.headers.get('Authorization');
+  const token = authHeader?.replace('Bearer ', '');
 
-    if (token) {
-      const {
-        data: { user: headerUser },
-        error,
-      } = await locals.supabase.auth.getUser(token);
-      if (!error && headerUser) {
-        user = headerUser;
-      }
+  if (token) {
+    const {
+      data: { user: headerUser },
+      error,
+    } = await adminClient.auth.getUser(token);
+    if (!error && headerUser) {
+      user = headerUser;
+    } else {
+      logerror('Error fetching user from token', { error });
+      return json({ error: 'Error fetching user from token.' }, { status: 401 });
     }
+  }
+
+  // If no token then try to find user from session
+  if (!user) {
+    const data = await locals.safeGetSession();
+    user = data.user;
   }
 
   if (!user) {

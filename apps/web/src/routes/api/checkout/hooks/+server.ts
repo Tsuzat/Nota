@@ -58,7 +58,7 @@ export const POST = Webhooks({
 
   onPaymentSucceeded: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Payment;
-    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata['nota_user_id']);
+    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata.nota_user_id);
     if (!user) {
       console.log('onPaymentSucceeded: user not found', JSON.stringify(payload));
       logerror('onPaymentSucceeded: user not found', { payload });
@@ -88,7 +88,7 @@ export const POST = Webhooks({
   onSubscriptionActive: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Subscription;
     console.log('ON SUBSCRIPTION ACTIVE', JSON.stringify(payload));
-    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata['nota_user_id']);
+    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata.nota_user_id);
     if (!user) {
       console.log('onSubscriptionActive: user not found', JSON.stringify(payload));
       logerror('onSubscriptionActive: user not found', { payload });
@@ -123,7 +123,7 @@ export const POST = Webhooks({
 
   onSubscriptionCancelled: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Subscription;
-    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata['nota_user_id']);
+    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata.nota_user_id);
     if (!user) return;
 
     try {
@@ -146,7 +146,7 @@ export const POST = Webhooks({
 
   onSubscriptionExpired: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Subscription;
-    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata['nota_user_id']);
+    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata.nota_user_id);
     if (!user) return;
 
     try {
@@ -169,7 +169,7 @@ export const POST = Webhooks({
 
   onPaymentFailed: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Payment;
-    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata['nota_user_id']);
+    const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata.nota_user_id);
     if (!user) return;
     console.log('onPaymentFailed: payload', payload);
     loginfo('onPaymentFailed', { userId: user.id, payload });
