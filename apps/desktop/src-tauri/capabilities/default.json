@@ -29,10 +29,14 @@
     "deep-link:default",
     "shell:default",
     {
+      "identifier": "http:default",
+      "allow": [{ "url": "https://*.nota.ink/*" }]
+    },
+    {
       "identifier": "opener:allow-open-url",
       "allow": [
         {
-          "url": "https://nota.ink/*"
+          "url": "https://*.nota.ink/*"
         }
       ]
     },
