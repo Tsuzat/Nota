@@ -1,6 +1,5 @@
 <script lang="ts">
-import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
-import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
+import { BorderBeam, SimpleToolTip, ToggleMode } from '@lib/components/custom';
 import BookOpen from '@lucide/svelte/icons/book-open';
 import Code from '@lucide/svelte/icons/code';
 import Github from '@lucide/svelte/icons/github';
@@ -29,23 +28,58 @@ import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svel
 import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
 import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
-import Spotlight from '$lib/components/custom/utils/spotlight.svelte';
 
 const { data } = $props();
 
+import Check from '@lucide/svelte/icons/check';
+import { sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
+
+const pricingList = {
+  monthly: [
+    'Unlimited Cloud Notes, Workspaces and UserWorkspaces',
+    'Notes collaborate with anyone [Comming Soon]',
+    'Notes Previews on Browser',
+    '2 Million AI Credits per month (Never Expires)',
+    '2 GB Storage for Media Files',
+    '10% discount on extra AI Credits',
+    'All data is encrypted',
+    'Priority support and 24/7 help',
+  ],
+  yearly: [
+    'Everything in Monthly',
+    '25 Million AI Credits at once',
+    '15% discount on extra AI Credits',
+    'Early access to beta features',
+    'Exclusive community badge',
+    'Direct dev team access',
+  ],
+  ai_credits: [
+    'Can be used without any subscription',
+    'Even Works for Free Tier Users',
+    'Never Expires',
+    'Pay as you go',
+    'Access to AI Features',
+  ],
+};
 
 const user = $derived(data.session?.user);
 </script>
 
 <Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
-<Spotlight />
 
 <header class="mx-auto flex max-w-4xl items-center justify-between gap-4 p-4">
   <a class="flex items-center gap-4" href={resolve("/")}>
-    <img src="/favicon.webp" alt="Nota" class="size-10" />
+    <enhanced:img src="../../static/favicon.webp" alt="Nota" class="size-10" />
     <h3 class="font-bold">Nota</h3>
   </a>
+  <div class="items-center gap-8 hidden sm:inline-flex">
+    <a class="text-sm hover:text-muted-foreground" href="#features">Features</a>
+    <a class="text-sm hover:text-muted-foreground" href="#solutions"
+      >Solutions</a
+    >
+    <a class="text-sm hover:text-muted-foreground" href="#pricing">Pricing</a>
+  </div>
   <div class="flex items-center gap-4">
     <ToggleMode />
     {#if user === undefined}
@@ -54,7 +88,13 @@ const user = $derived(data.session?.user);
       <Dropdown.Root>
         <Dropdown.Trigger>
           <SimpleToolTip content={user.email}>
-            <Avatar.Root class={buttonVariants({variant: "ghost", size: "icon-sm", class: "rounded-full"})}>
+            <Avatar.Root
+              class={buttonVariants({
+                variant: "ghost",
+                size: "icon-sm",
+                class: "rounded-full",
+              })}
+            >
               <Avatar.Image src={user.user_metadata["avatar_url"]} />
               <Avatar.Fallback>
                 <User />
@@ -84,8 +124,8 @@ const user = $derived(data.session?.user);
   class="mx-auto flex size-full max-w-4xl flex-col items-center justify-between gap-8 overflow-auto px-4 pt-8"
 >
   <p class="animate-bounce">
-    A fast, modern, feature rich, lightweight and local first note taking
-    desktop application
+    A fast, modern, feature rich, lightweight note taking app with native AI
+    features
   </p>
   <div class="flex flex-col items-center gap-4 sm:flex-row">
     <Button variant="outline" href={resolve("/playground")}>
@@ -117,16 +157,21 @@ const user = $derived(data.session?.user);
       {/if}
     {/await}
   </div>
-  <img
-    class="z-10 hidden aspect-auto h-auto w-full dark:block"
-    src="/previews/dark.webp"
-    alt="nota"
-  />
-  <img
-    class="z-10 block aspect-auto h-auto w-full dark:hidden"
-    src="/previews/light.webp"
-    alt="nota"
-  />
+  <div class="hidden dark:block">
+    <enhanced:img
+      class="aspect-auto h-auto w-full"
+      src="../../static/previews/dark.webp"
+      alt="nota"
+    />
+  </div>
+  <div class="block dark:hidden">
+    <enhanced:img
+      class="z-10 block aspect-auto h-auto w-full dark:hidden"
+      src="../../static/previews/light.webp"
+      alt="nota"
+    />
+  </div>
+
   <Reveal>
     <section class="flex w-full flex-col gap-8 py-12">
       <h2 class="text-center text-3xl font-bold">Features for Everyone</h2>
@@ -188,7 +233,7 @@ const user = $derived(data.session?.user);
   </Reveal>
 
   <Reveal delay={200}>
-    <section class="flex w-full flex-col gap-8 py-12">
+    <section id="solutions" class="flex w-full flex-col gap-8 py-12">
       <h2 class="text-center text-3xl font-bold">Solutions for Everyone</h2>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div class="flex flex-col items-center gap-4 text-center">
@@ -226,7 +271,10 @@ const user = $derived(data.session?.user);
   </Reveal>
 
   <Reveal delay={400}>
-    <section class="flex w-full flex-col gap-12 py-12 md:gap-24 md:py-24">
+    <section
+      id="features"
+      class="flex w-full flex-col gap-12 py-12 md:gap-24 md:py-24"
+    >
       <h2 class="text-center text-3xl font-bold tracking-tight md:text-4xl">
         Powerful Editor Features
       </h2>
@@ -295,6 +343,101 @@ const user = $derived(data.session?.user);
         >
           <MockAiDialog />
         </div>
+      </div>
+    </section>
+  </Reveal>
+
+  <Reveal delay={600}>
+    <section id="pricing" class="flex w-full flex-col gap-8 py-12">
+      <h2 class="text-center text-3xl font-bold">Simple Pricing</h2>
+      <p class="text-center text-muted-foreground">
+        Choose the plan that fits your workflow
+      </p>
+
+      <div class="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
+        <!-- Monthly -->
+        <Card.Root>
+          <Card.Header>
+            <Card.Title class="font-medium">Monthly</Card.Title>
+            <span class="my-3 block text-2xl font-semibold">$9 / mo</span>
+          </Card.Header>
+          <Card.Content class="space-y-4">
+            <hr class="border-dashed" />
+            <ul class="list-outside space-y-3 text-sm">
+              {#each pricingList.monthly as item, idx (idx)}
+                <li class="flex items-center gap-2">
+                  <Check class="size-3" />
+                  {item}
+                </li>
+              {/each}
+            </ul>
+          </Card.Content>
+          <Card.Footer>
+            <Button
+              class="w-full"
+              variant="outline"
+              onclick={() => sendToPaymentPortal("monthly")}>Start</Button
+            >
+          </Card.Footer>
+        </Card.Root>
+
+        <!-- Yearly (Popular) -->
+        <Card.Root class="relative border-primary/50">
+          <BorderBeam />
+          <span
+            class="absolute inset-x-0 -top-3 mx-auto flex h-6 w-fit items-center rounded-full bg-linear-to-br from-purple-400 to-amber-300 px-3 py-1 text-xs font-medium text-amber-950 ring-1 ring-white/20 ring-offset-1 ring-offset-gray-950/5 ring-inset"
+            >Popular</span
+          >
+          <Card.Header>
+            <Card.Title class="font-medium">Yearly</Card.Title>
+            <span class="my-3 block text-2xl font-semibold">
+              $8.25 / mo
+              <span class="text-lg font-normal text-muted-foreground"
+                >billed $99/y</span
+              >
+            </span>
+          </Card.Header>
+          <Card.Content class="space-y-4">
+            <hr class="border-dashed" />
+            <ul class="list-outside space-y-3 text-sm">
+              {#each pricingList.yearly as item, idx (idx)}
+                <li class="flex items-center gap-2">
+                  <Check class="size-3" />
+                  {item}
+                </li>
+              {/each}
+            </ul>
+          </Card.Content>
+          <Card.Footer class="mt-auto">
+            <Button class="w-full" onclick={() => sendToPaymentPortal("yearly")}
+              >Start to Save More</Button
+            >
+          </Card.Footer>
+        </Card.Root>
+
+        <!-- AI Credits -->
+        <Card.Root>
+          <Card.Header>
+            <Card.Title class="font-medium">AI Credits</Card.Title>
+            <span class="my-3 block text-2xl font-semibold"
+              >$10 / 5M tokens</span
+            >
+          </Card.Header>
+          <Card.Content class="space-y-4">
+            <hr class="border-dashed" />
+            <ul class="list-outside space-y-3 text-sm">
+              {#each pricingList.ai_credits as item, idx (idx)}
+                <li class="flex items-center gap-2">
+                  <Check class="size-3" />
+                  {item}
+                </li>
+              {/each}
+            </ul>
+          </Card.Content>
+          <Card.Footer class="mt-auto">
+            <Button class="w-full" variant="outline">Comming Soon</Button>
+          </Card.Footer>
+        </Card.Root>
       </div>
     </section>
   </Reveal>
