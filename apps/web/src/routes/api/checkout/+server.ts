@@ -1,8 +1,8 @@
-// import { adminClient } from '$lib/supabase/admin';
-import { dodoClient } from '$lib/dodopayments';
-import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-import { logerror } from '$lib/sentry/index.js';
+
 import { json, redirect } from '@sveltejs/kit';
+import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
+import { dodoClient } from '$lib/dodopayments';
+import { logerror } from '$lib/sentry/index.js';
 
 export const GET = async ({ request }) => {
   const { searchParams } = new URL(request.url);

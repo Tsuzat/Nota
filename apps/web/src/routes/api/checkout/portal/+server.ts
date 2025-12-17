@@ -1,5 +1,5 @@
-import { dodoClient } from '$lib/dodopayments';
 import { redirect } from '@sveltejs/kit';
+import { dodoClient } from '$lib/dodopayments';
 
 export const GET = async ({ request }) => {
   const { searchParams } = new URL(request.url);

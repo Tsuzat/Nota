@@ -1,9 +1,9 @@
 import { Webhooks } from '@dodopayments/sveltekit';
+import type { WebhookPayload } from 'dodopayments/resources';
 import { DODO_PAYMENT_WEBHOOK_SECRET } from '$env/static/private';
 import { PUBLIC_NOTA_MONTLY_SUB, PUBLIC_NOTA_YEARLY_SUB } from '$env/static/public';
-import { adminClient } from '$lib/supabase/admin';
 import { logerror, loginfo } from '$lib/sentry';
-import type { WebhookPayload } from 'dodopayments/resources';
+import { adminClient } from '$lib/supabase/admin';
 
 interface UserProfile {
   id: string;

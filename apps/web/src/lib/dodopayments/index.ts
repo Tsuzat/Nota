@@ -1,5 +1,5 @@
-import { DODO_MODE, DODO_PAYMENT_API_KEY, DODO_PAYMENT_WEBHOOK_SECRET } from '$env/static/private';
 import DodoPayments from 'dodopayments';
+import { DODO_MODE, DODO_PAYMENT_API_KEY, DODO_PAYMENT_WEBHOOK_SECRET } from '$env/static/private';
 
 const getMode = () => {
   switch (DODO_MODE) {
