@@ -20,6 +20,8 @@ import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/user
 import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { type CloudUserWorkspace, useCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
 import { ISMACOS, ISWINDOWS, timeAgo } from '$lib/utils';
+  import { onMount } from 'svelte';
+  import { auth } from '$lib/supabase';
 
 const sidebar = useSidebar();
 const localUserWorkspaces = getLocalUserWorkspaces();
@@ -67,6 +69,11 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
     await localUserWorkspaces.deleteUserWorkspace(workspace.id);
   }
 }
+
+onMount(async() => {
+	const data =await auth.signInWithPassword({email: "test@test.com", password:"123456"})
+	if (data.error) console.error(data.error)
+})
 </script>
 
 {#if currentUserWorkspace === null}

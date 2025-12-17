@@ -1,43 +1,17 @@
 <script lang="ts">
-import { Button } from '@nota/ui/shadcn/button';
-import { Input } from '@nota/ui/shadcn/input';
 import * as Label from '@nota/ui/shadcn/label';
-import * as Select from '@nota/ui/shadcn/select';
-import { toast } from '@nota/ui/shadcn/sonner';
 import * as Switch from '@nota/ui/shadcn/switch';
 import { onMount } from 'svelte';
-import { GeminiModel, getUserPreferedAIModel, setUserPreferedAIModel } from '$lib/gemini';
 import { getGlobalSettings } from '../constants.svelte';
 
 const useSettings = getGlobalSettings();
 
-let apiKey = $state('');
-let hasApiKey = $state(false);
-let selectedModel = $state(getUserPreferedAIModel());
 
 onMount(() => {
-  const storedKey = localStorage.getItem('gemini_api_key');
-  if (storedKey) {
-    hasApiKey = true;
-  }
+
 });
 
-function saveApiKey() {
-  if (apiKey.trim() === '') {
-    toast.error('API Key cannot be empty.');
-    return;
-  }
-  localStorage.setItem('gemini_api_key', apiKey);
-  hasApiKey = true;
-  apiKey = '';
-  toast.success('API Key saved successfully.');
-}
 
-function removeApiKey() {
-  localStorage.removeItem('gemini_api_key');
-  hasApiKey = false;
-  toast.success('API Key removed successfully.');
-}
 </script>
 
 <div class="mx-auto w-120 space-y-6 p-6">
@@ -54,7 +28,7 @@ function removeApiKey() {
 			<Switch.Root id="use-ai" bind:checked={useSettings.useAI} />
 		</div>
 
-		<div class="flex items-center justify-between rounded-lg border p-4">
+		<!-- <div class="flex items-center justify-between rounded-lg border p-4">
 			<div>
 				<Label.Root for="ai-model">AI Model</Label.Root>
 				<p class="text-muted-foreground text-xs">Select the AI model to use.</p>
@@ -106,6 +80,6 @@ function removeApiKey() {
 					Google AI Studio
 				</a>.
 			</p>
-		</div>
+		</div> -->
 	</div>
 </div>
