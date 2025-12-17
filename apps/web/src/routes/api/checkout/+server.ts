@@ -4,7 +4,6 @@ import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { logerror } from '$lib/sentry/index.js';
 import { json, redirect } from '@sveltejs/kit';
 
-
 export const GET = async ({ request }) => {
   const { searchParams } = new URL(request.url);
   const productId = searchParams.get('product_id');
@@ -13,7 +12,7 @@ export const GET = async ({ request }) => {
   if (productId === null || userEmail === null || customerId === null) {
     return json({ error: 'product_id, user_email, and external_user_id are required' }, { status: 400 });
   }
- 
+
   let checkOutURL = '';
 
   try {

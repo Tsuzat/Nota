@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@dodopayments/sveltekit": "^0.2.4",
+    "@google/genai": "^1.33.0",
     "@lucide/svelte": "^0.561.0",
     "@nota/ui": "workspace:*",
     "@sentry/sveltekit": "^10.30.0",
