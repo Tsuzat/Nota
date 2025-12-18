@@ -1,5 +1,5 @@
+import { fetch } from '@tauri-apps/plugin-http';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-import {fetch} from '@tauri-apps/plugin-http'
 
 /**
  * Calls the AI model to generate a streaming response.
@@ -50,7 +50,7 @@ export async function callAI(
       }
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
     const err = error instanceof Error ? error : new Error('Unknown error');
     onError?.(err);
   }

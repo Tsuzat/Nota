@@ -9,6 +9,7 @@ import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { cn } from '@nota/ui/utils';
 import { ask } from '@tauri-apps/plugin-dialog';
+import { onMount } from 'svelte';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
@@ -17,11 +18,10 @@ import { getNewUserWorkspace, useCurrentUserWorkspaceContext } from '$lib/compon
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
+import { auth } from '$lib/supabase';
 import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { type CloudUserWorkspace, useCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
 import { ISMACOS, ISWINDOWS, timeAgo } from '$lib/utils';
-  import { onMount } from 'svelte';
-  import { auth } from '$lib/supabase';
 
 const sidebar = useSidebar();
 const localUserWorkspaces = getLocalUserWorkspaces();
@@ -70,10 +70,10 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
   }
 }
 
-onMount(async() => {
-	const data =await auth.signInWithPassword({email: "test@test.com", password:"123456"})
-	if (data.error) console.error(data.error)
-})
+onMount(async () => {
+  const data = await auth.signInWithPassword({ email: 'test@test.com', password: '123456' });
+  if (data.error) console.error(data.error);
+});
 </script>
 
 {#if currentUserWorkspace === null}

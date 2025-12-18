@@ -1,7 +1,10 @@
 <script lang="ts">
+import { ProBadge } from '@lib/components/custom';
 import { toast } from '@lib/components/ui/sonner';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
+import { openUrl } from '@tauri-apps/plugin-opener';
+import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import OAuth from '$lib/components/global-signin/oauth.svelte';
 import { auth } from '$lib/supabase';
 import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
@@ -10,6 +13,7 @@ const useSessionAndUser = getSessionAndUserContext();
 
 const user = $derived(useSessionAndUser.getUser());
 const session = $derived(useSessionAndUser.getSession());
+const profile = $derived(useSessionAndUser.getProfile());
 
 async function handleSignout() {
   const { error } = await auth.signOut();
@@ -48,9 +52,20 @@ async function handleDeleteUser() {
 				<div class="text-muted-foreground text-xs">
 					Provider: {session?.provider_token ? 'oauth' : 'email'}
 				</div>
+				<div class="text-muted-foreground text-xs">
+					Subscription Tier: {profile?.subscription_tier}
+				</div>
 			</div>
 		</div>
 		<div class="mt-6 flex space-x-2">
+			{#if profile?.subscription_tier === "free"}
+			<Button variant="outline" onclick={() => {
+				openUrl(`${PUBLIC_NOTA_FRONTEND_URL}#pricing`)
+			}}>
+				<span>Upgrade to </span>
+				<ProBadge />
+			</Button>
+			{/if}
 			<Button onclick={handleSignout}>Sign Out</Button>
 			<Button variant="destructive" onclick={handleDeleteUser}>Delete Account</Button>
 		</div>

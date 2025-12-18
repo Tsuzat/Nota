@@ -81,6 +81,7 @@ onMount(() => {
     } else if (session) {
       sessionAndUser.setSession(session);
       sessionAndUser.setUser(session.user);
+      sessionAndUser.fetchUserProfile();
       if (event === 'SIGNED_IN') {
         invalidate('supabase:auth');
       }

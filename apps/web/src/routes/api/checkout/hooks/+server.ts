@@ -4,21 +4,7 @@ import { DODO_PAYMENT_WEBHOOK_SECRET } from '$env/static/private';
 import { PUBLIC_NOTA_AI_CREDITS, PUBLIC_NOTA_MONTLY_SUB, PUBLIC_NOTA_YEARLY_SUB } from '$env/static/public';
 import { logerror, loginfo } from '$lib/sentry';
 import { adminClient } from '$lib/supabase/admin';
-
-interface UserProfile {
-  id: string;
-  created_at: string;
-  storage_used: number;
-  storage_allotted: number;
-  subscription_tier: 'free' | 'pro';
-  subscription_type: 'monthtly' | 'yearly' | null;
-  payment_status: string | null;
-  subscription_start_date: string | null;
-  next_billing_date: string | null;
-  payment_method_id: string | null;
-  ai_credits: number;
-  external_customer_id: string | null;
-}
+import type { UserProfile } from '$lib/types';
 
 async function getUserIdFromPayload(customerId?: string, notaUserId?: string): Promise<UserProfile | null> {
   if (!customerId && !notaUserId) return null;
