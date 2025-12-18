@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { cn } from '@lib/utils';
 
-	const { class: className = '' }: { class?: string } = $props();
+	const { class: className = '', text }: { class?: string, text?: string } = $props();
 </script>
 
 <button
@@ -17,7 +17,7 @@
 	<span
 		class="animate-gradient inline bg-linear-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-size-[var(--bg-size)_100%] bg-clip-text text-transparent"
 	>
-		Pro
+		{text ?? "Pro"}
 	</span>
 </button>
 

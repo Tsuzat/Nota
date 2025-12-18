@@ -1,24 +1,24 @@
 <script lang="ts">
-  import LogOut from "@lucide/svelte/icons/log-out";
-  import Trash2 from "@lucide/svelte/icons/trash-2";
-  import * as Avatar from "@nota/ui/shadcn/avatar";
-  import { Button } from "@nota/ui/shadcn/button";
-  import * as Card from "@nota/ui/shadcn/card";
-  import { toast } from "@nota/ui/shadcn/sonner";
-  import { resolve } from "$app/paths";
-  import ProBadge from "@lib/components/custom/ProBadge.svelte";
+import ProBadge from '@lib/components/custom/ProBadge.svelte';
+import LogOut from '@lucide/svelte/icons/log-out';
+import Trash2 from '@lucide/svelte/icons/trash-2';
+import * as Avatar from '@nota/ui/shadcn/avatar';
+import { Button } from '@nota/ui/shadcn/button';
+import * as Card from '@nota/ui/shadcn/card';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { resolve } from '$app/paths';
 
-  const { data } = $props();
+const { data } = $props();
 
-  const isPro = $derived((data.profile?.subscription_tier || "free") === "pro");
-  const ai_credits = $derived(data.profile?.ai_credits);
-  const external_customer_id = $derived(data.profile?.external_customer_id);
-  const user = $derived(data.user);
-  const sub_type = $derived(data.profile?.subscription_type || undefined)
+const isPro = $derived((data.profile?.subscription_tier || 'free') === 'pro');
+const ai_credits = $derived(data.profile?.ai_credits);
+const external_customer_id = $derived(data.profile?.external_customer_id);
+const user = $derived(data.user);
+const sub_type = $derived(data.profile?.subscription_type || undefined);
 
-  function handleDeleteAccount() {
-    toast.warning("Account Deletion is coming soon.");
-  }
+function handleDeleteAccount() {
+  toast.warning('Account Deletion is coming soon.');
+}
 </script>
 
 <div class="container mx-auto max-w-4xl p-4 md:p-8">
@@ -53,7 +53,7 @@
                 {user?.user_metadata.full_name ?? "No Name"}
               </span>
               {#if isPro}
-                <ProBadge />
+                <ProBadge text={sub_type} />
               {/if}
             </div>
             <div class="text-muted-foreground text-sm">{user?.email}</div>
@@ -67,6 +67,12 @@
               month: "long",
               day: "numeric",
             })}
+          </div>
+        </div>
+		<div class="grid gap-2">
+          <div class="text-sm font-medium">Available AI Credits</div>
+          <div class="text-muted-foreground text-sm">
+			{ai_credits}
           </div>
         </div>
       </Card.Content>
