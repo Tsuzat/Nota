@@ -20,6 +20,7 @@ import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import ArtifactDownloader from '$lib/artifact/artifact-downloader.svelte';
@@ -31,6 +32,7 @@ import Reveal from '$lib/components/custom/utils/reveal.svelte';
 
 const { data } = $props();
 
+import { Menu } from '@lucide/svelte';
 import Check from '@lucide/svelte/icons/check';
 import { sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
@@ -42,7 +44,7 @@ const pricingList = {
     'Notes Previews on Browser',
     '2 Million AI Credits per month (Never Expires)',
     '2 GB Storage for Media Files',
-    '10% discount on extra AI Credits',
+    // '10% discount on extra AI Credits',
     'All data is encrypted',
     'Priority support and 24/7 help',
   ],
@@ -50,7 +52,7 @@ const pricingList = {
     'Everything in Monthly',
     '25 Million AI Credits at once',
     '15% discount on extra AI Credits',
-    'Early access to beta features',
+    // 'Early access to beta features',
     'Exclusive community badge',
     'Direct dev team access',
   ],
@@ -74,13 +76,42 @@ const user = $derived(data.session?.user);
     <h3 class="font-bold">Nota</h3>
   </a>
   <div class="items-center gap-8 hidden sm:inline-flex">
-    <a class="text-sm hover:text-muted-foreground" href="#features">Features</a>
-    <a class="text-sm hover:text-muted-foreground" href="#solutions"
-      >Solutions</a
+    <a
+      class="hover:text-muted-foreground transition-all duration-500"
+      href="#features">Features</a
     >
-    <a class="text-sm hover:text-muted-foreground" href="#pricing">Pricing</a>
+    <a
+      class="hover:text-muted-foreground transition-all duration-500"
+      href="#solutions">Solutions</a
+    >
+    <a
+      class="hover:text-muted-foreground transition-all duration-500"
+      href="#pricing">Pricing</a
+    >
   </div>
   <div class="flex items-center gap-4">
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger
+        class={buttonVariants({
+          variant: "ghost",
+          size: "icon-sm",
+          class: "sm:hidden",
+        })}
+      >
+        <Menu />
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content class="w-fit">
+        <a href="#features">
+          <DropdownMenu.Item>Features</DropdownMenu.Item>
+        </a>
+        <a href="#solutions">
+          <DropdownMenu.Item>Solutions</DropdownMenu.Item>
+        </a>
+        <a href="#pricing">
+          <DropdownMenu.Item>Pricing</DropdownMenu.Item>
+        </a>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
     <ToggleMode />
     {#if user === undefined}
       <Button href={resolve("/login")}>Sign In</Button>
@@ -366,7 +397,7 @@ const user = $derived(data.session?.user);
             <ul class="list-outside space-y-3 text-sm">
               {#each pricingList.monthly as item, idx (idx)}
                 <li class="flex items-center gap-2">
-                  <Check class="size-3" />
+                  <Check class="size-3!" />
                   {item}
                 </li>
               {/each}
@@ -402,7 +433,7 @@ const user = $derived(data.session?.user);
             <ul class="list-outside space-y-3 text-sm">
               {#each pricingList.yearly as item, idx (idx)}
                 <li class="flex items-center gap-2">
-                  <Check class="size-3" />
+                  <Check class="size-3!" />
                   {item}
                 </li>
               {/each}
@@ -435,7 +466,12 @@ const user = $derived(data.session?.user);
             </ul>
           </Card.Content>
           <Card.Footer class="mt-auto">
-            <Button class="w-full" variant="outline">Comming Soon</Button>
+            <Button
+              class="w-full"
+              variant="outline"
+              onclick={() => sendToPaymentPortal("ai_credits")}
+              >Get AI Credits</Button
+            >
           </Card.Footer>
         </Card.Root>
       </div>

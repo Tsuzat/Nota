@@ -1,7 +1,7 @@
 import { Webhooks } from '@dodopayments/sveltekit';
 import type { WebhookPayload } from 'dodopayments/resources';
 import { DODO_PAYMENT_WEBHOOK_SECRET } from '$env/static/private';
-import { PUBLIC_NOTA_MONTLY_SUB, PUBLIC_NOTA_YEARLY_SUB } from '$env/static/public';
+import { PUBLIC_NOTA_AI_CREDITS, PUBLIC_NOTA_MONTLY_SUB, PUBLIC_NOTA_YEARLY_SUB } from '$env/static/public';
 import { logerror, loginfo } from '$lib/sentry';
 import { adminClient } from '$lib/supabase/admin';
 
@@ -20,12 +20,12 @@ interface UserProfile {
   external_customer_id: string | null;
 }
 
-async function getUserIdFromPayload(customerId?: string, noteUserId?: string): Promise<UserProfile | null> {
-  if (!customerId && !noteUserId) return null;
+async function getUserIdFromPayload(customerId?: string, notaUserId?: string): Promise<UserProfile | null> {
+  if (!customerId && !notaUserId) return null;
 
   try {
     const filters: string[] = [];
-    if (noteUserId) filters.push(`id.eq.${noteUserId}`);
+    if (notaUserId) filters.push(`id.eq.${notaUserId}`);
     if (customerId) filters.push(`external_customer_id.eq.${customerId}`);
 
     const { data, error } = await adminClient.from('profiles').select('*').or(filters.join(',')).maybeSingle();
@@ -42,9 +42,11 @@ async function getUserIdFromPayload(customerId?: string, noteUserId?: string): P
   }
 }
 
+//! MAY BE ADD ENV VARIABLE FOR CREDITS AMOUNT
 function getCreditsToAdd(productId: string | null): number {
-  if (productId === PUBLIC_NOTA_MONTLY_SUB) return 5_000_000;
-  if (productId === PUBLIC_NOTA_YEARLY_SUB) return 60_000_000;
+  if (productId === PUBLIC_NOTA_MONTLY_SUB) return 2_000_000;
+  if (productId === PUBLIC_NOTA_YEARLY_SUB) return 25_000_000;
+  if (productId === PUBLIC_NOTA_AI_CREDITS) return 5_000_000;
   return 0;
 }
 
@@ -59,6 +61,7 @@ export const POST = Webhooks({
   onPaymentSucceeded: async (payload: WebhookPayload) => {
     const data = payload.data as WebhookPayload.Payment;
     const user = await getUserIdFromPayload(data.customer.customer_id, data.metadata.nota_user_id);
+    console.log('onPaymentSucceeded: payload', JSON.stringify(payload));
     if (!user) {
       console.log('onPaymentSucceeded: user not found', JSON.stringify(payload));
       logerror('onPaymentSucceeded: user not found', { payload });
@@ -76,8 +79,18 @@ export const POST = Webhooks({
         return;
       }
 
-      //!! may be later
       if (data.product_cart) {
+        const creditsToAdd = data.product_cart.reduce(
+          (acc, item) => acc + getCreditsToAdd(item.product_id) * item.quantity,
+          0
+        );
+        const { error } = await adminClient
+          .from('profiles')
+          .update({ ai_credits: user.ai_credits + creditsToAdd })
+          .eq('id', user.id);
+        if (error) throw error;
+        console.log('onPaymentSucceeded: ai credits updated', { userId: user.id, creditsToAdd });
+        loginfo('onPaymentSucceeded: ai credits updated', { userId: user.id, creditsToAdd });
       }
     } catch (e) {
       console.error('onPaymentSucceeded failed', { e, userId: user.id });

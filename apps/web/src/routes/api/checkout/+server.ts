@@ -7,6 +7,7 @@ import { logerror } from '$lib/sentry/index.js';
 export const GET = async ({ request, locals }) => {
   const { searchParams } = new URL(request.url);
   const productId = searchParams.get('product_id');
+  const quantity = Number.parseInt(searchParams.get('quantity') || '1', 10);
 
   if (productId === null) {
     return json({ error: 'product_id is required' }, { status: 400 });
@@ -17,7 +18,7 @@ export const GET = async ({ request, locals }) => {
     return redirect(307, '/login');
   }
 
-  const { data, error } = await locals.supabase.from('profile').select('external_customer_id').single();
+  const { data, error } = await locals.supabase.from('profiles').select('external_customer_id').single();
   if (error) {
     logerror('Error when user was trying to get profile', { error, productId, userEmail: user.email });
     console.error(error);
@@ -31,11 +32,11 @@ export const GET = async ({ request, locals }) => {
   try {
     const session = await dodoClient.checkoutSessions.create({
       customer: userEmail ? { email: userEmail } : customerId ? { customer_id: customerId } : undefined,
-      metadata: { nota_user_id: customerId },
+      metadata: { nota_user_id: user.id },
       product_cart: [
         {
           product_id: productId,
-          quantity: 1,
+          quantity,
         },
       ],
       return_url: PUBLIC_NOTA_FRONTEND_URL,
