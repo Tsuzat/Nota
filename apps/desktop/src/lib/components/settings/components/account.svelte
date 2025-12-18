@@ -25,13 +25,13 @@ async function handleSignout() {
 }
 
 async function handleDeleteUser() {
-  if (!confirm('Are you sure you want to delete your account? This action is irreversible.')) {
-    return;
-  }
+  //   if (!confirm('Are you sure you want to delete your account? This action is irreversible.')) {
+  //     return;
+  //   }
   // You would typically call a Supabase function to delete the user data.
   // For now, we will just sign out.
-  toast.warning('Delete user functionality is not implemented yet.');
-  await handleSignout();
+  toast.warning('Account deletion will be available soon');
+  //   await handleSignout();
 }
 </script>
 

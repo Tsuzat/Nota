@@ -3,6 +3,8 @@ import { SimpleToolTip } from '@lib/components/custom';
 import { Button } from '@lib/components/ui/button';
 import * as Label from '@nota/ui/shadcn/label';
 import * as Switch from '@nota/ui/shadcn/switch';
+import { openUrl } from '@tauri-apps/plugin-opener';
+import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 import { getGlobalSettings } from '../constants.svelte';
 
@@ -45,6 +47,6 @@ function getAICredits() {
 				<span class="text-sm text-muted-foreground">{getAICredits()}</span>
 			</SimpleToolTip>
 		</div>
-		<Button>Buy More AI Credits</Button>
+		<Button onclick={() => openUrl(`${PUBLIC_NOTA_FRONTEND_URL}#pricing`)}>Buy More AI Credits</Button>
 	</div>
 </div>
