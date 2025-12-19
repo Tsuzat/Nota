@@ -42,15 +42,9 @@ import * as Card from '@nota/ui/shadcn/card';
 			<section class="space-y-2">
 				<h2 class="text-foreground text-2xl font-semibold">3. AI Features</h2>
 				<p>
-					When you use our AI features, the text you submit is sent to the Gemini API for
-					processing. We do not store this data on our servers. You are responsible for managing
-					your own API keys if you choose to bring your own. You can get a Gemini API key
-					<a
-						href="https://aistudio.google.com/api-keys"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-primary hover:underline">here</a
-					>.
+					When you use our AI features, the text you submit is processed by our AI providers. 
+					We do not store this data on our servers beyond what is necessary for providing the service. 
+					AI Credits are managed by us and allocated to your account based on your usage.
 				</p>
 			</section>
 
