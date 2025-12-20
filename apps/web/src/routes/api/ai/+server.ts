@@ -5,7 +5,6 @@ import { GEMINI_API_KEY } from '$env/static/private';
 import { logerror, loginfo } from '$lib/sentry/index.js';
 import { adminClient } from '$lib/supabase/admin';
 import { systemInstruction } from './prompts.js';
-export const config = { runtime: 'bun1.x' };
 
 const genai = new GoogleGenAI({
   apiKey: GEMINI_API_KEY,
