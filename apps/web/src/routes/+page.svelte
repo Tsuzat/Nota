@@ -16,6 +16,7 @@ import User from '@lucide/svelte/icons/user';
 import UserRound from '@lucide/svelte/icons/user-round';
 import X from '@lucide/svelte/icons/x';
 import Zap from '@lucide/svelte/icons/zap';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
@@ -29,7 +30,6 @@ import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svel
 import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
 import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 
 const { data } = $props();
 
@@ -69,7 +69,7 @@ const faqItems = [
     id: 'item-1',
     question: 'Is Nota free to use?',
     answer:
-      "Nota is free for local usages. You can simply download the application and use it for free forever for local usage. All your data is stored in your local machine."
+      'Nota is free for local usages. You can simply download the application and use it for free forever for local usage. All your data is stored in your local machine.',
   },
   {
     id: 'item-2',
@@ -79,15 +79,16 @@ const faqItems = [
   },
   {
     id: 'item-3',
-    question: "What are AI credits?",
+    question: 'What are AI credits?',
     answer:
-      "AI credits are the currency used to access AI features in Nota. You can purchase AI credits to use AI features in Nota. AI credits are used to generate AI content, such as summaries, translations, and more. Usually, these credits are equivalent to tokens."
+      'AI credits are the currency used to access AI features in Nota. You can purchase AI credits to use AI features in Nota. AI credits are used to generate AI content, such as summaries, translations, and more. Usually, these credits are equivalent to tokens.',
   },
   {
     id: 'item-4',
     question: 'Can I use AI without a pro subscription?',
-    answer: "Yes, You can. Using AI features has nothing to do with having pro plan. You can simply login and buy AI Credits and then you can simply use the AI features."
-  }, 
+    answer:
+      'Yes, You can. Using AI features has nothing to do with having pro plan. You can simply login and buy AI Credits and then you can simply use the AI features.',
+  },
 ];
 
 const user = $derived(data.session?.user);
