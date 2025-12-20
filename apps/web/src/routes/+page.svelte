@@ -327,7 +327,7 @@ const user = $derived(data.session?.user);
     </section>
   </Reveal>
 
-  <Reveal delay={400}>
+  <Reveal delay={200}>
     <section
       id="features"
       class="flex w-full flex-col gap-12 py-12 md:gap-24 md:py-24"
@@ -404,7 +404,7 @@ const user = $derived(data.session?.user);
     </section>
   </Reveal>
 
-  <Reveal delay={600}>
+  <Reveal delay={200}>
     <section id="pricing" class="flex w-full flex-col gap-8 py-12">
       <h2 class="text-center text-3xl font-bold">Simple Pricing</h2>
       <p class="text-center text-muted-foreground">
@@ -504,7 +504,7 @@ const user = $derived(data.session?.user);
     </section>
   </Reveal>
 
-  <Reveal delay={800}>
+  <Reveal delay={200}>
      	<section id="faqs">
 		<div class="mx-auto px-4 md:px-6">
 			<div class="mx-auto max-w-xl text-center">
@@ -556,7 +556,7 @@ const user = $derived(data.session?.user);
       >
       <a href="/terms" class="hover:text-foreground transition-colors">Terms</a>
       <a
-        href="https://github.com/tsuzat/nota"
+        href="https://github.com/Tsuzat/Nota"
         target="_blank"
         class="hover:text-foreground transition-colors">GitHub</a
       >
