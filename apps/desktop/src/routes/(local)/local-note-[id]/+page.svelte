@@ -229,8 +229,8 @@ function handleKeydown(event: KeyboardEvent) {
 	{/if}
 	<EdraEditor
 		bind:editor
+    bind:element
 		{content}
-    {element}
 		class="flex-1 grow flex-col overflow-auto p-8!"
 		{onUpdate}
 		{onFileSelect}

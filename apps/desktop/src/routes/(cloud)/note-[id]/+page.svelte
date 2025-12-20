@@ -16,6 +16,7 @@ import { beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
 import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
+import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
@@ -35,6 +36,7 @@ const sidebar = useSidebar();
 
 // editor related
 let editor = $state<Editor>();
+let element = $state<HTMLElement>();
 let content = $state<Content>();
 let syncedContent = $state<Content>();
 let isDirty = $state(false);
@@ -287,9 +289,11 @@ function handleKeydown(e: KeyboardEvent) {
 		{#if useGlobalSettings.useDragHandle}
 			<EdraDragHandleExtended {editor} />
 		{/if}
+    <AI {editor} parentElement={element} />
 	{/if}
 	<EdraEditor
 		bind:editor
+    bind:element
 		{content}
 		class="flex-1 grow flex-col overflow-auto p-8!"
 		{onUpdate}
