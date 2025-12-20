@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "start": "node build/index.js",
     "preview": "vite preview",
     "format": "biome format . --write",
     "lint": "biome check .",
@@ -27,9 +28,7 @@
     "dodopayments": "^2.8.2"
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^7.0.0",
-    "@sveltejs/adapter-cloudflare": "^7.2.4",
-    "@sveltejs/adapter-vercel": "^6.2.0",
+    "@sveltejs/adapter-node": "^5.4.0",
     "@sveltejs/enhanced-img": "^0.9.2",
     "@sveltejs/kit": "^2.48.5",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
