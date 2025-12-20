@@ -42,8 +42,8 @@ import * as Card from '@nota/ui/shadcn/card';
 			<section class="space-y-2">
 				<h2 class="text-foreground text-2xl font-semibold">3. AI Features</h2>
 				<p>
-					When you use our AI features, the text you submit is processed by our AI providers. 
-					We do not store this data on our servers beyond what is necessary for providing the service. 
+					When you use our AI features, the text you submit is processed by our AI providers.
+					We do not store this data on our servers beyond what is necessary for providing the service.
 					AI Credits are managed by us and allocated to your account based on your usage.
 				</p>
 			</section>
@@ -61,7 +61,7 @@ import * as Card from '@nota/ui/shadcn/card';
 				<h2 class="text-foreground text-2xl font-semibold">5. Contact Us</h2>
 				<p>
 					If you have any questions about this Privacy Policy, please contact us at
-					support@tsuzat.com
+					support@nota.ink
 				</p>
 			</section>
 		</Card.Content>

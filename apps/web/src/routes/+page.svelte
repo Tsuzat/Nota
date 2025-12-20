@@ -29,6 +29,7 @@ import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svel
 import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
 import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 
 const { data } = $props();
 
@@ -43,8 +44,7 @@ const pricingList = {
     'Notes collaborate with anyone [Comming Soon]',
     'Notes Previews on Browser',
     '2 Million AI Credits per month (Never Expires)',
-    '2 GB Storage for Media Files',
-    // '10% discount on extra AI Credits',
+    '1 GB Storage for Media Files',
     'All data is encrypted',
     'Priority support and 24/7 help',
   ],
@@ -52,7 +52,6 @@ const pricingList = {
     'Everything in Monthly',
     '25 Million AI Credits at once',
     '15% discount on extra AI Credits',
-    // 'Early access to beta features',
     'Exclusive community badge',
     'Direct dev team access',
   ],
@@ -64,6 +63,32 @@ const pricingList = {
     'Access to AI Features',
   ],
 };
+
+const faqItems = [
+  {
+    id: 'item-1',
+    question: 'Is Nota free to use?',
+    answer:
+      "Nota is free for local usages. You can simply download the application and use it for free forever for local usage. All your data is stored in your local machine."
+  },
+  {
+    id: 'item-2',
+    question: 'What features are included in the Pro plan?',
+    answer:
+      "Pro plan, comes in monthly or yearly based subscription, allows you to use AI features with AI credits, Cloud Storage to store your notes, workspaces, and userworkspaces. You'll get 1 GB of storage to manage your media on cloud.",
+  },
+  {
+    id: 'item-3',
+    question: "What are AI credits?",
+    answer:
+      "AI credits are the currency used to access AI features in Nota. You can purchase AI credits to use AI features in Nota. AI credits are used to generate AI content, such as summaries, translations, and more. Usually, these credits are equivalent to tokens."
+  },
+  {
+    id: 'item-4',
+    question: 'Can I use AI without a pro subscription?',
+    answer: "Yes, You can. Using AI features has nothing to do with having pro plan. You can simply login and buy AI Credits and then you can simply use the AI features."
+  }, 
+];
 
 const user = $derived(data.session?.user);
 </script>
@@ -476,6 +501,48 @@ const user = $derived(data.session?.user);
         </Card.Root>
       </div>
     </section>
+  </Reveal>
+
+  <Reveal delay={800}>
+     	<section id="faqs">
+		<div class="mx-auto px-4 md:px-6">
+			<div class="mx-auto max-w-xl text-center">
+                <h2 class="text-center text-3xl font-bold">Frequently Asked Questions</h2>
+				<p class="mt-4 text-balance text-muted-foreground">
+					Discover quick and comprehensive answers to common questions about our platform, services,
+					and features.
+				</p>
+			</div>
+
+			<div class="mx-auto mt-12 max-w-2xl">
+				<Accordion
+					type="single"
+					class="w-full rounded-2xl border bg-background px-8 py-3 shadow-sm ring-4 ring-muted dark:ring-0"
+				>
+					{#each faqItems as item, index (index)}
+						<AccordionItem
+							value={item.id}
+							class={[faqItems.length - 1 !== index ? 'border-dashed' : 'border-none']}
+						>
+							<AccordionTrigger class="cursor-pointer text-base font-semibold hover:no-underline"
+								>{item.question}</AccordionTrigger
+							>
+							<AccordionContent>
+								<p class="text-base">{item.answer}</p>
+							</AccordionContent>
+						</AccordionItem>
+					{/each}
+				</Accordion>
+
+				<p class="mt-6 px-4 text-muted-foreground text-center">
+					Can't find what you're looking for?
+					<a href="mailto:contact@nota.ink" class="font-medium text-primary hover:underline">
+						Contact Us
+					</a>
+				</p>
+			</div>
+		</div>
+	</section>
   </Reveal>
 
   <footer

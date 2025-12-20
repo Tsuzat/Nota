@@ -70,10 +70,6 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
   }
 }
 
-onMount(async () => {
-  const data = await auth.signInWithPassword({ email: 'test@test.com', password: '123456' });
-  if (data.error) console.error(data.error);
-});
 </script>
 
 {#if currentUserWorkspace === null}
