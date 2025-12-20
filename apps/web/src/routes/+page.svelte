@@ -199,7 +199,7 @@ const user = $derived(data.session?.user);
     </Button>
     {#await getArtefacts()}
       <Button variant="outline">
-        <Loader />
+        <Loader class="animate-spin" />
         Loading
       </Button>
     {:then artefacts}
@@ -212,6 +212,8 @@ const user = $derived(data.session?.user);
           No Downloadables
         </Button>
       {/if}
+      {:catch error}
+      {console.error(error)}
     {/await}
   </div>
   <div class="hidden dark:block">

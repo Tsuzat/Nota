@@ -81,7 +81,7 @@ async function loadData(id: string) {
 			<Skeleton class="h-4 w-full rounded-md" />
 			<Skeleton class="h-4 w-full rounded-md" />
 			<Skeleton class="h-4 w-5/6 rounded-md" />
-			<Skeleton class="h-[400px] w-full rounded-lg" />
+			<Skeleton class="h-100 w-full rounded-lg" />
 		</div>
 	</main>
 {:else if name === undefined && icon === undefined && content === undefined && !isLoading}

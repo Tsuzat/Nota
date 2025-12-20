@@ -23,7 +23,8 @@
     "@sentry/sveltekit": "^10.30.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
-    "dodopayments": "^2.8.2"
+    "dodopayments": "^2.8.2",
+    "redis": "^5.10.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.4.0",

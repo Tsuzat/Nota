@@ -4,7 +4,6 @@ export const prerender = false;
 import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
 import { PUBLIC_SUPABASE_API_KEY, PUBLIC_SUPABASE_ENDPOINT } from '$env/static/public';
 
-
 export const load = async ({ fetch, data, depends }) => {
   depends('supabase:auth');
 

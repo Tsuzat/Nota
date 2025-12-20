@@ -1,6 +1,7 @@
 import { query } from '$app/server';
 import { GITHUB_API_TOKEN } from '$env/static/private';
 import type { ReleaseAssetsResponse } from '$lib/artifact/artifacts';
+import { redisClient } from '$lib/redis';
 import { logerror } from '$lib/sentry';
 
 interface ReleaseAsset {
@@ -12,6 +13,11 @@ type OSType = 'mac' | 'windows' | 'linux';
 
 export const getArtefacts = query(async () => {
   try {
+    // connect with redis and
+    await redisClient.connect();
+    const data = await redisClient.get('latest-artefacts');
+    if (data) return JSON.parse(data) as ReleaseAssetsResponse;
+    // Call Github API to get latest release
     const res = await fetch('https://api.github.com/repos/Tsuzat/Nota/releases/latest', {
       headers: {
         Authorization: `Bearer ${GITHUB_API_TOKEN}`,
@@ -19,6 +25,7 @@ export const getArtefacts = query(async () => {
         Accept: 'application/vnd.github+json',
       },
     });
+    console.log('Status', res.ok);
 
     if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
 
@@ -64,14 +71,20 @@ export const getArtefacts = query(async () => {
       }
     }
 
-    return {
+    const artefacts: ReleaseAssetsResponse = {
       tag: release.tag_name,
       name: release.name,
       published_at: release.published_at,
       platforms,
-    } as ReleaseAssetsResponse;
+    };
+    // Write to Redis
+    await redisClient.set('latest-artefacts', JSON.stringify(artefacts), { EX: 60 * 10 });
+    return artefacts;
   } catch (error) {
+    console.error(error);
     logerror('Failed to fetch artefacts', { error });
     return null;
+  } finally {
+    redisClient.destroy();
   }
 });
