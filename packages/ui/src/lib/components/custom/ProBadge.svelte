@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { cn } from '@lib/utils';
+import { cn } from '@lib/utils';
 
-	const { class: className = '', text }: { class?: string, text?: string } = $props();
+const { class: className = '', text }: { class?: string; text?: string } = $props();
 </script>
 
 <button

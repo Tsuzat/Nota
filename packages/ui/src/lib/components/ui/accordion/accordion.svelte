@@ -1,11 +1,7 @@
 <script lang="ts">
-	import { Accordion as AccordionPrimitive } from "bits-ui";
+import { Accordion as AccordionPrimitive } from 'bits-ui';
 
-	let {
-		ref = $bindable(null),
-		value = $bindable(),
-		...restProps
-	}: AccordionPrimitive.RootProps = $props();
+let { ref = $bindable(null), value = $bindable(), ...restProps }: AccordionPrimitive.RootProps = $props();
 </script>
 
 <AccordionPrimitive.Root

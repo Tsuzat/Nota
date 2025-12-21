@@ -1,29 +1,29 @@
 <script lang="ts">
-	import { cn } from '@lib/utils';
+import { cn } from '@lib/utils';
 
-	interface Props {
-		size?: number;
-		duration?: number;
-		anchor?: number;
-		borderWidth?: number;
-		colorFrom?: string;
-		colorTo?: string;
-		delay?: number;
-		class?: any;
-	}
+interface Props {
+  size?: number;
+  duration?: number;
+  anchor?: number;
+  borderWidth?: number;
+  colorFrom?: string;
+  colorTo?: string;
+  delay?: number;
+  class?: any;
+}
 
-	let {
-		size = 200,
-		duration = 15,
-		anchor = 90,
-		borderWidth = 1.5,
-		colorFrom = '#ffaa40',
-		colorTo = '#9c40ff',
-		delay = 0,
-		class: className = ''
-	}: Props = $props();
+let {
+  size = 200,
+  duration = 15,
+  anchor = 90,
+  borderWidth = 1.5,
+  colorFrom = '#ffaa40',
+  colorTo = '#9c40ff',
+  delay = 0,
+  class: className = '',
+}: Props = $props();
 
-	let delaySec = $derived(delay + 's');
+let delaySec = $derived(delay + 's');
 </script>
 
 <div
