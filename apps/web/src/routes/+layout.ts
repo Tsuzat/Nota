@@ -2,7 +2,12 @@ export const ssr = false;
 export const prerender = false;
 
 import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
+import { injectAnalytics } from '@vercel/analytics/sveltekit';
+import { injectSpeedInsights } from '@vercel/speed-insights';
 import { PUBLIC_SUPABASE_API_KEY, PUBLIC_SUPABASE_ENDPOINT } from '$env/static/public';
+
+injectAnalytics();
+injectSpeedInsights();
 
 export const load = async ({ fetch, data, depends }) => {
   depends('supabase:auth');
