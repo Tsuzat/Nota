@@ -13,10 +13,15 @@ type OSType = 'mac' | 'windows' | 'linux';
 
 export const getArtefacts = query(async () => {
   try {
-    // connect with redis and
-    await redisClient.connect();
-    const data = await redisClient.get('latest-artefacts');
-    if (data) return JSON.parse(data) as ReleaseAssetsResponse;
+    if (redisClient) {
+      try {
+        if (!redisClient.isOpen) await redisClient.connect();
+        const data = await redisClient.get('latest-artefacts');
+        if (data) return JSON.parse(data) as ReleaseAssetsResponse;
+      } catch (error) {
+        logerror('Redis cache read failed', { error });
+      }
+    }
     // Call Github API to get latest release
     const res = await fetch('https://api.github.com/repos/Tsuzat/Nota/releases/latest', {
       headers: {
@@ -78,13 +83,18 @@ export const getArtefacts = query(async () => {
       platforms,
     };
     // Write to Redis
-    await redisClient.set('latest-artefacts', JSON.stringify(artefacts), { EX: 60 * 10 });
+    if (redisClient) {
+      try {
+        if (!redisClient.isOpen) await redisClient.connect();
+        await redisClient.set('latest-artefacts', JSON.stringify(artefacts), { EX: 60 * 10 });
+      } catch (error) {
+        logerror('Redis cache write failed', { error });
+      }
+    }
     return artefacts;
   } catch (error) {
     console.error(error);
     logerror('Failed to fetch artefacts', { error });
     return null;
-  } finally {
-    redisClient.destroy();
   }
 });
