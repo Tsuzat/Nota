@@ -31,7 +31,7 @@ export const GET = async ({ request, locals }) => {
   const customerId = String(data.external_customer_id);
   const subscriptionTier = data.subscription_tier as 'free' | 'pro';
   if (subscriptionTier === 'pro') {
-    redirect(308, '/checkout/portal');
+    redirect(308, `/api/checkout/portal?external_user_id=${customerId}`);
   }
 
   let checkOutURL = '';
