@@ -18,7 +18,10 @@ export const GET = async ({ request, locals }) => {
     return redirect(307, '/login');
   }
 
-  const { data, error } = await locals.supabase.from('profiles').select('external_customer_id').single();
+  const { data, error } = await locals.supabase
+    .from('profiles')
+    .select('subscription_tier,external_customer_id')
+    .single();
   if (error) {
     logerror('Error when user was trying to get profile', { error, productId, userEmail: user.email });
     console.error(error);
@@ -26,6 +29,10 @@ export const GET = async ({ request, locals }) => {
   }
   const userEmail = user.email;
   const customerId = String(data.external_customer_id);
+  const subscriptionTier = data.subscription_tier as 'free' | 'pro';
+  if (subscriptionTier === 'pro') {
+    redirect(308, '/checkout/portal');
+  }
 
   let checkOutURL = '';
 
