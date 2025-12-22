@@ -51,7 +51,6 @@ const pricingList = {
   yearly: [
     'Everything in Monthly',
     '25 Million AI Credits at once',
-    '15% discount on extra AI Credits',
     'Exclusive community badge',
     'Direct dev team access',
   ],
@@ -114,6 +113,10 @@ const user = $derived(data.session?.user);
       class="hover:text-muted-foreground transition-all duration-500"
       href="#pricing">Pricing</a
     >
+    <a
+      class="hover:text-muted-foreground transition-all duration-500"
+      href="#faqs">FAQs</a
+    >
   </div>
   <div class="flex items-center gap-4">
     <DropdownMenu.Root>
@@ -135,6 +138,9 @@ const user = $derived(data.session?.user);
         </a>
         <a href="#pricing">
           <DropdownMenu.Item>Pricing</DropdownMenu.Item>
+        </a>
+        <a href="#faqs">
+          <DropdownMenu.Item>FAQs</DropdownMenu.Item>
         </a>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
@@ -493,12 +499,13 @@ const user = $derived(data.session?.user);
               {/each}
             </ul>
           </Card.Content>
-          <Card.Footer class="mt-auto">
+          <Card.Footer class="mt-auto flex flex-col gap-1">
+            <Button class="w-full" variant="outline" href="/api/getai-credits">Get Free 5K AI Credits</Button>
             <Button
               class="w-full"
               variant="outline"
               onclick={() => sendToPaymentPortal("ai_credits")}
-              >Get AI Credits</Button
+              >Buy AI Credits</Button
             >
           </Card.Footer>
         </Card.Root>
