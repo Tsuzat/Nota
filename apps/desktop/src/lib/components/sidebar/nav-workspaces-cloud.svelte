@@ -90,7 +90,7 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.getWorkspaces()[0]);
 										.getNotes()
 										.filter((n) => n.workspace === workspace.id && !n.trashed)}
 									{#each notes as note (note.id)}
-										{@const href = resolve("/")}
+										{@const href = resolve("/(cloud)/note-[id]", {id: note.id})}
 										{@const isActive = page.url.pathname.endsWith(href)}
 										<Sidebar.MenuSubItem>
 											<Sidebar.MenuSubButton {isActive} onclick={() => goto(href)}>

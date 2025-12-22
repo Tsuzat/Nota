@@ -47,7 +47,7 @@ async function openFileDialog() {
 	contenteditable="false"
 	class={buttonVariants({
 		variant: 'secondary',
-		class: 'media-placeholder relative my-2 flex w-full items-center justify-start gap-4 p-6'
+		class: 'media-placeholder relative my-4! flex w-full items-center justify-start gap-4 p-6'
 	})}
 	style="user-select: none;"
 	draggable={true}
