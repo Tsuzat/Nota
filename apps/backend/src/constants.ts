@@ -20,8 +20,13 @@ export const REFRESH_TOKEN_SECRET = checkEnv("REFRESH_TOKEN_SECRET");
 export const BACKEND_URL = checkEnv("BACKEND_URL");
 export const FRONTEND_URL = checkEnv("FRONTEND_URL");
 
+// Github OAuth
 export const GITHUB_CLIENT_ID = checkEnv("GITHUB_CLIENT_ID");
 export const GITHUB_CLIENT_SECRET = checkEnv("GITHUB_CLIENT_SECRET");
+
+// Google OAuth
+export const GOOGLE_CLIENT_ID = checkEnv("GOOGLE_CLIENT_ID");
+export const GOOGLE_CLIENT_SECRET = checkEnv("GOOGLE_CLIENT_SECRET");
 
 // Verification Token Expiry
 export const VERIFICATION_TOKEN_EXPIRY = parseInt(
