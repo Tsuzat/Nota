@@ -1,7 +1,7 @@
 {
   "name": "@nota/desktop",
   "description": "Nota is a note-taking app that helps you to keep track of your ideas and thoughts.",
-  "version": "0.9.47-beta",
+  "version": "0.9.48-beta",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
