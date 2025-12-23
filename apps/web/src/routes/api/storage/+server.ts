@@ -29,8 +29,9 @@ export const GET = async ({ request, locals }) => {
   if (user === null) {
     return new Response('Unauthorized', { status: 401 });
   }
+  const fileType = new URL(request.url).searchParams.get('type');
   try {
-    const files = await listFiles();
+    const files = await listFiles(`${user.id}/${fileType || ''}`);
     return json({ files });
   } catch (err) {
     console.error(err);

@@ -6,6 +6,7 @@ import { R2_PUBLIC_ENDPOINT } from '$env/static/private';
 import {
   ALLOWED_MIME_TYPES,
   deleteFiles,
+  detectCategoryFromMime,
   getFileHead,
   getFileRange,
   getPresignedUrl,
@@ -59,7 +60,7 @@ export const POST = async ({ request, locals }) => {
     // 3. Generate Storage Key
     // Sanitize filename: alphanumeric, dots, dashes, underscores only
     const sanitizedFilename = filename.replace(/(\.\.\/|\/)/g, '').replace(/[^a-zA-Z0-9._-]/g, '_');
-    const key = `${user.id}/${nanoid(12)}-${sanitizedFilename}`;
+    const key = `${user.id}/${detectCategoryFromMime(expectedMime)}/${nanoid(12)}-${sanitizedFilename}`;
 
     // 4. Create Signed URL
     const signedUrl = await getPresignedUrl(key, expectedMime, SIGNED_URL_EXPIRY);

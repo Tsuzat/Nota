@@ -29,6 +29,15 @@ export const ALLOWED_MIME_TYPES = new Set([
   'application/pdf',
 ]);
 
+export const detectCategoryFromMime = (mime: string) => {
+  if (mime.startsWith('image/')) return 'images';
+  if (mime.startsWith('video/')) return 'videos';
+  if (mime.startsWith('audio/')) return 'audios';
+  if (mime.startsWith('application/pdf')) return 'documents';
+  if (mime.startsWith('application/')) return 'miscellaneous';
+  return 'other';
+};
+
 export const S3 = new S3Client({
   region: 'auto',
   endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -113,9 +122,10 @@ export const deleteFiles = async (keys: string[]) => {
  * @param filter filter by file type
  * @returns list of file keys that match the filter
  */
-export const listFiles = async () => {
+export const listFiles = async (filter: string) => {
   const command = new ListObjectsV2Command({
     Bucket: BUCKET_NAME,
+    Prefix: filter,
   });
   const data = await S3.send(command);
   if (data.$metadata.httpStatusCode !== 200) {
