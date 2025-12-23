@@ -16,17 +16,16 @@ export const S3 = new S3Client({
   },
 });
 
-export const uploadFile = async (file: File, key: string) => {
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = new Uint8Array(arrayBuffer);
+
+
+export const uploadFile = async (buffer: Buffer<ArrayBuffer>, key: string, contentType: string) => {
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
     Body: buffer,
-    ContentType: file.type,
+    ContentType: contentType,
     ACL: 'public-read',
   });
-
   try {
     const data = await S3.send(command);
     if (data.$metadata.httpStatusCode !== 200) {

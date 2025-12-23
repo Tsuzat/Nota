@@ -25,6 +25,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
     "dodopayments": "^2.8.2",
+    "file-type": "^21.1.1",
     "nanoid": "^5.1.6",
     "redis": "^5.10.0"
   },
