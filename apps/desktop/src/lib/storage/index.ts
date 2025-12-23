@@ -4,6 +4,7 @@ import { basename } from '@tauri-apps/api/path';
 import { readFile } from '@tauri-apps/plugin-fs';
 import { fetch } from '@tauri-apps/plugin-http';
 import { open } from '@tauri-apps/plugin-dialog';
+import { toast } from '@lib/components/ui/sonner';
 
 interface SignedPostResponse {
   signedUrl: string;
@@ -13,23 +14,25 @@ interface SignedPostResponse {
 }
 
 /**
- * Uploads a file to the storage using signed upload and verify the upload
- * @param token - user auth token
- * @param file - file to be uploaded
- * @returns public url of the uploaded file
+ * Uploads a file using signed upload.
+ * Verification happens asynchronously on the server.
  */
-export async function uploadFile(token: string, file: File): Promise<string> {
-  if (file instanceof File) {
-    if (file.size === 0) {
-      throw new Error('File is empty.');
-    }
-    if (file.size > 50 * 1024 * 1024) {
-      throw new Error('File size exceeds 50MB.');
-    }
+export async function uploadFile(token: string, file: File, signal?: AbortSignal): Promise<string> {
+  // ---- basic client-side guards (UX only) ----
+  if (!(file instanceof File)) {
+    throw new Error('Invalid file.');
   }
-  console.log('FILE DATA = ', token, file.name, file.type);
 
-  const res = await fetch(`${PUBLIC_NOTA_FRONTEND_URL}/api/storage/signed`, {
+  if (file.size === 0) {
+    throw new Error('File is empty.');
+  }
+
+  if (file.size > 50 * 1024 * 1024) {
+    throw new Error('File size exceeds 50MB.');
+  }
+
+  // ---- 1. request signed upload ----
+  const signRes = await fetch(`${PUBLIC_NOTA_FRONTEND_URL}/api/storage/signed`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -39,48 +42,71 @@ export async function uploadFile(token: string, file: File): Promise<string> {
       filename: file.name,
       expectedMime: file.type,
     }),
+    signal,
   });
-  if (res.status !== 200) {
-    console.error(await res.text());
-    throw new Error('Could not create signed upload url.');
+
+  if (!signRes.ok) {
+    const err = await signRes.text();
+    throw new Error(`Failed to create signed URL: ${err}`);
   }
 
-  try {
-    const data: SignedPostResponse = await res.json();
-    const resSignedPut = await fetch(data.signedUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': file.type,
-        'Content-Length': file.size.toString(),
-      },
-      body: file,
-    });
-    if (resSignedPut.status !== 200) {
-      console.error("Status of Signed Upload Failed", await resSignedPut.text());
-      throw new Error('Could not upload. Signed Upload Failed.');
-    }
-    console.log("Trying to verify the uploaded file")
-    const uploadedFileVerification = await fetch(`${PUBLIC_NOTA_FRONTEND_URL}/api/storage/signed`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        key: data.key,
-        expectedMime: file.type,
-      }),
-    });
-    if (uploadedFileVerification.status !== 200) {
-      console.error(uploadedFileVerification.statusText);
-      throw new Error('Could not upload. File verification failed.');
-    }
-    return data.publicUrl;
-  } catch (error) {
-    console.error(error);
-    throw new Error('Could not upload');
+  const data: SignedPostResponse = await signRes.json();
+
+  const uploadRes = await fetch(data.signedUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': file.type,
+    },
+    body: file,
+    signal,
+  });
+  if (!uploadRes.ok) {
+    const err = await uploadRes.text();
+    throw new Error(`Signed upload failed: ${err}`);
   }
+  // ---- 3. fire-and-forget verification ----
+  fetch(`${PUBLIC_NOTA_FRONTEND_URL}/api/storage/signed`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      key: data.key,
+      clientMime: file.type,
+    }),
+  }).catch((err) => {
+    console.error('Post-upload verification failed:', err);
+  });
+  return data.publicUrl;
 }
+
+const getMimeType = (filename: string): string => {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'png':
+      return 'image/png';
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'webp':
+      return 'image/webp';
+    case 'mp4':
+      return 'video/mp4';
+    case 'webm':
+      return 'video/webm';
+    case 'mkv':
+      return 'video/x-matroska';
+    case 'mp3':
+      return 'audio/mpeg';
+    case 'ogg':
+      return 'audio/ogg';
+    case 'pdf':
+      return 'application/pdf';
+    default:
+      return 'application/octet-stream';
+  }
+};
 
 /**
  * Uploads a file to the storage by path
@@ -91,21 +117,9 @@ export async function uploadFile(token: string, file: File): Promise<string> {
 export async function uploadFileByPath(token: string, path: string): Promise<string> {
   const bytes = await readFile(path);
   const name = await basename(path);
-  const extension = getFileTypeFromExtension(name);
-  if (extension === FileType.UNKNOWN) {
-    throw new Error('Unsupported file is being uploaded. Rejected the Upload.');
-  }
-  const size = bytes.length;
-  if (size > 50 * 1024 * 1024) {
-    throw new Error('File size exceeds 50MB. Rejected the Upload.');
-  }
-
-  // Create file with correct MIME type
-  let mimeType = `${extension.replace('*', '')}${name.split('.').pop()}`;
-
-  console.log(mimeType);
-  const file = new File([bytes], name, { type: mimeType });
-  return await uploadFile(token, file);
+  const type = getMimeType(name);
+  const file = new File([bytes], name, { type });
+  return uploadFile(token, file);
 }
 
 /**
@@ -129,4 +143,32 @@ export async function uploadLocalFile(token: string, fileType: FileType): Promis
   });
   if (!file) return null;
   return await uploadFileByPath(token, file);
+}
+
+
+/**
+ * Gets assets from the storage by file type
+ * @param id - user id
+ * @param fileType - type of the file
+ * @returns array of public urls of the assets
+ */
+export async function getAssetsByFileType(token: string, fileType: FileType): Promise<string[]> {
+  try { 
+    const res = await fetch(`${PUBLIC_NOTA_FRONTEND_URL}/api/storage?type=${fileType}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Failed to get assets: ${err}`);
+    }
+    const { files }: { files: string[] } = await res.json();
+    return files;
+  } catch (error) {
+    console.error(error);
+    toast.error('Something went wrong when loading assets.');
+    return [];
+  }
 }
