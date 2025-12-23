@@ -6,6 +6,7 @@ import { deleteFiles, listFiles, uploadFile } from '$lib/s3/index.js';
 import { adminClient } from '$lib/supabase/admin/index.js';
 
 export const config = {
+  csrf: false,
   runtime: 'bun1.x',
 };
 
@@ -18,7 +19,7 @@ const getUserFromToken = async (token: string) => {
   return userData.user;
 };
 
-export const POST = async ({ request, locals }) => {
+export const GET = async ({ request, locals }) => {
   let user: User | null = null;
   const authHeader = request.headers.get('Authorization');
   const token = authHeader ? authHeader.split(' ')[1] : undefined;
@@ -39,7 +40,7 @@ export const POST = async ({ request, locals }) => {
   }
 };
 
-export const PUT = async ({ request, locals }) => {
+export const POST = async ({ request, locals }) => {
   let user: User | null = null;
   const authHeader = request.headers.get('Authorization');
   const token = authHeader ? authHeader.split(' ')[1] : undefined;
