@@ -1,6 +1,7 @@
 import type { User } from '@supabase/supabase-js';
 import { json } from '@sveltejs/kit';
 import { R2_PUBLIC_ENDPOINT } from '$env/static/private';
+import { redisClient } from '$lib/redis/index.js';
 import { deleteFiles, detectCategoryFromMime, listFiles } from '$lib/s3/index.js';
 import { adminClient } from '$lib/supabase/admin/index.js';
 
@@ -34,8 +35,21 @@ export const GET = async ({ request, locals }) => {
   if (fileType) {
     folder = detectCategoryFromMime(fileType);
   }
+  const filter = `${user.id}/${folder || ''}`;
+  if (redisClient) {
+    try {
+      if (!redisClient.isOpen) await redisClient.connect();
+      const data = await redisClient.get(filter);
+      if (data) {
+        return json(JSON.parse(data) as { files: string[] });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
   try {
-    const files = await listFiles(`${user.id}/${folder || ''}`);
+    const files = await listFiles(filter);
+    redisClient.set(filter, JSON.stringify({ files }), { EX: 360 });
     return json({ files });
   } catch (err) {
     console.error(err);
