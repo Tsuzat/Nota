@@ -1,7 +1,7 @@
 import type { User } from '@supabase/supabase-js';
 import { json } from '@sveltejs/kit';
 import { R2_PUBLIC_ENDPOINT } from '$env/static/private';
-import { deleteFiles, listFiles } from '$lib/s3/index.js';
+import { deleteFiles, detectCategoryFromMime, listFiles } from '$lib/s3/index.js';
 import { adminClient } from '$lib/supabase/admin/index.js';
 
 export const config = {
@@ -30,8 +30,12 @@ export const GET = async ({ request, locals }) => {
     return new Response('Unauthorized', { status: 401 });
   }
   const fileType = new URL(request.url).searchParams.get('type');
+  let folder = '';
+  if (fileType) {
+    folder = detectCategoryFromMime(fileType);
+  }
   try {
-    const files = await listFiles(`${user.id}/${fileType || ''}`);
+    const files = await listFiles(`${user.id}/${folder || ''}`);
     return json({ files });
   } catch (err) {
     console.error(err);
