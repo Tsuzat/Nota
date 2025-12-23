@@ -23,9 +23,10 @@ import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte.js';
 import { supabase } from '$lib/supabase/index.js';
-import { getAssetsByFileType, uploadFile, uploadFileByPath, uploadLocalFile } from '$lib/supabase/storage.js';
+import { getAssetsByFileType } from '$lib/supabase/storage.js';
 import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
+import { uploadFile, uploadFileByPath, uploadLocalFile } from '$lib/storage/index.js';
 
 const { data } = $props();
 
@@ -45,6 +46,7 @@ let isDirty = $state(false);
 // cloud related
 const cloudNotes = useCloudNotes();
 const user = $derived(getSessionAndUserContext().getUser());
+const token = $derived(getSessionAndUserContext().getSession()?.access_token);
 const useGlobalSettings = getGlobalSettings();
 
 // notes related
@@ -54,11 +56,11 @@ let syncing = $state(false);
 let syncingText = $state('');
 
 const onFileSelect = $derived.by(() => {
-  if (user) return (file: string) => uploadFileByPath(user.id, file);
+  if (token) return (file: string) => uploadFileByPath(token, file);
 });
 
 const onDropOrPaste = $derived.by(() => {
-  if (user) return (file: File) => uploadFile(user.id, file);
+  if (token) return (file: File) => uploadFile(token, file);
 });
 
 const getAssets = $derived.by(() => {
@@ -66,7 +68,7 @@ const getAssets = $derived.by(() => {
 });
 
 const getLocalFile = $derived.by(() => {
-  if (user) return async (fileType: FileType) => uploadLocalFile(user.id, fileType);
+  if (token) return async (fileType: FileType) => uploadLocalFile(token, fileType);
 });
 
 async function saveNoteContent() {
