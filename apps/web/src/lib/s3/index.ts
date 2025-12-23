@@ -1,4 +1,12 @@
-import { DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectsCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import {
   BUCKET_NAME,
   R2_ACCESS_ID,
@@ -6,6 +14,20 @@ import {
   R2_PUBLIC_ENDPOINT,
   R2_SECRETE_ACCESS_KEY,
 } from '$env/static/private';
+
+export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+export const SIGNED_URL_EXPIRY = 60; // 60 seconds
+
+export const ALLOWED_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'video/mp4',
+  'video/webm',
+  'video/x-matroska',
+  'audio/mpeg',
+  'application/pdf',
+]);
 
 export const S3 = new S3Client({
   region: 'auto',
@@ -16,7 +38,38 @@ export const S3 = new S3Client({
   },
 });
 
+export const getPresignedUrl = async (key: string, contentType: string, expiresIn = 3600) => {
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+    ContentType: contentType,
+    ACL: 'public-read',
+  });
+  return await getSignedUrl(S3, command, { expiresIn });
+};
 
+export const getFileHead = async (key: string) => {
+  const command = new HeadObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+  });
+  return await S3.send(command);
+};
+
+export const getFileRange = async (key: string, range: string) => {
+  const command = new GetObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+    Range: range,
+  });
+  const response = await S3.send(command);
+  if (!response.Body) {
+    throw new Error('No body in response');
+  }
+  // Convert stream to Buffer properly
+  const byteArray = await response.Body.transformToByteArray();
+  return Buffer.from(byteArray);
+};
 
 export const uploadFile = async (buffer: Buffer<ArrayBuffer>, key: string, contentType: string) => {
   const command = new PutObjectCommand({

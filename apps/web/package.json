@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.956.0",
+    "@aws-sdk/s3-request-presigner": "^3.957.0",
     "@dodopayments/sveltekit": "^0.2.4",
     "@google/genai": "^1.33.0",
     "@lucide/svelte": "^0.561.0",
