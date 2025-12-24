@@ -100,17 +100,9 @@ auth.post('/signup', zValidator('json', signupSchema), async (c) => {
       return c.json({ error: 'Failed to create user' }, 500);
     }
 
-    const accessToken = await generateAccessToken(newUser.id, newUser.email);
-    const refreshToken = await generateRefreshToken(newUser.id, newUser.email);
-
-    setCookie(c, 'access_token', accessToken, { ...COOKIE_OPTIONS, maxAge: 6 * 60 * 60 });
-    setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: 7 * 24 * 60 * 60 });
-
     return c.json(
       {
-        user: { id: newUser.id, email: newUser.email, name: newUser.name },
-        accessToken,
-        refreshToken,
+        message: 'User created successfully. Please login',
       },
       201
     );
@@ -146,9 +138,7 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
     setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: 7 * 24 * 60 * 60 });
 
     return c.json({
-      user: { id: user.id, email: user.email, name: user.name },
-      accessToken,
-      refreshToken,
+      message: 'Login successful',
     });
   } catch (error) {
     console.error('Login error:', error);

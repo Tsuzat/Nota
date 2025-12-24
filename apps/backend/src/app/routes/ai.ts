@@ -79,6 +79,10 @@ app.post('/generate', zValidator('json', schema), async (c) => {
   }
   const { prompt } = c.req.valid('json');
   return streamText(c, async (stream) => {
+    c.header('Content-Type', 'text/plain; charset=utf-8');
+    c.header('Transfer-Encoding', 'chunked');
+    c.header('Connection', 'keep-alive');
+    c.header('X-Accel-Buffering', 'no');
     let fullText = '';
     // 1. Count Input Tokens (Approximate or via API if fast enough)
     const countResult = genai.models.countTokens({ model: MODEL, contents: prompt });

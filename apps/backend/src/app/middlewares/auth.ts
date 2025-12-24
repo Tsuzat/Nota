@@ -20,8 +20,6 @@ export const authMiddleware = async (c: Context, next: Next) => {
 
     // Fetch user details for storage/credits
     const [user] = await DB.select({
-      id: users.id,
-      email: users.email,
       assignedStorage: users.assignedStorage,
       usedStorage: users.usedStorage,
       aiCredits: users.aiCredits,
@@ -34,6 +32,8 @@ export const authMiddleware = async (c: Context, next: Next) => {
     if (!user) {
       return c.json({ error: 'User not found' }, 401);
     }
+    c.set('userId', payload.sub);
+    c.set('userEmail', payload.email);
     c.set('user', user);
     await next();
   } catch (e) {
