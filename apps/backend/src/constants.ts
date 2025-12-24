@@ -46,3 +46,6 @@ export const R2_ACCESS_ID = checkEnv('R2_ACCESS_ID');
 export const R2_SECRETE_ACCESS_KEY = checkEnv('R2_SECRETE_ACCESS_KEY');
 export const R2_PUBLIC_ENDPOINT = checkEnv('R2_PUBLIC_ENDPOINT');
 export const BUCKET_NAME = checkEnv('BUCKET_NAME');
+
+// Gemini API
+export const GEMINI_API_KEY = checkEnv('GEMINI_API_KEY');

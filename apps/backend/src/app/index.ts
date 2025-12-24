@@ -5,6 +5,7 @@ import userworkspaces from './routes/userworkspaces';
 import workspaces from './routes/workspaces';
 import notes from './routes/notes';
 import storage from './routes/storage';
+import ai from './routes/ai';
 
 export type Variables = {
   userId: string;
@@ -22,8 +23,9 @@ export const app = new Hono<{ Variables: Variables }>();
 app.get('/health', (c) => c.json({ status: 'ok' }, 200));
 
 app.route('/auth', auth);
-app.route('/user', user);
-app.route('/db/userworkspaces', userworkspaces);
-app.route('/db/workspaces', workspaces);
-app.route('/db/notes', notes);
-app.route('/storage', storage);
+app.route('api/user', user);
+app.route('api/db/userworkspaces', userworkspaces);
+app.route('api/db/workspaces', workspaces);
+app.route('api/db/notes', notes);
+app.route('api/storage', storage);
+app.route('api/ai', ai);
