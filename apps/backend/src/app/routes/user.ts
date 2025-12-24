@@ -1,9 +1,9 @@
+import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { authMiddleware } from '../middlewares/auth';
 import { DB } from '../../db';
 import { users } from '../../db/schema';
-import { eq } from 'drizzle-orm';
 import type { Variables } from '..';
+import { authMiddleware } from '../middlewares/auth';
 
 const user = new Hono<{ Variables: Variables }>();
 

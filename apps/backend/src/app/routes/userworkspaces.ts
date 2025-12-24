@@ -1,11 +1,11 @@
+import { zValidator } from '@hono/zod-validator';
+import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { zValidator } from '@hono/zod-validator';
-import { eq, and } from 'drizzle-orm';
 import { DB } from '../../db';
 import { userworkspaces } from '../../db/schema';
-import { authMiddleware } from '../middlewares/auth';
 import type { Variables } from '..';
+import { authMiddleware } from '../middlewares/auth';
 
 const app = new Hono<{ Variables: Variables }>();
 

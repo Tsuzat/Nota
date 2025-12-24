@@ -1,5 +1,5 @@
 import { sign, verify } from 'hono/jwt';
-import { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY } from '../constants';
+import { ACCESS_TOKEN_EXPIRY, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET } from '../constants';
 
 export interface JWTPayload {
   sub: string; // userId
@@ -37,7 +37,7 @@ export const verifyRefreshToken = async (token: string) => {
 // Simple parser for expiry strings like "6h", "7d"
 function parseExpiry(expiry: string): number {
   const unit = expiry.slice(-1);
-  const value = parseInt(expiry.slice(0, -1));
+  const value = Number.parseInt(expiry.slice(0, -1), 10);
   switch (unit) {
     case 's':
       return value;

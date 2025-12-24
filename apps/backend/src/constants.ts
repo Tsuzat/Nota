@@ -8,7 +8,7 @@ const checkEnv = (key: string) => {
 };
 
 export const DB_URL = checkEnv('DB_URL');
-export const PORT = parseInt(process.env.PORT || '3000', 10);
+export const PORT = Number.parseInt(process.env.PORT || '3000', 10);
 export const CROSS_ORIGIN = process.env.CROSS_ORIGIN || '*';
 
 export const ACCESS_TOKEN_SECRET = checkEnv('ACCESS_TOKEN_SECRET');
@@ -29,7 +29,7 @@ export const GOOGLE_CLIENT_ID = checkEnv('GOOGLE_CLIENT_ID');
 export const GOOGLE_CLIENT_SECRET = checkEnv('GOOGLE_CLIENT_SECRET');
 
 // Verification Token Expiry
-export const VERIFICATION_TOKEN_EXPIRY = parseInt(process.env.VERIFICATION_TOKEN_EXPIRY || '30');
+export const VERIFICATION_TOKEN_EXPIRY = Number.parseInt(process.env.VERIFICATION_TOKEN_EXPIRY || '30', 10);
 
 // REDIS
 export const REDIS_URL = checkEnv('REDIS_URL');

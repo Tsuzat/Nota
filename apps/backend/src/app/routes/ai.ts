@@ -1,14 +1,14 @@
+import { GoogleGenAI } from '@google/genai';
+import { zValidator } from '@hono/zod-validator';
+import { eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { streamText } from 'hono/streaming';
-import { GoogleGenAI } from '@google/genai';
-import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { zValidator } from '@hono/zod-validator';
+import { GEMINI_API_KEY } from '../../constants';
 import { DB } from '../../db';
 import { users } from '../../db/schema';
-import { GEMINI_API_KEY } from '../../constants';
-import { authMiddleware } from '../middlewares/auth';
 import type { Variables } from '..';
+import { authMiddleware } from '../middlewares/auth';
 
 const app = new Hono<{ Variables: Variables }>();
 

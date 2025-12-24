@@ -1,9 +1,9 @@
+import { eq } from 'drizzle-orm';
 import type { Context, Next } from 'hono';
 import { getCookie } from 'hono/cookie';
-import { eq } from 'drizzle-orm';
-import { verifyAccessToken } from '../../lib/jwt';
 import { DB } from '../../db';
 import { users } from '../../db/schema';
+import { verifyAccessToken } from '../../lib/jwt';
 
 export const authMiddleware = async (c: Context, next: Next) => {
   let token = getCookie(c, 'access_token');
@@ -37,6 +37,7 @@ export const authMiddleware = async (c: Context, next: Next) => {
     c.set('user', user);
     await next();
   } catch (e) {
+    console.error('Error verifying token:', e);
     return c.json({ error: 'Invalid or expired token' }, 401);
   }
 };

@@ -1,20 +1,20 @@
-import { Hono } from 'hono';
-import { setCookie, getCookie, deleteCookie } from 'hono/cookie';
-import { DB } from '../../db';
-import { users, type User } from '../../db/schema';
-import { eq } from 'drizzle-orm';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../lib/jwt';
-import {
-  COOKIE_OPTIONS,
-  GITHUB_CLIENT_ID,
-  GITHUB_CLIENT_SECRET,
-  FRONTEND_URL,
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  BACKEND_URL,
-} from '../../constants';
 import { githubAuth } from '@hono/oauth-providers/github';
 import { googleAuth } from '@hono/oauth-providers/google';
+import { eq } from 'drizzle-orm';
+import { Hono } from 'hono';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
+import {
+  BACKEND_URL,
+  COOKIE_OPTIONS,
+  FRONTEND_URL,
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+} from '../../constants';
+import { DB } from '../../db';
+import { type User, users } from '../../db/schema';
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../lib/jwt';
 
 type GitHubUser = {
   id: number;
@@ -74,7 +74,7 @@ auth.use(
     }
 
     // upsert the user in database
-    let user: User | undefined = undefined;
+    let user: User | undefined;
     try {
       const [fetchedUser] = await DB.insert(users)
         .values({
@@ -152,7 +152,7 @@ auth.use(
     }
 
     // upsert the user in database
-    let user: User | undefined = undefined;
+    let user: User | undefined;
     try {
       const [fetchedUser] = await DB.insert(users)
         .values({
@@ -238,6 +238,7 @@ auth.post('/refresh', async (c) => {
 
     return c.json({ success: true });
   } catch (e) {
+    console.error('Error verifying refresh token:', e);
     return c.json({ error: 'Invalid refresh token' }, 401);
   }
 });
