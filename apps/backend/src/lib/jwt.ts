@@ -1,10 +1,5 @@
-import { sign, verify } from "hono/jwt";
-import {
-  ACCESS_TOKEN_SECRET,
-  ACCESS_TOKEN_EXPIRY,
-  REFRESH_TOKEN_SECRET,
-  REFRESH_TOKEN_EXPIRY,
-} from "../constants";
+import { sign, verify } from 'hono/jwt';
+import { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY } from '../constants';
 
 export interface JWTPayload {
   sub: string; // userId
@@ -44,13 +39,13 @@ function parseExpiry(expiry: string): number {
   const unit = expiry.slice(-1);
   const value = parseInt(expiry.slice(0, -1));
   switch (unit) {
-    case "s":
+    case 's':
       return value;
-    case "m":
+    case 'm':
       return value * 60;
-    case "h":
+    case 'h':
       return value * 60 * 60;
-    case "d":
+    case 'd':
       return value * 60 * 60 * 24;
     default:
       return 3600; // default 1h

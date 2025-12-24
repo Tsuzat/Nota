@@ -1,12 +1,13 @@
 {
-  "name": "backend",
-  "module": "index.ts",
+  "name": "@nota/backend",
+  "module": "src/index.ts",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir dist",
+    "build": "bun build src/index.ts --outdir dist --target=bun",
+    "prod": "bun dist/index.js",
     "format": "biome format . --write",
     "lint": "biome check .",
     "ci": "biome ci .",
