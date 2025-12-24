@@ -1,0 +1,162 @@
+import { Hono } from 'hono';
+import { z } from 'zod';
+import { zValidator } from '@hono/zod-validator';
+import { eq, and } from 'drizzle-orm';
+import { DB } from '../../db';
+import { notes } from '../../db/schema';
+import { authMiddleware } from '../middlewares/auth';
+
+const app = new Hono<{ Variables: { userId: string; userEmail: string } }>();
+
+// Protect all routes with auth middleware
+app.use('*', authMiddleware);
+
+// Schema for creating a note
+const createSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  workspaceId: z.uuid('Workspace ID is required'),
+  userworkspaceId: z.uuid('Userworkspace ID is required'),
+  icon: z.string().optional(),
+  content: z.record(z.any(),z.any()).optional(), // JSONB content
+});
+
+// Schema for updating a note
+const updateSchema = z.object({
+  name: z.string().min(1).optional(),
+  icon: z.string().optional(),
+  favorite: z.boolean().optional(),
+  trashed: z.boolean().optional(),
+  content: z.record(z.any(),z.any()).optional(),
+});
+
+// 1. Get note content by noteId (Specific path first)
+app.get('/:noteId/content', async (c) => {
+  const userId = c.get('userId');
+  const noteId = c.req.param('noteId');
+
+  try {
+    const note = await DB.select({
+      content: notes.content,
+    })
+      .from(notes)
+      .where(and(eq(notes.id, noteId), eq(notes.owner, userId)))
+      .limit(1);
+
+    if (note.length === 0) {
+      return c.json({ error: 'Note not found or unauthorized' }, 404);
+    }
+
+    return c.json(note[0]);
+  } catch (error) {
+    console.error('Error fetching note content:', error);
+    return c.json({ error: 'Failed to fetch note content' }, 500);
+  }
+});
+
+// 2. Get all notes for a userworkspace (Excluding content)
+app.get('/:userworkspaceId', async (c) => {
+  const userId = c.get('userId');
+  const userworkspaceId = c.req.param('userworkspaceId');
+
+  try {
+    // Select specific columns to exclude 'content'
+    const results = await DB.select({
+      id: notes.id,
+      name: notes.name,
+      icon: notes.icon,
+      workspace: notes.workspace,
+      userworkspace: notes.userworkspace,
+      owner: notes.owner,
+      favorite: notes.favorite,
+      trashed: notes.trashed,
+      createdAt: notes.createdAt,
+      updatedAt: notes.updatedAt,
+    })
+      .from(notes)
+      .where(and(eq(notes.owner, userId), eq(notes.userworkspace, userworkspaceId)));
+
+    return c.json(results);
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    return c.json({ error: 'Failed to fetch notes' }, 500);
+  }
+});
+
+// 3. Create a new note
+app.post('/', zValidator('json', createSchema), async (c) => {
+  const userId = c.get('userId');
+  const body = c.req.valid('json');
+
+  try {
+    const [newNote] = await DB.insert(notes)
+      .values({
+        name: body.name,
+        workspace: body.workspaceId,
+        userworkspace: body.userworkspaceId,
+        owner: userId,
+        icon: body.icon || '📝',
+        content: body.content || {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    return c.json(newNote, 201);
+  } catch (error) {
+    console.error('Error creating note:', error);
+    return c.json({ error: 'Failed to create note' }, 500);
+  }
+});
+
+// 4. Delete note by id
+app.delete('/:id', async (c) => {
+  const userId = c.get('userId');
+  const noteId = c.req.param('id');
+
+  try {
+    const deleted = await DB.delete(notes)
+      .where(and(eq(notes.id, noteId), eq(notes.owner, userId)))
+      .returning();
+
+    if (deleted.length === 0) {
+      return c.json({ error: 'Note not found or unauthorized' }, 404);
+    }
+
+    return c.json({ message: 'Note deleted successfully', id: noteId });
+  } catch (error) {
+    console.error('Error deleting note:', error);
+    return c.json({ error: 'Failed to delete note' }, 500);
+  }
+});
+
+// 5. Update note by id
+app.patch('/:id', zValidator('json', updateSchema), async (c) => {
+  const userId = c.get('userId');
+  const noteId = c.req.param('id');
+  const body = c.req.valid('json');
+
+  if (Object.keys(body).length === 0) {
+    return c.json({ error: 'Nothing to update' }, 400);
+  }
+
+  try {
+    const [updatedNote] = await DB.update(notes)
+      .set({
+        ...body,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(notes.id, noteId), eq(notes.owner, userId)))
+      .returning();
+
+    if (!updatedNote) {
+      return c.json({ error: 'Note not found or unauthorized' }, 404);
+    }
+
+    return c.json(updatedNote);
+  } catch (error) {
+    console.error('Error updating note:', error);
+    return c.json({ error: 'Failed to update note' }, 500);
+  }
+});
+
+export default app;
