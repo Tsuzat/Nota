@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { DB } from '../../db';
 import { notes } from '../../db/schema';
 import { authMiddleware } from '../middlewares/auth';
@@ -17,17 +17,26 @@ const createSchema = z.object({
   workspaceId: z.uuid('Workspace ID is required'),
   userworkspaceId: z.uuid('Userworkspace ID is required'),
   icon: z.string().optional(),
-  content: z.record(z.any(),z.any()).optional(), // JSONB content
+  content: z.record(z.any(), z.any()).optional(), // JSONB content
 });
 
-// Schema for updating a note
+// Schema for updating a note (Metadata only)
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
   icon: z.string().optional(),
   favorite: z.boolean().optional(),
   trashed: z.boolean().optional(),
-  content: z.record(z.any(),z.any()).optional(),
+  content: z.record(z.any(), z.any()).optional(), // Optional explicit full update
 });
+
+// Schema for JSON Patch
+const patchSchema = z.array(
+  z.object({
+    op: z.enum(['add', 'replace', 'remove']),
+    path: z.string(),
+    value: z.any().optional(),
+  })
+);
 
 // 1. Get note content by noteId (Specific path first)
 app.get('/:noteId/content', async (c) => {
@@ -53,7 +62,34 @@ app.get('/:noteId/content', async (c) => {
   }
 });
 
-// 2. Get all notes for a userworkspace (Excluding content)
+// 2. Apply JSON Patch to note content
+app.patch('/:noteId/content', zValidator('json', patchSchema), async (c) => {
+  const userId = c.get('userId');
+  const noteId = c.req.param('noteId');
+  const patch = c.req.valid('json');
+
+  try {
+    // Call the custom SQL function: apply_note_patch(note_id, patch, user_id)
+    await DB.execute(sql`SELECT apply_note_patch(${noteId}, ${JSON.stringify(patch)}::jsonb, ${userId})`);
+
+    return c.json({ success: true });
+  } catch (error: any) {
+    console.error('Error patching note:', error);
+    
+    // Attempt to parse Postgres errors
+    const errorMessage = error.message || '';
+    if (errorMessage.includes('Permission denied')) {
+      return c.json({ error: 'Unauthorized' }, 403);
+    }
+    if (errorMessage.includes('Note not found')) {
+      return c.json({ error: 'Note not found' }, 404);
+    }
+    
+    return c.json({ error: 'Failed to patch note content' }, 500);
+  }
+});
+
+// 3. Get all notes for a userworkspace (Excluding content)
 app.get('/:userworkspaceId', async (c) => {
   const userId = c.get('userId');
   const userworkspaceId = c.req.param('userworkspaceId');
@@ -82,7 +118,7 @@ app.get('/:userworkspaceId', async (c) => {
   }
 });
 
-// 3. Create a new note
+// 4. Create a new note
 app.post('/', zValidator('json', createSchema), async (c) => {
   const userId = c.get('userId');
   const body = c.req.valid('json');
@@ -108,7 +144,7 @@ app.post('/', zValidator('json', createSchema), async (c) => {
   }
 });
 
-// 4. Delete note by id
+// 5. Delete note by id
 app.delete('/:id', async (c) => {
   const userId = c.get('userId');
   const noteId = c.req.param('id');
@@ -129,7 +165,7 @@ app.delete('/:id', async (c) => {
   }
 });
 
-// 5. Update note by id
+// 6. Update note metadata by id
 app.patch('/:id', zValidator('json', updateSchema), async (c) => {
   const userId = c.get('userId');
   const noteId = c.req.param('id');

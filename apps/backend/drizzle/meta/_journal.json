@@ -15,6 +15,13 @@
       "when": 1766554237335,
       "tag": "0001_legal_scourge",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766594644659,
+      "tag": "0002_common_guardian",
+      "breakpoints": true
     }
   ]
 }
