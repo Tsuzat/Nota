@@ -5,8 +5,9 @@ import { eq, and, sql } from 'drizzle-orm';
 import { DB } from '../../db';
 import { notes } from '../../db/schema';
 import { authMiddleware } from '../middlewares/auth';
+import type { Variables } from '..';
 
-const app = new Hono<{ Variables: { userId: string; userEmail: string } }>();
+const app = new Hono<{ Variables: Variables }>();
 
 // Protect all routes with auth middleware
 app.use('*', authMiddleware);
@@ -75,7 +76,7 @@ app.patch('/:noteId/content', zValidator('json', patchSchema), async (c) => {
     return c.json({ success: true });
   } catch (error: any) {
     console.error('Error patching note:', error);
-    
+
     // Attempt to parse Postgres errors
     const errorMessage = error.message || '';
     if (errorMessage.includes('Permission denied')) {
@@ -84,7 +85,7 @@ app.patch('/:noteId/content', zValidator('json', patchSchema), async (c) => {
     if (errorMessage.includes('Note not found')) {
       return c.json({ error: 'Note not found' }, 404);
     }
-    
+
     return c.json({ error: 'Failed to patch note content' }, 500);
   }
 });

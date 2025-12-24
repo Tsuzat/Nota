@@ -4,10 +4,17 @@ import user from './routes/user';
 import userworkspaces from './routes/userworkspaces';
 import workspaces from './routes/workspaces';
 import notes from './routes/notes';
+import storage from './routes/storage';
 
-type Variables = {
+export type Variables = {
   userId: string;
   userEmail: string;
+  user: {
+    assignedStorage: number;
+    usedStorage: number;
+    aiCredits: number;
+    subscriptionPlan: 'free' | 'pro';
+  };
 };
 
 export const app = new Hono<{ Variables: Variables }>();
@@ -19,3 +26,4 @@ app.route('/user', user);
 app.route('/db/userworkspaces', userworkspaces);
 app.route('/db/workspaces', workspaces);
 app.route('/db/notes', notes);
+app.route('/storage', storage);

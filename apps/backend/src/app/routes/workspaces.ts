@@ -5,8 +5,9 @@ import { eq, and } from 'drizzle-orm';
 import { DB } from '../../db';
 import { workspaces } from '../../db/schema';
 import { authMiddleware } from '../middlewares/auth';
+import type { Variables } from '..';
 
-const app = new Hono<{ Variables: { userId: string; userEmail: string } }>();
+const app = new Hono<{ Variables: Variables }>();
 
 // Protect all routes with auth middleware
 app.use('*', authMiddleware);
@@ -32,13 +33,12 @@ app.get('/', async (c) => {
   const userworkspaceId = c.req.query('userworkspaceId');
 
   try {
-
     const result = DB.select()
       .from(workspaces)
       .where(
-        userworkspaceId ? 
-        and(eq(workspaces.owner, userId), eq(workspaces.userworkspace, userworkspaceId)) 
-        : eq(workspaces.owner, userId)
+        userworkspaceId
+          ? and(eq(workspaces.owner, userId), eq(workspaces.userworkspace, userworkspaceId))
+          : eq(workspaces.owner, userId)
       );
     return c.json(result);
   } catch (error) {

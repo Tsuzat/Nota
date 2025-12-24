@@ -1,6 +1,9 @@
 import type { Context, Next } from 'hono';
 import { getCookie } from 'hono/cookie';
+import { eq } from 'drizzle-orm';
 import { verifyAccessToken } from '../../lib/jwt';
+import { DB } from '../../db';
+import { users } from '../../db/schema';
 
 export const authMiddleware = async (c: Context, next: Next) => {
   let token = getCookie(c, 'access_token');
@@ -14,8 +17,24 @@ export const authMiddleware = async (c: Context, next: Next) => {
   }
   try {
     const payload = await verifyAccessToken(token);
-    c.set('userId', payload.sub);
-    c.set('userEmail', payload.email);
+
+    // Fetch user details for storage/credits
+    const [user] = await DB.select({
+      id: users.id,
+      email: users.email,
+      assignedStorage: users.assignedStorage,
+      usedStorage: users.usedStorage,
+      aiCredits: users.aiCredits,
+      subscriptionPlan: users.subscriptionPlan,
+    })
+      .from(users)
+      .where(eq(users.id, payload.sub))
+      .limit(1);
+
+    if (!user) {
+      return c.json({ error: 'User not found' }, 401);
+    }
+    c.set('user', user);
     await next();
   } catch (e) {
     return c.json({ error: 'Invalid or expired token' }, 401);
