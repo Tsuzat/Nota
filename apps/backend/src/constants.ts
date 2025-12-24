@@ -34,4 +34,8 @@ export const VERIFICATION_TOKEN_EXPIRY = parseInt(process.env.VERIFICATION_TOKEN
 // REDIS
 export const REDIS_URL = checkEnv('REDIS_URL');
 // Cookie Options
-export const COOKIE_OPTIONS = { httpOnly: true, secure: false };
+export const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'Lax' as const,
+};

@@ -41,6 +41,17 @@ const auth = new Hono<{
   };
 }>();
 
+auth.get('/login/:provider', (c) => {
+  const provider = c.req.param('provider');
+  const platform = c.req.query('platform');
+
+  if (platform === 'desktop') {
+    setCookie(c, 'auth_platform', platform, { ...COOKIE_OPTIONS, maxAge: 60 * 5 });
+  }
+
+  return c.redirect(`${BACKEND_URL}/auth/oauth/${provider}`);
+});
+
 auth.use(
   '/oauth/github',
   githubAuth({
@@ -109,6 +120,12 @@ auth.use(
       ...COOKIE_OPTIONS,
       maxAge: 7 * 24 * 60 * 60,
     });
+
+    const platform = getCookie(c, 'auth_platform');
+    if (platform === 'desktop') {
+      deleteCookie(c, 'auth_platform');
+      return c.redirect(`nota://auth/callback?access_token=${accessToken}&refresh_token=${refreshToken}`);
+    }
 
     return c.redirect(FRONTEND_URL || 'https://www.nota.ink');
   }
@@ -179,6 +196,12 @@ auth.use(
       ...COOKIE_OPTIONS,
       maxAge: 7 * 24 * 60 * 60,
     });
+
+    const platform = getCookie(c, 'auth_platform');
+    if (platform === 'desktop') {
+      deleteCookie(c, 'auth_platform');
+      return c.redirect(`nota://auth/callback?access_token=${accessToken}&refresh_token=${refreshToken}`);
+    }
 
     return c.redirect(FRONTEND_URL || 'https://www.nota.ink');
   }

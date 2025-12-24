@@ -26,7 +26,7 @@ export const users = pgTable('users', {
 
 export const userworkspaces = pgTable('userworkspaces', {
   id: uuid().primaryKey().defaultRandom(),
-  icons: text('icons').notNull(),
+  icon: text('icon').notNull(),
   name: text('name'),
   owner: uuid('owner').references(() => users.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -67,6 +67,7 @@ export const notes = pgTable(
     trashed: boolean('trashed').default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    isPublic: boolean('is_public').default(false),
     content: jsonb('content').default({}),
   },
   (table) => [index('idx_notes_userworkspace').on(table.userworkspace)]
