@@ -20,8 +20,11 @@ export const users = pgTable('users', {
   isVerified: boolean('is_verified').default(false).notNull(),
   subscriptionPlan: subscriptionPlans('subscription_plan').default('free').notNull(),
   aiCredits: integer('ai_credits').default(0).notNull(),
-  subscriptionType: subscriptionTypes('subscription_type').default('monthly'),
+  subscriptionType: subscriptionTypes('subscription_type'),
   externalCustomerId: varchar('external_customer_id', { length: 255 }),
+  assignedStorage: integer('assigned_storage').default(0).notNull(),
+  usedStorage: integer('used_storage').default(0).notNull(),
+  nextBillingAt: timestamp('next_billing_at', { withTimezone: true }),
 });
 
 export const userworkspaces = pgTable('userworkspaces', {

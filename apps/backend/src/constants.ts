@@ -39,3 +39,10 @@ export const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'Lax' as const,
 };
+
+// Cloudflare R2
+export const R2_ACCOUNT_ID = checkEnv('R2_ACCOUNT_ID');
+export const R2_ACCESS_ID = checkEnv('R2_ACCESS_ID');
+export const R2_SECRETE_ACCESS_KEY = checkEnv('R2_SECRETE_ACCESS_KEY');
+export const R2_PUBLIC_ENDPOINT = checkEnv('R2_PUBLIC_ENDPOINT');
+export const BUCKET_NAME = checkEnv('BUCKET_NAME');
