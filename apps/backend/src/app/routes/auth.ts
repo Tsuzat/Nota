@@ -1,8 +1,10 @@
 import { githubAuth } from '@hono/oauth-providers/github';
 import { googleAuth } from '@hono/oauth-providers/google';
+import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
+import { z } from 'zod';
 import {
   BACKEND_URL,
   COOKIE_OPTIONS,
@@ -41,6 +43,22 @@ const auth = new Hono<{
   };
 }>();
 
+// Schemas
+const signupSchema = z.object({
+  email: z.email(),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(64)
+    .regex(/^[a-zA-Z0-9!@#$%^&*(),.?":{}|<>-]+$/, 'Password must contain letters, numbers, and special characters'),
+  name: z.string().min(1).optional(),
+});
+
+const loginSchema = z.object({
+  email: z.email(),
+  password: z.string(),
+});
+
 auth.get('/login/:provider', (c) => {
   const provider = c.req.param('provider');
   const platform = c.req.query('platform');
@@ -50,6 +68,92 @@ auth.get('/login/:provider', (c) => {
   }
 
   return c.redirect(`${BACKEND_URL}/auth/oauth/${provider}`);
+});
+
+// Signup Endpoint
+auth.post('/signup', zValidator('json', signupSchema), async (c) => {
+  const { email, password, name } = c.req.valid('json');
+
+  try {
+    const existingUser = await DB.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    if (existingUser) {
+      return c.json({ error: 'User already exists' }, 409);
+    }
+
+    const encryptedPassword = await Bun.password.hash(password);
+
+    const [newUser] = await DB.insert(users)
+      .values({
+        email,
+        name: name || email.split('@')[0],
+        encryptedPassword,
+        provider: 'credentials',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    if (!newUser) {
+      return c.json({ error: 'Failed to create user' }, 500);
+    }
+
+    const accessToken = await generateAccessToken(newUser.id, newUser.email);
+    const refreshToken = await generateRefreshToken(newUser.id, newUser.email);
+
+    setCookie(c, 'access_token', accessToken, { ...COOKIE_OPTIONS, maxAge: 6 * 60 * 60 });
+    setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: 7 * 24 * 60 * 60 });
+
+    return c.json(
+      {
+        user: { id: newUser.id, email: newUser.email, name: newUser.name },
+        accessToken,
+        refreshToken,
+      },
+      201
+    );
+  } catch (error) {
+    console.error('Signup error:', error);
+    return c.json({ error: 'Failed to create user' }, 500);
+  }
+});
+
+// Login Endpoint
+auth.post('/login', zValidator('json', loginSchema), async (c) => {
+  const { email, password } = c.req.valid('json');
+
+  try {
+    const user = await DB.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    if (!user || !user.encryptedPassword) {
+      return c.json({ error: 'Invalid email or password' }, 401);
+    }
+
+    const isMatch = await Bun.password.verify(password, user.encryptedPassword);
+
+    if (!isMatch) {
+      return c.json({ error: 'Invalid email or password' }, 401);
+    }
+
+    const accessToken = await generateAccessToken(user.id, user.email);
+    const refreshToken = await generateRefreshToken(user.id, user.email);
+
+    setCookie(c, 'access_token', accessToken, { ...COOKIE_OPTIONS, maxAge: 6 * 60 * 60 });
+    setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: 7 * 24 * 60 * 60 });
+
+    return c.json({
+      user: { id: user.id, email: user.email, name: user.name },
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    return c.json({ error: 'Failed to login' }, 500);
+  }
 });
 
 auth.use(
