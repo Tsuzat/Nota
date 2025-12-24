@@ -11,6 +11,8 @@
     "lint": "biome check .",
     "ci": "biome ci .",
     "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate",
+    "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio"
   },
   "devDependencies": {

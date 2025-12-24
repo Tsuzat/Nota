@@ -74,6 +74,8 @@ auth.use(
           email,
           name: name || email.split("@")[0],
           avatarUrl,
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
           provider: "github",
           providerId: String(providerId),
           createdAt: new Date(),
@@ -92,7 +94,6 @@ auth.use(
         .returning();
       user = fetchedUser;
     } catch (error) {
-      //! May be add a logger
       console.error(error)
       return c.json({ error: "Something went wrong when upserting user" }, 505);
     }
