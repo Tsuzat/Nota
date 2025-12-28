@@ -27,6 +27,25 @@ export const users = pgTable('users', {
   nextBillingAt: timestamp('next_billing_at', { withTimezone: true }),
 });
 
+export const sessions = pgTable('sessions', {
+  id: uuid().primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  refreshedAt: timestamp('refreshed_at', { withTimezone: true }),
+  userAgent: text('user_agent'),
+  ip: text('ip'),
+  pkceChallenge: text('pkce_challenge'),
+  pkceChallengeMethod: text('pkce_challenge_method'),
+  state: text('state'),
+  browser: text('browser'),
+  os: text('os'),
+  device: text('device'),
+  country: text('country'),
+  revoked: boolean('revoked').default(false).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
+});
+
 export const userworkspaces = pgTable('userworkspaces', {
   id: uuid().primaryKey().defaultRandom(),
   icon: text('icon').notNull(),
@@ -77,6 +96,7 @@ export const notes = pgTable(
 );
 
 export type User = typeof users.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
 export type SubscriptionPlan = typeof subscriptionPlans.enumValues;
 export type SubscriptionType = typeof subscriptionTypes.enumValues;
 

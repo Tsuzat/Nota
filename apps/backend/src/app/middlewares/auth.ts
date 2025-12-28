@@ -2,13 +2,12 @@ import { eq } from 'drizzle-orm';
 import type { Context, Next } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { DB } from '../../db';
-import { users } from '../../db/schema';
+import { sessions, users } from '../../db/schema';
 import { verifyAccessToken } from '../../lib/jwt';
 import { logerror } from '../../logging';
 
 export const authMiddleware = async (c: Context, next: Next) => {
   let token = getCookie(c, 'access_token');
-
   // check the token from header if not found in cookie
   if (!token) {
     token = c.req.header('Authorization')?.split(' ')[1];
@@ -18,7 +17,12 @@ export const authMiddleware = async (c: Context, next: Next) => {
   }
   try {
     const payload = await verifyAccessToken(token);
-
+    const session = await DB.query.sessions.findFirst({
+      where: eq(sessions.id, payload.sessionId),
+    });
+    if (!session || session.revoked) {
+      return c.json({ error: 'Session not found or revoked' }, 401);
+    }
     // Fetch user details for storage/credits
     const user = await DB.query.users.findFirst({
       where: eq(users.id, payload.sub),

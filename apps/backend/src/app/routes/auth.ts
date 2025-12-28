@@ -3,6 +3,7 @@ import { googleAuth } from '@hono/oauth-providers/google';
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { getConnInfo } from 'hono/bun';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { z } from 'zod';
 import {
@@ -15,7 +16,7 @@ import {
   GOOGLE_CLIENT_SECRET,
 } from '../../constants';
 import { DB } from '../../db';
-import { type User, users } from '../../db/schema';
+import { sessions, type User, users } from '../../db/schema';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../lib/jwt';
 import { logerror } from '../../logging';
 
@@ -131,9 +132,22 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
     if (!isMatch) {
       return c.json({ error: 'Invalid email or password' }, 401);
     }
-
-    const accessToken = await generateAccessToken(user.id, user.email);
-    const refreshToken = await generateRefreshToken(user.id, user.email);
+    const info = getConnInfo(c);
+    const session = await DB.insert(sessions)
+      .values({
+        userId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ip: info.remote.address,
+        userAgent: info.remote.addressType,
+      })
+      .returning({ id: sessions.id });
+    if (!session || !session[0] || session.length === 0) {
+      return c.json({ error: 'Failed to create session' }, 500);
+    }
+    const sessionId = session[0].id;
+    const accessToken = await generateAccessToken(user.id, user.email, sessionId);
+    const refreshToken = await generateRefreshToken(user.id, user.email, sessionId);
 
     setCookie(c, 'access_token', accessToken, { ...COOKIE_OPTIONS, maxAge: 6 * 60 * 60 });
     setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: 7 * 24 * 60 * 60 });
@@ -203,9 +217,22 @@ auth.use(
     if (!user) {
       return c.json({ error: 'Something went wrong when upserting user' }, 505);
     }
-
-    const accessToken = await generateAccessToken(user.id, user.email);
-    const refreshToken = await generateRefreshToken(user.id, user.email);
+    const info = getConnInfo(c);
+    const session = await DB.insert(sessions)
+      .values({
+        userId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ip: info.remote.address,
+        userAgent: info.remote.addressType,
+      })
+      .returning({ id: sessions.id });
+    if (!session || !session[0] || session.length === 0) {
+      return c.json({ error: 'Failed to create session' }, 500);
+    }
+    const sessionId = session[0].id;
+    const accessToken = await generateAccessToken(user.id, user.email, sessionId);
+    const refreshToken = await generateRefreshToken(user.id, user.email, sessionId);
 
     setCookie(c, 'access_token', accessToken, {
       ...COOKIE_OPTIONS,
@@ -280,8 +307,22 @@ auth.use(
       return c.json({ error: 'Something went wrong when upserting user' }, 505);
     }
 
-    const accessToken = await generateAccessToken(user.id, user.email);
-    const refreshToken = await generateRefreshToken(user.id, user.email);
+    const info = getConnInfo(c);
+    const session = await DB.insert(sessions)
+      .values({
+        userId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ip: info.remote.address,
+        userAgent: info.remote.addressType,
+      })
+      .returning({ id: sessions.id });
+    if (!session || !session[0] || session.length === 0) {
+      return c.json({ error: 'Failed to create session' }, 500);
+    }
+    const sessionId = session[0].id;
+    const accessToken = await generateAccessToken(user.id, user.email, sessionId);
+    const refreshToken = await generateRefreshToken(user.id, user.email, sessionId);
 
     setCookie(c, 'access_token', accessToken, {
       ...COOKIE_OPTIONS,
@@ -318,9 +359,22 @@ auth.post('/refresh', async (c) => {
     if (!user) {
       return c.json({ error: 'User not found' }, 401);
     }
-
-    const newAccessToken = await generateAccessToken(user.id, user.email);
-    const newRefreshToken = await generateRefreshToken(user.id, user.email);
+    const info = getConnInfo(c);
+    const session = await DB.insert(sessions)
+      .values({
+        userId: user.id,
+        updatedAt: new Date(),
+        refreshedAt: new Date(),
+        ip: info.remote.address,
+        userAgent: info.remote.addressType,
+      })
+      .returning({ id: sessions.id });
+    if (!session || !session[0] || session.length === 0) {
+      return c.json({ error: 'Failed to create session' }, 500);
+    }
+    const sessionId = session[0].id;
+    const newAccessToken = await generateAccessToken(user.id, user.email, sessionId);
+    const newRefreshToken = await generateRefreshToken(user.id, user.email, sessionId);
 
     setCookie(c, 'access_token', newAccessToken, {
       ...COOKIE_OPTIONS,
@@ -338,7 +392,29 @@ auth.post('/refresh', async (c) => {
   }
 });
 
-auth.get('/logout', (c) => {
+auth.get('/logout', async (c) => {
+  let token: string | undefined;
+  token = getCookie(c, 'access_token');
+  if (!token) {
+    token = c.req.header('Authorization')?.replace('Bearer ', '');
+  }
+  if (!token) {
+    return c.json({ error: 'User not logged in' }, 401);
+  }
+
+  const payload = await verifyRefreshToken(token);
+  if (!payload) {
+    return c.json({ error: 'Invalid access token' }, 401);
+  }
+
+  const sessionId = payload.sessionId;
+  // let's not await the updating of DB
+  DB.update(sessions)
+    .set({
+      revoked: true,
+    })
+    .where(eq(sessions.id, sessionId));
+
   deleteCookie(c, 'access_token');
   deleteCookie(c, 'refresh_token');
   return c.json({ success: true });

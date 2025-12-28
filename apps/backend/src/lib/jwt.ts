@@ -5,22 +5,25 @@ export interface JWTPayload {
   sub: string; // userId
   email: string;
   exp: number;
+  sessionId: string;
   [key: string]: unknown;
 }
 
-export const generateAccessToken = async (userId: string, email: string) => {
+export const generateAccessToken = async (userId: string, email: string, sessionId: string) => {
   const payload: JWTPayload = {
     sub: userId,
     email,
+    sessionId,
     exp: Math.floor(Date.now() / 1000) + parseExpiry(ACCESS_TOKEN_EXPIRY),
   };
   return await sign(payload, ACCESS_TOKEN_SECRET);
 };
 
-export const generateRefreshToken = async (userId: string, email: string) => {
+export const generateRefreshToken = async (userId: string, email: string, sessionId: string) => {
   const payload: JWTPayload = {
     sub: userId,
     email,
+    sessionId,
     exp: Math.floor(Date.now() / 1000) + parseExpiry(REFRESH_TOKEN_EXPIRY),
   };
   return await sign(payload, REFRESH_TOKEN_SECRET);
