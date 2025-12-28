@@ -31,8 +31,6 @@ export const GOOGLE_CLIENT_SECRET = checkEnv('GOOGLE_CLIENT_SECRET');
 // Verification Token Expiry
 export const VERIFICATION_TOKEN_EXPIRY = Number.parseInt(process.env.VERIFICATION_TOKEN_EXPIRY || '30', 10);
 
-// REDIS
-export const REDIS_URL = checkEnv('REDIS_URL');
 // Cookie Options
 export const COOKIE_OPTIONS = {
   httpOnly: true,
