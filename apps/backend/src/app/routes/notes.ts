@@ -45,18 +45,16 @@ app.get('/:noteId/content', async (c) => {
   const noteId = c.req.param('noteId');
 
   try {
-    const note = await DB.select({
-      content: notes.content,
-    })
-      .from(notes)
-      .where(and(eq(notes.id, noteId), eq(notes.owner, userId)))
-      .limit(1);
+    const note = await DB.query.notes.findFirst({
+      where: and(eq(notes.id, noteId), eq(notes.owner, userId)),
+      columns: { content: true },
+    });
 
-    if (note.length === 0) {
+    if (!note) {
       return c.json({ error: 'Note not found or unauthorized' }, 404);
     }
 
-    return c.json(note[0]);
+    return c.json(note);
   } catch (error) {
     console.error('Error fetching note content:', error);
     return c.json({ error: 'Failed to fetch note content' }, 500);

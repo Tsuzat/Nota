@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import ai from './routes/ai';
 import auth from './routes/auth';
 import notes from './routes/notes';
+import payment from './routes/payment';
 import storage from './routes/storage';
 import user from './routes/user';
 import userworkspaces from './routes/userworkspaces';
@@ -15,6 +16,9 @@ export type Variables = {
     usedStorage: number;
     aiCredits: number;
     subscriptionPlan: 'free' | 'pro';
+    externalCustomerId: string | null;
+    nextBillingAt: Date | null;
+    subscriptionType: 'monthly' | 'yearly' | null;
   };
 };
 
@@ -29,3 +33,4 @@ app.route('api/db/workspaces', workspaces);
 app.route('api/db/notes', notes);
 app.route('api/storage', storage);
 app.route('api/ai', ai);
+app.route('api/payment', payment);

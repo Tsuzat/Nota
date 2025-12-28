@@ -196,9 +196,9 @@ app.get('/list', async (c) => {
 });
 
 // 4. Delete File
-app.delete('/', zValidator('json', deleteSchema), async (c) => {
+app.delete('/:key', zValidator('json', deleteSchema), async (c) => {
   const userId = c.get('userId');
-  const { key } = c.req.valid('json');
+  const key = c.req.param('key');
 
   // Security check
   if (!key.startsWith(`${userId}/`)) {

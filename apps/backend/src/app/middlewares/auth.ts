@@ -19,16 +19,9 @@ export const authMiddleware = async (c: Context, next: Next) => {
     const payload = await verifyAccessToken(token);
 
     // Fetch user details for storage/credits
-    const [user] = await DB.select({
-      assignedStorage: users.assignedStorage,
-      usedStorage: users.usedStorage,
-      aiCredits: users.aiCredits,
-      subscriptionPlan: users.subscriptionPlan,
-    })
-      .from(users)
-      .where(eq(users.id, payload.sub))
-      .limit(1);
-
+    const user = await DB.query.users.findFirst({
+      where: eq(users.id, payload.sub),
+    });
     if (!user) {
       return c.json({ error: 'User not found' }, 401);
     }

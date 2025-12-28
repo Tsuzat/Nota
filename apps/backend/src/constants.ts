@@ -49,3 +49,12 @@ export const BUCKET_NAME = checkEnv('BUCKET_NAME');
 
 // Gemini API
 export const GEMINI_API_KEY = checkEnv('GEMINI_API_KEY');
+
+// DODO Related
+export const DODO_MODE = checkEnv('DODO_MODE') as 'live_mode' | 'test_mode';
+export const DODO_PAYMENTS_LOG = checkEnv('DODO_PAYMENTS_LOG');
+export const DODO_API_KEY = checkEnv('DODO_API_KEY');
+export const DODO_WEBHOOK_SECRET = checkEnv('DODO_WEBHOOK_SECRET');
+export const DODO_AI_CREDITS = checkEnv('DODO_AI_CREDITS');
+export const DODO_MONTLY_SUB = checkEnv('DODO_MONTLY_SUB');
+export const DODO_YEARLY_SUB = checkEnv('DODO_YEARLY_SUB');
