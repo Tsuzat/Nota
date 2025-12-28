@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { DODO_AI_CREDITS, DODO_MONTLY_SUB, DODO_YEARLY_SUB, FRONTEND_URL } from '../../constants';
 import { DB } from '../../db';
 import { users } from '../../db/schema';
+import { logerror, loginfo, logwarn } from '../../logging';
 import { dodoClient } from '../../payment';
 import type { Variables } from '..';
 import { authMiddleware } from '../middlewares/auth';
@@ -67,7 +68,7 @@ app.get('/checkout', authMiddleware, async (c) => {
     }
     return c.redirect(session.checkout_url, 303);
   } catch (error) {
-    console.error('Checkout error:', error);
+    logerror('Checkout error:', error);
     return c.json({ error: 'Failed to create checkout session' }, 500);
   }
 });
@@ -82,7 +83,7 @@ app.get('/portal', authMiddleware, async (c) => {
     const portal = await dodoClient.customers.customerPortal.create(user.externalCustomerId);
     return c.redirect(portal.link, 303);
   } catch (error) {
-    console.error('Portal error:', error);
+    logerror('Portal error:', error);
     return c.json({ error: 'Failed to create portal session' }, 500);
   }
 });
@@ -103,12 +104,12 @@ app.post('/hooks', async (c) => {
   try {
     payload = await c.req.json();
   } catch (e) {
-    console.error('Invalid JSON:', e);
+    logerror('Invalid JSON:', e);
     return c.json({ error: 'Invalid JSON' }, 400);
   }
 
   const { type } = payload;
-  console.log(`Received webhook: ${type}`);
+  loginfo(`Received webhook: ${type}`);
 
   try {
     switch (type) {
@@ -122,13 +123,13 @@ app.post('/hooks', async (c) => {
         const user = await DB.query.users.findFirst({ where: query });
 
         if (!user) {
-          console.warn('Webhook: User not found', { customerId, notaUserId });
+          logwarn('Webhook: User not found', { customerId, notaUserId });
           return c.json({ received: true });
         }
         // If it's a subscription payment, we might skip logic here if 'subscription.active' handles it,
         // OR we handle one-time credits here.
         if (data.subscription_id) {
-          console.log('Skipping payment.succeeded for subscription');
+          loginfo('Skipping payment.succeeded for subscription');
           break;
         }
 
@@ -141,7 +142,7 @@ app.post('/hooks', async (c) => {
             await DB.update(users)
               .set({ aiCredits: sql`${users.aiCredits} + ${creditsToAdd}` })
               .where(eq(users.id, user.id));
-            console.log(`Added ${creditsToAdd} credits to user ${user.id}`);
+            loginfo(`Added ${creditsToAdd} credits to user ${user.id}`);
           }
         }
         break;
@@ -157,7 +158,7 @@ app.post('/hooks', async (c) => {
         const user = await DB.query.users.findFirst({ where: query });
 
         if (!user) {
-          console.warn('Webhook: User not found', { customerId, notaUserId });
+          logwarn('Webhook: User not found', { customerId, notaUserId });
           return c.json({ received: true });
         }
         const productId = data.product_id;
@@ -175,7 +176,7 @@ app.post('/hooks', async (c) => {
             nextBillingAt: data.next_billing_date ? new Date(data.next_billing_date) : null,
           })
           .where(eq(users.id, user.id));
-        console.log(`Activated subscription for user ${user.id}`);
+        loginfo(`Activated subscription for user ${user.id}`);
         break;
       }
 
@@ -190,7 +191,7 @@ app.post('/hooks', async (c) => {
         const user = await DB.query.users.findFirst({ where: query });
 
         if (!user) {
-          console.warn('Webhook: User not found', { customerId, notaUserId });
+          logwarn('Webhook: User not found', { customerId, notaUserId });
           return c.json({ received: true });
         }
         await DB.update(users)
@@ -200,17 +201,17 @@ app.post('/hooks', async (c) => {
             nextBillingAt: null,
           })
           .where(eq(users.id, user.id));
-        console.log(`Subscription ended for user ${user.id}`);
+        loginfo(`Subscription ended for user ${user.id}`);
         break;
       }
       case 'payment.failed': {
-        console.log('Payment failed for user. Payload = ', payload);
+        loginfo('Payment failed for user. Payload = ', payload);
         break;
       }
     }
     return c.json({ received: true });
   } catch (err) {
-    console.error('Webhook processing error:', err);
+    logerror('Webhook processing error:', err);
     return c.json({ error: 'Webhook handler failed' }, 500);
   }
 });

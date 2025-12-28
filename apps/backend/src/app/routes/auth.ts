@@ -17,6 +17,7 @@ import {
 import { DB } from '../../db';
 import { type User, users } from '../../db/schema';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../lib/jwt';
+import { logerror } from '../../logging';
 
 type GitHubUser = {
   id: number;
@@ -107,7 +108,7 @@ auth.post('/signup', zValidator('json', signupSchema), async (c) => {
       201
     );
   } catch (error) {
-    console.error('Signup error:', error);
+    logerror('Signup error:', error);
     return c.json({ error: 'Failed to create user' }, 500);
   }
 });
@@ -141,7 +142,7 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
       message: 'Login successful',
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logerror('Login error:', error);
     return c.json({ error: 'Failed to login' }, 500);
   }
 });
@@ -195,7 +196,7 @@ auth.use(
         .returning();
       user = fetchedUser;
     } catch (error) {
-      console.error(error);
+      logerror(error);
       return c.json({ error: 'Something went wrong when upserting user' }, 505);
     }
 
@@ -271,7 +272,7 @@ auth.use(
         .returning();
       user = fetchedUser;
     } catch (error) {
-      console.error(error);
+      logerror(error);
       return c.json({ error: 'Something went wrong when upserting user' }, 505);
     }
 
@@ -332,7 +333,7 @@ auth.post('/refresh', async (c) => {
 
     return c.json({ success: true });
   } catch (e) {
-    console.error('Error verifying refresh token:', e);
+    logerror('Error verifying refresh token:', e);
     return c.json({ error: 'Invalid refresh token' }, 401);
   }
 });

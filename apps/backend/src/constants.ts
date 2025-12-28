@@ -56,3 +56,9 @@ export const DODO_WEBHOOK_SECRET = checkEnv('DODO_WEBHOOK_SECRET');
 export const DODO_AI_CREDITS = checkEnv('DODO_AI_CREDITS');
 export const DODO_MONTLY_SUB = checkEnv('DODO_MONTLY_SUB');
 export const DODO_YEARLY_SUB = checkEnv('DODO_YEARLY_SUB');
+
+// Sentry DSN
+export const SENTRY_DSN = checkEnv('SENTRY_DSN');
+
+// Environment
+export const ENV = checkEnv('ENV') as 'development' | 'production';

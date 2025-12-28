@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { DB } from '../../db';
 import { workspaces } from '../../db/schema';
+import { logerror } from '../../logging';
 import type { Variables } from '..';
 import { authMiddleware } from '../middlewares/auth';
 
@@ -42,7 +43,7 @@ app.get('/', async (c) => {
       );
     return c.json(result);
   } catch (error) {
-    console.error('Error fetching workspaces:', error);
+    logerror('Error fetching workspaces:', error);
     return c.json({ error: 'Failed to fetch workspaces' }, 500);
   }
 });
@@ -65,7 +66,7 @@ app.post('/', zValidator('json', createSchema), async (c) => {
       .returning();
     return c.json(newWorkspace, 201);
   } catch (error) {
-    console.error('Error creating workspace:', error);
+    logerror('Error creating workspace:', error);
     return c.json({ error: 'Failed to create workspace' }, 500);
   }
 });
@@ -86,7 +87,7 @@ app.delete('/:id', async (c) => {
 
     return c.json({ message: 'Workspace deleted successfully', id: workspaceId });
   } catch (error) {
-    console.error('Error deleting workspace:', error);
+    logerror('Error deleting workspace:', error);
     return c.json({ error: 'Failed to delete workspace' }, 500);
   }
 });
@@ -118,7 +119,7 @@ app.patch('/:id', zValidator('json', updateSchema), async (c) => {
 
     return c.json(updatedWorkspace);
   } catch (error) {
-    console.error('Error updating workspace:', error);
+    logerror('Error updating workspace:', error);
     return c.json({ error: 'Failed to update workspace' }, 500);
   }
 });

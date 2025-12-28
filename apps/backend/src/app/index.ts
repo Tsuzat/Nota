@@ -24,9 +24,9 @@ export type Variables = {
 
 export const app = new Hono<{ Variables: Variables }>();
 
-app.get('/health', (c) => c.json({ status: 'ok' }, 200));
+app.get('/api/health', (c) => c.json({ status: 'ok' }, 200));
 
-app.route('/auth', auth);
+app.route('api/auth', auth);
 app.route('api/user', user);
 app.route('api/db/userworkspaces', userworkspaces);
 app.route('api/db/workspaces', workspaces);

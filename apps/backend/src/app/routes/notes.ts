@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { DB } from '../../db';
 import { notes } from '../../db/schema';
+import { logerror } from '../../logging';
 import type { Variables } from '..';
 import { authMiddleware } from '../middlewares/auth';
 
@@ -56,7 +57,7 @@ app.get('/:noteId/content', async (c) => {
 
     return c.json(note);
   } catch (error) {
-    console.error('Error fetching note content:', error);
+    logerror('Error fetching note content:', error);
     return c.json({ error: 'Failed to fetch note content' }, 500);
   }
 });
@@ -73,7 +74,7 @@ app.patch('/:noteId/content', zValidator('json', patchSchema), async (c) => {
 
     return c.json({ success: true });
   } catch (error: any) {
-    console.error('Error patching note:', error);
+    logerror('Error patching note:', error);
 
     // Attempt to parse Postgres errors
     const errorMessage = error.message || '';
@@ -112,7 +113,7 @@ app.get('/:userworkspaceId', async (c) => {
 
     return c.json(results);
   } catch (error) {
-    console.error('Error fetching notes:', error);
+    logerror('Error fetching notes:', error);
     return c.json({ error: 'Failed to fetch notes' }, 500);
   }
 });
@@ -138,7 +139,7 @@ app.post('/', zValidator('json', createSchema), async (c) => {
 
     return c.json(newNote, 201);
   } catch (error) {
-    console.error('Error creating note:', error);
+    logerror('Error creating note:', error);
     return c.json({ error: 'Failed to create note' }, 500);
   }
 });
@@ -159,7 +160,7 @@ app.delete('/:id', async (c) => {
 
     return c.json({ message: 'Note deleted successfully', id: noteId });
   } catch (error) {
-    console.error('Error deleting note:', error);
+    logerror('Error deleting note:', error);
     return c.json({ error: 'Failed to delete note' }, 500);
   }
 });
@@ -189,7 +190,7 @@ app.patch('/:id', zValidator('json', updateSchema), async (c) => {
 
     return c.json(updatedNote);
   } catch (error) {
-    console.error('Error updating note:', error);
+    logerror('Error updating note:', error);
     return c.json({ error: 'Failed to update note' }, 500);
   }
 });

@@ -9,6 +9,7 @@ import { BUCKET_NAME, R2_PUBLIC_ENDPOINT } from '../../constants';
 import { DB } from '../../db';
 import { users } from '../../db/schema';
 import { storage } from '../../lib/storage';
+import { logerror } from '../../logging';
 import { authMiddleware } from '../middlewares/auth';
 
 const app = new Hono<{ Variables: { userId: string; userEmail: string; user: any } }>();
@@ -46,7 +47,7 @@ const invalidateListCache = (userId: string) => {
     const versionKey = `storage:version:${userId}`;
     redis.incr(versionKey);
   } catch (e) {
-    console.error('Redis Invalidation Error:', e);
+    logerror('Redis Invalidation Error:', e);
   }
 };
 
@@ -93,7 +94,7 @@ app.post('/presigned-url', zValidator('json', uploadSchema), async (c) => {
       key: key,
     });
   } catch (error) {
-    console.error('Error generating presigned URL:', error);
+    logerror('Error generating presigned URL:', error);
     return c.json({ error: 'Failed to generate upload URL' }, 500);
   }
 });
@@ -131,7 +132,7 @@ app.post('/confirm', zValidator('json', confirmSchema), async (c) => {
 
     return c.json({ success: true, size: realSize });
   } catch (error) {
-    console.error('Error confirming upload:', error);
+    logerror('Error confirming upload:', error);
     return c.json({ error: 'Failed to confirm upload' }, 500);
   }
 });
@@ -190,7 +191,7 @@ app.get('/list', async (c) => {
 
     return c.json(result);
   } catch (error) {
-    console.error('List files error:', error);
+    logerror('List files error:', error);
     return c.json({ error: 'Failed to list files' }, 500);
   }
 });
@@ -235,7 +236,7 @@ app.delete('/:key', zValidator('json', deleteSchema), async (c) => {
     if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
       return c.json({ error: 'File not found' }, 404);
     }
-    console.error('Delete error:', error);
+    logerror('Delete error:', error);
     return c.json({ error: 'Failed to delete file' }, 500);
   }
 });

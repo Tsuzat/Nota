@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { GEMINI_API_KEY } from '../../constants';
 import { DB } from '../../db';
 import { users } from '../../db/schema';
+import { logerror, loginfo } from '../../logging';
 import type { Variables } from '..';
 import { authMiddleware } from '../middlewares/auth';
 
@@ -101,7 +102,7 @@ app.post('/generate', zValidator('json', schema), async (c) => {
         }
       }
     } catch (e) {
-      console.error('Gemini Stream Error:', e);
+      logerror('Gemini Stream Error:', e);
       await stream.write('\n[Error generating response]');
     } finally {
       // 3. Calculate Cost & Update DB
@@ -113,14 +114,14 @@ app.post('/generate', zValidator('json', schema), async (c) => {
         if (totalCost > 0) {
           // Update DB safely
           DB.update(users)
-            .set({ aiCredits: sql`${users.aiCredits} - ${totalCost}` })
+            .set({ aiCredits: sql`GREATEST(0, ${users.aiCredits} - ${totalCost})` })
             .where(eq(users.id, userId))
             .then(() => {
-              console.log(`Updated credits for user ${userId}: spent ${totalCost}`);
+              loginfo(`Updated credits for user ${userId}: spent ${totalCost}`);
             });
         }
       } catch (dbError) {
-        console.error('Failed to update AI credits:', dbError);
+        logerror('Failed to update AI credits:', dbError);
       }
     }
   });
