@@ -1,3 +1,4 @@
+import type { WebhookPayload } from 'dodopayments/resources';
 import { eq, or, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { DODO_AI_CREDITS, DODO_MONTLY_SUB, DODO_YEARLY_SUB, FRONTEND_URL } from '../../constants';
@@ -6,7 +7,6 @@ import { users } from '../../db/schema';
 import { dodoClient } from '../../payment';
 import type { Variables } from '..';
 import { authMiddleware } from '../middlewares/auth';
-import type { WebhookPayload } from 'dodopayments/resources';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -103,6 +103,7 @@ app.post('/hooks', async (c) => {
   try {
     payload = await c.req.json();
   } catch (e) {
+    console.error('Invalid JSON:', e);
     return c.json({ error: 'Invalid JSON' }, 400);
   }
 
@@ -203,7 +204,7 @@ app.post('/hooks', async (c) => {
         break;
       }
       case 'payment.failed': {
-        console.log(`Payment failed for user. Payload = `, payload);
+        console.log('Payment failed for user. Payload = ', payload);
         break;
       }
     }
