@@ -11,6 +11,7 @@ import workspaces from './routes/workspaces';
 export type Variables = {
   userId: string;
   userEmail: string;
+  sessionId: string;
   user: {
     assignedStorage: number;
     usedStorage: number;

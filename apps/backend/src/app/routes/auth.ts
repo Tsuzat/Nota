@@ -19,6 +19,7 @@ import { DB } from '../../db';
 import { sessions, type User, users } from '../../db/schema';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../lib/jwt';
 import { logerror } from '../../logging';
+import { authMiddleware } from '../middlewares/auth';
 
 type GitHubUser = {
   id: number;
@@ -42,6 +43,7 @@ const auth = new Hono<{
   Variables: {
     'user-github': GitHubUser;
     'user-google': GoogleUser;
+    sessionId: string;
   };
 }>();
 
@@ -392,29 +394,14 @@ auth.post('/refresh', async (c) => {
   }
 });
 
-auth.get('/logout', async (c) => {
-  let token: string | undefined;
-  token = getCookie(c, 'access_token');
-  if (!token) {
-    token = c.req.header('Authorization')?.replace('Bearer ', '');
-  }
-  if (!token) {
-    return c.json({ error: 'User not logged in' }, 401);
-  }
-
-  const payload = await verifyRefreshToken(token);
-  if (!payload) {
-    return c.json({ error: 'Invalid access token' }, 401);
-  }
-
-  const sessionId = payload.sessionId;
+auth.get('/logout', authMiddleware, async (c) => {
+  const sessionId = c.get('sessionId');
   // let's not await the updating of DB
   DB.update(sessions)
     .set({
       revoked: true,
     })
     .where(eq(sessions.id, sessionId));
-
   deleteCookie(c, 'access_token');
   deleteCookie(c, 'refresh_token');
   return c.json({ success: true });

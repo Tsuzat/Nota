@@ -4,7 +4,7 @@ import { getCookie } from 'hono/cookie';
 import { DB } from '../../db';
 import { sessions, users } from '../../db/schema';
 import { verifyAccessToken } from '../../lib/jwt';
-import { logerror } from '../../logging';
+import { logerror, logwarn } from '../../logging';
 
 export const authMiddleware = async (c: Context, next: Next) => {
   let token = getCookie(c, 'access_token');
@@ -13,7 +13,8 @@ export const authMiddleware = async (c: Context, next: Next) => {
     token = c.req.header('Authorization')?.split(' ')[1];
   }
   if (!token) {
-    return c.json({ error: 'Unauthorized' }, 401);
+    logwarn('Unauthorized: No token provided');
+    return c.json({ error: 'Unauthorized: No token provided' }, 401);
   }
   try {
     const payload = await verifyAccessToken(token);
@@ -31,6 +32,7 @@ export const authMiddleware = async (c: Context, next: Next) => {
       return c.json({ error: 'User not found' }, 401);
     }
     c.set('userId', payload.sub);
+    c.set('sessionId', payload.sessionId);
     c.set('userEmail', payload.email);
     c.set('user', user);
     await next();
