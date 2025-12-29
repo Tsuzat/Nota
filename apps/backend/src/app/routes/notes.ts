@@ -28,7 +28,6 @@ const updateSchema = z.object({
   icon: z.string().optional(),
   favorite: z.boolean().optional(),
   trashed: z.boolean().optional(),
-  content: z.record(z.any(), z.any()).optional(), // Optional explicit full update
 });
 
 // Schema for JSON Patch

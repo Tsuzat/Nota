@@ -31,7 +31,7 @@ const updateSchema = z.object({
 // 1. Get all workspaces (optionally filtered by userworkspaceId)
 app.get('/', async (c) => {
   const userId = c.get('userId');
-  const userworkspaceId = c.req.query('userworkspaceId');
+  const userworkspaceId = c.req.query('userworkspace_id');
 
   try {
     const result = DB.select()
