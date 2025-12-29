@@ -7,9 +7,15 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
+    "format": "biome format --write",
+    "lint": "biome check .",
+    "ci": "biome ci .",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+  },
+  "exports": {
+    ".": "./src/index.js"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.0",
@@ -19,5 +25,8 @@
     "svelte-check": "^4.3.4",
     "typescript": "^5.9.3",
     "vite": "^7.2.6"
+  },
+  "dependencies": {
+    "zod": "^4.2.1"
   }
 }
