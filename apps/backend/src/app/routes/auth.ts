@@ -71,7 +71,7 @@ auth.get('/login/:provider', (c) => {
     setCookie(c, 'auth_platform', platform, { ...COOKIE_OPTIONS, maxAge: 60 * 5 });
   }
 
-  return c.redirect(`${BACKEND_URL}/auth/oauth/${provider}`);
+  return c.redirect(`${BACKEND_URL}/api/auth/oauth/${provider}`);
 });
 
 // Signup Endpoint
@@ -170,7 +170,7 @@ auth.use(
     client_secret: GITHUB_CLIENT_SECRET,
     scope: ['user:email'],
     oauthApp: true,
-    redirect_uri: `${BACKEND_URL}/auth/oauth/github`,
+    redirect_uri: `${BACKEND_URL}/api/auth/oauth/github`,
   }),
   async (c) => {
     const githubUser = c.get('user-github');
@@ -261,7 +261,7 @@ auth.use(
     client_id: GOOGLE_CLIENT_ID,
     client_secret: GOOGLE_CLIENT_SECRET,
     scope: ['openid', 'email', 'profile'],
-    redirect_uri: `${BACKEND_URL}/auth/oauth/google`,
+    redirect_uri: `${BACKEND_URL}/api/auth/oauth/google`,
   }),
   async (c) => {
     const googleUser = c.get('user-google');
