@@ -26,6 +26,7 @@
         "dotenv": "^17.2.3",
         "drizzle-orm": "^0.45.1",
         "hono": "^4.11.1",
+        "hono-rate-limiter": "^0.5.2",
         "zod": "^4.2.1",
       },
       "devDependencies": {
@@ -1423,6 +1424,8 @@
     "highlight.js": ["highlight.js@11.11.1", "", {}, "sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w=="],
 
     "hono": ["hono@4.11.1", "", {}, "sha512-KsFcH0xxHes0J4zaQgWbYwmz3UPOOskdqZmItstUG93+Wk1ePBLkLGwbP9zlmh1BFUiL8Qp+Xfu9P7feJWpGNg=="],
+
+    "hono-rate-limiter": ["hono-rate-limiter@0.5.2", "", { "peerDependencies": { "hono": "^4.10.8", "unstorage": "^1.17.3" }, "optionalPeers": ["unstorage"] }, "sha512-AMgn16vbzpt6Qy+sZJ9h5yuH9iBIybc5ZrUktoY7Xy6OOPIwR2TjmLzwdDPlTPZPKD/C75811rYwK0WPwEzvXw=="],
 
     "html-void-elements": ["html-void-elements@3.0.0", "", {}, "sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg=="],
 

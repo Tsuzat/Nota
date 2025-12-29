@@ -17,9 +17,10 @@ export const loggerMiddleware = async (c: Context, next: Next) => {
 
   if (/windows/i.test(ua)) os = 'Windows';
   else if (/macintosh|mac os x/i.test(ua)) os = 'macOS';
-  else if (/linux/i.test(ua)) os = 'Linux';
-  else if (/android/i.test(ua)) os = 'Android';
+  if (/android/i.test(ua)) os = 'Android';
   else if (/iphone|ipad|ipod/i.test(ua)) os = 'iOS';
+
+  const location = c.req.header('CF-IPCountry') || c.req.header('X-Vercel-IP-Country') || 'Unknown';
 
   await next();
 
@@ -33,6 +34,7 @@ export const loggerMiddleware = async (c: Context, next: Next) => {
     status,
     duration,
     ip: info.remote.address,
+    location,
     os,
     browser,
     userAgent: ua,

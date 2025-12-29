@@ -1,5 +1,11 @@
 import { Hono } from 'hono';
+import { getConnInfo } from 'hono/bun';
+import { cors } from 'hono/cors';
+import { secureHeaders } from 'hono/secure-headers';
+import { rateLimiter } from 'hono-rate-limiter';
+import { CROSS_ORIGIN } from '../constants';
 import { loggerMiddleware } from './middlewares/logger';
+import { sanitizationMiddleware } from './middlewares/sanitization';
 import ai from './routes/ai';
 import auth from './routes/auth';
 import notes from './routes/notes';
@@ -26,6 +32,18 @@ export type Variables = {
 
 export const app = new Hono<{ Variables: Variables }>();
 
+// Apply rate limiting middleware
+app.use(
+  rateLimiter({
+    windowMs: 1 * 60 * 1000, // 1 Minute
+    limit: 100,
+    keyGenerator: (c) => getConnInfo(c).remote.address || c.req.header('x-forwarded-for') || 'unknown',
+  })
+);
+// Security Middlewares
+app.use('*', secureHeaders());
+app.use('*', cors({ origin: CROSS_ORIGIN, credentials: true }));
+app.use('*', sanitizationMiddleware);
 app.use('*', loggerMiddleware);
 
 app.get('/api/health', (c) => {
