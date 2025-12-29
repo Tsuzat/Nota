@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { loggerMiddleware } from './middlewares/logger';
 import ai from './routes/ai';
 import auth from './routes/auth';
 import notes from './routes/notes';
@@ -25,7 +26,11 @@ export type Variables = {
 
 export const app = new Hono<{ Variables: Variables }>();
 
-app.get('/api/health', (c) => c.json({ status: 'ok' }, 200));
+app.use('*', loggerMiddleware);
+
+app.get('/api/health', (c) => {
+  return c.json({ status: 'ok' }, 200);
+});
 
 app.route('api/auth', auth);
 app.route('api/user', user);
