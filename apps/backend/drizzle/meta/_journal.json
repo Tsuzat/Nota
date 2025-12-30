@@ -43,6 +43,13 @@
       "when": 1767073544732,
       "tag": "0005_strong_piledriver",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1767109968611,
+      "tag": "0006_fat_johnny_blaze",
+      "breakpoints": true
     }
   ]
 }

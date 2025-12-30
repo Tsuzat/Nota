@@ -75,7 +75,7 @@ export const notes = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     name: text('name').notNull(),
-    icon: text('icon').default('📝'),
+    icon: text('icon').default('📝').notNull(),
     workspace: uuid('workspace')
       .notNull()
       .references(() => workspaces.id, { onDelete: 'cascade' }),
@@ -85,8 +85,8 @@ export const notes = pgTable(
     owner: uuid('owner')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    favorite: boolean('favorite').default(false),
-    trashed: boolean('trashed').default(false),
+    favorite: boolean('favorite').default(false).notNull(),
+    trashed: boolean('trashed').default(false).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
     isPublic: boolean('is_public').default(false),

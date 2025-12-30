@@ -19,7 +19,7 @@ const createSchema = z.object({
   workspaceId: z.uuid('Workspace ID is required'),
   userworkspaceId: z.uuid('Userworkspace ID is required'),
   icon: z.string().optional(),
-  content: z.record(z.any(), z.any()).optional(), // JSONB content
+  isFavorite: z.boolean().optional(),
 });
 
 // Schema for updating a note (Metadata only)
@@ -28,6 +28,7 @@ const updateSchema = z.object({
   icon: z.string().optional(),
   favorite: z.boolean().optional(),
   trashed: z.boolean().optional(),
+  isPublic: z.boolean().optional(),
 });
 
 // Schema for JSON Patch
@@ -54,7 +55,7 @@ app.get('/:noteId/content', async (c) => {
       return c.json({ error: 'Note not found or unauthorized' }, 404);
     }
 
-    return c.json(note);
+    return c.json(note.content);
   } catch (error) {
     logerror('Error fetching note content:', error);
     return c.json({ error: 'Failed to fetch note content' }, 500);
@@ -130,7 +131,7 @@ app.post('/', zValidator('json', createSchema), async (c) => {
         userworkspace: body.userworkspaceId,
         owner: userId,
         icon: body.icon || '📝',
-        content: body.content || {},
+        favorite: body.isFavorite || false,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -191,6 +192,25 @@ app.patch('/:id', zValidator('json', updateSchema), async (c) => {
   } catch (error) {
     logerror('Error updating note:', error);
     return c.json({ error: 'Failed to update note' }, 500);
+  }
+});
+
+app.post('/:id/duplicate', async (c) => {
+  const userId = c.get('userId');
+  const noteId = c.req.param('id');
+
+  try {
+    const [duplicatedNote] = await DB.execute(sql`
+      INSERT INTO notes (name, icon, workspace, userworkspace, owner, content, favorite, trashed, createdAt, updatedAt)
+      SELECT name || ' (copy)', icon, workspace, userworkspace, owner, content, false, false, NOW(), NOW()
+      FROM notes
+      WHERE id = ${noteId} AND owner = ${userId}
+      RETURNING *
+    `);
+    return c.json(duplicatedNote, 201);
+  } catch (error) {
+    logerror('Error duplicating note:', error);
+    return c.json({ error: 'Failed to duplicate note' }, 500);
   }
 });
 
