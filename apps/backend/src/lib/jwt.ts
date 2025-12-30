@@ -37,8 +37,12 @@ export const verifyRefreshToken = async (token: string) => {
   return (await verify(token, REFRESH_TOKEN_SECRET)) as unknown as JWTPayload;
 };
 
-// Simple parser for expiry strings like "6h", "7d"
-function parseExpiry(expiry: string): number {
+/**
+ * Simple parser for expiry strings like "6h", "7d"
+ * @param expiry - Expiry string like "6h", "7d"
+ * @returns Expiry in seconds
+ */
+export function parseExpiry(expiry: string): number {
   const unit = expiry.slice(-1);
   const value = Number.parseInt(expiry.slice(0, -1), 10);
   switch (unit) {

@@ -1,17 +1,54 @@
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+
 /**
- * Make a request to the given URL with the given options,
- * adding an Authorization header if an access token is found in local storage
+ * Make a request to the given URL with the given options.
+ * Relies on Cookies for authentication in BOTH Web and Desktop (Tauri) environments.
+ * Handles automatic token refresh if a 401 response occurs.
+ *
+ * Note: On Desktop, ensure you call `init()` from this package at the app start
+ * to override the global fetch.
+ *
  * @param url The URL to make the request to
  * @param options The options to pass to the fetch function
- * @param fetchFn The fetch function to use (default: global fetch)
  * @returns The response from the fetch function
- * @throws {Error} If the request fails with a non-200 status code
  */
-export default async (url: string, options: RequestInit) => {
-  const access_token = localStorage.getItem('access_token');
-  options.headers = {
-    ...options.headers,
-    ...(access_token ? { Authorization: `Bearer ${access_token}` } : {}),
+export default async (url: string, options: RequestInit = {}): Promise<Response> => {
+  // 1. Prepare Options
+  const headers = new Headers(options.headers || {});
+
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const currentOptions: RequestInit = {
+    ...options,
+    headers,
+    credentials: 'include', // Required for Web cookies, supported by Tauri plugin-http
   };
-  return await fetch(url, options);
+
+  // 2. Initial Request
+  let response = await fetch(url, currentOptions);
+
+  // 3. Handle 401 (Auto-Refresh)
+  if (response.status === 401) {
+    if (url.includes('/auth/refresh')) {
+      return response;
+    }
+
+    try {
+      const refreshResponse = await fetch(`${PUBLIC_BACKEND_URL}/api/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (refreshResponse.ok) {
+        // Retry Original Request
+        response = await fetch(url, currentOptions);
+      }
+    } catch (e) {
+      console.error('Auto-refresh failed', e);
+    }
+  }
+
+  return response;
 };

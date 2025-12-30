@@ -43,7 +43,7 @@ export const sessions = pgTable('sessions', {
   device: text('device'),
   country: text('country'),
   revoked: boolean('revoked').default(false).notNull(),
-  expiresAt: timestamp('expires_at', { withTimezone: true }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 });
 
 export const userworkspaces = pgTable('userworkspaces', {

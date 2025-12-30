@@ -21,7 +21,7 @@ export const authMiddleware = async (c: Context, next: Next) => {
     const session = await DB.query.sessions.findFirst({
       where: eq(sessions.id, payload.sessionId),
     });
-    if (!session || session.revoked) {
+    if (!session || session.revoked || session.expiresAt < new Date()) {
       return c.json({ error: 'Session not found or revoked' }, 401);
     }
     // Fetch user details for storage/credits
