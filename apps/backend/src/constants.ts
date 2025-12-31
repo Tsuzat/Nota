@@ -62,3 +62,6 @@ export const SENTRY_DSN = checkEnv('SENTRY_DSN');
 
 // Environment
 export const ENV = checkEnv('ENV') as 'development' | 'production';
+
+// Desktop Identifier
+export const DESKTOP_APP_IDENTIFIER = checkEnv('DESKTOP_APP_IDENTIFIER');

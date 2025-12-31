@@ -3,7 +3,7 @@ import { getConnInfo } from 'hono/bun';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 import { rateLimiter } from 'hono-rate-limiter';
-import { CROSS_ORIGIN } from '../constants';
+import { DESKTOP_APP_IDENTIFIER } from '../constants';
 import { loggerMiddleware } from './middlewares/logger';
 import { sanitizationMiddleware } from './middlewares/sanitization';
 import ai from './routes/ai';
@@ -42,7 +42,25 @@ app.use(
 );
 // Security Middlewares
 app.use('*', secureHeaders());
-app.use('*', cors({ origin: CROSS_ORIGIN, credentials: true }));
+app.use(
+  '*',
+  cors({
+    origin: (origin, c) => {
+      const allowedOrigins = ['https://www.nota.ink', 'http://tauri.localhost'];
+      if (!origin) return allowedOrigins[0]; // Fallback if no origin
+      if (allowedOrigins.includes(origin)) return origin;
+
+      // Check for Desktop Token bypass
+      const desktopToken = c.req.header('X-Nota-Desktop-Identifier');
+      if (DESKTOP_APP_IDENTIFIER && desktopToken === DESKTOP_APP_IDENTIFIER) {
+        return origin;
+      }
+
+      return allowedOrigins[0]; // or null to block
+    },
+    credentials: true,
+  })
+);
 app.use('*', sanitizationMiddleware);
 app.use('*', loggerMiddleware);
 
