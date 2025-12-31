@@ -3,7 +3,7 @@ import { getConnInfo } from 'hono/bun';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 import { rateLimiter } from 'hono-rate-limiter';
-import { DESKTOP_APP_IDENTIFIER } from '../constants';
+import { DESKTOP_APP_IDENTIFIER, FRONTEND_URL } from '../constants';
 import { loggerMiddleware } from './middlewares/logger';
 import { sanitizationMiddleware } from './middlewares/sanitization';
 import ai from './routes/ai';
@@ -63,6 +63,10 @@ app.use(
 );
 app.use('*', sanitizationMiddleware);
 app.use('*', loggerMiddleware);
+
+app.get('/', (c) => {
+  return c.redirect(FRONTEND_URL, 301);
+});
 
 app.get('/api/health', (c) => {
   return c.json({ status: 'ok' }, 200);

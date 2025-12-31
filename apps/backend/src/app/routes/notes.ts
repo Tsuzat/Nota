@@ -69,8 +69,10 @@ app.patch('/:noteId/content', zValidator('json', patchSchema), async (c) => {
   const patch = c.req.valid('json');
 
   try {
-    // Call the custom SQL function: apply_note_patch(note_id, patch, user_id)
-    await DB.execute(sql`SELECT apply_note_patch(${noteId}, ${JSON.stringify(patch)}::jsonb, ${userId})`);
+    // Wrap patch in an object to ensure Drizzle treats it as a single JSON parameter
+    // and not a list of values. Then extract it back in SQL.
+    const wrapper = { p: patch };
+    await DB.execute(sql`SELECT apply_note_patch(${noteId}, (${wrapper}::jsonb)->'p', ${userId})`);
 
     return c.json({ success: true });
   } catch (error: any) {
@@ -84,7 +86,6 @@ app.patch('/:noteId/content', zValidator('json', patchSchema), async (c) => {
     if (errorMessage.includes('Note not found')) {
       return c.json({ error: 'Note not found' }, 404);
     }
-
     return c.json({ error: 'Failed to patch note content' }, 500);
   }
 });
