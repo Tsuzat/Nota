@@ -26,10 +26,6 @@ const confirmSchema = z.object({
   key: z.string().min(1),
 });
 
-const deleteSchema = z.object({
-  key: z.string().min(1),
-});
-
 const getFolder = (mime: string): string => {
   if (mime.startsWith('image/')) return 'images';
   if (mime.startsWith('video/')) return 'videos';
@@ -197,7 +193,7 @@ app.get('/list', async (c) => {
 });
 
 // 4. Delete File
-app.delete('/:key', zValidator('json', deleteSchema), async (c) => {
+app.delete('/:key', async (c) => {
   const userId = c.get('userId');
   const key = c.req.param('key');
 
