@@ -5,6 +5,13 @@ import '../app.css';
 
 let { children, data } = $props();
 
+import {
+  setAuthContext,
+  setNotesContext,
+  setStorageContext,
+  setUserWorkspacesContext,
+  setWorkspacesContext,
+} from '@nota/client';
 import { ModeWatcher } from '@nota/ui';
 import { Toaster, toast } from '@nota/ui/shadcn/sonner';
 import { check } from '@tauri-apps/plugin-updater';
@@ -15,6 +22,7 @@ import { setGlobalSignInContext } from '$lib/components/global-signin';
 import GlobalSignin from '$lib/components/global-signin/global-signin.svelte';
 import { GlobalSettings, setGlobalSettings } from '$lib/components/settings';
 import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
+import { NewUserWorkspace, setNewUserWorkspace } from '$lib/components/user-workspace';
 import { setCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte';
 import { useDeepLinkAuth } from '$lib/handleOAuth.svelte';
 import { setLocalNotes } from '$lib/local/notes.svelte';
@@ -22,8 +30,6 @@ import { setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { setTheme } from '$lib/theme';
 import { downloadAndInstall } from '$lib/updater';
-import { setAuthContext, setNotesContext, setStorageContext, setUserWorkspacesContext, setWorkspacesContext } from '@nota/client';
-import { setNewUserWorkspace, NewUserWorkspace } from '$lib/components/user-workspace';
 
 // Local Workspaces and Notes
 const localUserWorkspaces = setLocalUserWorkspaces();
@@ -74,7 +80,7 @@ onMount(async () => {
     error: (error) => {
       console.error(error);
       return 'Failed to authenticate';
-    }
+    },
   });
   check().then((update) => {
     if (update) {

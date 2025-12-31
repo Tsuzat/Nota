@@ -1,12 +1,12 @@
 <script lang="ts">
 import { SimpleToolTip } from '@lib/components/custom';
 import { Button } from '@lib/components/ui/button';
+import { getAuthContext } from '@nota/client';
 import * as Label from '@nota/ui/shadcn/label';
 import * as Switch from '@nota/ui/shadcn/switch';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { getGlobalSettings } from '../constants.svelte';
-import { getAuthContext } from '@nota/client';
 
 const useSettings = getGlobalSettings();
 

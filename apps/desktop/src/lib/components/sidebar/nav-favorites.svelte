@@ -1,4 +1,5 @@
 <script lang="ts">
+import { getNotesContext, type Note } from '@nota/client';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
@@ -14,7 +15,6 @@ import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { timeAgo } from '$lib/utils';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
-import { getNotesContext, type Note } from '@nota/client';
 
 const sidebar = useSidebar();
 let showMore = $state(false);

@@ -1,16 +1,15 @@
 <script lang="ts">
+import { getAuthContext, getUserWorkspacesContext } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Dialog from '@nota/ui/shadcn/dialog';
 import { Input } from '@nota/ui/shadcn/input';
 import { Label } from '@nota/ui/shadcn/label';
-
 import { toast } from '@nota/ui/shadcn/sonner';
 import { Switch } from '@nota/ui/shadcn/switch';
 import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 import { getNewUserWorkspace } from '.';
-import { getAuthContext, getUserWorkspacesContext } from '@nota/client';
 
 let name: string | undefined = $state<string>();
 let icon: string = $state('lucide:User');

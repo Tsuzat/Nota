@@ -1,4 +1,5 @@
 <script lang="ts">
+import { getNotesContext, getUserWorkspacesContext, getWorkspacesContext, type UserWorkspace } from '@nota/client';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
@@ -10,7 +11,6 @@ import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/user
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { getNewUserWorkspace } from '../user-workspace';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
-import { getNotesContext, getUserWorkspacesContext, getWorkspacesContext, type UserWorkspace } from '@nota/client';
 
 const localUserWorkspaces = getLocalUserWorkspaces();
 const localWorkspaces = getLocalWorkspaces();

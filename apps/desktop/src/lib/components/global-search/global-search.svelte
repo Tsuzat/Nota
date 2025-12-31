@@ -1,5 +1,6 @@
 <script lang="ts">
 import { toast } from '@lib/components/ui/sonner';
+import { getNotesContext, getUserWorkspacesContext, getWorkspacesContext, type UserWorkspace } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import * as Command from '@nota/ui/shadcn/command';
@@ -10,7 +11,6 @@ import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/user
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 import { getGlobalSearch } from './constants.svelte';
-import { getNotesContext, getUserWorkspacesContext, getWorkspacesContext, type UserWorkspace } from '@nota/client';
 
 const search = getGlobalSearch();
 const currentUserWorkspace = useCurrentUserWorkspaceContext();

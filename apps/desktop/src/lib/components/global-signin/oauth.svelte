@@ -1,11 +1,11 @@
 <script lang="ts">
 import { toast } from '@lib/components/ui/sonner';
+import { getAuthContext } from '@nota/client';
 import Github from '@nota/ui/icons/customs/github.svelte';
 import Google from '@nota/ui/icons/customs/google.svelte';
 import { Button } from '@nota/ui/shadcn/button';
-import { getGlobalSignInContext } from './constants.svelte';
-import { getAuthContext } from '@nota/client';
 import { invoke } from '@tauri-apps/api/core';
+import { getGlobalSignInContext } from './constants.svelte';
 
 const useGlobalSignIn = getGlobalSignInContext();
 const auth = getAuthContext();

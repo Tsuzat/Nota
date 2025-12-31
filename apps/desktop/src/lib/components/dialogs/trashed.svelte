@@ -1,4 +1,5 @@
 <script lang="ts">
+import { getNotesContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
@@ -6,7 +7,6 @@ import * as Popover from '@nota/ui/shadcn/popover';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
-import { getNotesContext, type Note } from '@nota/client';
 
 interface Props {
   open?: boolean;

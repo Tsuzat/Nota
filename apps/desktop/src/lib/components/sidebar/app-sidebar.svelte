@@ -1,5 +1,4 @@
 <script lang="ts">
-import { ToggleMode } from '@nota/ui/custom/index.js';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { type ComponentProps, onMount } from 'svelte';
 import { APPWINDOW } from '$lib/contants';
@@ -11,8 +10,7 @@ import NavMain from './nav-main.svelte';
 import NavSecondary from './nav-secondary.svelte';
 import NavWorkspacesCloud from './nav-workspaces-cloud.svelte';
 import NavWorkspacesLocal from './nav-workspaces-local.svelte';
-import UserWorkspaceSwitcher from './userworkspace-switcher.svelte';
-  import UserworkspaceSwitcher from './userworkspace-switcher.svelte';
+import UserworkspaceSwitcher from './userworkspace-switcher.svelte';
 
 let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext());

@@ -1,5 +1,7 @@
 <script lang="ts">
+import type { Content } from '@lib/components/edra/types.js';
 import { cn } from '@lib/utils.js';
+import { getNotesContext, getWorkspacesContext, type Note, type Workspace } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
@@ -15,8 +17,6 @@ import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { ISMACOS, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
-import { getNotesContext, getWorkspacesContext, type Note, type Workspace } from '@nota/client';
-import type { Content } from '@lib/components/edra/types.js';
 
 let { data } = $props();
 

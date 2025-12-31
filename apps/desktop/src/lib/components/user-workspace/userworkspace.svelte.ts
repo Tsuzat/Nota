@@ -1,6 +1,6 @@
+import type { UserWorkspace } from '@nota/client';
 import { getContext, setContext } from 'svelte';
 import type { LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
-import type { UserWorkspace } from '@nota/client';
 
 class CurrentUserWorkspace {
   #userworkspace: LocalUserWorkspace | UserWorkspace | null = $state(null);

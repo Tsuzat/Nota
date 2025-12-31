@@ -1,12 +1,12 @@
 <script lang="ts">
 import { ProBadge } from '@lib/components/custom';
 import { toast } from '@lib/components/ui/sonner';
+import { getAuthContext } from '@nota/client';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import OAuth from '$lib/components/global-signin/oauth.svelte';
-import { getAuthContext } from '@nota/client';
 
 const auth = getAuthContext();
 const user = $derived(auth.user);

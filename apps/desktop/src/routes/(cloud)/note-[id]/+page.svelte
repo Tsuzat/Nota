@@ -1,6 +1,8 @@
 <script lang="ts">
+import { type FileType, getFileTypeExtensions, getFileTypeFromExtension } from '@lib/components/edra/utils.js';
 import { Skeleton } from '@lib/components/ui/skeleton/index.js';
 import { cn } from '@lib/utils.js';
+import { getNotesContext, getStorageContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
@@ -10,6 +12,9 @@ import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { Separator } from '@nota/ui/shadcn/separator';
 import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { basename } from '@tauri-apps/api/path';
+import { open } from '@tauri-apps/plugin-dialog';
+import { readFile } from '@tauri-apps/plugin-fs';
 import { compare } from 'fast-json-patch';
 import { onMount } from 'svelte';
 import { beforeNavigate, goto } from '$app/navigation';
@@ -21,11 +26,6 @@ import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
-import { getNotesContext, getStorageContext, type Note } from '@nota/client';
-  import { readFile } from '@tauri-apps/plugin-fs';
-  import { basename } from '@tauri-apps/api/path';
-  import { FileType, getFileTypeExtensions, getFileTypeFromExtension } from '@lib/components/edra/utils.js';
-  import {open} from '@tauri-apps/plugin-dialog'
 
 const { data } = $props();
 
@@ -62,8 +62,8 @@ const onFileSelect = async (path: string) => {
   }
   const file = new File([bytes], name, { type: extension });
   return await cloudStorage.upload(file);
-}
-const onDropOrPaste = async(file: File) => await cloudStorage.upload(file);
+};
+const onDropOrPaste = async (file: File) => await cloudStorage.upload(file);
 const getAssets = async (fileType: FileType) => {
   const files = cloudStorage.files;
   const extensions = new Set(getFileTypeExtensions(fileType));
@@ -76,9 +76,9 @@ const getAssets = async (fileType: FileType) => {
     }
   }
   return assets;
-}
+};
 const getLocalFile = async (fileType: FileType) => {
- const extensions = getFileTypeExtensions(fileType);
+  const extensions = getFileTypeExtensions(fileType);
   const file = await open({
     title: 'Select File',
     multiple: false,
@@ -92,7 +92,7 @@ const getLocalFile = async (fileType: FileType) => {
   });
   if (!file) return null;
   return await onFileSelect(file);
-}
+};
 
 async function saveNoteContent() {
   if (!isDirty || note === undefined || editor === undefined) return;

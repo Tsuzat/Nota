@@ -1,5 +1,6 @@
 <script lang="ts">
 import { toast } from '@lib/components/ui/sonner';
+import { getAuthContext, getNotesContext, type Workspace } from '@nota/client';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { Checkbox } from '@nota/ui/shadcn/checkbox';
@@ -10,7 +11,6 @@ import type { Snippet } from 'svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import type { LocalWorkSpace } from '$lib/local/workspaces.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
-import { getAuthContext, getNotesContext, type Workspace } from '@nota/client';
 
 interface Props {
   open?: boolean;

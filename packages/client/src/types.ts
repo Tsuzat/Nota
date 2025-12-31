@@ -93,6 +93,6 @@ export const NotaFileSchema = z.object({
   key: z.string(),
   size: z.number().int(),
   lastModified: z.coerce.date(),
-  url: z.url()
-})
+  url: z.url(),
+});
 export type NotaFile = z.infer<typeof NotaFileSchema>;

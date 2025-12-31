@@ -1,4 +1,5 @@
 <script lang="ts">
+import { getAuthContext, getNotesContext } from '@nota/client';
 import { icons } from '@nota/ui/icons/index.js';
 import Login from '@nota/ui/icons/moving-icons/login.svelte';
 import Settings from '@nota/ui/icons/moving-icons/settings.svelte';
@@ -15,7 +16,6 @@ import Trashed from '../dialogs/trashed.svelte';
 import { getGlobalSignInContext } from '../global-signin';
 import { getGlobalSettings } from '../settings';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
-import { getAuthContext, getNotesContext } from '@nota/client';
 
 let isTrashHovered = $state(false);
 let isLoginHovered = $state(false);

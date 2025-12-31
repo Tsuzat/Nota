@@ -1,4 +1,5 @@
 <script lang="ts">
+import { getNotesContext, getUserWorkspacesContext, type UserWorkspace } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
@@ -18,7 +19,6 @@ import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import { ISMACOS, ISWINDOWS, timeAgo } from '$lib/utils';
-import { getNotesContext, getUserWorkspacesContext, type UserWorkspace } from '@nota/client';
 
 const sidebar = useSidebar();
 const localUserWorkspaces = getLocalUserWorkspaces();

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { getNotesContext, getWorkspacesContext } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
@@ -12,7 +13,6 @@ import { page } from '$app/state';
 import { getKeyboardShortcut, timeAgo } from '$lib/utils';
 import NewNotes from '../dialogs/new-notes.svelte';
 import NewWorkspace from '../dialogs/new-workspace.svelte';
-import { getNotesContext, getWorkspacesContext } from '@nota/client';
 
 let showMore = $state(false);
 

@@ -1,5 +1,5 @@
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
-import {fetch as tauriFetch} from '@tauri-apps/plugin-http'
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 
 const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
