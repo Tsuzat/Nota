@@ -3,6 +3,16 @@ import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import request from './request';
 import { type Note, NoteSchema } from './types';
 
+interface UpdateNotes {
+  name?: string;
+  icon?: string;
+  favorite?: boolean;
+  trashed?: boolean;
+  isPublic?: boolean;
+  workspaceId?: string;
+  userworkspaceId?: string;
+}
+
 class Notes {
   #notes = $state<Note[]>([]);
 
@@ -89,14 +99,14 @@ class Notes {
    * @param id Note ID
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async update(name: string, icon: string, favorite: boolean, trashed: boolean, isPublic: boolean, noteId: string) {
+  async update(noteId: string, note: Partial<UpdateNotes>) {
     const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${noteId}`;
     const res = await request(url, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, icon, favorite, trashed, isPublic }),
+      body: JSON.stringify(note),
     });
     if (res.ok) {
       const updatedNote = (await res.json()) as Note;

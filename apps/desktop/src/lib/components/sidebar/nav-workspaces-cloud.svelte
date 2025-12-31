@@ -110,12 +110,12 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.workspaces[0]);
 													{/snippet}
 												</DropdownMenu.Trigger>
 												<DropdownMenu.Content>
-													<DropdownMenu.Item onclick={() => cloudNotes.update(note.name, note.icon, !note.favorite, note.trashed, note.isPublic, note.id)}>
+													<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { favorite: !note.favorite })}>
 														{@const favorite = note.favorite}
 														<icons.Star class={cn(favorite && 'fill-yellow-500 text-yellow-500')} />
 														{favorite ? 'Unfavorite' : 'Favorite'}
 													</DropdownMenu.Item>
-													<DropdownMenu.Item onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, note.trashed, !note.isPublic, note.id)}>
+													<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { isPublic: !note.isPublic })}>
 														<icons.Globe />
 														{note.isPublic ? 'Make Private' : 'Make Public'}
 													</DropdownMenu.Item>
@@ -126,7 +126,7 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.workspaces[0]);
 													<DropdownMenu.Separator />
 													<DropdownMenu.Item
 														variant="destructive"
-														onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, true, note.isPublic, note.id)}
+														onclick={() => cloudNotes.update(note.id, { trashed: true })}
 													>
 														<icons.Trash2 />
 														Move to Trash

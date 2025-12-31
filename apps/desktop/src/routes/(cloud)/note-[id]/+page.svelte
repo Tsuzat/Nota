@@ -26,6 +26,7 @@ import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
+import { id } from 'zod/locales';
 
 const { data } = $props();
 
@@ -162,7 +163,10 @@ async function updateNote(name: string, icon: string, favorite: boolean) {
   if (note === undefined) return;
   syncing = true;
   try {
-    await cloudNotes.update(name, icon, favorite, note.trashed, note.isPublic, note.id);
+    await cloudNotes.update(note.id, { name, icon, favorite });
+    note.name = name;
+    note.icon = icon;
+    note.favorite = favorite;
   } catch (e) {
     toast.error('Could not update note');
     console.error(e);

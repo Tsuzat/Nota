@@ -24,7 +24,7 @@ import { GlobalSettings, setGlobalSettings } from '$lib/components/settings';
 import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
 import { NewUserWorkspace, setNewUserWorkspace } from '$lib/components/user-workspace';
 import { setCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte';
-import { useDeepLinkAuth } from '$lib/handleOAuth.svelte';
+import { useDeepLinkAuth } from '$lib/handleOAuth';
 import { setLocalNotes } from '$lib/local/notes.svelte';
 import { setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
@@ -61,19 +61,13 @@ $effect(() => {
   }
 });
 
-useDeepLinkAuth();
+useDeepLinkAuth((access_token, refresh_token) => authContext.exchangeTokenForSession(access_token, refresh_token));
 setGlobalSignInContext();
 setGlobalSearch();
 const useSettings = setGlobalSettings();
 
 onMount(async () => {
   setTheme(useSettings.themeColor);
-  // authContext.signInWithEmailAndPassword('alok@test.com', 'alok@tsuzat1234').then(() => {
-  //   toast.success('Successfully signed in with email and password');
-  // }).catch((error) => {
-  //   console.error(error);
-  //   toast.error('Failed to sign in with email and password');
-  // });
   toast.promise(authContext.init(), {
     loading: 'Checking auth status...',
     success: 'Successfully authenticated',

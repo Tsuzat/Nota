@@ -70,12 +70,11 @@ let open = $state(false);
 			<Dropdown.Separator />
 			<Dropdown.Group>
 				{#if 'owner' in note}
-					<Dropdown.Item onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, note.trashed, !note.isPublic, note.id)}>
+					<Dropdown.Item onclick={() => cloudNotes.update(note.id, { isPublic: !note.isPublic})}>
 						<icons.Globe />
 						{note.isPublic ? 'Make Private' : 'Make Public'}
 					</Dropdown.Item>
 				{/if}
-
 				<Dropdown.Item
 					onclick={() => {
 						if ('owner' in note) cloudNotes.duplicate(note.id);
@@ -122,7 +121,7 @@ let open = $state(false);
 			<Dropdown.Group>
 				<Dropdown.Item
 					onclick={() => {
-						if ('owner' in note) cloudNotes.update(note.name, note.icon, note.favorite, true, note.isPublic, note.id);
+						if ('owner' in note) cloudNotes.update(note.id, { trashed: true });
 						else localNotes.trashNote(note);
 					}}
 				>

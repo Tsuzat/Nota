@@ -17,6 +17,7 @@ import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { ISMACOS, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
+import { ask } from '@tauri-apps/plugin-dialog';
 
 let { data } = $props();
 
@@ -41,14 +42,14 @@ async function updateWorkspace(icon: string, name: string) {
 
 async function moveToWorkspace(note: Note, newWorkspace: Workspace) {
   toast.warning('To be implemented..');
-  //   const ok = await ask(`Move note ${note.name} to workspace ${newWorkspace.name}?`, {
-  //     title: 'Move Note',
-  //     kind: 'info',
-  //     okLabel: 'Yes, Move',
-  //   });
-  //   if (!ok) return;
-  //   note.workspace = newWorkspace.id;
-  //   await cloudNotes.updateNote(note);
+  const ok = await ask(`Move note ${note.name} to workspace ${newWorkspace.name}?`, {
+    title: 'Move Note',
+    kind: 'info',
+    okLabel: 'Yes, Move',
+  });
+  if (!ok) return;
+  note.workspace = newWorkspace.id;
+  await cloudNotes.update(note.id, { workspaceId: newWorkspace.id });
 }
 
 async function exportNote(note: Note) {
@@ -214,7 +215,7 @@ async function importNote() {
 									<DropdownMenu.Separator />
 									<DropdownMenu.Item
 										variant="destructive"
-										onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, true, false, note.id)}
+										onclick={() => cloudNotes.update(note.id, { trashed: true })}
 									>
 										<icons.Trash2 class="mr-2 size-4" />
 										Trash Note

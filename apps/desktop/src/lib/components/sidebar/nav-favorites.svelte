@@ -31,8 +31,7 @@ const notes = $derived.by(() => {
 async function toggleStar(note: LocalNote | Note) {
   try {
     note.favorite = !note.favorite;
-    if ('owner' in note)
-      await cloudNotes.update(note.name, note.icon, !note.favorite, note.trashed, note.isPublic, note.id);
+    if ('owner' in note) await cloudNotes.update(note.id, { favorite: note.favorite });
     else await localNotes.updateNote(note);
   } catch (e) {
     toast.error('Could not update note starred');
@@ -42,7 +41,7 @@ async function toggleStar(note: LocalNote | Note) {
 
 async function trashNote(note: LocalNote | Note) {
   try {
-    if ('owner' in note) await cloudNotes.update(note.name, note.icon, note.favorite, true, note.isPublic, note.id);
+    if ('owner' in note) await cloudNotes.update(note.id, { trashed: true });
     else await localNotes.trashNote(note);
   } catch (e) {
     toast.error('Could not update note trashed');
@@ -99,7 +98,7 @@ async function deleteNote(note: LocalNote | Note) {
 									Unfavorites
 								</DropdownMenu.Item>
 								{#if isCloud}
-									<DropdownMenu.Item onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, note.trashed, !note.isPublic, note.id)}>
+									<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { isPublic: !note.isPublic })}>
 										<icons.Globe />
 										{note.isPublic ? 'Make Private' : 'Make Public'}
 									</DropdownMenu.Item>

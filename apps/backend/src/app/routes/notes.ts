@@ -29,6 +29,8 @@ const updateSchema = z.object({
   favorite: z.boolean().optional(),
   trashed: z.boolean().optional(),
   isPublic: z.boolean().optional(),
+  workspaceId: z.uuid().optional(),
+  userworkspaceId: z.uuid().optional(),
 });
 
 // Schema for JSON Patch

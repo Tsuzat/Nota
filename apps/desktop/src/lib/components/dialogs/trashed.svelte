@@ -34,7 +34,7 @@ async function deleteNote(note: LocalNote | Note) {
 }
 async function restoreNote(note: LocalNote | Note) {
   try {
-    if ('owner' in note) await cloudNotes.update(note.name, note.icon, note.favorite, false, note.isPublic, note.id);
+    if ('owner' in note) await cloudNotes.update(note.id, { trashed: false });
     else await localNotes.restoreNote(note);
   } catch (error) {
     console.error(error);
