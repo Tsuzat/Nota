@@ -1,5 +1,4 @@
 <script lang="ts">
-import type { FileType } from '@lib/components/edra/utils.js';
 import { Skeleton } from '@lib/components/ui/skeleton/index.js';
 import { cn } from '@lib/utils.js';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
@@ -21,11 +20,12 @@ import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte.js';
-import { supabase } from '$lib/supabase/index.js';
-import { getAssetsByFileType, uploadFile, uploadFileByPath, uploadLocalFile } from '$lib/supabase/storage.js';
-import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
+import { getNotesContext, getStorageContext, type Note } from '@nota/client';
+  import { readFile } from '@tauri-apps/plugin-fs';
+  import { basename } from '@tauri-apps/api/path';
+  import { FileType, getFileTypeExtensions, getFileTypeFromExtension } from '@lib/components/edra/utils.js';
+  import {open} from '@tauri-apps/plugin-dialog'
 
 const { data } = $props();
 
@@ -43,31 +43,56 @@ let syncedContent = $state<Content>();
 let isDirty = $state(false);
 
 // cloud related
-const cloudNotes = useCloudNotes();
-const user = $derived(getSessionAndUserContext().getUser());
+const cloudNotes = getNotesContext();
+const cloudStorage = getStorageContext();
 const useGlobalSettings = getGlobalSettings();
 
 // notes related
 let isLoading = $state(false);
-let note = $state<CloudNote>();
+let note = $state<Note>();
 let syncing = $state(false);
 let syncingText = $state('');
 
-const onFileSelect = $derived.by(() => {
-  if (user) return (file: string) => uploadFileByPath(user.id, file);
-});
-
-const onDropOrPaste = $derived.by(() => {
-  if (user) return (file: File) => uploadFile(user.id, file);
-});
-
-const getAssets = $derived.by(() => {
-  if (user) return async (fileType: FileType) => getAssetsByFileType(user.id, fileType);
-});
-
-const getLocalFile = $derived.by(() => {
-  if (user) return async (fileType: FileType) => uploadLocalFile(user.id, fileType);
-});
+const onFileSelect = async (path: string) => {
+  const bytes = await readFile(path);
+  const name = await basename(path);
+  const extension = getFileTypeFromExtension(name);
+  if (extension === null) {
+    throw new Error('Unsupported file is being uploaded. Rejected the Upload.');
+  }
+  const file = new File([bytes], name, { type: extension });
+  return await cloudStorage.upload(file);
+}
+const onDropOrPaste = async(file: File) => await cloudStorage.upload(file);
+const getAssets = async (fileType: FileType) => {
+  const files = cloudStorage.files;
+  const extensions = new Set(getFileTypeExtensions(fileType));
+  const assets: string[] = [];
+  for (const file of files) {
+    const key = file.key;
+    const fileExtension = key.split('.').pop();
+    if (fileExtension !== undefined && extensions.has(fileExtension)) {
+      assets.push(file.url);
+    }
+  }
+  return assets;
+}
+const getLocalFile = async (fileType: FileType) => {
+ const extensions = getFileTypeExtensions(fileType);
+  const file = await open({
+    title: 'Select File',
+    multiple: false,
+    directory: false,
+    filters: [
+      {
+        name: 'Select File',
+        extensions,
+      },
+    ],
+  });
+  if (!file) return null;
+  return await onFileSelect(file);
+}
 
 async function saveNoteContent() {
   if (!isDirty || note === undefined || editor === undefined) return;
@@ -86,18 +111,9 @@ async function saveNoteContent() {
   syncing = true;
   syncingText = `Syncing ${patch.length} changes`;
   try {
-    const { error } = await supabase.rpc('apply_note_patch', {
-      note_id: note.id,
-      patch: patch,
-    });
-
-    if (error) {
-      console.error(error);
-      toast.error(error.message);
-    } else {
-      syncedContent = currentContent;
-      isDirty = false;
-    }
+    await cloudNotes.patch(note.id, patch);
+    syncedContent = currentContent;
+    isDirty = false;
   } catch (error) {
     console.error(error);
     toast.error('Something went wrong when saving content to cloud');
@@ -116,20 +132,15 @@ onMount(() => {
 
 async function loadData(id: string) {
   isLoading = true;
-  note = cloudNotes.getNotes().find((n) => n.id === id);
+  note = cloudNotes.notes.find((n) => n.id === id);
   if (note === undefined) {
     toast.error(`Notes with id ${id} not found`);
     return goto(resolve('/'));
   }
   try {
-    const { data, error } = await supabase.from('notes').select('content').eq('id', id).single();
-    if (error) {
-      console.error(error);
-      toast.error(error.message);
-      goto(resolve('/'));
-    }
+    const data = await cloudNotes.fetchContent(id);
     if (data) {
-      const dbContent = data.content as Content;
+      const dbContent = data as Content;
       content = dbContent;
       syncedContent = dbContent;
       isDirty = false;
@@ -147,42 +158,13 @@ function onUpdate() {
   isDirty = true;
 }
 
-async function updateIcon(icon: string) {
+async function updateNote(name: string, icon: string, favorite: boolean) {
   if (note === undefined) return;
   syncing = true;
   try {
-    note = { ...note, icon };
-    await cloudNotes.updateNote(note);
+    await cloudNotes.update(name, icon, favorite, note.trashed, note.isPublic, note.id);
   } catch (e) {
-    toast.error('Could not update note icon');
-    console.error(e);
-  } finally {
-    syncing = false;
-  }
-}
-
-async function updateName(name: string) {
-  if (note === undefined) return;
-  syncing = true;
-  try {
-    note = { ...note, name };
-    await cloudNotes.updateNote(note);
-  } catch (e) {
-    toast.error('Could not update note name');
-    console.error(e);
-  } finally {
-    syncing = false;
-  }
-}
-
-async function toggleStar() {
-  if (note === undefined) return;
-  syncing = true;
-  try {
-    note = { ...note, favorite: !note.favorite };
-    await cloudNotes.toggleFavorite(note);
-  } catch (e) {
-    toast.error('Could not update note starred');
+    toast.error('Could not update note');
     console.error(e);
   } finally {
     syncing = false;
@@ -273,7 +255,7 @@ function handleKeydown(e: KeyboardEvent) {
         orientation="vertical"
         class="mr-2 data-[orientation=vertical]:h-4"
       />
-      <IconPicker onSelect={updateIcon}>
+      <IconPicker onSelect={(icon) => updateNote(note!.name, icon, note!.favorite)}>
         <div class={buttonVariants({ variant: "ghost", class: "size-7! p-1" })}>
           <IconRenderer icon={note.icon} />
         </div>
@@ -285,7 +267,7 @@ function handleKeydown(e: KeyboardEvent) {
           const target = e.target as HTMLInputElement;
           const value = target.value;
           if (value.trim() === "") return;
-          updateName(target.value);
+          updateNote(value, note!.icon, note!.favorite);
         }}
       />
     </div>
@@ -326,7 +308,7 @@ function handleKeydown(e: KeyboardEvent) {
       </SimpleToolTip>
       <NavActions
         starred={note.favorite as boolean}
-        {toggleStar}
+        toggleStar={() => updateNote(note!.name, note!.icon, !note!.favorite)}
         {editor}
         {note}
       />

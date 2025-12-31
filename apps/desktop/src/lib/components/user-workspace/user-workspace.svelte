@@ -9,9 +9,8 @@ import { Label } from '@nota/ui/shadcn/label';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { Switch } from '@nota/ui/shadcn/switch';
 import { getLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
-import { useCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
-import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 import { getNewUserWorkspace } from '.';
+import { getAuthContext, getUserWorkspacesContext } from '@nota/client';
 
 let name: string | undefined = $state<string>();
 let icon: string = $state('lucide:User');
@@ -19,9 +18,9 @@ let useCloud = $state(false);
 
 let loading = $state(false);
 const localUserWorkspaces = getLocalUserWorkspaces();
-const cloudUserWorkspaces = useCloudUserWorkspaces();
+const cloudUserWorkspaces = getUserWorkspacesContext();
 const useNewLocalUserWorkspace = getNewUserWorkspace();
-const user = $derived(getSessionAndUserContext().getUser());
+const user = $derived(getAuthContext().user);
 
 async function handlesubmit(e: Event) {
   e.preventDefault();
@@ -38,7 +37,7 @@ async function handlesubmit(e: Event) {
         });
         return;
       }
-      await cloudUserWorkspaces.createWorkspace({ name, icon, owner: user.id });
+      await cloudUserWorkspaces.create(icon, name);
     } else await localUserWorkspaces.createUserWorkspace(name, icon);
     useNewLocalUserWorkspace.open = false;
     toast.success('User Workspace created successfully');

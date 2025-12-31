@@ -18,7 +18,6 @@ import {
   SOLVE_PROBLEM_PROMPT,
   SUMMARIZE_PROMPT,
 } from '$lib/ai/commands';
-import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 
 interface Props {
   editor: Editor;
@@ -41,8 +40,6 @@ function shouldShow(props: ShouldShowProps) {
   return false;
 }
 
-const authToken = $derived.by(() => getSessionAndUserContext().getSession()?.access_token);
-
 enum AIState {
   Idle = 'Idle',
   Thinking = 'Thinking',
@@ -64,10 +61,6 @@ async function processText(type: 'shorter' | 'longer' | 'summarize' | 'grammer' 
   const selectedText = getSelectionText();
   if (!selectedText || selectedText.trim().length === 0) {
     toast.error('Can not get the selected content from editor', { id });
-    return;
-  }
-  if (!authToken) {
-    toast.error('Can not get the auth token. Please login in and try again', { id });
     return;
   }
   try {
@@ -95,7 +88,6 @@ async function processText(type: 'shorter' | 'longer' | 'summarize' | 'grammer' 
     aiState = AIState.Confirmation;
     await callAI(
       prompt,
-      authToken,
       (chunk) => {
         aiResponse += chunk;
       },
@@ -128,10 +120,6 @@ const continueWriting = () => processText('continue');
 const solveProblem = () => processText('solve');
 
 async function handleSubmit() {
-  if (!authToken) {
-    toast.error('Can not get the auth token. Please login in and try again');
-    return;
-  }
   if (!inputValue || inputValue.trim().length === 0) return;
   const text = getSelectionText();
   if (!text) return;
@@ -140,7 +128,6 @@ async function handleSubmit() {
     const prompt = `${text}\n\n\n${inputValue}`;
     await callAI(
       prompt,
-      authToken,
       (chunk) => {
         aiResponse += chunk;
       },

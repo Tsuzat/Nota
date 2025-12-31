@@ -8,21 +8,21 @@ import { cn } from '@nota/ui/utils';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { exportContent, importNotes } from '$lib/utils';
 import { getGlobalSettings } from '../settings';
+import { getNotesContext, type Note } from '@nota/client';
 
 interface Props {
   starred?: boolean;
   toggleStar?: () => void;
-  note: LocalNote | CloudNote;
+  note: LocalNote | Note;
   editor?: Editor;
 }
 
 let { starred, toggleStar, note, editor }: Props = $props();
 
 const localNotes = getLocalNotes();
-const cloudNotes = useCloudNotes();
+const cloudNotes = getNotesContext();
 const globalSettings = getGlobalSettings();
 const workspace = $derived(
   getLocalWorkspaces()
@@ -70,7 +70,7 @@ let open = $state(false);
 			<Dropdown.Separator />
 			<Dropdown.Group>
 				{#if 'owner' in note}
-					<Dropdown.Item onclick={() => cloudNotes.togglePublic(note)}>
+					<Dropdown.Item onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, note.trashed, !note.isPublic, note.id)}>
 						<icons.Globe />
 						{note.isPublic ? 'Make Private' : 'Make Public'}
 					</Dropdown.Item>
@@ -78,7 +78,7 @@ let open = $state(false);
 
 				<Dropdown.Item
 					onclick={() => {
-						if ('owner' in note) cloudNotes.duplicate(note);
+						if ('owner' in note) cloudNotes.duplicate(note.id);
 						else if (workspace) localNotes.duplicateNote(workspace, note);
 					}}
 				>
@@ -122,7 +122,7 @@ let open = $state(false);
 			<Dropdown.Group>
 				<Dropdown.Item
 					onclick={() => {
-						if ('owner' in note) cloudNotes.moveToTrash(note);
+						if ('owner' in note) cloudNotes.update(note.name, note.icon, note.favorite, true, note.isPublic, note.id);
 						else localNotes.trashNote(note);
 					}}
 				>
@@ -141,7 +141,7 @@ let open = $state(false);
 							}
 						);
 						if (!shouldDelete) return;
-						if ('owner' in note) cloudNotes.deleteNote(note);
+						if ('owner' in note) cloudNotes.delete(note.id);
 						else localNotes.deleteNote(note);
 						window.location.replace('/');
 					}}

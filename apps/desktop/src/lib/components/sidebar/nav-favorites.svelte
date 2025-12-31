@@ -12,26 +12,27 @@ import { resolve } from '$app/paths';
 import { page } from '$app/state';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { timeAgo } from '$lib/utils';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+import { getNotesContext, type Note } from '@nota/client';
 
 const sidebar = useSidebar();
 let showMore = $state(false);
 const localNotes = getLocalNotes();
-const cloudNotes = useCloudNotes();
+const cloudNotes = getNotesContext();
 const currentUserWorkspace = useCurrentUserWorkspaceContext();
 const notes = $derived.by(() => {
-  let notes: LocalNote[] | CloudNote[] = [];
+  let notes: LocalNote[] | Note[] = [];
   if (currentUserWorkspace.getIsLocal()) notes = localNotes.getNotes();
-  else notes = cloudNotes.getNotes();
+  else notes = cloudNotes.notes;
   return notes.filter((n) => n.favorite && !n.trashed);
 });
 
-async function toggleStar(note: LocalNote | CloudNote) {
+async function toggleStar(note: LocalNote | Note) {
   try {
     note.favorite = !note.favorite;
-    if ('owner' in note) await cloudNotes.updateNote(note);
+    if ('owner' in note)
+      await cloudNotes.update(note.name, note.icon, !note.favorite, note.trashed, note.isPublic, note.id);
     else await localNotes.updateNote(note);
   } catch (e) {
     toast.error('Could not update note starred');
@@ -39,18 +40,18 @@ async function toggleStar(note: LocalNote | CloudNote) {
   }
 }
 
-async function trashNote(note: LocalNote | CloudNote) {
+async function trashNote(note: LocalNote | Note) {
   try {
-    if ('owner' in note) await cloudNotes.moveToTrash(note);
+    if ('owner' in note) await cloudNotes.update(note.name, note.icon, note.favorite, true, note.isPublic, note.id);
     else await localNotes.trashNote(note);
   } catch (e) {
-    toast.error('Could not update note starred');
+    toast.error('Could not update note trashed');
     console.error(e);
   }
 }
-async function deleteNote(note: LocalNote | CloudNote) {
+async function deleteNote(note: LocalNote | Note) {
   try {
-    if ('owner' in note) await cloudNotes.deleteNote(note);
+    if ('owner' in note) await cloudNotes.delete(note.id);
     else await localNotes.deleteNote(note);
   } catch (e) {
     toast.error('Could not delete note');
@@ -70,7 +71,6 @@ async function deleteNote(note: LocalNote | CloudNote) {
 					: resolve('/(local)/local-note-[id]', { id: note.id })}
 				{@const isActive = page.url.pathname.endsWith(href)}
 				<div transition:slide={{ easing: linear, duration: 200 }}>
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<Sidebar.MenuItem onclick={() => goto(href)}>
 						<Sidebar.MenuButton {isActive}>
 							{#snippet child({ props })}
@@ -99,7 +99,7 @@ async function deleteNote(note: LocalNote | CloudNote) {
 									Unfavorites
 								</DropdownMenu.Item>
 								{#if isCloud}
-									<DropdownMenu.Item onclick={() => cloudNotes.togglePublic(note)}>
+									<DropdownMenu.Item onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, note.trashed, !note.isPublic, note.id)}>
 										<icons.Globe />
 										{note.isPublic ? 'Make Private' : 'Make Public'}
 									</DropdownMenu.Item>
@@ -136,7 +136,7 @@ async function deleteNote(note: LocalNote | CloudNote) {
 								<DropdownMenu.Separator />
 								<DropdownMenu.Label class="text-muted-foreground text-sm">
 									Last Edited:
-									{timeAgo(note.updated_at)}
+									{'owner' in note ? timeAgo(note.updatedAt.toISOString()) : timeAgo(note.updated_at)}
 								</DropdownMenu.Label>
 							</DropdownMenu.Content>
 						</DropdownMenu.Root>

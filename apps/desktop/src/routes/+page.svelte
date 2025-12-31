@@ -17,33 +17,32 @@ import { getNewUserWorkspace, useCurrentUserWorkspaceContext } from '$lib/compon
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
-import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { type CloudUserWorkspace, useCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
 import { ISMACOS, ISWINDOWS, timeAgo } from '$lib/utils';
+import { getNotesContext, getUserWorkspacesContext, type UserWorkspace } from '@nota/client';
 
 const sidebar = useSidebar();
 const localUserWorkspaces = getLocalUserWorkspaces();
-const cloudUserWorkspaces = useCloudUserWorkspaces();
+const cloudUserWorkspaces = getUserWorkspacesContext();
 const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
 const localNotes = $derived(getLocalNotes().getNotes());
-const cloudNotes = $derived(useCloudNotes().getNotes());
+const cloudNotes = $derived(getNotesContext().notes);
 
 const useNewUserWorkspace = getNewUserWorkspace();
-const userWorkspaces: (LocalUserWorkspace | CloudUserWorkspace)[] = $derived.by(() => {
-  return [...localUserWorkspaces.getUserWorkspaces(), ...cloudUserWorkspaces.getWorkspaces()];
+const userWorkspaces: (LocalUserWorkspace | UserWorkspace)[] = $derived.by(() => {
+  return [...localUserWorkspaces.getUserWorkspaces(), ...cloudUserWorkspaces.userWorkspaces];
 });
 
 const recentNotes = $derived.by(() => {
   if (currentUserWorkspace === null) return [];
   if ('owner' in currentUserWorkspace) {
     return cloudNotes
-      .toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      .toSorted((a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime())
       .slice(0, 5);
   }
   return localNotes.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 5);
 });
 
-async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) {
+async function handleDelete(workspace: LocalUserWorkspace | UserWorkspace) {
   if (currentUserWorkspace?.id === workspace.id) {
     return;
   }
@@ -55,7 +54,7 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
   if (!shouldDelete) {
     return;
   }
-  if ('owner' in workspace) await cloudUserWorkspaces.deleteWorkspace(workspace.id);
+  if ('owner' in workspace) await cloudUserWorkspaces.delete(workspace.id);
   else {
     if (localUserWorkspaces.getUserWorkspaces().length === 1) {
       toast.error('Can not delete last local user workspace', {
@@ -162,7 +161,7 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
 									<div
 										class="bg-secondary/50 flex size-8 shrink-0 items-center justify-center rounded-md"
 									>
-										<IconRenderer icon={recent.icon} class="size-4" />
+										<IconRenderer icon={recent.icon ?? "lucide:File"} class="size-4" />
 									</div>
 									<Card.Title class="line-clamp-1 text-base font-medium">
 										{recent.name}
@@ -175,7 +174,7 @@ async function handleDelete(workspace: LocalUserWorkspace | CloudUserWorkspace) 
 								<div class="text-muted-foreground flex items-center justify-between text-xs">
 									<div class="flex items-center gap-1">
 										<icons.Clock class="size-3" />
-										{timeAgo(recent.updated_at)}
+										{"owner" in recent ? timeAgo(recent.updatedAt?.toString() ?? ""): timeAgo(recent.updated_at)}
 									</div>
 								</div>
 							</div>

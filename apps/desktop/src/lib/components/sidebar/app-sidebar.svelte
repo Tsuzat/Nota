@@ -11,7 +11,8 @@ import NavMain from './nav-main.svelte';
 import NavSecondary from './nav-secondary.svelte';
 import NavWorkspacesCloud from './nav-workspaces-cloud.svelte';
 import NavWorkspacesLocal from './nav-workspaces-local.svelte';
-import TeamSwitcher from './userworkspace-switcher.svelte';
+import UserWorkspaceSwitcher from './userworkspace-switcher.svelte';
+  import UserworkspaceSwitcher from './userworkspace-switcher.svelte';
 
 let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext());
@@ -26,17 +27,16 @@ onMount(async () => {
 });
 </script>
 
-<Sidebar.Root bind:ref class="border-r-0" {...restProps}>
+<Sidebar.Root bind:ref variant="floating" class="p-1.75 z-5!" {...restProps}>
 	<Sidebar.Header>
-			<div data-tauri-drag-region class="flex h-10 items-center justify-between">
+			<div class="flex items-center justify-between">
 				{#if ISMACOS  && !IS_MAXIMUM}
 					<div></div>
 				{:else}
 					<AppLogoMenu />
 				{/if}
-				<ToggleMode />
 			</div>
-		<TeamSwitcher />
+		<UserworkspaceSwitcher />
 		<NavMain />
 	</Sidebar.Header>
 	<Sidebar.Content>

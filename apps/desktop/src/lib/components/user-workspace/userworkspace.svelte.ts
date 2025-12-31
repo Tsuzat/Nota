@@ -1,12 +1,12 @@
 import { getContext, setContext } from 'svelte';
 import type { LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
-import type { CloudUserWorkspace } from '$lib/supabase/db/clouduserworkspaces.svelte';
+import type { UserWorkspace } from '@nota/client';
 
 class CurrentUserWorkspace {
-  #userworkspace: LocalUserWorkspace | CloudUserWorkspace | null = $state(null);
+  #userworkspace: LocalUserWorkspace | UserWorkspace | null = $state(null);
   #isLocal: boolean = $state(true);
 
-  setCurrentUserWorkspace(userworkspace: LocalUserWorkspace | CloudUserWorkspace | null) {
+  setCurrentUserWorkspace(userworkspace: LocalUserWorkspace | UserWorkspace | null) {
     this.#userworkspace = userworkspace;
     this.#isLocal = userworkspace === null ? true : !('owner' in userworkspace);
   }

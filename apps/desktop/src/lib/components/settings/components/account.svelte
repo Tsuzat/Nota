@@ -6,22 +6,17 @@ import { Button } from '@nota/ui/shadcn/button';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import OAuth from '$lib/components/global-signin/oauth.svelte';
-import { auth } from '$lib/supabase';
-import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
+import { getAuthContext } from '@nota/client';
 
-const useSessionAndUser = getSessionAndUserContext();
-
-const user = $derived(useSessionAndUser.getUser());
-const session = $derived(useSessionAndUser.getSession());
-const profile = $derived(useSessionAndUser.getProfile());
+const auth = getAuthContext();
+const user = $derived(auth.user);
 
 async function handleSignout() {
-  const { error } = await auth.signOut();
-  if (error) {
-    toast.error(error.message);
-  } else {
-    toast.success('Signed out successfully');
-  }
+  toast.promise(auth.logout(), {
+    loading: 'Signing out...',
+    success: 'Signed out successfully',
+    error: (error) => (error as Error).message,
+  });
 }
 
 async function handleDeleteUser() {
@@ -39,26 +34,23 @@ async function handleDeleteUser() {
 	{#if user}
 		<div class="flex items-center space-x-4">
 			<Avatar.Root class="h-16 w-16">
-				<Avatar.Image src={user.user_metadata.avatar_url} alt={user.user_metadata.full_name} />
+				<Avatar.Image src={user.avatarUrl} alt={user.name ?? 'Unknown'} />
 				<Avatar.Fallback>
-					{user.user_metadata.full_name?.charAt(0) ?? user.email?.charAt(0)}
+					{user.name?.charAt(0) ?? user.email.charAt(0)}
 				</Avatar.Fallback>
 			</Avatar.Root>
 			<div class="space-y-1">
 				<div class="text-lg font-semibold">
-					{user.user_metadata.full_name ?? 'No name'}
+					{user.name ?? 'No name'}
 				</div>
-				<div class="text-muted-foreground text-sm">{user.email}</div>
+				<div class="text-muted-foreground text-sm">{user.email}</div>	
 				<div class="text-muted-foreground text-xs">
-					Provider: {session?.provider_token ? 'oauth' : 'email'}
-				</div>
-				<div class="text-muted-foreground text-xs">
-					Subscription Tier: {profile?.subscription_tier}
+					Subscription Tier: {user.subscriptionType}
 				</div>
 			</div>
 		</div>
 		<div class="mt-6 flex space-x-2">
-			{#if profile?.subscription_tier === "free"}
+			{#if user.subscriptionPlan === 'free'}
 			<Button variant="outline" onclick={() => {
 				openUrl(`${PUBLIC_NOTA_FRONTEND_URL}#pricing`)
 			}}>

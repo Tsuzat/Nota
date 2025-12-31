@@ -5,8 +5,8 @@ import { Button } from '@nota/ui/shadcn/button';
 import * as Popover from '@nota/ui/shadcn/popover';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+import { getNotesContext, type Note } from '@nota/client';
 
 interface Props {
   open?: boolean;
@@ -17,24 +17,24 @@ let { open = $bindable(false) }: Props = $props();
 const currentUserWorkspace = useCurrentUserWorkspaceContext();
 
 const localNotes = getLocalNotes();
-const cloudNotes = useCloudNotes();
-const trashedNotes = $derived.by<LocalNote[] | CloudNote[]>(() => {
+const cloudNotes = getNotesContext();
+const trashedNotes = $derived.by<LocalNote[] | Note[]>(() => {
   if (currentUserWorkspace.getIsLocal()) return localNotes.getNotes().filter((n) => n.trashed);
-  return cloudNotes.getTrashedNotes();
+  return cloudNotes.notes.filter((n) => n.trashed);
 });
 
-async function deleteNote(note: LocalNote | CloudNote) {
+async function deleteNote(note: LocalNote | Note) {
   try {
-    if ('owner' in note) await cloudNotes.deleteNote(note);
+    if ('owner' in note) await cloudNotes.delete(note.id);
     else await localNotes.deleteNote(note);
   } catch (error) {
     console.error(error);
     toast.error(`Something went wrong while deleting ${note.name}`);
   }
 }
-async function restoreNote(note: LocalNote | CloudNote) {
+async function restoreNote(note: LocalNote | Note) {
   try {
-    if ('owner' in note) await cloudNotes.restoreFromTrash(note.id);
+    if ('owner' in note) await cloudNotes.update(note.name, note.icon, note.favorite, false, note.isPublic, note.id);
     else await localNotes.restoreNote(note);
   } catch (error) {
     console.error(error);

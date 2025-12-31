@@ -5,21 +5,21 @@ import * as Label from '@nota/ui/shadcn/label';
 import * as Switch from '@nota/ui/shadcn/switch';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 import { getGlobalSettings } from '../constants.svelte';
+import { getAuthContext } from '@nota/client';
 
 const useSettings = getGlobalSettings();
 
-const profile = $derived(getSessionAndUserContext().getProfile());
+const user = $derived(getAuthContext().user);
 
 function getAICredits() {
-  if (!profile) return '0 Credits';
-  if (!profile.ai_credits) return '0 Credits';
-  return profile.ai_credits >= 1000000
-    ? `${(profile.ai_credits / 1000000).toFixed(1)}M`
-    : profile.ai_credits >= 1000
-      ? `${(profile.ai_credits / 1000).toFixed(1)}K`
-      : `${profile.ai_credits}`;
+  if (!user) return '0 Credits';
+  if (!user.aiCredits) return '0 Credits';
+  return user.aiCredits >= 1000000
+    ? `${(user.aiCredits / 1000000).toFixed(1)}M`
+    : user.aiCredits >= 1000
+      ? `${(user.aiCredits / 1000).toFixed(1)}K`
+      : `${user.aiCredits}`;
 }
 </script>
 
@@ -43,7 +43,7 @@ function getAICredits() {
 					Your AI credits are used to power the AI features. They never expire. Regardles of the subscription tier.
 				</p>	
 			</div>
-			<SimpleToolTip content={`${profile?.ai_credits || 0} AI Credits Available`}>
+			<SimpleToolTip content={`${user?.aiCredits || 0} AI Credits Available`}>
 				<span class="text-sm text-muted-foreground">{getAICredits()}</span>
 			</SimpleToolTip>
 		</div>

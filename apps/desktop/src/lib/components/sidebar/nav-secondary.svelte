@@ -10,14 +10,12 @@ import { toast } from '@nota/ui/shadcn/sonner';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { getLocalNotes } from '$lib/local/notes.svelte';
-import { auth } from '$lib/supabase';
-import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 import { getKeyboardShortcut } from '$lib/utils';
 import Trashed from '../dialogs/trashed.svelte';
 import { getGlobalSignInContext } from '../global-signin';
 import { getGlobalSettings } from '../settings';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+import { getAuthContext, getNotesContext } from '@nota/client';
 
 let isTrashHovered = $state(false);
 let isLoginHovered = $state(false);
@@ -30,16 +28,15 @@ const trashedNotes = $derived.by(() => {
       .getNotes()
       .filter((n) => n.trashed).length;
 
-  return useCloudNotes()
-    .getNotes()
-    .filter((n) => n.trashed).length;
+  return getNotesContext().notes.filter((n) => n.trashed).length;
 });
 
 let open = $state(false);
 const sidebar = Sidebar.useSidebar();
 
+const auth = getAuthContext();
 const globalSignInContext = getGlobalSignInContext();
-const user = $derived(getSessionAndUserContext().getUser());
+const user = $derived(auth.user);
 const useSettings = getGlobalSettings();
 
 function getUserIntials(name?: string) {
@@ -85,7 +82,7 @@ function getUserIntials(name?: string) {
 				</Sidebar.MenuBadge>
 				<Trashed bind:open />
 			</Sidebar.MenuItem>
-			{#if user === null}
+			{#if !user}
 				<Sidebar.MenuItem>
 					<Sidebar.MenuButton
 						onclick={() => (globalSignInContext.open = true)}
@@ -97,7 +94,7 @@ function getUserIntials(name?: string) {
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>
 			{/if}
-			{#if user !== null}
+			{#if user}
 				<Sidebar.MenuItem>
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>
@@ -108,14 +105,14 @@ function getUserIntials(name?: string) {
 									class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 								>
 									<Avatar.Root class="size-8 rounded-lg">
-										<Avatar.Image src={user?.user_metadata['avatar_url']} alt="User" />
+										<Avatar.Image src={user.avatarUrl} alt="User" />
 										<Avatar.Fallback class="rounded-lg"
-											>{getUserIntials(user.user_metadata['full_name'])}</Avatar.Fallback
+											>{getUserIntials(user.name || "Unknown")}</Avatar.Fallback
 										>
 									</Avatar.Root>
 									<div class="grid flex-1 text-left text-sm leading-tight">
 										<span class="truncate font-medium"
-											>{user.user_metadata['full_name'] ?? 'Unknown'}</span
+											>{user.name ?? 'Unknown'}</span
 										>
 										<span class="text-muted-foreground truncate text-xs">
 											{user.email}
@@ -134,14 +131,14 @@ function getUserIntials(name?: string) {
 							<DropdownMenu.Label class="p-0 font-normal">
 								<div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 									<Avatar.Root class="size-8 rounded-lg">
-										<Avatar.Image src={user.user_metadata['avatar_url']} alt="User" />
+										<Avatar.Image src={user.avatarUrl} alt="User" />
 										<Avatar.Fallback class="rounded-lg"
-											>{getUserIntials(user.user_metadata['full_name'])}</Avatar.Fallback
+											>{getUserIntials(user.name || "Unknown")}</Avatar.Fallback
 										>
 									</Avatar.Root>
 									<div class="grid flex-1 text-left text-sm leading-tight">
 										<span class="truncate font-medium"
-											>{user.user_metadata['full_name'] ?? 'Unknown'}</span
+											>{user.name ?? 'Unknown'}</span
 										>
 										<span class="text-muted-foreground truncate text-xs">
 											{user.email}
@@ -171,7 +168,7 @@ function getUserIntials(name?: string) {
 							<DropdownMenu.Separator />
 							<DropdownMenu.Item
 								onclick={() =>
-									toast.promise(auth.signOut(), {
+									toast.promise(auth.logout(), {
 										loading: 'Signing you out...',
 										success: 'Signed Out Successfully',
 										error: (err) => {

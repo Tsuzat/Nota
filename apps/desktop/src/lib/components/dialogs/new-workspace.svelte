@@ -6,9 +6,8 @@ import * as Dialog from '@nota/ui/shadcn/dialog';
 import { Input } from '@nota/ui/shadcn/input';
 import type { Snippet } from 'svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
-import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+import { getAuthContext, getWorkspacesContext } from '@nota/client';
 
 interface Props {
   open?: boolean;
@@ -24,9 +23,9 @@ let icon: string = $state('emoji:📂');
 let loading = $state(false);
 
 const localWorspaces = getLocalWorkspaces();
-const cloudWorkspaces = useCloudWorkspaces();
+const cloudWorkspaces = getWorkspacesContext();
 const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
-const user = $derived(getSessionAndUserContext().getUser());
+const user = $derived(getAuthContext().user);
 
 $effect(() => {
   if (useCurrentUserWorkspaceContext().getIsLocal()) type = 'local';
@@ -76,12 +75,7 @@ async function createCloudWorkspace() {
   }
   try {
     loading = true;
-    await cloudWorkspaces.createWorkspace({
-      name,
-      icon,
-      owner: user.id,
-      userworkspace: currentUserWorkspace.id,
-    });
+    await cloudWorkspaces.create(icon, name, currentUserWorkspace.id);
     open = false;
   } catch (error) {
     console.error(error);

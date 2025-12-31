@@ -9,14 +9,12 @@ import { Label } from '@nota/ui/shadcn/label';
 import type { Snippet } from 'svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import type { LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import type { CloudWorkspace } from '$lib/supabase/db/cloudworkspace.svelte';
-import { getSessionAndUserContext } from '$lib/supabase/user.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
+import { getAuthContext, getNotesContext, type Workspace } from '@nota/client';
 
 interface Props {
   open?: boolean;
-  workspace: LocalWorkSpace | CloudWorkspace;
+  workspace: LocalWorkSpace | Workspace;
   children?: Snippet<[]>;
 }
 
@@ -30,8 +28,8 @@ let loading = $state(false);
 
 const localNotes = getLocalNotes();
 const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
-const cloudNotes = useCloudNotes();
-const user = $derived(getSessionAndUserContext().getUser());
+const cloudNotes = getNotesContext();
+const user = $derived(getAuthContext().user);
 
 async function handleSubmit(e: Event) {
   e.preventDefault();
@@ -48,20 +46,12 @@ async function handleSubmit(e: Event) {
     if (!('owner' in workspace) && !('owner' in currentUserWorkspace))
       await localNotes.createNote(name, icon, isFavorite, workspace, currentUserWorkspace.id);
     else {
-      if (user === null) {
+      if (!user) {
         toast.error('User is not logged in. Please login to create cloud notes');
         return;
       }
-      await cloudNotes.createNote({
-        name,
-        icon,
-        favorite: isFavorite,
-        workspace: String(workspace.id),
-        userworkspace: String(currentUserWorkspace.id),
-        owner: user.id,
-      });
+      await cloudNotes.create(name, icon, workspace.id, currentUserWorkspace.id, isFavorite);
     }
-
     open = false;
   } catch (e) {
     loading = false;

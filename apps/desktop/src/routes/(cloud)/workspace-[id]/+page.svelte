@@ -8,67 +8,54 @@ import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import { Separator } from '@nota/ui/shadcn/separator';
 import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
 import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { type CloudWorkspace, useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
-import { supabase } from '$lib/supabase/index.js';
-import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import { ISMACOS, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
+import { getNotesContext, getWorkspacesContext, type Note, type Workspace } from '@nota/client';
+import type { Content } from '@lib/components/edra/types.js';
 
 let { data } = $props();
 
-const cloudWorkspaces = useCloudWorkspaces();
-const cloudNotes = useCloudNotes();
+const cloudWorkspaces = getWorkspacesContext();
+const cloudNotes = getNotesContext();
 
 // Derived state
-const workspace = $derived(cloudWorkspaces.getWorkspaces().find((w) => w.id === data.id));
-const notes = $derived(cloudNotes.getNotes().filter((n) => n.workspace === data.id && !n.trashed));
+const workspace = $derived(cloudWorkspaces.workspaces.find((w) => w.id === data.id));
+const notes = $derived(cloudNotes.notes.filter((n) => n.workspace === data.id && !n.trashed));
 let openNewNote = $state(false);
 
-function openNote(note: CloudNote) {
+function openNote(note: Note) {
   goto(resolve('/(cloud)/note-[id]', { id: note.id }));
 }
 
-async function updateIcon(icon: string) {
+async function updateWorkspace(icon: string, name: string) {
   if (!workspace) return;
   workspace.icon = icon;
-  await cloudWorkspaces.updateWorkspace(workspace);
-}
-
-async function updateName(name: string) {
-  if (!workspace) return;
   workspace.name = name;
-  await cloudWorkspaces.updateWorkspace(workspace);
+  await cloudWorkspaces.update(icon, name, workspace.id);
 }
 
-async function moveToWorkspace(note: CloudNote, newWorkspace: CloudWorkspace) {
-  const ok = await ask(`Move note ${note.name} to workspace ${newWorkspace.name}?`, {
-    title: 'Move Note',
-    kind: 'info',
-    okLabel: 'Yes, Move',
-  });
-  if (!ok) return;
-  note.workspace = newWorkspace.id;
-  await cloudNotes.updateNote(note);
+async function moveToWorkspace(note: Note, newWorkspace: Workspace) {
+  toast.warning('To be implemented..');
+  //   const ok = await ask(`Move note ${note.name} to workspace ${newWorkspace.name}?`, {
+  //     title: 'Move Note',
+  //     kind: 'info',
+  //     okLabel: 'Yes, Move',
+  //   });
+  //   if (!ok) return;
+  //   note.workspace = newWorkspace.id;
+  //   await cloudNotes.updateNote(note);
 }
 
-async function exportNote(note: CloudNote) {
+async function exportNote(note: Note) {
+  toast.warning('To be implemented..');
   const id = toast.loading(`Exporting ${note.name}`);
   try {
-    const { data, error } = await supabase.from('notes').select('content').eq('id', note.id).single();
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    if (!data) {
-      toast.error('Note not found');
-      return;
-    }
+    const content: Content = await cloudNotes.fetchContent(note.id);
     await writeStringToFile(JSON.stringify(data), `${note.name}.json`);
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Unknown error');
@@ -78,25 +65,19 @@ async function exportNote(note: CloudNote) {
 }
 
 async function importNote() {
-  const id = toast.loading('Importing note...');
-  const data = await importNotes(undefined, true);
-  if (!data) {
-    toast.error('Something went wrong. We could not import the note.', { id });
-    return;
-  }
-  if (!workspace) {
-    toast.error('Workspace not found.', { id });
-    return;
-  }
-  toast.info('Pushing note to cloud...', { id });
-  await cloudNotes.createNote({
-    name: data.name,
-    workspace: workspace.id,
-    userworkspace: workspace.userworkspace,
-    owner: workspace.owner,
-    icon: 'lucide:FileText',
-    content: data.content,
-  });
+  toast.warning('To be implemented..');
+  //   const id = toast.loading('Importing note...');
+  //   const data = await importNotes(undefined, true);
+  //   if (!data) {
+  //     toast.error('Something went wrong. We could not import the note.', { id });
+  //     return;
+  //   }
+  //   if (!workspace) {
+  //     toast.error('Workspace not found.', { id });
+  //     return;
+  //   }
+  //   toast.info('Pushing note to cloud...', { id });
+  //   await cloudNotes.create();
 }
 </script>
 
@@ -126,7 +107,7 @@ async function importNote() {
 	</header>
 	<main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
 		<div class="mb-4 flex items-center gap-2">
-			<IconPicker onSelect={updateIcon}>
+			<IconPicker onSelect={(icon) => updateWorkspace(icon, workspace.name)}>
 				<div
 					class={buttonVariants({
 						variant: 'ghost',
@@ -144,20 +125,20 @@ async function importNote() {
 						const target = e.target as HTMLInputElement;
 						const value = target.value;
 						if (value.trim() === '') return;
-						updateName(target.value);
+						updateWorkspace(workspace.icon, value);
 					}}
 				/>
 				<div class="text-muted-foreground flex items-center gap-4">
 					<SimpleToolTip content="Created At">
 						<Button variant="ghost" size="sm">
 							<icons.CalendarDays />
-							{timeAgo(workspace.created_at)}
+							{timeAgo(workspace.createdAt.toISOString())}
 						</Button>
 					</SimpleToolTip>
 					<SimpleToolTip content="Last Updated At">
 						<Button variant="ghost" size="sm">
 							<icons.Clock />
-							{timeAgo(workspace.updated_at)}
+							{timeAgo(workspace.updatedAt.toISOString())}	
 						</Button>
 					</SimpleToolTip>
 				</div>
@@ -217,11 +198,11 @@ async function importNote() {
 										Export Notes
 									</DropdownMenu.Item>
 									<DropdownMenu.Sub>
-										<DropdownMenu.SubTrigger disabled={cloudWorkspaces.getWorkspaces().length === 1}
+										<DropdownMenu.SubTrigger disabled={cloudWorkspaces.workspaces.length === 1}
 											>Move to...</DropdownMenu.SubTrigger
 										>
 										<DropdownMenu.SubContent>
-											{#each cloudWorkspaces.getWorkspaces() as workspace (workspace.id)}
+											{#each cloudWorkspaces.workspaces as workspace (workspace.id)}
 												{#if workspace.id !== data.id}
 													<DropdownMenu.Item onclick={() => moveToWorkspace(note, workspace)}>
 														{workspace.name}
@@ -233,14 +214,14 @@ async function importNote() {
 									<DropdownMenu.Separator />
 									<DropdownMenu.Item
 										variant="destructive"
-										onclick={() => cloudNotes.moveToTrash(note)}
+										onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, true, false, note.id)}
 									>
 										<icons.Trash2 class="mr-2 size-4" />
 										Trash Note
 									</DropdownMenu.Item>
 									<DropdownMenu.Item
 										variant="destructive"
-										onclick={() => cloudNotes.deleteNote(note)}
+										onclick={() => cloudNotes.delete(note.id)}
 									>
 										<icons.Trash2 class="mr-2 size-4" />
 										Delete Note
@@ -254,7 +235,7 @@ async function importNote() {
 							<div class="text-muted-foreground flex items-center justify-between text-xs">
 								<div class="flex items-center gap-1">
 									<icons.Clock class="size-3" />
-									{timeAgo(note.updated_at)}
+									{timeAgo(note.updatedAt.toISOString())}
 								</div>
 							</div>
 						</div>

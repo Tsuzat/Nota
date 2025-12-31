@@ -8,11 +8,9 @@ import { resolve } from '$app/paths';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { type CloudUserWorkspace, useCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
-import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 import { getGlobalSearch } from './constants.svelte';
+import { getNotesContext, getUserWorkspacesContext, getWorkspacesContext, type UserWorkspace } from '@nota/client';
 
 const search = getGlobalSearch();
 const currentUserWorkspace = useCurrentUserWorkspaceContext();
@@ -22,18 +20,18 @@ const localUserWorkspaces = getLocalUserWorkspaces();
 const localWorkspaces = getLocalWorkspaces();
 const localNotes = getLocalNotes();
 
-const cloudUserWorkspaces = useCloudUserWorkspaces();
-const cloudWorkspaces = useCloudWorkspaces();
-const cloudNotes = useCloudNotes();
+const cloudUserWorkspaces = getUserWorkspacesContext();
+const cloudWorkspaces = getWorkspacesContext();
+const cloudNotes = getNotesContext();
 
 const workspaces = $derived.by(() => {
   if (isLocal) return getLocalWorkspaces().getWorkspaces();
-  return useCloudWorkspaces().getWorkspaces();
+  return cloudWorkspaces.workspaces;
 });
 
 const notes = $derived.by(() => {
   if (isLocal) return getLocalNotes().getNotes();
-  return useCloudNotes().getNotes();
+  return cloudNotes.notes;
 });
 
 function handleKeydown(e: KeyboardEvent) {
@@ -54,15 +52,15 @@ async function selectLocalUserWorkspace(workspace: LocalUserWorkspace) {
     await localWorkspaces.fetchWorkspaces(workspace.id);
     await localNotes.fetchNotes(workspace.id);
     toast.success(`Changed User Workspace to ${workspace.name}`, { id });
-    cloudWorkspaces.setWorkspaces([]);
-    cloudNotes.setNotes([]);
+    cloudWorkspaces.workspaces = [];
+    cloudNotes.notes = [];
   } catch (error) {
     console.error(error);
     toast.error(`Something went wrong when changing the user workspace to ${workspace.name}`, { id });
   }
 }
 
-async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
+async function selectCloudUserWorkspace(workspace: UserWorkspace) {
   if (activeWorkspace?.id === workspace.id) {
     return toast.info("You're already in this workspace");
   }
@@ -71,16 +69,16 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
     goto(resolve('/'));
     currentUserWorkspace.setCurrentUserWorkspace(workspace);
     toast.loading(`Loading Workspaces for ${workspace.name}`, { id });
-    await cloudWorkspaces.fetchWorkspaces(workspace);
+    await cloudWorkspaces.fetch(workspace.id);
     toast.loading(`Loading Notes for ${workspace.name}`, { id });
-    await cloudNotes.fetchNotes(workspace);
+    await cloudNotes.fetch(workspace.id);
     toast.dismiss(id);
     toast.success(`Changed User Workspace to ${workspace.name}`, { id });
     localWorkspaces.setWorkspaces([]);
     localNotes.setNotes([]);
   } catch (error) {
     console.error(error);
-    toast.error(`Something went wrong when switching to cloud workspace ${workspace.name}`);
+    toast.error(`Something went wrong when switching to cloud workspace ${workspace.name}`, { id });
   }
 }
 </script>
@@ -121,7 +119,7 @@ async function selectCloudUserWorkspace(workspace: CloudUserWorkspace) {
 					</Command.Shortcut>
 				</Command.Item>
 			{/each}
-			{#each cloudUserWorkspaces.getWorkspaces() as cloudUserWorkspace (cloudUserWorkspace.id)}
+			{#each cloudUserWorkspaces.userWorkspaces as cloudUserWorkspace (cloudUserWorkspace.id)}
 				{@const onselect = () => selectCloudUserWorkspace(cloudUserWorkspace)}
 				<Command.Item
 					itemid={cloudUserWorkspace.id}

@@ -9,22 +9,21 @@ import { cn } from '@nota/ui/utils';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { page } from '$app/state';
-import { useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { useCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
 import { getKeyboardShortcut, timeAgo } from '$lib/utils';
 import NewNotes from '../dialogs/new-notes.svelte';
 import NewWorkspace from '../dialogs/new-workspace.svelte';
+import { getNotesContext, getWorkspacesContext } from '@nota/client';
 
 let showMore = $state(false);
 
-const cloudWorkspaces = useCloudWorkspaces();
-const workspaces = $derived(cloudWorkspaces.getWorkspaces().slice(0, showMore ? undefined : 5));
-const cloudNotes = useCloudNotes();
+const cloudWorkspaces = getWorkspacesContext();
+const workspaces = $derived(cloudWorkspaces.workspaces.slice(0, showMore ? undefined : 5));
+const cloudNotes = getNotesContext();
 
 let open = $state(false);
 let openNewNotes = $state(false);
 
-let currentCloudWorkspace = $derived(cloudWorkspaces.getWorkspaces()[0]);
+let currentCloudWorkspace = $derived(cloudWorkspaces.workspaces[0]);
 </script>
 
 <NewWorkspace bind:open />
@@ -54,7 +53,7 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.getWorkspaces()[0]);
 							<Sidebar.MenuButton onclick={() => goto(resolve("/(cloud)/workspace-[id]", {id: workspace.id}))}>
 								{#snippet child({ props })}
 									<span {...props}>
-										<IconRenderer icon={workspace.icon} />
+										<IconRenderer icon={workspace.icon ?? "lucide:File"} />
 										<span class="cursor-default">{workspace.name}</span>
 									</span>
 								{/snippet}
@@ -87,7 +86,7 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.getWorkspaces()[0]);
 							<Collapsible.Content>
 								<Sidebar.MenuSub>
 									{@const notes = cloudNotes
-										.getNotes()
+										.notes
 										.filter((n) => n.workspace === workspace.id && !n.trashed)}
 									{#each notes as note (note.id)}
 										{@const href = resolve("/")}
@@ -96,7 +95,7 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.getWorkspaces()[0]);
 											<Sidebar.MenuSubButton {isActive} onclick={() => goto(href)}>
 												{#snippet child({ props })}
 													<span {...props}>
-														<IconRenderer icon={note.icon} />
+														<IconRenderer icon={note.icon ?? "lucide:File"} />
 														<span class="cursor-default">{note.name}</span>
 													</span>
 												{/snippet}
@@ -111,30 +110,30 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.getWorkspaces()[0]);
 													{/snippet}
 												</DropdownMenu.Trigger>
 												<DropdownMenu.Content>
-													<DropdownMenu.Item onclick={() => cloudNotes.toggleFavorite(note)}>
+													<DropdownMenu.Item onclick={() => cloudNotes.update(note.name, note.icon, !note.favorite, note.trashed, note.isPublic, note.id)}>
 														{@const favorite = note.favorite}
 														<icons.Star class={cn(favorite && 'fill-yellow-500 text-yellow-500')} />
 														{favorite ? 'Unfavorite' : 'Favorite'}
 													</DropdownMenu.Item>
-													<DropdownMenu.Item onclick={() => cloudNotes.togglePublic(note)}>
+													<DropdownMenu.Item onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, note.trashed, !note.isPublic, note.id)}>
 														<icons.Globe />
 														{note.isPublic ? 'Make Private' : 'Make Public'}
 													</DropdownMenu.Item>
-													<DropdownMenu.Item onclick={() => cloudNotes.duplicate(note)}>
+													<DropdownMenu.Item onclick={() => cloudNotes.duplicate(note.id)}>
 														<icons.Copy />
 														Duplicate
 													</DropdownMenu.Item>
 													<DropdownMenu.Separator />
 													<DropdownMenu.Item
 														variant="destructive"
-														onclick={() => cloudNotes.moveToTrash(note)}
+														onclick={() => cloudNotes.update(note.name, note.icon, note.favorite, true, note.isPublic, note.id)}
 													>
 														<icons.Trash2 />
 														Move to Trash
 													</DropdownMenu.Item>
 													<DropdownMenu.Item
 														variant="destructive"
-														onclick={() => cloudNotes.deleteNote(note)}
+														onclick={() => cloudNotes.delete(note.id)}
 													>
 														<icons.Trash2 />
 														Delete
@@ -142,7 +141,7 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.getWorkspaces()[0]);
 													<DropdownMenu.Separator />
 													<DropdownMenu.Label class="text-muted-foreground text-sm">
 														Last Edited:
-														{timeAgo(note.updated_at)}
+														{timeAgo(note.updatedAt.toISOString())}
 													</DropdownMenu.Label>
 												</DropdownMenu.Content>
 											</DropdownMenu.Root>

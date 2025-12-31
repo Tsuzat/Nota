@@ -1,5 +1,4 @@
-import { fetch } from '@tauri-apps/plugin-http';
-import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
+import { aiGenerate } from '@nota/client';
 
 /**
  * Calls the AI model to generate a streaming response.
@@ -9,21 +8,9 @@ import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
  * @param onChunck - Callback invoked with each text chunk as it arrives.
  * @param onError - Optional callback invoked if an error occurs during generation.
  */
-export async function callAI(
-  prompt: string,
-  authToken: string,
-  onChunck: (chunk: string) => void,
-  onError?: (error: Error) => void
-) {
+export async function callAI(prompt: string, onChunck: (chunk: string) => void, onError?: (error: Error) => void) {
   try {
-    const res = await fetch(`${PUBLIC_NOTA_FRONTEND_URL}/api/ai`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authToken}`,
-      },
-      body: JSON.stringify({ prompt }),
-    });
+    const res = await aiGenerate(prompt);
     if (!res.ok) {
       let message = 'Failed to call AI';
       try {

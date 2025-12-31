@@ -7,10 +7,8 @@ let { children, data } = $props();
 
 import { ModeWatcher } from '@nota/ui';
 import { Toaster, toast } from '@nota/ui/shadcn/sonner';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { check } from '@tauri-apps/plugin-updater';
 import { onMount } from 'svelte';
-import { invalidate } from '$app/navigation';
 import { setGlobalSearch } from '$lib/components/global-search';
 import GlobalSearch from '$lib/components/global-search/global-search.svelte';
 import { setGlobalSignInContext } from '$lib/components/global-signin';
@@ -18,18 +16,14 @@ import GlobalSignin from '$lib/components/global-signin/global-signin.svelte';
 import { GlobalSettings, setGlobalSettings } from '$lib/components/settings';
 import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
 import { setCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte';
-import { useDeepLinkAuth } from '$lib/handleOAuth';
+import { useDeepLinkAuth } from '$lib/handleOAuth.svelte';
 import { setLocalNotes } from '$lib/local/notes.svelte';
 import { setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { supabase } from '$lib/supabase';
-import { setCloudNotes } from '$lib/supabase/db/cloudnotes.svelte';
-import { setCloudUserWorkspaces } from '$lib/supabase/db/clouduserworkspaces.svelte';
-import { setCloudWorkspaces } from '$lib/supabase/db/cloudworkspace.svelte';
-import { getSessionAndUserContext, setSessionAndUserContext } from '$lib/supabase/user.svelte';
 import { setTheme } from '$lib/theme';
 import { downloadAndInstall } from '$lib/updater';
-import { ISWINDOWS } from '$lib/utils';
+import { setAuthContext, setNotesContext, setStorageContext, setUserWorkspacesContext, setWorkspacesContext } from '@nota/client';
+import { setNewUserWorkspace, NewUserWorkspace } from '$lib/components/user-workspace';
 
 // Local Workspaces and Notes
 const localUserWorkspaces = setLocalUserWorkspaces();
@@ -37,23 +31,27 @@ const localWorkspaces = setLocalWorkspaces();
 const localNotes = setLocalNotes();
 
 // Cloud Workspaces and Notes
-const cloudUserWorkspaces = setCloudUserWorkspaces();
-const cloudWorkspaces = setCloudWorkspaces();
-const cloudNotes = setCloudNotes();
+const cloudUserWorkspaces = setUserWorkspacesContext();
+const cloudWorkspaces = setWorkspacesContext();
+const cloudNotes = setNotesContext();
+const cloudStorage = setStorageContext();
 
 const currentUserWorkspace = setCurrentUserWorkspaceContext();
+setNewUserWorkspace();
 
-const user = $derived(getSessionAndUserContext().getUser());
+const authContext = setAuthContext();
+const user = $derived(authContext.user);
 
 let open = $state(localStorage.getItem('sidebar-state') === 'open');
 
 $effect(() => {
-  if (user === null) {
-    cloudUserWorkspaces.setWorkspace([]);
-    cloudWorkspaces.setWorkspaces([]);
-    cloudNotes.setNotes([]);
+  if (!user) {
+    cloudUserWorkspaces.userWorkspaces = [];
+    cloudWorkspaces.workspaces = [];
+    cloudNotes.notes = [];
   } else {
-    cloudUserWorkspaces.fetchWorkspaces(user);
+    cloudUserWorkspaces.fetch();
+    cloudStorage.fetch();
   }
 });
 
@@ -61,30 +59,21 @@ useDeepLinkAuth();
 setGlobalSignInContext();
 setGlobalSearch();
 const useSettings = setGlobalSettings();
-const sessionAndUser = setSessionAndUserContext();
 
-onMount(() => {
+onMount(async () => {
   setTheme(useSettings.themeColor);
-  const id = toast.loading('Checking auth status...', { duration: 5000 });
-  const { data } = supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'INITIAL_SESSION') {
-      if (session) {
-        toast.success('Signed in successfully', { id });
-      } else {
-        toast.dismiss(id);
-      }
-    }
-    if (event === 'SIGNED_OUT') {
-      sessionAndUser.setSession(null);
-      sessionAndUser.setUser(null);
-      invalidate('supabase:auth');
-    } else if (session) {
-      sessionAndUser.setSession(session);
-      sessionAndUser.setUser(session.user);
-      sessionAndUser.fetchUserProfile();
-      if (event === 'SIGNED_IN') {
-        invalidate('supabase:auth');
-      }
+  // authContext.signInWithEmailAndPassword('alok@test.com', 'alok@tsuzat1234').then(() => {
+  //   toast.success('Successfully signed in with email and password');
+  // }).catch((error) => {
+  //   console.error(error);
+  //   toast.error('Failed to sign in with email and password');
+  // });
+  toast.promise(authContext.init(), {
+    loading: 'Checking auth status...',
+    success: 'Successfully authenticated',
+    error: (error) => {
+      console.error(error);
+      return 'Failed to authenticate';
     }
   });
   check().then((update) => {
@@ -103,12 +92,10 @@ onMount(() => {
       });
     }
   });
-  const window = getCurrentWindow();
-  window.show().then(() => {
-    if (ISWINDOWS) window.setDecorations(false);
-  });
-
-  return () => data.subscription.unsubscribe();
+  // const window = getCurrentWindow();
+  // window.show().then(() => {
+  //   if (ISWINDOWS) window.setDecorations(false);
+  // });
 });
 
 $effect(() => {
@@ -134,7 +121,9 @@ $effect(() => {
 <GlobalSignin />
 <GlobalSearch />
 <GlobalSettings />
+<NewUserWorkspace />
 
+<div data-tauri-drag-region class="absolute top-0 z-10! h-12 w-full"></div>
 <Sidebar.Provider
 	bind:open
 	onOpenChange={(value: boolean) => {
@@ -143,7 +132,6 @@ $effect(() => {
 >
 	<AppSideBar />
 	<Sidebar.Inset class="flex h-screen w-full flex-col overflow-hidden">
-		<div data-tauri-drag-region class="absolute top-0 z-10! h-12 w-full"></div>
 		{@render children()}
 	</Sidebar.Inset>
 </Sidebar.Provider>
