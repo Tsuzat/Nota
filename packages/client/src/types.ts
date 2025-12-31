@@ -1,4 +1,4 @@
-import { size, z } from 'zod';
+import { z } from 'zod';
 
 export const SubscriptionPlanSchema = z.enum(['free', 'pro']);
 export type SubscriptionPlan = z.infer<typeof SubscriptionPlanSchema>;

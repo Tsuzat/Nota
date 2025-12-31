@@ -118,9 +118,8 @@ class Notes {
     const res = await request(url);
     if (res.ok) {
       return await res.json();
-    } else {
-      throw new Error(await res.text());
     }
+    throw new Error(await res.text());
   }
 
   /**
