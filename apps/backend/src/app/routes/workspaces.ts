@@ -34,16 +34,14 @@ app.get('/', async (c) => {
   const userworkspaceId = c.req.query('userworkspace_id');
 
   try {
-    const result = DB.select()
-      .from(workspaces)
-      .where(
-        userworkspaceId
-          ? and(eq(workspaces.owner, userId), eq(workspaces.userworkspace, userworkspaceId))
-          : eq(workspaces.owner, userId)
-      );
+    const result = await DB.query.workspaces.findMany({
+      where: userworkspaceId
+        ? and(eq(workspaces.owner, userId), eq(workspaces.userworkspace, userworkspaceId))
+        : eq(workspaces.owner, userId),
+    });
     return c.json(result);
   } catch (error) {
-    logerror('Error fetching workspaces:', error);
+    logerror('Error fetching workspaces:', { error });
     return c.json({ error: 'Failed to fetch workspaces' }, 500);
   }
 });
