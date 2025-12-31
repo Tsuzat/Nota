@@ -1,6 +1,5 @@
 {
-  "name": "@note/client",
-  "private": true,
+  "name": "@nota/client",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -17,6 +16,9 @@
   "exports": {
     ".": "./src/index.js"
   },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.0",
     "@sveltejs/kit": "^2.49.1",
@@ -27,6 +29,7 @@
     "vite": "^7.2.6"
   },
   "dependencies": {
+    "@tauri-apps/plugin-http": "^2.5.4",
     "zod": "^4.2.1"
   }
 }

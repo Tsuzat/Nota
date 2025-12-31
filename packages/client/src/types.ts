@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { size, z } from 'zod';
 
 export const SubscriptionPlanSchema = z.enum(['free', 'pro']);
 export type SubscriptionPlan = z.infer<typeof SubscriptionPlanSchema>;
@@ -54,8 +54,8 @@ export type Session = z.infer<typeof SessionSchema>;
 export const UserWorkspaceSchema = z.object({
   id: z.uuid(),
   icon: z.string(),
-  name: z.string().nullable().optional(),
-  owner: z.uuid().nullable().optional(),
+  name: z.string(),
+  owner: z.uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -63,28 +63,36 @@ export type UserWorkspace = z.infer<typeof UserWorkspaceSchema>;
 
 export const WorkspaceSchema = z.object({
   id: z.uuid(),
-  name: z.string().nullable().optional(),
-  icon: z.string().nullable().optional().default('📁'),
+  name: z.string(),
+  icon: z.string().default('📁'),
   description: z.string().nullable().optional(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  owner: z.uuid().nullable().optional(),
-  userworkspace: z.uuid().nullable().optional(),
+  owner: z.uuid(),
+  userworkspace: z.uuid(),
 });
 export type Workspace = z.infer<typeof WorkspaceSchema>;
 
 export const NoteSchema = z.object({
   id: z.uuid(),
   name: z.string(),
-  icon: z.string().nullable().optional().default('📝'),
+  icon: z.string().default('📝'),
   workspace: z.uuid(),
   userworkspace: z.uuid(),
   owner: z.uuid(),
-  favorite: z.boolean().nullable().optional().default(false),
-  trashed: z.boolean().nullable().optional().default(false),
-  createdAt: z.coerce.date().nullable().optional(),
-  updatedAt: z.coerce.date().nullable().optional(),
-  isPublic: z.boolean().nullable().optional().default(false),
-  content: z.record(z.any(), z.any()).nullable().optional().default({}),
+  favorite: z.boolean().default(false),
+  trashed: z.boolean().default(false),
+  createdAt: z.coerce.date().default(() => new Date()),
+  updatedAt: z.coerce.date().default(() => new Date()),
+  isPublic: z.boolean().default(false),
+  content: z.record(z.any(), z.any()).default({}),
 });
 export type Note = z.infer<typeof NoteSchema>;
+
+export const NotaFileSchema = z.object({
+  key: z.string(),
+  size: z.number().int(),
+  lastModified: z.coerce.date(),
+  url: z.url()
+})
+export type NotaFile = z.infer<typeof NotaFileSchema>;

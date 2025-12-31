@@ -23,14 +23,9 @@ class Workspaces {
    */
   async fetch(userworkspaceId: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/db/workspaces?userworkspace_id=${userworkspaceId}`;
-    const res = await request(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const res = await request(url);
     if (res.ok) {
-      const workspaces = (await res.json()) as Workspace[];
+      const workspaces: Workspace[] = await res.json();
       const parsedWorkspaces = workspaces.map((workspace) => WorkspaceSchema.parse(workspace));
       this.workspaces = parsedWorkspaces;
     } else {
@@ -122,7 +117,7 @@ const NOTAWORKSPACEKEY = Symbol('NOTAWORKSPACEKEY');
  * Set the workspaces context.
  */
 export const setWorkspacesContext = () => {
-  setContext(NOTAWORKSPACEKEY, new Workspaces());
+  return setContext(NOTAWORKSPACEKEY, new Workspaces());
 };
 
 /**

@@ -41,14 +41,14 @@ class Notes {
    * @param note Partial note object
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async create(note: Partial<Note>) {
+  async create(name: string, icon: string, workspaceId: string, userworkspaceId: string, isFavorite: boolean) {
     const url = `${PUBLIC_BACKEND_URL}/api/db/notes`;
     const res = await request(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(note),
+      body: JSON.stringify({ name, icon, workspaceId, userworkspaceId, isFavorite }),
     });
     if (res.ok) {
       const createdNote = (await res.json()) as Note;
@@ -85,22 +85,61 @@ class Notes {
    * @param icon Note icon
    * @param favorite Whether the note is favorite
    * @param trashed Whether the note is trashed
+   * @param isPublic Whether the note is public
    * @param id Note ID
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async update(name: string, icon: string, favorite: boolean, trashed: boolean, noteId: string) {
+  async update(name: string, icon: string, favorite: boolean, trashed: boolean, isPublic: boolean, noteId: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${noteId}`;
     const res = await request(url, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, icon, favorite, trashed }),
+      body: JSON.stringify({ name, icon, favorite, trashed, isPublic }),
     });
     if (res.ok) {
       const updatedNote = (await res.json()) as Note;
       const parsedNote = NoteSchema.parse(updatedNote);
       this.notes = this.notes.map((note) => (note.id === noteId ? parsedNote : note));
+    } else {
+      throw new Error(await res.text());
+    }
+  }
+
+  /**
+   * Fetch note content by ID
+   * @param noteId Note ID
+   * @returns Note content as a string
+   * @throws {Error} If the request fails with a non-200 status code
+   */
+  async fetchContent(noteId: string) {
+    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${noteId}/content`;
+    const res = await request(url);
+    if (res.ok) {
+      return await res.json();
+    } else {
+      throw new Error(await res.text());
+    }
+  }
+
+  /**
+   * Duplicate a note
+   * @param noteId Note ID
+   * @throws {Error} If the request fails with a non-200 status code
+   */
+  async duplicate(noteId: string) {
+    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${noteId}/duplicate`;
+    const res = await request(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (res.ok) {
+      const duplicatedNote = (await res.json()) as Note;
+      const parsedNote = NoteSchema.parse(duplicatedNote);
+      this.notes.push(parsedNote);
     } else {
       throw new Error(await res.text());
     }
@@ -121,11 +160,7 @@ class Notes {
       },
       body: JSON.stringify(patch),
     });
-    if (res.ok) {
-      const updatedNote = (await res.json()) as Note;
-      const parsedNote = NoteSchema.parse(updatedNote);
-      this.notes = this.notes.map((note) => (note.id === noteId ? parsedNote : note));
-    } else {
+    if (!res.ok) {
       throw new Error(await res.text());
     }
   }
@@ -137,7 +172,7 @@ const NOTANOTESKEY = Symbol('NOTANOTESKEY');
  * Set the notes context.
  */
 export const setNotesContext = () => {
-  setContext(NOTANOTESKEY, new Notes());
+  return setContext(NOTANOTESKEY, new Notes());
 };
 
 /**

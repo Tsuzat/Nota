@@ -19,7 +19,8 @@ class Auth {
     const url = `${PUBLIC_BACKEND_URL}/api/user/me`;
     const res = await request(url);
     if (res.ok) {
-      const user = (await res.json()) as User;
+      const data = await res.json();
+      const user = data.user;
       const parsedUser = UserSchema.parse(user);
       this.#user = parsedUser;
     } else {
@@ -57,12 +58,55 @@ class Auth {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async signInWithOAuth(provider: 'github' | 'google', isDesktop = false) {
-    const url = `${PUBLIC_BACKEND_URL}/api/login/${provider}${isDesktop ? '?platform=desktop' : ''}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/auth/login/${provider}${isDesktop ? '?platform=desktop' : ''}`;
+    if (isDesktop) return url;
     const res = await request(url, {
       method: 'POST',
     });
     if (res.ok) {
       // this sets the access_tokens so we can get user info now
+      await this.init();
+    } else {
+      throw new Error(await res.text());
+    }
+  }
+
+  /**
+   * Exchange access token and refresh token for a new session
+   * @param access_token - The access token to exchange
+   * @param refresh_token - The refresh token to exchange
+   * @throws {Error} If the request fails with a non-200 status code
+   */
+  async exchangeTokenForSession(access_token: string, refresh_token: string) {
+    const url = `${PUBLIC_BACKEND_URL}/api/auth/session`;
+    const res = await request(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        access_token,
+        refresh_token,
+      }),
+    });
+    if (res.ok) {
+      await this.init();
+    } else {
+      throw new Error(await res.text());
+    }
+  }
+
+  /**
+   * Sign in with email and password
+   * @param email - The email of the user
+   * @param password - The password of the user
+   * @returns A promise that resolves when the sign-in request is successful
+   * @throws {Error} If the request fails with a non-200 status code
+   */
+  async signInWithEmailAndPassword(email: string, password: string) {
+    const url = `${PUBLIC_BACKEND_URL}/api/auth/login`;
+    const res = await request(url, {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    if (res.ok) {
       await this.init();
     } else {
       throw new Error(await res.text());

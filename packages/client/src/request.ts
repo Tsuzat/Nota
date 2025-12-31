@@ -1,4 +1,7 @@
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import {fetch as tauriFetch} from '@tauri-apps/plugin-http'
+
+const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 /**
  * Make a request to the given URL with the given options.
@@ -20,6 +23,12 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
     headers.set('Content-Type', 'application/json');
   }
 
+  // Inject Desktop Identifier if on Tauri
+  // if (isTauri() && DESKTOP_APP_IDENTIFIER) {
+  //   headers.set('X-Nota-Desktop-Identifier', DESKTOP_APP_IDENTIFIER);
+  // }
+  const fetchFn = isTauri() ? tauriFetch : fetch;
+
   const currentOptions: RequestInit = {
     ...options,
     headers,
@@ -27,7 +36,7 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
   };
 
   // 2. Initial Request
-  let response = await fetch(url, currentOptions);
+  let response = await fetchFn(url, currentOptions);
 
   // 3. Handle 401 (Auto-Refresh)
   if (response.status === 401) {
@@ -36,14 +45,14 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
     }
 
     try {
-      const refreshResponse = await fetch(`${PUBLIC_BACKEND_URL}/api/auth/refresh`, {
+      const refreshResponse = await fetchFn(`${PUBLIC_BACKEND_URL}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
       });
 
       if (refreshResponse.ok) {
         // Retry Original Request
-        response = await fetch(url, currentOptions);
+        response = await fetchFn(url, currentOptions);
       }
     } catch (e) {
       console.error('Auto-refresh failed', e);

@@ -180,27 +180,61 @@ export const getFileTypeExtensions = (fileType: FileType) => {
   }
 };
 
-export const getFileTypeFromExtension = (fileName: string): FileType => {
+/**
+ * Get file MIME type from file extension
+ * @param fileName - file name with extension
+ * @returns - file type or null if unknown
+ */
+export const getFileTypeFromExtension = (fileName: string): string | null => {
   const extension = fileName.toLowerCase().split('.').pop();
 
-  if (!extension) return FileType.UNKNOWN;
+  if (!extension) return null;
 
-  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico', 'tiff', 'tif'];
-  const videoExtensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv', 'm4v', '3gp', 'ogv'];
-  const audioExtensions = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'opus', 'aiff'];
-  const docsExtensions = ['docx', 'doc', 'pptx', 'ppt', 'xlsx', 'xls', 'pdf'];
+  const mimeTypes: Record<string, string> = {
+    // Images
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    bmp: 'image/bmp',
+    webp: 'image/webp',
+    svg: 'image/svg+xml',
+    ico: 'image/x-icon',
+    tiff: 'image/tiff',
+    tif: 'image/tiff',
 
-  if (imageExtensions.includes(extension)) {
-    return FileType.IMAGE;
-  }
-  if (videoExtensions.includes(extension)) {
-    return FileType.VIDEO;
-  }
-  if (audioExtensions.includes(extension)) {
-    return FileType.AUDIO;
-  }
-  if (docsExtensions.includes(extension)) {
-    return FileType.DOCS;
-  }
-  return FileType.UNKNOWN;
+    // Videos
+    mp4: 'video/mp4',
+    avi: 'video/x-msvideo',
+    mov: 'video/quicktime',
+    wmv: 'video/x-ms-wmv',
+    flv: 'video/x-flv',
+    webm: 'video/webm',
+    mkv: 'video/x-matroska',
+    m4v: 'video/x-m4v',
+    '3gp': 'video/3gpp',
+    ogv: 'video/ogg',
+
+    // Audio
+    mp3: 'audio/mpeg',
+    wav: 'audio/wav',
+    flac: 'audio/flac',
+    aac: 'audio/aac',
+    ogg: 'audio/ogg',
+    m4a: 'audio/mp4',
+    wma: 'audio/x-ms-wma',
+    opus: 'audio/opus',
+    aiff: 'audio/aiff',
+
+    // Docs
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    doc: 'application/msword',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    ppt: 'application/vnd.ms-powerpoint',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    xls: 'application/vnd.ms-excel',
+    pdf: 'application/pdf',
+  };
+
+  return mimeTypes[extension] ?? null;
 };

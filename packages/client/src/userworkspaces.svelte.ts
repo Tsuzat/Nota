@@ -44,8 +44,8 @@ class UserWorkspaces {
    * Fetch all userworkspaces from the backend
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async fetch(userworkspaceId: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/userworkspaces?userworkspace_id=${userworkspaceId}`;
+  async fetch() {
+    const url = `${PUBLIC_BACKEND_URL}/api/db/userworkspaces`;
     const res = await request(url, {
       method: 'GET',
       headers: {
@@ -54,7 +54,7 @@ class UserWorkspaces {
     });
     if (res.ok) {
       const userWorkspaces = (await res.json()) as UserWorkspace[];
-      this.userWorkspaces = userWorkspaces;
+      this.#userWorkspaces = userWorkspaces;
     } else {
       throw new Error(await res.text());
     }
@@ -74,7 +74,7 @@ class UserWorkspaces {
       },
     });
     if (res.ok) {
-      this.userWorkspaces = this.userWorkspaces.filter((userWorkspace) => userWorkspace.id !== id);
+      this.#userWorkspaces = this.#userWorkspaces.filter((userWorkspace) => userWorkspace.id !== id);
     } else {
       throw new Error(await res.text());
     }
@@ -102,7 +102,7 @@ class UserWorkspaces {
     if (res.ok) {
       const userWorkspace = (await res.json()) as UserWorkspace;
       const parsedUserWorkspace = UserWorkspaceSchema.parse(userWorkspace);
-      this.userWorkspaces = this.userWorkspaces.map((userWorkspace) =>
+      this.#userWorkspaces = this.#userWorkspaces.map((userWorkspace) =>
         userWorkspace.id === id ? parsedUserWorkspace : userWorkspace
       );
     } else {
@@ -117,7 +117,7 @@ const NOTAUSERWORKSPACESKEY = Symbol('NOTAUSERWORKSPACESKEY');
  * Set the userworkspaces context.
  */
 export const setUserWorkspacesContext = () => {
-  setContext(NOTAUSERWORKSPACESKEY, new UserWorkspaces());
+  return setContext(NOTAUSERWORKSPACESKEY, new UserWorkspaces());
 };
 
 /**
