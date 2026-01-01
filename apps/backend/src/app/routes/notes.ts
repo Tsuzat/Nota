@@ -10,6 +10,34 @@ import { authMiddleware } from '../middlewares/auth';
 
 const app = new Hono<{ Variables: Variables }>();
 
+// Public endpoint to get note content if it is public
+app.get('/public/:id', async (c) => {
+  const noteId = c.req.param('id');
+  try {
+    const note = await DB.query.notes.findFirst({
+      where: and(eq(notes.id, noteId), eq(notes.isPublic, true)),
+      columns: {
+        id: true,
+        name: true,
+        icon: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+        isPublic: true,
+      },
+    });
+
+    if (!note) {
+      return c.json({ error: 'Note not found or not public' }, 404);
+    }
+
+    return c.json(note);
+  } catch (error) {
+    logerror('Error fetching public note:', error);
+    return c.json({ error: 'Failed to fetch public note' }, 500);
+  }
+});
+
 // Protect all routes with auth middleware
 app.use('*', authMiddleware);
 
