@@ -1,17 +1,17 @@
-name: "Desktop Biome CI"
+name: "Backend Biome CI"
 
 on:
   push:
     paths:
-      - apps/desktop/**
-      - .github/workflows/desktop-ci.yml
+      - apps/backend/**
+      - .github/workflows/backend-ci.yml
       - package.json
       - bun.lock
       - biome.jsonc
   pull_request:
     paths:
-      - apps/desktop/**
-      - .github/workflows/desktop-ci.yml
+      - apps/backend/**
+      - .github/workflows/backend-ci.yml
       - package.json
       - bun.lock
       - biome.jsonc
@@ -21,7 +21,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 15
     concurrency:
-      group: desktop-ci-${{ github.ref }}
+      group: backend-ci-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: Checkout
@@ -50,6 +50,6 @@ jobs:
       - name: Verify Biome installed
         run: biome --version
 
-      - name: Run Desktop CI
-        working-directory: apps/desktop
+      - name: Run Backend Biome CI
+        working-directory: apps/backend
         run: bun run ci
