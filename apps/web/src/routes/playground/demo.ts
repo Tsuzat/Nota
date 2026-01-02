@@ -5,70 +5,393 @@ export default {
       type: 'heading',
       attrs: {
         textAlign: 'center',
-        id: 'e488834e-48fa-48a0-9323-7e8f3e1e6246',
-        'data-toc-id': 'e488834e-48fa-48a0-9323-7e8f3e1e6246',
+        id: '83d3ba41-ff49-4efc-b093-e12d171930d7',
+        'data-toc-id': '83d3ba41-ff49-4efc-b093-e12d171930d7',
         level: 1,
       },
-      content: [{ type: 'text', text: 'Welcome to Nota' }],
-    },
-    {
-      type: 'paragraph',
-      attrs: { textAlign: 'justify' },
       content: [
         {
           type: 'text',
-          text: 'Nota is a minimal, fast, modern and AI ready note taking application. We support',
+          text: 'Welcome to Nota',
         },
-        { type: 'text', marks: [{ type: 'bold' }], text: ' bold' },
-        { type: 'text', text: ', ' },
-        { type: 'text', marks: [{ type: 'italic' }], text: 'italic' },
-        { type: 'text', text: ', ' },
-        { type: 'text', marks: [{ type: 'underline' }], text: 'underline' },
-        { type: 'text', text: ', ' },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Nota is a fast, light weight, feature rich, modern and beautiful note taking application with native AI integration. Click on the drag-handle (on the left which follows your cursor) and see more options. ',
+        },
+      ],
+    },
+    {
+      type: 'heading',
+      attrs: {
+        textAlign: null,
+        id: '2d844bdf-9700-4cfb-bec7-2e962974f414',
+        'data-toc-id': '2d844bdf-9700-4cfb-bec7-2e962974f414',
+        level: 3,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Typography ',
+        },
+      ],
+    },
+    {
+      type: 'horizontalRule',
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'In Nota, we support modern typography like ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'bold',
+            },
+          ],
+          text: 'bold',
+        },
+        {
+          type: 'text',
+          text: ',',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'italic',
+            },
+          ],
+          text: ' italic',
+        },
+        {
+          type: 'text',
+          text: ', ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'strike',
+            },
+          ],
+          text: 'strike',
+        },
+        {
+          type: 'text',
+          text: ', ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'underline',
+            },
+          ],
+          text: 'underline',
+        },
+        {
+          type: 'text',
+          text: ', superscript A',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'superscript',
+            },
+          ],
+          text: 'b',
+        },
+        {
+          type: 'text',
+          text: ', subscript A',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'subscript',
+            },
+          ],
+          text: 'b',
+        },
+        {
+          type: 'text',
+          text: ', ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: 'inline code',
+        },
+        {
+          type: 'text',
+          text: ', in line',
+        },
+        {
+          type: 'inlineMath',
+          attrs: {
+            latex: '\\LaTeX',
+          },
+        },
+        {
+          type: 'text',
+          text: ', ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'textStyle',
+              attrs: {
+                color: '',
+                fontSize: null,
+              },
+            },
+            {
+              type: 'highlight',
+              attrs: {
+                color: '#7D0404',
+              },
+            },
+          ],
+          text: 'text highlight',
+        },
+        {
+          type: 'text',
+          text: ', ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'textStyle',
+              attrs: {
+                color: '#83069C',
+                fontSize: null,
+              },
+            },
+          ],
+          text: 'text color',
+        },
+        {
+          type: 'text',
+          text: ' and many more. ',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'You can also preview colors by typing their hex code. e.g. #00FFFF, #000FFF, #FF0000 etc.',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'You can also have some cool typography short hands which converts ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '1/2',
+        },
+        {
+          type: 'text',
+          text: ' to ½ , ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '!=',
+        },
+        {
+          type: 'text',
+          text: ' to ≠, ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '->',
+        },
+        {
+          type: 'text',
+          text: ' to → and many more. You can change the style of this entire paragraph (or node) by clicking on drag-handle on left and choosing something. Explore it please. ',
+        },
+      ],
+    },
+    {
+      type: 'horizontalRule',
+    },
+    {
+      type: 'heading',
+      attrs: {
+        textAlign: null,
+        id: '3f4464f6-cfbc-443c-a735-c73408b19e8d',
+        'data-toc-id': '3f4464f6-cfbc-443c-a735-c73408b19e8d',
+        level: 3,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Slash Command and ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'textStyle',
+              attrs: {
+                color: '#83069C',
+                fontSize: null,
+              },
+            },
+          ],
+          text: 'AI',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'The editor supports the slash commands, just type ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '/',
+        },
+        {
+          type: 'text',
+          text: ' anywhere and you’ll get an option to perform or insert things. You can insert images, videos, tables, audios, iframe, block mathematical expressions using slash commands.',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Editor has native AI integration. Using AI features will require you to logged in and have AI Credits with you. You can request upto ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'bold',
+            },
+          ],
+          text: '5000',
+        },
+        {
+          type: 'text',
+          text: ' AI credits for free, for the playgroud explorations. Check it out in ',
+        },
         {
           type: 'text',
           marks: [
             {
               type: 'link',
               attrs: {
-                href: 'https://nota.ink',
+                href: 'https://www.nota.ink/#pricing',
                 target: '_tab',
                 rel: 'noopener noreferrer nofollow',
                 class: null,
               },
             },
           ],
-          text: 'links',
-        },
-        { type: 'text', text: ', ' },
-        { type: 'text', marks: [{ type: 'strike' }], text: 'strikethrough' },
-        { type: 'text', text: ', ' },
-        { type: 'text', marks: [{ type: 'code' }], text: 'inline code' },
-        { type: 'text', text: ', Superscript A' },
-        { type: 'text', marks: [{ type: 'superscript' }], text: 'b' },
-        { type: 'text', text: ' and subscript A' },
-        { type: 'text', marks: [{ type: 'subscript' }], text: 'b' },
-        { type: 'text', text: '. We support text colours like ' },
-        {
-          type: 'text',
-          marks: [{ type: 'textStyle', attrs: { color: 'rgb(165, 42, 42)', fontSize: '' } }],
-          text: 'red',
-        },
-        { type: 'text', text: ', ' },
-        {
-          type: 'text',
-          marks: [{ type: 'textStyle', attrs: { color: 'rgb(0, 0, 255)', fontSize: '' } }],
-          text: 'blue',
-        },
-        { type: 'text', text: ' and ' },
-        {
-          type: 'text',
-          marks: [{ type: 'highlight', attrs: { color: '#008000' } }],
-          text: 'highlights',
+          text: 'pricing',
         },
         {
           type: 'text',
-          text: '. Drag your mouse to see a contextual bubble menu for more actions. We support markdown shortcuts for these texts, similar to Notion. ',
+          text: '.',
+        },
+      ],
+    },
+    {
+      type: 'heading',
+      attrs: {
+        textAlign: null,
+        id: 'cd63bf51-22f1-450d-9c4f-5358f92fe7d0',
+        'data-toc-id': 'cd63bf51-22f1-450d-9c4f-5358f92fe7d0',
+        level: 3,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'How to use AI??',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'You can either highlight certain part and check on Ask AI on bubble menu or click on the drag-handle on the left to select the whole paragraph (or node) to process it for AI. Please try it now.',
         },
       ],
     },
@@ -77,11 +400,13 @@ export default {
       content: [
         {
           type: 'paragraph',
-          attrs: { textAlign: 'justify' },
+          attrs: {
+            textAlign: null,
+          },
           content: [
             {
               type: 'text',
-              text: 'We also have quote blocks. These can really differentiate your content while looking sleek and unbothered.',
+              text: 'Highlight the next paragraph (problem) or select it using drag-handle to ask something. Or just press on “solve problem”. ',
             },
           ],
         },
@@ -89,222 +414,65 @@ export default {
     },
     {
       type: 'paragraph',
-      attrs: { textAlign: 'justify' },
+      attrs: {
+        textAlign: null,
+      },
       content: [
         {
           type: 'text',
-          text: 'We also have 4 levels of headings to give you a better experience on topics you are commiting to. Moreover, we have 3 types of lists.',
+          marks: [
+            {
+              type: 'bold',
+            },
+          ],
+          text: 'Problem',
+        },
+        {
+          type: 'text',
+          text: ': If the mass of the earth is to be twice and its radius is to be half, how much would I weigh if my current weight is 150 lbs.',
         },
       ],
     },
     {
-      type: 'orderedList',
-      attrs: { start: 1, type: null },
-      content: [
-        {
-          type: 'listItem',
-          content: [
-            {
-              type: 'paragraph',
-              attrs: { textAlign: null },
-              content: [{ type: 'text', text: 'Numbered or ordered list' }],
-            },
-          ],
-        },
-      ],
+      type: 'horizontalRule',
     },
-    {
-      type: 'bulletList',
-      content: [
-        {
-          type: 'listItem',
-          content: [
-            {
-              type: 'paragraph',
-              attrs: { textAlign: null },
-              content: [{ type: 'text', text: 'Unordered List' }],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: 'taskList',
-      content: [
-        {
-          type: 'taskItem',
-          attrs: { checked: true },
-          content: [
-            {
-              type: 'paragraph',
-              attrs: { textAlign: null },
-              content: [
-                {
-                  type: 'text',
-                  text: 'Checklist for getting thing done. Do toggle this checklist.',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          type: 'taskItem',
-          attrs: { checked: false },
-          content: [
-            {
-              type: 'paragraph',
-              attrs: { textAlign: null },
-              content: [{ type: 'text', text: 'Hello World.' }],
-            },
-          ],
-        },
-        {
-          type: 'taskItem',
-          attrs: { checked: false },
-          content: [
-            {
-              type: 'paragraph',
-              attrs: { textAlign: null },
-              content: [{ type: 'text', text: 'This is really weird. ' }],
-            },
-          ],
-        },
-      ],
-    },
-    { type: 'paragraph', attrs: { textAlign: null } },
-    {
-      type: 'blockquote',
-      content: [
-        {
-          type: 'paragraph',
-          attrs: { textAlign: null },
-          content: [
-            {
-              type: 'text',
-              marks: [{ type: 'textStyle', attrs: { color: '#DB0762', fontSize: null } }],
-              text: 'Tip: Click on the drag handle to see more options. Drag and drop things here and there for fun.',
-            },
-          ],
-        },
-      ],
-    },
-    { type: 'horizontalRule' },
     {
       type: 'heading',
       attrs: {
         textAlign: null,
-        id: '756407f7-d276-47d8-bfec-515581b4485e',
-        'data-toc-id': '756407f7-d276-47d8-bfec-515581b4485e',
-        level: 2,
+        id: 'a7762e4a-fa7e-4f9b-8db4-1c1b4b54a81f',
+        'data-toc-id': 'a7762e4a-fa7e-4f9b-8db4-1c1b4b54a81f',
+        level: 3,
       },
-      content: [{ type: 'text', text: 'Code Block and Highlights' }],
-    },
-    {
-      type: 'codeBlock',
-      attrs: { language: 'go' },
       content: [
         {
           type: 'text',
-          text: 'func twoSum(nums []int, target int) []int { \n\tvar res []int\n\tmp := make(map[int]int)\n\tfor idx, val := range nums {\n\t\ttoBeSearched := target - val\n\t\tif _, ok := mp[toBeSearched]; ok {\n\t\t\tres = append(res, mp[toBeSearched], idx)\n\t\t\tbreak\n\t\t}\n\t\tmp[val] = idx\n\t}\n\treturn res\n}',
+          text: 'Tables',
         },
       ],
-    },
-    { type: 'horizontalRule' },
-    {
-      type: 'heading',
-      attrs: {
-        textAlign: null,
-        id: '0dab42e3-78b4-441d-9bfb-94390cbb232a',
-        'data-toc-id': '0dab42e3-78b4-441d-9bfb-94390cbb232a',
-        level: 2,
-      },
-      content: [{ type: 'text', text: 'Media and Placeholders' }],
-    },
-    {
-      type: 'image',
-      attrs: {
-        src: 'https://placehold.co/800x400/6A00F5/white',
-        alt: null,
-        title: null,
-        width: '74.08854166666666%',
-        height: null,
-        align: 'center',
-      },
-    },
-    {
-      type: 'video',
-      attrs: {
-        src: 'https://videos.pexels.com/video-files/2491284/2491284-uhd_2732_1440_24fps.mp4',
-        alt: null,
-        title: null,
-        width: '75.15151515151514%',
-        height: null,
-        align: 'center',
-      },
-    },
-    {
-      type: 'audio',
-      attrs: {
-        src: 'https://cdn.pixabay.com/audio/2024/10/30/audio_42e6870f29.mp3',
-        alt: null,
-        title: null,
-        width: '57.47474747474747%',
-        height: null,
-        align: 'center',
-      },
-    },
-    {
-      type: 'iframe',
-      attrs: {
-        src: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3748.5645078258503!2d75.17451197505285!3d20.026784381383496!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bdb93bd138ae4bd%3A0x574c6482cf0b89cf!2sEllora%20Caves!5e0!3m2!1sen!2sin!4v1742466514831!5m2!1sen!2sin',
-        alt: null,
-        title: null,
-        width: '75.69444444444444%',
-        height: null,
-        align: 'center',
-      },
-    },
-    { type: 'horizontalRule' },
-    {
-      type: 'heading',
-      attrs: {
-        textAlign: null,
-        id: 'cc8a36c5-b9cc-4f4a-9fc1-9c247080927f',
-        'data-toc-id': 'cc8a36c5-b9cc-4f4a-9fc1-9c247080927f',
-        level: 2,
-      },
-      content: [{ type: 'text', text: 'Typography' }],
     },
     {
       type: 'paragraph',
-      attrs: { textAlign: null },
-      content: [
-        { type: 'text', text: 'Typography support e.g. type ' },
-        { type: 'text', marks: [{ type: 'code' }], text: '!=' },
-        {
-          type: 'text',
-          text: ' and it becomes ≠. Similarly (c) becomes ©, -> becomes → and many more like 1×2, ½. We also have color visualizer. #FFF, #000, #FF00FF can be visualised.',
-        },
-      ],
-    },
-    { type: 'horizontalRule' },
-    {
-      type: 'heading',
       attrs: {
         textAlign: null,
-        id: '7be29895-c6cd-4c7b-a2a5-89f9aad52e80',
-        'data-toc-id': '7be29895-c6cd-4c7b-a2a5-89f9aad52e80',
-        level: 2,
       },
-      content: [{ type: 'text', text: 'Tables' }],
-    },
-    {
-      type: 'paragraph',
-      attrs: { textAlign: null },
       content: [
         {
           type: 'text',
-          text: 'We support tables with many customisations. Click on them and explore things.',
+          text: 'You can insert the tables using ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '/table',
+        },
+        {
+          type: 'text',
+          text: ' (slash table). Explore this ',
         },
       ],
     },
@@ -316,34 +484,70 @@ export default {
           content: [
             {
               type: 'tableHeader',
-              attrs: { colspan: 1, rowspan: 1, colwidth: [138], style: null },
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [134],
+                style: null,
+              },
               content: [
                 {
                   type: 'paragraph',
-                  attrs: { textAlign: null },
-                  content: [{ type: 'text', text: 'No' }],
+                  attrs: {
+                    textAlign: null,
+                  },
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Sr. No',
+                    },
+                  ],
                 },
               ],
             },
             {
               type: 'tableHeader',
-              attrs: { colspan: 1, rowspan: 1, colwidth: [151], style: null },
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [149],
+                style: null,
+              },
               content: [
                 {
                   type: 'paragraph',
-                  attrs: { textAlign: null },
-                  content: [{ type: 'text', text: 'Item' }],
+                  attrs: {
+                    textAlign: null,
+                  },
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Items',
+                    },
+                  ],
                 },
               ],
             },
             {
               type: 'tableHeader',
-              attrs: { colspan: 1, rowspan: 1, colwidth: [136], style: null },
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [115],
+                style: null,
+              },
               content: [
                 {
                   type: 'paragraph',
-                  attrs: { textAlign: null },
-                  content: [{ type: 'text', text: 'Quantity' }],
+                  attrs: {
+                    textAlign: null,
+                  },
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Quantity',
+                    },
+                  ],
                 },
               ],
             },
@@ -354,34 +558,70 @@ export default {
           content: [
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: [138], style: null },
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [134],
+                style: null,
+              },
               content: [
                 {
                   type: 'paragraph',
-                  attrs: { textAlign: null },
-                  content: [{ type: 'text', text: '1' }],
+                  attrs: {
+                    textAlign: null,
+                  },
+                  content: [
+                    {
+                      type: 'text',
+                      text: '1',
+                    },
+                  ],
                 },
               ],
             },
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: [151], style: null },
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [149],
+                style: null,
+              },
               content: [
                 {
                   type: 'paragraph',
-                  attrs: { textAlign: null },
-                  content: [{ type: 'text', text: 'Banana' }],
+                  attrs: {
+                    textAlign: null,
+                  },
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Mangos',
+                    },
+                  ],
                 },
               ],
             },
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: [136], style: null },
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [115],
+                style: null,
+              },
               content: [
                 {
                   type: 'paragraph',
-                  attrs: { textAlign: null },
-                  content: [{ type: 'text', text: '12' }],
+                  attrs: {
+                    textAlign: null,
+                  },
+                  content: [
+                    {
+                      type: 'text',
+                      text: '10',
+                    },
+                  ],
                 },
               ],
             },
@@ -392,34 +632,126 @@ export default {
           content: [
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: [138], style: null },
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [134],
+                style: null,
+              },
               content: [
                 {
                   type: 'paragraph',
-                  attrs: { textAlign: null },
-                  content: [{ type: 'text', text: '2' }],
+                  attrs: {
+                    textAlign: null,
+                  },
+                  content: [
+                    {
+                      type: 'text',
+                      text: '2',
+                    },
+                  ],
                 },
               ],
             },
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: [151], style: null },
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [149],
+                style: null,
+              },
               content: [
                 {
                   type: 'paragraph',
-                  attrs: { textAlign: null },
-                  content: [{ type: 'text', text: 'Apple' }],
+                  attrs: {
+                    textAlign: null,
+                  },
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Apples',
+                    },
+                  ],
                 },
               ],
             },
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: [136], style: null },
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [115],
+                style: null,
+              },
               content: [
                 {
                   type: 'paragraph',
-                  attrs: { textAlign: null },
-                  content: [{ type: 'text', text: '19' }],
+                  attrs: {
+                    textAlign: null,
+                  },
+                  content: [
+                    {
+                      type: 'text',
+                      text: '7',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'tableRow',
+          content: [
+            {
+              type: 'tableCell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [134],
+                style: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                  attrs: {
+                    textAlign: null,
+                  },
+                },
+              ],
+            },
+            {
+              type: 'tableCell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [149],
+                style: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                  attrs: {
+                    textAlign: null,
+                  },
+                },
+              ],
+            },
+            {
+              type: 'tableCell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [115],
+                style: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                  attrs: {
+                    textAlign: null,
+                  },
                 },
               ],
             },
@@ -427,56 +759,481 @@ export default {
         },
       ],
     },
-    { type: 'horizontalRule' },
+    {
+      type: 'horizontalRule',
+    },
     {
       type: 'heading',
       attrs: {
         textAlign: null,
-        id: '678746d9-33a7-42a9-859f-3e88869eee24',
-        'data-toc-id': '678746d9-33a7-42a9-859f-3e88869eee24',
-        level: 2,
+        id: '6285c4e0-406a-4bf6-b87d-7c4e07d29ba4',
+        'data-toc-id': '6285c4e0-406a-4bf6-b87d-7c4e07d29ba4',
+        level: 3,
       },
       content: [
         {
           type: 'text',
-          marks: [{ type: 'textStyle', attrs: { color: 'var(--tw-prose-headings)', fontSize: '' } }],
-          text: 'Rending Math and ',
-        },
-        { type: 'inlineMath', attrs: { latex: '\\LaTeX' } },
-        {
-          type: 'text',
-          marks: [{ type: 'textStyle', attrs: { color: null, fontSize: '' } }],
-          text: '. ',
+          text: 'Code Blocks',
         },
       ],
     },
     {
       type: 'paragraph',
-      attrs: { textAlign: null },
+      attrs: {
+        textAlign: null,
+      },
       content: [
-        { type: 'text', text: 'The editor supports the' },
-        { type: 'inlineMath', attrs: { latex: '\\LaTeX' } },
-        { type: 'text', text: ' rendering. e.g.' },
+        {
+          type: 'text',
+          text: 'You can add a code block using ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '```python',
+        },
+        {
+          type: 'text',
+          text: ' (enter), or using ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '/',
+        },
+        {
+          type: 'text',
+          text: ' (slash command).',
+        },
+      ],
+    },
+    {
+      type: 'codeBlock',
+      attrs: {
+        language: 'go',
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'func twoSum(nums []int, target int) []int { \n\tvar res []int\n\tmp := make(map[int]int)\n\tfor idx, val := range nums {\n\t\ttoBeSearched := target - val\n\t\tif _, ok := mp[toBeSearched]; ok {\n\t\t\tres = append(res, mp[toBeSearched], idx)\n\t\t\tbreak\n\t\t}\n\t\tmp[val] = idx\n\t}\n\treturn res\n}',
+        },
+      ],
+    },
+    {
+      type: 'horizontalRule',
+    },
+    {
+      type: 'heading',
+      attrs: {
+        textAlign: null,
+        id: 'dfc1e2a9-351e-452f-9b1b-20e556999411',
+        'data-toc-id': 'dfc1e2a9-351e-452f-9b1b-20e556999411',
+        level: 3,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Medias and Placeholders',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'You can use urls and raw files to add medias like images, videos and audios. You can also embedd iframes. Use ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '/',
+        },
+        {
+          type: 'text',
+          text: ' (slash) command to access them. ',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+    },
+    {
+      type: 'image-placeholder',
+    },
+    {
+      type: 'image',
+      attrs: {
+        src: 'https://media.istockphoto.com/id/508030340/photo/sunny-cat.jpg?s=612x612&w=0&k=20&c=qkz-Mf32sbJnefRxpB7Fwpcxbp1fozYtJxbQoKvSeGM=',
+        alt: null,
+        title: 'Caption: This cat is just too cute',
+        width: '100%',
+        height: null,
+        align: 'center',
+      },
+    },
+    {
+      type: 'video-placeholder',
+    },
+    {
+      type: 'video',
+      attrs: {
+        src: 'https://cdn.pixabay.com/video/2016/09/22/5631-183849543_large.mp4',
+        alt: null,
+        title: 'This dog is just too cute, but is thirsty',
+        width: '100%',
+        height: null,
+        align: 'center',
+      },
+    },
+    {
+      type: 'audio-placeholder',
+    },
+    {
+      type: 'audio',
+      attrs: {
+        src: 'https://cdn.pixabay.com/audio/2024/10/30/audio_42e6870f29.mp3',
+        alt: null,
+        title: null,
+        width: '100%',
+        height: null,
+        align: 'left',
+      },
+    },
+    {
+      type: 'iframe-placeholder',
+    },
+    {
+      type: 'iframe',
+      attrs: {
+        src: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3748.5643876340596!2d75.17451197508399!3d20.026789421437474!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bdb93bd138ae4bd%3A0x574c6482cf0b89cf!2sEllora%20Caves!5e0!3m2!1sen!2sin!4v1766417703396!5m2!1sen!2sin',
+        alt: null,
+        title: 'Ellora Caves as ancient temples',
+        width: '100%',
+        height: null,
+        align: 'left',
+      },
+    },
+    {
+      type: 'horizontalRule',
+    },
+    {
+      type: 'heading',
+      attrs: {
+        textAlign: null,
+        id: 'c12f5108-ed9c-4d15-86a7-e46deeb815a5',
+        'data-toc-id': 'c12f5108-ed9c-4d15-86a7-e46deeb815a5',
+        level: 3,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Lists',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'We support 3 types of lists, un-ordered, ordered and task lists. You can use shortcuts to get them.',
+        },
+      ],
+    },
+    {
+      type: 'bulletList',
+      content: [
+        {
+          type: 'listItem',
+          content: [
+            {
+              type: 'paragraph',
+              attrs: {
+                textAlign: null,
+              },
+              content: [
+                {
+                  type: 'text',
+                  text: 'Use ',
+                },
+                {
+                  type: 'text',
+                  marks: [
+                    {
+                      type: 'code',
+                    },
+                  ],
+                  text: '-',
+                },
+                {
+                  type: 'text',
+                  text: ' then space bar to create unordered list',
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
       type: 'orderedList',
-      attrs: { start: 1, type: null },
+      attrs: {
+        start: 1,
+        type: null,
+      },
       content: [
         {
           type: 'listItem',
           content: [
             {
               type: 'paragraph',
-              attrs: { textAlign: null },
+              attrs: {
+                textAlign: null,
+              },
               content: [
                 {
                   type: 'text',
-                  marks: [{ type: 'textStyle', attrs: { color: 'rgb(165, 42, 42)', fontSize: '' } }],
-                  text: 'Functions like',
+                  text: 'Use ',
                 },
-                { type: 'text', text: ',' },
-                { type: 'inlineMath', attrs: { latex: 'sin² \\theta + cos² \\theta = 1' } },
+                {
+                  type: 'text',
+                  marks: [
+                    {
+                      type: 'code',
+                    },
+                  ],
+                  text: '1',
+                },
+                {
+                  type: 'text',
+                  text: ' then space bar to create unordered list',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'taskList',
+      content: [
+        {
+          type: 'taskItem',
+          attrs: {
+            checked: false,
+          },
+          content: [
+            {
+              type: 'paragraph',
+              attrs: {
+                textAlign: null,
+              },
+              content: [
+                {
+                  type: 'text',
+                  text: 'Use ',
+                },
+                {
+                  type: 'text',
+                  marks: [
+                    {
+                      type: 'code',
+                    },
+                  ],
+                  text: '[]',
+                },
+                {
+                  type: 'text',
+                  text: ' then space bar to create tasks list',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'taskItem',
+          attrs: {
+            checked: true,
+          },
+          content: [
+            {
+              type: 'paragraph',
+              attrs: {
+                textAlign: null,
+              },
+              content: [
+                {
+                  type: 'text',
+                  text: 'You can toggle them, but clicking on the box.',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'horizontalRule',
+    },
+    {
+      type: 'heading',
+      attrs: {
+        textAlign: null,
+        id: 'a8bae23b-0ef4-4b8b-b37b-a3379a54e153',
+        'data-toc-id': 'a8bae23b-0ef4-4b8b-b37b-a3379a54e153',
+        level: 3,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Math Expressions',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'You can insert math expressions by enclosing expressions with ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '$$',
+        },
+        {
+          type: 'text',
+          text: ' or using bubble menu. You can insert block expressions using ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'code',
+            },
+          ],
+          text: '/',
+        },
+        {
+          type: 'text',
+          text: ' (slash) commands (As ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'italic',
+            },
+          ],
+          text: 'block expressions',
+        },
+        {
+          type: 'text',
+          text: ').',
+        },
+      ],
+    },
+    {
+      type: 'blockMath',
+      attrs: {
+        latex:
+          '\\text{If } \\  \nM =\n\\begin{bmatrix}\na_{11} & a_{12} \\\\\na_{21} & a_{22} \\\\\na_{31} & a_{32}\n\\end{bmatrix};\n\n\\text{then its transpose is}\n;\\ \nM^{T} =\n\\begin{bmatrix}\na_{11} & a_{21} & a_{31} \\\\\na_{12} & a_{22} & a_{32}\n\\end{bmatrix}',
+      },
+    },
+    {
+      type: 'horizontalRule',
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'What More??…',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'You can check these notes, without even logging in.',
+        },
+      ],
+    },
+    {
+      type: 'orderedList',
+      attrs: {
+        start: 1,
+        type: null,
+      },
+      content: [
+        {
+          type: 'listItem',
+          content: [
+            {
+              type: 'paragraph',
+              attrs: {
+                textAlign: null,
+              },
+              content: [
+                {
+                  type: 'text',
+                  marks: [
+                    {
+                      type: 'link',
+                      attrs: {
+                        href: 'https://www.nota.ink/note-preview-cd6b66a2-c6f9-43c2-b6ea-57e1512c95fd',
+                        target: '_tab',
+                        rel: 'noopener noreferrer nofollow',
+                        class: null,
+                      },
+                    },
+                  ],
+                  text: 'Probability Note',
+                },
               ],
             },
           ],
@@ -486,50 +1243,42 @@ export default {
           content: [
             {
               type: 'paragraph',
-              attrs: { textAlign: null },
+              attrs: {
+                textAlign: null,
+              },
               content: [
                 {
                   type: 'text',
-                  marks: [{ type: 'highlight', attrs: { color: '#A52A2A' } }],
-                  text: 'Matrix like unit matrix',
+                  marks: [
+                    {
+                      type: 'link',
+                      attrs: {
+                        href: 'https://www.nota.ink/note-preview-ad5176fd-147b-4f52-9292-c087c11bd079',
+                        target: '_tab',
+                        rel: 'noopener noreferrer nofollow',
+                        class: null,
+                      },
+                    },
+                  ],
+                  text: 'Matrices',
                 },
               ],
             },
-            {
-              type: 'paragraph',
-              attrs: { textAlign: null },
-              content: [
-                {
-                  type: 'inlineMath',
-                  attrs: { latex: '\\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}' },
-                },
-              ],
-            },
-            {
-              type: 'paragraph',
-              attrs: { textAlign: null },
-              content: [{ type: 'text', text: 'or more matrices like' }],
-            },
-            {
-              type: 'blockMath',
-              attrs: {
-                latex:
-                  '\\begin{pmatrix} 1 & 0 & \\cdots & 0 \\\\ 0 & 1 & \\cdots & 0 \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ 0 & 0 & \\cdots & 1 \\end{pmatrix}',
-              },
-            },
-            { type: 'paragraph', attrs: { textAlign: null } },
           ],
         },
       ],
     },
     {
       type: 'paragraph',
-      attrs: { textAlign: null },
-      content: [{ type: 'text', text: 'Explore More…' }],
+      attrs: {
+        textAlign: null,
+      },
     },
-    { type: 'paragraph', attrs: { textAlign: null } },
-    { type: 'paragraph', attrs: { textAlign: null } },
-    { type: 'paragraph', attrs: { textAlign: null } },
-    { type: 'paragraph', attrs: { textAlign: null } },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+    },
   ],
 };

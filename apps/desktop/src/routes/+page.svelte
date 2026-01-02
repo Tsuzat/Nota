@@ -19,7 +19,6 @@ import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import { ISMACOS, ISWINDOWS, timeAgo } from '$lib/utils';
-
 const sidebar = useSidebar();
 const localUserWorkspaces = getLocalUserWorkspaces();
 const cloudUserWorkspaces = getUserWorkspacesContext();
@@ -69,76 +68,84 @@ async function handleDelete(workspace: LocalUserWorkspace | UserWorkspace) {
 </script>
 
 {#if currentUserWorkspace === null}
-	<h2>No User Workspace Selected</h2>
+  <h2>No User Workspace Selected</h2>
 {:else}
-	<header class="flex h-12 shrink-0 items-center gap-2">
-		<div
-			class={cn(
-				'z-20 ml-18 flex items-center gap-2 px-3',
-				ISMACOS && !sidebar.open && 'ml-18',
-				ISWINDOWS || sidebar.open && 'ml-0',
-			)}
-		>
-			{#if ISWINDOWS && !sidebar.open}
-				<AppLogoMenu />
-			{/if}
-			<SidebarTrigger />
-			<BackAndForthButtons />
-			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
-			<h3>{currentUserWorkspace?.name}</h3>
-		</div>
-		<div class={cn('z-20 ml-auto px-3', ISWINDOWS && 'mr-30')}></div>
-		{#if ISWINDOWS}
-			<WindowsButtons />
-		{/if}
-	</header>
-	<div
-		class="mx-auto flex h-[calc(100vh-3rem)] w-full max-w-3xl flex-1 grow flex-col gap-8 overflow-auto"
-	>
-		<section class="my-2 flex w-full flex-col items-start gap-4 p-2">
-			<div class="text-muted-foreground flex w-full items-center gap-2">
-				<h4>User Workspaces</h4>
-				<span class="text-foreground text-sm">{userWorkspaces.length}</span>
-				<SimpleToolTip content="Add New UserWorkspace">
-					<Button
-						variant="ghost"
-						class="size-7 rounded-full"
-						onclick={() => (useNewUserWorkspace.open = true)}
-					>
-						<icons.Plus />
-					</Button>
-				</SimpleToolTip>
-			</div>
-			<div class="flex w-full items-center gap-2 overflow-x-auto">
-				{#each userWorkspaces as workspace (workspace.id)}
-					<DropdownMenu.Root>
-						<DropdownMenu.Trigger
-							class={buttonVariants({
-								variant: 'secondary',
-								class: cn(
-									'w-fit rounded-lg p-6!',
-									currentUserWorkspace?.id === workspace.id && 'border-primary border'
-								)
-							})}
-							disabled={currentUserWorkspace?.id === workspace.id}
-						>
-							<IconRenderer icon={workspace.icon} class="mr-2 size-4" />
-							<span class="text-muted-foreground">{workspace.name}</span>
-							<icons.ChevronDown class="text-muted-foreground size-2!" />
-						</DropdownMenu.Trigger>
-						<DropdownMenu.Content>
-							<DropdownMenu.Item variant="destructive" onclick={() => handleDelete(workspace)}>
-								<icons.Trash />
-								Delete
-							</DropdownMenu.Item>
-						</DropdownMenu.Content>
-					</DropdownMenu.Root>
-				{/each}
-				{#if userWorkspaces.length === 0}
-					<span class="text-muted-foreground">No Userworkspaces are found.</span>
-				{/if}
-			</div>
-		</section>
+  <header class="flex h-12 shrink-0 items-center gap-2">
+    <div
+      class={cn(
+        "z-20 ml-18 flex items-center gap-2 px-3",
+        ISMACOS && !sidebar.open && "ml-18",
+        ISWINDOWS || (sidebar.open && "ml-0")
+      )}
+    >
+      {#if ISWINDOWS && !sidebar.open}
+        <AppLogoMenu />
+      {/if}
+      <SidebarTrigger />
+      <BackAndForthButtons />
+      <Separator
+        orientation="vertical"
+        class="mr-2 data-[orientation=vertical]:h-4"
+      />
+      <h3>{currentUserWorkspace?.name}</h3>
+    </div>
+    <div class={cn("z-20 ml-auto px-3", ISWINDOWS && "mr-30")}></div>
+    {#if ISWINDOWS}
+      <WindowsButtons />
+    {/if}
+  </header>
+  <div
+    class="mx-auto flex h-[calc(100vh-3rem)] w-full max-w-3xl flex-1 grow flex-col gap-8 overflow-auto"
+  >
+    <section class="my-2 flex w-full flex-col items-start gap-4 p-2">
+      <div class="text-muted-foreground flex w-full items-center gap-2">
+        <h4>User Workspaces</h4>
+        <span class="text-foreground text-sm">{userWorkspaces.length}</span>
+        <SimpleToolTip content="Add New UserWorkspace">
+          <Button
+            variant="ghost"
+            class="size-7 rounded-full"
+            onclick={() => (useNewUserWorkspace.open = true)}
+          >
+            <icons.Plus />
+          </Button>
+        </SimpleToolTip>
+      </div>
+      <div class="flex w-full items-center gap-2 overflow-x-auto">
+        {#each userWorkspaces as workspace (workspace.id)}
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger
+              class={buttonVariants({
+                variant: "secondary",
+                class: cn(
+                  "w-fit rounded-lg p-6!",
+                  currentUserWorkspace?.id === workspace.id &&
+                    "border-primary border"
+                ),
+              })}
+              disabled={currentUserWorkspace?.id === workspace.id}
+            >
+              <IconRenderer icon={workspace.icon} class="mr-2 size-4" />
+              <span class="text-muted-foreground">{workspace.name}</span>
+              <icons.ChevronDown class="text-muted-foreground size-2!" />
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content>
+              <DropdownMenu.Item
+                variant="destructive"
+                onclick={() => handleDelete(workspace)}
+              >
+                <icons.Trash />
+                Delete
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        {/each}
+        {#if userWorkspaces.length === 0}
+          <span class="text-muted-foreground">No Userworkspaces are found.</span
+          >
+        {/if}
+      </div>
+    </section>
 
 		<section class="my-2 flex w-full flex-col items-start gap-4 p-2">
 			<h4 class="text-foreground flex items-center gap-2">
@@ -161,7 +168,7 @@ async function handleDelete(workspace: LocalUserWorkspace | UserWorkspace) {
 									<div
 										class="bg-secondary/50 flex size-8 shrink-0 items-center justify-center rounded-md"
 									>
-										<IconRenderer icon={recent.icon ?? "lucide:File"} class="size-4" />
+										<IconRenderer icon={recent.icon} class="size-4" />
 									</div>
 									<Card.Title class="line-clamp-1 text-base font-medium">
 										{recent.name}
@@ -174,7 +181,7 @@ async function handleDelete(workspace: LocalUserWorkspace | UserWorkspace) {
 								<div class="text-muted-foreground flex items-center justify-between text-xs">
 									<div class="flex items-center gap-1">
 										<icons.Clock class="size-3" />
-										{"owner" in recent ? timeAgo(recent.updatedAt?.toString() ?? ""): timeAgo(recent.updated_at)}
+										{timeAgo(recent.updated_at)}
 									</div>
 								</div>
 							</div>

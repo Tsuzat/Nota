@@ -55,7 +55,7 @@ async function openFileDialog() {
   contenteditable="false"
   class={buttonVariants({
     variant: "secondary",
-    class: "media-placeholder relative my-2 w-full justify-start p-6",
+    class: "media-placeholder relative my-4! w-full justify-start p-6",
   })}
   style="user-select: none;"
   draggable={true}

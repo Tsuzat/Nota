@@ -25,7 +25,12 @@ import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
+import { type CloudNote, useCloudNotes } from '$lib/supabase/db/cloudnotes.svelte.js';
+import { supabase } from '$lib/supabase/index.js';
+import { getAssetsByFileType, uploadFile, uploadFileByPath, uploadLocalFile } from '$lib/supabase/storage.js';
+import { getSessionAndUserContext } from '$lib/supabase/user.svelte.js';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
+import { uploadFile, uploadFileByPath, uploadLocalFile, getAssetsByFileType } from '$lib/storage/index.js';
 
 const { data } = $props();
 
@@ -43,8 +48,8 @@ let syncedContent = $state<Content>();
 let isDirty = $state(false);
 
 // cloud related
-const cloudNotes = getNotesContext();
-const cloudStorage = getStorageContext();
+const cloudNotes = useCloudNotes();
+const user = $derived(getSessionAndUserContext().getUser());
 const useGlobalSettings = getGlobalSettings();
 
 // notes related
@@ -53,46 +58,21 @@ let note = $state<Note>();
 let syncing = $state(false);
 let syncingText = $state('');
 
-const onFileSelect = async (path: string) => {
-  const bytes = await readFile(path);
-  const name = await basename(path);
-  const extension = getFileTypeFromExtension(name);
-  if (extension === null) {
-    throw new Error('Unsupported file is being uploaded. Rejected the Upload.');
-  }
-  const file = new File([bytes], name, { type: extension });
-  return await cloudStorage.upload(file);
-};
-const onDropOrPaste = async (file: File) => await cloudStorage.upload(file);
-const getAssets = async (fileType: FileType) => {
-  const files = cloudStorage.files;
-  const extensions = new Set(getFileTypeExtensions(fileType));
-  const assets: string[] = [];
-  for (const file of files) {
-    const key = file.key;
-    const fileExtension = key.split('.').pop();
-    if (fileExtension !== undefined && extensions.has(fileExtension)) {
-      assets.push(file.url);
-    }
-  }
-  return assets;
-};
-const getLocalFile = async (fileType: FileType) => {
-  const extensions = getFileTypeExtensions(fileType);
-  const file = await open({
-    title: 'Select File',
-    multiple: false,
-    directory: false,
-    filters: [
-      {
-        name: 'Select File',
-        extensions,
-      },
-    ],
-  });
-  if (!file) return null;
-  return await onFileSelect(file);
-};
+const onFileSelect = $derived.by(() => {
+  if (user) return (file: string) => uploadFileByPath(user.id, file);
+});
+
+const onDropOrPaste = $derived.by(() => {
+  if (user) return (file: File) => uploadFile(user.id, file);
+});
+
+const getAssets = $derived.by(() => {
+  if (user) return async (fileType: FileType) => getAssetsByFileType(user.id, fileType);
+});
+
+const getLocalFile = $derived.by(() => {
+  if (user) return async (fileType: FileType) => uploadLocalFile(user.id, fileType);
+});
 
 async function saveNoteContent() {
   if (!isDirty || note === undefined || editor === undefined) return;
