@@ -18,7 +18,7 @@ import User from '@lucide/svelte/icons/user';
 import UserRound from '@lucide/svelte/icons/user-round';
 import X from '@lucide/svelte/icons/x';
 import Zap from '@lucide/svelte/icons/zap';
-import { getAuthContext } from '@nota/client';
+import { getAuthContext, sendToPaymentPortal } from '@nota/client';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
@@ -33,7 +33,6 @@ import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svel
 import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
 import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
-import { sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
 
 const auth = getAuthContext();
