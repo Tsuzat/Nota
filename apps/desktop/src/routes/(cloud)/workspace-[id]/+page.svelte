@@ -10,6 +10,7 @@ import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import { Separator } from '@nota/ui/shadcn/separator';
 import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
@@ -17,7 +18,6 @@ import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { ISMACOS, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
-import { ask } from '@tauri-apps/plugin-dialog';
 
 let { data } = $props();
 

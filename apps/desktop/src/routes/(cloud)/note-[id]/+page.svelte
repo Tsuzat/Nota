@@ -26,7 +26,6 @@ import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
-import { id } from 'zod/locales';
 
 const { data } = $props();
 
