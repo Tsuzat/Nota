@@ -1,9 +1,11 @@
 import { zValidator } from '@hono/zod-validator';
 import { and, eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { getCookie } from 'hono/cookie';
 import { z } from 'zod';
 import { DB } from '../../db';
-import { notes } from '../../db/schema';
+import { notes, sessions } from '../../db/schema';
+import { verifyAccessToken } from '../../lib/jwt';
 import { logerror } from '../../logging';
 import type { Variables } from '..';
 import { authMiddleware } from '../middlewares/auth';
@@ -11,11 +13,13 @@ import { authMiddleware } from '../middlewares/auth';
 const app = new Hono<{ Variables: Variables }>();
 
 // Public endpoint to get note content if it is public
-app.get('/public/:id', async (c) => {
+// or if the user is authenticated and is the owner
+app.get('/:id/preview', async (c) => {
   const noteId = c.req.param('id');
   try {
+    // 1. Fetch the note first
     const note = await DB.query.notes.findFirst({
-      where: and(eq(notes.id, noteId), eq(notes.isPublic, true)),
+      where: eq(notes.id, noteId),
       columns: {
         id: true,
         name: true,
@@ -24,17 +28,46 @@ app.get('/public/:id', async (c) => {
         createdAt: true,
         updatedAt: true,
         isPublic: true,
+        owner: true,
       },
     });
 
     if (!note) {
-      return c.json({ error: 'Note not found or not public' }, 404);
+      return c.json({ error: 'Note not found' }, 404);
+    }
+
+    // 2. If public, return immediately
+    if (note.isPublic) {
+      return c.json(note);
+    }
+
+    // 3. If private, check auth
+    let token = getCookie(c, 'access_token');
+    if (!token) {
+      token = c.req.header('Authorization')?.split(' ')[1];
+    }
+    if (!token) {
+      return c.json({ error: 'Unauthorized: Private note and no token provided' }, 401);
+    }
+
+    const payload = await verifyAccessToken(token);
+    // Check session
+    const session = await DB.query.sessions.findFirst({
+      where: eq(sessions.id, payload.sessionId),
+    });
+    if (!session || session.revoked || session.expiresAt < new Date()) {
+      return c.json({ error: 'Session not found or revoked' }, 401);
+    }
+
+    // 4. Check ownership
+    if (note.owner !== payload.sub) {
+      return c.json({ error: 'Unauthorized: You are not the owner of this note' }, 403);
     }
 
     return c.json(note);
   } catch (error) {
-    logerror('Error fetching public note:', error);
-    return c.json({ error: 'Failed to fetch public note' }, 500);
+    logerror('Error fetching preview note:', error);
+    return c.json({ error: 'Failed to fetch note' }, 500);
   }
 });
 
