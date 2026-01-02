@@ -83,6 +83,15 @@ const createSchema = z.object({
   isFavorite: z.boolean().optional(),
 });
 
+// Schema for importing a note
+const importSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  icon: z.string().default('📝'),
+  userworkspaceId: z.uuid('Userworkspace ID is required'),
+  workspaceId: z.uuid('Workspace ID is required'),
+  content: z.record(z.string(), z.any()).default({}),
+});
+
 // Schema for updating a note (Metadata only)
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -259,6 +268,7 @@ app.patch('/:id', zValidator('json', updateSchema), async (c) => {
   }
 });
 
+// 7. Duplicate note by id
 app.post('/:id/duplicate', async (c) => {
   const userId = c.get('userId');
   const noteId = c.req.param('id');
@@ -275,6 +285,41 @@ app.post('/:id/duplicate', async (c) => {
   } catch (error) {
     logerror('Error duplicating note:', error);
     return c.json({ error: 'Failed to duplicate note' }, 500);
+  }
+});
+
+// 8. Import Note
+app.post('/import', zValidator('json', importSchema), async (c) => {
+  const userId = c.get('userId');
+  const body = c.req.valid('json');
+
+  try {
+    const [newNote] = await DB.insert(notes)
+      .values({
+        name: body.name,
+        workspace: body.workspaceId,
+        userworkspace: body.userworkspaceId,
+        owner: userId,
+        icon: body.icon,
+        content: body.content,
+      })
+      .returning({
+        id: notes.id,
+        name: notes.name,
+        icon: notes.icon,
+        workspace: notes.workspace,
+        userworkspace: notes.userworkspace,
+        owner: notes.owner,
+        favorite: notes.favorite,
+        trashed: notes.trashed,
+        createdAt: notes.createdAt,
+        updatedAt: notes.updatedAt,
+      });
+
+    return c.json(newNote, 201);
+  } catch (error) {
+    logerror('Error importing note:', error);
+    return c.json({ error: 'Failed to import note' }, 500);
   }
 });
 
