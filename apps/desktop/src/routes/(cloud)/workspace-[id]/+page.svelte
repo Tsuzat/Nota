@@ -53,7 +53,6 @@ async function moveToWorkspace(note: Note, newWorkspace: Workspace) {
 }
 
 async function exportNote(note: Note) {
-  toast.warning('To be implemented..');
   const id = toast.loading(`Exporting ${note.name}`);
   try {
     const content: Content = await cloudNotes.fetchContent(note.id);
@@ -66,7 +65,6 @@ async function exportNote(note: Note) {
 }
 
 async function importNote() {
-  toast.warning('To be implemented..');
   //   const id = toast.loading('Importing note...');
   //   const data = await importNotes(undefined, true);
   //   if (!data) {

@@ -173,6 +173,24 @@ class Notes {
       throw new Error(await res.text());
     }
   }
+
+  async import(name: string, icon: string, workspaceId: string, userworkspaceId: string, content: any) {
+    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/import`;
+    const res = await request(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, icon, workspaceId, userworkspaceId, content }),
+    });
+    if (res.ok) {
+      const importedNote = (await res.json()) as Note;
+      const parsedNote = NoteSchema.parse(importedNote);
+      this.notes.push(parsedNote);
+    } else {
+      throw new Error(await res.text());
+    }
+  }
 }
 
 const NOTANOTESKEY = Symbol('NOTANOTESKEY');
