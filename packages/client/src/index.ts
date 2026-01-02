@@ -7,3 +7,4 @@ export type { NotaFile, Note, Session, User, UserWorkspace, Workspace } from './
 export { NotaFileSchema, NoteSchema, SessionSchema, UserSchema, UserWorkspaceSchema, WorkspaceSchema } from './types';
 export { getUserWorkspacesContext, setUserWorkspacesContext } from './userworkspaces.svelte';
 export { getWorkspacesContext, setWorkspacesContext } from './workspaces.svelte';
+export { sendToPaymentPortal } from './payment';
