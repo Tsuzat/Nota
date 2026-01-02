@@ -498,8 +498,7 @@ const faqItems = [
               {/each}
             </ul>
           </Card.Content>
-          <Card.Footer class="mt-auto flex flex-col gap-1">
-            <Button class="w-full" variant="outline" href="/api/getai-credits">Get Free 5K AI Credits</Button>
+          <Card.Footer class="mt-auto flex flex-col gap-1"> 
             <Button
               class="w-full"
               variant="outline"
