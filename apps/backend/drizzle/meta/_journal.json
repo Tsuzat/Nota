@@ -50,6 +50,13 @@
       "when": 1767109968611,
       "tag": "0006_fat_johnny_blaze",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1767376900343,
+      "tag": "0007_glossy_hairball",
+      "breakpoints": true
     }
   ]
 }

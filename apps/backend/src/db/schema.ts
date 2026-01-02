@@ -50,7 +50,7 @@ export const userworkspaces = pgTable('userworkspaces', {
   id: uuid().primaryKey().defaultRandom(),
   icon: text('icon').notNull(),
   name: text('name'),
-  owner: uuid('owner').references(() => users.id),
+  owner: uuid('owner').references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
