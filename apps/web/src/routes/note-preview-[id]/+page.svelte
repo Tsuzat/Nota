@@ -9,12 +9,12 @@ import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { logerror, logwarn } from '$lib/sentry/index.js';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { logerror } from '$lib/sentry/index.js';
 
+const { data } = $props();
 let content = $state<Content>();
 let isLoading = $state(false);
-const { data } = $props();
-const supabase = $derived(data.supabase);
 let name = $state<string>();
 let icon = $state<string>();
 
@@ -25,11 +25,9 @@ $effect(() => {
 async function loadData(id: string) {
   isLoading = true;
   try {
-    const { data, error } = await supabase.from('notes').select('icon, name, content').eq('id', id).single();
-    if (error) {
-      logwarn('Error when loading note preview', { error });
-      toast.error(error.details);
-    } else {
+    const res = await fetch(`${PUBLIC_BACKEND_URL}/api/db/notes/${id}/preview`);
+    if (res.ok) {
+      const data = await res.json();
       name = data.name;
       icon = data.icon;
       content = data.content;

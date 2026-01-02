@@ -1,6 +1,8 @@
 <script lang="ts">
 import { BorderBeam, SimpleToolTip, ToggleMode } from '@lib/components/custom';
+import { Menu } from '@lucide/svelte';
 import BookOpen from '@lucide/svelte/icons/book-open';
+import Check from '@lucide/svelte/icons/check';
 import Code from '@lucide/svelte/icons/code';
 import Github from '@lucide/svelte/icons/github';
 import GraduationCap from '@lucide/svelte/icons/graduation-cap';
@@ -16,6 +18,7 @@ import User from '@lucide/svelte/icons/user';
 import UserRound from '@lucide/svelte/icons/user-round';
 import X from '@lucide/svelte/icons/x';
 import Zap from '@lucide/svelte/icons/zap';
+import { getAuthContext } from '@nota/client';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
@@ -30,13 +33,11 @@ import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svel
 import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
 import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
-
-const { data } = $props();
-
-import { Menu } from '@lucide/svelte';
-import Check from '@lucide/svelte/icons/check';
 import { sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
+
+const auth = getAuthContext();
+const user = $derived(auth.user);
 
 const pricingList = {
   monthly: [
@@ -90,8 +91,6 @@ const faqItems = [
       'Yes, You can. Using AI features has nothing to do with having pro plan. You can simply login and buy AI Credits and then you can simply use the AI features.',
   },
 ];
-
-const user = $derived(data.session?.user);
 </script>
 
 <Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
@@ -152,7 +151,7 @@ const user = $derived(data.session?.user);
                 class: "rounded-full",
               })}
             >
-              <Avatar.Image src={user.user_metadata["avatar_url"]} />
+              <Avatar.Image src={user.avatarUrl} />
               <Avatar.Fallback>
                 <User />
               </Avatar.Fallback>
@@ -167,7 +166,7 @@ const user = $derived(data.session?.user);
             <UserRound />
             <span>Profile</span>
           </Dropdown.Item>
-          <Dropdown.Item onclick={() => goto(resolve("/signout"))}>
+          <Dropdown.Item onclick={async() => await auth.logout()}>
             <LogOut />
             Sign Out
           </Dropdown.Item>

@@ -1,15 +1,14 @@
 <script lang="ts">
+import { getAuthContext } from '@nota/client';
 import Github from '@nota/ui/icons/customs/github.svelte';
 import Google from '@nota/ui/icons/customs/google.svelte';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { onMount } from 'svelte';
 import Particles from '$lib/components/custom/utils/particles.svelte';
-import { signInWithOAuth } from '$lib/supabase/index.js';
-
-const { data } = $props();
 
 let ref = $state<HTMLDivElement>();
+const auth = getAuthContext();
 
 // variables for animation
 let mouseX = $state(0);
@@ -80,7 +79,7 @@ onMount(() => {
 							variant="outline"
 							size="lg"
 							class="w-full"
-							onclick={() => signInWithOAuth(data.supabase, 'google')}
+							onclick={() => auth.signInWithOAuth('google')}
 						>
 							<Google class="size-4" />
 							Login with Google
@@ -89,7 +88,7 @@ onMount(() => {
 							variant="outline"
 							size="lg"
 							class="w-full"
-							onclick={() => signInWithOAuth(data.supabase, 'github')}
+							onclick={() => auth.signInWithOAuth('github')}
 						>
 							<Github class="size-4" />
 							Sign up with Github

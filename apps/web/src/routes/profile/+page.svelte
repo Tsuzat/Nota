@@ -2,24 +2,30 @@
 import ProBadge from '@lib/components/custom/ProBadge.svelte';
 import LogOut from '@lucide/svelte/icons/log-out';
 import Trash2 from '@lucide/svelte/icons/trash-2';
+import { getAuthContext } from '@nota/client';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { resolve } from '$app/paths';
 
-const { data } = $props();
+const auth = getAuthContext();
+const user = $derived(auth.user);
 
-const isPro = $derived((data.profile?.subscription_tier || 'free') === 'pro');
-const ai_credits = $derived(data.profile?.ai_credits);
-const external_customer_id = $derived(data.profile?.external_customer_id);
-const user = $derived(data.user);
-const sub_type = $derived(data.profile?.subscription_type || undefined);
+const isPro = $derived((user?.subscriptionPlan || 'free') === 'pro');
+const ai_credits = $derived(user?.aiCredits || 0);
+const external_customer_id = $derived(user?.externalCustomerId);
+const sub_type = $derived(user?.subscriptionPlan || undefined);
 
 function handleDeleteAccount() {
   toast.warning('Account Deletion is coming soon.');
 }
 </script>
+
+{#if !user}
+  <main class="container mx-auto max-w-4xl p-4 md:p-8">
+    <h2>Please sign in to view your profile.</h2>
+  </main>
+{:else}
 
 <div class="container mx-auto max-w-4xl p-4 md:p-8">
   <div class="mb-8">
@@ -36,21 +42,20 @@ function handleDeleteAccount() {
       <Card.Content class="grid gap-6">
         <div class="flex items-center gap-4">
           <Avatar.Root class="h-16 w-16">
-            {#if user?.user_metadata.avatar_url}
+            {#if user.avatarUrl}
               <Avatar.Image
-                src={user.user_metadata.avatar_url}
-                alt={user.user_metadata.full_name}
+                src={user.avatarUrl}
+                alt={user.name}
               />
             {/if}
             <Avatar.Fallback>
-              {user?.user_metadata.full_name?.charAt(0) ??
-                user?.email?.charAt(0)?.toUpperCase()}
+              {user.name?.charAt(0) ?? user.email.charAt(0)?.toUpperCase()}
             </Avatar.Fallback>
           </Avatar.Root>
           <div class="grid gap-1">
             <div class="text-xl font-semibold flex items-center gap-2">
               <span>
-                {user?.user_metadata.full_name ?? "No Name"}
+                {user.name ?? "No Name"}
               </span>
               {#if isPro}
                 <ProBadge text={sub_type} />
@@ -62,7 +67,7 @@ function handleDeleteAccount() {
         <div class="grid gap-2">
           <div class="text-sm font-medium">Account created</div>
           <div class="text-muted-foreground text-sm">
-            {new Date(user?.created_at ?? "").toLocaleDateString("en-US", {
+            {new Date(user.createdAt ?? "").toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -90,7 +95,7 @@ function handleDeleteAccount() {
             Manage Your Subs
           </Button>
         {/if}
-        <Button href={resolve("/signout")} variant="outline">
+        <Button onclick={() => auth.logout()} variant="outline">
           <LogOut class="mr-2 h-4 w-4" />
           Sign Out
         </Button>
@@ -121,3 +126,5 @@ function handleDeleteAccount() {
     </Card.Root>
   </div>
 </div>
+
+{/if}
