@@ -38,8 +38,8 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
   // 2. Initial Request
   let response = await fetchFn(url, currentOptions);
 
-  // 3. Handle 401 (Auto-Refresh)
-  if (response.status === 401) {
+  // 3. Handle 403 (Auto-Refresh) if access token expired or invalid
+  if (response.status === 403) {
     if (url.includes('/auth/refresh')) {
       return response;
     }

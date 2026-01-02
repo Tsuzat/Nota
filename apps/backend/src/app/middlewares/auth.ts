@@ -40,6 +40,6 @@ export const authMiddleware = async (c: Context, next: Next) => {
     await next();
   } catch (e) {
     logerror('Error verifying token:', e);
-    return c.json({ error: 'Invalid or expired token' }, 401);
+    return c.json({ error: 'Invalid or expired token' }, 403);
   }
 };
