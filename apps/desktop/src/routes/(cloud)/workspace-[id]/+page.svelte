@@ -16,13 +16,15 @@ import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
 import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
+import { useCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte.js';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { ISMACOS, ISWINDOWS, timeAgo, writeStringToFile } from '$lib/utils';
+import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
 
 let { data } = $props();
 
 const cloudWorkspaces = getWorkspacesContext();
 const cloudNotes = getNotesContext();
+const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
 
 // Derived state
 const workspace = $derived(cloudWorkspaces.workspaces.find((w) => w.id === data.id));
@@ -65,18 +67,31 @@ async function exportNote(note: Note) {
 }
 
 async function importNote() {
-  //   const id = toast.loading('Importing note...');
-  //   const data = await importNotes(undefined, true);
-  //   if (!data) {
-  //     toast.error('Something went wrong. We could not import the note.', { id });
-  //     return;
-  //   }
-  //   if (!workspace) {
-  //     toast.error('Workspace not found.', { id });
-  //     return;
-  //   }
-  //   toast.info('Pushing note to cloud...', { id });
-  //   await cloudNotes.create();
+  const id = toast.loading('Importing note...');
+  if (!currentUserWorkspace) {
+    toast.error('Current user workspace not found.', { id });
+    return;
+  }
+  if (!workspace) {
+    toast.error('Workspace not found.', { id });
+    return;
+  }
+  if (workspace.userworkspace !== currentUserWorkspace.id) {
+    toast.error('You can only import notes to your current workspace.', { id });
+    return;
+  }
+  const data = await importNotes(undefined, true);
+  if (!data) {
+    toast.error('Something went wrong. We could not import the note.', { id });
+    return;
+  }
+  if (!workspace) {
+    toast.error('Workspace not found.', { id });
+    return;
+  }
+  toast.loading('Pushing note to cloud...', { id });
+  await cloudNotes.import(data.name, workspace.id, currentUserWorkspace.id, data.content);
+  toast.success('Note pushed to cloud.', { id });
 }
 </script>
 

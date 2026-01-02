@@ -86,7 +86,6 @@ const createSchema = z.object({
 // Schema for importing a note
 const importSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  icon: z.string().default('📝'),
   userworkspaceId: z.uuid('Userworkspace ID is required'),
   workspaceId: z.uuid('Workspace ID is required'),
   content: z.record(z.string(), z.any()).default({}),
@@ -300,7 +299,6 @@ app.post('/import', zValidator('json', importSchema), async (c) => {
         workspace: body.workspaceId,
         userworkspace: body.userworkspaceId,
         owner: userId,
-        icon: body.icon,
         content: body.content,
       })
       .returning({
@@ -315,7 +313,6 @@ app.post('/import', zValidator('json', importSchema), async (c) => {
         createdAt: notes.createdAt,
         updatedAt: notes.updatedAt,
       });
-
     return c.json(newNote, 201);
   } catch (error) {
     logerror('Error importing note:', error);

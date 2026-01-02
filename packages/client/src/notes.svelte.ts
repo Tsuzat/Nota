@@ -174,17 +174,17 @@ class Notes {
     }
   }
 
-  async import(name: string, icon: string, workspaceId: string, userworkspaceId: string, content: any) {
+  async import(name: string, workspaceId: string, userworkspaceId: string, content: any) {
     const url = `${PUBLIC_BACKEND_URL}/api/db/notes/import`;
     const res = await request(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, icon, workspaceId, userworkspaceId, content }),
+      body: JSON.stringify({ name, workspaceId, userworkspaceId, content }),
     });
     if (res.ok) {
-      const importedNote = (await res.json()) as Note;
+      const importedNote = await res.json();
       const parsedNote = NoteSchema.parse(importedNote);
       this.notes.push(parsedNote);
     } else {
