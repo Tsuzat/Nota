@@ -13,6 +13,7 @@ import {
 import { type Editor, EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '@nota/ui/edra/shadcn/index.ts';
 import type { FileType } from '@nota/ui/edra/utils.ts';
 import { onMount } from 'svelte';
+import AI from '$lib/editor/Ai.svelte';
 import defalutContent from './demo';
 
 let content = $state(defalutContent);
@@ -45,8 +46,8 @@ onMount(() => {
     <DialogTitle>Some Features May Not Work</DialogTitle>
     <DialogDescription>
       This is a playgroud. This is to give you an experience of Nota and it's
-      features. But, Some features may not work, like AI, Media Uploads, and
-      some more features.
+      features. But, Some features may not work like Media Uploads, and
+      some more features. Please be logged in to use AI features.
     </DialogDescription>
     <DialogFooter>
       <DialogClose class={buttonVariants({})}>Close</DialogClose>
@@ -65,6 +66,7 @@ onMount(() => {
   {#if editor && !editor?.isDestroyed}
     <EdraBubbleMenu {editor} />
     <EdraDragHandleExtended {editor} />
+    <AI {editor} />
   {/if}
   <EdraEditor
     bind:editor
