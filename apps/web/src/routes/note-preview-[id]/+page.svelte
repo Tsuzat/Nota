@@ -1,5 +1,6 @@
 <script lang="ts">
 import Printer from '@lucide/svelte/icons/printer';
+import { request } from '@nota/client';
 import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
 import { EdraEditor } from '@nota/ui/edra/shadcn/index.ts';
 import type { Content } from '@nota/ui/edra/types.js';
@@ -25,7 +26,7 @@ $effect(() => {
 async function loadData(id: string) {
   isLoading = true;
   try {
-    const res = await fetch(`${PUBLIC_BACKEND_URL}/api/db/notes/${id}/preview`);
+    const res = await request(`${PUBLIC_BACKEND_URL}/api/db/notes/${id}/preview`);
     if (res.ok) {
       const data = await res.json();
       name = data.name;

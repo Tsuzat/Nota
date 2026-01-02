@@ -22,6 +22,7 @@ export const authMiddleware = async (c: Context, next: Next) => {
       where: eq(sessions.id, payload.sessionId),
     });
     if (!session || session.revoked || session.expiresAt < new Date()) {
+      logwarn('Session not found or revoked');
       return c.json({ error: 'Session not found or revoked' }, 401);
     }
     // Fetch user details for storage/credits
@@ -29,6 +30,7 @@ export const authMiddleware = async (c: Context, next: Next) => {
       where: eq(users.id, payload.sub),
     });
     if (!user) {
+      logwarn('User not found');
       return c.json({ error: 'User not found' }, 401);
     }
     c.set('userId', payload.sub);
