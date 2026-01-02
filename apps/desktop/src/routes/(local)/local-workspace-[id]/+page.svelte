@@ -180,12 +180,10 @@ async function importNote() {
 				>
 					<Card.Header class="pb-2">
 						<div class="flex items-start justify-between gap-2">
-							<div class="flex items-center gap-2">
-								<div
-									class="bg-secondary/50 flex size-8 shrink-0 items-center justify-center rounded-md"
-								>
-									<IconRenderer icon={note.icon} class="size-4" />
-								</div>
+							<div class="flex items-center gap-2">	
+								<Button variant="ghost" size="icon" class="bg-muted">
+									<IconRenderer icon={note.icon} />
+								</Button>
 								<Card.Title class="line-clamp-1 text-base font-medium">
 									{note.name}
 								</Card.Title>

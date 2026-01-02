@@ -58,12 +58,33 @@ async function exportNote(note: Note) {
   const id = toast.loading(`Exporting ${note.name}`);
   try {
     const content: Content = await cloudNotes.fetchContent(note.id);
-    await writeStringToFile(JSON.stringify(data), `${note.name}.json`);
+    await writeStringToFile(JSON.stringify(content), `${note.name}.json`);
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Unknown error');
   } finally {
     toast.dismiss(id);
   }
+}
+
+async function trashNote(note: Note) {
+  const ok = await ask(`Trash note ${note.name}?`, {
+    title: 'Trash Note',
+    kind: 'info',
+    okLabel: 'Yes, Trash',
+  });
+  if (!ok) return;
+  note.trashed = true;
+  await cloudNotes.update(note.id, { trashed: true });
+}
+
+async function deleteNote(note: Note) {
+  const ok = await ask(`Delete note ${note.name}?`, {
+    title: 'Delete Note',
+    kind: 'info',
+    okLabel: 'Yes, Delete',
+  });
+  if (!ok) return;
+  await cloudNotes.delete(note.id);
 }
 
 async function importNote() {
@@ -187,11 +208,9 @@ async function importNote() {
 					<Card.Header class="pb-2">
 						<div class="flex items-start justify-between gap-2">
 							<div class="flex items-center gap-2">
-								<div
-									class="bg-secondary/50 flex size-8 shrink-0 items-center justify-center rounded-md"
-								>
-									<IconRenderer icon={note.icon} class="size-4" />
-								</div>
+								<Button variant="ghost" size="icon" class="bg-muted">
+									<IconRenderer icon={note.icon}/>
+								</Button>
 								<Card.Title class="line-clamp-1 text-base font-medium">
 									{note.name}
 								</Card.Title>
@@ -228,14 +247,14 @@ async function importNote() {
 									<DropdownMenu.Separator />
 									<DropdownMenu.Item
 										variant="destructive"
-										onclick={() => cloudNotes.update(note.id, { trashed: true })}
+										onclick={() => trashNote(note)}
 									>
 										<icons.Trash2 class="mr-2 size-4" />
 										Trash Note
 									</DropdownMenu.Item>
 									<DropdownMenu.Item
 										variant="destructive"
-										onclick={() => cloudNotes.delete(note.id)}
+										onclick={() => deleteNote(note)}
 									>
 										<icons.Trash2 class="mr-2 size-4" />
 										Delete Note
