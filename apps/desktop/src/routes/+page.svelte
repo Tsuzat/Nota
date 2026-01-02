@@ -19,6 +19,7 @@ import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import { ISMACOS, ISWINDOWS, timeAgo } from '$lib/utils';
+
 const sidebar = useSidebar();
 const localUserWorkspaces = getLocalUserWorkspaces();
 const cloudUserWorkspaces = getUserWorkspacesContext();
