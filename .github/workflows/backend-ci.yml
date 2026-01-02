@@ -53,3 +53,7 @@ jobs:
       - name: Run Backend Biome CI
         working-directory: apps/backend
         run: bun run ci
+
+      - name: Run Backend Tests
+        working-directory: apps/backend
+        run: bun run test
