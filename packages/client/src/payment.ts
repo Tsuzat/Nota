@@ -1,8 +1,14 @@
-import { PUBLIC_BACKEND_URL, PUBLIC_DODO_AI_CREDITS, PUBLIC_DODO_MONTLY_SUB, PUBLIC_DODO_YEARLY_SUB } from "$env/static/public";
-import request from "./request";
+import {
+  PUBLIC_BACKEND_URL,
+  PUBLIC_DODO_AI_CREDITS,
+  PUBLIC_DODO_MONTLY_SUB,
+  PUBLIC_DODO_YEARLY_SUB,
+} from '$env/static/public';
+import request from './request';
 
-export const sendToPaymentPortal = (which: 'monthly' | 'yearly' | 'ai_credits', quantity: number = 1) => {
+export const sendToPaymentPortal = (which: 'monthly' | 'yearly' | 'ai_credits', productQuantity = 1) => {
   let productId = '';
+  let quantity = productQuantity;
   switch (which) {
     case 'monthly':
       productId = PUBLIC_DODO_MONTLY_SUB;
@@ -16,7 +22,7 @@ export const sendToPaymentPortal = (which: 'monthly' | 'yearly' | 'ai_credits', 
     default:
       throw new Error('Invalid subscription type');
   }
-  if (quantity && which === 'ai_credits') {
+  if (quantity && which !== 'ai_credits') {
     quantity = 1;
   }
   const url = `${PUBLIC_BACKEND_URL}/api/payment/checkout?productId=${productId}&quantity=${quantity}`;
