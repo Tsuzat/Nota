@@ -13,6 +13,7 @@ import {
 import { type Editor, EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '@nota/ui/edra/shadcn/index.ts';
 import type { FileType } from '@nota/ui/edra/utils.ts';
 import { onMount } from 'svelte';
+import AI from '$lib/editor/Ai.svelte';
 import defalutContent from './demo';
 
 let content = $state(defalutContent);
@@ -32,10 +33,6 @@ const getAssets = async (_fileType: FileType) => {
 
 let open = $state(false);
 
-const { data } = $props();
-
-const user = $derived(data.session?.user);
-
 onMount(() => {
   open = true;
 });
@@ -49,8 +46,8 @@ onMount(() => {
     <DialogTitle>File Uploads is Not Available</DialogTitle>
     <DialogDescription>
       This is a playgroud. This is to give you an experience of Nota and it's
-      features. But, Some features may not work, like AI, Media Uploads, and
-      some more features.
+      features. But, Some features may not work like Media Uploads, and
+      some more features. Please be logged in to use AI features.
     </DialogDescription>
     <DialogFooter>
       <DialogClose class={buttonVariants({})}>Close</DialogClose>

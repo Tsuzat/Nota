@@ -168,7 +168,7 @@ async function handleDelete(workspace: LocalUserWorkspace | UserWorkspace) {
 									<div
 										class="bg-secondary/50 flex size-8 shrink-0 items-center justify-center rounded-md"
 									>
-										<IconRenderer icon={recent.icon} class="size-4" />
+										<IconRenderer icon={recent.icon ?? "lucide:File"} class="size-4" />
 									</div>
 									<Card.Title class="line-clamp-1 text-base font-medium">
 										{recent.name}
@@ -181,7 +181,7 @@ async function handleDelete(workspace: LocalUserWorkspace | UserWorkspace) {
 								<div class="text-muted-foreground flex items-center justify-between text-xs">
 									<div class="flex items-center gap-1">
 										<icons.Clock class="size-3" />
-										{timeAgo(recent.updated_at)}
+										{"owner" in recent ? timeAgo(recent.updatedAt?.toString() ?? ""): timeAgo(recent.updated_at)}
 									</div>
 								</div>
 							</div>
