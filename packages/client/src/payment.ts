@@ -4,7 +4,6 @@ import {
   PUBLIC_DODO_MONTLY_SUB,
   PUBLIC_DODO_YEARLY_SUB,
 } from '$env/static/public';
-import request from './request';
 
 export const sendToPaymentPortal = (which: 'monthly' | 'yearly' | 'ai_credits', productQuantity = 1) => {
   let productId = '';
@@ -26,5 +25,5 @@ export const sendToPaymentPortal = (which: 'monthly' | 'yearly' | 'ai_credits', 
     quantity = 1;
   }
   const url = `${PUBLIC_BACKEND_URL}/api/payment/checkout?productId=${productId}&quantity=${quantity}`;
-  request(url);
+  window.location.href = url;
 };
