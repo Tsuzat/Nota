@@ -47,7 +47,7 @@ app.use(
   '*',
   cors({
     origin: (origin, c) => {
-      const allowedOrigins = ['https://www.nota.ink', 'http://tauri.localhost'];
+      const allowedOrigins = ['https://*.nota.ink'];
       if (!origin) return allowedOrigins[0]; // Fallback if no origin
       if (allowedOrigins.includes(origin)) return origin;
 
