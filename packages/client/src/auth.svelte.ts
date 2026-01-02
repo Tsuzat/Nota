@@ -60,13 +60,8 @@ class Auth {
   async signInWithOAuth(provider: 'github' | 'google', isDesktop = false) {
     const url = `${PUBLIC_BACKEND_URL}/api/auth/login/${provider}${isDesktop ? '?platform=desktop' : ''}`;
     if (isDesktop) return url;
-    const res = await request(url);
-    if (res.ok) {
-      // this sets the access_tokens so we can get user info now
-      await this.init();
-    } else {
-      throw new Error(await res.text());
-    }
+    // Use direct navigation instead of fetch to avoid CORS issues with redirects
+    window.location.href = url;
   }
 
   /**
