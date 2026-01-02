@@ -52,7 +52,7 @@ async function loadData(id: string) {
 </svelte:head>
 
 {#if content !== undefined && name !== undefined && icon !== undefined}
-	<div class="fixed top-2 right-2 ml-auto inline-flex items-center gap-2 print:hidden">
+	<div class="fixed top-2 right-2 ml-auto flex items-center gap-2 print:hidden">
 		<ToggleMode />
 		<Button variant="ghost" size="icon-sm" onclick={() => window.print()}>
 			<Printer />

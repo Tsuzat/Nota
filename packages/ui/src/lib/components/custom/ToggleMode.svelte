@@ -7,8 +7,8 @@ import SimpleToolTip from './SimpleToolTip.svelte';
 </script>
 
 <SimpleToolTip content="Toggle Mode">
-  <Button onclick={toggleMode} variant="ghost" class="relative" size="icon-sm">
-    <MoonStar class="dark:scale-100 scale-0 absolute transition-all duration-500" />
-    <Sun class="scale-100 dark:scale-0 absolute transition-all duration-500" />
+  <Button onclick={toggleMode} variant="ghost" size="icon-sm">
+    <MoonStar class="dark:block hidden" />
+    <Sun class="block dark:hidden" />
   </Button>
 </SimpleToolTip>
