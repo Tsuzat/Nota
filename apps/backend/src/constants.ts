@@ -9,7 +9,7 @@ const checkEnv = (key: string) => {
 
 export const DB_URL = checkEnv('DB_URL');
 export const PORT = Number.parseInt(process.env.PORT || '3000', 10);
-export const CROSS_ORIGIN = process.env.CROSS_ORIGIN || '*';
+export const CROSS_ORIGIN = process.env.CROSS_ORIGIN || '';
 
 export const ACCESS_TOKEN_SECRET = checkEnv('ACCESS_TOKEN_SECRET');
 export const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || '6h';

@@ -3,7 +3,7 @@ import { getConnInfo } from 'hono/bun';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 import { rateLimiter } from 'hono-rate-limiter';
-import { DESKTOP_APP_IDENTIFIER, FRONTEND_URL } from '../constants';
+import { CROSS_ORIGIN, DESKTOP_APP_IDENTIFIER, FRONTEND_URL } from '../constants';
 import { banMiddleware } from './middlewares/ban';
 import { loggerMiddleware } from './middlewares/logger';
 import { sanitizationMiddleware } from './middlewares/sanitization';
@@ -47,7 +47,10 @@ app.use(
   '*',
   cors({
     origin: (origin, c) => {
-      const allowedOrigins = ['https://*.nota.ink'];
+      const allowedOrigins = ['https://www.nota.ink', 'https://nota.ink'];
+      CROSS_ORIGIN.split(',').forEach((origin) => {
+        allowedOrigins.push(origin.trim());
+      });
       if (!origin) return allowedOrigins[0]; // Fallback if no origin
       if (allowedOrigins.includes(origin)) return origin;
 
