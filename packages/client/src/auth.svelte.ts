@@ -10,6 +10,10 @@ class Auth {
     return this.#user;
   }
 
+  set user(user: User | undefined) {
+    this.#user = user;
+  }
+
   /**
    * Initializes auth and sets the current user
    * You can use `auth.user` getter to get the current user

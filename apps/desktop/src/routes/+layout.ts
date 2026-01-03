@@ -6,9 +6,11 @@ export const ssr = false;
 export const prerender = false;
 export const csr = true;
 
+import { request, UserSchema } from '@nota/client';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import { DB, initializeLocalDB } from '$lib/local/db';
 import type { LocalNote } from '$lib/local/notes.svelte';
 import type { LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
@@ -70,6 +72,15 @@ async function loadLocalNotes(currentUserWorkspaceId: string): Promise<LocalNote
   }
 }
 
+const getUser = async () => {
+  const res = await request(`${PUBLIC_BACKEND_URL}/api/user/me`);
+  if (res.ok) {
+    const user = await res.json();
+    const userData = UserSchema.parse(user.user);
+    return userData;
+  }
+};
+
 export const load = async () => {
   await initializeLocalDB();
   const localUserWorkspaces = await loadLocalUserWorkspaces();
@@ -98,10 +109,12 @@ export const load = async () => {
     return goto(resolve('/'));
   }
 
+  const user = await getUser();
   return {
     localUserWorkspaces,
     currentUserWorkspace,
     localWorkspaces,
     localNotes,
+    user,
   };
 };

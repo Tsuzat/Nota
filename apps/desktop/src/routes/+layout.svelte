@@ -68,14 +68,7 @@ const useSettings = setGlobalSettings();
 
 onMount(async () => {
   setTheme(useSettings.themeColor);
-  toast.promise(authContext.init(), {
-    loading: 'Checking auth status...',
-    success: 'Successfully authenticated',
-    error: (error) => {
-      console.error(error);
-      return 'Failed to authenticate';
-    },
-  });
+  authContext.user = data.user;
   check().then((update) => {
     if (update) {
       const id = Symbol('CheckForNotaUpdate').toString();
