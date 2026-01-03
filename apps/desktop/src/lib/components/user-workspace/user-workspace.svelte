@@ -59,7 +59,7 @@ async function handlesubmit(e: Event) {
 		</Dialog.Header>
 		<form class="flex flex-col gap-2" onsubmit={handlesubmit}>
 			<div class="flex w-full items-center gap-2">
-				<IconPicker {icon} side="right" onIconSelect={(ic: string) => (icon = ic)}>
+				<IconPicker {icon} side="right" onSelect={(ic: string) => (icon = ic)}>
 					<div class={buttonVariants({ variant: 'outline', size: 'icon' })}>
 						<IconRenderer {icon} />
 					</div>

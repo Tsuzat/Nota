@@ -259,8 +259,15 @@ function handleKeydown(e: KeyboardEvent) {
         orientation="vertical"
         class="mr-2 data-[orientation=vertical]:h-4"
       />
-      <IconPicker onSelect={(icon) => updateNote(note!.name, icon, note!.favorite)}>
-        <div class={buttonVariants({ variant: "ghost", class: "size-7! p-1" })}>
+      <IconPicker
+        onSelect={(icon) => {
+          note!.icon = icon;
+        }}
+        onClose={() => {
+          updateNote(note!.name, note!.icon, note!.favorite);
+        }}
+      >
+        <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
           <IconRenderer icon={note.icon} />
         </div>
       </IconPicker>

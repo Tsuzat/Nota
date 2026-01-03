@@ -98,12 +98,16 @@ async function importNote() {
     return;
   }
   if (workspace.userworkspace !== currentUserWorkspace.id) {
-    toast.error('You can only import notes to your current workspace.', { id });
+    toast.error('You can only import notes to your current workspace.', {
+      id,
+    });
     return;
   }
   const data = await importNotes(undefined, true);
   if (!data) {
-    toast.error('Something went wrong. We could not import the note.', { id });
+    toast.error('Something went wrong. We could not import the note.', {
+      id,
+    });
     return;
   }
   if (!workspace) {
@@ -117,172 +121,196 @@ async function importNote() {
 </script>
 
 {#if workspace}
-	<NewNotes bind:open={openNewNote} {workspace} />
-	<header class="flex h-12 shrink-0 items-center gap-2">
-		<div
-			class={cn(
-				'z-20 ml-18 flex items-center gap-2 px-3',
-				ISMACOS && !useSidebar().open && 'ml-18',
-				ISWINDOWS && !useSidebar().open && 'ml-0',
-				useSidebar().open && 'md:ml-0'
-			)}
-		>
-			{#if ISWINDOWS && !useSidebar().open}
-				<AppLogoMenu />
-			{/if}
-			<SidebarTrigger />
-			<BackAndForthButtons />
-			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
-		</div>
-		<div class={cn('z-20 ml-auto flex items-center gap-2 px-3', ISWINDOWS && 'mr-30')}></div>
-		{#if ISWINDOWS}
-			<Separator orientation="vertical" class="h-4" />
-			<WindowsButtons />
-		{/if}
-	</header>
-	<main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
-		<div class="mb-4 flex items-center gap-2">
-			<IconPicker onSelect={(icon) => updateWorkspace(icon, workspace.name)}>
-				<div
-					class={buttonVariants({
-						variant: 'ghost',
-						class: 'size-24 p-2 [&_img]:aspect-square [&_img]:size-full! [&_svg]:size-full!'
-					})}
-				>
-					<IconRenderer icon={workspace.icon} class="text-muted-foreground text-[5rem]" />
-				</div>
-			</IconPicker>
-			<div class="flex flex-col gap-2">
-				<input
-					value={workspace.name}
-					class="hover:bg-muted truncate rounded px-1 py-0.5 text-2xl font-bold focus:outline-none"
-					onchange={(e) => {
-						const target = e.target as HTMLInputElement;
-						const value = target.value;
-						if (value.trim() === '') return;
-						updateWorkspace(workspace.icon, value);
-					}}
-				/>
-				<div class="text-muted-foreground flex items-center gap-4">
-					<SimpleToolTip content="Created At">
-						<Button variant="ghost" size="sm">
-							<icons.CalendarDays />
-							{timeAgo(workspace.createdAt.toISOString())}
-						</Button>
-					</SimpleToolTip>
-					<SimpleToolTip content="Last Updated At">
-						<Button variant="ghost" size="sm">
-							<icons.Clock />
-							{timeAgo(workspace.updatedAt.toISOString())}	
-						</Button>
-					</SimpleToolTip>
-				</div>
-			</div>
-			<div class="ml-auto">
-				<SimpleToolTip content="Import Note from JSON file">
-					<Button variant="outline" onclick={importNote}>
-						<icons.Download />
-						<span class="hidden sm:block">Import Note</span>
-					</Button>
-				</SimpleToolTip>
-			</div>
-		</div>
-		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			<Button
-				class="group bg-muted/30 hover:bg-muted/50 flex h-48 flex-col items-center justify-center rounded-xl border border-dashed transition-colors"
-				onclick={() => (openNewNote = true)}
-			>
-				<div
-					class="bg-background mb-2 flex size-10 items-center justify-center rounded-full shadow-sm transition-all duration-500 group-hover:scale-110"
-				>
-					<icons.Plus class="text-primary size-5" />
-				</div>
-				<span class="text-muted-foreground font-medium">Create New Note</span>
-			</Button>
+  <NewNotes bind:open={openNewNote} {workspace} />
+  <header class="flex h-12 shrink-0 items-center gap-2">
+    <div
+      class={cn(
+        "z-20 ml-18 flex items-center gap-2 px-3",
+        ISMACOS && !useSidebar().open && "ml-18",
+        ISWINDOWS && !useSidebar().open && "ml-0",
+        useSidebar().open && "md:ml-0"
+      )}
+    >
+      {#if ISWINDOWS && !useSidebar().open}
+        <AppLogoMenu />
+      {/if}
+      <SidebarTrigger />
+      <BackAndForthButtons />
+      <Separator
+        orientation="vertical"
+        class="mr-2 data-[orientation=vertical]:h-4"
+      />
+    </div>
+    <div
+      class={cn(
+        "z-20 ml-auto flex items-center gap-2 px-3",
+        ISWINDOWS && "mr-30"
+      )}
+    ></div>
+    {#if ISWINDOWS}
+      <Separator orientation="vertical" class="h-4" />
+      <WindowsButtons />
+    {/if}
+  </header>
+  <main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
+    <div class="mb-4 flex items-center gap-2">
+      <IconPicker
+        onSelect={(icon) => (workspace.icon = icon)}
+        onClose={() => updateWorkspace(workspace.icon, workspace.name)}
+      >
+        <div
+          class={buttonVariants({
+            variant: "ghost",
+            class:
+              "size-24 p-2 [&_img]:aspect-square [&_img]:size-full! [&_svg]:size-full!",
+          })}
+        >
+          <IconRenderer
+            icon={workspace.icon}
+            class="text-muted-foreground text-[5rem]"
+          />
+        </div>
+      </IconPicker>
+      <div class="flex flex-col gap-2">
+        <input
+          value={workspace.name}
+          class="hover:bg-muted truncate rounded px-1 py-0.5 text-2xl font-bold focus:outline-none"
+          onchange={(e) => {
+            const target = e.target as HTMLInputElement;
+            const value = target.value;
+            if (value.trim() === "") return;
+            updateWorkspace(workspace.icon, value);
+          }}
+        />
+        <div class="text-muted-foreground flex items-center gap-4">
+          <SimpleToolTip content="Created At">
+            <Button variant="ghost" size="sm">
+              <icons.CalendarDays />
+              {timeAgo(workspace.createdAt.toISOString())}
+            </Button>
+          </SimpleToolTip>
+          <SimpleToolTip content="Last Updated At">
+            <Button variant="ghost" size="sm">
+              <icons.Clock />
+              {timeAgo(workspace.updatedAt.toISOString())}
+            </Button>
+          </SimpleToolTip>
+        </div>
+      </div>
+      <div class="ml-auto">
+        <SimpleToolTip content="Import Note from JSON file">
+          <Button variant="outline" onclick={importNote}>
+            <icons.Download />
+            <span class="hidden sm:block">Import Note</span>
+          </Button>
+        </SimpleToolTip>
+      </div>
+    </div>
+    <div
+      class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+    >
+      <Button
+        class="group bg-muted/30 hover:bg-muted/50 flex h-48 flex-col items-center justify-center rounded-xl border border-dashed transition-colors"
+        onclick={() => (openNewNote = true)}
+      >
+        <div
+          class="bg-background mb-2 flex size-10 items-center justify-center rounded-full shadow-sm transition-all duration-500 group-hover:scale-110"
+        >
+          <icons.Plus class="text-primary size-5" />
+        </div>
+        <span class="text-muted-foreground font-medium">Create New Note</span>
+      </Button>
 
-			{#each notes as note (note.id)}
-				<Card.Root
-					class="group relative h-48 cursor-pointer overflow-hidden transition-all hover:shadow-md"
-					onclick={() => openNote(note)}
-				>
-					<Card.Header class="pb-2">
-						<div class="flex items-start justify-between gap-2">
-							<div class="flex items-center gap-2">
-								<Button variant="ghost" size="icon" class="bg-muted">
-									<IconRenderer icon={note.icon}/>
-								</Button>
-								<Card.Title class="line-clamp-1 text-base font-medium">
-									{note.name}
-								</Card.Title>
-							</div>
-							<DropdownMenu.Root>
-								<DropdownMenu.Trigger>
-									<Button
-										variant="ghost"
-										size="icon"
-										class="size-8 opacity-0 transition-opacity group-hover:opacity-100"
-									>
-										<icons.EllipsisVertical class="size-4" />
-									</Button>
-								</DropdownMenu.Trigger>
-								<DropdownMenu.Content>
-									<DropdownMenu.Item onclick={() => exportNote(note)}>
-										<icons.ArrowDownToLine />
-										Export Notes
-									</DropdownMenu.Item>
-									<DropdownMenu.Sub>
-										<DropdownMenu.SubTrigger disabled={cloudWorkspaces.workspaces.length === 1}
-											>Move to...</DropdownMenu.SubTrigger
-										>
-										<DropdownMenu.SubContent>
-											{#each cloudWorkspaces.workspaces as workspace (workspace.id)}
-												{#if workspace.id !== data.id}
-													<DropdownMenu.Item onclick={() => moveToWorkspace(note, workspace)}>
-														{workspace.name}
-													</DropdownMenu.Item>
-												{/if}
-											{/each}
-										</DropdownMenu.SubContent>
-									</DropdownMenu.Sub>
-									<DropdownMenu.Separator />
-									<DropdownMenu.Item
-										variant="destructive"
-										onclick={() => trashNote(note)}
-									>
-										<icons.Trash2 class="mr-2 size-4" />
-										Trash Note
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										variant="destructive"
-										onclick={() => deleteNote(note)}
-									>
-										<icons.Trash2 class="mr-2 size-4" />
-										Delete Note
-									</DropdownMenu.Item>
-								</DropdownMenu.Content>
-							</DropdownMenu.Root>
-						</div>
-					</Card.Header>
-					<Card.Content>
-						<div class="absolute right-4 bottom-4 left-4">
-							<div class="text-muted-foreground flex items-center justify-between text-xs">
-								<div class="flex items-center gap-1">
-									<icons.Clock class="size-3" />
-									{timeAgo(note.updatedAt.toISOString())}
-								</div>
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
-			{/each}
-		</div>
-	</main>
+      {#each notes as note (note.id)}
+        <Card.Root
+          class="group relative h-48 cursor-pointer overflow-hidden transition-all hover:shadow-md"
+          onclick={() => openNote(note)}
+        >
+          <Card.Header class="pb-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <Button variant="ghost" size="icon" class="bg-muted">
+                  <IconRenderer icon={note.icon} />
+                </Button>
+                <Card.Title class="line-clamp-1 text-base font-medium">
+                  {note.name}
+                </Card.Title>
+              </div>
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    class="size-8 opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <icons.EllipsisVertical class="size-4" />
+                  </Button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content>
+                  <DropdownMenu.Item onclick={() => exportNote(note)}>
+                    <icons.ArrowDownToLine />
+                    Export Notes
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Sub>
+                    <DropdownMenu.SubTrigger
+                      disabled={cloudWorkspaces.workspaces.length === 1}
+                      >Move to...</DropdownMenu.SubTrigger
+                    >
+                    <DropdownMenu.SubContent>
+                      {#each cloudWorkspaces.workspaces as workspace (workspace.id)}
+                        {#if workspace.id !== data.id}
+                          <DropdownMenu.Item
+                            onclick={() => moveToWorkspace(note, workspace)}
+                          >
+                            {workspace.name}
+                          </DropdownMenu.Item>
+                        {/if}
+                      {/each}
+                    </DropdownMenu.SubContent>
+                  </DropdownMenu.Sub>
+                  <DropdownMenu.Separator />
+                  <DropdownMenu.Item
+                    variant="destructive"
+                    onclick={() => trashNote(note)}
+                  >
+                    <icons.Trash2 class="mr-2 size-4" />
+                    Trash Note
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    variant="destructive"
+                    onclick={() => deleteNote(note)}
+                  >
+                    <icons.Trash2 class="mr-2 size-4" />
+                    Delete Note
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
+            </div>
+          </Card.Header>
+          <Card.Content>
+            <div class="absolute right-4 bottom-4 left-4">
+              <div
+                class="text-muted-foreground flex items-center justify-between text-xs"
+              >
+                <div class="flex items-center gap-1">
+                  <icons.Clock class="size-3" />
+                  {timeAgo(note.updatedAt.toISOString())}
+                </div>
+              </div>
+            </div>
+          </Card.Content>
+        </Card.Root>
+      {/each}
+    </div>
+  </main>
 {:else}
-	<div class="flex h-full items-center justify-center">
-		<div class="text-center">
-			<h2 class="text-xl font-semibold">Workspace not found</h2>
-			<p class="text-muted-foreground">The requested workspace could not be found.</p>
-			<Button variant="link" href="/">Go Home</Button>
-		</div>
-	</div>
+  <div class="flex h-full items-center justify-center">
+    <div class="text-center">
+      <h2 class="text-xl font-semibold">Workspace not found</h2>
+      <p class="text-muted-foreground">
+        The requested workspace could not be found.
+      </p>
+      <Button variant="link" href="/">Go Home</Button>
+    </div>
+  </div>
 {/if}

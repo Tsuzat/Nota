@@ -113,7 +113,7 @@ onDestroy(() => {
 async function updateIcon(icon: string) {
   if (note === undefined) return;
   try {
-    note = { ...note, icon };
+    note.icon = icon;
     await localNotes.updateNote(note);
   } catch (e) {
     toast.error('Could not update note icon');
