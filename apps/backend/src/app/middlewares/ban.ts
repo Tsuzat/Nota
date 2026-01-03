@@ -1,12 +1,10 @@
+import { redis } from 'bun';
 import type { Context, Next } from 'hono';
 import { getConnInfo } from 'hono/bun';
 import { logwarn } from '../../logging';
 
-// Ban duration in milliseconds (e.g., 24 hours)
-const BAN_DURATION = 24 * 60 * 60 * 1000;
-
-// Map to store banned IPs and their unban timestamp
-const bannedIPs = new Map<string, number>();
+// Ban duration in seconds (24 hours)
+const BAN_DURATION_SECONDS = 24 * 60 * 60;
 
 // List of suspicious paths that should trigger a ban
 const HONEYPOT_PATHS = [
@@ -82,16 +80,12 @@ const HONEYPOT_PATHS = [
 export const banMiddleware = async (c: Context, next: Next) => {
   const info = getConnInfo(c);
   const ip = info.remote.address || 'unknown';
+  const banKey = `ban:${ip}`;
 
   // 1. Check if IP is already banned
-  const unbanTime = bannedIPs.get(ip);
-  if (unbanTime) {
-    if (Date.now() < unbanTime) {
-      // Still banned
-      return c.text('Forbidden', 403);
-    }
-    // Ban expired
-    bannedIPs.delete(ip);
+  const isBanned = await redis.exists(banKey);
+  if (isBanned) {
+    return c.text('Forbidden', 403);
   }
 
   // 2. Check for suspicious paths (Honeypot)
@@ -105,15 +99,12 @@ export const banMiddleware = async (c: Context, next: Next) => {
   if (isSuspicious) {
     logwarn(`[SECURITY] Banning IP ${ip} for accessing suspicious path: ${path}`);
 
-    // Ban the IP
-    bannedIPs.set(ip, Date.now() + BAN_DURATION);
+    // Ban the IP in Redis
+    await redis.set(banKey, 'true');
+    await redis.expire(banKey, BAN_DURATION_SECONDS);
 
     return c.text('Forbidden', 403);
   }
-
-  // 3. Cleanup logic (Optional: Run periodically to prevent map from growing too large)
-  // For simplicity, we can do a lazy cleanup occasionally, or just let it be for now.
-  // In a robust production env, use Redis for this.
 
   await next();
 };
