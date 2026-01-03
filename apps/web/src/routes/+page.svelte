@@ -36,6 +36,7 @@ import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
 import { logout, sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
+  import { request } from '@nota/client';
 
 const { data } = $props();
 const user = $derived(data.user);
@@ -516,8 +517,17 @@ const faqItems = [
             {#if (user?.aiCredits || 0) <= 0}
               <Button
                 class="w-full"
-                href={`${PUBLIC_BACKEND_URL}/api/promotion/redeem-ai-credits`}
                 disabled={!user || user?.aiCredits > 0}
+                onclick={() => {
+                  toast.promise(request(`${PUBLIC_BACKEND_URL}/api/promotion/redeem-ai-credits`), {
+                    loading: 'Redeeming AI Credits...',
+                    success: () => {
+                      window.location.reload();
+                      return "AI Credits redeemed successfully";
+                    },
+                    error: "Failed to redeem AI Credits",
+                  })
+                }}
               >
                 {#if !user}
                   Login to claim free AI Credits
