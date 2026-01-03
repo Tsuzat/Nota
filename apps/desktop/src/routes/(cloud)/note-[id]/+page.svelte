@@ -17,7 +17,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
 import { compare } from 'fast-json-patch';
 import { onMount } from 'svelte';
-import { beforeNavigate, goto } from '$app/navigation';
+import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
 import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
@@ -29,8 +29,8 @@ import { ISMACOS, ISWINDOWS } from '$lib/utils';
 
 const { data } = $props();
 
-$effect(() => {
-  if (data.id) loadData(data.id);
+afterNavigate(() => {
+  if (data.id) loadData();
 });
 
 const sidebar = useSidebar();
@@ -130,7 +130,8 @@ onMount(() => {
   return () => clearInterval(saveInterval);
 });
 
-async function loadData(id: string) {
+async function loadData() {
+  const id = data.id;
   isLoading = true;
   note = cloudNotes.notes.find((n) => n.id === id);
   if (note === undefined) {

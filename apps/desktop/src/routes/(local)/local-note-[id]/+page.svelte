@@ -11,7 +11,7 @@ import { Separator } from '@nota/ui/shadcn/separator';
 import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
 import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { onDestroy, onMount } from 'svelte';
-import { beforeNavigate, goto } from '$app/navigation';
+import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import AppLogoMenu from '$lib/components/app-menu.svelte';
 import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
@@ -37,7 +37,7 @@ const globalSettings = getGlobalSettings();
 
 const { data } = $props();
 
-$effect(() => {
+afterNavigate(() => {
   if (data.id) loadData();
 });
 
