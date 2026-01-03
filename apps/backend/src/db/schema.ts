@@ -29,13 +29,15 @@ export const users = pgTable('users', {
 
 export const sessions = pgTable('sessions', {
   id: uuid().primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   refreshedAt: timestamp('refreshed_at', { withTimezone: true }),
   userAgent: text('user_agent'),
   ip: text('ip'),
-  pkceChallenge: text('pkce_challenge'),
+  pkceChallenge: text('pkce_challenge').unique(),
   pkceChallengeMethod: text('pkce_challenge_method'),
   state: text('state'),
   browser: text('browser'),

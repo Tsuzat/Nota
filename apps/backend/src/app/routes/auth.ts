@@ -15,6 +15,7 @@ import {
   GITHUB_CLIENT_SECRET,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
+  REFRESH_TOKEN_EXPIRY,
 } from '../../constants';
 import { DB } from '../../db';
 import { sessions, type User, users } from '../../db/schema';
@@ -48,25 +49,72 @@ const auth = new Hono<{
   };
 }>();
 
-const generateTokens = async (c: Context, userId: string, userEmail: string) => {
-  const info = getConnInfo(c);
+/**
+ * Generates a session token for PKCE flow.
+ *
+ * @param codeChallenge - The code challenge from the PKCE flow.
+ * @param userId - The ID of the user.
+ * @returns A promise that resolves to the session token.
+ */
+const getPKCESessionToken = async (codeChallenge: string, userId: string) => {
   const session = await DB.insert(sessions)
     .values({
       userId,
       createdAt: new Date(),
       updatedAt: new Date(),
-      expiresAt: new Date(Date.now() + parseExpiry(ACCESS_TOKEN_EXPIRY) * 1000),
-      ip: info.remote.address,
-      userAgent: info.remote.addressType,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5-minute TTL
+      pkceChallenge: codeChallenge,
+      pkceChallengeMethod: 'S256',
     })
     .returning({ id: sessions.id });
-  if (!session || !session[0] || session.length === 0) {
-    logerror('Failed to create session', { userId, userEmail, info });
+  return session?.[0]?.id;
+};
+
+/**
+ * Generates access and refresh tokens for a user.
+ * If a sessionId is provided, it updates the existing session.
+ * Otherwise, it creates a new session.
+ *
+ * @param c - The Hono context object.
+ * @param userId - The ID of the user.
+ * @param userEmail - The email of the user.
+ * @param sessionId - Optional. The ID of the existing session to update.
+ * @returns A promise that resolves to an object containing the accessToken and refreshToken.
+ */
+const generateTokens = async (c: Context, userId: string, userEmail: string, sessionId?: string) => {
+  const info = getConnInfo(c);
+  let session: { id: string }[] | undefined;
+  if (sessionId) {
+    session = await DB.update(sessions)
+      .set({
+        updatedAt: new Date(),
+        refreshedAt: new Date(),
+        expiresAt: new Date(Date.now() + parseExpiry(REFRESH_TOKEN_EXPIRY) * 1000),
+        ip: info.remote.address,
+        userAgent: info.remote.addressType,
+      })
+      .where(eq(sessions.id, sessionId))
+      .returning({ id: sessions.id });
+  }
+  if (!session || !session[0]) {
+    session = await DB.insert(sessions)
+      .values({
+        userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        expiresAt: new Date(Date.now() + parseExpiry(REFRESH_TOKEN_EXPIRY) * 1000),
+        ip: info.remote.address,
+        userAgent: info.remote.addressType,
+      })
+      .returning({ id: sessions.id });
+  }
+  if (!session || !session[0]) {
+    logerror('Failed to create or update session', { userId, userEmail, info });
     throw new Error('Failed to create session');
   }
-  const sessionId = session[0].id;
-  const accessToken = await generateAccessToken(userId, userEmail, sessionId);
-  const refreshToken = await generateRefreshToken(userId, userEmail, sessionId);
+  const finalSessionId = session[0].id;
+  const accessToken = await generateAccessToken(userId, userEmail, finalSessionId);
+  const refreshToken = await generateRefreshToken(userId, userEmail, finalSessionId);
   return { accessToken, refreshToken };
 };
 
@@ -86,13 +134,24 @@ const loginSchema = z.object({
   password: z.string(),
 });
 
+const exchangeSchema = z.object({
+  code: z.string(),
+  code_verifier: z.string(),
+});
+
 auth.get('/login/:provider', (c) => {
   const provider = c.req.param('provider');
   const platform = c.req.query('platform');
+  const codeChallenge = c.req.query('code_challenge');
 
   if (platform === 'desktop') {
     setCookie(c, 'auth_platform', platform, { ...COOKIE_OPTIONS, maxAge: 60 * 5 });
   }
+
+  if (codeChallenge) {
+    setCookie(c, 'code_challenge', codeChallenge, { ...COOKIE_OPTIONS, maxAge: 60 * 5 });
+  }
+
   return c.redirect(`${BACKEND_URL}/api/auth/oauth/${provider}`);
 });
 
@@ -158,8 +217,8 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
     }
     const { accessToken, refreshToken } = await generateTokens(c, user.id, user.email);
 
-    setCookie(c, 'access_token', accessToken, { ...COOKIE_OPTIONS, maxAge: 6 * 60 * 60 });
-    setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: 7 * 24 * 60 * 60 });
+    setCookie(c, 'access_token', accessToken, { ...COOKIE_OPTIONS, maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY) });
+    setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY) });
 
     return c.json({
       message: 'Login successful',
@@ -227,22 +286,27 @@ auth.use(
       return c.json({ error: 'Something went wrong when upserting user' }, 505);
     }
 
-    const { accessToken, refreshToken } = await generateTokens(c, user.id, user.email);
+    const platform = getCookie(c, 'auth_platform');
+    const codeChallenge = getCookie(c, 'code_challenge');
 
+    if (platform === 'desktop' && codeChallenge) {
+      deleteCookie(c, 'auth_platform');
+      deleteCookie(c, 'code_challenge');
+      const sessionId = await getPKCESessionToken(codeChallenge, user.id);
+      if (!sessionId) {
+        return c.json({ error: 'Failed to create session' }, 500);
+      }
+      return c.redirect(`nota://auth/callback?code=${sessionId}`);
+    }
+    const { accessToken, refreshToken } = await generateTokens(c, user.id, user.email);
     setCookie(c, 'access_token', accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 6 * 60 * 60,
+      maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY),
     });
     setCookie(c, 'refresh_token', refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY),
     });
-
-    const platform = getCookie(c, 'auth_platform');
-    if (platform === 'desktop') {
-      deleteCookie(c, 'auth_platform');
-      return c.redirect(`nota://auth/callback?access_token=${accessToken}&refresh_token=${refreshToken}`);
-    }
 
     return c.redirect(FRONTEND_URL || 'https://www.nota.ink');
   }
@@ -302,23 +366,27 @@ auth.use(
       return c.json({ error: 'Something went wrong when upserting user' }, 505);
     }
 
-    const { accessToken, refreshToken } = await generateTokens(c, user.id, user.email);
+    const platform = getCookie(c, 'auth_platform');
+    const codeChallenge = getCookie(c, 'code_challenge');
 
+    if (platform === 'desktop' && codeChallenge) {
+      deleteCookie(c, 'auth_platform');
+      deleteCookie(c, 'code_challenge');
+      const sessionId = await getPKCESessionToken(codeChallenge, user.id);
+      if (!sessionId) {
+        return c.json({ error: 'Failed to create session' }, 500);
+      }
+      return c.redirect(`nota://auth/callback?code=${sessionId}`);
+    }
+    const { accessToken, refreshToken } = await generateTokens(c, user.id, user.email);
     setCookie(c, 'access_token', accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 6 * 60 * 60,
+      maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY),
     });
     setCookie(c, 'refresh_token', refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY),
     });
-
-    const platform = getCookie(c, 'auth_platform');
-    if (platform === 'desktop') {
-      deleteCookie(c, 'auth_platform');
-      return c.redirect(`nota://auth/callback?access_token=${accessToken}&refresh_token=${refreshToken}`);
-    }
-
     return c.redirect(FRONTEND_URL || 'https://www.nota.ink');
   }
 );
@@ -340,15 +408,28 @@ auth.post('/refresh', async (c) => {
       return c.json({ error: 'User not found' }, 401);
     }
 
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await generateTokens(c, user.id, user.email);
+    const session = await DB.query.sessions.findFirst({
+      where: eq(sessions.id, payload.sessionId),
+    });
+
+    if (!session) {
+      return c.json({ error: 'No active session with given refresh token' }, 401);
+    }
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await generateTokens(
+      c,
+      user.id,
+      user.email,
+      payload.sessionId
+    );
 
     setCookie(c, 'refresh_token', newRefreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY),
     });
     setCookie(c, 'access_token', newAccessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 6 * 60 * 60,
+      maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY),
     });
 
     return c.json({ success: true });
@@ -357,26 +438,52 @@ auth.post('/refresh', async (c) => {
   }
 });
 
-// Session Establishment Endpoint (for Desktop Deep Link)
-auth.post('/session', async (c) => {
-  const { access_token, refresh_token } = await c.req.json();
-
-  if (!access_token || !refresh_token) {
-    return c.json({ error: 'Missing tokens' }, 400);
-  }
-
+// PKCE Exchange Endpoint
+auth.post('/exchange', zValidator('json', exchangeSchema), async (c) => {
+  const { code, code_verifier } = c.req.valid('json');
   try {
-    // Verify refresh token to ensure validity before setting cookies
-    await verifyRefreshToken(refresh_token);
+    const session = await DB.query.sessions.findFirst({
+      where: eq(sessions.id, code),
+    });
 
-    // Set cookies so plugin-http (Desktop) picks them up
-    setCookie(c, 'access_token', access_token, { ...COOKIE_OPTIONS, maxAge: 6 * 60 * 60 });
-    setCookie(c, 'refresh_token', refresh_token, { ...COOKIE_OPTIONS, maxAge: 7 * 24 * 60 * 60 });
+    if (!session || session.expiresAt < new Date()) {
+      return c.json({ error: 'Invalid or expired code' }, 400);
+    }
 
-    return c.json({ success: true });
-  } catch (e) {
-    console.error('Error verifying tokens for session:', e);
-    return c.json({ error: 'Invalid tokens' }, 401);
+    // verify code challenge with code_verifier
+    const codeChallenge = session.pkceChallenge;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(code_verifier);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    const challenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    if (codeChallenge !== challenge) {
+      return c.json({ error: 'Invalid code verifier' }, 400);
+    }
+
+    const user = await DB.query.users.findFirst({
+      where: eq(users.id, session.userId),
+    });
+
+    if (!user) {
+      return c.json({ error: 'User not found' }, 401);
+    }
+
+    const { accessToken, refreshToken } = await generateTokens(c, user.id, user.email, session.id);
+    setCookie(c, 'access_token', accessToken, {
+      ...COOKIE_OPTIONS,
+      maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY),
+    });
+    setCookie(c, 'refresh_token', refreshToken, {
+      ...COOKIE_OPTIONS,
+      maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY),
+    });
+    return c.json({ access_token: accessToken, refresh_token: refreshToken });
+  } catch (error) {
+    logerror('Exchange error:', error);
+    return c.json({ error: 'Token exchange failed' }, 500);
   }
 });
 

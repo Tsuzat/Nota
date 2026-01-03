@@ -61,7 +61,10 @@ $effect(() => {
   }
 });
 
-useDeepLinkAuth((access_token, refresh_token) => authContext.exchangeTokenForSession(access_token, refresh_token));
+useDeepLinkAuth({
+  onCode: (code) => authContext.exchangeCode(code),
+});
+
 setGlobalSignInContext();
 setGlobalSearch();
 const useSettings = setGlobalSettings();

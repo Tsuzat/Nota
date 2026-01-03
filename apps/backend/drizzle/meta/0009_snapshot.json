@@ -111,12 +111,8 @@
           "name": "notes_workspace_workspaces_id_fk",
           "tableFrom": "notes",
           "tableTo": "workspaces",
-          "columnsFrom": [
-            "workspace"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workspace"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -124,12 +120,8 @@
           "name": "notes_userworkspace_userworkspaces_id_fk",
           "tableFrom": "notes",
           "tableTo": "userworkspaces",
-          "columnsFrom": [
-            "userworkspace"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userworkspace"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -137,12 +129,8 @@
           "name": "notes_owner_users_id_fk",
           "tableFrom": "notes",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -264,12 +252,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -279,9 +263,7 @@
         "sessions_pkce_challenge_unique": {
           "name": "sessions_pkce_challenge_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "pkce_challenge"
-          ]
+          "columns": ["pkce_challenge"]
         }
       },
       "policies": {},
@@ -437,9 +419,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -496,12 +476,8 @@
           "name": "userworkspaces_owner_users_id_fk",
           "tableFrom": "userworkspaces",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -591,12 +567,8 @@
           "name": "workspaces_owner_users_id_fk",
           "tableFrom": "workspaces",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -604,12 +576,8 @@
           "name": "workspaces_userworkspace_userworkspaces_id_fk",
           "tableFrom": "workspaces",
           "tableTo": "userworkspaces",
-          "columnsFrom": [
-            "userworkspace"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userworkspace"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -625,18 +593,12 @@
     "public.subscription_plan": {
       "name": "subscription_plan",
       "schema": "public",
-      "values": [
-        "free",
-        "pro"
-      ]
+      "values": ["free", "pro"]
     },
     "public.subscription_type": {
       "name": "subscription_type",
       "schema": "public",
-      "values": [
-        "monthly",
-        "yearly"
-      ]
+      "values": ["monthly", "yearly"]
     }
   },
   "schemas": {},

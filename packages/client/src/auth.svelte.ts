@@ -14,6 +14,25 @@ class Auth {
     this.#user = user;
   }
 
+  private async generatePKCE() {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    const verifier = btoa(String.fromCharCode(...array))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    const challenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    return { verifier, challenge };
+  }
+
   /**
    * Initializes auth and sets the current user
    * You can use `auth.user` getter to get the current user
@@ -62,28 +81,37 @@ class Auth {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async signInWithOAuth(provider: 'github' | 'google', isDesktop = false) {
-    const url = `${PUBLIC_BACKEND_URL}/api/auth/login/${provider}${isDesktop ? '?platform=desktop' : ''}`;
-    if (isDesktop) return url;
+    let url = `${PUBLIC_BACKEND_URL}/api/auth/login/${provider}${isDesktop ? '?platform=desktop' : ''}`;
+
+    if (isDesktop) {
+      const { verifier, challenge } = await this.generatePKCE();
+      localStorage.setItem('pkce_verifier', verifier);
+      url += `&code_challenge=${challenge}`;
+      return url;
+    }
+
     // Use direct navigation instead of fetch to avoid CORS issues with redirects
     window.location.href = url;
   }
 
   /**
-   * Exchange access token and refresh token for a new session
-   * @param access_token - The access token to exchange
-   * @param refresh_token - The refresh token to exchange
-   * @throws {Error} If the request fails with a non-200 status code
+   * Exchange auth code for tokens (PKCE flow)
+   * @param code - The auth code received from deep link
    */
-  async exchangeTokenForSession(access_token: string, refresh_token: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/auth/session`;
+  async exchangeCode(code: string) {
+    const verifier = localStorage.getItem('pkce_verifier');
+    if (!verifier) throw new Error('No PKCE verifier found');
+
+    const url = `${PUBLIC_BACKEND_URL}/api/auth/exchange`;
     const res = await request(url, {
       method: 'POST',
       body: JSON.stringify({
-        access_token,
-        refresh_token,
+        code,
+        code_verifier: verifier,
       }),
     });
     if (res.ok) {
+      localStorage.removeItem('pkce_verifier');
       await this.init();
     } else {
       throw new Error(await res.text());
