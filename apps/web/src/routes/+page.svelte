@@ -27,6 +27,7 @@ import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import ArtifactDownloader from '$lib/artifact/artifact-downloader.svelte';
 import MockAiDialog from '$lib/components/custom/landing/mock-ai-dialog.svelte';
 import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svelte';
@@ -52,6 +53,7 @@ const pricingList = {
   yearly: [
     'Everything in Monthly',
     '25 Million AI Credits at once',
+    '1.5 GB Storage for Media Files',
     'Exclusive community badge',
     'Direct dev team access',
   ],
@@ -217,7 +219,7 @@ const faqItems = [
           No Downloadables
         </Button>
       {/if}
-      {:catch error}
+    {:catch error}
       {console.error(error)}
     {/await}
   </div>
@@ -415,8 +417,9 @@ const faqItems = [
     <section id="pricing" class="flex w-full flex-col gap-8 py-12">
       <h2 class="text-center text-3xl font-bold">Simple Pricing</h2>
       <p class="text-center text-muted-foreground">
-        Choose the plan that fits your workflow
+        Choose the plan that fits your workflow. 
       </p>
+      <strong class="animate-bounce text-center">Get 10% off on all purchases.</strong>
 
       <div class="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
         <!-- Monthly -->
@@ -441,12 +444,11 @@ const faqItems = [
               class="w-full"
               variant="outline"
               onclick={() => {
-                if (!user){
-                  return toast.warning("Please login to continue")
+                if (!user) {
+                  return toast.warning("Please login to continue");
                 }
-                sendToPaymentPortal("monthly")
-                }}
-              >Start</Button
+                sendToPaymentPortal("monthly");
+              }}>Start With Monthly Plan</Button
             >
           </Card.Footer>
         </Card.Root>
@@ -479,13 +481,14 @@ const faqItems = [
             </ul>
           </Card.Content>
           <Card.Footer class="mt-auto">
-            <Button class="w-full" onclick={() => {
-              if (!user){
-                return toast.warning("Please login to continue")
-              }
-              sendToPaymentPortal("yearly")
-              }}
-              >Start to Save More</Button
+            <Button
+              class="w-full"
+              onclick={() => {
+                if (!user) {
+                  return toast.warning("Please login to continue");
+                }
+                sendToPaymentPortal("yearly");
+              }}>Start with Yearly Plan</Button
             >
           </Card.Footer>
         </Card.Root>
@@ -509,17 +512,29 @@ const faqItems = [
               {/each}
             </ul>
           </Card.Content>
-          <Card.Footer class="mt-auto flex flex-col gap-1"> 
+          <Card.Footer class="mt-auto flex flex-col gap-1">
+            {#if (user?.aiCredits || 0) <= 0}
+              <Button
+                class="w-full"
+                href={`${PUBLIC_BACKEND_URL}/api/promotion/redeem-ai-credits`}
+                disabled={!user || user?.aiCredits > 0}
+              >
+                {#if !user}
+                  Login to claim free AI Credits
+                {:else}
+                  Claim 10K Free AI Credits
+                {/if}
+              </Button>
+            {/if}
             <Button
               class="w-full"
               variant="outline"
               onclick={() => {
-                if (!user){
-                  return toast.warning("Please login to continue")
+                if (!user) {
+                  return toast.warning("Please login to continue");
                 }
-                sendToPaymentPortal("ai_credits")
-                }}
-              >Buy AI Credits</Button
+                sendToPaymentPortal("ai_credits");
+              }}>Buy AI Credits</Button
             >
           </Card.Footer>
         </Card.Root>
@@ -528,45 +543,55 @@ const faqItems = [
   </Reveal>
 
   <Reveal delay={200}>
-     	<section id="faqs">
-		<div class="mx-auto px-4 md:px-6">
-			<div class="mx-auto max-w-xl text-center">
-                <h2 class="text-center text-3xl font-bold">Frequently Asked Questions</h2>
-				<p class="mt-4 text-balance text-muted-foreground">
-					Discover quick and comprehensive answers to common questions about our platform, services,
-					and features.
-				</p>
-			</div>
+    <section id="faqs">
+      <div class="mx-auto px-4 md:px-6">
+        <div class="mx-auto max-w-xl text-center">
+          <h2 class="text-center text-3xl font-bold">
+            Frequently Asked Questions
+          </h2>
+          <p class="mt-4 text-balance text-muted-foreground">
+            Discover quick and comprehensive answers to common questions about
+            our platform, services, and features.
+          </p>
+        </div>
 
-			<div class="mx-auto mt-12 max-w-2xl">
-				<Accordion
-					type="single"
-					class="w-full rounded-2xl border bg-background px-8 py-3 shadow-sm ring-4 ring-muted dark:ring-0"
-				>
-					{#each faqItems as item, index (index)}
-						<AccordionItem
-							value={item.id}
-							class={[faqItems.length - 1 !== index ? 'border-dashed' : 'border-none']}
-						>
-							<AccordionTrigger class="cursor-pointer text-base font-semibold hover:no-underline"
-								>{item.question}</AccordionTrigger
-							>
-							<AccordionContent>
-								<p class="text-base">{item.answer}</p>
-							</AccordionContent>
-						</AccordionItem>
-					{/each}
-				</Accordion>
+        <div class="mx-auto mt-12 max-w-2xl">
+          <Accordion
+            type="single"
+            class="w-full rounded-2xl border bg-background px-8 py-3 shadow-sm ring-4 ring-muted dark:ring-0"
+          >
+            {#each faqItems as item, index (index)}
+              <AccordionItem
+                value={item.id}
+                class={[
+                  faqItems.length - 1 !== index
+                    ? "border-dashed"
+                    : "border-none",
+                ]}
+              >
+                <AccordionTrigger
+                  class="cursor-pointer text-base font-semibold hover:no-underline"
+                  >{item.question}</AccordionTrigger
+                >
+                <AccordionContent>
+                  <p class="text-base">{item.answer}</p>
+                </AccordionContent>
+              </AccordionItem>
+            {/each}
+          </Accordion>
 
-				<p class="mt-6 px-4 text-muted-foreground text-center">
-					Can't find what you're looking for?
-					<a href="mailto:contact@nota.ink" class="font-medium text-primary hover:underline">
-						Contact Us
-					</a>
-				</p>
-			</div>
-		</div>
-	</section>
+          <p class="mt-6 px-4 text-muted-foreground text-center">
+            Can't find what you're looking for?
+            <a
+              href="mailto:contact@nota.ink"
+              class="font-medium text-primary hover:underline"
+            >
+              Contact Us
+            </a>
+          </p>
+        </div>
+      </div>
+    </section>
   </Reveal>
 
   <footer

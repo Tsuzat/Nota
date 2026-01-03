@@ -1,7 +1,8 @@
 import type { WebhookPayload } from 'dodopayments/resources';
 import { eq, or, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { DODO_AI_CREDITS, DODO_MONTLY_SUB, DODO_YEARLY_SUB, FRONTEND_URL } from '../../constants';
+import { Webhook } from 'standardwebhooks';
+import { DODO_AI_CREDITS, DODO_MONTLY_SUB, DODO_WEBHOOK_SECRET, DODO_YEARLY_SUB, FRONTEND_URL } from '../../constants';
 import { DB } from '../../db';
 import { users } from '../../db/schema';
 import { logerror, loginfo, logwarn } from '../../logging';
@@ -16,6 +17,12 @@ function getCreditsToAdd(productId: string | null): number {
   if (productId === DODO_MONTLY_SUB) return 2_000_000;
   if (productId === DODO_YEARLY_SUB) return 25_000_000;
   if (productId === DODO_AI_CREDITS) return 5_000_000;
+  return 0;
+}
+
+function getStorageToAdd(productId: string | null): number {
+  if (productId === DODO_MONTLY_SUB) return 1_000_000_000;
+  if (productId === DODO_YEARLY_SUB) return 1_500_000_000;
   return 0;
 }
 
@@ -92,20 +99,35 @@ app.get('/portal', authMiddleware, async (c) => {
 // NOTE: This endpoint is NOT protected by authMiddleware
 app.post('/hooks', async (c) => {
   const webhookId = c.req.header('webhook-id');
-  if (!webhookId) {
-    return c.json({ error: 'No webhook-id' }, 400);
+  const webhookSignature = c.req.header('webhook-signature');
+  const webhookTimestamp = c.req.header('webhook-timestamp');
+
+  if (!webhookId || !webhookSignature || !webhookTimestamp) {
+    return c.json({ error: 'Missing webhook headers' }, 400);
   }
+
   if (processedWebhooks.has(webhookId)) {
     return c.json({ received: true }, 200);
   }
-  processedWebhooks.add(webhookId);
 
   let payload: WebhookPayload;
+
   try {
-    payload = await c.req.json();
+    const rawBody = await c.req.text();
+    const headers = {
+      'webhook-id': webhookId,
+      'webhook-signature': webhookSignature,
+      'webhook-timestamp': webhookTimestamp,
+    };
+    const wh = new Webhook(DODO_WEBHOOK_SECRET);
+    // standardwebhooks verify expects headers object
+    payload = wh.verify(rawBody, headers) as WebhookPayload;
+
+    // Mark as processed only after successful verification
+    processedWebhooks.add(webhookId);
   } catch (e) {
-    logerror('Invalid JSON:', e);
-    return c.json({ error: 'Invalid JSON' }, 400);
+    logerror('Webhook Verification Failed:', e);
+    return c.json({ error: 'Invalid Signature' }, 401);
   }
 
   const { type } = payload;
@@ -164,12 +186,14 @@ app.post('/hooks', async (c) => {
         const productId = data.product_id;
         const tier = getSubscriptionTier(productId);
         const creditsToAdd = getCreditsToAdd(productId);
+        const storageToAdd = getStorageToAdd(productId);
         const subscriptionType =
           productId === DODO_MONTLY_SUB ? 'monthly' : productId === DODO_YEARLY_SUB ? 'yearly' : null;
 
         await DB.update(users)
           .set({
             aiCredits: sql`${users.aiCredits} + ${creditsToAdd}`,
+            assignedStorage: storageToAdd,
             subscriptionPlan: tier,
             subscriptionType: subscriptionType as 'monthly' | 'yearly' | null,
             externalCustomerId: data.customer.customer_id,
@@ -197,6 +221,7 @@ app.post('/hooks', async (c) => {
         await DB.update(users)
           .set({
             subscriptionPlan: 'free',
+            assignedStorage: 0,
             subscriptionType: null,
             nextBillingAt: null,
           })

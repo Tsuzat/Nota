@@ -26,6 +26,7 @@
         "drizzle-orm": "^0.45.1",
         "hono": "^4.11.1",
         "hono-rate-limiter": "^0.5.2",
+        "standardwebhooks": "^1.0.0",
         "zod": "^4.2.1",
       },
       "devDependencies": {
