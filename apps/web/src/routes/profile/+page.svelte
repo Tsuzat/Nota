@@ -2,14 +2,14 @@
 import ProBadge from '@lib/components/custom/ProBadge.svelte';
 import LogOut from '@lucide/svelte/icons/log-out';
 import Trash2 from '@lucide/svelte/icons/trash-2';
-import { getAuthContext } from '@nota/client';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { logout } from '$lib/utils.js';
 
-const auth = getAuthContext();
-const user = $derived(auth.user);
+const { data } = $props();
+const user = $derived(data.user);
 
 const isPro = $derived((user?.subscriptionPlan || 'free') === 'pro');
 const ai_credits = $derived(user?.aiCredits || 0);
@@ -91,7 +91,7 @@ function handleDeleteAccount() {
               Manage Your Subs
             </Button>
           {/if}
-          <Button onclick={() => auth.logout()} variant="outline">
+          <Button onclick={logout} variant="outline">
             <LogOut class="mr-2 h-4 w-4" />
             Sign Out
           </Button>

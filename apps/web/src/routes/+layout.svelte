@@ -5,13 +5,13 @@ import { ModeWatcher } from '@nota/ui';
 import { Toaster } from '@nota/ui/shadcn/sonner';
 import { onMount } from 'svelte';
 
+let { data, children } = $props();
+
 const auth = setAuthContext();
 
-onMount(async () => {
-  await auth.init();
+onMount(() => {
+  auth.user = data.user;
 });
-
-let { children } = $props();
 </script>
 
 <ModeWatcher />

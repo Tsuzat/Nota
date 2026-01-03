@@ -1,3 +1,6 @@
+import { request } from '@nota/client';
+import { goto, invalidateAll } from '$app/navigation';
+import { resolve } from '$app/paths';
 import {
   PUBLIC_BACKEND_URL,
   PUBLIC_DODO_AI_CREDITS,
@@ -26,4 +29,10 @@ export const sendToPaymentPortal = (which: 'monthly' | 'yearly' | 'ai_credits', 
   }
   const url = `${PUBLIC_BACKEND_URL}/api/payment/checkout?productId=${productId}&quantity=${quantity}`;
   window.location.href = url;
+};
+
+export const logout = async () => {
+  await request(`${PUBLIC_BACKEND_URL}/api/auth/logout`);
+  await invalidateAll();
+  return goto(resolve('/'));
 };

@@ -33,11 +33,11 @@ import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svel
 import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
 import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
-import { sendToPaymentPortal } from '$lib/utils.js';
+import { logout, sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
 
-const auth = getAuthContext();
-const user = $derived(auth.user);
+const { data } = $props();
+const user = $derived(data.user);
 
 const pricingList = {
   monthly: [
@@ -172,7 +172,7 @@ const faqItems = [
             <UserRound />
             <span>Profile</span>
           </Dropdown.Item>
-          <Dropdown.Item onclick={async() => await auth.logout()}>
+          <Dropdown.Item onclick={logout}>
             <LogOut />
             Sign Out
           </Dropdown.Item>
