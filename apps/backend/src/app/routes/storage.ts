@@ -16,10 +16,48 @@ const app = new Hono<{ Variables: { userId: string; userEmail: string; user: any
 
 app.use('*', authMiddleware);
 
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB
+
+const ALLOWED_MIME_TYPES = new Set([
+  // Images
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+  'image/bmp',
+  'image/tiff',
+  // Video
+  'video/mp4',
+  'video/webm',
+  'video/ogg',
+  'video/quicktime',
+  // Audio
+  'audio/mpeg',
+  'audio/ogg',
+  'audio/wav',
+  'audio/webm',
+  'audio/aac',
+  // Documents
+  'application/pdf',
+  'text/plain',
+  'text/markdown',
+  'text/csv',
+  'application/json',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation', // pptx
+]);
+
 const uploadSchema = z.object({
   filename: z.string().min(1),
-  contentType: z.string().min(1),
-  size: z.number().int().positive(), // in bytes
+  contentType: z.string().refine((type) => ALLOWED_MIME_TYPES.has(type), {
+    message: 'Invalid or disallowed content type',
+  }),
+  size: z.number().int().positive().max(MAX_FILE_SIZE, 'File size exceeds the 500MB limit'), // in bytes
 });
 
 const confirmSchema = z.object({
