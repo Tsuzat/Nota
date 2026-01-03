@@ -1,5 +1,6 @@
 <script lang="ts">
 import { BorderBeam, SimpleToolTip, ToggleMode } from '@lib/components/custom';
+import { toast } from '@lib/components/ui/sonner/index.js';
 import { Menu } from '@lucide/svelte';
 import BookOpen from '@lucide/svelte/icons/book-open';
 import Check from '@lucide/svelte/icons/check';
@@ -18,7 +19,6 @@ import User from '@lucide/svelte/icons/user';
 import UserRound from '@lucide/svelte/icons/user-round';
 import X from '@lucide/svelte/icons/x';
 import Zap from '@lucide/svelte/icons/zap';
-import { getAuthContext } from '@nota/client';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
@@ -440,7 +440,13 @@ const faqItems = [
             <Button
               class="w-full"
               variant="outline"
-              onclick={() => sendToPaymentPortal("monthly")}>Start</Button
+              onclick={() => {
+                if (!user){
+                  return toast.warning("Please login to continue")
+                }
+                sendToPaymentPortal("monthly")
+                }}
+              >Start</Button
             >
           </Card.Footer>
         </Card.Root>
@@ -473,7 +479,12 @@ const faqItems = [
             </ul>
           </Card.Content>
           <Card.Footer class="mt-auto">
-            <Button class="w-full" onclick={() => sendToPaymentPortal("yearly")}
+            <Button class="w-full" onclick={() => {
+              if (!user){
+                return toast.warning("Please login to continue")
+              }
+              sendToPaymentPortal("yearly")
+              }}
               >Start to Save More</Button
             >
           </Card.Footer>
@@ -502,7 +513,12 @@ const faqItems = [
             <Button
               class="w-full"
               variant="outline"
-              onclick={() => sendToPaymentPortal("ai_credits")}
+              onclick={() => {
+                if (!user){
+                  return toast.warning("Please login to continue")
+                }
+                sendToPaymentPortal("ai_credits")
+                }}
               >Buy AI Credits</Button
             >
           </Card.Footer>
