@@ -1,7 +1,7 @@
 <script lang="ts">
 import { BorderBeam, SimpleToolTip, ToggleMode } from '@lib/components/custom';
 import { toast } from '@lib/components/ui/sonner/index.js';
-import { Menu } from '@lucide/svelte';
+import { Clipboard, Menu } from '@lucide/svelte';
 import BookOpen from '@lucide/svelte/icons/book-open';
 import Check from '@lucide/svelte/icons/check';
 import Code from '@lucide/svelte/icons/code';
@@ -50,6 +50,7 @@ const pricingList = {
     'Local Media Storage',
     "AI Features with AI Credits (You'd need to logged in and buy AI Credits to use)",
     'Regular Updates and Bug Fixes',
+    'Bring your own AI API Key [Coming Soon]',
   ],
   monthly: [
     'Unlimited Cloud Notes, Workspaces and UserWorkspaces',
@@ -104,6 +105,14 @@ const faqItems = [
       'Yes, You can. Using AI features has nothing to do with having pro plan. You can simply login and buy AI Credits and then you can simply use the AI features.',
   },
 ];
+
+async function copyToClipboard() {
+  toast.promise(navigator.clipboard.writeText('brew install --cask Tsuzat/tap/nota'), {
+    loading: 'Copying...',
+    success: 'Copied on Clipboard!',
+    error: 'Failed to copy',
+  });
+}
 </script>
 
 <Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
@@ -234,6 +243,13 @@ const faqItems = [
     {:catch error}
       {console.error(error)}
     {/await}
+  </div>
+  <div class="flex relative items-center gap-1 border p-1 pl-2 rounded-lg">
+    <BorderBeam />
+    <code class="text-sm text-muted-foreground">$ brew install --cask Tsuzat/tap/nota</code>
+    <Button variant="ghost" size="icon-sm" onclick={copyToClipboard}>
+      <Clipboard />
+    </Button>
   </div>
   <div class="hidden dark:block">
     <enhanced:img
@@ -454,9 +470,7 @@ const faqItems = [
             </ul>
           </Card.Content>
           <Card.Footer class="my-auto">
-            <Button class="w-full" variant="outline" onclick={() => {
-              toast.promise(navigator.clipboard.writeText("brew install --cask Tsuzat/tap/nota"))
-            }}>Install With Homebrew</Button>
+            <Button class="w-full" variant="outline" onclick={copyToClipboard}>Install With Homebrew</Button>
           </Card.Footer>
         </Card.Root>
         <!-- Monthly -->
