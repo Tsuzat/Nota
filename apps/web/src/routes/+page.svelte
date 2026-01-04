@@ -41,7 +41,16 @@ import { getArtefacts } from './data.remote.js';
 const { data } = $props();
 const user = $derived(data.user);
 
+let tabPro = $state<'monthly' | 'yearly'>('monthly');
+
 const pricingList = {
+  free: [
+    'All the data is in your local machine',
+    'Unlimited Local Notes, Workspaces and UserWorkspaces',
+    'Local Media Storage',
+    "AI Features with AI Credits (You'd need to logged in and buy AI Credits to use)",
+    'Regular Updates and Bug Fixes',
+  ],
   monthly: [
     'Unlimited Cloud Notes, Workspaces and UserWorkspaces',
     'Notes collaborate with anyone [Comming Soon]',
@@ -52,11 +61,13 @@ const pricingList = {
     'Priority support and 24/7 help',
   ],
   yearly: [
-    'Everything in Monthly',
-    '25 Million AI Credits at once',
+    'Unlimited Cloud Notes, Workspaces and UserWorkspaces',
+    'Notes collaborate with anyone [Comming Soon]',
+    'Notes Previews on Browser',
+    '25 Million AI Credits at once (Never Expires)',
     '1.5 GB Storage for Media Files',
-    'Exclusive community badge',
-    'Direct dev team access',
+    'All data is encrypted',
+    'Priority support and 24/7 help',
   ],
   ai_credits: [
     'Can be used without any subscription',
@@ -418,21 +429,77 @@ const faqItems = [
     <section id="pricing" class="flex w-full flex-col gap-8 py-12">
       <h2 class="text-center text-3xl font-bold">Simple Pricing</h2>
       <p class="text-center text-muted-foreground">
-        Choose the plan that fits your workflow. 
+        Choose the plan that fits your workflow.
       </p>
-      <strong class="animate-bounce text-center">Get 10% off on all purchases.</strong>
+      <strong class="animate-bounce text-center"
+        >Get 10% off on all purchases.</strong
+      >
 
       <div class="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
-        <!-- Monthly -->
+        <!-- Free -->
         <Card.Root>
           <Card.Header>
-            <Card.Title class="font-medium">Monthly</Card.Title>
-            <span class="my-3 block text-2xl font-semibold">$9 / mo</span>
+            <Card.Title class="font-medium">Free</Card.Title>
+            <span class="my-3 block text-2xl font-semibold">$0 / mo</span>
           </Card.Header>
           <Card.Content class="space-y-4">
             <hr class="border-dashed" />
             <ul class="list-outside space-y-3 text-sm">
-              {#each pricingList.monthly as item, idx (idx)}
+              {#each pricingList.free as item, idx (idx)}
+                <li class="flex items-center gap-2">
+                  <Check class="size-3!" />
+                  {item}
+                </li>
+              {/each}
+            </ul>
+          </Card.Content>
+          <Card.Footer class="my-auto">
+            <Button class="w-full" variant="outline" onclick={() => {
+              toast.promise(navigator.clipboard.writeText("brew install --cask Tsuzat/tap/nota"))
+            }}>Install With Homebrew</Button>
+          </Card.Footer>
+        </Card.Root>
+        <!-- Monthly -->
+
+        <Card.Root class="relative">
+          <BorderBeam />
+          <Card.Header>
+            <Card.Title class="font-medium flex items-center justify-center">
+              <span>Pro</span>
+              <div
+                class="ml-3 inline-flex items-center rounded-full bg-background"
+              >
+                <Button
+                  class="rounded-full"
+                  size="sm"
+                  variant={tabPro === "monthly" ? "default" : "ghost"}
+                  onclick={() => (tabPro = "monthly")}>Monthly</Button
+                >
+                <Button
+                  class="rounded-full"
+                  size="sm"
+                  variant={tabPro === "yearly" ? "default" : "ghost"}
+                  onclick={() => (tabPro = "yearly")}>Yearly</Button
+                >
+              </div>
+            </Card.Title>
+            {#if tabPro === "monthly"}
+              <span class="my-3 block text-2xl font-semibold">$9 / mo</span>
+            {:else}
+              <span class="my-3 block text-2xl font-semibold">
+                $8.25 / mo
+                <span class="text-lg font-normal text-muted-foreground"
+                  >billed $99/y</span
+                >
+              </span>
+            {/if}
+          </Card.Header>
+          <Card.Content class="space-y-4">
+            {@const list =
+              tabPro === "monthly" ? pricingList.monthly : pricingList.yearly}
+            <hr class="border-dashed" />
+            <ul class="list-outside space-y-3 text-sm">
+              {#each list as item, idx (idx)}
                 <li class="flex items-center gap-2">
                   <Check class="size-3!" />
                   {item}
@@ -448,48 +515,9 @@ const faqItems = [
                 if (!user) {
                   return toast.warning("Please login to continue");
                 }
-                sendToPaymentPortal("monthly");
-              }}>Start With Monthly Plan</Button
-            >
-          </Card.Footer>
-        </Card.Root>
-
-        <!-- Yearly (Popular) -->
-        <Card.Root class="relative border-primary/50">
-          <BorderBeam />
-          <span
-            class="absolute inset-x-0 -top-3 mx-auto flex h-6 w-fit items-center rounded-full bg-linear-to-br from-purple-400 to-amber-300 px-3 py-1 text-xs font-medium text-amber-950 ring-1 ring-white/20 ring-offset-1 ring-offset-gray-950/5 ring-inset"
-            >Popular</span
-          >
-          <Card.Header>
-            <Card.Title class="font-medium">Yearly</Card.Title>
-            <span class="my-3 block text-2xl font-semibold">
-              $8.25 / mo
-              <span class="text-lg font-normal text-muted-foreground"
-                >billed $99/y</span
-              >
-            </span>
-          </Card.Header>
-          <Card.Content class="space-y-4">
-            <hr class="border-dashed" />
-            <ul class="list-outside space-y-3 text-sm">
-              {#each pricingList.yearly as item, idx (idx)}
-                <li class="flex items-center gap-2">
-                  <Check class="size-3!" />
-                  {item}
-                </li>
-              {/each}
-            </ul>
-          </Card.Content>
-          <Card.Footer class="mt-auto">
-            <Button
-              class="w-full"
-              onclick={() => {
-                if (!user) {
-                  return toast.warning("Please login to continue");
-                }
-                sendToPaymentPortal("yearly");
-              }}>Start with Yearly Plan</Button
+                sendToPaymentPortal(tabPro);
+              }}
+              >Start With {tabPro === "monthly" ? "Monthly" : "Yearly"} Plan</Button
             >
           </Card.Footer>
         </Card.Root>
@@ -519,14 +547,19 @@ const faqItems = [
                 class="w-full"
                 disabled={!user || user?.aiCredits > 0}
                 onclick={() => {
-                  toast.promise(request(`${PUBLIC_BACKEND_URL}/api/promotion/redeem-ai-credits`), {
-                    loading: 'Redeeming AI Credits...',
-                    success: () => {
-                      window.location.reload();
-                      return "AI Credits redeemed successfully";
-                    },
-                    error: "Failed to redeem AI Credits",
-                  })
+                  toast.promise(
+                    request(
+                      `${PUBLIC_BACKEND_URL}/api/promotion/redeem-ai-credits`
+                    ),
+                    {
+                      loading: "Redeeming AI Credits...",
+                      success: () => {
+                        window.location.reload();
+                        return "AI Credits redeemed successfully";
+                      },
+                      error: "Failed to redeem AI Credits",
+                    }
+                  );
                 }}
               >
                 {#if !user}

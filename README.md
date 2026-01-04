@@ -36,6 +36,44 @@
 - **⚡ Fast**: Built with Rust (Tauri) and Bun for blazing fast performance.
 - **🎨 Modern UI**: Beautiful, responsive interface with Dark/Light mode support.
 
+## 📥 Installation
+
+You can download the latest version of Nota from the [Releases page](https://github.com/Tsuzat/Nota/releases).
+
+### macOS
+
+#### Homebrew (Recommended)
+
+Just open your terminal and run the following command to install Nota using Homebrew:
+
+```sh
+brew install --cask Tsuzat/tap/nota
+```
+
+#### Manual Download
+
+> [!WARNING]
+>
+> We do not have an Apple Developer ID, so the application is not signed with an Apple Developer ID. As a result, you may encounter a warning when trying to open it.
+>
+> **Note:** This warning is a security feature to alert users that the app is not from a verified developer or application is damaged. In that case run the following command to remove the quarantine check from the app.
+>
+> ```sh
+> xattr -r -d com.apple.quarantine /Applications/Nota.app
+> ```
+
+1. Download the `.dmg` file.
+2. Open the `.dmg` and drag **Nota** to your **Applications** folder.
+3. Open **Nota** from the Applications folder.
+4. If you see a warning saying _"Nota" can't be opened because it is from an unidentified developer_:
+   - Click **OK**.
+   - Go to **System Settings** > **Privacy & Security**.
+   - Scroll down to the **Security** section.
+   - You should see a message about "Nota" being blocked. Click **Open Anyway**.
+   - Enter your password if prompted.
+
+**Tip:** You can also right-click (or Control-click) the app icon and select **Open**, then click **Open** in the dialog box to bypass the check.
+
 ## 🛠️ Tech Stack
 
 Nota is built as a monorepo using **Bun Workspaces**.
