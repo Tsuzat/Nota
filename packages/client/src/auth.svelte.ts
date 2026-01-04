@@ -47,7 +47,7 @@ class Auth {
       const parsedUser = UserSchema.parse(user);
       this.#user = parsedUser;
     } else {
-      throw new Error(await res.text());
+      console.log(await res.text());
     }
   }
 
