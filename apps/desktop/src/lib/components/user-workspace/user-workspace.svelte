@@ -30,12 +30,18 @@ async function handlesubmit(e: Event) {
   }
   try {
     if (useCloud) {
-      if (user === null) {
+      if (!user) {
         toast.error('User is not logged in', {
           description: 'Please login again or create local user workspaces',
         });
         return;
       }
+	  if (user.subscriptionPlan === "free"){
+		toast.error('Pro feature is not available for free users', {
+          description: 'Please upgrade to pro to use this feature',
+        });
+		return;
+	  }
       await cloudUserWorkspaces.create(icon, name);
     } else await localUserWorkspaces.createUserWorkspace(name, icon);
     useNewLocalUserWorkspace.open = false;
