@@ -244,13 +244,15 @@ async function copyToClipboard() {
       {console.error(error)}
     {/await}
   </div>
-  <div class="flex relative items-center gap-1 border p-1 pl-2 rounded-lg">
+  <Button
+    variant="outline"
+    class="mx-auto relative text-muted-foreground"
+    onclick={copyToClipboard}
+    title="Click to copy the installation command"
+  >
     <BorderBeam />
-    <code class="text-sm text-muted-foreground">$ brew install --cask Tsuzat/tap/nota</code>
-    <Button variant="ghost" size="icon-sm" onclick={copyToClipboard}>
-      <Clipboard />
-    </Button>
-  </div>
+    $ brew install --cask Tsuzat/tap/nota
+  </Button>
   <div class="hidden dark:block">
     <enhanced:img
       class="aspect-auto h-auto w-full"
@@ -470,7 +472,9 @@ async function copyToClipboard() {
             </ul>
           </Card.Content>
           <Card.Footer class="my-auto">
-            <Button class="w-full" variant="outline" onclick={copyToClipboard}>Install With Homebrew</Button>
+            <Button class="w-full" variant="outline" onclick={copyToClipboard}
+              >Install With Homebrew</Button
+            >
           </Card.Footer>
         </Card.Root>
         <!-- Monthly -->
