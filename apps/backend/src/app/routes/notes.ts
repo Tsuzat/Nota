@@ -9,6 +9,7 @@ import { verifyAccessToken } from '../../lib/jwt';
 import { logerror } from '../../logging';
 import type { Variables } from '..';
 import { authMiddleware } from '../middlewares/auth';
+import { proMiddleWare } from '../middlewares/checkpro';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -72,7 +73,7 @@ app.get('/:id/preview', async (c) => {
 });
 
 // Protect all routes with auth middleware
-app.use('*', authMiddleware);
+app.use('*', authMiddleware, proMiddleWare);
 
 // Schema for creating a note
 const createSchema = z.object({

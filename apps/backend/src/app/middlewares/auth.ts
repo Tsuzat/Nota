@@ -28,6 +28,15 @@ export const authMiddleware = async (c: Context, next: Next) => {
     // Fetch user details for storage/credits
     const user = await DB.query.users.findFirst({
       where: eq(users.id, payload.sub),
+      columns: {
+        subscriptionPlan: true,
+        assignedStorage: true,
+        usedStorage: true,
+        aiCredits: true,
+        externalCustomerId: true,
+        nextBillingAt: true,
+        subscriptionType: true,
+      },
     });
     if (!user) {
       logwarn('User not found');

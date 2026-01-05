@@ -7,11 +7,12 @@ import { workspaces } from '../../db/schema';
 import { logerror } from '../../logging';
 import type { Variables } from '..';
 import { authMiddleware } from '../middlewares/auth';
+import { proMiddleWare } from '../middlewares/checkpro';
 
 const app = new Hono<{ Variables: Variables }>();
 
 // Protect all routes with auth middleware
-app.use('*', authMiddleware);
+app.use('*', authMiddleware, proMiddleWare);
 
 // Schema for creating a workspace
 const createSchema = z.object({
