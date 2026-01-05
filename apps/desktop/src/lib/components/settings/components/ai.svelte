@@ -7,6 +7,7 @@ import * as Switch from '@nota/ui/shadcn/switch';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { getGlobalSettings } from '../constants.svelte';
+import Myai from './myai.svelte';
 
 const useSettings = getGlobalSettings();
 
@@ -50,3 +51,5 @@ function getAICredits() {
 		<Button onclick={() => openUrl(`${PUBLIC_NOTA_FRONTEND_URL}#pricing`)}>Buy More AI Credits</Button>
 	</div>
 </div>
+
+<Myai />

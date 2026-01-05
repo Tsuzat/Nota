@@ -30,11 +30,11 @@ function handleKeydown(e: KeyboardEvent) {
 <Dialog.Root bind:open={useSettings.open}>
 	<Dialog.Trigger class="sr-only">Open</Dialog.Trigger>
 	<Dialog.Content
-		class="overflow-hidden p-2 transition-all duration-500 md:max-h-[500px] md:max-w-[700px] lg:max-w-[800px]"
+		class="p-2 transition-all overflow-auto duration-500 md:max-h-125 md:max-w-175 lg:max-w-200"
 		trapFocus={false}
 		showCloseButton={false}
 	>
-		<Tabs.Root value="account">
+		<Tabs.Root value="account" class="h-full">
 			<Tabs.List class="mx-auto inline-flex items-center justify-between">
 				{#each nav as item (item.name)}
 					<Tabs.Trigger value={item.name.toLowerCase()}>

@@ -1,4 +1,5 @@
 import { getContext, setContext } from 'svelte';
+import { GEMINI_MODELS } from '$lib/ai';
 
 function getLocalStorageValue(key: string, defaultValue: boolean): boolean {
   const data = localStorage.getItem(key);
@@ -16,6 +17,8 @@ class GlobalSettings {
   #useBubbleMenu = $state(getLocalStorageValue('useBubbleMenu', true));
   #useDragHandle = $state(getLocalStorageValue('useDragHandle', true));
   #themeColor = $state(localStorage.getItem('themeColor') || 'default');
+  #useMyOwnAI = $state(getLocalStorageValue('useMyOwnAI', false));
+  #geminiModel = $state(localStorage.getItem('geminiModel') || GEMINI_MODELS.GEMINI_2_5_FLASH_LITE);
 
   constructor(open = false) {
     this.#open = open;
@@ -60,6 +63,20 @@ class GlobalSettings {
   set themeColor(value) {
     this.#themeColor = value;
     localStorage.setItem('themeColor', value);
+  }
+  get useMyOwnAI() {
+    return this.#useMyOwnAI;
+  }
+  set useMyOwnAI(value) {
+    this.#useMyOwnAI = value;
+    localStorage.setItem('useMyOwnAI', String(value));
+  }
+  get geminiModel() {
+    return this.#geminiModel;
+  }
+  set geminiModel(value: string) {
+    this.#geminiModel = value;
+    localStorage.setItem('geminiModel', value);
   }
 }
 

@@ -41,7 +41,7 @@
       "name": "@nota/desktop",
       "version": "0.9.50-beta",
       "dependencies": {
-        "@google/genai": "^1.33.0",
+        "@google/genai": "^1.34.0",
         "@nota/client": "workspace:*",
         "@nota/ui": "workspace:*",
         "@tauri-apps/api": "^2",

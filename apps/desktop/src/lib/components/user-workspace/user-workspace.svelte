@@ -36,12 +36,12 @@ async function handlesubmit(e: Event) {
         });
         return;
       }
-	  if (user.subscriptionPlan === "free"){
-		toast.error('Pro feature is not available for free users', {
+      if (user.subscriptionPlan === 'free') {
+        toast.error('Pro feature is not available for free users', {
           description: 'Please upgrade to pro to use this feature',
         });
-		return;
-	  }
+        return;
+      }
       await cloudUserWorkspaces.create(icon, name);
     } else await localUserWorkspaces.createUserWorkspace(name, icon);
     useNewLocalUserWorkspace.open = false;
