@@ -107,8 +107,8 @@ jobs:
           SHA256_ARM=$(sha256sum "$ARM_DMG" | awk '{print $1}')
           SHA256_INTEL=$(sha256sum "$INTEL_DMG" | awk '{print $1}')
           
-          CASK_PATH="tap/Casks/nota.rb"
-          mkdir -p tap/Casks
+          CASK_PATH="homebrew-tap/Casks/nota.rb"
+          mkdir -p homebrew-tap/Casks
           
           cat > "$CASK_PATH" <<EOF
           cask "nota" do
@@ -149,7 +149,7 @@ jobs:
           cat "$CASK_PATH"
 
       - name: Push to Tap
-        working-directory: tap
+        working-directory: homebrew-tap
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
