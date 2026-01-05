@@ -1,0 +1,88 @@
+name: Update Homebrew Tap
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  update-cask:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Homebrew Tap
+        uses: actions/checkout@v4
+        with:
+          repository: Tsuzat/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+
+      - name: Download Release Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download ${{ github.event.release.tag_name }} --repo ${{ github.repository }} --pattern "*.dmg" --dir assets
+
+      - name: Update Cask
+        run: |
+          VERSION=${{ github.event.release.tag_name }}
+          VERSION=${VERSION#release-v} # Remove 'release-v' prefix
+          
+          # Find files and calculate hashes
+          ARM_DMG=$(find assets -name "*_aarch64.dmg" | head -n 1)
+          INTEL_DMG=$(find assets -name "*_x64.dmg" | head -n 1)
+          
+          if [[ -z "$ARM_DMG" || -z "$INTEL_DMG" ]]; then
+            echo "Error: Could not find both ARM and Intel DMGs"
+            ls -R assets
+            exit 1
+          fi
+          
+          SHA256_ARM=$(sha256sum "$ARM_DMG" | awk '{print $1}')
+          SHA256_INTEL=$(sha256sum "$INTEL_DMG" | awk '{print $1}')
+          
+          CASK_PATH="homebrew-tap/Casks/nota.rb"
+          mkdir -p homebrew-tap/Casks
+          
+          cat > "$CASK_PATH" <<EOF
+          cask "nota" do
+            arch arm: "aarch64", intel: "x64"
+          
+            version "$VERSION"
+            sha256 arm:   "\$SHA256_ARM",
+                   intel: "\$SHA256_INTEL"
+          
+            url "https://github.com/Tsuzat/Nota/releases/download/release-v#{version}/Nota_#{version}_#{arch}.dmg"
+            name "Nota"
+            desc "Fast, Lightweight, Feature-Rich Note-Taking App with Native AI Integration"
+            homepage "https://www.nota.ink/"
+          
+            livecheck do
+              url :url
+              strategy :github_latest
+            end
+          
+            app "Nota.app"
+          
+            postflight do
+              system_command "xattr",
+                             args: ["-rd", "com.apple.quarantine", "#{appdir}/Nota.app"],
+                             sudo: false
+            end
+          
+            zap trash: [
+              "~/Library/Application Support/app.nota.ink",
+              "~/Library/Caches/app.nota.ink",
+              "~/Library/Preferences/app.nota.ink.plist",
+              "~/Library/Saved Application State/app.nota.ink.savedState",
+            ]
+          end
+          EOF
+          
+          echo "Generated Cask content:"
+          cat "$CASK_PATH"
+
+      - name: Push to Tap
+        working-directory: homebrew-tap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/nota.rb
+          git diff --staged --quiet || (git commit -m "Update Nota Cask to ${{ github.event.release.tag_name }}" && git push)
