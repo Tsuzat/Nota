@@ -50,9 +50,10 @@ const pricingList = {
     'Local Media Storage',
     "AI Features with AI Credits (You'd need to logged in and buy AI Credits to use)",
     'Regular Updates and Bug Fixes',
-    'Bring your own AI API Key [Coming Soon]',
+    'Bring your own AI API Key',
   ],
   monthly: [
+    'All the features of Free Tier',
     'Unlimited Cloud Notes, Workspaces and UserWorkspaces',
     'Notes collaborate with anyone [Comming Soon]',
     'Notes Previews on Browser',
@@ -88,18 +89,24 @@ const faqItems = [
   },
   {
     id: 'item-2',
+    question: 'What is bring your own AI API Key?',
+    answer:
+      'Bring your own AI API Key allows you to use Gemini API Keys with Nota. We do not process your data and store the API key securely.',
+  },
+  {
+    id: 'item-3',
     question: 'What features are included in the Pro plan?',
     answer:
       "Pro plan, comes in monthly or yearly based subscription, allows you to use AI features with AI credits, Cloud Storage to store your notes, workspaces, and userworkspaces. You'll get 1 GB of storage to manage your media on cloud.",
   },
   {
-    id: 'item-3',
+    id: 'item-4',
     question: 'What are AI credits?',
     answer:
       'AI credits are the currency used to access AI features in Nota. You can purchase AI credits to use AI features in Nota. AI credits are used to generate AI content, such as summaries, translations, and more. Usually, these credits are equivalent to tokens.',
   },
   {
-    id: 'item-4',
+    id: 'item-5',
     question: 'Can I use AI without a pro subscription?',
     answer:
       'Yes, You can. Using AI features has nothing to do with having pro plan. You can simply login and buy AI Credits and then you can simply use the AI features.',
@@ -208,9 +215,14 @@ async function copyToClipboard() {
 <main
   class="mx-auto flex size-full max-w-4xl flex-col items-center justify-between gap-8 overflow-auto px-4 pt-8"
 >
-  <p class="animate-bounce">
-    A fast, modern, feature rich, lightweight note taking app with native AI
-    features
+  <span
+    class="inline animate-pulse text-2xl font-bold bg-linear-to-r from-[#ff8c00] via-[#7c01ff] to-[#ff7b00] bg-size-[var(--bg-size)_100%] bg-clip-text text-transparent"
+  >
+    Free. Privacy Focused. Local First
+  </span>
+
+  <p class="animate-bounce text-lg">
+    A fast, modern note taking app with native AI features
   </p>
   <div class="flex flex-col items-center gap-4 sm:flex-row">
     <Button variant="outline" href={resolve("/playground")}>
@@ -275,53 +287,53 @@ async function copyToClipboard() {
         <Card.Root class="bg-background/60 backdrop-blur-sm">
           <Card.Header>
             <Card.Title class="flex items-center gap-2">
-              <Sparkles class="size-5 text-yellow-500" />
-              AI Powered
+              <Zap class="size-5 text-orange-500" />
+              Local First & Private
             </Card.Title>
-            <Card.Description>Intelligent writing assistance</Card.Description>
+            <Card.Description>Your data, your control</Card.Description>
           </Card.Header>
           <Card.Content>
-            Seamlessly integrate AI into your workflow. Edit with AI, Ask AI,
-            generate text, fix grammar, and summarize notes instantly.
+            All your data is stored locally on your machine. We never see your
+            notes. Truly private by default.
           </Card.Content>
         </Card.Root>
         <Card.Root class="bg-background/60 backdrop-blur-sm">
           <Card.Header>
             <Card.Title class="flex items-center gap-2">
               <Code class="size-5 text-blue-500" />
-              Developer Friendly
+              Bring Your Own Keys
             </Card.Title>
-            <Card.Description>Built for code</Card.Description>
+            <Card.Description>Supports Gemini API</Card.Description>
           </Card.Header>
           <Card.Content>
-            First-class support for code blocks, syntax highlighting, and
-            developer-focused features like slash commands.
+            Connect your own <strong>Gemini</strong> API key. No limits, no subscriptions
+            required for AI features.
           </Card.Content>
         </Card.Root>
         <Card.Root class="bg-background/60 backdrop-blur-sm">
           <Card.Header>
             <Card.Title class="flex items-center gap-2">
-              <Zap class="size-5 text-orange-500" />
-              Lightning Fast
+              <Sparkles class="size-5 text-yellow-500" />
+              Native AI Features
             </Card.Title>
-            <Card.Description>Local-first architecture</Card.Description>
+            <Card.Description>Fast and amazing experience</Card.Description>
           </Card.Header>
           <Card.Content>
-            Experience zero latency with our local-first approach. Your notes
-            are stored on your device for instant access.
+            Integrated AI for effortless writing. Summarize, translate, and edit
+            with AI directly in your workflow.
           </Card.Content>
         </Card.Root>
         <Card.Root class="bg-background/60 backdrop-blur-sm">
           <Card.Header>
             <Card.Title class="flex items-center gap-2">
               <PenTool class="size-5 text-purple-500" />
-              Rich Formatting
+              Free Forever
             </Card.Title>
-            <Card.Description>Express yourself</Card.Description>
+            <Card.Description>For local usage</Card.Description>
           </Card.Header>
           <Card.Content>
-            Full support for markdown, rich text, images, and more. Customize
-            your notes with colors and highlights.
+            Nota is free for all local usage. Open source and community driven.
+            No hidden costs for your local data.
           </Card.Content>
         </Card.Root>
       </div>
