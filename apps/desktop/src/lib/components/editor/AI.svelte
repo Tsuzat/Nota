@@ -126,7 +126,6 @@ async function handleSubmit() {
 
 async function generateAIContent(prompt: string) {
   if (settings.useMyOwnAI) {
-    toast.info('Using My Own AI API Key');
     await callGemini(
       prompt,
       (chunk) => {
