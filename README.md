@@ -36,6 +36,19 @@
 - **⚡ Fast**: Built with Rust (Tauri) and Bun for blazing fast performance.
 - **🎨 Modern UI**: Beautiful, responsive interface with Dark/Light mode support.
 
+## 💡 Philosophy
+
+> **Nota is designed to be the nimble sports car of note-taking—fast, precise, and enjoyable to drive—stripping away the bloat while keeping the power where it matters.**
+
+I love writing and taking notes, but I struggled to find a tool that felt *just right*. Apps like Notion and Obsidian are powerful, but often feel like driving a semi-truck when all you need is a sedan—feature-rich, but heavy and sluggish due to their Electron roots. On the other hand, lightweight alternatives often lack the polish or specific UI finesse I craved.
+
+**Nota strikes a balance:**
+
+- **Lightweight & Efficient**: Weighing in at roughly ~16MB post-installation on macOS, Nota respects your system's resources (CPU, Memory, Energy) far more than typical web-wrapper applications.
+- **Purposeful AI**: AI is a tool, not a subscription trap. While features like solving complex calculus problems or summarizing notes are invaluable, paying $20/month per service is unsustainable. Nota adopts a **Bring Your Own Key (BYOK)** model (or non-expiring credits), giving you first-class AI powers without the recurring costs.
+
+It's built for those who want the fluid editing experience of Notion without the weight, and the simplicity of plain text with the superpowers of modern AI.
+
 ## 📥 Installation
 
 You can download the latest version of Nota from the [Releases page](https://github.com/Tsuzat/Nota/releases).
