@@ -10,7 +10,8 @@ import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { PUBLIC_BACKEND_URL, PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
+import Metadata from '$lib/components/seo/Metadata.svelte';
 import { logerror } from '$lib/sentry/index.js';
 
 const { data } = $props();
@@ -47,9 +48,10 @@ async function loadData(id: string) {
 }
 </script>
 
-<svelte:head>
-	<title>{name || 'Preview Note'}</title>
-</svelte:head>
+<Metadata 
+  title={name || 'Preview Note'} 
+  url={`${PUBLIC_NOTA_FRONTEND_URL}/note-preview-${data.id}`}
+/>
 
 {#if content !== undefined && name !== undefined && icon !== undefined}
 	<div class="fixed top-2 right-2 ml-auto flex items-center gap-2 print:hidden">

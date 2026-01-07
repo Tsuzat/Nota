@@ -514,12 +514,12 @@ async function copyToClipboard() {
               </div>
             </Card.Title>
             {#if tabPro === "monthly"}
-              <span class="my-3 block text-2xl font-semibold">$9 / mo</span>
+              <span class="my-3 block text-2xl font-semibold">$5 / mo</span>
             {:else}
               <span class="my-3 block text-2xl font-semibold">
-                $8.25 / mo
+                $4.5 / mo
                 <span class="text-lg font-normal text-muted-foreground"
-                  >billed $99/y</span
+                  >billed $55/y</span
                 >
               </span>
             {/if}
@@ -557,7 +557,7 @@ async function copyToClipboard() {
           <Card.Header>
             <Card.Title class="font-medium">AI Credits</Card.Title>
             <span class="my-3 block text-2xl font-semibold"
-              >$10 / 5M tokens</span
+              >$5 / 5M tokens</span
             >
           </Card.Header>
           <Card.Content class="space-y-4">
