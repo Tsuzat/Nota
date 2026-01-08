@@ -24,15 +24,15 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
   }
 
   // Inject Desktop Identifier if on Tauri
-  // if (isTauri() && DESKTOP_APP_IDENTIFIER) {
-  //   headers.set('X-Nota-Desktop-Identifier', DESKTOP_APP_IDENTIFIER);
-  // }
+  if (isTauri()) {
+    headers.set('Authorization', `Bearer ${localStorage.getItem('access_token')}`);
+  }
   const fetchFn = isTauri() ? tauriFetch : fetch;
 
   const currentOptions: RequestInit = {
     ...options,
     headers,
-    credentials: 'include', // Required for Web cookies, supported by Tauri plugin-http
+    credentials: 'include',
   };
 
   // 2. Initial Request
@@ -45,13 +45,26 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
     }
 
     try {
-      const refreshResponse = await fetchFn(`${PUBLIC_BACKEND_URL}/api/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-      });
+      const refreshResponse = await fetchFn(
+        `${PUBLIC_BACKEND_URL}/api/auth/refresh${isTauri() ? '?isDesktop=true' : ''}`,
+        {
+          method: 'POST',
+          ...(isTauri() && {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('refresh_token')}`,
+            },
+          }),
+          credentials: 'include',
+        }
+      );
 
       if (refreshResponse.ok) {
         // Retry Original Request
+        if (isTauri()) {
+          const { access_token } = await refreshResponse.json();
+          localStorage.setItem('access_token', access_token);
+        }
         response = await fetchFn(url, currentOptions);
       }
     } catch (e) {

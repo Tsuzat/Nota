@@ -112,6 +112,9 @@ class Auth {
     });
     if (res.ok) {
       localStorage.removeItem('pkce_verifier');
+      const { access_token, refresh_token } = await res.json();
+      localStorage.setItem('access_token', access_token);
+      localStorage.setItem('refresh_token', refresh_token);
       await this.init();
     } else {
       throw new Error(await res.text());

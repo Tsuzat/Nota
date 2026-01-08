@@ -200,6 +200,7 @@ auth.post('/signup', zValidator('json', signupSchema), async (c) => {
 // Login Endpoint
 auth.post('/login', zValidator('json', loginSchema), async (c) => {
   const { email, password } = c.req.valid('json');
+  const isDesktop = c.req.query('isDesktop') === 'true';
 
   try {
     const user = await DB.query.users.findFirst({
@@ -217,11 +218,14 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
     }
     const { accessToken, refreshToken } = await generateTokens(c, user.id, user.email);
 
-    setCookie(c, 'access_token', accessToken, { ...COOKIE_OPTIONS, maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY) });
-    setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY) });
+    if (!isDesktop) {
+      setCookie(c, 'access_token', accessToken, { ...COOKIE_OPTIONS, maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY) });
+      setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY) });
+    }
 
     return c.json({
       message: 'Login successful',
+      ...(isDesktop && { accessToken, refreshToken }),
     });
   } catch (error) {
     logerror('Login error:', error);
@@ -393,6 +397,7 @@ auth.use(
 
 auth.post('/refresh', async (c) => {
   const refreshToken = getCookie(c, 'refresh_token');
+  const isDesktop = c.req.query('isDesktop') === 'true';
 
   if (!refreshToken) {
     return c.json({ error: 'No refresh token' }, 401);
@@ -432,7 +437,7 @@ auth.post('/refresh', async (c) => {
       maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY),
     });
 
-    return c.json({ success: true });
+    return c.json({ success: true, ...(isDesktop && { access_token: newAccessToken }) });
   } catch (e) {
     console.error('Error verifying refresh token:', e);
   }
@@ -472,14 +477,6 @@ auth.post('/exchange', zValidator('json', exchangeSchema), async (c) => {
     }
 
     const { accessToken, refreshToken } = await generateTokens(c, user.id, user.email, session.id);
-    setCookie(c, 'access_token', accessToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY),
-    });
-    setCookie(c, 'refresh_token', refreshToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY),
-    });
     return c.json({ access_token: accessToken, refresh_token: refreshToken });
   } catch (error) {
     logerror('Exchange error:', error);
