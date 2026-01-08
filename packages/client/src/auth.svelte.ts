@@ -151,6 +151,8 @@ class Auth {
     const res = await request(url);
     if (res.ok) {
       this.#user = undefined;
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
     } else {
       throw new Error(await res.text());
     }
