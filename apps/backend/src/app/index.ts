@@ -44,6 +44,15 @@ app.use(
 );
 // Security Middlewares
 app.use('*', secureHeaders());
+
+app.get('/', (c) => {
+  return c.redirect(FRONTEND_URL, 301);
+});
+
+app.get('/api/health', (c) => {
+  return c.json({ status: 'ok' }, 200);
+});
+
 app.use(
   '*',
   cors({
@@ -69,14 +78,6 @@ app.use(
 app.use('*', sanitizationMiddleware);
 app.use('*', loggerMiddleware);
 app.use('*', banMiddleware);
-
-app.get('/', (c) => {
-  return c.redirect(FRONTEND_URL, 301);
-});
-
-app.get('/api/health', (c) => {
-  return c.json({ status: 'ok' }, 200);
-});
 
 app.route('api/auth', auth);
 app.route('api/user', user);
