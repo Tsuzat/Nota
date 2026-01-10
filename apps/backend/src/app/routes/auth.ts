@@ -145,11 +145,17 @@ auth.get('/login/:provider', (c) => {
   const codeChallenge = c.req.query('code_challenge');
 
   if (platform === 'desktop') {
-    setCookie(c, 'auth_platform', platform, { ...COOKIE_OPTIONS, maxAge: 60 * 5 });
+    setCookie(c, 'auth_platform', platform, {
+      ...COOKIE_OPTIONS,
+      maxAge: 60 * 5,
+    });
   }
 
   if (codeChallenge) {
-    setCookie(c, 'code_challenge', codeChallenge, { ...COOKIE_OPTIONS, maxAge: 60 * 5 });
+    setCookie(c, 'code_challenge', codeChallenge, {
+      ...COOKIE_OPTIONS,
+      maxAge: 60 * 5,
+    });
   }
 
   return c.redirect(`${BACKEND_URL}/api/auth/oauth/${provider}`);
@@ -219,8 +225,14 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
     const { accessToken, refreshToken } = await generateTokens(c, user.id, user.email);
 
     if (!isDesktop) {
-      setCookie(c, 'access_token', accessToken, { ...COOKIE_OPTIONS, maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY) });
-      setCookie(c, 'refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY) });
+      setCookie(c, 'access_token', accessToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY),
+      });
+      setCookie(c, 'refresh_token', refreshToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY),
+      });
     }
 
     return c.json({
@@ -396,13 +408,15 @@ auth.use(
 );
 
 auth.post('/refresh', async (c) => {
-  const refreshToken = getCookie(c, 'refresh_token');
+  let refreshToken = getCookie(c, 'refresh_token');
   const isDesktop = c.req.query('isDesktop') === 'true';
-
   if (!refreshToken) {
-    return c.json({ error: 'No refresh token' }, 401);
+    refreshToken = c.req.header('Authorization')?.split(' ')[1];
   }
 
+  if (!refreshToken || refreshToken.trim() === '') {
+    return c.json({ error: 'No refresh token' }, 401);
+  }
   try {
     const payload = await verifyRefreshToken(refreshToken);
     const user = await DB.query.users.findFirst({
@@ -421,25 +435,21 @@ auth.post('/refresh', async (c) => {
       return c.json({ error: 'No active session with given refresh token' }, 401);
     }
 
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await generateTokens(
-      c,
-      user.id,
-      user.email,
-      payload.sessionId
-    );
+    const accessToken = await generateAccessToken(user.id, user.email, session.id);
 
-    setCookie(c, 'refresh_token', newRefreshToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: parseExpiry(REFRESH_TOKEN_EXPIRY),
+    if (!isDesktop) {
+      setCookie(c, 'access_token', accessToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY),
+      });
+    }
+    return c.json({
+      success: true,
+      ...(isDesktop && { access_token: accessToken }),
     });
-    setCookie(c, 'access_token', newAccessToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: parseExpiry(ACCESS_TOKEN_EXPIRY),
-    });
-
-    return c.json({ success: true, ...(isDesktop && { access_token: newAccessToken }) });
   } catch (e) {
     console.error('Error verifying refresh token:', e);
+    return c.json({ error: 'Invalid refresh token' }, 401);
   }
 });
 
