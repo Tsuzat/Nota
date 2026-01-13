@@ -49,7 +49,9 @@
       >
         {defaultLanguage}
       </Popover.Trigger>
-      <Popover.Content class="p-0 w-36 max-h-96 text-primary!">
+      <Popover.Content class="p-0 w-36 max-h-96 text-primary!" 
+      			portalProps={{ disabled: true, to: undefined }}
+      >
         <Command.Root>
           <Command.Input placeholder="Search language..." />
           <Command.List>
