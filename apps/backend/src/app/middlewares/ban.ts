@@ -78,32 +78,31 @@ const HONEYPOT_PATHS = [
 ];
 
 export const banMiddleware = async (c: Context, next: Next) => {
-  const info = getConnInfo(c);
-  const ip = info.remote.address || 'unknown';
-  const banKey = `ban:${ip}`;
-
-  // 1. Check if IP is already banned
-  const isBanned = await redis.exists(banKey);
-  if (isBanned) {
-    return c.text('Forbidden', 403);
-  }
-
-  // 2. Check for suspicious paths (Honeypot)
-  const path = c.req.path.toLowerCase();
-
-  // Check exact match or starts with for directories like /.git/
-  const isSuspicious = HONEYPOT_PATHS.some(
-    (badPath) => path === badPath || path.startsWith(`${badPath}/`) || path.endsWith(badPath)
-  );
-
-  if (isSuspicious) {
-    logwarn(`[SECURITY] Banning IP ${ip} for accessing suspicious path: ${path}`);
-
-    // Ban the IP in Redis
-    await redis.set(banKey, 'true');
-    await redis.expire(banKey, BAN_DURATION_SECONDS);
-
-    return c.text('Forbidden', 403);
+  try {
+    const info = getConnInfo(c);
+    const ip = info.remote.address || 'unknown';
+    const banKey = `ban:${ip}`;
+    // 1. Check if IP is already banned
+    const isBanned = await redis.exists(banKey);
+    if (isBanned) {
+      return c.text('Forbidden', 403);
+    }
+    // 2. Check for suspicious paths (Honeypot)
+    const path = c.req.path.toLowerCase();
+    // Check exact match or starts with for directories like /.git/
+    const isSuspicious = HONEYPOT_PATHS.some(
+      (badPath) => path === badPath || path.startsWith(`${badPath}/`) || path.endsWith(badPath)
+    );
+    if (isSuspicious) {
+      logwarn(`[SECURITY] Banning IP ${ip} for accessing suspicious path: ${path}`);
+      // Ban the IP in Redis
+      await redis.set(banKey, 'true');
+      await redis.expire(banKey, BAN_DURATION_SECONDS);
+      return c.text('Forbidden', 403);
+    }
+  } catch (error) {
+    logwarn(`[SECURITY] Error in banMiddleware: ${error}`);
+    return c.text('Internal Server Error', 500);
   }
 
   await next();
