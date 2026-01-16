@@ -85,6 +85,7 @@ export const banMiddleware = async (c: Context, next: Next) => {
     // 1. Check if IP is already banned
     const isBanned = await redis.exists(banKey);
     if (isBanned) {
+      logwarn(`[SECURITY] IP ${ip} is banned`);
       return c.text('Forbidden', 403);
     }
     // 2. Check for suspicious paths (Honeypot)
