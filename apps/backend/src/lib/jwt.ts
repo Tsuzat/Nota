@@ -16,7 +16,7 @@ export const generateAccessToken = async (userId: string, email: string, session
     sessionId,
     exp: Math.floor(Date.now() / 1000) + parseExpiry(ACCESS_TOKEN_EXPIRY),
   };
-  return await sign(payload, ACCESS_TOKEN_SECRET);
+  return await sign(payload, ACCESS_TOKEN_SECRET, 'HS256');
 };
 
 export const generateRefreshToken = async (userId: string, email: string, sessionId: string) => {
@@ -26,15 +26,15 @@ export const generateRefreshToken = async (userId: string, email: string, sessio
     sessionId,
     exp: Math.floor(Date.now() / 1000) + parseExpiry(REFRESH_TOKEN_EXPIRY),
   };
-  return await sign(payload, REFRESH_TOKEN_SECRET);
+  return await sign(payload, REFRESH_TOKEN_SECRET, 'HS256');
 };
 
 export const verifyAccessToken = async (token: string) => {
-  return (await verify(token, ACCESS_TOKEN_SECRET)) as unknown as JWTPayload;
+  return (await verify(token, ACCESS_TOKEN_SECRET, 'HS256')) as unknown as JWTPayload;
 };
 
 export const verifyRefreshToken = async (token: string) => {
-  return (await verify(token, REFRESH_TOKEN_SECRET)) as unknown as JWTPayload;
+  return (await verify(token, REFRESH_TOKEN_SECRET, 'HS256')) as unknown as JWTPayload;
 };
 
 /**

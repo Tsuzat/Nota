@@ -10,7 +10,7 @@ export const authMiddleware = async (c: Context, next: Next) => {
   let token = getCookie(c, 'access_token');
   // check the token from header if not found in cookie
   if (!token) {
-    token = c.req.header('Authorization')?.split(' ')[1]?.replace('Bearer ', '');
+    token = c.req.header('Authorization')?.split(' ')[1];
   }
   if (!token) {
     logwarn('Unauthorized: No token provided');
