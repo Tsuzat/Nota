@@ -1,8 +1,6 @@
 import { Hono } from 'hono';
-import { getConnInfo } from 'hono/bun';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import { rateLimiter } from 'hono-rate-limiter';
 import { CROSS_ORIGIN, DESKTOP_APP_IDENTIFIER, FRONTEND_URL } from '../constants';
 import { banMiddleware } from './middlewares/ban';
 import { loggerMiddleware } from './middlewares/logger';
@@ -34,14 +32,6 @@ export type Variables = {
 
 export const app = new Hono<{ Variables: Variables }>();
 
-// Apply rate limiting middleware
-app.use(
-  rateLimiter({
-    windowMs: 1 * 60 * 1000, // 1 Minute
-    limit: 100,
-    keyGenerator: (c) => getConnInfo(c).remote.address || c.req.header('x-forwarded-for') || 'unknown',
-  })
-);
 // Security Middlewares
 app.use('*', secureHeaders());
 
