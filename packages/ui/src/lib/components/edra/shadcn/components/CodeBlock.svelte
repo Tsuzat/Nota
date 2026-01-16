@@ -20,7 +20,7 @@
     extension.options.lowlight.listLanguages().sort()
   );
 
-  let defaultLanguage = $derived(node.attrs.language);
+  let defaultLanguage = $derived(node.attrs.language ?? "Plain Text");
 
   $effect(() => {
     updateAttributes({ language: defaultLanguage });
