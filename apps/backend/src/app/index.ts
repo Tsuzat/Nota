@@ -4,6 +4,7 @@ import { secureHeaders } from 'hono/secure-headers';
 import { CROSS_ORIGIN, DESKTOP_APP_IDENTIFIER, FRONTEND_URL } from '../constants';
 import { banMiddleware } from './middlewares/ban';
 import { loggerMiddleware } from './middlewares/logger';
+import { rateLimitHost } from './middlewares/ratelimit';
 import { sanitizationMiddleware } from './middlewares/sanitization';
 import ai from './routes/ai';
 import auth from './routes/auth';
@@ -65,9 +66,7 @@ app.use(
     credentials: true,
   })
 );
-app.use('*', sanitizationMiddleware);
-app.use('*', loggerMiddleware);
-app.use('*', banMiddleware);
+app.use('*', sanitizationMiddleware, loggerMiddleware, banMiddleware, rateLimitHost);
 
 app.route('api/auth', auth);
 app.route('api/user', user);
