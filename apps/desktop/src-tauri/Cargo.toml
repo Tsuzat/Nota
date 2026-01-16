@@ -1,6 +1,6 @@
 [package]
 name = "nota"
-version = "0.9.53-beta"
+version = "0.9.54-beta"
 description = "Nota - Best Note taking ap"
 authors = ["Tsuzat"]
 edition = "2021"
