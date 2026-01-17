@@ -109,7 +109,7 @@ const faqItems = [
     id: 'item-5',
     question: 'Can I use AI without a pro subscription?',
     answer:
-      'Yes, You can. Using AI features has nothing to do with having pro plan. You can simply login and buy AI Credits and then you can simply use the AI features.',
+      'Yes, You can. Using AI features has nothing to do with having pro plan. You can simply sign in and buy AI Credits and then you can simply use the AI features.',
   },
 ];
 
@@ -175,7 +175,7 @@ async function copyToClipboard() {
     </DropdownMenu.Root>
     <ToggleMode />
     {#if user === undefined}
-      <Button href={resolve("/login")}>Sign In</Button>
+      <Button href={resolve("/signin")}>Sign In</Button>
     {:else}
       <Dropdown.Root>
         <Dropdown.Trigger>
@@ -543,7 +543,12 @@ async function copyToClipboard() {
               variant="outline"
               onclick={() => {
                 if (!user) {
-                  return toast.warning("Please login to continue");
+                  return toast.warning("Please signin to continue", {action: {
+                    label: "Sign In",
+                    onClick: () => {
+                      goto(resolve("/signin"))
+                    }
+                  }});
                 }
                 sendToPaymentPortal(tabPro);
               }}
@@ -575,8 +580,10 @@ async function copyToClipboard() {
             {#if (user?.aiCredits || 0) <= 0}
               <Button
                 class="w-full"
-                disabled={!user || user?.aiCredits > 0}
                 onclick={() => {
+                  if (!user) {
+                   goto(resolve("/signin"))
+                  }
                   toast.promise(
                     request(
                       `${PUBLIC_BACKEND_URL}/api/promotion/redeem-ai-credits`
@@ -593,7 +600,7 @@ async function copyToClipboard() {
                 }}
               >
                 {#if !user}
-                  Login to claim free AI Credits
+                  Sign In to claim free AI Credits
                 {:else}
                   Claim 10K Free AI Credits
                 {/if}
@@ -604,7 +611,7 @@ async function copyToClipboard() {
               variant="outline"
               onclick={() => {
                 if (!user) {
-                  return toast.warning("Please login to continue");
+                  return toast.warning("Please Sign In to continue");
                 }
                 sendToPaymentPortal("ai_credits");
               }}>Buy AI Credits</Button

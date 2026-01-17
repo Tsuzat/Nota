@@ -45,7 +45,7 @@ function handleMouseLeave(e: MouseEvent) {
 }
 
 onMount(() => {
-  ref = document.getElementById('login-card') as HTMLDivElement;
+  ref = document.getElementById('sign-in-card') as HTMLDivElement;
   ref.addEventListener('mousemove', handleMouseMove);
   ref.addEventListener('mouseleave', handleMouseLeave);
   return () => {
@@ -65,12 +65,12 @@ onMount(() => {
         <img src="/favicon.webp" alt="applogo" class="mx-auto size-20 aspect-square" />
     </a>
 	<Card.Root
-	 id="login-card"
+	 id="sign-in-card"
 		class="w-120 max-w-full border bg-transparent p-4 backdrop-blur-2xl transition-transform duration-500 ease-out"
 		style="transform: perspective(1000px) rotateX({rotateX}deg) rotateY({rotateY}deg); transform-style: preserve-3d;"
 	>
 		<Card.Header class="text-center">
-			<Card.Title class="text-xl">Login to Nota</Card.Title>
+			<Card.Title class="text-xl">Sign In to Nota</Card.Title>
 		</Card.Header>
 		<Card.Content>
 				<div class="grid gap-6">
@@ -82,7 +82,7 @@ onMount(() => {
 							onclick={() => auth.signInWithOAuth('google')}
 						>
 							<Google class="size-4" />
-							Login with Google
+							Sign In with Google
 						</Button>
 						<Button
 							variant="outline"
@@ -91,7 +91,7 @@ onMount(() => {
 							onclick={() => auth.signInWithOAuth('github')}
 						>
 							<Github class="size-4" />
-							Sign up with Github
+							Sign In with Github
 						</Button>
 					</div>
                 </div>

@@ -202,6 +202,7 @@ function closeAI() {
   options={{
     shift: {
       crossAxis: true,
+      mainAxis: false
     },
     strategy: "absolute",
     autoPlacement: {

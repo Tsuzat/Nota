@@ -45,7 +45,7 @@ async function handleDeleteUser() {
 				</div>
 				<div class="text-muted-foreground text-sm">{user.email}</div>	
 				<div class="text-muted-foreground text-xs">
-					Subscription Tier: {user.subscriptionType}
+					Subscription Tier: {user.subscriptionType ?? "Pro"}
 				</div>
 			</div>
 		</div>

@@ -1,163 +1,184 @@
 <script lang="ts">
-import type { FileType } from '@lib/components/edra/utils.js';
-import { toast } from '@lib/components/ui/sonner/index.js';
-import { cn } from '@lib/utils.js';
-import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
-import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
-import type { Content, Editor } from '@nota/ui/edra/types.js';
-import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
-import { buttonVariants } from '@nota/ui/shadcn/button';
-import { Separator } from '@nota/ui/shadcn/separator';
-import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
-import { Skeleton } from '@nota/ui/shadcn/skeleton';
-import { onDestroy, onMount } from 'svelte';
-import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
-import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
-import AI from '$lib/components/editor/AI.svelte';
-import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js';
-import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { DB } from '$lib/local/db.js';
-import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-import { createFile, getAssetsByFileType, moveFileToAssets, selectLocalFile } from '$lib/local/util.js';
-import { ISMACOS, ISWINDOWS } from '$lib/utils';
+  import type { FileType } from "@lib/components/edra/utils.js";
+  import { toast } from "@lib/components/ui/sonner/index.js";
+  import { cn } from "@lib/utils.js";
+  import SearchAndReplace from "@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte";
+  import {
+    EdraBubbleMenu,
+    EdraDragHandleExtended,
+    EdraEditor,
+    EdraToolBar,
+  } from "@nota/ui/edra/shadcn/index.js";
+  import type { Content, Editor } from "@nota/ui/edra/types.js";
+  import { IconPicker, IconRenderer, icons } from "@nota/ui/icons/index.js";
+  import { buttonVariants } from "@nota/ui/shadcn/button";
+  import { Separator } from "@nota/ui/shadcn/separator";
+  import { SidebarTrigger, useSidebar } from "@nota/ui/shadcn/sidebar";
+  import { Skeleton } from "@nota/ui/shadcn/skeleton";
+  import { onDestroy, onMount } from "svelte";
+  import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
+  import AppLogoMenu from "$lib/components/app-menu.svelte";
+  import BackAndForthButtons from "$lib/components/back-and-forth-buttons.svelte";
+  import AI from "$lib/components/editor/AI.svelte";
+  import { getGlobalSettings } from "$lib/components/settings/constants.svelte.js";
+  import NavActions from "$lib/components/sidebar/nav-actions.svelte";
+  import WindowsButtons from "$lib/components/windows-buttons.svelte";
+  import { DB } from "$lib/local/db.js";
+  import { getLocalNotes, type LocalNote } from "$lib/local/notes.svelte";
+  import {
+    createFile,
+    getAssetsByFileType,
+    moveFileToAssets,
+    selectLocalFile,
+  } from "$lib/local/util.js";
+  import { ISMACOS, ISWINDOWS } from "$lib/utils";
 
-const sidebar = useSidebar();
+  const sidebar = useSidebar();
 
-// editor related
-let editor = $state<Editor>();
-let element = $state<HTMLElement>();
-let content = $state<Content>();
-let pendingContent = $state<Content>();
+  // editor related
+  let editor = $state<Editor>();
+  let element = $state<HTMLElement>();
+  let content = $state<Content>();
+  let pendingContent = $state<Content>();
 
-const localNotes = getLocalNotes();
-const globalSettings = getGlobalSettings();
+  const localNotes = getLocalNotes();
+  const globalSettings = getGlobalSettings();
 
-const { data } = $props();
+  const { data } = $props();
 
-afterNavigate(() => {
-  if (data.id) loadData();
-});
+  afterNavigate(() => {
+    if (data.id) loadData();
+  });
 
-let note = $state<LocalNote>();
+  let note = $state<LocalNote>();
 
-async function loadData() {
-  isLoading = true;
-  const id = data.id;
-  note = localNotes.getNotes().find((n) => n.id === id);
-  if (note === undefined) {
-    toast.error(`Notes with id ${id} not found`);
-    return goto(resolve('/'));
-  }
-  try {
-    const data = await DB.select<{ content: string }[]>('SELECT content FROM notes WHERE id = $1', [id]);
-    if (data.length === 0) {
-      toast.error(`Notes content with id ${id} not found`);
-      return goto(resolve('/'));
+  async function loadData() {
+    isLoading = true;
+    const id = data.id;
+    note = localNotes.getNotes().find((n) => n.id === id);
+    if (note === undefined) {
+      toast.error(`Notes with id ${id} not found`);
+      return goto(resolve("/"));
     }
-    content = JSON.parse(data[0].content) as Content;
-  } catch (error) {
-    console.error(error);
-    toast.error('Something went wrong when loading notes');
-  } finally {
-    isLoading = false;
+    try {
+      const data = await DB.select<{ content: string }[]>(
+        "SELECT content FROM notes WHERE id = $1",
+        [id]
+      );
+      if (data.length === 0) {
+        toast.error(`Notes content with id ${id} not found`);
+        return goto(resolve("/"));
+      }
+      content = JSON.parse(data[0].content) as Content;
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong when loading notes");
+    } finally {
+      isLoading = false;
+    }
   }
-}
 
-onMount(() => {
-  const saveInterval = setInterval(() => {
+  onMount(() => {
+    const saveInterval = setInterval(() => {
+      if (pendingContent !== undefined && pendingContent !== null) {
+        saveContent();
+      }
+    }, 5000);
+    return () => clearInterval(saveInterval);
+  });
+
+  async function saveContent() {
+    if (
+      note === undefined ||
+      pendingContent === undefined ||
+      pendingContent === null
+    )
+      return;
+    await DB.execute("UPDATE notes SET content = $1 WHERE id = $2", [
+      JSON.stringify(pendingContent),
+      note.id,
+    ]);
+    pendingContent = null;
+  }
+
+  const onFileSelect = async (file: string) => moveFileToAssets(file);
+
+  const onDropOrPaste = async (file: File) => createFile(file);
+
+  const getAssets = async (fileType: FileType) => getAssetsByFileType(fileType);
+
+  const getLocalFile = async (fileType: FileType) => selectLocalFile(fileType);
+
+  let isLoading = $state(false);
+
+  async function onUpdate() {
+    try {
+      pendingContent = editor?.getJSON();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  beforeNavigate(() => {
     if (pendingContent !== undefined && pendingContent !== null) {
       saveContent();
     }
-  }, 5000);
-  return () => clearInterval(saveInterval);
-});
+    pendingContent = undefined;
+  });
 
-async function saveContent() {
-  if (note === undefined || pendingContent === undefined || pendingContent === null) return;
-  await DB.execute('UPDATE notes SET content = $1 WHERE id = $2', [JSON.stringify(pendingContent), note.id]);
-  pendingContent = null;
-}
+  onDestroy(() => {
+    editor?.destroy();
+  });
 
-const onFileSelect = async (file: string) => moveFileToAssets(file);
-
-const onDropOrPaste = async (file: File) => createFile(file);
-
-const getAssets = async (fileType: FileType) => getAssetsByFileType(fileType);
-
-const getLocalFile = async (fileType: FileType) => selectLocalFile(fileType);
-
-let isLoading = $state(false);
-
-async function onUpdate() {
-  try {
-    pendingContent = editor?.getJSON();
-  } catch (error) {
-    console.error(error);
+  async function updateIcon(icon: string) {
+    if (note === undefined) return;
+    try {
+      note.icon = icon;
+      await localNotes.updateNote(note);
+    } catch (e) {
+      toast.error("Could not update note icon");
+      console.error(e);
+    }
   }
-}
 
-beforeNavigate(() => {
-  if (pendingContent !== undefined && pendingContent !== null) {
-    saveContent();
+  async function updateName(name: string) {
+    if (note === undefined) return;
+    try {
+      note = { ...note, name };
+      await localNotes.updateNote(note);
+    } catch (e) {
+      toast.error("Could not update note name");
+      console.error(e);
+    }
   }
-  pendingContent = undefined;
-});
 
-onDestroy(() => {
-  editor?.destroy();
-});
-
-async function updateIcon(icon: string) {
-  if (note === undefined) return;
-  try {
-    note.icon = icon;
-    await localNotes.updateNote(note);
-  } catch (e) {
-    toast.error('Could not update note icon');
-    console.error(e);
+  async function toggleStar() {
+    if (note === undefined) return;
+    try {
+      note = { ...note, favorite: !note.favorite };
+      await localNotes.updateNote(note);
+    } catch (e) {
+      toast.error("Could not update note starred");
+      console.error(e);
+    }
   }
-}
 
-async function updateName(name: string) {
-  if (note === undefined) return;
-  try {
-    note = { ...note, name };
-    await localNotes.updateNote(note);
-  } catch (e) {
-    toast.error('Could not update note name');
-    console.error(e);
+  function handleKeydown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+      event.preventDefault();
+      pendingContent = editor?.getJSON() as Content;
+      toast.promise(saveContent(), {
+        loading: "Saving to local store",
+        success: "Note saved",
+        error: (err) => {
+          console.error(err);
+          return "Could not save note";
+        },
+        duration: 1000,
+      });
+    }
   }
-}
-
-async function toggleStar() {
-  if (note === undefined) return;
-  try {
-    note = { ...note, favorite: !note.favorite };
-    await localNotes.updateNote(note);
-  } catch (e) {
-    toast.error('Could not update note starred');
-    console.error(e);
-  }
-}
-
-function handleKeydown(event: KeyboardEvent) {
-  if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-    event.preventDefault();
-    pendingContent = editor?.getJSON() as Content;
-    toast.promise(saveContent(), {
-      loading: 'Saving to local store',
-      success: 'Note saved',
-      error: (err) => {
-        console.error(err);
-        return 'Could not save note';
-      },
-      duration: 1000,
-    });
-  }
-}
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
@@ -271,17 +292,19 @@ function handleKeydown(event: KeyboardEvent) {
       <WindowsButtons />
     {/if}
   </header>
-  {#if globalSettings.useToolBar && editor}
-    <EdraToolBar {editor} />
-  {/if}
   {#if editor && !editor?.isDestroyed}
+    {#if globalSettings.useToolBar && editor}
+      <EdraToolBar {editor} useAI={globalSettings.useAI} />
+    {/if}
     {#if globalSettings.useBubbleMenu}
-      <EdraBubbleMenu {editor} />
+      <EdraBubbleMenu {editor} useAI={globalSettings.useAI} />
     {/if}
     {#if globalSettings.useDragHandle}
-      <EdraDragHandleExtended {editor} />
+      <EdraDragHandleExtended {editor} useAI={globalSettings.useAI} />
     {/if}
-    <AI {editor} parentElement={element} />
+    {#if globalSettings.useAI}
+      <AI {editor} parentElement={element} />
+    {/if}
   {/if}
   <EdraEditor
     bind:editor
