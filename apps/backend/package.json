@@ -30,6 +30,7 @@
     "@hono/oauth-providers": "^0.8.5",
     "@hono/zod-validator": "^0.7.6",
     "@sentry/bun": "^10.34.0",
+    "better-auth": "^1.4.14",
     "dodopayments": "^2.14.3",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
