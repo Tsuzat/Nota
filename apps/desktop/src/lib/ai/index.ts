@@ -1,7 +1,7 @@
-import { GoogleGenAI } from "@google/genai";
-import { aiGenerate } from "@nota/client";
-import { decrypt } from "$lib/components/settings";
-import { systemInstruction } from "./prompts";
+import { GoogleGenAI } from '@google/genai';
+import { aiGenerate } from '@nota/client';
+import { decrypt } from '$lib/components/settings';
+import { systemInstruction } from './prompts';
 
 /**
  * Calls the AI model to generate a streaming response.
@@ -11,15 +11,11 @@ import { systemInstruction } from "./prompts";
  * @param onChunck - Callback invoked with each text chunk as it arrives.
  * @param onError - Optional callback invoked if an error occurs during generation.
  */
-export async function callAI(
-  prompt: string,
-  onChunck: (chunk: string) => void,
-  onError?: (error: Error) => void
-) {
+export async function callAI(prompt: string, onChunck: (chunk: string) => void, onError?: (error: Error) => void) {
   try {
     const res = await aiGenerate(prompt);
     if (!res.ok) {
-      let message = "Failed to call AI";
+      let message = 'Failed to call AI';
       try {
         const data = await res.json();
         message = data?.error ?? message;
@@ -30,7 +26,7 @@ export async function callAI(
     }
     const reader = res.body?.getReader();
     if (!reader) {
-      const err = new Error("Streaming not supported");
+      const err = new Error('Streaming not supported');
       onError?.(err);
       return;
     }
@@ -45,7 +41,7 @@ export async function callAI(
     }
   } catch (error) {
     console.error(error);
-    const err = error instanceof Error ? error : new Error("Unknown error");
+    const err = error instanceof Error ? error : new Error('Unknown error');
     onError?.(err);
   }
 }
@@ -63,20 +59,19 @@ export const callGemini = async (
   onChunck: (chunk: string) => void,
   onError?: (error: Error) => void
 ) => {
-  const apiKeyRaw = localStorage.getItem("geminiApiKeyEnc");
+  const apiKeyRaw = localStorage.getItem('geminiApiKeyEnc');
   if (apiKeyRaw === null) {
-    onError?.(new Error("Please set Gemini API key on settings."));
+    onError?.(new Error('Please set Gemini API key on settings.'));
     return;
   }
   const GEMINI_API_KEY = await decrypt(apiKeyRaw);
-  if (GEMINI_API_KEY.trim() === "") {
-    const err = new Error("Gemini API key not found");
+  if (GEMINI_API_KEY.trim() === '') {
+    const err = new Error('Gemini API key not found');
     onError?.(err);
     return;
   }
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-  const model =
-    localStorage.getItem("geminiModel") || GEMINI_MODELS.GEMINI_2_5_FLASH_LITE;
+  const model = localStorage.getItem('geminiModel') || GEMINI_MODELS.GEMINI_2_5_FLASH_LITE;
   const res = await ai.models.generateContentStream({
     model,
     config: {
@@ -84,7 +79,7 @@ export const callGemini = async (
     },
     contents: [
       {
-        role: "user",
+        role: 'user',
         parts: [{ text: prompt }],
       },
     ],
@@ -96,9 +91,9 @@ export const callGemini = async (
 };
 
 export enum GEMINI_MODELS {
-  GEMINI_2_5_FLASH_LITE = "gemini-2.5-flash-lite",
-  GEMINI_2_5_FLASH = "gemini-2.5-flash",
-  GEMINI_2_5_PRO = "gemini-2.5-pro",
-  GEMINI_3_FLASH = "gemini-3-flash-preview",
-  GEMINI_3_PRO = "gemini-3-pro-preview",
+  GEMINI_2_5_FLASH_LITE = 'gemini-2.5-flash-lite',
+  GEMINI_2_5_FLASH = 'gemini-2.5-flash',
+  GEMINI_2_5_PRO = 'gemini-2.5-pro',
+  GEMINI_3_FLASH = 'gemini-3-flash-preview',
+  GEMINI_3_PRO = 'gemini-3-pro-preview',
 }
