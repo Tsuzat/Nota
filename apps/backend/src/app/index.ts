@@ -48,13 +48,11 @@ app.use(
       });
       if (!origin) return allowedOrigins[0]; // Fallback if no origin
       if (allowedOrigins.includes(origin)) return origin;
-
       // Check for Desktop Token bypass
       const desktopToken = c.req.header("X-Nota-Desktop-Identifier");
-      if (DESKTOP_APP_IDENTIFIER && desktopToken === DESKTOP_APP_IDENTIFIER) {
+      if (desktopToken === DESKTOP_APP_IDENTIFIER) {
         return origin;
       }
-
       return allowedOrigins[0]; // or null to block
     },
     credentials: true,

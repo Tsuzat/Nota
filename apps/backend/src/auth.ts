@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { bearer } from "better-auth/plugins";
 import { DB } from "./db";
 import {
   BACKEND_URL,
@@ -74,6 +75,7 @@ export const auth = betterAuth({
       clientSecret: GOOGLE_CLIENT_SECRET,
     },
     plugins: [
+      bearer(),
       polar({
         client: polarClient,
         createCustomerOnSignUp: true,
