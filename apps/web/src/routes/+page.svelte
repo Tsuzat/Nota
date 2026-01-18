@@ -550,7 +550,7 @@ async function copyToClipboard() {
                     }
                   }});
                 }
-                sendToPaymentPortal(tabPro);
+                sendToPaymentPortal(tabPro, user);
               }}
               >Start With {tabPro === "monthly" ? "Monthly" : "Yearly"} Plan</Button
             >
@@ -613,7 +613,7 @@ async function copyToClipboard() {
                 if (!user) {
                   return toast.warning("Please Sign In to continue");
                 }
-                sendToPaymentPortal("ai_credits");
+                sendToPaymentPortal("ai_credits", user);
               }}>Buy AI Credits</Button
             >
           </Card.Footer>

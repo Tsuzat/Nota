@@ -86,9 +86,9 @@ function handleDeleteAccount() {
           {:else}
             <Button
               variant="outline"
-              href="/api/checkout/portal?external_user_id={external_customer_id}"
+              href="https://api.nota.ink/api/checkout/portal"
             >
-              Manage Your Subs
+              Manage Your Subscription
             </Button>
           {/if}
           <Button onclick={logout} variant="outline">
