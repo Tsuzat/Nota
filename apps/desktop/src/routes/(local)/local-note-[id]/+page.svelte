@@ -271,17 +271,19 @@ function handleKeydown(event: KeyboardEvent) {
       <WindowsButtons />
     {/if}
   </header>
-  {#if globalSettings.useToolBar && editor}
-    <EdraToolBar {editor} />
-  {/if}
   {#if editor && !editor?.isDestroyed}
+    {#if globalSettings.useToolBar && editor}
+      <EdraToolBar {editor} useAI={globalSettings.useAI} />
+    {/if}
     {#if globalSettings.useBubbleMenu}
-      <EdraBubbleMenu {editor} />
+      <EdraBubbleMenu {editor} useAI={globalSettings.useAI} />
     {/if}
     {#if globalSettings.useDragHandle}
-      <EdraDragHandleExtended {editor} />
+      <EdraDragHandleExtended {editor} useAI={globalSettings.useAI} />
     {/if}
-    <AI {editor} parentElement={element} />
+    {#if globalSettings.useAI}
+      <AI {editor} parentElement={element} />
+    {/if}
   {/if}
   <EdraEditor
     bind:editor

@@ -59,9 +59,12 @@ export const callGemini = async (
   onChunck: (chunk: string) => void,
   onError?: (error: Error) => void
 ) => {
-  const time = Date.now();
-  const GEMINI_API_KEY = await decrypt(localStorage.getItem('geminiApiKeyEnc') || '');
-  console.log(`Gemini API key decrypted in ${Date.now() - time}ms`);
+  const apiKeyRaw = localStorage.getItem('geminiApiKeyEnc');
+  if (apiKeyRaw === null) {
+    onError?.(new Error('Please set Gemini API key on settings.'));
+    return;
+  }
+  const GEMINI_API_KEY = await decrypt(apiKeyRaw);
   if (GEMINI_API_KEY.trim() === '') {
     const err = new Error('Gemini API key not found');
     onError?.(err);
