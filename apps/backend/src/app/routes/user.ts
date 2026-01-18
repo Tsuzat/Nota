@@ -1,23 +1,31 @@
-import { eq } from 'drizzle-orm';
-import { Hono } from 'hono';
-import { DB } from '../../db';
-import { users } from '../../db/schema';
-import type { Variables } from '..';
-import { authMiddleware } from '../middlewares/auth';
+import { eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { DB } from "../../db";
+import { account, user } from "../../db/schema";
+import type { Variables } from "..";
+import { authMiddleware } from "../middlewares/auth";
+import { logerror } from "../../logging";
 
-const user = new Hono<{ Variables: Variables }>();
+const app = new Hono<{ Variables: Variables }>();
 
-user.use('*', authMiddleware);
+app.use("*", authMiddleware);
 
-user.get('/me', async (c) => {
-  const userId = c.get('userId');
-  const userData = await DB.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
-  if (!userData) {
-    return c.json({ error: 'User not found' }, 404);
-  }
-  return c.json({ user: userData });
+app.get("/me", async (c) => {
+  const user = c.get("user");
+  return c.json({ user });
 });
 
-export default user;
+app.get("account", async (c) => {
+  const user = c.get("user");
+  try {
+    const accounts = await DB.query.account.findMany({
+      where: eq(account.userId, user.id),
+    });
+    return c.json({ accounts });
+  } catch (error) {
+    logerror(error, "Failed to fetch accounts");
+    return c.json({ error: "Failed to fetch accounts" }, 500);
+  }
+});
+
+export default app;

@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@tauri-apps/plugin-http": "^2.5.6",
+    "better-auth": "^1.4.15",
     "zod": "^4.3.5"
   }
 }

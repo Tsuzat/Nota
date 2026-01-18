@@ -12,27 +12,17 @@ import { rateLimitHost } from "./middlewares/ratelimit";
 import { sanitizationMiddleware } from "./middlewares/sanitization";
 import ai from "./routes/ai";
 import notes from "./routes/notes";
-import payment from "./routes/payment";
 import promotion from "./routes/promotion";
 import storage from "./routes/storage";
 import user from "./routes/user";
 import userworkspaces from "./routes/userworkspaces";
 import workspaces from "./routes/workspaces";
 import { auth } from "../auth";
+import type { Session, User } from "../db/schema";
 
 export type Variables = {
-  userId: string;
-  userEmail: string;
-  sessionId: string;
-  user: {
-    assignedStorage: number;
-    usedStorage: number;
-    aiCredits: number;
-    subscriptionPlan: "free" | "pro";
-    externalCustomerId: string | null;
-    nextBillingAt: Date | null;
-    subscriptionType: "monthly" | "yearly" | null;
-  };
+  user: User;
+  session: Session;
 };
 
 export const app = new Hono<{ Variables: Variables }>();
@@ -68,14 +58,14 @@ app.use(
       return allowedOrigins[0]; // or null to block
     },
     credentials: true,
-  })
+  }),
 );
 app.use(
   "*",
   sanitizationMiddleware,
   loggerMiddleware,
   banMiddleware,
-  rateLimitHost
+  rateLimitHost,
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => {
@@ -87,5 +77,4 @@ app.route("api/db/workspaces", workspaces);
 app.route("api/db/notes", notes);
 app.route("api/storage", storage);
 app.route("api/ai", ai);
-app.route("api/payment", payment);
 app.route("api/promotion", promotion);

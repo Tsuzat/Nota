@@ -1,5 +1,19 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  index,
+  integer,
+  pgEnum,
+} from "drizzle-orm/pg-core";
+
+export const subscriptionPlans = pgEnum("subscription_plan", ["free", "pro"]);
+export const subscriptionTypes = pgEnum("subscription_type", [
+  "monthly",
+  "yearly",
+]);
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -7,6 +21,11 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  aiCredits: integer("ai_credits").default(0).notNull(),
+  assignedStorage: integer("assigned_storage").default(0).notNull(),
+  usedStorage: integer("used_storage").default(0).notNull(),
+  subscriptionPlan: subscriptionPlans("subscription_plan").default("free"),
+  subscriptionType: subscriptionTypes("subscription_type").default("monthly"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at")
     .$onUpdate(() => new Date())
@@ -89,3 +108,10 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export type User = typeof user.$inferSelect;
+export type Session = typeof session.$inferSelect;
+export type Account = typeof account.$inferSelect;
+
+export type SubscriptionPlan = typeof subscriptionPlans.enumValues;
+export type SubscriptionType = typeof subscriptionTypes.enumValues;
