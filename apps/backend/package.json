@@ -29,12 +29,11 @@
     "@google/genai": "^1.37.0",
     "@hono/oauth-providers": "^0.8.5",
     "@hono/zod-validator": "^0.7.6",
+    "@polar-sh/hono": "^0.5.3",
     "@sentry/bun": "^10.34.0",
-    "dodopayments": "^2.14.3",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.11.4",
-    "standardwebhooks": "^1.0.0",
     "zod": "^4.3.5"
   }
 }

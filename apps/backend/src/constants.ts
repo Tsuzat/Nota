@@ -48,14 +48,14 @@ export const BUCKET_NAME = checkEnv('BUCKET_NAME');
 // Gemini API
 export const GEMINI_API_KEY = checkEnv('GEMINI_API_KEY');
 
-// DODO Related
-export const DODO_MODE = checkEnv('DODO_MODE') as 'live_mode' | 'test_mode';
-export const DODO_PAYMENTS_LOG = checkEnv('DODO_PAYMENTS_LOG');
-export const DODO_API_KEY = checkEnv('DODO_API_KEY');
-export const DODO_WEBHOOK_SECRET = checkEnv('DODO_WEBHOOK_SECRET');
-export const DODO_AI_CREDITS = checkEnv('DODO_AI_CREDITS');
-export const DODO_MONTLY_SUB = checkEnv('DODO_MONTLY_SUB');
-export const DODO_YEARLY_SUB = checkEnv('DODO_YEARLY_SUB');
+// POLAR   Related
+export const POLAR_SERVER = checkEnv('POLAR_SERVER') as 'sandbox' | 'production';
+export const POLAR_SUCCESS_URL = checkEnv('POLAR_SUCCESS_URL');
+export const POLAR_API_KEY = checkEnv('POLAR_API_KEY');
+export const POLAR_WEBHOOK_SECRET = checkEnv('POLAR_WEBHOOK_SECRET');
+export const POLAR_AI_CREDITS = checkEnv('POLAR_AI_CREDITS');
+export const POLAR_MONTLY_SUB = checkEnv('POLAR_MONTLY_SUB');
+export const POLAR_YEARLY_SUB = checkEnv('POLAR_YEARLY_SUB');
 
 // Sentry DSN
 export const SENTRY_DSN = checkEnv('SENTRY_DSN');
