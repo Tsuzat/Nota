@@ -6,6 +6,7 @@ import '../app.css';
 let { children, data } = $props();
 
 import {
+  authClient,
   setAuthContext,
   setNotesContext,
   setStorageContext,
@@ -15,7 +16,7 @@ import {
 import { ModeWatcher } from '@nota/ui';
 import { Toaster, toast } from '@nota/ui/shadcn/sonner';
 import { check } from '@tauri-apps/plugin-updater';
-import { onMount } from 'svelte';
+import { onDestroy, onMount } from 'svelte';
 import { setGlobalSearch } from '$lib/components/global-search';
 import GlobalSearch from '$lib/components/global-search/global-search.svelte';
 import { setGlobalSignInContext } from '$lib/components/global-signin';
@@ -24,12 +25,12 @@ import { GlobalSettings, setGlobalSettings } from '$lib/components/settings';
 import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
 import { NewUserWorkspace, setNewUserWorkspace } from '$lib/components/user-workspace';
 import { setCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte';
-import { useDeepLinkAuth } from '$lib/handleOAuth';
 import { setLocalNotes } from '$lib/local/notes.svelte';
 import { setLocalUserWorkspaces } from '$lib/local/userworkspaces.svelte';
 import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { setTheme } from '$lib/theme';
 import { downloadAndInstall } from '$lib/updater';
+  import { setupBetterAuthTauri } from '@daveyplate/better-auth-tauri';
 
 // Local Workspaces and Notes
 const localUserWorkspaces = setLocalUserWorkspaces();
@@ -61,15 +62,31 @@ $effect(() => {
   }
 });
 
-useDeepLinkAuth({
-  onCode: (code) => authContext.exchangeCode(code),
-});
+
 
 setGlobalSignInContext();
 setGlobalSearch();
 const useSettings = setGlobalSettings();
 
+let cleanup: (() => void) | undefined;
 onMount(async () => {
+  cleanup = setupBetterAuthTauri({
+    authClient,
+    scheme: "nota",
+    debugLogs: false,
+    onRequest: (href) => {
+      toast.info('Signing you in...');
+      console.log("Auth request:", href);
+    },
+    onSuccess: () => {
+      console.log("Auth successful");
+      toast.success('Successfully signed in');
+      },
+      onError: (error) => {
+        console.error("Auth error:", error);
+        toast.error('Please signin again.');
+      },
+    });
   setTheme(useSettings.themeColor);
   if (localStorage.getItem('access_token')) {
     toast.promise(authContext.init(), {
@@ -98,6 +115,10 @@ onMount(async () => {
   // window.show().then(() => {
   //   if (ISWINDOWS) window.setDecorations(false);
   // });
+});
+
+onDestroy(() => {
+    cleanup?.();
 });
 
 $effect(() => {
