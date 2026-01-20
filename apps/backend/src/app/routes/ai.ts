@@ -6,7 +6,7 @@ import { streamText } from 'hono/streaming';
 import { z } from 'zod';
 import { GEMINI_API_KEY } from '../../constants';
 import { DB } from '../../db';
-import { users } from '../../db/schema';
+import { user as userSchema } from '../../db/schema';
 import { logerror, loginfo } from '../../logging';
 import type { Variables } from '..';
 import { authMiddleware } from '../middlewares/auth';
@@ -72,8 +72,8 @@ You will receive context in this format:
 `;
 
 app.post('/generate', zValidator('json', schema), async (c) => {
-  const userId = c.get('userId');
   const user = c.get('user');
+  const userId = user.id;
 
   if (!user || user.aiCredits <= 0) {
     return c.json({ error: 'Insufficient AI credits' }, 403);
@@ -86,7 +86,10 @@ app.post('/generate', zValidator('json', schema), async (c) => {
     c.header('X-Accel-Buffering', 'no');
     let fullText = '';
     // 1. Count Input Tokens (Approximate or via API if fast enough)
-    const countResult = genai.models.countTokens({ model: MODEL, contents: prompt });
+    const countResult = genai.models.countTokens({
+      model: MODEL,
+      contents: prompt,
+    });
     // 2. Start Generation
     try {
       const responseStream = await genai.models.generateContentStream({
@@ -107,15 +110,20 @@ app.post('/generate', zValidator('json', schema), async (c) => {
     } finally {
       // 3. Calculate Cost & Update DB
       try {
-        const outputTokensResult = await genai.models.countTokens({ model: MODEL, contents: fullText });
+        const outputTokensResult = await genai.models.countTokens({
+          model: MODEL,
+          contents: fullText,
+        });
         const outputTokens = outputTokensResult.totalTokens ?? 0;
         const inputTokens = (await countResult).totalTokens ?? 0;
         const totalCost = inputTokens + outputTokens;
         if (totalCost > 0) {
           // Update DB safely
-          DB.update(users)
-            .set({ aiCredits: sql`GREATEST(0, ${users.aiCredits} - ${totalCost})` })
-            .where(eq(users.id, userId))
+          DB.update(userSchema)
+            .set({
+              aiCredits: sql`GREATEST(0, ${userSchema.aiCredits} - ${totalCost})`,
+            })
+            .where(eq(userSchema.id, userId))
             .then(() => {
               loginfo(`Updated credits for user ${userId}: spent ${totalCost}`);
             });

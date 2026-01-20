@@ -1,7 +1,9 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { bearer } from "better-auth/plugins";
-import { DB } from "./db";
+import { checkout, polar, portal, webhooks } from '@polar-sh/better-auth';
+import { Polar } from '@polar-sh/sdk';
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { bearer } from 'better-auth/plugins';
+import { eq, sql } from 'drizzle-orm';
 import {
   BACKEND_URL,
   GITHUB_CLIENT_ID,
@@ -15,19 +17,10 @@ import {
   POLAR_SUCCESS_URL,
   POLAR_WEBHOOK_SECRET,
   POLAR_YEARLY_SUB,
-} from "./constants";
-
-import {
-  polar,
-  checkout,
-  portal,
-  usage,
-  webhooks,
-} from "@polar-sh/better-auth";
-import { Polar } from "@polar-sh/sdk";
-import { user } from "./db/schema";
-import { eq, sql } from "drizzle-orm";
-import { logerror } from "./logging";
+} from './constants';
+import { DB } from './db';
+import { user } from './db/schema';
+import { logerror } from './logging';
 
 // Helpers
 function getCreditsToAdd(productId: string): number {
@@ -43,16 +36,15 @@ function getStorageToAdd(productId: string): number {
   return 0;
 }
 
-function getSubscriptionTier(productId: string): "pro" | "free" {
-  if (productId === POLAR_MONTLY_SUB || productId === POLAR_YEARLY_SUB)
-    return "pro";
-  return "free";
+function getSubscriptionTier(productId: string): 'pro' | 'free' {
+  if (productId === POLAR_MONTLY_SUB || productId === POLAR_YEARLY_SUB) return 'pro';
+  return 'free';
 }
 
-function getSubscriptionTime(productId: string): "monthly" | "yearly" {
-  if (productId === POLAR_MONTLY_SUB) return "monthly";
-  if (productId === POLAR_YEARLY_SUB) return "yearly";
-  return "monthly";
+function getSubscriptionTime(productId: string): 'monthly' | 'yearly' {
+  if (productId === POLAR_MONTLY_SUB) return 'monthly';
+  if (productId === POLAR_YEARLY_SUB) return 'yearly';
+  return 'monthly';
 }
 
 const polarClient = new Polar({
@@ -63,7 +55,7 @@ const polarClient = new Polar({
 export const auth = betterAuth({
   baseURL: BACKEND_URL,
   database: drizzleAdapter(DB, {
-    provider: "pg",
+    provider: 'pg',
   }),
   socialProviders: {
     github: {
@@ -74,97 +66,97 @@ export const auth = betterAuth({
       clientId: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
     },
-    plugins: [
-      bearer(),
-      polar({
-        client: polarClient,
-        createCustomerOnSignUp: true,
-        use: [
-          checkout({
-            products: [
-              {
-                productId: POLAR_AI_CREDITS,
-                slug: "ai-credits",
-              },
-              {
-                productId: POLAR_MONTLY_SUB,
-                slug: "monthly",
-              },
-              {
-                productId: POLAR_YEARLY_SUB,
-                slug: "yearly",
-              },
-            ],
-            successUrl: POLAR_SUCCESS_URL,
-            authenticatedUsersOnly: true,
-          }),
-          portal(),
-          webhooks({
-            secret: POLAR_WEBHOOK_SECRET,
-            onSubscriptionActive: async (payload) => {
-              const userId = payload.data.customer.externalId;
-              if (!userId) {
-                logerror("Customer ID not found in webhook payload", {
-                  ...payload,
-                });
-                return;
-              }
-              const productId = payload.data.productId;
-              const creditsToAdd = getCreditsToAdd(productId);
-              const storageToAdd = getStorageToAdd(productId);
-              const subscriptionTier = getSubscriptionTier(productId);
-              const subscriptionTime = getSubscriptionTime(productId);
-              await DB.update(user)
-                .set({
-                  aiCredits: sql`${user.aiCredits} + ${creditsToAdd}`,
-                  assignedStorage: sql`${storageToAdd}`,
-                  subscriptionPlan: subscriptionTier,
-                  subscriptionType: subscriptionTime,
-                })
-                .where(eq(user.id, userId));
-            },
-            onSubscriptionCanceled: async (payload) => {
-              const userId = payload.data.customer.externalId;
-              if (!userId) {
-                logerror("Customer ID not found in webhook payload", {
-                  ...payload,
-                });
-                return;
-              }
-              await DB.update(user)
-                .set({
-                  aiCredits: 0,
-                  assignedStorage: 0,
-                  subscriptionPlan: "free",
-                  subscriptionType: null,
-                })
-                .where(eq(user.id, userId));
-            },
-            onSubscriptionUpdated: async (payload) => {
-              const userId = payload.data.customer.externalId;
-              if (!userId) {
-                logerror("Customer ID not found in webhook payload", {
-                  ...payload,
-                });
-                return;
-              }
-              const productId = payload.data.productId;
-              const creditsToAdd = getCreditsToAdd(productId);
-              const storageToAdd = getStorageToAdd(productId);
-              const subscriptionTier = getSubscriptionTier(productId);
-              const subscriptionTime = getSubscriptionTime(productId);
-              await DB.update(user)
-                .set({
-                  aiCredits: sql`${user.aiCredits} + ${creditsToAdd}`,
-                  assignedStorage: sql`${storageToAdd}`,
-                  subscriptionPlan: subscriptionTier,
-                  subscriptionType: subscriptionTime,
-                })
-                .where(eq(user.id, userId));
-            },
-          }),
-        ],
-      }),
-    ],
   },
+  plugins: [
+    bearer(),
+    polar({
+      client: polarClient,
+      createCustomerOnSignUp: true,
+      use: [
+        checkout({
+          products: [
+            {
+              productId: POLAR_AI_CREDITS,
+              slug: 'ai-credits',
+            },
+            {
+              productId: POLAR_MONTLY_SUB,
+              slug: 'monthly',
+            },
+            {
+              productId: POLAR_YEARLY_SUB,
+              slug: 'yearly',
+            },
+          ],
+          successUrl: POLAR_SUCCESS_URL,
+          authenticatedUsersOnly: true,
+        }),
+        portal(),
+        webhooks({
+          secret: POLAR_WEBHOOK_SECRET,
+          onSubscriptionActive: async (payload) => {
+            const userId = payload.data.customer.externalId;
+            if (!userId) {
+              logerror('Customer ID not found in webhook payload', {
+                ...payload,
+              });
+              return;
+            }
+            const productId = payload.data.productId;
+            const creditsToAdd = getCreditsToAdd(productId);
+            const storageToAdd = getStorageToAdd(productId);
+            const subscriptionTier = getSubscriptionTier(productId);
+            const subscriptionTime = getSubscriptionTime(productId);
+            await DB.update(user)
+              .set({
+                aiCredits: sql`${user.aiCredits} + ${creditsToAdd}`,
+                assignedStorage: sql`${storageToAdd}`,
+                subscriptionPlan: subscriptionTier,
+                subscriptionType: subscriptionTime,
+              })
+              .where(eq(user.id, userId));
+          },
+          onSubscriptionCanceled: async (payload) => {
+            const userId = payload.data.customer.externalId;
+            if (!userId) {
+              logerror('Customer ID not found in webhook payload', {
+                ...payload,
+              });
+              return;
+            }
+            await DB.update(user)
+              .set({
+                aiCredits: 0,
+                assignedStorage: 0,
+                subscriptionPlan: 'free',
+                subscriptionType: null,
+              })
+              .where(eq(user.id, userId));
+          },
+          onSubscriptionUpdated: async (payload) => {
+            const userId = payload.data.customer.externalId;
+            if (!userId) {
+              logerror('Customer ID not found in webhook payload', {
+                ...payload,
+              });
+              return;
+            }
+            const productId = payload.data.productId;
+            const creditsToAdd = getCreditsToAdd(productId);
+            const storageToAdd = getStorageToAdd(productId);
+            const subscriptionTier = getSubscriptionTier(productId);
+            const subscriptionTime = getSubscriptionTime(productId);
+            await DB.update(user)
+              .set({
+                aiCredits: sql`${user.aiCredits} + ${creditsToAdd}`,
+                assignedStorage: sql`${storageToAdd}`,
+                subscriptionPlan: subscriptionTier,
+                subscriptionType: subscriptionTime,
+              })
+              .where(eq(user.id, userId));
+          },
+        }),
+      ],
+    }),
+  ],
 });
