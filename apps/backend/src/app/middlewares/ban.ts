@@ -77,15 +77,25 @@ const HONEYPOT_PATHS = [
   '/bootstrap/cache',
 ];
 
+export const getClientIdentifier = (c: Context) => {
+  const info = getConnInfo(c);
+  const ip = info.remote.address || 'unknown';
+  const cleanIp = ip.replace('::ffff:', '');
+  const country = c.req.header('cf-ipcountry') || c.req.header('x-vercel-ip-country') || 'unknown';
+  return `${cleanIp}:${country}`;
+};
+
+export const getBanKey = (c: Context) => `ban:${getClientIdentifier(c)}`;
+
 export const banMiddleware = async (c: Context, next: Next) => {
   try {
     const info = getConnInfo(c);
     const ip = info.remote.address || 'unknown';
-    const banKey = `ban:${ip.replace('::ffff:', '')}`;
+    const banKey = getBanKey(c);
     // 1. Check if IP is already banned
     const isBanned = await redis.exists(banKey);
     if (isBanned) {
-      logwarn(`[SECURITY] IP ${ip} is banned`);
+      logwarn(`[SECURITY] Client ${getClientIdentifier(c)} (IP: ${ip}) is banned`);
       return c.text('Forbidden', 403);
     }
     // 2. Check for suspicious paths (Honeypot)

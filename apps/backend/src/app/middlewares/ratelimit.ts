@@ -2,6 +2,7 @@ import { redis } from 'bun';
 import type { Context, Next } from 'hono';
 import { getConnInfo } from 'hono/bun';
 import { logwarn } from '../../logging';
+import { getBanKey, getClientIdentifier } from './ban';
 
 const RATE_LIMIT_WINDOW = 60; // 1 minute
 const MAX_REQUESTS = 100;
@@ -18,12 +19,12 @@ export const rateLimitHost = async (c: Context, next: Next) => {
   // Check if IP is already banned (Fail fast)
   // Note: banMiddleware usually handles this globally, but checking here ensures enforcement
   // if this middleware is used in isolation.
-  const banKey = `ban:${ip}`;
+  const banKey = getBanKey(c);
   if (await redis.exists(banKey)) {
-    logwarn(`[RATE LIMIT] IP ${ip} is banned`);
+    logwarn(`[RATE LIMIT] Client ${getClientIdentifier(c)} (IP: ${ip}) is banned`);
     return c.text('Forbidden', 403);
   }
-  const rateLimitKey = `ratelimit:${ip}`;
+  const rateLimitKey = `ratelimit:${getClientIdentifier(c)}`;
   try {
     const currentCount = await redis.incr(rateLimitKey);
 
@@ -33,7 +34,9 @@ export const rateLimitHost = async (c: Context, next: Next) => {
     }
 
     if (currentCount > MAX_REQUESTS) {
-      logwarn(`[RATE LIMIT] Banning IP ${ip} for exceeding ${MAX_REQUESTS} req/min`);
+      logwarn(
+        `[RATE LIMIT] Banning Client ${getClientIdentifier(c)} (IP: ${ip}) for exceeding ${MAX_REQUESTS} req/min`
+      );
       // Ban the user
       await redis.set(banKey, 'true');
       await redis.expire(banKey, BAN_DURATION);
