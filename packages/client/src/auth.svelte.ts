@@ -1,6 +1,6 @@
-import { getContext, setContext } from "svelte";
-import { authClient } from "./auth";
-import type { User } from "./types";
+import { getContext, setContext } from 'svelte';
+import { authClient } from './auth';
+import type { User } from './types';
 
 class Auth {
   #user = $state<User>();
@@ -32,7 +32,7 @@ class Auth {
    * @returns A promise that resolves when the sign-in request is successful
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async signInWithOAuth(provider: "github" | "google") {
+  async signInWithOAuth(provider: 'github' | 'google') {
     await authClient.signIn.social({ provider });
   }
 
@@ -43,11 +43,11 @@ class Auth {
    */
   async logout() {
     await authClient.signOut();
-    localStorage.removeItem("bearer_token");
+    localStorage.removeItem('bearer_token');
   }
 }
 
-const NOTAAUTHKEY = Symbol("NOTAAUTHKEY");
+const NOTAAUTHKEY = Symbol('NOTAAUTHKEY');
 
 /**
  * Set the auth context.
