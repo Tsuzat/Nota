@@ -1,3 +1,4 @@
+import { tauri } from '@daveyplate/better-auth-tauri/plugin';
 import { checkout, polar, portal, webhooks } from '@polar-sh/better-auth';
 import { Polar } from '@polar-sh/sdk';
 import { betterAuth } from 'better-auth';
@@ -54,6 +55,7 @@ const polarClient = new Polar({
 
 export const auth = betterAuth({
   baseURL: BACKEND_URL,
+  trustedOrigins: ['tauri:', 'https://www.nota.ink', 'https://nota.ink'],
   database: drizzleAdapter(DB, {
     provider: 'pg',
   }),
@@ -69,6 +71,11 @@ export const auth = betterAuth({
   },
   plugins: [
     bearer(),
+    tauri({
+      scheme: 'nota',
+      successText: 'Authentication successful! You can close this window.', // Optional
+      debugLogs: true,
+    }),
     polar({
       client: polarClient,
       createCustomerOnSignUp: true,
