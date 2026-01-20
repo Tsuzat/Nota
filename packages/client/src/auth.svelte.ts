@@ -1,8 +1,6 @@
 import { getContext, setContext } from "svelte";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import request from "./request";
-import { type User, UserSchema } from "./types";
 import { authClient } from "./auth";
+import type { User } from "./types";
 
 class Auth {
   #user = $state<User>();
@@ -21,16 +19,9 @@ class Auth {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async init() {
-    const url = `${PUBLIC_BACKEND_URL}/api/user/me`;
-    const res = await request(url);
-    if (res.ok) {
-      const data = await res.json();
-      const user = data.user;
-      const parsedUser = UserSchema.parse(user);
-      this.#user = parsedUser;
-    } else {
-      console.log(await res.text());
-      throw new Error("Please signin again");
+    const session = await authClient.getSession();
+    if (session.data) {
+      this.#user = session.data.user;
     }
   }
 
@@ -41,7 +32,7 @@ class Auth {
    * @returns A promise that resolves when the sign-in request is successful
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async signInWithOAuth(provider: "github" | "google", isDesktop = false) {
+  async signInWithOAuth(provider: "github" | "google") {
     await authClient.signIn.social({ provider });
   }
 

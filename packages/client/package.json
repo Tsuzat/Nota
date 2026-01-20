@@ -29,6 +29,7 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "@daveyplate/better-auth-tauri": "^0.1.6",
     "@tauri-apps/plugin-http": "^2.5.6",
     "better-auth": "^1.4.15",
     "zod": "^4.3.5"
