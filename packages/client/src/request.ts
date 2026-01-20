@@ -64,13 +64,15 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
         if (isTauri()) {
           const { access_token } = await refreshResponse.json();
           localStorage.setItem('access_token', access_token);
+          headers.set('Authorization', `Bearer ${localStorage.getItem('access_token')}`);
+          currentOptions.headers = headers;
         }
         response = await fetchFn(url, currentOptions);
+        return response;
       }
     } catch (e) {
       console.error('Auto-refresh failed', e);
     }
   }
-
   return response;
 };
