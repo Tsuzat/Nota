@@ -118,7 +118,8 @@ const continueWriting = () => processText('continue');
 
 const solveProblem = () => processText('solve');
 
-async function handleSubmit() {
+async function handleSubmit(e: Event) {
+  e.preventDefault();
   if (!inputValue || inputValue.trim().length === 0) return;
   const text = getSelectionText();
   if (!text) return;
