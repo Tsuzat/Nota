@@ -3,6 +3,7 @@ import { SimpleToolTip, StreamDown } from '@lib/components/custom/index.js';
 import { Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
 import { Separator } from '@lib/components/ui/separator';
+import { cn } from '@lib/utils';
 import BubbleMenu from '@nota/ui/edra/components/BubbleMenu.svelte';
 import { removeAIHighlight } from '@nota/ui/edra/extensions/AIHighLight.js';
 import type { Editor, ShouldShowProps } from '@nota/ui/edra/types.js';
@@ -202,8 +203,8 @@ function closeAI() {
   class="bg-popover flex max-h-120 max-w-3xl flex-col rounded-lg border p-0 transition-[height] duration-500"
   options={{
     shift: {
-      crossAxis: true,
-      mainAxis: false
+      crossAxis: false,
+      mainAxis: true
     },
     strategy: "absolute",
     autoPlacement: {
@@ -227,7 +228,7 @@ function closeAI() {
         <icons.ArrowUp />
       </Button>
     </form>
-    <div class="flex flex-col gap-1 overflow-auto">
+    <div class:hidden={!getSelectionText()?.trim()} class="flex flex-col gap-1 overflow-auto">
       <Separator orientation="horizontal" />
       <small class="text-muted-foreground ml-4 p-1 text-start"
         >Quick Actions</small
@@ -293,7 +294,7 @@ function closeAI() {
           <div class="flex h-5 items-center space-x-1">
             {#each Array(3) as _unused, i (i)}
               <div
-                class="bg-primary h-2 w-2 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
+                class="bg-primary h-1 w-1 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
                 style:animation-delay="{i * 160}ms"
               ></div>
             {/each}
