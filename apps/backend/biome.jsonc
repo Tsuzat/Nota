@@ -1,7 +1,0 @@
-{
-  "$schema": "https://biomejs.dev/schemas/latest/schema.json",
-  "extends": ["../../biome.jsonc"],
-  "files": {
-    "includes": ["**", "!build/*", "!dist/*", "!.svelte-kit/*"]
-  }
-}
