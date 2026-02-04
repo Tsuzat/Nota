@@ -16,4 +16,8 @@ func checkHealth(c fiber.Ctx) error {
 
 func RoutesInit() {
 	config.APP.Get("/api/v1/healthcheck", checkHealth)
+
+	InitAuthRouter()
+	UserRouteInit()
+
 }

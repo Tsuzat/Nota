@@ -5,3 +5,9 @@ type APIResponse struct {
 	Message string `json:"message"`
 	Data    any    `json:"data"`
 }
+
+type APIError struct {
+	Status int    `json:"status"`
+	Error  string `json:"error"`
+	Data   any    `json:"data"`
+}
