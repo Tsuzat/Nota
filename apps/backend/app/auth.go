@@ -14,20 +14,33 @@ import (
 	"github.com/gofiber/fiber/v3/log"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/google"
 )
 
 var AvailableOAuthProviders = []string{"google", "github"}
 
-var GoogleAuthConfig = &oauth2.Config{
-	ClientID:     config.GOOGLE_CLIENT_ID,
-	ClientSecret: config.GOOGLE_CLIENT_SECRET,
-	RedirectURL:  config.FRONTEND_URL,
-	Scopes: []string{
-		"https://www.googleapis.com/auth/userinfo.email",
-		"https://www.googleapis.com/auth/userinfo.name",
-	},
-	Endpoint: google.Endpoint,
+func getGoogleAuthConfig() *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     config.GOOGLE_CLIENT_ID,
+		ClientSecret: config.GOOGLE_CLIENT_SECRET,
+		RedirectURL:  fmt.Sprintf("%s/api/v1/auth/callback/google", config.BACKEND_URL),
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+		},
+		Endpoint: google.Endpoint,
+	}
+}
+
+func getGithubAuthConfig() *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     config.GITHUB_CLIENT_ID,
+		ClientSecret: config.GITHUB_CLIENT_SECRET,
+		RedirectURL:  fmt.Sprintf("%s/api/v1/auth/callback/github", config.BACKEND_URL),
+		Scopes:       []string{"user:email"},
+		Endpoint:     github.Endpoint,
+	}
 }
 
 func SignUpWithEmailAndPassword(c fiber.Ctx) error {
@@ -111,15 +124,8 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 			Error:  "Password is incorrect",
 		})
 	}
-	log.Info(user)
-	session := &models.Session{
-		UserId:    user.Id,
-		Ip:        c.IP(),
-		UserAgent: c.UserAgent(),
-		ExpiresAt: time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
-	}
-
-	if db.CreateSession(session) != nil {
+	session, err := db.CreateSession(user.Id, c)
+	if err != nil {
 		log.Error("Error while creating session for user: ", user.Id)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -127,14 +133,6 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 		})
 	}
 	log.Info(fmt.Sprintf("Created new session for user: %s", user.Id), session)
-
-	if err != nil {
-		log.Error("Session creation error:", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-			Status: fiber.StatusInternalServerError,
-			Error:  "Failed to create session. Please try again.",
-		})
-	}
 
 	// get the access_token and refresh_token
 	accessToken, err := user.GenerateAccessToken(session.Id)
@@ -189,18 +187,25 @@ func SignInOAuth(c fiber.Ctx) error {
 		})
 	}
 	// redirect to oauth login page
-	return c.Status(fiber.StatusTemporaryRedirect).Redirect().To(fmt.Sprintf("/api/v1/auth/oauth/%s", provider))
+	return c.Status(fiber.StatusTemporaryRedirect).Redirect().To(fmt.Sprintf("/api/v1/auth/%s", provider))
 }
 
 func SignInWithGoogle(c fiber.Ctx) error {
-	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(GoogleAuthConfig.AuthCodeURL("state"))
+	url := getGoogleAuthConfig().AuthCodeURL("state")
+	log.Info("Url: ", url)
+	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(url)
 }
 
 func SingInWithGoogleCallBack(c fiber.Ctx) error {
-	token, error := GoogleAuthConfig.Exchange(c.RequestCtx(), c.FormValue("code"))
-	if error != nil {
-		panic(error)
+	token, err := getGoogleAuthConfig().Exchange(c.RequestCtx(), c.FormValue("code"))
+	if err != nil {
+		log.Error("OAuth Exchange error:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to exchange token with Google",
+		})
 	}
+	log.Info("Token: ", token)
 	gUser, err := utils.GetGoogleUserInfo(token.AccessToken)
 	if err != nil || gUser == nil {
 		log.Error("Error while fetch google user: ", err)
@@ -239,10 +244,8 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 			})
 		}
 	}
-	session := &models.Session{
-		UserId: user.Id,
-	}
-	if db.CreateSession(session) != nil {
+	session, err := db.CreateSession(user.Id, c)
+	if err != nil {
 		c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Unable to create session",

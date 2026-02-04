@@ -8,6 +8,7 @@ import (
 
 	"github.com/Tsuzat/Nota/models"
 	"github.com/goccy/go-json"
+	"github.com/gofiber/fiber/v3/log"
 )
 
 // GetGoogleUserInfo of user
@@ -33,10 +34,11 @@ func GetGoogleUserInfo(token string) (*models.GoogleResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	var data *models.GoogleResponse
-	err = json.Unmarshal(body, data)
+	log.Info("Google Res: ", string(body))
+	var data models.GoogleResponse
+	err = json.Unmarshal(body, &data)
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	return &data, nil
 }

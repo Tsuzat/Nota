@@ -5,17 +5,24 @@ import (
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/models"
+	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 )
 
 // CreateSession creates a new session in the database
-func CreateSession(session *models.Session) error {
+func CreateSession(userId string, c fiber.Ctx) (*models.Session, error) {
+	session := &models.Session{
+		UserId:    userId,
+		Ip:        c.IP(),
+		UserAgent: c.UserAgent(),
+		ExpiresAt: time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
+	}
 	_, err := config.DB.Model(session).Insert()
 	if err != nil {
 		log.Error("Error while inserting the session info", err)
-		return err
+		return nil, err
 	}
-	return nil
+	return session, nil
 }
 
 // GetSession retrieves a session from the database by its ID

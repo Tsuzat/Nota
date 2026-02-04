@@ -12,6 +12,7 @@ func InitAuthRouter() {
 	group.Post("/signin-email", app.SignInWithEmailAndPassword)
 	group.Get("/signout", app.SignOut)
 	group.Get("/oauth/:provider", app.SignInOAuth)
-	group.Get("/oauth/google", app.SignInWithGoogle)
+	group.Get("/google", app.SignInWithGoogle)
+	group.Get("/callback/google", app.SingInWithGoogleCallBack)
 
 }

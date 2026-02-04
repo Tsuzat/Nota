@@ -25,11 +25,13 @@ var GOOGLE_CLIENT_ID string
 var GOOGLE_CLIENT_SECRET string
 
 // R2 Related
-var R2_ACCOUNT_ID string
-var R2_ACCESS_ID string
-var R2_SECRETE_ACCESS_KEY string
-var R2_PUBLIC_ENDPOINT string
-var BUCKET_NAME string
+var (
+	R2_ACCOUNT_ID         string
+	R2_ACCESS_ID          string
+	R2_SECRETE_ACCESS_KEY string
+	R2_PUBLIC_ENDPOINT    string
+	BUCKET_NAME           string
+)
 
 // GEMINI API Key
 var GEMINI_API_KEY string

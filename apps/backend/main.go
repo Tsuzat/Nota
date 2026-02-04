@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/goccy/go-json"
 
@@ -11,6 +12,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/limiter"
+	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/joho/godotenv"
 )
 
@@ -48,10 +52,27 @@ func main() {
 	defer config.VALKEY.Close()
 
 	config.APP = fiber.New(fiber.Config{
+		ReadBufferSize:  32768,
 		JSONEncoder:     json.Marshal,
 		JSONDecoder:     json.Unmarshal,
 		StructValidator: &structValidator{validate: validator.New()},
 	})
+	// logger middleware
+	config.APP.Use(logger.New(logger.Config{
+		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
+	}))
+
+	// check the origin
+	config.APP.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"https://www.nota.ink", "https://nota.ink"},
+	}))
+	// use rate limiting
+	config.APP.Use(limiter.New(limiter.Config{
+		Max:               100,
+		Expiration:        60 * time.Second,
+		Storage:           config.VALKEY,
+		LimiterMiddleware: limiter.SlidingWindow{},
+	}))
 	if config.APP == nil {
 		log.Error("Error creating the app")
 		return
