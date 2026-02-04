@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/goccy/go-json"
 
 	"github.com/Tsuzat/Nota/config"
@@ -22,8 +24,11 @@ func (v *structValidator) Validate(out any) error {
 
 func main() {
 	// Load the .env file
-	if err := godotenv.Load(); err != nil {
-		log.Error("Error loading .env file")
+	env := os.Getenv("ENV")
+	if env != "production" {
+		if err := godotenv.Load(); err != nil {
+			log.Error("Error loading .env file")
+		}
 	}
 
 	config.ConstsInit()
