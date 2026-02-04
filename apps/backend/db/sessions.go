@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"time"
 
 	"github.com/Tsuzat/Nota/config"
@@ -10,25 +11,28 @@ import (
 )
 
 // CreateSession creates a new session in the database
-func CreateSession(userId string, c fiber.Ctx) (*models.Session, error) {
+func CreateSession(userId string, c fiber.Ctx) (string, error) {
+	ctx := context.Background()
 	session := &models.Session{
 		UserId:    userId,
 		Ip:        c.IP(),
 		UserAgent: c.UserAgent(),
 		ExpiresAt: time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
 	}
-	_, err := config.DB.Model(session).Insert()
+
+	_, err := config.DB.NewInsert().Model(session).Exec(ctx)
 	if err != nil {
 		log.Error("Error while inserting the session info", err)
-		return nil, err
+		return "", err
 	}
-	return session, nil
+	return session.Id, nil
 }
 
 // GetSession retrieves a session from the database by its ID
 func GetSession(id string) (*models.Session, error) {
-	session := &models.Session{}
-	err := config.DB.Model(session).Where("id = ?", id).First()
+	ctx := context.Background()
+	session := new(models.Session)
+	err := config.DB.NewSelect().Model(session).Where("id = ?", id).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +41,9 @@ func GetSession(id string) (*models.Session, error) {
 
 // DeleteSession deletes a session from the database by its ID
 func DeleteSession(id string) error {
-	_, err := config.DB.Model(&models.Session{}).Where("id = ?", id).Delete()
+	ctx := context.Background()
+	user := &models.User{Id: id}
+	_, err := config.DB.NewDelete().Model(user).WherePK().Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -46,7 +52,9 @@ func DeleteSession(id string) error {
 
 // RevokeSession revokes a session by setting its revoke flag to true
 func RevokeSession(id string) error {
-	_, err := config.DB.Model(&models.Session{}).Where("id = ?", id).Update("revoke", true)
+	ctx := context.Background()
+	session := &models.Session{Id: id}
+	_, err := config.DB.NewUpdate().Model(session).WherePK().Set("revoke = true").Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -55,7 +63,8 @@ func RevokeSession(id string) error {
 
 // RevokeAllUserSessions revokes all sessions of a user by setting their revoke flag to true
 func RevokeAllUserSessions(userID string) error {
-	_, err := config.DB.Model(&models.Session{}).Where("user_id = ?", userID).Update("revoke", true)
+	ctx := context.Background()
+	_, err := config.DB.NewUpdate().Model((*models.Session)(nil)).Where("user_id = ?", userID).Set("revoke = true").Exec(ctx)
 	if err != nil {
 		return err
 	}

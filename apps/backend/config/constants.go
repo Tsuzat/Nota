@@ -4,9 +4,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/storage/valkey"
+	"github.com/uptrace/bun"
 )
 
 // Environment variables
@@ -47,7 +47,7 @@ var POLAR_SUCCESS_URL string
 
 // Global variables
 var (
-	DB  *pg.DB
+	DB  *bun.DB
 	APP *fiber.App
 )
 

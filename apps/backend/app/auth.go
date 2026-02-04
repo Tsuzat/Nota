@@ -9,7 +9,6 @@ import (
 	"github.com/Tsuzat/Nota/db"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/Tsuzat/Nota/utils"
-	"github.com/go-pg/pg/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 	"golang.org/x/crypto/bcrypt"
@@ -98,7 +97,7 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 	user, err := db.GetUserByEmail(req.Email)
 	log.Info("User:", user)
 	log.Info("Error: ", err)
-	if err != nil && err != pg.ErrNoRows {
+	if err != nil {
 		log.Error("User retrieval error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -124,7 +123,7 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 			Error:  "Password is incorrect",
 		})
 	}
-	session, err := db.CreateSession(user.Id, c)
+	sessionId, err := db.CreateSession(user.Id, c)
 	if err != nil {
 		log.Error("Error while creating session for user: ", user.Id)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -132,17 +131,17 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 			Error:  "Failed to create session. Please try again.",
 		})
 	}
-	log.Info(fmt.Sprintf("Created new session for user: %s", user.Id), session)
+	log.Info(fmt.Sprintf("Created new session for user: %s", user.Id), sessionId)
 
 	// get the access_token and refresh_token
-	accessToken, err := user.GenerateAccessToken(session.Id)
+	accessToken, err := user.GenerateAccessToken(sessionId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Failed to generate access token. Please try again.",
 		})
 	}
-	refreshToken, err := user.GenerateRefreshToken(session.Id)
+	refreshToken, err := user.GenerateRefreshToken(sessionId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -243,21 +242,21 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 			})
 		}
 	}
-	session, err := db.CreateSession(user.Id, c)
+	sessionId, err := db.CreateSession(user.Id, c)
 	if err != nil {
 		c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Unable to create session",
 		})
 	}
-	access_token, err := user.GenerateAccessToken(session.Id)
+	access_token, err := user.GenerateAccessToken(sessionId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Unable to generate access token",
 		})
 	}
-	refresh_token, err := user.GenerateRefreshToken(session.Id)
+	refresh_token, err := user.GenerateRefreshToken(sessionId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -362,21 +361,21 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 			})
 		}
 	}
-	session, err := db.CreateSession(user.Id, c)
+	sessionId, err := db.CreateSession(user.Id, c)
 	if err != nil {
 		c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Unable to create session",
 		})
 	}
-	access_token, err := user.GenerateAccessToken(session.Id)
+	access_token, err := user.GenerateAccessToken(sessionId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Unable to generate access token",
 		})
 	}
-	refresh_token, err := user.GenerateRefreshToken(session.Id)
+	refresh_token, err := user.GenerateRefreshToken(sessionId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
