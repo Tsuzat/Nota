@@ -205,7 +205,6 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 			Error:  "Failed to exchange token with Google",
 		})
 	}
-	log.Info("Token: ", token)
 	gUser, err := utils.GetGoogleUserInfo(token.AccessToken)
 	if err != nil || gUser == nil {
 		log.Error("Error while fetch google user: ", err)
@@ -292,5 +291,114 @@ func SignOut(c fiber.Ctx) error {
 		Status:  fiber.StatusOK,
 		Message: "Logged out successfully",
 		Data:    nil,
+	})
+}
+
+func SignInWithGithub(c fiber.Ctx) error {
+	url := getGithubAuthConfig().AuthCodeURL("state")
+	log.Info("Url: ", url)
+	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(url)
+}
+
+func SignInWithGithubCallBack(c fiber.Ctx) error {
+	token, err := getGithubAuthConfig().Exchange(c.RequestCtx(), c.FormValue("code"))
+	if err != nil {
+		log.Error("OAuth Exchange error:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to exchange token with Github",
+		})
+	}
+	gitUser, err := utils.GetGithubUserInfo(token.AccessToken)
+	if err != nil || gitUser == nil {
+		log.Error("Error while fetch github user: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  fmt.Sprintf("Failed to get github user info: %s", err.Error()),
+		})
+	}
+
+	// If email is empty, fetch it separately
+	if gitUser.Email == "" {
+		email, err := utils.GetGithubUserEmail(token.AccessToken)
+		if err != nil {
+			log.Error("Error while fetch github user email: ", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+				Status: fiber.StatusInternalServerError,
+				Error:  "Failed to get github user email",
+			})
+		}
+		gitUser.Email = email
+	}
+
+	// check if the user if present in DB
+	user, err := db.GetUserByEmail(gitUser.Email)
+	if err == nil {
+		user.Provider = "github"
+		user.ProviderId = fmt.Sprintf("%d", gitUser.ID)
+		user.AvatarUrl = gitUser.AvatarUrl
+		user.Name = gitUser.Name
+		if db.UpdateUser(user) != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+				Status: fiber.StatusInternalServerError,
+				Error:  "User is found in DB but unable to update the User with new OAuth information",
+			})
+		}
+	}
+	// if the user is not found
+	if user == nil {
+		user = &models.User{
+			Name:       gitUser.Name,
+			ProviderId: fmt.Sprintf("%d", gitUser.ID),
+			Email:      gitUser.Email,
+			AvatarUrl:  gitUser.AvatarUrl,
+			IsVerified: true, // Github verified email
+			Provider:   "github",
+		}
+		if db.InsertUser(user) != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+				Status: fiber.StatusInternalServerError,
+				Error:  "Unable to insert the User with new OAuth information",
+			})
+		}
+	}
+	session, err := db.CreateSession(user.Id, c)
+	if err != nil {
+		c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Unable to create session",
+		})
+	}
+	access_token, err := user.GenerateAccessToken(session.Id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Unable to generate access token",
+		})
+	}
+	refresh_token, err := user.GenerateRefreshToken(session.Id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Unable to generate refresh token",
+		})
+	}
+	c.Cookie(&fiber.Cookie{
+		Name:     "access_token",
+		Value:    access_token,
+		Expires:  time.Now().Add(time.Minute * time.Duration(config.ACCESS_TOKEN_EXPIRY)),
+		HTTPOnly: true,
+		Secure:   true,
+	})
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    refresh_token,
+		Expires:  time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
+		HTTPOnly: true,
+		Secure:   true,
+	})
+	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "Logged in successfully",
 	})
 }
