@@ -53,5 +53,5 @@ func main() {
 	}
 	routes.RoutesInit()
 
-	config.APP.Listen("localhost:3000", fiber.ListenConfig{EnablePrefork: true})
+	config.APP.Listen(":3000", fiber.ListenConfig{EnablePrefork: true})
 }
