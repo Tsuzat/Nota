@@ -14,10 +14,13 @@ import (
 func CreateSession(userId string, c fiber.Ctx) (string, error) {
 	ctx := context.Background()
 	session := &models.Session{
-		UserId:    userId,
-		Ip:        c.IP(),
-		UserAgent: c.UserAgent(),
-		ExpiresAt: time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
+		UserId:      userId,
+		Ip:          c.IP(),
+		UserAgent:   c.UserAgent(),
+		ExpiresAt:   time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		RefreshedAt: time.Now(),
 	}
 
 	_, err := config.DB.NewInsert().Model(session).Exec(ctx)
@@ -83,13 +86,13 @@ func RevokeAllUserSessions(userID string) error {
 
 // VerifySession verifies if a session is valid by checking its
 // expiration time and revoke flag returns true if session is invalid
-func VerifySession(sessionId string) bool {
+func IsValidSession(sessionId string) bool {
 	session, err := GetSession(sessionId)
 	if err != nil {
 		log.Error("Unable to find the session", err)
 		return false
 	}
-	return session.ExpiresAt.After(time.Now()) || session.Revoked
+	return session.ExpiresAt.After(time.Now()) && !session.Revoked
 }
 
 func CheckSessionOwner(sessionId string, userId string) bool {

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"strings"
+	"time"
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/db"
@@ -51,7 +52,21 @@ func Authenticate(c fiber.Ctx) error {
 	}
 	// Get the user from the database and attach it to the context so that we can use it in the route
 	id, sessionId := claims["id"].(string), claims["session_id"].(string)
-	if db.VerifySession(sessionId) {
+	if !db.IsValidSession(sessionId) {
+		c.Cookie(&fiber.Cookie{
+			Name:     "access_token",
+			Value:    "",
+			Expires:  time.Now().Add(-time.Hour),
+			HTTPOnly: true,
+			Secure:   true,
+		})
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    "",
+			Expires:  time.Now().Add(-time.Hour),
+			HTTPOnly: true,
+			Secure:   true,
+		})
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "Invalid token, Session revoked",
