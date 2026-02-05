@@ -14,15 +14,20 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
+	github.com/polarsource/polar-go v0.12.0
+	github.com/svix/svix-webhooks v1.84.1
 	github.com/uptrace/bun v1.2.16
 	github.com/uptrace/bun/dialect/pgdialect v1.2.16
 	github.com/uptrace/bun/driver/pgdriver v1.2.16
 	golang.org/x/crypto v0.47.0
 	golang.org/x/oauth2 v0.34.0
+	google.golang.org/genai v1.45.0
 )
 
 require (
-	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	cloud.google.com/go v0.116.0 // indirect
+	cloud.google.com/go/auth v0.9.3 // indirect
+	cloud.google.com/go/compute/metadata v0.5.0 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.4 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.17 // indirect
@@ -45,13 +50,17 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/gofiber/schema v1.6.0 // indirect
 	github.com/gofiber/utils/v2 v2.0.0 // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/google/s2a-go v0.1.8 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/klauspost/compress v1.18.3 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
-	github.com/polarsource/polar-go v0.12.0 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
 	github.com/spyzhov/ajson v0.8.0 // indirect
 	github.com/tinylib/msgp v1.6.3 // indirect
@@ -61,10 +70,14 @@ require (
 	github.com/valyala/fasthttp v1.69.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/otel v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
+	google.golang.org/grpc v1.66.2 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 	mellium.im/sasl v0.3.2 // indirect
 )

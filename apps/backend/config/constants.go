@@ -83,6 +83,15 @@ func ConstsInit() {
 
 	GEMINI_API_KEY = os.Getenv("GEMINI_API_KEY")
 
+	// Polar Related
+	POLAR_API_KEY = os.Getenv("POLAR_API_KEY")
+	POLAR_WEBHOOK_SECRET = os.Getenv("POLAR_WEBHOOK_SECRET")
+	POLAR_AI_CREDITS = os.Getenv("POLAR_AI_CREDITS")
+	POLAR_MONTLY_SUB = os.Getenv("POLAR_MONTLY_SUB")
+	POLAR_YEARLY_SUB = os.Getenv("POLAR_YEARLY_SUB")
+	POLAR_SERVER = os.Getenv("POLAR_SERVER")
+	POLAR_SUCCESS_URL = os.Getenv("POLAR_SUCCESS_URL")
+
 	// Redis Related
 	VALKEY_URL = os.Getenv("VALKEY_URL")
 }

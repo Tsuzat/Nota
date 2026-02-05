@@ -22,6 +22,8 @@ func RoutesInit() {
 	InitAuthRouter()
 	InitSessionRouter()
 	InitStorageRouter()
+	InitPaymentRouter()
+	InitAIRouter()
 	UserRouteInit()
 
 	config.APP.Get("/api/v1/redeem/ai-credits", middleware.Authenticate, app.RedeemAICredits)
