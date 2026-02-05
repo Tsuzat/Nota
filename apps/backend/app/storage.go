@@ -106,9 +106,6 @@ func ConfirmUpload(c fiber.Ctx) error {
 	}
 
 	// Update user storage in DB
-	// Note: We use db.DB (bun) directly here
-	// Assuming there is an implementation to run raw query or update with expression
-	// Since Bun supports expressions:
 	_, err = config.DB.NewUpdate().
 		Model((*models.User)(nil)).
 		Set("used_storage = used_storage + ?", realSize).
@@ -135,11 +132,6 @@ func ConfirmUpload(c fiber.Ctx) error {
 func ListFiles(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	userId := user.Id
-	prefix := c.Query("prefix")
-
-	if prefix != "" && !strings.HasPrefix(prefix, userId+"/") {
-		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: fiber.StatusForbidden, Error: "Invalid prefix"})
-	}
 
 	// Cache Check
 	versionKey := fmt.Sprintf("storage:version:%s", userId)
@@ -149,10 +141,7 @@ func ListFiles(c fiber.Ctx) error {
 		version = string(versionBytes)
 	}
 
-	cacheKey := fmt.Sprintf("storage:list:%s:%s:%s", userId, version, prefix)
-	if prefix == "" {
-		cacheKey = fmt.Sprintf("storage:list:%s:%s:all", userId, version)
-	}
+	cacheKey := fmt.Sprintf("storage:list:%s:%s", userId, version)
 
 	if cached, err := config.VALKEY.Get(cacheKey); err == nil && len(cached) > 0 {
 		// Return cached raw bytes as JSON
@@ -160,11 +149,7 @@ func ListFiles(c fiber.Ctx) error {
 		return c.Send(cached)
 	}
 
-	// Fetch from S3
-	searchPrefix := prefix
-	if searchPrefix == "" {
-		searchPrefix = userId + "/"
-	}
+	searchPrefix := userId + "/"
 
 	listOutput, err := utils.S3CLIENT.ListObjectsV2(c.Context(), &s3.ListObjectsV2Input{
 		Bucket: aws.String(config.BUCKET_NAME),
@@ -182,19 +167,12 @@ func ListFiles(c fiber.Ctx) error {
 	for _, item := range listOutput.Contents {
 		files = append(files, map[string]any{
 			"key":          *item.Key,
-			"size":         item.Size, // int64
+			"size":         item.Size,
 			"lastModified": item.LastModified,
 			"url":          fmt.Sprintf("%s/%s", endpoint, *item.Key),
 		})
 	}
 
-	// Update Cache
-	// Using db.ConnectValkey logic or config.VALKEY directly
-	// Note: config.VALKEY.Set accepts []byte and expiry duration
-	// We need to marshal files to JSON first
-	// Since we returned map, we can rely on Fiber to marshal for response, but for cache we need to marshal manually
-
-	// Quick hack: Use fiber's json marshaller (goccy/go-json)
 	jsonBytes, _ := config.APP.Config().JSONEncoder(files)
 	config.VALKEY.Set(cacheKey, jsonBytes, 10*time.Minute)
 
@@ -209,24 +187,11 @@ func ListFiles(c fiber.Ctx) error {
 func DeleteFile(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	userId := user.Id
-	key := c.Params("key") // NOTE: key might contain slashes, need to ensure route handles it or pass as query param?
-	// Usually wildcard params like /:key* are better, or key passed in body.
-	// Hono implementation uses /:key. If key has slashes, it might be an issue depending on router.
-	// However, usually keys are url encoded.
-
-	// Decode key if necessary, but typically fiber params are decoded.
-	// If key is "userId/folder/file.ext", checking prefix is safe.
-
-	// Decode if URL encoded:
-	decodedKey := strings.ReplaceAll(key, "%2F", "/") // basic replace if needed, or url.QueryUnescape
-	// But let's assume standard behavior first.
-
-	// Handle potentially missed slashes if passed as wildcard
-	// Actually for simplicity, let's assume the key is passed exactly as is or verify how it comes.
-	// If the route is /:key, and key is "a/b/c", fiber v3 default router handles it?
-	// Safest is to use * wildcard in route: /:key*
-
-	// Let's assume the route handles it.
+	req := new(utils.ConfirmUploadRequest)
+	if err := c.Bind().Body(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: err.Error()})
+	}
+	key := req.Key
 
 	if !strings.HasPrefix(key, userId+"/") {
 		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: fiber.StatusForbidden, Error: "Permission denied"})
@@ -234,7 +199,7 @@ func DeleteFile(c fiber.Ctx) error {
 
 	headOutput, err := utils.S3CLIENT.HeadObject(c.Context(), &s3.HeadObjectInput{
 		Bucket: aws.String(config.BUCKET_NAME),
-		Key:    aws.String(decodedKey),
+		Key:    aws.String(key),
 	})
 
 	if err != nil {
