@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/Tsuzat/Nota/db"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/gofiber/fiber/v3"
@@ -16,7 +18,11 @@ func GetUserSessions(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
-	return c.JSON(sessions)
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: fmt.Sprintf("Total %d sessions fetched", len(sessions)),
+		Data:    sessions,
+	})
 }
 
 func RevokeSession(c fiber.Ctx) error {
