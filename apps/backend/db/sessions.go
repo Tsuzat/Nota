@@ -81,14 +81,15 @@ func RevokeAllUserSessions(userID string) error {
 	return nil
 }
 
-// VerifySession verifies if a session is valid by checking its expiration time and revoke flag
+// VerifySession verifies if a session is valid by checking its
+// expiration time and revoke flag returns true if session is invalid
 func VerifySession(sessionId string) bool {
 	session, err := GetSession(sessionId)
 	if err != nil {
 		log.Error("Unable to find the session", err)
 		return false
 	}
-	return session.ExpiresAt.After(time.Now()) && session.Revoked
+	return session.ExpiresAt.After(time.Now()) || session.Revoked
 }
 
 func CheckSessionOwner(sessionId string, userId string) bool {

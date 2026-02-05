@@ -26,7 +26,7 @@ func Authenticate(c fiber.Ctx) error {
 		})
 	}
 	// decode the token
-	token, err := jwt.Parse(access_token, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(access_token, func(token *jwt.Token) (any, error) {
 		return []byte(config.ACCESS_TOKEN_SECRET), nil
 	})
 	// If there is an error, return 401
@@ -51,12 +51,6 @@ func Authenticate(c fiber.Ctx) error {
 	}
 	// Get the user from the database and attach it to the context so that we can use it in the route
 	id, sessionId := claims["id"].(string), claims["session_id"].(string)
-	if !ok {
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "Error while parsing the access token",
-		})
-	}
 	if db.VerifySession(sessionId) {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,

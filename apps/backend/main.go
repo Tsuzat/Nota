@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -10,13 +9,13 @@ import (
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/db"
 	"github.com/Tsuzat/Nota/routes"
+	"github.com/Tsuzat/Nota/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/limiter"
 	"github.com/gofiber/fiber/v3/middleware/logger"
-	"github.com/gofiber/storage/s3/v2"
 	"github.com/joho/godotenv"
 )
 
@@ -53,21 +52,9 @@ func main() {
 	}
 	defer config.VALKEY.Close()
 
-	// initialise the R2 storage
-	config.STORAGE = s3.New(s3.Config{
-		Region:   "auto",
-		Bucket:   config.BUCKET_NAME,
-		Endpoint: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", config.R2_ACCOUNT_ID),
-		Credentials: s3.Credentials{
-			AccessKey:       config.R2_ACCESS_ID,
-			SecretAccessKey: config.R2_SECRETE_ACCESS_KEY,
-		},
-	})
-	if config.STORAGE == nil {
-		log.Error("Error initializing the R2 storage")
+	if utils.InitS3() != nil {
 		return
 	}
-	defer config.STORAGE.Close()
 
 	config.APP = fiber.New(fiber.Config{
 		ReadBufferSize:  32768,

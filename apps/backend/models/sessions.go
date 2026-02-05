@@ -11,9 +11,9 @@ type Session struct {
 
 	Id                  string    `json:"id" bun:"id,type:uuid,pk,default:uuid_generate_v4()"`
 	UserId              string    `json:"user_id" bun:"user_id,type:uuid"`
-	CreatedAt           time.Time `json:"created_at" bun:"created_at"`
-	UpdatedAt           time.Time `json:"updated_at" bun:"updated_at"`
-	RefreshedAt         time.Time `json:"refreshed_at" bun:"refreshed_at"`
+	CreatedAt           time.Time `json:"created_at" bun:"created_at,default:current_timestamp"`
+	UpdatedAt           time.Time `json:"updated_at" bun:"updated_at,default:current_timestamp"`
+	RefreshedAt         time.Time `json:"refreshed_at" bun:"refreshed_at,default:current_timestamp"`
 	UserAgent           string    `json:"user_agent" bun:"user_agent"`
 	Ip                  string    `json:"ip" bun:"ip"`
 	PkceChallenge       string    `json:"pkce_challenge" bun:"pkce_challenge,default:null,unique"`

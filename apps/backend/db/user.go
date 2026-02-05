@@ -27,8 +27,8 @@ func InsertOrUpdateUser(user *models.User) error {
 
 func GetUserById(id string) (*models.User, error) {
 	ctx := context.Background()
-	user := new(models.User)
-	if err := config.DB.NewSelect().Model(user).Where("id = ?", id).Scan(ctx); err != nil {
+	user := &models.User{Id: id}
+	if err := config.DB.NewSelect().Model(user).WherePK().Scan(ctx); err != nil {
 		return nil, err
 	}
 	return user, nil

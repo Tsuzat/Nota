@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/Tsuzat/Nota/config"
@@ -11,6 +12,7 @@ import (
 	"github.com/Tsuzat/Nota/utils"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
@@ -397,5 +399,95 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Logged in successfully",
+	})
+}
+
+func RefreshAccessToken(c fiber.Ctx) error {
+	var refresh_token string
+	// Find the token in cookies
+	refresh_token = c.Cookies("refresh_token")
+	// if Cookies is not found, find the token in headers
+	if refresh_token == "" {
+		refresh_token = strings.Split(string(c.Request().Header.Peek("Authorization")), "Bearer ")[0]
+	}
+	// if token is not found, return 403
+	if refresh_token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "No Access Token Provided in Request",
+		})
+	}
+	// decode the token
+	token, err := jwt.Parse(refresh_token, func(token *jwt.Token) (any, error) {
+		return []byte(config.REFRESH_TOKEN_SECRET), nil
+	})
+	// If there is an error, return 401
+	if err != nil && err != jwt.ErrTokenExpired {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Error while parsing the access token. Please relogin or refresh your access token",
+			Data:   err,
+		})
+	}
+	if err == jwt.ErrTokenExpired {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Access token has expired. Please refresh your access token",
+		})
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Error while parsing the access token",
+		})
+	}
+	// Get the user from the database and attach it to the context so that we can use it in the route
+	id, sessionId := claims["id"].(string), claims["session_id"].(string)
+	if db.VerifySession(sessionId) {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Invalid token, Session revoked",
+		})
+	}
+	user, err := db.GetUserById(id)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Invalid token, User not found",
+			Data:   err,
+		})
+	} else if !user.IsVerified {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Unauthorized access, User not verified",
+		})
+	}
+	access_token, err := user.GenerateAccessToken(sessionId)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Error while generating access token",
+			Data:   err,
+		})
+	}
+	isDesktop := c.Query("isDesktop") == "true"
+	if !isDesktop {
+		c.Cookie(&fiber.Cookie{
+			Name:     "access_token",
+			Value:    access_token,
+			Expires:  time.Now().Add(time.Minute * time.Duration(config.ACCESS_TOKEN_EXPIRY)),
+			HTTPOnly: true,
+			Secure:   true,
+		})
+	}
+	var data any
+	if isDesktop {
+		data = access_token
+	}
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "AccessToken Generated Successfully",
+		Data:    data,
 	})
 }

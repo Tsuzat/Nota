@@ -17,21 +17,21 @@ type User struct {
 	AvatarUrl                       string    `json:"avatar_url" bun:"avatar_url"`
 	Provider                        string    `json:"provider" bun:"provider"`
 	ProviderId                      string    `json:"provider_id" bun:"provider_id"`
-	CreatedAt                       time.Time `json:"created_at" bun:"created_at"`
-	UpdatedAt                       time.Time `json:"updated_at" bun:"updated_at"`
-	IsVerified                      bool      `json:"is_verified" bun:"is_verified"`
+	CreatedAt                       time.Time `json:"created_at" bun:"created_at,default:current_timestamp"`
+	UpdatedAt                       time.Time `json:"updated_at" bun:"updated_at,default:current_timestamp"`
+	IsVerified                      bool      `json:"is_verified" bun:"is_verified,default:false"`
 	SubscriptionPlan                string    `json:"subscription_plan" bun:"subscription_plan"`
 	AiCredits                       int       `json:"ai_credits" bun:"ai_credits"`
 	SubscriptionType                string    `json:"subscription_type" bun:"subscription_type"`
 	ExternalCustomerId              string    `json:"external_customer_id" bun:"external_customer_id"`
 	Password                        string    `json:"password" bun:"encrypted_password"`
-	EmailVerified                   bool      `json:"email_verified" bun:"email_verified"`
-	EmailVerifiedAt                 time.Time `json:"email_verified_at" bun:"email_verified_at"`
-	EmailVerificationToken          string    `json:"email_verification_token" bun:"email_verification_token"`
-	EmailVerificationTokenExpiresAt time.Time `json:"email_verification_token_expires_at" bun:"email_verification_token_expires_at"`
-	AssignedStorage                 int64     `json:"assigned_storage" bun:"assigned_storage"`
-	UsedStorage                     int64     `json:"used_storage" bun:"used_storage"`
-	NextBillingAt                   time.Time `json:"next_billing_at" bun:"next_billing_at"`
+	EmailVerified                   bool      `json:"email_verified" bun:"email_verified,default:false"`
+	EmailVerifiedAt                 time.Time `json:"email_verified_at" bun:"email_verified_at,default:null"`
+	EmailVerificationToken          string    `json:"email_verification_token" bun:"email_verification_token,default:null"`
+	EmailVerificationTokenExpiresAt time.Time `json:"email_verification_token_expires_at" bun:"email_verification_token_expires_at,default:null"`
+	AssignedStorage                 int64     `json:"assigned_storage" bun:"assigned_storage,default:0"`
+	UsedStorage                     int64     `json:"used_storage" bun:"used_storage,default:0"`
+	NextBillingAt                   time.Time `json:"next_billing_at" bun:"next_billing_at,default:null"`
 }
 
 /*
