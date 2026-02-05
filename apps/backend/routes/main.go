@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"github.com/Tsuzat/Nota/app"
 	"github.com/Tsuzat/Nota/config"
+	"github.com/Tsuzat/Nota/middleware"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/gofiber/fiber/v3"
 )
@@ -18,6 +20,9 @@ func RoutesInit() {
 	config.APP.Get("/api/v1/healthcheck", checkHealth)
 
 	InitAuthRouter()
+	InitSessionRouter()
 	UserRouteInit()
+
+	config.APP.Get("/api/v1/redeem/ai-credits", middleware.Authenticate, app.RedeemAICredits)
 
 }

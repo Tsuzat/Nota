@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/storage/s3/v2"
 	"github.com/gofiber/storage/valkey"
 	"github.com/uptrace/bun"
 )
@@ -26,6 +27,7 @@ var GOOGLE_CLIENT_SECRET string
 
 // R2 Related
 var (
+	STORAGE               *s3.Storage
 	R2_ACCOUNT_ID         string
 	R2_ACCESS_ID          string
 	R2_SECRETE_ACCESS_KEY string

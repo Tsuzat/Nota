@@ -42,8 +42,18 @@ func GetSession(id string) (*models.Session, error) {
 // DeleteSession deletes a session from the database by its ID
 func DeleteSession(id string) error {
 	ctx := context.Background()
-	user := &models.User{Id: id}
-	_, err := config.DB.NewDelete().Model(user).WherePK().Exec(ctx)
+	session := &models.Session{Id: id}
+	_, err := config.DB.NewDelete().Model(session).WherePK().Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteAllUserSessions deletes all sessions of a user from the database
+func DeleteAllUserSessions(userId string) error {
+	ctx := context.Background()
+	_, err := config.DB.NewDelete().Model((*models.Session)(nil)).Where("user_id = ?", userId).Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -71,6 +81,7 @@ func RevokeAllUserSessions(userID string) error {
 	return nil
 }
 
+// VerifySession verifies if a session is valid by checking its expiration time and revoke flag
 func VerifySession(sessionId string) bool {
 	session, err := GetSession(sessionId)
 	if err != nil {
@@ -78,4 +89,24 @@ func VerifySession(sessionId string) bool {
 		return false
 	}
 	return session.ExpiresAt.After(time.Now()) && session.Revoked
+}
+
+func CheckSessionOwner(sessionId string, userId string) bool {
+	session, err := GetSession(sessionId)
+	if err != nil {
+		log.Error("Unable to find the session", err)
+		return false
+	}
+	return session.UserId == userId
+}
+
+// GetSessions retrieves all sessions of a user from the database
+func GetSessions(userId string) ([]*models.Session, error) {
+	ctx := context.Background()
+	sessions := []*models.Session{}
+	err := config.DB.NewSelect().Model(&sessions).Where("user_id = ?", userId).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return sessions, nil
 }

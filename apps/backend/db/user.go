@@ -44,7 +44,7 @@ func InsertUser(user *models.User) error {
 
 func UpdateUser(user *models.User) error {
 	ctx := context.Background()
-	_, err := config.DB.NewUpdate().Model(user).Column().WherePK().Exec(ctx)
+	_, err := config.DB.NewUpdate().Model(user).WherePK().Exec(ctx)
 	if err != nil {
 		log.Error("Error while updating the user", user, err)
 		return err

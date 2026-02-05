@@ -95,20 +95,18 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 	}
 	// Check if the user exists
 	user, err := db.GetUserByEmail(req.Email)
-	log.Info("User:", user)
-	log.Info("Error: ", err)
-	if err != nil {
+	if err != nil && err.Error() != "sql: no rows in result set" {
 		log.Error("User retrieval error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
-			Error:  err.Error(),
+			Error:  "Something went wrong when retrieving user. Please try again.",
+			Data:   err,
 		})
 	} else if user == nil {
 		log.Error("User not found with email:", req.Email)
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Data:   "User not found with email",
-			Error:  err.Error(),
+			Status: fiber.StatusNotFound,
+			Error:  "User not found with email",
 		})
 	} else if user.IsVerified == false {
 		log.Error("User not verified with email:", req.Email)
