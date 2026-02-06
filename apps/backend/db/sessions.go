@@ -10,6 +10,29 @@ import (
 	"github.com/gofiber/fiber/v3/log"
 )
 
+// GetPKCESessionToken creates a new session in the database for PKCE authentication
+func GetPKCESessionToken(userId string, pkceChallenge string, c fiber.Ctx) (string, error) {
+	var id string
+	_, err := config.DB.NewInsert().Model(&models.Session{
+		UserId:              userId,
+		Ip:                  c.IP(),
+		UserAgent:           c.UserAgent(),
+		PkceChallenge:       pkceChallenge,
+		PkceChallengeMethod: "256",
+		ExpiresAt:           time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
+		CreatedAt:           time.Now(),
+		UpdatedAt:           time.Now(),
+		RefreshedAt:         time.Now(),
+	}).
+		Returning("id").
+		Exec(c.Context(), &id)
+	if err != nil {
+		log.Error("Error while inserting the session info", err)
+		return "", err
+	}
+	return id, nil
+}
+
 // CreateSession creates a new session in the database
 func CreateSession(userId string, c fiber.Ctx) (string, error) {
 	ctx := context.Background()

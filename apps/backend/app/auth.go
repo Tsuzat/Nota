@@ -148,6 +148,17 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 			Error:  "Failed to generate refresh token. Please try again.",
 		})
 	}
+	isDesktop := c.Locals("isDesktop").(bool)
+	if isDesktop {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Signed In Successfully",
+			Data: fiber.Map{
+				"access_token":  accessToken,
+				"refresh_token": refreshToken,
+			},
+		})
+	}
 	// Setup Cookies
 	c.Cookie(&fiber.Cookie{
 		Name:     "access_token",
@@ -172,6 +183,22 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 
 func SignInOAuth(c fiber.Ctx) error {
 	provider := c.Req().Params("provider")
+	codeChallenge := c.Req().Query("code_challenge")
+	isDesktop := c.Locals("isDesktop").(bool)
+	if isDesktop {
+		c.Cookie(&fiber.Cookie{
+			Name:   "auth_platform",
+			Value:  "desktop",
+			MaxAge: 60 * 5,
+		})
+	}
+	if codeChallenge != "" {
+		c.Cookie(&fiber.Cookie{
+			Name:   "code_challenge",
+			Value:  codeChallenge,
+			MaxAge: 60 * 5,
+		})
+	}
 	if provider == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
@@ -186,12 +213,19 @@ func SignInOAuth(c fiber.Ctx) error {
 		})
 	}
 	// redirect to oauth login page
-	return c.Status(fiber.StatusTemporaryRedirect).Redirect().To(fmt.Sprintf("/api/v1/auth/%s", provider))
+	return c.Status(fiber.StatusTemporaryRedirect).Redirect().To(fmt.Sprintf("%s/api/v1/auth/oauth/%s", config.BACKEND_URL, provider))
 }
 
 func SignInWithGoogle(c fiber.Ctx) error {
 	url := getGoogleAuthConfig().AuthCodeURL("state")
-	log.Info("Url: ", url)
+	isDesktop := c.Locals("isDesktop").(bool)
+	if isDesktop {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Send a signin url for google",
+			Data:    url,
+		})
+	}
 	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(url)
 }
 
@@ -212,35 +246,45 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 			Error:  fmt.Sprintf("Failed to get google user info: %s", err.Error()),
 		})
 	}
-	// check if the user if present in DB
-	user, err := db.GetUserByEmail(gUser.Email)
-	if err == nil {
-		user.Provider = "google"
-		user.ProviderId = gUser.ID
-		user.AvatarUrl = gUser.Picture
-		user.Name = gUser.Name
-		if db.UpdateUser(user) != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-				Status: fiber.StatusInternalServerError,
-				Error:  "User is found in DB but unable to update the User with new OAuth information",
-			})
-		}
+	user := &models.User{
+		Name:       gUser.Name,
+		Email:      gUser.Name,
+		Provider:   "google",
+		AvatarUrl:  gUser.Picture,
+		ProviderId: gUser.ID,
 	}
-	// if the user is not found
-	if user == nil {
-		user = &models.User{
-			Name:       gUser.Name,
-			ProviderId: gUser.ID,
-			Email:      gUser.Email,
-			AvatarUrl:  gUser.Picture,
-			IsVerified: gUser.Verified,
-		}
-		if db.InsertUser(user) != nil {
+	// check if the user if present in DB
+	_, err = config.DB.NewInsert().
+		Model(user).
+		On("CONFLICT (email) DO UPDATE").
+		Set(
+			"name = ?, avatar_url = ?, provider = ?, provider_id = ?", gUser.Name, gUser.Picture, "google", gUser.ID,
+		).
+		Exec(c.Context())
+	if err != nil {
+		return c.Status(fiber.ErrInternalServerError.Code).JSON(models.APIError{
+			Status: fiber.ErrInternalServerError.Code,
+			Error:  "Something went wrong when updating user",
+			Data:   err,
+		})
+	}
+
+	platform := string(c.Request().Header.Cookie("auth_platform"))
+	codeChallenge := string(c.Request().Header.Cookie("code_challenge"))
+	if platform == "desktop" {
+		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c)
+		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 				Status: fiber.StatusInternalServerError,
-				Error:  "Unable to insert the User with new OAuth information",
+				Error:  "Unable to create session",
+				Data:   err,
 			})
 		}
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Session Code Recieved",
+			Data:    sessionId,
+		})
 	}
 	sessionId, err := db.CreateSession(user.Id, c)
 	if err != nil {
@@ -280,7 +324,6 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Logged in successfully",
-		// Data:    map[string]string{"access_token": access_token, "refresh_token": refresh_token},
 	})
 }
 

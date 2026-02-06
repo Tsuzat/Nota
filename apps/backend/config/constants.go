@@ -36,6 +36,9 @@ var (
 // GEMINI API Key
 var GEMINI_API_KEY string
 
+// Desktop Identifier
+var DESKTOP_APP_IDENTIFIER string
+
 // Polar Related
 var POLAR_API_KEY string
 var POLAR_WEBHOOK_SECRET string
@@ -82,6 +85,7 @@ func ConstsInit() {
 	BUCKET_NAME = os.Getenv("BUCKET_NAME")
 
 	GEMINI_API_KEY = os.Getenv("GEMINI_API_KEY")
+	DESKTOP_APP_IDENTIFIER = os.Getenv("DESKTOP_APP_IDENTIFIER")
 
 	// Polar Related
 	POLAR_API_KEY = os.Getenv("POLAR_API_KEY")
