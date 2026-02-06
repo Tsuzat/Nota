@@ -11,5 +11,5 @@ func InitNotesRouter() {
 
 	group.Get("/:id<guid>", app.GetNotes)
 	group.Post("/", app.CreateNote)
-	group.Put("/:id<guid>", app.UpdateNote)
+	group.Patch("/:id<guid>", app.UpdateNote)
 }

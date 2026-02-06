@@ -11,7 +11,7 @@ func InitWorkspaceRoutes() {
 
 	group.Get("/:id<guid>", app.GetWorkspaces)
 	group.Post("/", app.CreateWorkspace)
-	group.Put("/:id<guid>", app.UpdateWorkspace)
+	group.Patch("/:id<guid>", app.UpdateWorkspace)
 	group.Delete("/:id<guid>", app.DeleteWorkspace)
 
 }
