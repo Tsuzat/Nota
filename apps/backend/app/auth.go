@@ -1,8 +1,11 @@
 package app
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -385,37 +388,45 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 		}
 		gitUser.Email = email
 	}
-
-	// check if the user if present in DB
-	user, err := db.GetUserByEmail(gitUser.Email)
-	if err == nil {
-		user.Provider = "github"
-		user.ProviderId = fmt.Sprintf("%d", gitUser.ID)
-		user.AvatarUrl = gitUser.AvatarUrl
-		user.Name = gitUser.Name
-		if db.UpdateUser(user) != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-				Status: fiber.StatusInternalServerError,
-				Error:  "User is found in DB but unable to update the User with new OAuth information",
-			})
-		}
+	user := &models.User{
+		Name:       gitUser.Name,
+		Email:      gitUser.Name,
+		Provider:   "github",
+		AvatarUrl:  gitUser.AvatarUrl,
+		ProviderId: strconv.Itoa(gitUser.ID),
 	}
-	// if the user is not found
-	if user == nil {
-		user = &models.User{
-			Name:       gitUser.Name,
-			ProviderId: fmt.Sprintf("%d", gitUser.ID),
-			Email:      gitUser.Email,
-			AvatarUrl:  gitUser.AvatarUrl,
-			IsVerified: true, // Github verified email
-			Provider:   "github",
-		}
-		if db.InsertUser(user) != nil {
+	// check if the user if present in DB
+	_, err = config.DB.NewInsert().
+		Model(user).
+		On("CONFLICT (email) DO UPDATE").
+		Set(
+			"name = ?, avatar_url = ?, provider = ?, provider_id = ?", gitUser.Name, gitUser.AvatarUrl, "github", strconv.Itoa(gitUser.ID),
+		).
+		Exec(c.Context())
+	if err != nil {
+		return c.Status(fiber.ErrInternalServerError.Code).JSON(models.APIError{
+			Status: fiber.ErrInternalServerError.Code,
+			Error:  "Something went wrong when updating user",
+			Data:   err,
+		})
+	}
+
+	platform := string(c.Request().Header.Cookie("auth_platform"))
+	codeChallenge := string(c.Request().Header.Cookie("code_challenge"))
+	if platform == "desktop" {
+		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c)
+		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 				Status: fiber.StatusInternalServerError,
-				Error:  "Unable to insert the User with new OAuth information",
+				Error:  "Unable to create session",
+				Data:   err,
 			})
 		}
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Session Code Recieved",
+			Data:    sessionId,
+		})
 	}
 	sessionId, err := db.CreateSession(user.Id, c)
 	if err != nil {
@@ -559,5 +570,84 @@ func RefreshAccessToken(c fiber.Ctx) error {
 		Status:  fiber.StatusOK,
 		Message: "AccessToken Generated Successfully",
 		Data:    data,
+	})
+}
+
+func ExchangeCodeForTokens(c fiber.Ctx) error {
+	type ExchangeRequest struct {
+		Code         string `json:"code" validator:"required"`
+		CodeVerifier string `json:"code_verifier" validator:"required"`
+	}
+
+	req := new(ExchangeRequest)
+	if err := c.Bind().Body(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Invalid request body",
+			Data:   err,
+		})
+	}
+
+	if req.Code == "" || req.CodeVerifier == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Code and Code Verifier are required",
+		})
+	}
+
+	// Find session by ID (which is the code)
+	session, err := db.GetSession(req.Code)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Invalid or expired code",
+		})
+	}
+
+	if session.ExpiresAt.Before(time.Now()) {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Invalid or expired code",
+		})
+	}
+
+	// Verify code challenge
+	sha256Hash := sha256.Sum256([]byte(req.CodeVerifier))
+	challenge := base64.RawURLEncoding.EncodeToString(sha256Hash[:])
+
+	if session.PkceChallenge != challenge {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Invalid code verifier",
+		})
+	}
+
+	user, err := db.GetUserById(session.UserId)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "User not found",
+		})
+	}
+
+	accessToken, err := user.GenerateAccessToken(session.Id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to generate access token",
+		})
+	}
+
+	refreshToken, err := user.GenerateRefreshToken(session.Id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to generate refresh token",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
 	})
 }
