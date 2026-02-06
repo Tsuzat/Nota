@@ -6,6 +6,17 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type CreateUserWorkspaceRequest struct {
+	Icon string `json:"icon" validate:"required"`
+	Name string `json:"name" validate:"required"`
+}
+
+type UpdateUserWorkspaceRequest struct {
+	Id   string `json:"id" validate:"required,uuid"`
+	Icon string `json:"icon" validate:"required,min=1,max=255"`
+	Name string `json:"name" validate:"required,min=1,max=255"`
+}
+
 type UserWorkspace struct {
 	bun.BaseModel `bun:"table:userworkspaces"`
 

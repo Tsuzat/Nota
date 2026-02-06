@@ -105,7 +105,7 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Something went wrong when retrieving user. Please try again.",
-			Data:   err,
+			Data:   err.Error(),
 		})
 	} else if user == nil {
 		log.Error("User not found with email:", req.Email)
@@ -265,7 +265,7 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 		return c.Status(fiber.ErrInternalServerError.Code).JSON(models.APIError{
 			Status: fiber.ErrInternalServerError.Code,
 			Error:  "Something went wrong when updating user",
-			Data:   err,
+			Data:   err.Error(),
 		})
 	}
 
@@ -277,7 +277,7 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 				Status: fiber.StatusInternalServerError,
 				Error:  "Unable to create session",
-				Data:   err,
+				Data:   err.Error(),
 			})
 		}
 		return c.JSON(models.APIResponse{
@@ -408,7 +408,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 		return c.Status(fiber.ErrInternalServerError.Code).JSON(models.APIError{
 			Status: fiber.ErrInternalServerError.Code,
 			Error:  "Something went wrong when updating user",
-			Data:   err,
+			Data:   err.Error(),
 		})
 	}
 
@@ -420,7 +420,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 				Status: fiber.StatusInternalServerError,
 				Error:  "Unable to create session",
-				Data:   err,
+				Data:   err.Error(),
 			})
 		}
 		return c.JSON(models.APIResponse{
@@ -494,7 +494,7 @@ func RefreshAccessToken(c fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "Error while parsing the access token. Please relogin or refresh your access token",
-			Data:   err,
+			Data:   err.Error(),
 		})
 	}
 	if err == jwt.ErrTokenExpired {
@@ -537,7 +537,7 @@ func RefreshAccessToken(c fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "Invalid token, User not found",
-			Data:   err,
+			Data:   err.Error(),
 		})
 	} else if !user.IsVerified {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
@@ -550,7 +550,7 @@ func RefreshAccessToken(c fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "Error while generating access token",
-			Data:   err,
+			Data:   err.Error(),
 		})
 	}
 	isDesktop := c.Locals("isDesktop").(bool)
@@ -585,7 +585,7 @@ func ExchangeCodeForTokens(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
 			Error:  "Invalid request body",
-			Data:   err,
+			Data:   err.Error(),
 		})
 	}
 
