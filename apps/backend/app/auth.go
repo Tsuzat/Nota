@@ -187,7 +187,7 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 func SignInOAuth(c fiber.Ctx) error {
 	provider := c.Req().Params("provider")
 	codeChallenge := c.Req().Query("code_challenge")
-	isDesktop := c.Locals("isDesktop").(bool)
+	isDesktop := c.Locals("isDesktop").(bool) || c.Req().Query("isdesktop") == "true"
 	if isDesktop {
 		c.Cookie(&fiber.Cookie{
 			Name:   "auth_platform",
@@ -221,14 +221,6 @@ func SignInOAuth(c fiber.Ctx) error {
 
 func SignInWithGoogle(c fiber.Ctx) error {
 	url := getGoogleAuthConfig().AuthCodeURL("state")
-	isDesktop := c.Locals("isDesktop").(bool)
-	if isDesktop {
-		return c.JSON(models.APIResponse{
-			Status:  fiber.StatusOK,
-			Message: "Send a signin url for google",
-			Data:    url,
-		})
-	}
 	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(url)
 }
 
@@ -249,22 +241,28 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 			Error:  fmt.Sprintf("Failed to get google user info: %s", err.Error()),
 		})
 	}
+
 	user := &models.User{
-		Name:       gUser.Name,
-		Email:      gUser.Name,
-		Provider:   "google",
-		AvatarUrl:  gUser.Picture,
-		ProviderId: gUser.ID,
+		Name:             gUser.Name,
+		Email:            gUser.Name,
+		Provider:         "google",
+		AvatarUrl:        gUser.Picture,
+		ProviderId:       gUser.ID,
+		IsVerified:       true,
+		EmailVerified:    true,
+		EmailVerifiedAt:  time.Now(),
+		SubscriptionType: "free",
 	}
 	// check if the user if present in DB
 	_, err = config.DB.NewInsert().
 		Model(user).
 		On("CONFLICT (email) DO UPDATE").
 		Set(
-			"name = ?, avatar_url = ?, provider = ?, provider_id = ?", gUser.Name, gUser.Picture, "google", gUser.ID,
+			"name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, provider = EXCLUDED.provider, provider_id = EXCLUDED.provider_id",
 		).
 		Exec(c.Context())
 	if err != nil {
+		log.Error("Error while updating user: ", err)
 		return c.Status(fiber.ErrInternalServerError.Code).JSON(models.APIError{
 			Status: fiber.ErrInternalServerError.Code,
 			Error:  "Something went wrong when updating user",
@@ -291,13 +289,15 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 	}
 	sessionId, err := db.CreateSession(user.Id, c)
 	if err != nil {
-		c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+		log.Error("Error while creating session: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Unable to create session",
 		})
 	}
 	access_token, err := user.GenerateAccessToken(sessionId)
 	if err != nil {
+		log.Error("Error while generating access token: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Unable to generate access token",
@@ -354,7 +354,6 @@ func SignOut(c fiber.Ctx) error {
 
 func SignInWithGithub(c fiber.Ctx) error {
 	url := getGithubAuthConfig().AuthCodeURL("state")
-	log.Info("Url: ", url)
 	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(url)
 }
 
@@ -389,11 +388,14 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 		gitUser.Email = email
 	}
 	user := &models.User{
-		Name:       gitUser.Name,
-		Email:      gitUser.Name,
-		Provider:   "github",
-		AvatarUrl:  gitUser.AvatarUrl,
-		ProviderId: strconv.Itoa(gitUser.ID),
+		Name:            gitUser.Name,
+		Email:           gitUser.Name,
+		Provider:        "github",
+		AvatarUrl:       gitUser.AvatarUrl,
+		ProviderId:      strconv.Itoa(gitUser.ID),
+		IsVerified:      true,
+		EmailVerified:   true,
+		EmailVerifiedAt: time.Now(),
 	}
 	// check if the user if present in DB
 	_, err = config.DB.NewInsert().
@@ -552,7 +554,7 @@ func RefreshAccessToken(c fiber.Ctx) error {
 			Data:   err,
 		})
 	}
-	isDesktop := c.Query("isDesktop") == "true"
+	isDesktop := c.Locals("isDesktop").(bool)
 	if !isDesktop {
 		c.Cookie(&fiber.Cookie{
 			Name:     "access_token",

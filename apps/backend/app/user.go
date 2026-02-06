@@ -10,6 +10,6 @@ func Me(c fiber.Ctx) error {
 	return c.Status(200).JSON(models.APIResponse{
 		Status:  200,
 		Message: "Success",
-		Data:    user,
+		Data:    user.UserResponse(),
 	})
 }

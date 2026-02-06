@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Tsuzat/Nota/config"
+	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 )
@@ -71,4 +72,25 @@ func (user *User) GenerateRefreshToken(sessionId string) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func (user *User) UserResponse() any {
+	return fiber.Map{
+		"id":                   user.Id,
+		"email":                user.Email,
+		"name":                 user.Name,
+		"avatar_url":           user.AvatarUrl,
+		"provider":             user.Provider,
+		"created_at":           user.CreatedAt,
+		"updated_at":           user.UpdatedAt,
+		"is_verified":          user.IsVerified,
+		"subscription_plan":    user.SubscriptionPlan,
+		"ai_credits":           user.AiCredits,
+		"subscription_type":    user.SubscriptionType,
+		"external_customer_id": user.ExternalCustomerId,
+		"email_verified":       user.EmailVerified,
+		"assigned_storage":     user.AssignedStorage,
+		"used_storage":         user.UsedStorage,
+		"next_billing_at":      user.NextBillingAt,
+	}
 }
