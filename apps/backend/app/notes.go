@@ -20,7 +20,11 @@ func GetNotes(c fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-	return c.JSON(notes)
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "Notes retrieved successfully",
+		Data:    notes,
+	})
 }
 
 func CreateNote(c fiber.Ctx) error {
@@ -72,16 +76,24 @@ func UpdateNote(c fiber.Ctx) error {
 		Favorite: req.Favorite,
 		IsPublic: req.IsPublic,
 		Trashed:  req.Trashed,
-		Owner:    user.Id,
 	}
 	log.Info("Updating note: ", note)
-	// if _, err := config.DB.NewUpdate().Model(&note).Where("id = ? AND owner = ?", id, user.Id).Exec(c.Context()); err != nil {
-	// 	log.Error("Error when updating note: ", err)
-	// 	return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-	// 		Status: fiber.StatusInternalServerError,
-	// 		Error:  "Error when updating note",
-	// 		Data:   err.Error(),
-	// 	})
-	// }
-	return c.JSON(note)
+	if _, err := config.DB.NewUpdate().
+		Model(&note).
+		Column("name", "icon", "favorite", "is_public", "trashed").
+		Where("id = ? AND owner = ?", id, user.Id).
+		Returning("*").
+		Exec(c.Context()); err != nil {
+		log.Error("Error when updating note: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Error when updating note",
+			Data:   err.Error(),
+		})
+	}
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "Note updated successfully",
+		Data:    note,
+	})
 }

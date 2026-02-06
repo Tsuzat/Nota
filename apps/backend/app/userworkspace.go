@@ -11,7 +11,7 @@ import (
 
 func GetUserWorkspaces(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	var userworkspaces []models.UserWorkspace
+	userworkspaces := []models.UserWorkspace{}
 	err := config.DB.NewSelect().Model(&userworkspaces).Where("owner = ?", user.Id).Scan(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{

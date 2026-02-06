@@ -32,9 +32,9 @@ type CreateNoteRequest struct {
 }
 
 type UpdateNoteRequest struct {
-	Name     string `json:"name" validate:"omitempty,min=1,max=255"`
-	Icon     string `json:"icon" validate:"omitempty,min=1,max=255"`
-	Favorite bool   `json:"favorite" validate:"boolean"`
-	IsPublic bool   `json:"is_public" validate:"boolean"`
-	Trashed  bool   `json:"trashed" validate:"boolean"`
+	Name     string `json:"name" validate:"required,omitempty,min=1,max=255"`
+	Icon     string `json:"icon" validate:"required,omitempty,min=1,max=255"`
+	Favorite bool   `json:"favorite" validate:"required,boolean"`
+	IsPublic bool   `json:"is_public" validate:"required,boolean"`
+	Trashed  bool   `json:"trashed" validate:"required,boolean"`
 }
