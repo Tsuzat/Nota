@@ -11,12 +11,6 @@ type CreateUserWorkspaceRequest struct {
 	Name string `json:"name" validate:"required"`
 }
 
-type UpdateUserWorkspaceRequest struct {
-	Id   string `json:"id" validate:"required,uuid"`
-	Icon string `json:"icon" validate:"required,min=1,max=255"`
-	Name string `json:"name" validate:"required,min=1,max=255"`
-}
-
 type UserWorkspace struct {
 	bun.BaseModel `bun:"table:userworkspaces"`
 
@@ -26,6 +20,13 @@ type UserWorkspace struct {
 	Owner     string    `json:"owner" bun:"owner,type:uuid"`
 	CreatedAt time.Time `json:"created_at" bun:"created_at,nullzero,notnull,default:current_timestamp"`
 	UpdatedAt time.Time `json:"updated_at" bun:"updated_at,nullzero,notnull,default:current_timestamp"`
+}
+
+type CreateWorkspaceRequest struct {
+	Icon          string `json:"icon" validate:"required,min=1,max=255"`
+	Name          string `json:"name" validate:"required,min=1,max=255"`
+	Description   string `json:"description" validate:"required,max=255"`
+	UserWorkspace string `json:"userworkspace" validate:"required,uuid"`
 }
 
 type Workspace struct {

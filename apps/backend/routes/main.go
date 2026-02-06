@@ -38,6 +38,9 @@ func RoutesInit() {
 	InitPaymentRouter()
 	InitAIRouter()
 	UserRouteInit()
+	InitUserWorkspaceRoutes()
+	InitWorkspaceRoutes()
+	InitNotesRouter()
 
 	config.APP.Get("/api/v1/redeem/ai-credits", middleware.Authenticate, app.RedeemAICredits)
 

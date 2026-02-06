@@ -9,27 +9,27 @@ import (
 	"github.com/gofiber/fiber/v3/log"
 )
 
-func GetUserWorkspaces(c fiber.Ctx) error {
+func GetWorkspaces(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	var userworkspaces []models.UserWorkspace
-	err := config.DB.NewSelect().Model(&userworkspaces).Where("owner = ?", user.Id).Scan(c.Context())
+	var workspaces []models.Workspace
+	err := config.DB.NewSelect().Model(&workspaces).Where("owner = ?", user.Id).Scan(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
-			Error:  "Something went wrong when fetching the userworkspaces",
+			Error:  "Something went wrong when fetching the workspaces",
 			Data:   err.Error(),
 		})
 	}
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
-		Message: "User Workspaces Fetched",
-		Data:    userworkspaces,
+		Message: "Workspaces Fetched",
+		Data:    workspaces,
 	})
 }
 
-func CreateUserWorkspace(c fiber.Ctx) error {
+func CreateWorkspace(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	req := new(models.CreateUserWorkspaceRequest)
+	req := new(models.CreateWorkspaceRequest)
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(models.APIError{
@@ -38,12 +38,14 @@ func CreateUserWorkspace(c fiber.Ctx) error {
 				Data:   err.Error(),
 			})
 	}
-	userworkspace := &models.UserWorkspace{
-		Icon:  req.Icon,
-		Name:  req.Name,
-		Owner: user.Id,
+	workspace := &models.Workspace{
+		Icon:          req.Icon,
+		Name:          req.Name,
+		Description:   req.Description,
+		Owner:         user.Id,
+		UserWorkspace: req.UserWorkspace,
 	}
-	_, err := config.DB.NewInsert().Model(userworkspace).Exec(c.Context())
+	_, err := config.DB.NewInsert().Model(workspace).Exec(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -53,15 +55,15 @@ func CreateUserWorkspace(c fiber.Ctx) error {
 	}
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
-		Message: "User Workspace Created",
-		Data:    userworkspace,
+		Message: "Workspace Created",
+		Data:    workspace,
 	})
 }
 
-func UpdateUserWorkspace(c fiber.Ctx) error {
+func UpdateWorkspace(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")
-	req := new(models.CreateUserWorkspaceRequest)
+	req := new(models.CreateWorkspaceRequest)
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(models.APIError{
@@ -77,43 +79,44 @@ func UpdateUserWorkspace(c fiber.Ctx) error {
 			Data:   "id is required",
 		})
 	}
-	userworkspace := &models.UserWorkspace{
-		Id:        id,
-		Icon:      req.Icon,
-		Name:      req.Name,
-		Owner:     user.Id,
-		UpdatedAt: time.Now(),
+	workspace := &models.Workspace{
+		Id:          id,
+		Icon:        req.Icon,
+		Name:        req.Name,
+		Description: req.Description,
+		Owner:       user.Id,
+		UpdatedAt:   time.Now(),
 	}
-	_, err := config.DB.NewUpdate().Model(userworkspace).Where("id = ? and owner = ?", id, user.Id).Exec(c.Context())
+	_, err := config.DB.NewUpdate().Model(workspace).Where("id = ? and owner = ?", id, user.Id).Exec(c.Context())
 	if err != nil {
-		log.Error("Error while updating userworkspace: ", err)
+		log.Error("Error while updating workspace: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
-			Error:  "Something went wrong when updating the userworkspace",
+			Error:  "Something went wrong when updating the workspace",
 			Data:   err.Error(),
 		})
 	}
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
-		Message: "User Workspace Updated",
-		Data:    userworkspace,
+		Message: "Workspace Updated",
+		Data:    workspace,
 	})
 }
 
-func DeleteUserWorkspace(c fiber.Ctx) error {
+func DeleteWorkspace(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")
-	_, err := config.DB.NewDelete().Model(&models.UserWorkspace{}).Where("id = ? and owner = ?", id, user.Id).Exec(c.Context())
+	_, err := config.DB.NewDelete().Model(&models.Workspace{}).Where("id = ? and owner = ?", id, user.Id).Exec(c.Context())
 	if err != nil {
-		log.Error("Error while deleting userworkspace: ", err)
+		log.Error("Error while deleting workspace: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
-			Error:  "Something went wrong when deleting the userworkspace",
+			Error:  "Something went wrong when deleting the workspace",
 			Data:   err.Error(),
 		})
 	}
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
-		Message: "User Workspace Deleted",
+		Message: "Workspace Deleted",
 	})
 }

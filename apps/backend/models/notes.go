@@ -22,3 +22,19 @@ type Note struct {
 	IsPublic      bool           `json:"is_public" bun:"is_public,default:false"`
 	Content       map[string]any `json:"content" bun:"content,type:jsonb,default:'{}'"`
 }
+
+type CreateNoteRequest struct {
+	Name          string `json:"name" validate:"required,min=1,max=255"`
+	Icon          string `json:"icon" validate:"required,min=1,max=255"`
+	Workspace     string `json:"workspace" validate:"required,uuid"`
+	UserWorkspace string `json:"userworkspace" validate:"required,uuid"`
+	Favorite      bool   `json:"favorite" validate:"boolean"`
+}
+
+type UpdateNoteRequest struct {
+	Name     string `json:"name" validate:"omitempty,min=1,max=255"`
+	Icon     string `json:"icon" validate:"omitempty,min=1,max=255"`
+	Favorite bool   `json:"favorite" validate:"boolean"`
+	IsPublic bool   `json:"is_public" validate:"boolean"`
+	Trashed  bool   `json:"trashed" validate:"boolean"`
+}
