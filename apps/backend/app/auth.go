@@ -243,15 +243,14 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 	}
 
 	user := &models.User{
-		Name:             gUser.Name,
-		Email:            gUser.Name,
-		Provider:         "google",
-		AvatarUrl:        gUser.Picture,
-		ProviderId:       gUser.ID,
-		IsVerified:       true,
-		EmailVerified:    true,
-		EmailVerifiedAt:  time.Now(),
-		SubscriptionType: "free",
+		Name:            gUser.Name,
+		Email:           gUser.Email,
+		Provider:        "google",
+		AvatarUrl:       gUser.Picture,
+		ProviderId:      gUser.ID,
+		IsVerified:      true,
+		EmailVerified:   true,
+		EmailVerifiedAt: time.Now(),
 	}
 	// check if the user if present in DB
 	_, err = config.DB.NewInsert().
@@ -389,7 +388,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 	}
 	user := &models.User{
 		Name:            gitUser.Name,
-		Email:           gitUser.Name,
+		Email:           gitUser.Email,
 		Provider:        "github",
 		AvatarUrl:       gitUser.AvatarUrl,
 		ProviderId:      strconv.Itoa(gitUser.ID),

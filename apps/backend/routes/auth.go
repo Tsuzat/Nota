@@ -17,4 +17,5 @@ func InitAuthRouter() {
 	group.Get("/oauth/github", app.SignInWithGithub)
 	group.Get("/callback/github", app.SignInWithGithubCallBack)
 	group.Post("/refreshtoken", app.RefreshAccessToken)
+	group.Post("/exchange", app.ExchangeCodeForTokens)
 }

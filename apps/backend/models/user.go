@@ -23,7 +23,7 @@ type User struct {
 	IsVerified                      bool      `json:"is_verified" bun:"is_verified,notnull,default:false"`
 	SubscriptionPlan                string    `json:"subscription_plan" bun:"subscription_plan,notnull,default:'free'"`
 	AiCredits                       int       `json:"ai_credits" bun:"ai_credits,notnull,default:0"`
-	SubscriptionType                string    `json:"subscription_type" bun:"subscription_type"`
+	SubscriptionType                string    `json:"subscription_type" bun:"subscription_type,nullzero"`
 	ExternalCustomerId              string    `json:"external_customer_id" bun:"external_customer_id"`
 	Password                        string    `json:"password" bun:"encrypted_password"`
 	EmailVerified                   bool      `json:"email_verified" bun:"email_verified,notnull,default:false"`
