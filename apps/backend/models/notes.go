@@ -25,7 +25,7 @@ type Note struct {
 
 type CreateNoteRequest struct {
 	Name          string `json:"name" validate:"required,min=1,max=255"`
-	Icon          string `json:"icon" validate:"required,min=1,max=255"`
+	Icon          string `json:"icon" validate:"required,min=1,max=512"`
 	Workspace     string `json:"workspace" validate:"required,uuid"`
 	UserWorkspace string `json:"userworkspace" validate:"required,uuid"`
 	Favorite      bool   `json:"favorite" validate:"boolean"`
@@ -33,8 +33,21 @@ type CreateNoteRequest struct {
 
 type UpdateNoteRequest struct {
 	Name     string `json:"name" validate:"required,omitempty,min=1,max=255"`
-	Icon     string `json:"icon" validate:"required,omitempty,min=1,max=255"`
+	Icon     string `json:"icon" validate:"required,omitempty,min=1,max=512"`
 	Favorite bool   `json:"favorite" validate:"required,boolean"`
 	IsPublic bool   `json:"is_public" validate:"required,boolean"`
 	Trashed  bool   `json:"trashed" validate:"required,boolean"`
+}
+
+type ImportNoteRequest struct {
+	Name          string         `json:"name" validate:"required,min=1,max=255"`
+	Workspace     string         `json:"workspace" validate:"required,uuid"`
+	UserWorkspace string         `json:"userworkspace" validate:"required,uuid"`
+	Content       map[string]any `json:"content" validate:"required,json"`
+}
+
+type NotePatchOperation struct {
+	Op    string `json:"op" validate:"required,oneof=add replace remove"`
+	Path  string `json:"path" validate:"required"`
+	Value any    `json:"value" validate:"omitempty"`
 }

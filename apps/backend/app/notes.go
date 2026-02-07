@@ -2,12 +2,14 @@ package app
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/middleware"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/Tsuzat/Nota/utils"
+	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 )
@@ -184,6 +186,63 @@ func GetNoteContent(c fiber.Ctx) error {
 	})
 }
 
+func ApplyNoteContentPatch(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+	noteId := c.Params("id")
+
+	var patch []models.NotePatchOperation
+	if err := c.Bind().Body(&patch); err != nil {
+		log.Error("Error binding patch: ", err)
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Invalid patch format",
+			Data:   err.Error(),
+		})
+	}
+
+	wrapper := fiber.Map{"p": patch}
+	wrapperJSON, err := json.Marshal(wrapper)
+	if err != nil {
+		log.Error("Error marshaling wrapper: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to process patch",
+		})
+	}
+
+	if _, err := config.DB.NewRaw("SELECT apply_note_patch(?, (?::jsonb)->'p', ?)", noteId, string(wrapperJSON), user.Id).Exec(c.Context()); err != nil {
+		log.Error("Error patching note: ", err)
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "Permission denied") {
+			return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+				Status: fiber.StatusForbidden,
+				Error:  "Unauthorized",
+				Data:   errMsg,
+			})
+		}
+		if strings.Contains(errMsg, "Note not found") {
+			return c.Status(fiber.StatusNotFound).JSON(models.APIError{
+				Status: fiber.StatusNotFound,
+				Error:  "Note not found",
+				Data:   errMsg,
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to patch note content",
+			Data:   errMsg,
+		})
+	}
+	// invalidate the cache for note preview
+	cacheKey := fmt.Sprintf("note:%s:preview", noteId)
+	go config.VALKEY.Delete(cacheKey)
+
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "Note content patched successfully",
+	})
+}
+
 func GetNotePreview(c fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
@@ -277,6 +336,45 @@ func DuplicateNote(c fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
 		Status:  fiber.StatusCreated,
 		Message: "Note duplicated successfully",
+		Data:    note,
+	})
+}
+
+func ImportNote(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+	req := new(models.ImportNoteRequest)
+	if err := c.Bind().Body(&req); err != nil {
+		log.Error("Error when parsing import note request: ", err)
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Error when parsing import note request",
+			Data:   err.Error(),
+		})
+	}
+	note := &models.Note{
+		Name:          req.Name,
+		Workspace:     req.Workspace,
+		UserWorkspace: req.UserWorkspace,
+		Owner:         user.Id,
+		Content:       req.Content,
+	}
+	if _, err := config.DB.NewInsert().
+		Model(note).
+		Returning("id, name, icon, workspace, userworkspace, owner, favorite, trashed, created_at, updated_at").
+		Exec(c.Context()); err != nil {
+		log.Error("Error when importing note: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to import note",
+			Data:   err.Error(),
+		})
+	}
+	// Invalidate the GetNotes cache for the userworkspace
+	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
+	go config.VALKEY.Delete(cacheKey)
+	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
+		Status:  fiber.StatusCreated,
+		Message: "Note imported successfully",
 		Data:    note,
 	})
 }

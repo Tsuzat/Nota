@@ -18,7 +18,11 @@ func InitNotesRouter() {
 	group.Delete("/:id<guid>", app.DeleteNote)
 	// Get the content of the note by it's id
 	group.Get("/:id<guid>/content", app.GetNoteContent)
+	// Apply patch to the note content by it's id
+	group.Patch("/:id<guid>/content", app.ApplyNoteContentPatch)
 	// Duplicate a note by it's id
 	group.Post("/:id<guid>/duplicate", app.DuplicateNote)
+	// Import a note
+	group.Post("/import", app.ImportNote)
 
 }
