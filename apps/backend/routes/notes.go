@@ -18,5 +18,7 @@ func InitNotesRouter() {
 	group.Delete("/:id<guid>", app.DeleteNote)
 	// Get the content of the note by it's id
 	group.Get("/:id<guid>/content", app.GetNoteContent)
+	// Duplicate a note by it's id
+	group.Post("/:id<guid>/duplicate", app.DuplicateNote)
 
 }

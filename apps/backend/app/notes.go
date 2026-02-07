@@ -8,7 +8,6 @@ import (
 	"github.com/Tsuzat/Nota/middleware"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/Tsuzat/Nota/utils"
-	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 )
@@ -197,24 +196,15 @@ func GetNotePreview(c fiber.Ctx) error {
 	log.Info("Note Preview Requested for id: ", id)
 	note := models.Note{}
 	cacheKey := fmt.Sprintf("note:%s:preview", id)
-	cacheData, err := config.VALKEY.Get(cacheKey)
-	if err == nil {
-		log.Info("Cache Hit for NotePreview Call, Key: ", cacheKey)
-		if json.Unmarshal(cacheData, &note) == nil {
-			if note.IsPublic {
-				log.Info("Found cache for public note preview: ", note.Name)
-				return c.JSON(models.APIResponse{
-					Status:  fiber.StatusOK,
-					Message: "Note preview retrieved successfully",
-					Data:    note,
-				})
-			}
-		}
-	} else {
-		log.Error("Error when getting cache: ", err)
+	if utils.GetCache(cacheKey, &note) == nil {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Note retrieved successfully",
+			Data:    note,
+		})
 	}
 	note.Id = id
-	if err = config.DB.NewSelect().
+	if err := config.DB.NewSelect().
 		Model(&note).
 		WherePK().
 		Scan(c.Context()); err != nil {
@@ -257,6 +247,36 @@ func GetNotePreview(c fiber.Ctx) error {
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Note preview retrieved successfully",
+		Data:    note,
+	})
+}
+
+func DuplicateNote(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+	id := c.Params("id")
+	note := new(models.Note)
+
+	if err := config.DB.NewRaw(
+		`INSERT INTO notes (name, icon, workspace, userworkspace, owner, content, favorite, trashed, created_at, updated_at)
+		 SELECT name || ' (copy)', icon, workspace, userworkspace, owner, content, false, false, NOW(), NOW()
+		 FROM notes
+		 WHERE id = ? AND owner = ?
+		 RETURNING id, name, icon, workspace, userworkspace, owner, favorite, trashed, created_at, updated_at`,
+		id, user.Id,
+	).Scan(c.Context(), note); err != nil {
+		log.Error("Error when duplicating note: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to duplicate note",
+			Data:   err.Error(),
+		})
+	}
+	// invalidate the GetNotes cache for the userworkspace
+	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
+	go config.VALKEY.Delete(cacheKey)
+	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
+		Status:  fiber.StatusCreated,
+		Message: "Note duplicated successfully",
 		Data:    note,
 	})
 }
