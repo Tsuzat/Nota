@@ -11,7 +11,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func Authenticate(c fiber.Ctx) error {
+func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
+
 	var access_token string
 	// Find the token in cookies
 	access_token = c.Cookies("access_token")
@@ -21,10 +22,7 @@ func Authenticate(c fiber.Ctx) error {
 	}
 	// if token is not found, return 403
 	if access_token == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "No Access Token Provided in Request",
-		})
+		return nil, fiber.ErrUnauthorized
 	}
 	// decode the token
 	token, err := jwt.Parse(access_token, func(token *jwt.Token) (any, error) {
@@ -32,23 +30,14 @@ func Authenticate(c fiber.Ctx) error {
 	})
 	// If there is an error, return 401
 	if err != nil && err != jwt.ErrTokenExpired {
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "Error while parsing the access token. Please relogin or refresh your access token",
-		})
+		return nil, fiber.ErrUnauthorized
 	}
 	if err == jwt.ErrTokenExpired {
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "Access token has expired. Please refresh your access token",
-		})
+		return nil, fiber.ErrUnauthorized
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "Error while parsing the access token",
-		})
+		return nil, fiber.ErrUnauthorized
 	}
 	// Get the user from the database and attach it to the context so that we can use it in the route
 	id, sessionId := claims["id"].(string), claims["session_id"].(string)
@@ -67,21 +56,24 @@ func Authenticate(c fiber.Ctx) error {
 			HTTPOnly: true,
 			Secure:   true,
 		})
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "Invalid token, Session revoked",
-		})
+		return nil, fiber.ErrUnauthorized
 	}
 	user, err := db.GetUserById(id)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "Invalid token, User not found",
-		})
+		return nil, err
 	} else if !user.IsVerified {
+		return nil, fiber.ErrUnauthorized
+	}
+	return user, nil
+}
+
+func Authenticate(c fiber.Ctx) error {
+	user, err := AuthenticatedUser(c)
+	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
-			Error:  "Unauthorized access, User not verified",
+			Error:  "User is not authenticated",
+			Data:   err.Error(),
 		})
 	}
 	// Attach the user to the context
