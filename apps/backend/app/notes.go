@@ -165,16 +165,7 @@ func DeleteNote(c fiber.Ctx) error {
 func GetNoteContent(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")
-	// note := new(models.Note)
 	var content string
-	// cacheKey := fmt.Sprintf("note:%s:content", id)
-	// if utils.GetCache(cacheKey, note) == nil {
-	// 	return c.JSON(models.APIResponse{
-	// 		Status:  fiber.StatusOK,
-	// 		Message: "Note content retrieved successfully",
-	// 		Data:    note.Content,
-	// 	})
-	// }
 	if err := config.DB.NewSelect().
 		Model((*models.Note)(nil)).
 		Column("content").
@@ -194,14 +185,21 @@ func GetNoteContent(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
-	var data any
-	json.Unmarshal([]byte(content), &data)
-	// go utils.SetCache(cacheKey, note, time.Hour*24*7)
-	return c.JSON(models.APIResponse{
-		Status:  fiber.StatusOK,
-		Message: "Note content retrieved successfully",
-		Data:    data,
-	})
+	var data map[string]any
+	if err := json.Unmarshal([]byte(content), &data); err == nil {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Note content retrieved successfully",
+			Data:    data,
+		})
+	} else {
+		log.Error("Error when unmarshalling note content: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Error when unmarshalling note content",
+			Data:   err.Error(),
+		})
+	}
 }
 
 func ApplyNoteContentPatch(c fiber.Ctx) error {

@@ -24,7 +24,7 @@ func SetCache(key string, data any, ttl time.Duration) {
 
 func GetCache(key string, dest any) error {
 	cacheData, err := config.VALKEY.Get(key)
-	if err != nil {
+	if err != nil || len(cacheData) == 0 {
 		log.Info("Cache miss: ", key)
 		return err
 	}
