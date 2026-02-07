@@ -79,7 +79,7 @@ func CreateNote(c fiber.Ctx) error {
 	}
 	// invalidate the cache
 	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
-	go config.VALKEY.Delete(cacheKey)
+	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Note created successfully",
@@ -123,10 +123,10 @@ func UpdateNote(c fiber.Ctx) error {
 	}
 	// invalidate the cache
 	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
-	go config.VALKEY.Delete(cacheKey)
+	go utils.DeleteCache(cacheKey)
 	// invalidate the cache for note preview
 	cacheKey = fmt.Sprintf("note:%s:preview", id)
-	go config.VALKEY.Delete(cacheKey)
+	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Note updated successfully",
@@ -152,10 +152,10 @@ func DeleteNote(c fiber.Ctx) error {
 	}
 	// invalidate the cache
 	cacheKey := fmt.Sprintf("notes:%s:%s", userworkspace, user.Id)
-	go config.VALKEY.Delete(cacheKey)
+	go utils.DeleteCache(cacheKey)
 	// invalidate the cache for note preview
 	cacheKey = fmt.Sprintf("note:%s:preview", id)
-	go config.VALKEY.Delete(cacheKey)
+	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Note deleted successfully",
@@ -165,24 +165,42 @@ func DeleteNote(c fiber.Ctx) error {
 func GetNoteContent(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")
-	note := models.Note{}
+	// note := new(models.Note)
+	var content string
+	// cacheKey := fmt.Sprintf("note:%s:content", id)
+	// if utils.GetCache(cacheKey, note) == nil {
+	// 	return c.JSON(models.APIResponse{
+	// 		Status:  fiber.StatusOK,
+	// 		Message: "Note content retrieved successfully",
+	// 		Data:    note.Content,
+	// 	})
+	// }
 	if err := config.DB.NewSelect().
-		Model(&note).
+		Model((*models.Note)(nil)).
 		Column("content").
 		Where("id = ? AND owner = ?", id, user.Id).
-		Scan(c.Context()); err != nil {
+		Scan(c.Context(), &content); err != nil {
 		log.Error("Error when getting note content: ", err)
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return c.Status(fiber.StatusNotFound).JSON(models.APIError{
+				Status: fiber.StatusNotFound,
+				Error:  "Note not found",
+				Data:   err.Error(),
+			})
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Error when getting note content",
 			Data:   err.Error(),
 		})
 	}
-	log.Info("Note content: ", note)
+	var data any
+	json.Unmarshal([]byte(content), &data)
+	// go utils.SetCache(cacheKey, note, time.Hour*24*7)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Note content retrieved successfully",
-		Data:    note.Content,
+		Data:    data,
 	})
 }
 
@@ -235,7 +253,10 @@ func ApplyNoteContentPatch(c fiber.Ctx) error {
 	}
 	// invalidate the cache for note preview
 	cacheKey := fmt.Sprintf("note:%s:preview", noteId)
-	go config.VALKEY.Delete(cacheKey)
+	go utils.DeleteCache(cacheKey)
+	// invalidate the cache for note content
+	cacheKey = fmt.Sprintf("note:%s:content", noteId)
+	go utils.DeleteCache(cacheKey)
 
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
@@ -275,8 +296,9 @@ func GetNotePreview(c fiber.Ctx) error {
 		})
 	}
 	if note.IsPublic {
-		// set cache
-		go utils.SetCache(cacheKey, note, time.Minute*30)
+		// set cache for 30 days, usually, user'll not make changes in it at certain point
+		// we'll invalidate it, if changes are made
+		go utils.SetCache(cacheKey, note, time.Hour*24*30)
 		return c.JSON(models.APIResponse{
 			Status:  fiber.StatusOK,
 			Message: "Note preview retrieved successfully",
@@ -332,7 +354,7 @@ func DuplicateNote(c fiber.Ctx) error {
 	}
 	// invalidate the GetNotes cache for the userworkspace
 	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
-	go config.VALKEY.Delete(cacheKey)
+	go utils.DeleteCache(cacheKey)
 	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
 		Status:  fiber.StatusCreated,
 		Message: "Note duplicated successfully",
@@ -371,7 +393,7 @@ func ImportNote(c fiber.Ctx) error {
 	}
 	// Invalidate the GetNotes cache for the userworkspace
 	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
-	go config.VALKEY.Delete(cacheKey)
+	go utils.DeleteCache(cacheKey)
 	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
 		Status:  fiber.StatusCreated,
 		Message: "Note imported successfully",

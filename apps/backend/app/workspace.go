@@ -1,18 +1,34 @@
 package app
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/models"
+	"github.com/Tsuzat/Nota/utils"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 )
 
 func GetWorkspaces(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
+	userworkspaceId := c.Params("id")
 	workspaces := []models.Workspace{}
-	err := config.DB.NewSelect().Model(&workspaces).Where("owner = ?", user.Id).Scan(c.Context())
+
+	cacheKey := fmt.Sprintf("workspaces:%s:%s", userworkspaceId, user.Id)
+	if utils.GetCache(cacheKey, &workspaces) == nil {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Workspaces Fetched",
+			Data:    workspaces,
+		})
+	}
+
+	err := config.DB.NewSelect().
+		Model(&workspaces).
+		Where("owner = ? AND userworkspace = ?", user.Id, userworkspaceId).
+		Scan(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -20,6 +36,10 @@ func GetWorkspaces(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
+
+	// setting the cache for 7 days, it's invalidates on workspace update anyways
+	go utils.SetCache(cacheKey, workspaces, time.Hour*24*7)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Workspaces Fetched",
@@ -53,6 +73,11 @@ func CreateWorkspace(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
+
+	// Invalidate cache
+	cacheKey := fmt.Sprintf("workspaces:%s:%s", workspace.UserWorkspace, user.Id)
+	go utils.DeleteCache(cacheKey)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Workspace Created",
@@ -87,7 +112,10 @@ func UpdateWorkspace(c fiber.Ctx) error {
 		Owner:       user.Id,
 		UpdatedAt:   time.Now(),
 	}
-	_, err := config.DB.NewUpdate().Model(workspace).Where("id = ? and owner = ?", id, user.Id).Exec(c.Context())
+	_, err := config.DB.NewUpdate().
+		Model(workspace).
+		Where("id = ? and owner = ?", id, user.Id).
+		Exec(c.Context())
 	if err != nil {
 		log.Error("Error while updating workspace: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -96,6 +124,11 @@ func UpdateWorkspace(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
+
+	// Invalidate cache
+	cacheKey := fmt.Sprintf("workspaces:%s:%s", workspace.UserWorkspace, user.Id)
+	go utils.DeleteCache(cacheKey)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Workspace Updated",
@@ -106,7 +139,12 @@ func UpdateWorkspace(c fiber.Ctx) error {
 func DeleteWorkspace(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")
-	_, err := config.DB.NewDelete().Model(&models.Workspace{}).Where("id = ? and owner = ?", id, user.Id).Exec(c.Context())
+	var userworkspaceId string
+	_, err := config.DB.NewDelete().
+		Model(&models.Workspace{}).
+		Where("id = ? and owner = ?", id, user.Id).
+		Returning("userworkspace").
+		Exec(c.Context(), &userworkspaceId)
 	if err != nil {
 		log.Error("Error while deleting workspace: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -115,6 +153,11 @@ func DeleteWorkspace(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
+
+	// Invalidate cache
+	cacheKey := fmt.Sprintf("workspaces:%s:%s", userworkspaceId, user.Id)
+	go utils.DeleteCache(cacheKey)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Workspace Deleted",

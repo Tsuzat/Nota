@@ -1,10 +1,12 @@
 package app
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/models"
+	"github.com/Tsuzat/Nota/utils"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 )
@@ -12,6 +14,16 @@ import (
 func GetUserWorkspaces(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	userworkspaces := []models.UserWorkspace{}
+
+	cacheKey := fmt.Sprintf("userworkspaces:%s", user.Id)
+	if utils.GetCache(cacheKey, &userworkspaces) == nil {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "User Workspaces Fetched",
+			Data:    userworkspaces,
+		})
+	}
+
 	err := config.DB.NewSelect().Model(&userworkspaces).Where("owner = ?", user.Id).Scan(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -20,6 +32,10 @@ func GetUserWorkspaces(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
+
+	// set the cache for 7 days, if user does not change the userworkspaces, we can use the cache
+	go utils.SetCache(cacheKey, userworkspaces, time.Hour*24*7)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "User Workspaces Fetched",
@@ -51,6 +67,11 @@ func CreateUserWorkspace(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
+
+	// Invalidate cache
+	cacheKey := fmt.Sprintf("userworkspaces:%s", user.Id)
+	go utils.DeleteCache(cacheKey)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "User Workspace Created",
@@ -93,6 +114,11 @@ func UpdateUserWorkspace(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
+
+	// Invalidate cache
+	cacheKey := fmt.Sprintf("userworkspaces:%s", user.Id)
+	go utils.DeleteCache(cacheKey)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "User Workspace Updated",
@@ -112,6 +138,11 @@ func DeleteUserWorkspace(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
+
+	// Invalidate cache
+	cacheKey := fmt.Sprintf("userworkspaces:%s", user.Id)
+	go utils.DeleteCache(cacheKey)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "User Workspace Deleted",

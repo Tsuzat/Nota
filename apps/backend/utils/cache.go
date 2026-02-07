@@ -25,8 +25,21 @@ func SetCache(key string, data any, ttl time.Duration) {
 func GetCache(key string, dest any) error {
 	cacheData, err := config.VALKEY.Get(key)
 	if err != nil {
-		log.Error("Error when trying to get the cache for key: ", key, "\n Error: ", err)
+		log.Info("Cache miss: ", key)
 		return err
 	}
-	return json.Unmarshal(cacheData, dest)
+	if err := json.Unmarshal(cacheData, dest); err != nil {
+		log.Error("Error when unmarshalling cache: ", err)
+		return err
+	}
+	log.Info("Cache hit: ", key)
+	return nil
+}
+
+func DeleteCache(key string) {
+	if err := config.VALKEY.Delete(key); err != nil {
+		log.Error("Error when deleting cache: ", err)
+	} else {
+		log.Info("Cache deleted successfully: ", key)
+	}
 }
