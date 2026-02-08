@@ -7,7 +7,7 @@ import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import { Separator } from '@nota/ui/shadcn/separator';
-import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
+import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
@@ -104,7 +104,6 @@ async function importNote() {
 			{#if ISWINDOWS && !useSidebar().open}
 				<AppLogoMenu />
 			{/if}
-			<SidebarTrigger />
 			<BackAndForthButtons />
 			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
 		</div>

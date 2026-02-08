@@ -115,9 +115,9 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.workspaces[0]);
 														<icons.Star class={cn(favorite && 'fill-yellow-500 text-yellow-500')} />
 														{favorite ? 'Unfavorite' : 'Favorite'}
 													</DropdownMenu.Item>
-													<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { isPublic: !note.isPublic })}>
+													<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { is_public: !note.is_public })}>
 														<icons.Globe />
-														{note.isPublic ? 'Make Private' : 'Make Public'}
+														{note.is_public ? 'Make Private' : 'Make Public'}
 													</DropdownMenu.Item>
 													<DropdownMenu.Item onclick={() => cloudNotes.duplicate(note.id)}>
 														<icons.Copy />
@@ -141,7 +141,7 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.workspaces[0]);
 													<DropdownMenu.Separator />
 													<DropdownMenu.Label class="text-muted-foreground text-sm">
 														Last Edited:
-														{timeAgo(note.updatedAt.toISOString())}
+														{timeAgo(note.updated_at.toISOString())}
 													</DropdownMenu.Label>
 												</DropdownMenu.Content>
 											</DropdownMenu.Root>

@@ -98,9 +98,9 @@ async function deleteNote(note: LocalNote | Note) {
 									Unfavorites
 								</DropdownMenu.Item>
 								{#if isCloud}
-									<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { isPublic: !note.isPublic })}>
+									<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { is_public: !note.is_public })}>
 										<icons.Globe />
-										{note.isPublic ? 'Make Private' : 'Make Public'}
+										{note.is_public ? 'Make Private' : 'Make Public'}
 									</DropdownMenu.Item>
 								{/if}
 								{#if isCloud}
@@ -135,7 +135,7 @@ async function deleteNote(note: LocalNote | Note) {
 								<DropdownMenu.Separator />
 								<DropdownMenu.Label class="text-muted-foreground text-sm">
 									Last Edited:
-									{'owner' in note ? timeAgo(note.updatedAt.toISOString()) : timeAgo(note.updated_at)}
+									{'owner' in note ? timeAgo(note.updated_at.toISOString()) : timeAgo(note.updated_at)}
 								</DropdownMenu.Label>
 							</DropdownMenu.Content>
 						</DropdownMenu.Root>

@@ -15,12 +15,12 @@ const user = $derived(getAuthContext().user);
 
 function getAICredits() {
   if (!user) return '0 Credits';
-  if (!user.aiCredits) return '0 Credits';
-  return user.aiCredits >= 1000000
-    ? `${(user.aiCredits / 1000000).toFixed(1)}M`
-    : user.aiCredits >= 1000
-      ? `${(user.aiCredits / 1000).toFixed(1)}K`
-      : `${user.aiCredits}`;
+  if (!user.ai_credits) return '0 Credits';
+  return user.ai_credits >= 1000000
+    ? `${(user.ai_credits / 1000000).toFixed(1)}M`
+    : user.ai_credits >= 1000
+      ? `${(user.ai_credits / 1000).toFixed(1)}K`
+      : `${user.ai_credits}`;
 }
 </script>
 
@@ -44,7 +44,7 @@ function getAICredits() {
 					Your AI credits are used to power the AI features. They never expire. Regardles of the subscription tier.
 				</p>	
 			</div>
-			<SimpleToolTip content={`${user?.aiCredits || 0} AI Credits Available`}>
+			<SimpleToolTip content={`${user?.ai_credits || 0} AI Credits Available`}>
 				<span class="text-sm text-muted-foreground">{getAICredits()}</span>
 			</SimpleToolTip>
 		</div>

@@ -22,10 +22,11 @@ class Workspaces {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async fetch(userworkspaceId: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/workspaces?userworkspace_id=${userworkspaceId}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace/${userworkspaceId}`;
     const res = await request(url);
     if (res.ok) {
-      const workspaces: Workspace[] = await res.json();
+      const json = await res.json();
+      const workspaces = json.data as Workspace[];
       const parsedWorkspaces = workspaces.map((workspace) => WorkspaceSchema.parse(workspace));
       this.workspaces = parsedWorkspaces;
     } else {
@@ -39,7 +40,7 @@ class Workspaces {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async create(icon: string, name: string, userworkspaceId: string, description?: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/workspaces`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace`;
     const res = await request(url, {
       method: 'POST',
       headers: {
@@ -48,12 +49,13 @@ class Workspaces {
       body: JSON.stringify({
         icon,
         name,
-        userworkspaceId,
-        description,
+        userworkspace: userworkspaceId,
+        description: description || '',
       }),
     });
     if (res.ok) {
-      const createdWorkspace = (await res.json()) as Workspace;
+      const json = await res.json();
+      const createdWorkspace = json.data as Workspace;
       const parsedWorkspace = WorkspaceSchema.parse(createdWorkspace);
       this.workspaces.push(parsedWorkspace);
     } else {
@@ -67,7 +69,7 @@ class Workspaces {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async delete(workspaceId: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/workspaces/${workspaceId}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace/${workspaceId}`;
     const res = await request(url, {
       method: 'DELETE',
       headers: {
@@ -89,7 +91,7 @@ class Workspaces {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async update(icon: string, name: string, id: string, description?: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/workspaces/${id}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace/${id}`;
     const res = await request(url, {
       method: 'PATCH',
       headers: {
@@ -98,11 +100,12 @@ class Workspaces {
       body: JSON.stringify({
         icon,
         name,
-        description,
+        description: description || '',
       }),
     });
     if (res.ok) {
-      const updatedWorkspace = (await res.json()) as Workspace;
+      const json = await res.json();
+      const updatedWorkspace = json.data as Workspace;
       const parsedWorkspace = WorkspaceSchema.parse(updatedWorkspace);
       this.workspaces = this.workspaces.map((workspace) => (workspace.id === id ? parsedWorkspace : workspace));
     } else {

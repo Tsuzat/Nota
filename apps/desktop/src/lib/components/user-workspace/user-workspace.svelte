@@ -36,7 +36,7 @@ async function handlesubmit(e: Event) {
         });
         return;
       }
-      if (user.subscriptionPlan === 'free') {
+      if (user.subscription_plan === 'free') {
         toast.error('Pro feature is not available for free users', {
           description: 'Please upgrade to pro to use this feature',
         });

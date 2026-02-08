@@ -6,6 +6,7 @@ import {
   SidebarHeader,
   SidebarRail,
   Root as SidebarRoot,
+  SidebarTrigger,
 } from '@nota/ui/shadcn/sidebar';
 import { type ComponentProps, onMount } from 'svelte';
 import { APPWINDOW } from '$lib/contants';
@@ -32,7 +33,7 @@ onMount(async () => {
 });
 </script>
 
-<SidebarRoot bind:ref variant="floating" class="p-1.75 z-5!" {...restProps}>
+<SidebarRoot bind:ref variant="floating" class="p-1.75" {...restProps}>
 	<SidebarHeader>
 			<div class="flex items-center justify-between">
 				{#if ISMACOS  && !IS_MAXIMUM}
@@ -40,6 +41,7 @@ onMount(async () => {
 				{:else}
 					<AppLogoMenu />
 				{/if}
+				<SidebarTrigger class="z-100! absolute top-2 right-2" />
 			</div>
 		<UserworkspaceSwitcher />
 		<NavMain />

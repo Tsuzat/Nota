@@ -31,7 +31,10 @@
     "http:allow-fetch-read-body",
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://*.nota.ink/*" }]
+      "allow": [
+        { "url": "https://*.nota.ink/*" },
+        { "url": "http://127.0.0.1:3000/*" }
+      ]
     },
     {
       "identifier": "opener:allow-open-url",

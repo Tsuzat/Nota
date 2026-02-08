@@ -8,7 +8,7 @@ import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import { Separator } from '@nota/ui/shadcn/separator';
-import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
+import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
@@ -51,7 +51,7 @@ async function moveToWorkspace(note: Note, newWorkspace: Workspace) {
   });
   if (!ok) return;
   note.workspace = newWorkspace.id;
-  await cloudNotes.update(note.id, { workspaceId: newWorkspace.id });
+  await cloudNotes.update(note.id, { workspace: newWorkspace.id });
 }
 
 async function exportNote(note: Note) {
@@ -134,7 +134,6 @@ async function importNote() {
       {#if ISWINDOWS && !useSidebar().open}
         <AppLogoMenu />
       {/if}
-      <SidebarTrigger />
       <BackAndForthButtons />
       <Separator
         orientation="vertical"
@@ -186,13 +185,13 @@ async function importNote() {
           <SimpleToolTip content="Created At">
             <Button variant="ghost" size="sm">
               <icons.CalendarDays />
-              {timeAgo(workspace.createdAt.toISOString())}
+              {timeAgo(workspace.created_at.toISOString())}
             </Button>
           </SimpleToolTip>
           <SimpleToolTip content="Last Updated At">
             <Button variant="ghost" size="sm">
               <icons.Clock />
-              {timeAgo(workspace.updatedAt.toISOString())}
+              {timeAgo(workspace.updated_at.toISOString())}
             </Button>
           </SimpleToolTip>
         </div>
@@ -294,7 +293,7 @@ async function importNote() {
               >
                 <div class="flex items-center gap-1">
                   <icons.Clock class="size-3" />
-                  {timeAgo(note.updatedAt.toISOString())}
+                  {timeAgo(note.updated_at.toISOString())}
                 </div>
               </div>
             </div>

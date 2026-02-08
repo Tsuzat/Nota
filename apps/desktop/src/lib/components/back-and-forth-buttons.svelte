@@ -2,10 +2,14 @@
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
+import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
 import { getKeyboardShortcut } from '$lib/utils';
 </script>
 
 <div class="flex items-center">
+	{#if !useSidebar().open}
+		<SidebarTrigger />
+	{/if}
 	<SimpleToolTip>
 		<Button variant="ghost" size="icon-sm" onclick={() => history.back()}>
 			<icons.ArrowLeft />

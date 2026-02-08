@@ -10,7 +10,7 @@ import type { Content, Editor } from '@nota/ui/edra/types.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { Separator } from '@nota/ui/shadcn/separator';
-import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
+import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { basename } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -205,7 +205,6 @@ function handleKeydown(e: KeyboardEvent) {
         {#if ISWINDOWS && !sidebar.open}
           <AppLogoMenu />
         {/if}
-        <SidebarTrigger />
         <BackAndForthButtons />
         <Separator
           orientation="vertical"
@@ -253,7 +252,6 @@ function handleKeydown(e: KeyboardEvent) {
       {#if ISWINDOWS && !sidebar.open}
         <AppLogoMenu />
       {/if}
-      <SidebarTrigger />
       <BackAndForthButtons />
       <Separator
         orientation="vertical"
@@ -289,7 +287,7 @@ function handleKeydown(e: KeyboardEvent) {
         ISWINDOWS && "mr-30"
       )}
     >
-      {#if note.isPublic}
+      {#if note.is_public}
         <SimpleToolTip>
           <Button variant="ghost" size="icon-sm">
             <icons.Globe />

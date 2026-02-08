@@ -70,9 +70,9 @@ let open = $state(false);
 			<Dropdown.Separator />
 			<Dropdown.Group>
 				{#if 'owner' in note}
-					<Dropdown.Item onclick={() => cloudNotes.update(note.id, { isPublic: !note.isPublic})}>
+					<Dropdown.Item onclick={() => cloudNotes.update(note.id, { is_public: !note.is_public})}>
 						<icons.Globe />
-						{note.isPublic ? 'Make Private' : 'Make Public'}
+						{note.is_public ? 'Make Private' : 'Make Public'}
 					</Dropdown.Item>
 				{/if}
 				<Dropdown.Item

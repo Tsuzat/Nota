@@ -8,7 +8,7 @@ import type { Content, Editor } from '@nota/ui/edra/types.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { buttonVariants } from '@nota/ui/shadcn/button';
 import { Separator } from '@nota/ui/shadcn/separator';
-import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
+import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { onDestroy, onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
@@ -176,7 +176,6 @@ function handleKeydown(event: KeyboardEvent) {
         {#if ISWINDOWS && !sidebar.open}
           <AppLogoMenu />
         {/if}
-        <SidebarTrigger />
         <BackAndForthButtons />
         <Separator
           orientation="vertical"
@@ -224,7 +223,6 @@ function handleKeydown(event: KeyboardEvent) {
       {#if ISWINDOWS && !sidebar.open}
         <AppLogoMenu />
       {/if}
-      <SidebarTrigger />
       <BackAndForthButtons />
       <Separator
         orientation="vertical"
