@@ -476,13 +476,16 @@ func RefreshAccessToken(c fiber.Ctx) error {
 	refresh_token = c.Cookies("refresh_token")
 	// if Cookies is not found, find the token in headers
 	if refresh_token == "" {
-		refresh_token = strings.Split(string(c.Request().Header.Peek("Authorization")), "Bearer ")[1]
+		authHeader := strings.Split(string(c.Request().Header.Peek("Authorization")), "Bearer ")
+		if len(authHeader) == 2 {
+			refresh_token = authHeader[1]
+		}
 	}
 	// if token is not found, return 403
 	if refresh_token == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
-			Error:  "No Access Token Provided in Request",
+			Error:  "No Refresh Token Provided in Request",
 		})
 	}
 	// decode the token

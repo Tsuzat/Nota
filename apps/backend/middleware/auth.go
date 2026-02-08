@@ -18,7 +18,10 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 	access_token = c.Cookies("access_token")
 	// if Cookies is not found, find the token in headers
 	if access_token == "" {
-		access_token = strings.Split(string(c.Request().Header.Peek("Authorization")), "Bearer ")[1]
+		authHeader := strings.Split(string(c.Request().Header.Peek("Authorization")), "Bearer ")
+		if len(authHeader) == 2 {
+			access_token = authHeader[1]
+		}
 	}
 	// if token is not found, return 403
 	if access_token == "" {
