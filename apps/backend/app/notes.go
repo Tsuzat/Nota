@@ -99,21 +99,46 @@ func UpdateNote(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
-	note := models.Note{
-		Id:       id,
-		Name:     req.Name,
-		Icon:     req.Icon,
-		Favorite: req.Favorite,
-		IsPublic: req.IsPublic,
-		Trashed:  req.Trashed,
+
+	query := config.DB.NewUpdate().Model((*models.Note)(nil))
+	hasUpdates := false
+
+	if req.Name != nil {
+		query.Set("name = ?", *req.Name)
+		hasUpdates = true
 	}
-	log.Info("Updating note: ", note)
-	if _, err := config.DB.NewUpdate().
-		Model(&note).
-		Column("name", "icon", "favorite", "is_public", "trashed").
+	if req.Icon != nil {
+		query.Set("icon = ?", *req.Icon)
+		hasUpdates = true
+	}
+	if req.Favorite != nil {
+		query.Set("favorite = ?", *req.Favorite)
+		hasUpdates = true
+	}
+	if req.IsPublic != nil {
+		query.Set("is_public = ?", *req.IsPublic)
+		hasUpdates = true
+	}
+	if req.Trashed != nil {
+		query.Set("trashed = ?", *req.Trashed)
+		hasUpdates = true
+	}
+
+	if !hasUpdates {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "No changes to update",
+		})
+	}
+
+	// Always update UpdatedAt
+	query.Set("updated_at = ?", time.Now())
+
+	var note models.Note
+	if _, err := query.
 		Where("id = ? AND owner = ?", id, user.Id).
 		Returning("*").
-		Exec(c.Context()); err != nil {
+		Exec(c.Context(), &note); err != nil {
 		log.Error("Error when updating note: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,

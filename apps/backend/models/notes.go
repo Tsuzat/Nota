@@ -32,11 +32,12 @@ type CreateNoteRequest struct {
 }
 
 type UpdateNoteRequest struct {
-	Name     string `json:"name" validate:"required,omitempty,min=1,max=255"`
-	Icon     string `json:"icon" validate:"required,omitempty,min=1,max=512"`
-	Favorite bool   `json:"favorite" validate:"required,boolean"`
-	IsPublic bool   `json:"is_public" validate:"required,boolean"`
-	Trashed  bool   `json:"trashed" validate:"required,boolean"`
+	Name      *string `json:"name" validate:"omitempty,max=255"`
+	Icon      *string `json:"icon" validate:"omitempty,max=512"`
+	Favorite  *bool   `json:"favorite" validate:"omitempty,boolean"`
+	IsPublic  *bool   `json:"is_public" validate:"omitempty,boolean"`
+	Trashed   *bool   `json:"trashed" validate:"omitempty,boolean"`
+	Workspace *string `json:"workspace" validate:"omitempty,uuid"`
 }
 
 type ImportNoteRequest struct {

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Tsuzat/Nota/config"
@@ -24,9 +25,13 @@ func SetCache(key string, data any, ttl time.Duration) {
 
 func GetCache(key string, dest any) error {
 	cacheData, err := config.VALKEY.Get(key)
-	if err != nil || len(cacheData) == 0 {
+	if err != nil {
 		log.Info("Cache miss: ", key)
 		return err
+	}
+	if len(cacheData) == 0 {
+		log.Info("Cache miss: ", key)
+		return errors.New("Nothing found on Cache")
 	}
 	if err := json.Unmarshal(cacheData, dest); err != nil {
 		log.Error("Error when unmarshalling cache: ", err)
