@@ -476,7 +476,7 @@ func RefreshAccessToken(c fiber.Ctx) error {
 	refresh_token = c.Cookies("refresh_token")
 	// if Cookies is not found, find the token in headers
 	if refresh_token == "" {
-		refresh_token = strings.Split(string(c.Request().Header.Peek("Authorization")), "Bearer ")[0]
+		refresh_token = strings.Split(string(c.Request().Header.Peek("Authorization")), "Bearer ")[1]
 	}
 	// if token is not found, return 403
 	if refresh_token == "" {
