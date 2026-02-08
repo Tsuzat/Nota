@@ -88,7 +88,7 @@ func CreateWorkspace(c fiber.Ctx) error {
 func UpdateWorkspace(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")
-	req := new(models.CreateWorkspaceRequest)
+	req := new(models.UpdateWorkspaceRequest)
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(models.APIError{
@@ -114,7 +114,9 @@ func UpdateWorkspace(c fiber.Ctx) error {
 	}
 	_, err := config.DB.NewUpdate().
 		Model(workspace).
+		Column("icon", "name", "description", "updated_at").
 		Where("id = ? and owner = ?", id, user.Id).
+		Returning("*").
 		Exec(c.Context())
 	if err != nil {
 		log.Error("Error while updating workspace: ", err)

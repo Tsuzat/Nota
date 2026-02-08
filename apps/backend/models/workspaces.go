@@ -25,8 +25,14 @@ type UserWorkspace struct {
 type CreateWorkspaceRequest struct {
 	Icon          string `json:"icon" validate:"required,min=1,max=255"`
 	Name          string `json:"name" validate:"required,min=1,max=255"`
-	Description   string `json:"description" validate:"required,max=255"`
+	Description   string `json:"description" validate:"omitempty,max=255"`
 	UserWorkspace string `json:"userworkspace" validate:"required,uuid"`
+}
+
+type UpdateWorkspaceRequest struct {
+	Icon        string `json:"icon" validate:"required,min=1,max=255"`
+	Name        string `json:"name" validate:"required,min=1,max=255"`
+	Description string `json:"description" validate:"omitempty,max=255"`
 }
 
 type Workspace struct {

@@ -143,10 +143,13 @@ func ListFiles(c fiber.Ctx) error {
 
 	cacheKey := fmt.Sprintf("storage:list:%s:%s", userId, version)
 
-	if cached, err := config.VALKEY.Get(cacheKey); err == nil && len(cached) > 0 {
-		// Return cached raw bytes as JSON
-		c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
-		return c.Send(cached)
+	files := make([]map[string]any, 0)
+	if err := utils.GetCache(cacheKey, files); err == nil {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Fetched Files Successfully",
+			Data:    files,
+		})
 	}
 
 	searchPrefix := userId + "/"
@@ -162,7 +165,6 @@ func ListFiles(c fiber.Ctx) error {
 	}
 
 	endpoint := strings.TrimSuffix(config.R2_PUBLIC_ENDPOINT, "/")
-	files := make([]map[string]any, 0)
 
 	for _, item := range listOutput.Contents {
 		files = append(files, map[string]any{
