@@ -8,6 +8,7 @@ import (
 	"github.com/Tsuzat/Nota/db"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/log"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -32,12 +33,14 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 		return []byte(config.ACCESS_TOKEN_SECRET), nil
 	})
 	// If there is an error, return 401
-	if err != nil && err != jwt.ErrTokenExpired {
+	if err != nil {
+		log.Error("Error on parsing JWT: ", err)
+		if strings.Contains(err.Error(), jwt.ErrTokenExpired.Error()) {
+			return nil, fiber.ErrForbidden
+		}
 		return nil, fiber.ErrUnauthorized
 	}
-	if err == jwt.ErrTokenExpired {
-		return nil, fiber.ErrUnauthorized
-	}
+
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return nil, fiber.ErrUnauthorized
@@ -73,9 +76,16 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 func Authenticate(c fiber.Ctx) error {
 	user, err := AuthenticatedUser(c)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "User is not authenticated",
+		log.Error("JWT Error: ", err)
+		statusCode := fiber.StatusUnauthorized
+		errorMessage := "User is not authenticated"
+		if err == fiber.ErrForbidden {
+			statusCode = fiber.StatusForbidden
+			errorMessage = "Token is expired"
+		}
+		return c.Status(statusCode).JSON(models.APIError{
+			Status: statusCode,
+			Error:  errorMessage,
 			Data:   err.Error(),
 		})
 	}
