@@ -51,7 +51,7 @@ export default async (
 
   // 3. Handle 403 (Auto-Refresh) if access token expired or invalid
   if (response.status === 403) {
-    if (url.includes("/auth/refresh")) {
+    if (url.includes("/auth/refreshtoken")) {
       return response;
     }
     try {
@@ -63,6 +63,9 @@ export default async (
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("refresh_token")}`,
+              ...(isTauri() && {
+                "X-Nota-Desktop-Identifier": PUBLIC_DESKTOP_APP_IDENTIFIER,
+              }),
             },
           }),
           credentials: "include",
@@ -73,7 +76,6 @@ export default async (
         // Retry Original Request
         if (isTauri()) {
           const resData = await refreshResponse.json();
-          console.log("Access token refreshed:", resData);
           localStorage.setItem("access_token", resData.data);
           headers.set("Authorization", `Bearer ${resData.data}`);
           currentOptions.headers = headers;
