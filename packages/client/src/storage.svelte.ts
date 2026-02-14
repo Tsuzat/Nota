@@ -1,8 +1,8 @@
-import { getContext, setContext } from "svelte";
-import z from "zod";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import request from "./request";
-import { type NotaFile, NotaFileSchema } from "./types";
+import { getContext, setContext } from 'svelte';
+import z from 'zod';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import request, { fetchFn } from './request';
+import { type NotaFile, NotaFileSchema } from './types';
 
 const SignedUrlResponseSchema = z.object({
   uploadUrl: z.string().nonempty(),
@@ -26,10 +26,8 @@ class Storage {
     if (res.ok) {
       const json = await res.json();
       const files = json.data as NotaFile[];
-      if (files.length == 0) return;
-      const parsedFiles = files.map((file: NotaFile) =>
-        NotaFileSchema.parse(file),
-      );
+      if (files.length === 0) return;
+      const parsedFiles = files.map((file: NotaFile) => NotaFileSchema.parse(file));
       this.#files = parsedFiles;
     } else {
       throw new Error(await res.text());
@@ -39,7 +37,7 @@ class Storage {
   async upload(file: File) {
     const getSignedUrl = `${PUBLIC_BACKEND_URL}/api/v1/storage/presigned-url`;
     const signedUrlRes = await request(getSignedUrl, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({
         filename: file.name,
         contentType: file.type,
@@ -47,24 +45,29 @@ class Storage {
       }),
     });
     if (!signedUrlRes.ok) {
+      console.log('Status of Presigned: ', signedUrlRes.ok);
       throw new Error(await signedUrlRes.text());
     }
     const json = await signedUrlRes.json();
     const signedUrl = SignedUrlResponseSchema.parse(json.data);
-    const res = await request(signedUrl.uploadUrl, {
-      method: "PUT",
+    console.log(signedUrl);
+    const res = await fetchFn(signedUrl.uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type,
+      },
       body: file,
     });
     if (!res.ok) {
-      throw new Error((await res.text()) || "Failed to upload file");
+      throw new Error((await res.text()) || 'Failed to upload file');
     }
     const confirmUrl = `${PUBLIC_BACKEND_URL}/api/v1/storage/confirm`;
     const confirmRes = await request(confirmUrl, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({ key: signedUrl.key }),
     });
     if (!confirmRes.ok) {
-      throw new Error((await confirmRes.text()) || "Failed to confirm upload");
+      throw new Error((await confirmRes.text()) || 'Failed to confirm upload');
     }
     this.#files.push({
       key: signedUrl.key,
@@ -83,7 +86,7 @@ class Storage {
   async delete(key: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/storage`;
     const res = await request(url, {
-      method: "DELETE",
+      method: 'DELETE',
       body: JSON.stringify({ key }),
     });
     if (res.ok) {
@@ -94,7 +97,7 @@ class Storage {
   }
 }
 
-const NOTASTORAGEKEY = Symbol("NOTASTORAGEKEY");
+const NOTASTORAGEKEY = Symbol('NOTASTORAGEKEY');
 
 /**
  * Set the storage context.

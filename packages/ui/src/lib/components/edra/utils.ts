@@ -1,29 +1,35 @@
-import type { Editor } from '@tiptap/core';
-import type { Node } from '@tiptap/pm/model';
-import { Decoration, DecorationSet, type EditorView } from '@tiptap/pm/view';
-import { toast } from 'svelte-sonner';
-import { browser } from '$app/environment';
+import type { Editor } from "@tiptap/core";
+import type { Node } from "@tiptap/pm/model";
+import { Decoration, DecorationSet, type EditorView } from "@tiptap/pm/view";
+import { toast } from "svelte-sonner";
+import { browser } from "$app/environment";
 
 /**
  * Check if the current browser is in mac or not
  */
 export const isMac = browser
-  ? navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('Mac OS X')
+  ? navigator.userAgent.includes("Macintosh") ||
+    navigator.userAgent.includes("Mac OS X")
   : false;
 
-export const getKeyboardShortcut = (key: string, ctrl = false, shift = false, alt = false) => {
+export const getKeyboardShortcut = (
+  key: string,
+  ctrl = false,
+  shift = false,
+  alt = false,
+) => {
   const modifiers: string[] = [];
   if (isMac) {
-    if (ctrl) modifiers.push('⌘');
-    if (shift) modifiers.push('⇧');
-    if (alt) modifiers.push('⌥');
+    if (ctrl) modifiers.push("⌘");
+    if (shift) modifiers.push("⇧");
+    if (alt) modifiers.push("⌥");
   } else {
-    if (ctrl) modifiers.push('Ctrl');
-    if (shift) modifiers.push('Shift');
-    if (alt) modifiers.push('Alt');
+    if (ctrl) modifiers.push("Ctrl");
+    if (shift) modifiers.push("Shift");
+    if (alt) modifiers.push("Alt");
   }
 
-  return [...modifiers, key].join(' ');
+  return [...modifiers, key].join(" ");
 };
 
 /**
@@ -31,25 +37,27 @@ export const getKeyboardShortcut = (key: string, ctrl = false, shift = false, al
  * @param editor Editor - editor instance
  * @param maxSize number - max size of the image to be pasted in MB, default is 2MB
  */
-export function getHandlePasteImage(onDropOrPaste?: (file: File) => Promise<string>) {
+export function getHandlePasteImage(
+  onDropOrPaste?: (file: File) => Promise<string>,
+) {
   return (view: EditorView, event: ClipboardEvent) => {
     const item = event.clipboardData?.items[0];
-    if (item?.type.indexOf('image') !== 0) {
+    if (item?.type.indexOf("image") !== 0) {
       return;
     }
     const file = item.getAsFile();
     if (file === null || file.size === undefined) return;
-    const id = toast.loading('Processing Pasted Image');
+    const id = toast.loading("Processing Pasted Image", { duration: 10000 });
     onDropOrPaste?.(file)
       .then((src) => {
         const node = view.state.schema.nodes.image.create({ src });
         const transaction = view.state.tr.replaceSelectionWith(node);
         view.dispatch(transaction);
-        toast.success('Uploaded Successfully', { id, duration: 300 });
+        toast.success("Uploaded Successfully", { id, duration: 300 });
       })
       .catch((error) => {
         console.error(error);
-        toast.error('Something went wrong while pasting image', {
+        toast.error("Something went wrong while pasting image", {
           id,
           duration: 300,
         });
@@ -58,23 +66,25 @@ export function getHandlePasteImage(onDropOrPaste?: (file: File) => Promise<stri
   };
 }
 
-export function getHandleDropImage(onDropOrPaste?: (file: File) => Promise<string>) {
+export function getHandleDropImage(
+  onDropOrPaste?: (file: File) => Promise<string>,
+) {
   return (view: EditorView, event: DragEvent) => {
     const files = Array.from(event.dataTransfer?.files ?? []);
     if (files.length === 0) return;
     const file = files[0];
     if (file === null || file.size === undefined) return;
-    const id = toast.loading('Processing Dropped Image');
+    const id = toast.loading("Processing Dropped Image", { duration: 10000 });
     onDropOrPaste?.(file)
       .then((src) => {
         const node = view.state.schema.nodes.image.create({ src });
         const transaction = view.state.tr.replaceSelectionWith(node);
         view.dispatch(transaction);
-        toast.success('Uploaded Successfully', { id, duration: 300 });
+        toast.success("Uploaded Successfully", { id, duration: 300 });
       })
       .catch((error) => {
         console.error(error);
-        toast.error('Something went wrong when handling dropped image', {
+        toast.error("Something went wrong when handling dropped image", {
           id,
           duration: 300,
         });
@@ -98,7 +108,7 @@ export const findColors = (doc: Node) => {
       const from = position + index;
       const to = from + color.length;
       const decoration = Decoration.inline(from, to, {
-        class: 'color',
+        class: "color",
         style: `--color: ${color}`,
       });
 
@@ -140,24 +150,24 @@ export const isURL = (str: string): boolean => {
 };
 
 export const quickcolors = [
-  { label: 'Default', value: '' },
-  { label: 'Blue', value: '#0E0E99' },
-  { label: 'Brown', value: '#7D0404' },
-  { label: 'Green', value: '#077507' },
-  { label: 'Grey', value: '#636262' },
-  { label: 'Orange', value: '#A34603' },
-  { label: 'Pink', value: '#DB0762' },
-  { label: 'Purple', value: '#83069C' },
-  { label: 'Red', value: '#B30707' },
-  { label: 'Yellow', value: '#C4C404' },
+  { label: "Default", value: "" },
+  { label: "Blue", value: "#0E0E99" },
+  { label: "Brown", value: "#7D0404" },
+  { label: "Green", value: "#077507" },
+  { label: "Grey", value: "#636262" },
+  { label: "Orange", value: "#A34603" },
+  { label: "Pink", value: "#DB0762" },
+  { label: "Purple", value: "#83069C" },
+  { label: "Red", value: "#B30707" },
+  { label: "Yellow", value: "#C4C404" },
 ];
 
 export enum FileType {
-  IMAGE = 'image/*',
-  VIDEO = 'video/*',
-  AUDIO = 'audio/*',
-  DOCS = 'docs/*',
-  UNKNOWN = 'unknown',
+  IMAGE = "image/*",
+  VIDEO = "video/*",
+  AUDIO = "audio/*",
+  DOCS = "docs/*",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -168,13 +178,13 @@ export enum FileType {
 export const getFileTypeExtensions = (fileType: FileType) => {
   switch (fileType) {
     case FileType.IMAGE:
-      return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+      return ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
     case FileType.VIDEO:
-      return ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
+      return ["mp4", "webm", "ogg", "mov", "avi", "mkv"];
     case FileType.AUDIO:
-      return ['mp3', 'wav', 'ogg', 'flac', 'aac'];
+      return ["mp3", "wav", "ogg", "flac", "aac"];
     case FileType.DOCS:
-      return ['docx', 'doc', 'pptx', 'ppt', 'xlsx', 'xls'];
+      return ["docx", "doc", "pptx", "ppt", "xlsx", "xls"];
     case FileType.UNKNOWN:
       return [];
   }
@@ -186,54 +196,54 @@ export const getFileTypeExtensions = (fileType: FileType) => {
  * @returns - file type or null if unknown
  */
 export const getFileTypeFromExtension = (fileName: string): string | null => {
-  const extension = fileName.toLowerCase().split('.').pop();
+  const extension = fileName.toLowerCase().split(".").pop();
 
   if (!extension) return null;
 
   const mimeTypes: Record<string, string> = {
     // Images
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    gif: 'image/gif',
-    bmp: 'image/bmp',
-    webp: 'image/webp',
-    svg: 'image/svg+xml',
-    ico: 'image/x-icon',
-    tiff: 'image/tiff',
-    tif: 'image/tiff',
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    bmp: "image/bmp",
+    webp: "image/webp",
+    svg: "image/svg+xml",
+    ico: "image/x-icon",
+    tiff: "image/tiff",
+    tif: "image/tiff",
 
     // Videos
-    mp4: 'video/mp4',
-    avi: 'video/x-msvideo',
-    mov: 'video/quicktime',
-    wmv: 'video/x-ms-wmv',
-    flv: 'video/x-flv',
-    webm: 'video/webm',
-    mkv: 'video/x-matroska',
-    m4v: 'video/x-m4v',
-    '3gp': 'video/3gpp',
-    ogv: 'video/ogg',
+    mp4: "video/mp4",
+    avi: "video/x-msvideo",
+    mov: "video/quicktime",
+    wmv: "video/x-ms-wmv",
+    flv: "video/x-flv",
+    webm: "video/webm",
+    mkv: "video/x-matroska",
+    m4v: "video/x-m4v",
+    "3gp": "video/3gpp",
+    ogv: "video/ogg",
 
     // Audio
-    mp3: 'audio/mpeg',
-    wav: 'audio/wav',
-    flac: 'audio/flac',
-    aac: 'audio/aac',
-    ogg: 'audio/ogg',
-    m4a: 'audio/mp4',
-    wma: 'audio/x-ms-wma',
-    opus: 'audio/opus',
-    aiff: 'audio/aiff',
+    mp3: "audio/mpeg",
+    wav: "audio/wav",
+    flac: "audio/flac",
+    aac: "audio/aac",
+    ogg: "audio/ogg",
+    m4a: "audio/mp4",
+    wma: "audio/x-ms-wma",
+    opus: "audio/opus",
+    aiff: "audio/aiff",
 
     // Docs
-    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    doc: 'application/msword',
-    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    ppt: 'application/vnd.ms-powerpoint',
-    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    xls: 'application/vnd.ms-excel',
-    pdf: 'application/pdf',
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    doc: "application/msword",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ppt: "application/vnd.ms-powerpoint",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    xls: "application/vnd.ms-excel",
+    pdf: "application/pdf",
   };
 
   return mimeTypes[extension] ?? null;
