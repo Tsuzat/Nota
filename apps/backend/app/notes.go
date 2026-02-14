@@ -231,8 +231,8 @@ func ApplyNoteContentPatch(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	noteId := c.Params("id")
 
-	var patch []models.NotePatchOperation
-	if err := c.Bind().Body(&patch); err != nil {
+	patch := make([]models.NotePatchOperation, 0)
+	if err := json.Unmarshal(c.Body(), &patch); err != nil {
 		log.Error("Error binding patch: ", err)
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
