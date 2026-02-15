@@ -144,7 +144,7 @@ func ListFiles(c fiber.Ctx) error {
 	cacheKey := fmt.Sprintf("storage:list:%s:%s", userId, version)
 
 	files := make([]map[string]any, 0)
-	if err := utils.GetCache(cacheKey, files); err == nil {
+	if err := utils.GetCache(cacheKey, &files); err == nil {
 		return c.JSON(models.APIResponse{
 			Status:  fiber.StatusOK,
 			Message: "Fetched Files Successfully",
