@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/storage/valkey"
@@ -32,6 +33,17 @@ var (
 	R2_PUBLIC_ENDPOINT    string
 	BUCKET_NAME           string
 )
+
+func GetCookieOptions(name string, value string, expires time.Time) *fiber.Cookie {
+	return &fiber.Cookie{
+		Name:     name,
+		Value:    value,
+		Expires:  expires,
+		HTTPOnly: true,
+		Secure:   os.Getenv("ENV") == "production",
+		SameSite: "Lax",
+	}
+}
 
 // GEMINI API Key
 var GEMINI_API_KEY string

@@ -163,13 +163,7 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 		})
 	}
 	// Setup Cookies
-	c.Cookie(&fiber.Cookie{
-		Name:     "access_token",
-		Value:    accessToken,
-		Expires:  time.Now().Add(time.Minute * time.Duration(config.ACCESS_TOKEN_EXPIRY)),
-		HTTPOnly: true,
-		Secure:   true,
-	})
+	c.Cookie(config.GetCookieOptions("access_token", accessToken, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
 	c.Cookie(&fiber.Cookie{
 		Name:     "refresh_token",
 		Value:    refreshToken,
@@ -309,41 +303,14 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 			Error:  "Unable to generate refresh token",
 		})
 	}
-	c.Cookie(&fiber.Cookie{
-		Name:     "access_token",
-		Value:    access_token,
-		Expires:  time.Now().Add(time.Minute * time.Duration(config.ACCESS_TOKEN_EXPIRY)),
-		HTTPOnly: true,
-		Secure:   true,
-	})
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    refresh_token,
-		Expires:  time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
-		HTTPOnly: true,
-		Secure:   true,
-	})
-	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
-		Status:  fiber.StatusOK,
-		Message: "Logged in successfully",
-	})
+	c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
+	c.Cookie(config.GetCookieOptions("refresh_token", refresh_token, time.Now().Add(time.Hour*24*time.Duration(config.REFRESH_TOKEN_EXPIRY))))
+	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(config.FRONTEND_URL)
 }
 
 func SignOut(c fiber.Ctx) error {
-	c.Cookie(&fiber.Cookie{
-		Name:     "access_token",
-		Value:    "",
-		Expires:  time.Now().Add(-time.Hour),
-		HTTPOnly: true,
-		Secure:   true,
-	})
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    "",
-		Expires:  time.Now().Add(-time.Hour),
-		HTTPOnly: true,
-		Secure:   true,
-	})
+	c.Cookie(config.GetCookieOptions("access_token", "", time.Now().Add(-time.Hour)))
+	c.Cookie(config.GetCookieOptions("refresh_token", "", time.Now().Add(-time.Hour)))
 	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Logged out successfully",
@@ -450,24 +417,9 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 			Error:  "Unable to generate refresh token",
 		})
 	}
-	c.Cookie(&fiber.Cookie{
-		Name:     "access_token",
-		Value:    access_token,
-		Expires:  time.Now().Add(time.Minute * time.Duration(config.ACCESS_TOKEN_EXPIRY)),
-		HTTPOnly: true,
-		Secure:   true,
-	})
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    refresh_token,
-		Expires:  time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
-		HTTPOnly: true,
-		Secure:   true,
-	})
-	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
-		Status:  fiber.StatusOK,
-		Message: "Logged in successfully",
-	})
+	c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
+	c.Cookie(config.GetCookieOptions("refresh_token", refresh_token, time.Now().Add(time.Hour*24*time.Duration(config.REFRESH_TOKEN_EXPIRY))))
+	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(config.FRONTEND_URL)
 }
 
 func RefreshAccessToken(c fiber.Ctx) error {
@@ -516,20 +468,8 @@ func RefreshAccessToken(c fiber.Ctx) error {
 	// Get the user from the database and attach it to the context so that we can use it in the route
 	id, sessionId := claims["id"].(string), claims["session_id"].(string)
 	if !db.IsValidSession(sessionId) {
-		c.Cookie(&fiber.Cookie{
-			Name:     "access_token",
-			Value:    "",
-			Expires:  time.Now().Add(-time.Hour),
-			HTTPOnly: true,
-			Secure:   true,
-		})
-		c.Cookie(&fiber.Cookie{
-			Name:     "refresh_token",
-			Value:    "",
-			Expires:  time.Now().Add(-time.Hour),
-			HTTPOnly: true,
-			Secure:   true,
-		})
+		c.Cookie(config.GetCookieOptions("access_token", "", time.Now().Add(-time.Hour)))
+		c.Cookie(config.GetCookieOptions("refresh_token", "", time.Now().Add(-time.Hour)))
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "Invalid token, Session revoked",
@@ -558,13 +498,7 @@ func RefreshAccessToken(c fiber.Ctx) error {
 	}
 	isDesktop := c.Locals("isDesktop").(bool)
 	if !isDesktop {
-		c.Cookie(&fiber.Cookie{
-			Name:     "access_token",
-			Value:    access_token,
-			Expires:  time.Now().Add(time.Minute * time.Duration(config.ACCESS_TOKEN_EXPIRY)),
-			HTTPOnly: true,
-			Secure:   true,
-		})
+		c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
 	}
 	var data any
 	if isDesktop {
