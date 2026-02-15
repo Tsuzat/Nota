@@ -21,6 +21,10 @@ func checkHealth(c fiber.Ctx) error {
 	})
 }
 
+func redirectToDesktop(c fiber.Ctx) error {
+	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(config.FRONTEND_URL)
+}
+
 func RoutesInit() {
 	config.APP.Use(func(c fiber.Ctx) error {
 		// check if this call is from DESKTOP
@@ -31,6 +35,7 @@ func RoutesInit() {
 	})
 
 	config.APP.Get("/api/v1/healthcheck", checkHealth)
+	config.APP.Get("/", redirectToDesktop)
 
 	InitAuthRouter()
 	InitSessionRouter()

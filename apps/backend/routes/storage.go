@@ -7,7 +7,7 @@ import (
 )
 
 func InitStorageRouter() {
-	group := config.APP.Group("/api/v1/storage", middleware.Authenticate)
+	group := config.APP.Group("/api/v1/storage", middleware.Authenticate, middleware.CheckPro)
 
 	group.Post("/presigned-url", app.GeneratePresignedURL)
 	group.Post("/confirm", app.ConfirmUpload)

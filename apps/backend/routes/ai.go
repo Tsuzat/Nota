@@ -7,6 +7,6 @@ import (
 )
 
 func InitAIRouter() {
-	group := config.APP.Group("/api/v1/ai", middleware.Authenticate)
+	group := config.APP.Group("/api/v1/ai", middleware.Authenticate, middleware.CheckPro)
 	group.Post("/generate", app.GenerateContent)
 }
