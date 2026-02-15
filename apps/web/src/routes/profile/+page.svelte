@@ -11,10 +11,10 @@ import { logout } from '$lib/utils.js';
 const { data } = $props();
 const user = $derived(data.user);
 
-const isPro = $derived((user?.subscriptionPlan || 'free') === 'pro');
-const ai_credits = $derived(user?.aiCredits || 0);
-const external_customer_id = $derived(user?.externalCustomerId);
-const sub_type = $derived(user?.subscriptionPlan || undefined);
+const isPro = $derived((user?.subscription_plan || 'free') === 'pro');
+const ai_credits = $derived(user?.ai_credits || 0);
+const external_customer_id = $derived(user?.external_customer_id);
+const sub_type = $derived(user?.subscription_plan || undefined);
 
 function handleDeleteAccount() {
   toast.warning('Account Deletion is coming soon.');
@@ -41,8 +41,8 @@ function handleDeleteAccount() {
         <Card.Content class="grid gap-6">
           <div class="flex items-center gap-4">
             <Avatar.Root class="h-16 w-16">
-              {#if user.avatarUrl}
-                <Avatar.Image src={user.avatarUrl} alt={user.name} />
+              {#if user.avatar_url}
+                <Avatar.Image src={user.avatar_url} alt={user.name} />
               {/if}
               <Avatar.Fallback>
                 {user.name?.charAt(0) ?? user.email.charAt(0)?.toUpperCase()}
@@ -63,7 +63,7 @@ function handleDeleteAccount() {
           <div class="grid gap-2">
             <div class="text-sm font-medium">Account created</div>
             <div class="text-muted-foreground text-sm">
-              {new Date(user.createdAt ?? "").toLocaleDateString("en-US", {
+              {new Date(user.created_at ?? "").toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
