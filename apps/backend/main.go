@@ -8,6 +8,7 @@ import (
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/db"
+	"github.com/Tsuzat/Nota/middleware"
 	"github.com/Tsuzat/Nota/routes"
 	"github.com/Tsuzat/Nota/utils"
 	"github.com/go-playground/validator/v10"
@@ -15,7 +16,6 @@ import (
 	"github.com/gofiber/fiber/v3/log"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/limiter"
-	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/joho/godotenv"
 )
 
@@ -63,9 +63,11 @@ func main() {
 		StructValidator: &structValidator{validate: validator.New()},
 	})
 	// logger middleware
-	config.APP.Use(logger.New(logger.Config{
-		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
-	}))
+	config.APP.Use(middleware.RequestLogger)
+	// sanitization middleware
+	config.APP.Use(middleware.SanitizationMiddleware)
+	// ban middleware
+	config.APP.Use(middleware.BanMiddleware)
 
 	// check the origin
 	config.APP.Use(cors.New(cors.Config{
