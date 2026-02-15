@@ -9,7 +9,7 @@ export default defineConfig({
     noExternal: ['@nota/ui', 'svelte-sonner'],
   },
   server: {
-    allowedHosts: ['emerging-rabbit-solely.ngrok-free.app'],
+    host: '127.0.0.1',
   },
   build: {
     sourcemap: false,
