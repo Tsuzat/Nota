@@ -274,11 +274,7 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 				Data:   err.Error(),
 			})
 		}
-		return c.JSON(models.APIResponse{
-			Status:  fiber.StatusOK,
-			Message: "Session Code Recieved",
-			Data:    sessionId,
-		})
+		return c.Redirect().Status(fiber.StatusPermanentRedirect).To(fmt.Sprintf("nota://auth/callback?code=%s", sessionId))
 	}
 	sessionId, err := db.CreateSession(user.Id, c)
 	if err != nil {
@@ -390,11 +386,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 				Data:   err.Error(),
 			})
 		}
-		return c.JSON(models.APIResponse{
-			Status:  fiber.StatusOK,
-			Message: "Session Code Recieved",
-			Data:    sessionId,
-		})
+		return c.Redirect().Status(fiber.StatusPermanentRedirect).To(fmt.Sprintf("nota://auth/callback?code=%s", sessionId))
 	}
 	sessionId, err := db.CreateSession(user.Id, c)
 	if err != nil {
