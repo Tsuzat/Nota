@@ -1,1 +1,0 @@
-ALTER TABLE "sessions" ADD CONSTRAINT "sessions_pkce_challenge_unique" UNIQUE("pkce_challenge");
