@@ -27,9 +27,9 @@ $effect(() => {
 async function loadData(id: string) {
   isLoading = true;
   try {
-    const res = await request(`${PUBLIC_BACKEND_URL}/api/db/notes/${id}/preview`);
+    const res = await request(`${PUBLIC_BACKEND_URL}/api/v1/db/note/preview/${id}`);
     if (res.ok) {
-      const data = await res.json();
+      const { data } = await res.json();
       name = data.name;
       icon = data.icon;
       content = data.content;

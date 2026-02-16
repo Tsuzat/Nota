@@ -36,7 +36,7 @@ const recentNotes = $derived.by(() => {
   if (currentUserWorkspace === null) return [];
   if ('owner' in currentUserWorkspace) {
     return cloudNotes
-      .toSorted((a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime())
+      .toSorted((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime())
       .slice(0, 5);
   }
   return localNotes.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 5);
@@ -82,7 +82,6 @@ async function handleDelete(workspace: LocalUserWorkspace | UserWorkspace) {
       {#if ISWINDOWS && !sidebar.open}
         <AppLogoMenu />
       {/if}
-      <SidebarTrigger />
       <BackAndForthButtons />
       <Separator
         orientation="vertical"
@@ -182,7 +181,7 @@ async function handleDelete(workspace: LocalUserWorkspace | UserWorkspace) {
 								<div class="text-muted-foreground flex items-center justify-between text-xs">
 									<div class="flex items-center gap-1">
 										<icons.Clock class="size-3" />
-										{"owner" in recent ? timeAgo(recent.updatedAt?.toString() ?? ""): timeAgo(recent.updated_at)}
+										{"owner" in recent ? timeAgo(recent.updated_at?.toString() ?? ""): timeAgo(recent.updated_at)}
 									</div>
 								</div>
 							</div>

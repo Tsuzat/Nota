@@ -31,7 +31,12 @@
     "http:allow-fetch-read-body",
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://*.nota.ink/*" }]
+      "allow": [
+        { "url": "https://*.nota.ink/*" },
+        {
+          "url": "https://*.cloudflarestorage.com/*"
+        }
+      ]
     },
     {
       "identifier": "opener:allow-open-url",

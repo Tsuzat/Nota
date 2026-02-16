@@ -8,9 +8,8 @@ interface UpdateNotes {
   icon?: string;
   favorite?: boolean;
   trashed?: boolean;
-  isPublic?: boolean;
-  workspaceId?: string;
-  userworkspaceId?: string;
+  is_public?: boolean;
+  workspace?: string;
 }
 
 class Notes {
@@ -30,7 +29,7 @@ class Notes {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async fetch(userworkspaceId: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${userworkspaceId}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${userworkspaceId}`;
     const res = await request(url, {
       method: 'GET',
       headers: {
@@ -38,7 +37,8 @@ class Notes {
       },
     });
     if (res.ok) {
-      const notes = (await res.json()) as Note[];
+      const json = await res.json();
+      const notes = json.data as Note[];
       const parsedNotes = notes.map((note) => NoteSchema.parse(note));
       this.notes = parsedNotes;
     } else {
@@ -52,16 +52,23 @@ class Notes {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async create(name: string, icon: string, workspaceId: string, userworkspaceId: string, isFavorite: boolean) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/notes`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note`;
     const res = await request(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, icon, workspaceId, userworkspaceId, isFavorite }),
+      body: JSON.stringify({
+        name,
+        icon,
+        workspace: workspaceId,
+        userworkspace: userworkspaceId,
+        favorite: isFavorite,
+      }),
     });
     if (res.ok) {
-      const createdNote = (await res.json()) as Note;
+      const json = await res.json();
+      const createdNote = json.data as Note;
       const parsedNote = NoteSchema.parse(createdNote);
       this.notes.push(parsedNote);
     } else {
@@ -75,7 +82,7 @@ class Notes {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async delete(noteId: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${noteId}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}`;
     const res = await request(url, {
       method: 'DELETE',
       headers: {
@@ -95,12 +102,12 @@ class Notes {
    * @param icon Note icon
    * @param favorite Whether the note is favorite
    * @param trashed Whether the note is trashed
-   * @param isPublic Whether the note is public
+   * @param is_public Whether the note is public
    * @param id Note ID
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async update(noteId: string, note: Partial<UpdateNotes>) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${noteId}`;
+  async update(noteId: string, note: UpdateNotes) {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}`;
     const res = await request(url, {
       method: 'PATCH',
       headers: {
@@ -109,7 +116,8 @@ class Notes {
       body: JSON.stringify(note),
     });
     if (res.ok) {
-      const updatedNote = (await res.json()) as Note;
+      const json = await res.json();
+      const updatedNote = json.data as Note;
       const parsedNote = NoteSchema.parse(updatedNote);
       this.notes = this.notes.map((note) => (note.id === noteId ? parsedNote : note));
     } else {
@@ -124,10 +132,11 @@ class Notes {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async fetchContent(noteId: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${noteId}/content`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/content`;
     const res = await request(url);
     if (res.ok) {
-      return await res.json();
+      const json = await res.json();
+      return json.data;
     }
     throw new Error(await res.text());
   }
@@ -138,7 +147,7 @@ class Notes {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async duplicate(noteId: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${noteId}/duplicate`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/duplicate`;
     const res = await request(url, {
       method: 'POST',
       headers: {
@@ -146,7 +155,8 @@ class Notes {
       },
     });
     if (res.ok) {
-      const duplicatedNote = (await res.json()) as Note;
+      const json = await res.json();
+      const duplicatedNote = json.data as Note;
       const parsedNote = NoteSchema.parse(duplicatedNote);
       this.notes.push(parsedNote);
     } else {
@@ -161,7 +171,7 @@ class Notes {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async patch(noteId: string, patch: any) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/${noteId}/content`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/content`;
     const res = await request(url, {
       method: 'PATCH',
       headers: {
@@ -175,16 +185,22 @@ class Notes {
   }
 
   async import(name: string, workspaceId: string, userworkspaceId: string, content: any) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/notes/import`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/import`;
     const res = await request(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, workspaceId, userworkspaceId, content }),
+      body: JSON.stringify({
+        name,
+        workspace: workspaceId,
+        userworkspace: userworkspaceId,
+        content,
+      }),
     });
     if (res.ok) {
-      const importedNote = await res.json();
+      const json = await res.json();
+      const importedNote = json.data as Note;
       const parsedNote = NoteSchema.parse(importedNote);
       this.notes.push(parsedNote);
     } else {

@@ -34,7 +34,7 @@ async function handleDeleteUser() {
 	{#if user}
 		<div class="flex items-center space-x-4">
 			<Avatar.Root class="h-16 w-16">
-				<Avatar.Image src={user.avatarUrl} alt={user.name ?? 'Unknown'} />
+				<Avatar.Image src={user.avatar_url} alt={user.name ?? 'Unknown'} />
 				<Avatar.Fallback>
 					{user.name?.charAt(0) ?? user.email.charAt(0)}
 				</Avatar.Fallback>
@@ -45,12 +45,12 @@ async function handleDeleteUser() {
 				</div>
 				<div class="text-muted-foreground text-sm">{user.email}</div>	
 				<div class="text-muted-foreground text-xs">
-					Subscription Tier: {user.subscriptionType ?? "Pro"}
+					Subscription Tier: {user.subscription_type ?? "Pro"}
 				</div>
 			</div>
 		</div>
 		<div class="mt-6 flex space-x-2">
-			{#if user.subscriptionPlan === 'free'}
+			{#if user.subscription_plan === 'free'}
 			<Button variant="outline" onclick={() => {
 				openUrl(`${PUBLIC_NOTA_FRONTEND_URL}#pricing`)
 			}}>

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { BorderBeam, SimpleToolTip, ToggleMode } from '@lib/components/custom';
 import { toast } from '@lib/components/ui/sonner/index.js';
-import { Clipboard, Menu } from '@lucide/svelte';
+import { Menu } from '@lucide/svelte';
 import BookOpen from '@lucide/svelte/icons/book-open';
 import Check from '@lucide/svelte/icons/check';
 import Code from '@lucide/svelte/icons/code';
@@ -187,7 +187,7 @@ async function copyToClipboard() {
                 class: "rounded-full",
               })}
             >
-              <Avatar.Image src={user.avatarUrl} />
+              <Avatar.Image src={user.avatar_url} />
               <Avatar.Fallback>
                 <User />
               </Avatar.Fallback>
@@ -577,7 +577,7 @@ async function copyToClipboard() {
             </ul>
           </Card.Content>
           <Card.Footer class="mt-auto flex flex-col gap-1">
-            {#if (user?.aiCredits || 0) <= 0}
+            {#if (user?.ai_credits || 0) <= 0}
               <Button
                 class="w-full"
                 onclick={() => {

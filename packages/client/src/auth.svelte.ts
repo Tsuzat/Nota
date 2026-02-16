@@ -39,13 +39,18 @@ class Auth {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async init() {
-    const url = `${PUBLIC_BACKEND_URL}/api/user/me`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/user/me`;
     const res = await request(url);
     if (res.ok) {
-      const data = await res.json();
-      const user = data.user;
-      const parsedUser = UserSchema.parse(user);
-      this.#user = parsedUser;
+      try {
+        const json = await res.json();
+        const user = json.data;
+        const parsedUser = UserSchema.parse(user);
+        this.#user = parsedUser;
+      } catch (error) {
+        console.log(error);
+        throw new Error('Please signin again');
+      }
     } else {
       console.log(await res.text());
       throw new Error('Please signin again');
@@ -62,7 +67,7 @@ class Auth {
    * @deprecated Do not use signup from email, password. Use signup from OAuth instead.
    */
   async signup(email: string, password: string, name?: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/auth/signup`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signup-email`;
     const res = await request(url, {
       method: 'POST',
       body: JSON.stringify({ email, password, name }),
@@ -82,12 +87,12 @@ class Auth {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async signInWithOAuth(provider: 'github' | 'google', isDesktop = false) {
-    let url = `${PUBLIC_BACKEND_URL}/api/auth/login/${provider}${isDesktop ? '?platform=desktop' : ''}`;
+    let url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signin/${provider}`;
 
     if (isDesktop) {
       const { verifier, challenge } = await this.generatePKCE();
       localStorage.setItem('pkce_verifier', verifier);
-      url += `&code_challenge=${challenge}`;
+      url += `?isDesktop=true&code_challenge=${challenge}`;
       return url;
     }
     // Use direct navigation instead of fetch to avoid CORS issues with redirects
@@ -102,7 +107,7 @@ class Auth {
     const verifier = localStorage.getItem('pkce_verifier');
     if (!verifier) throw new Error('No PKCE verifier found');
 
-    const url = `${PUBLIC_BACKEND_URL}/api/auth/exchange`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/exchange`;
     const res = await request(url, {
       method: 'POST',
       body: JSON.stringify({
@@ -129,12 +134,17 @@ class Auth {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async signInWithEmailAndPassword(email: string, password: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/auth/login`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signin-email`;
     const res = await request(url, {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
     if (res.ok) {
+      const {
+        data: { access_token, refresh_token },
+      } = await res.json();
+      localStorage.setItem('access_token', access_token);
+      localStorage.setItem('refresh_token', refresh_token);
       await this.init();
     } else {
       throw new Error(await res.text());
@@ -147,15 +157,11 @@ class Auth {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async logout() {
-    const url = `${PUBLIC_BACKEND_URL}/api/auth/logout`;
-    const res = await request(url);
-    if (res.ok) {
-      this.#user = undefined;
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-    } else {
-      throw new Error(await res.text());
-    }
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signout`;
+    this.#user = undefined;
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    await request(url);
   }
 }
 

@@ -1,158 +1,204 @@
 <script lang="ts">
-import { autoPlacement } from '@floating-ui/dom';
-import { Button } from '@lib/components/ui/button/index.js';
-import * as DropdownMenu from '@lib/components/ui/dropdown-menu/index.js';
-import { TextAlignCenter } from '@lucide/svelte';
-import Clipboard from '@lucide/svelte/icons/clipboard';
-import Duplicate from '@lucide/svelte/icons/copy';
-import GripVertical from '@lucide/svelte/icons/grip-vertical';
-import LinkIcon from '@lucide/svelte/icons/link';
-import Palette from '@lucide/svelte/icons/palette';
-import Plus from '@lucide/svelte/icons/plus';
-import RemoveFormatting from '@lucide/svelte/icons/remove-formatting';
-import Repeat2 from '@lucide/svelte/icons/repeat-2';
-import Sparkles from '@lucide/svelte/icons/sparkles';
-import Delete from '@lucide/svelte/icons/trash-2';
-import type { Editor } from '@tiptap/core';
-import { DragHandlePlugin } from '@tiptap/extension-drag-handle';
-import type { Node } from '@tiptap/pm/model';
-import { NodeSelection } from '@tiptap/pm/state';
-import { onDestroy, onMount } from 'svelte';
-import { page } from '$app/state';
-import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-import commands from '../commands/toolbar-commands';
-import { quickcolors } from '../utils';
+  import { autoPlacement } from "@floating-ui/dom";
+  import { Button } from "@lib/components/ui/button/index.js";
+  import * as DropdownMenu from "@lib/components/ui/dropdown-menu/index.js";
+  import { Braces, TextAlignCenter } from "@lucide/svelte";
+  import Clipboard from "@lucide/svelte/icons/clipboard";
+  import Duplicate from "@lucide/svelte/icons/copy";
+  import GripVertical from "@lucide/svelte/icons/grip-vertical";
+  import LinkIcon from "@lucide/svelte/icons/link";
+  import Palette from "@lucide/svelte/icons/palette";
+  import Plus from "@lucide/svelte/icons/plus";
+  import RemoveFormatting from "@lucide/svelte/icons/remove-formatting";
+  import Repeat2 from "@lucide/svelte/icons/repeat-2";
+  import Sparkles from "@lucide/svelte/icons/sparkles";
+  import Delete from "@lucide/svelte/icons/trash-2";
+  import type { Editor } from "@tiptap/core";
+  import { DragHandlePlugin } from "@tiptap/extension-drag-handle";
+  import type { Node } from "@tiptap/pm/model";
+  import { NodeSelection } from "@tiptap/pm/state";
+  import { onDestroy, onMount } from "svelte";
+  import { page } from "$app/state";
+  import { PUBLIC_NOTA_FRONTEND_URL } from "$env/static/public";
+  import commands from "../commands/toolbar-commands";
+  import { quickcolors } from "../utils";
 
-interface Props {
-  editor: Editor;
-  useAI?: boolean;
-}
-
-const { editor, useAI = true }: Props = $props();
-
-const alignments = commands['alignment'];
-
-let currentNode: Node | null = $state(null);
-let currentNodePos: number = $state(-1);
-let open = $state(false);
-
-let currentNodeId = $derived.by(() => {
-  if (page.url.pathname.includes('local') || currentNode === null) return null;
-  return currentNode.attrs['id'] as string;
-});
-
-const pluginKey = 'globalDragHandle';
-let element = $state(document.createElement('div'));
-
-const turnIntoCommand = Object.values(commands)
-  .flat()
-  .filter((c) => c.turnInto !== undefined);
-const editorElement = document.getElementById('nota-editor');
-
-onMount(() => {
-  const plugin = DragHandlePlugin({
-    element,
-    pluginKey,
-    editor,
-    computePositionConfig: {
-      strategy: 'absolute',
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['left', 'left-start', 'left-end'],
-        }),
-      ],
-    },
-    onNodeChange,
-  });
-  editor.registerPlugin(plugin.plugin);
-  element.addEventListener('drag', onDragHandleDrag);
-  element.addEventListener('dragstart', onDragHandleDrag);
-  return () => editor.unregisterPlugin(pluginKey);
-});
-
-onDestroy(() => {
-  element.removeEventListener('drag', onDragHandleDrag);
-  element.removeEventListener('dragstart', onDragHandleDrag);
-});
-
-const onNodeChange = (data: { editor: Editor; node: Node | null; pos: number }) => {
-  if (data.node) currentNode = data.node;
-  currentNodePos = data.pos;
-};
-
-function onDragHandleDrag(e: DragEvent) {
-  if (editorElement === null) return;
-  const scrollY = editorElement.scrollTop;
-  if (e.clientY < 50) {
-    editorElement.scrollTo({ top: scrollY - 30, behavior: 'smooth' });
-  } else if (editorElement.clientHeight - e.clientY < 50) {
-    editorElement.scrollTo({ top: scrollY + 30, behavior: 'smooth' });
+  interface Props {
+    editor: Editor;
+    useAI?: boolean;
   }
-}
 
-const handleRemoveFormatting = () => {
-  const chain = editor.chain();
-  chain.setNodeSelection(currentNodePos).unsetAllMarks();
-  chain.setParagraph();
-  chain.run();
-};
+  const { editor, useAI = true }: Props = $props();
 
-const handleDuplicate = () => {
-  editor.commands.setNodeSelection(currentNodePos);
-  const selectedNode = editor.state.selection.$anchor.node(1) || (editor.state.selection as NodeSelection).node;
-  editor
-    .chain()
-    .setMeta('hideDragHandle', true)
-    .insertContentAt(currentNodePos + (currentNode?.nodeSize || 0), selectedNode.toJSON())
-    .run();
-};
+  const alignments = commands["alignment"];
 
-const handleCopyToClipboard = () => {
-  editor.chain().setMeta('hideDragHandle', true).setNodeSelection(currentNodePos).run();
-  /**
-   * !FIXME: document.execCommand is deprecated, use navigator.clipboard.writeText instead
-   */
-  document.execCommand('copy');
-};
+  let currentNode: Node | null = $state(null);
+  let currentNodePos: number = $state(-1);
+  let open = $state(false);
 
-const handleDelete = () => {
-  editor.chain().setMeta('hideDragHandle', true).setNodeSelection(currentNodePos).deleteSelection().run();
-};
+  let currentNodeId = $derived.by(() => {
+    if (page.url.pathname.includes("local") || currentNode === null)
+      return null;
+    return currentNode.attrs["id"] as string;
+  });
 
-const handleCopyNodeLink = () => {
-  const pathName = PUBLIC_NOTA_FRONTEND_URL + page.url.pathname + `#${currentNodeId}`;
-  navigator.clipboard.writeText(pathName);
-};
+  const pluginKey = "globalDragHandle";
+  let element = $state(document.createElement("div"));
 
-const insertNode = () => {
-  if (currentNodePos === -1) return;
-  const currentNodeSize = currentNode?.nodeSize || 0;
-  const insertPos = currentNodePos + currentNodeSize;
-  const currentNodeIsEmptyParagraph = currentNode?.type.name === 'paragraph' && currentNode?.content?.size === 0;
-  const focusPos = currentNodeIsEmptyParagraph ? currentNodePos + 2 : insertPos + 2;
-  editor
-    .chain()
-    .command(({ dispatch, tr, state }) => {
-      if (dispatch) {
-        if (currentNodeIsEmptyParagraph) {
-          tr.insertText('/', currentNodePos, currentNodePos + 1);
-        } else {
-          tr.insert(insertPos, state.schema.nodes.paragraph.create(null, [state.schema.text('/')]));
+  const turnIntoCommand = Object.values(commands)
+    .flat()
+    .filter((c) => c.turnInto !== undefined);
+  const editorElement = document.getElementById("nota-editor");
+
+  onMount(() => {
+    const plugin = DragHandlePlugin({
+      element,
+      pluginKey,
+      editor,
+      computePositionConfig: {
+        strategy: "absolute",
+        middleware: [
+          autoPlacement({
+            allowedPlacements: ["left", "left-start", "left-end"],
+          }),
+        ],
+      },
+      onNodeChange,
+    });
+    editor.registerPlugin(plugin.plugin);
+    element.addEventListener("drag", onDragHandleDrag);
+    element.addEventListener("dragstart", onDragHandleDrag);
+    return () => editor.unregisterPlugin(pluginKey);
+  });
+
+  onDestroy(() => {
+    element.removeEventListener("drag", onDragHandleDrag);
+    element.removeEventListener("dragstart", onDragHandleDrag);
+  });
+
+  const onNodeChange = (data: {
+    editor: Editor;
+    node: Node | null;
+    pos: number;
+  }) => {
+    if (data.node) currentNode = data.node;
+    currentNodePos = data.pos;
+  };
+
+  function onDragHandleDrag(e: DragEvent) {
+    if (editorElement === null) return;
+    const scrollY = editorElement.scrollTop;
+    if (e.clientY < 50) {
+      editorElement.scrollTo({ top: scrollY - 30, behavior: "smooth" });
+    } else if (editorElement.clientHeight - e.clientY < 50) {
+      editorElement.scrollTo({ top: scrollY + 30, behavior: "smooth" });
+    }
+  }
+
+  const handleRemoveFormatting = () => {
+    const chain = editor.chain();
+    chain.setNodeSelection(currentNodePos).unsetAllMarks();
+    chain.setParagraph();
+    chain.run();
+  };
+
+  const handleDuplicate = () => {
+    editor.commands.setNodeSelection(currentNodePos);
+    const selectedNode =
+      editor.state.selection.$anchor.node(1) ||
+      (editor.state.selection as NodeSelection).node;
+    editor
+      .chain()
+      .setMeta("hideDragHandle", true)
+      .insertContentAt(
+        currentNodePos + (currentNode?.nodeSize || 0),
+        selectedNode.toJSON(),
+      )
+      .run();
+  };
+
+  const handleCopyToClipboard = () => {
+    editor
+      .chain()
+      .setMeta("hideDragHandle", true)
+      .setNodeSelection(currentNodePos)
+      .run();
+    /**
+     * !FIXME: document.execCommand is deprecated, use navigator.clipboard.writeText instead
+     */
+    document.execCommand("copy");
+  };
+
+  const handleCopyContentAs = (as: "markdown" | "json") => {
+    let data: string = "";
+    let nodeData = currentNode?.toJSON();
+    if (as === "markdown") {
+      data = editor.markdown?.serialize(nodeData) || "";
+    } else if (as === "json") {
+      data = JSON.stringify(nodeData, null, 2) || "";
+    }
+    if (data) {
+      navigator.clipboard.writeText(data);
+    }
+  };
+
+  const handleDelete = () => {
+    editor
+      .chain()
+      .setMeta("hideDragHandle", true)
+      .setNodeSelection(currentNodePos)
+      .deleteSelection()
+      .run();
+  };
+
+  const handleCopyNodeLink = () => {
+    const pathName =
+      PUBLIC_NOTA_FRONTEND_URL + page.url.pathname + `#${currentNodeId}`;
+    navigator.clipboard.writeText(pathName);
+  };
+
+  const insertNode = () => {
+    if (currentNodePos === -1) return;
+    const currentNodeSize = currentNode?.nodeSize || 0;
+    const insertPos = currentNodePos + currentNodeSize;
+    const currentNodeIsEmptyParagraph =
+      currentNode?.type.name === "paragraph" &&
+      currentNode?.content?.size === 0;
+    const focusPos = currentNodeIsEmptyParagraph
+      ? currentNodePos + 2
+      : insertPos + 2;
+    editor
+      .chain()
+      .command(({ dispatch, tr, state }) => {
+        if (dispatch) {
+          if (currentNodeIsEmptyParagraph) {
+            tr.insertText("/", currentNodePos, currentNodePos + 1);
+          } else {
+            tr.insert(
+              insertPos,
+              state.schema.nodes.paragraph.create(null, [
+                state.schema.text("/"),
+              ]),
+            );
+          }
+
+          return dispatch(tr);
         }
 
-        return dispatch(tr);
-      }
+        return true;
+      })
+      .focus(focusPos)
+      .run();
+  };
 
-      return true;
-    })
-    .focus(focusPos)
-    .run();
-};
-
-function handleAIHighlight() {
-  if (currentNodePos === -1) return;
-  editor.chain().setNodeSelection(currentNodePos).setAIHighlight({ color: '#c1ecf970' }).run();
-}
+  function handleAIHighlight() {
+    if (currentNodePos === -1) return;
+    editor
+      .chain()
+      .setNodeSelection(currentNodePos)
+      .setAIHighlight({ color: "#c1ecf970" })
+      .run();
+  }
 </script>
 
 <div
@@ -177,14 +223,14 @@ function handleAIHighlight() {
           {currentNode?.type.name}
         </DropdownMenu.GroupHeading>
         {#if useAI}
-        <DropdownMenu.Item onclick={handleAIHighlight}>
-          <Sparkles />
-          <span
-            class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
-          >
-            Edit With AI</span
-          >
-        </DropdownMenu.Item>
+          <DropdownMenu.Item onclick={handleAIHighlight}>
+            <Sparkles />
+            <span
+              class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+            >
+              Edit With AI</span
+            >
+          </DropdownMenu.Item>
         {/if}
         <DropdownMenu.Sub>
           <DropdownMenu.SubTrigger openDelay={300}>
@@ -252,7 +298,6 @@ function handleAIHighlight() {
             <DropdownMenu.Label class="text-muted-foreground text-sm"
               >Highlight Color</DropdownMenu.Label
             >
-            <!-- {@const currentHighlight = editor.getAttributes('highlight').color as string} -->
             {#each quickcolors as color (color.label)}
               <DropdownMenu.Item
                 title={color.label}
@@ -315,20 +360,46 @@ function handleAIHighlight() {
         Remove Formatting
       </DropdownMenu.Item>
       <DropdownMenu.Separator />
-      {#if currentNodeId}
-        <DropdownMenu.Item onclick={handleCopyNodeLink}>
-          <LinkIcon />
-          Copy Node Link
-        </DropdownMenu.Item>
-      {/if}
       <DropdownMenu.Item onclick={handleDuplicate}>
         <Duplicate />
         Duplicate
       </DropdownMenu.Item>
-      <DropdownMenu.Item onclick={handleCopyToClipboard}>
-        <Clipboard />
-        Copy Content
-      </DropdownMenu.Item>
+      <DropdownMenu.Sub>
+        <DropdownMenu.SubTrigger>
+          <Clipboard />
+          Copy As
+        </DropdownMenu.SubTrigger>
+        <DropdownMenu.Content side="right">
+          <DropdownMenu.Label>Copy to clipboard</DropdownMenu.Label>
+          {#if currentNodeId}
+            <DropdownMenu.Item onclick={handleCopyNodeLink}>
+              <LinkIcon />
+              Copy Node Link
+            </DropdownMenu.Item>
+          {/if}
+          <DropdownMenu.Item onclick={handleCopyToClipboard}>
+            <Clipboard />
+            Copy Content
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onclick={() => handleCopyContentAs("markdown")}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              ><path
+                fill="currentColor"
+                d="M2.491 4.046a.75.75 0 0 1 .83.218L7 8.592l3.678-4.328A.75.75 0 0 1 12 4.75v9.5a.75.75 0 0 1-1.5 0V6.79l-2.929 3.446a.75.75 0 0 1-1.142 0L3.5 6.79v7.46a.75.75 0 0 1-1.5 0v-9.5a.75.75 0 0 1 .491-.704M13.22 11.72a.75.75 0 0 1 1.06 0l.72.72V4.75a.75.75 0 0 1 1.5 0v7.69l.72-.72a.75.75 0 1 1 1.06 1.06l-2 2a.75.75 0 0 1-1.06 0l-2-2a.75.75 0 0 1 0-1.06"
+              /></svg
+            >
+            Copy as Markdown
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onclick={() => handleCopyContentAs("json")}>
+            <Braces />
+            Copy as JSON
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Sub>
       <DropdownMenu.Separator />
       <DropdownMenu.Item onclick={handleDelete}>
         <Delete class="text-destructive" />

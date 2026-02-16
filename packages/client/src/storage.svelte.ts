@@ -1,12 +1,12 @@
 import { getContext, setContext } from 'svelte';
 import z from 'zod';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
-import request from './request';
+import request, { fetchFn } from './request';
 import { type NotaFile, NotaFileSchema } from './types';
 
 const SignedUrlResponseSchema = z.object({
-  uploadUrl: z.url().nonempty(),
-  publicUrl: z.url().nonempty(),
+  uploadUrl: z.string().nonempty(),
+  publicUrl: z.string().nonempty(),
   key: z.string().nonempty(),
 });
 
@@ -21,10 +21,12 @@ class Storage {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async fetch() {
-    const url = `${PUBLIC_BACKEND_URL}/api/storage/list`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/storage/list`;
     const res = await request(url);
     if (res.ok) {
-      const files = await res.json();
+      const json = await res.json();
+      const files = json.data as NotaFile[];
+      if (files.length === 0) return;
       const parsedFiles = files.map((file: NotaFile) => NotaFileSchema.parse(file));
       this.#files = parsedFiles;
     } else {
@@ -33,23 +35,33 @@ class Storage {
   }
 
   async upload(file: File) {
-    const getSignedUrl = `${PUBLIC_BACKEND_URL}/api/storage/presigned-url`;
+    const getSignedUrl = `${PUBLIC_BACKEND_URL}/api/v1/storage/presigned-url`;
     const signedUrlRes = await request(getSignedUrl, {
       method: 'POST',
-      body: JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }),
+      body: JSON.stringify({
+        filename: file.name,
+        contentType: file.type,
+        size: file.size,
+      }),
     });
     if (!signedUrlRes.ok) {
+      console.log('Status of Presigned: ', signedUrlRes.ok);
       throw new Error(await signedUrlRes.text());
     }
-    const signedUrl = SignedUrlResponseSchema.parse(await signedUrlRes.json());
-    const res = await request(signedUrl.uploadUrl, {
+    const json = await signedUrlRes.json();
+    const signedUrl = SignedUrlResponseSchema.parse(json.data);
+    console.log(signedUrl);
+    const res = await fetchFn(signedUrl.uploadUrl, {
       method: 'PUT',
+      headers: {
+        'Content-Type': file.type,
+      },
       body: file,
     });
     if (!res.ok) {
       throw new Error((await res.text()) || 'Failed to upload file');
     }
-    const confirmUrl = `${PUBLIC_BACKEND_URL}/api/storage/confirm`;
+    const confirmUrl = `${PUBLIC_BACKEND_URL}/api/v1/storage/confirm`;
     const confirmRes = await request(confirmUrl, {
       method: 'POST',
       body: JSON.stringify({ key: signedUrl.key }),
@@ -72,9 +84,10 @@ class Storage {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async delete(key: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/storage/${key}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/storage`;
     const res = await request(url, {
       method: 'DELETE',
+      body: JSON.stringify({ key }),
     });
     if (res.ok) {
       this.#files = this.#files.filter((file) => file.key !== key);

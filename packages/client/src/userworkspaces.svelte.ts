@@ -19,7 +19,7 @@ class UserWorkspaces {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async create(icon: string, name: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/userworkspaces`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/userworkspace`;
     const res = await request(url, {
       method: 'POST',
       headers: {
@@ -28,11 +28,11 @@ class UserWorkspaces {
       body: JSON.stringify({
         icon,
         name,
-        owner: localStorage.getItem('user_id'),
       }),
     });
     if (res.ok) {
-      const userWorkspace = (await res.json()) as UserWorkspace;
+      const json = await res.json();
+      const userWorkspace = json.data as UserWorkspace;
       const parsedUserWorkspace = UserWorkspaceSchema.parse(userWorkspace);
       this.userWorkspaces.push(parsedUserWorkspace);
     } else {
@@ -45,7 +45,7 @@ class UserWorkspaces {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async fetch() {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/userworkspaces`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/userworkspace`;
     const res = await request(url, {
       method: 'GET',
       headers: {
@@ -53,8 +53,9 @@ class UserWorkspaces {
       },
     });
     if (res.ok) {
-      const userWorkspaces = (await res.json()) as UserWorkspace[];
-      this.#userWorkspaces = userWorkspaces;
+      const json = await res.json();
+      const userWorkspaces = json.data as UserWorkspace[];
+      this.#userWorkspaces = userWorkspaces.map((uw) => UserWorkspaceSchema.parse(uw));
     } else {
       throw new Error(await res.text());
     }
@@ -66,7 +67,7 @@ class UserWorkspaces {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async delete(id: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/userworkspaces/${id}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/userworkspace/${id}`;
     const res = await request(url, {
       method: 'DELETE',
       headers: {
@@ -88,9 +89,9 @@ class UserWorkspaces {
    * @throws {Error} If the request fails with a non-200 status code
    */
   async update(icon: string, name: string, id: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/db/userworkspaces/${id}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/userworkspace/${id}`;
     const res = await request(url, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -100,7 +101,8 @@ class UserWorkspaces {
       }),
     });
     if (res.ok) {
-      const userWorkspace = (await res.json()) as UserWorkspace;
+      const json = await res.json();
+      const userWorkspace = json.data as UserWorkspace;
       const parsedUserWorkspace = UserWorkspaceSchema.parse(userWorkspace);
       this.#userWorkspaces = this.#userWorkspaces.map((userWorkspace) =>
         userWorkspace.id === id ? parsedUserWorkspace : userWorkspace

@@ -28,7 +28,7 @@ export const sendToPaymentPortal = (which: 'monthly' | 'yearly' | 'ai_credits', 
 };
 
 export const logout = async () => {
-  await request(`${PUBLIC_BACKEND_URL}/api/auth/logout`);
+  await request(`${PUBLIC_BACKEND_URL}/api/v1/auth/signout`);
   await invalidateAll();
   return goto(resolve('/'));
 };

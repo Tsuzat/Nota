@@ -125,13 +125,13 @@ $effect(() => {
 <GlobalSettings />
 <NewUserWorkspace />
 
-<div data-tauri-drag-region class="absolute top-0 z-10! h-12 w-full"></div>
 <Sidebar.Provider
 	bind:open
 	onOpenChange={(value: boolean) => {
 		localStorage.setItem('sidebar-state', value ? 'open' : 'closed');
 	}}
 >
+  <div data-tauri-drag-region class="absolute top-0 z-10! h-12 w-full"></div>
 	<AppSideBar />
 	<Sidebar.Inset class="flex h-screen w-full flex-col overflow-hidden">
 		{@render children()}
