@@ -1,0 +1,39 @@
+{
+  "name": "@nota/backend",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target=bun",
+    "prod": "bun dist/index.js",
+    "format": "biome format . --write",
+    "lint": "biome check .",
+    "ci": "biome ci .",
+    "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.8"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.970.0",
+    "@aws-sdk/s3-request-presigner": "^3.970.0",
+    "@google/genai": "^1.37.0",
+    "@hono/oauth-providers": "^0.8.5",
+    "@hono/zod-validator": "^0.7.6",
+    "@polar-sh/hono": "^0.5.3",
+    "@sentry/bun": "^10.34.0",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.11.4",
+    "zod": "^4.3.5"
+  }
+}
