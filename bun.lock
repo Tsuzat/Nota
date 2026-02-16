@@ -73,7 +73,7 @@
     },
     "apps/web": {
       "name": "@nota/web",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "dependencies": {
         "@lucide/svelte": "^0.561.0",
         "@nota/client": "workspace:*",
