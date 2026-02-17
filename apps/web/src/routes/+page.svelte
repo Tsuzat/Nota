@@ -35,7 +35,7 @@ import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svel
 import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
 import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
-import { logout, sendToPaymentPortal } from '$lib/utils.js';
+import { sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
 
 const auth = getAuthContext();
@@ -201,7 +201,9 @@ async function copyToClipboard() {
             <UserRound />
             <span>Profile</span>
           </Dropdown.Item>
-          <Dropdown.Item onclick={logout}>
+          <Dropdown.Item onclick={() => {
+            auth.logout();
+          }}>
             <LogOut />
             Sign Out
           </Dropdown.Item>
