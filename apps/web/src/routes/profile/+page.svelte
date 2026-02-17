@@ -86,7 +86,7 @@ function handleDeleteAccount() {
           {:else}
             <Button
               variant="outline"
-              href="https://api.nota.ink/api/checkout/portal"
+              href="https://api.nota.ink/api/v1/payments/portal"
             >
               Manage Your Subscription
             </Button>
