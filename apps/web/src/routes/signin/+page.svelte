@@ -45,6 +45,10 @@ function handleMouseLeave(e: MouseEvent) {
 }
 
 onMount(() => {
+  if (auth.user) {
+    window.location.href = '/';
+    return;
+  }
   ref = document.getElementById('sign-in-card') as HTMLDivElement;
   ref.addEventListener('mousemove', handleMouseMove);
   ref.addEventListener('mouseleave', handleMouseLeave);

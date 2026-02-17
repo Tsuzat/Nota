@@ -19,7 +19,7 @@ import User from '@lucide/svelte/icons/user';
 import UserRound from '@lucide/svelte/icons/user-round';
 import X from '@lucide/svelte/icons/x';
 import Zap from '@lucide/svelte/icons/zap';
-import { request } from '@nota/client';
+import { getAuthContext, request } from '@nota/client';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
@@ -38,9 +38,8 @@ import Reveal from '$lib/components/custom/utils/reveal.svelte';
 import { logout, sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
 
-const { data } = $props();
-const user = $derived(data.user);
-
+const auth = getAuthContext();
+const user = $derived(auth.user);
 let tabPro = $state<'monthly' | 'yearly'>('monthly');
 
 const pricingList = {

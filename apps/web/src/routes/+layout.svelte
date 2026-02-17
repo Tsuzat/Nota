@@ -6,7 +6,7 @@ import { Toaster } from '@nota/ui/shadcn/sonner';
 import { onMount } from 'svelte';
 import Metadata from '$lib/components/seo/Metadata.svelte';
 
-let { data, children } = $props();
+let { children } = $props();
 
 const auth = setAuthContext();
 
