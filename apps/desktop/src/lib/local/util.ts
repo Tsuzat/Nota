@@ -4,6 +4,7 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import { appDataDir, resolve } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
 import { copyFile, exists, readDir, writeFile } from '@tauri-apps/plugin-fs';
+import { nanoid } from 'nanoid';
 import { ISWINDOWS } from '$lib/utils';
 
 /**
@@ -15,7 +16,8 @@ export const moveFileToAssets = async (file: string) => {
   const assetsPath = await resolve(await appDataDir(), 'assets');
   const fileName = file.split(ISWINDOWS ? '\\' : '/').pop();
   if (fileName === undefined) throw new Error('Assets file is not supported');
-  const finalPath = await resolve(assetsPath, fileName);
+  const randomString = nanoid(10);
+  const finalPath = await resolve(assetsPath, `${randomString}-${fileName}`);
   await copyFile(file, finalPath);
   const fileExists = await exists(finalPath);
   if (!fileExists) throw new Error('Failed to move file to assets folder');
@@ -26,8 +28,10 @@ export const createFile = async (file: File): Promise<string> => {
   const id = toast.loading(`Saving ${file.name} of ${file.size} bytes...`);
   const fileReader = new FileReader();
 
+  // get the random string
+  const randomString = nanoid(10);
   // Construct the asset path
-  const assetsPath = await resolve(await appDataDir(), 'assets', file.name);
+  const assetsPath = await resolve(await appDataDir(), 'assets', `${randomString}-${file.name}`);
 
   // Create a promise to handle the asynchronous file writing
   return new Promise((res, reject) => {
