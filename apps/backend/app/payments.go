@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/base64"
 	"net/http"
 
 	"github.com/Tsuzat/Nota/config"
@@ -164,8 +165,9 @@ func PolarWebhook(c fiber.Ctx) error {
 	headers.Set("webhook-id", c.Get("webhook-id"))
 	headers.Set("webhook-timestamp", c.Get("webhook-timestamp"))
 	headers.Set("webhook-signature", c.Get("webhook-signature"))
+	base64Secret := base64.StdEncoding.EncodeToString([]byte(config.POLAR_WEBHOOK_SECRET))
 
-	wh, err := svix.NewWebhook(config.POLAR_WEBHOOK_SECRET)
+	wh, err := svix.NewWebhook(base64Secret)
 	if err != nil {
 		log.Error("Svix Setup Error:", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Webhook setup failed")
@@ -180,7 +182,7 @@ func PolarWebhook(c fiber.Ctx) error {
 		})
 	}
 
-	var event map[string]interface{}
+	var event map[string]any
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
@@ -189,7 +191,7 @@ func PolarWebhook(c fiber.Ctx) error {
 	}
 
 	eventType, _ := event["type"].(string)
-	data, _ := event["data"].(map[string]interface{})
+	data, _ := event["data"].(map[string]any)
 
 	log.Info("Polar Webhook Event:", eventType)
 
