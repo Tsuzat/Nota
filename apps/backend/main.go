@@ -71,7 +71,7 @@ func main() {
 
 	// check the origin
 	config.APP.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://www.nota.ink", "https://*.nota.ink", "http://127.0.0.1:5173"},
+		AllowOrigins:     []string{"https://www.nota.ink", "https://*.nota.ink"},
 		AllowCredentials: true,
 	}))
 	// use rate limiting
