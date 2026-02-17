@@ -10,8 +10,8 @@ let { data, children } = $props();
 
 const auth = setAuthContext();
 
-onMount(() => {
-  auth.user = data.user;
+onMount(async () => {
+  await auth.init();
 });
 </script>
 
