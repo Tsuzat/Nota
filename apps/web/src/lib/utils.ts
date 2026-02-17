@@ -21,6 +21,6 @@ export const sendToPaymentPortal = (which: 'monthly' | 'yearly' | 'ai_credits', 
     default:
       throw new Error('Invalid subscription type');
   }
-  const url = `${PUBLIC_BACKEND_URL}/api/payment/checkout?products=${productId}&customerExternalId=${user.id}&customerEmail=${user.email}&customerName=${user.name}`;
+  const url = `${PUBLIC_BACKEND_URL}/api/v1/payments/checkout?products=${productId}&customerExternalId=${user.id}&customerEmail=${user.email}&customerName=${user.name}`;
   window.location.href = url;
 };
