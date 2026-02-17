@@ -28,12 +28,11 @@ function handleDeleteAccount() {
   </main>
 {:else}
   <div class="container mx-auto max-w-4xl p-4 md:p-8">
-    {#if external_customer_id}
+    
     <div class="mb-8">
       <h1 class="text-3xl font-bold tracking-tight">Profile</h1>
       <p class="text-muted-foreground">Manage your account and settings.</p>
     </div>
-    {/if}
 
     <div class="grid gap-8">
       <Card.Root>
@@ -86,10 +85,10 @@ function handleDeleteAccount() {
               >Upgrade to
               <ProBadge />
             </Button>
-          {:else}
+          {:else if external_customer_id}
             <Button
               variant="outline"
-              href="https://api.nota.ink/api/checkout/portal"
+              href="https://api.nota.ink/api/v1/payments/portal"
             >
               Manage Your Subscription
             </Button>
