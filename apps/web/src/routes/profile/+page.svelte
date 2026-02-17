@@ -7,7 +7,7 @@ import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { logout } from '$lib/utils.js';
+import { invalidateAll } from '$app/navigation';
 
 const auth = getAuthContext();
 const user = $derived(auth.user);
@@ -19,6 +19,11 @@ const sub_type = $derived(user?.subscription_plan || undefined);
 
 function handleDeleteAccount() {
   toast.warning('Account Deletion is coming soon.');
+}
+async function logout() {
+  await auth.logout();
+  await invalidateAll();
+  window.location.href = '/';
 }
 </script>
 

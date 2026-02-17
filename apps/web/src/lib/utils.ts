@@ -1,6 +1,4 @@
-import { request, type User } from '@nota/client';
-import { goto, invalidateAll } from '$app/navigation';
-import { resolve } from '$app/paths';
+import type { User } from '@nota/client';
 import {
   PUBLIC_BACKEND_URL,
   PUBLIC_POLAR_AI_CREDITS,
@@ -25,10 +23,4 @@ export const sendToPaymentPortal = (which: 'monthly' | 'yearly' | 'ai_credits', 
   }
   const url = `${PUBLIC_BACKEND_URL}/api/payment/checkout?products=${productId}&customerExternalId=${user.id}&customerEmail=${user.email}&customerName=${user.name}`;
   window.location.href = url;
-};
-
-export const logout = async () => {
-  await request(`${PUBLIC_BACKEND_URL}/api/v1/auth/signout`);
-  await invalidateAll();
-  return goto(resolve('/'));
 };
