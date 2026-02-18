@@ -92,11 +92,7 @@ func Checkout(c fiber.Ctx) error {
 	}
 
 	if checkoutSession.Checkout != nil {
-		return c.JSON(models.APIResponse{
-			Status:  fiber.StatusOK,
-			Message: "Checkout session created successfully",
-			Data:    checkoutSession.Checkout.URL,
-		})
+		return c.Redirect().Status(fiber.StatusPermanentRedirect).To(checkoutSession.Checkout.URL)
 	}
 
 	return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
