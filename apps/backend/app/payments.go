@@ -92,7 +92,11 @@ func Checkout(c fiber.Ctx) error {
 	}
 
 	if checkoutSession.Checkout != nil {
-		return c.Redirect().To(checkoutSession.Checkout.URL)
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Checkout session created successfully",
+			Data:    checkoutSession.Checkout.URL,
+		})
 	}
 
 	return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -196,10 +200,12 @@ func PolarWebhook(c fiber.Ctx) error {
 	log.Info("Polar Webhook Event:", eventType)
 
 	switch eventType {
-	case "subscription.created", "subscription.updated", "subscription.active":
+	case "subscription.active", "subscription.updated":
 		handleSubscriptionChange(c.Context(), data)
 	case "subscription.canceled", "subscription.revoked":
 		handleSubscriptionCanceled(c.Context(), data)
+	case "order.paid":
+		handleOrderPaid(c.Context(), data)
 	}
 
 	return c.Status(fiber.StatusOK).SendString("OK")
@@ -226,6 +232,37 @@ func handleSubscriptionChange(ctx context.Context, data map[string]interface{}) 
 
 	if err != nil {
 		log.Error("Webhook Update User Error:", err)
+	}
+}
+
+func handleOrderPaid(ctx context.Context, data map[string]interface{}) {
+	productId, _ := data["product_id"].(string)
+	if productId != config.POLAR_AI_CREDITS {
+		return
+	}
+
+	customer, _ := data["customer"].(map[string]interface{})
+	email, _ := customer["email"].(string)
+	if email == "" {
+		return
+	}
+
+	creditsToAdd := getCreditsToAdd(productId)
+	if creditsToAdd <= 0 {
+		return
+	}
+
+	customerId, _ := data["customer_id"].(string)
+
+	_, err := config.DB.NewUpdate().
+		Model((*models.User)(nil)).
+		Set("ai_credits = ai_credits + ?", creditsToAdd).
+		Set("external_customer_id = ?", customerId).
+		Where("email = ?", email).
+		Exec(ctx)
+
+	if err != nil {
+		log.Error("Webhook Order Paid Update User Error:", err)
 	}
 }
 
