@@ -80,6 +80,9 @@ func CreateNote(c fiber.Ctx) error {
 	// invalidate the cache
 	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
 	go utils.DeleteCache(cacheKey)
+	// invalidate the userworkspacesdata too
+	cacheKey = fmt.Sprintf("userworkspacedata:%s", note.UserWorkspace)
+	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Note created successfully",
@@ -152,6 +155,9 @@ func UpdateNote(c fiber.Ctx) error {
 	// invalidate the cache for note preview
 	cacheKey = fmt.Sprintf("note:%s:preview", id)
 	go utils.DeleteCache(cacheKey)
+	// invalidate the userworkspacesdata too
+	cacheKey = fmt.Sprintf("userworkspacedata:%s", note.UserWorkspace)
+	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Note updated successfully",
@@ -180,6 +186,9 @@ func DeleteNote(c fiber.Ctx) error {
 	go utils.DeleteCache(cacheKey)
 	// invalidate the cache for note preview
 	cacheKey = fmt.Sprintf("note:%s:preview", id)
+	go utils.DeleteCache(cacheKey)
+	// invalidate the userworkspacesdata too
+	cacheKey = fmt.Sprintf("userworkspacedata:%s", userworkspace)
 	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
@@ -378,6 +387,9 @@ func DuplicateNote(c fiber.Ctx) error {
 	// invalidate the GetNotes cache for the userworkspace
 	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
 	go utils.DeleteCache(cacheKey)
+	// invalidate the userworkspacesdata too
+	cacheKey = fmt.Sprintf("userworkspacedata:%s", note.UserWorkspace)
+	go utils.DeleteCache(cacheKey)
 	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
 		Status:  fiber.StatusCreated,
 		Message: "Note duplicated successfully",
@@ -416,6 +428,9 @@ func ImportNote(c fiber.Ctx) error {
 	}
 	// Invalidate the GetNotes cache for the userworkspace
 	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
+	go utils.DeleteCache(cacheKey)
+	// invalidate the userworkspacesdata too
+	cacheKey = fmt.Sprintf("userworkspacedata:%s", note.UserWorkspace)
 	go utils.DeleteCache(cacheKey)
 	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
 		Status:  fiber.StatusCreated,

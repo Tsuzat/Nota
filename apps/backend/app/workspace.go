@@ -77,7 +77,9 @@ func CreateWorkspace(c fiber.Ctx) error {
 	// Invalidate cache
 	cacheKey := fmt.Sprintf("workspaces:%s:%s", workspace.UserWorkspace, user.Id)
 	go utils.DeleteCache(cacheKey)
-
+	// invalidate the userworkspacesdata too
+	cacheKey = fmt.Sprintf("userworkspacedata:%s", workspace.UserWorkspace)
+	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Workspace Created",
@@ -130,7 +132,9 @@ func UpdateWorkspace(c fiber.Ctx) error {
 	// Invalidate cache
 	cacheKey := fmt.Sprintf("workspaces:%s:%s", workspace.UserWorkspace, user.Id)
 	go utils.DeleteCache(cacheKey)
-
+	// invalidate the userworkspacesdata too
+	cacheKey = fmt.Sprintf("userworkspacedata:%s", workspace.UserWorkspace)
+	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Workspace Updated",
@@ -159,7 +163,9 @@ func DeleteWorkspace(c fiber.Ctx) error {
 	// Invalidate cache
 	cacheKey := fmt.Sprintf("workspaces:%s:%s", userworkspaceId, user.Id)
 	go utils.DeleteCache(cacheKey)
-
+	// invalidate the userworkspacesdata too
+	cacheKey = fmt.Sprintf("userworkspacedata:%s", userworkspaceId)
+	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Workspace Deleted",

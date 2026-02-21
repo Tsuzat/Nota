@@ -20,6 +20,10 @@ type UserWorkspace struct {
 	Owner     string    `json:"owner" bun:"owner,type:uuid"`
 	CreatedAt time.Time `json:"created_at" bun:"created_at,nullzero,notnull,default:current_timestamp"`
 	UpdatedAt time.Time `json:"updated_at" bun:"updated_at,nullzero,notnull,default:current_timestamp"`
+
+	// Many Relation with Workspace and Notes
+	Workspaces []Workspace `json:"workspaces" bun:"rel:has-many,join:id=userworkspace"`
+	Notes      []Note      `json:"notes" bun:"rel:has-many,join:id=userworkspace"`
 }
 
 type CreateWorkspaceRequest struct {

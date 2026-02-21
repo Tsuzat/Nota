@@ -9,7 +9,66 @@ import (
 	"github.com/Tsuzat/Nota/utils"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
+	"github.com/uptrace/bun"
 )
+
+func GetUserWorkspaceData(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+	id := c.Params("id")
+
+	userworkspaces := new(models.UserWorkspace)
+
+	cacheKey := fmt.Sprintf("userworkspacedata:%s", id)
+	if utils.GetCache(cacheKey, userworkspaces) == nil {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "User Workspace Data Fetched",
+			Data:    userworkspaces,
+		})
+	}
+	// get all the workspaces and notes for given userworkspace id
+	err := config.DB.NewSelect().
+		Model(userworkspaces).
+		Where("id = ? AND owner = ?", id, user.Id).
+		Relation("Workspaces", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Where("userworkspace = ?", id).Order("created_at DESC")
+		}).
+		Relation("Notes", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.
+				Column(
+					"id",
+					"name",
+					"icon",
+					"workspace",
+					"userworkspace",
+					"owner",
+					"favorite",
+					"trashed",
+					"created_at",
+					"updated_at",
+					"is_public",
+				).
+				Where("userworkspace = ?", id).
+				Order("created_at DESC")
+		}).
+		Scan(c.Context())
+	if err != nil {
+		log.Error("Error fetching userworkspace data: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Something went wrong when fetching the userworkspace data",
+			Data:   err.Error(),
+		})
+	}
+	// set the cache for 7 days, if user does not change the userworkspaces, we can use the cache
+	go utils.SetCache(cacheKey, userworkspaces, time.Hour*24*7)
+
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "User Workspace Data Fetched",
+		Data:    userworkspaces,
+	})
+}
 
 func GetUserWorkspaces(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)

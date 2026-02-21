@@ -13,5 +13,5 @@ func InitUserWorkspaceRoutes() {
 	group.Post("/", app.CreateUserWorkspace)
 	group.Patch("/:id<guid>", app.UpdateUserWorkspace)
 	group.Delete("/:id<guid>", app.DeleteUserWorkspace)
-
+	group.Get("/:id<guid>", app.GetUserWorkspaceData)
 }
