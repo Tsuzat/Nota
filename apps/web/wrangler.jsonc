@@ -1,13 +1,19 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "nota-web",
+  "name": "nota",
   "compatibility_date": "2026-02-21",
   "compatibility_flags": ["nodejs_compat"],
   "main": ".svelte-kit/cloudflare/_worker.js",
   "assets": {
     "binding": "ASSETS",
-    "directory": ".svelte-kit/cloudflare"
+    "directory": ".svelte-kit/cloudflare",
+  },
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
   },
   "workers_dev": true,
-  "preview_urls": true
+  "preview_urls": true,
 }
