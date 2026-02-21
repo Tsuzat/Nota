@@ -18,6 +18,7 @@ var REFRESH_TOKEN_SECRET string
 var REFRESH_TOKEN_EXPIRY int64
 var BACKEND_URL string
 var FRONTEND_URL string
+var COOKIE_DOMAIN string
 
 // OAuth Client
 var GITHUB_CLIENT_ID string
@@ -43,6 +44,7 @@ func GetCookieOptions(name string, value string, expires time.Time) *fiber.Cooki
 		HTTPOnly: true,
 		Secure:   isProd,
 		SameSite: "Lax",
+		Domain:   COOKIE_DOMAIN,
 	}
 }
 
@@ -85,6 +87,7 @@ func ConstsInit() {
 	REFRESH_TOKEN_EXPIRY, _ = strconv.ParseInt(os.Getenv("REFRESH_TOKEN_EXPIRY"), 10, 64)
 	BACKEND_URL = os.Getenv("BACKEND_URL")
 	FRONTEND_URL = os.Getenv("FRONTEND_URL")
+	COOKIE_DOMAIN = os.Getenv("COOKIE_DOMAIN")
 
 	GITHUB_CLIENT_ID = os.Getenv("GITHUB_CLIENT_ID")
 	GITHUB_CLIENT_SECRET = os.Getenv("GITHUB_CLIENT_SECRET")

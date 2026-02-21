@@ -164,13 +164,7 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 	}
 	// Setup Cookies
 	c.Cookie(config.GetCookieOptions("access_token", accessToken, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshToken,
-		Expires:  time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
-		HTTPOnly: true,
-		Secure:   true,
-	})
+	c.Cookie(config.GetCookieOptions("refresh_token", refreshToken, time.Now().Add(time.Hour*24*time.Duration(config.REFRESH_TOKEN_EXPIRY))))
 	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "User signed in successfully.",
