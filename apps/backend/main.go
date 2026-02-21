@@ -69,9 +69,8 @@ func main() {
 	// ban middleware
 	config.APP.Use(middleware.BanMiddleware)
 
-	// check the origin
 	config.APP.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://www.nota.ink", "https://*.nota.ink"},
+		AllowOrigins:     []string{"https://nota.ink", "https://www.nota.ink", "https://*.nota.ink"},
 		AllowCredentials: true,
 	}))
 	// use rate limiting

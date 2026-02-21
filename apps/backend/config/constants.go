@@ -35,12 +35,13 @@ var (
 )
 
 func GetCookieOptions(name string, value string, expires time.Time) *fiber.Cookie {
+	isProd := os.Getenv("ENV") == "production"
 	return &fiber.Cookie{
 		Name:     name,
 		Value:    value,
 		Expires:  expires,
 		HTTPOnly: true,
-		Secure:   os.Getenv("ENV") == "production",
+		Secure:   isProd,
 		SameSite: "Lax",
 	}
 }
