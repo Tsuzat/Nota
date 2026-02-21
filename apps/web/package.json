@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "bun run build/index.js",
+    "start": "vite preview",
     "preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
     "format": "biome format . --write",
     "lint": "biome check .",
