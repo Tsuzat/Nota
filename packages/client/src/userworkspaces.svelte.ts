@@ -1,7 +1,7 @@
 import { getContext, setContext } from 'svelte';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import request from './request';
-import { type UserWorkspace, UserWorkspaceSchema } from './types';
+import { type UserWorkspace, type UserWorkspaceData, UserWorkspaceDataSchema, UserWorkspaceSchema } from './types';
 
 class UserWorkspaces {
   #userWorkspaces = $state<UserWorkspace[]>([]);
@@ -79,6 +79,30 @@ class UserWorkspaces {
     } else {
       throw new Error(await res.text());
     }
+  }
+
+  /**
+   * Switch to the userworkspace with the given id
+   * @param id The id of the userworkspace to switch to
+   */
+  async fetchData(id: string) {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/userworkspace/${id}`;
+    const res = await request(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const userWorkspaceData = json.data as UserWorkspaceData;
+      const parsedUserWorkspaceData = UserWorkspaceDataSchema.parse(userWorkspaceData);
+      return {
+        workspaces: parsedUserWorkspaceData.workspaces,
+        notes: parsedUserWorkspaceData.notes,
+      };
+    }
+    throw new Error(await res.text());
   }
 
   /**

@@ -91,3 +91,9 @@ export const NotaFileSchema = z.object({
   url: z.url(),
 });
 export type NotaFile = z.infer<typeof NotaFileSchema>;
+
+export const UserWorkspaceDataSchema = UserWorkspaceSchema.extend({
+  workspaces: z.array(WorkspaceSchema),
+  notes: z.array(NoteSchema),
+});
+export type UserWorkspaceData = z.infer<typeof UserWorkspaceDataSchema>;
