@@ -1,9 +1,7 @@
-import * as Sentry from '@sentry/sveltekit';
 import type { Handle } from '@sveltejs/kit';
-import { sequence } from '@sveltejs/kit/hooks';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
-export const handleAuth: Handle = async ({ event, resolve }) => {
+export const handle: Handle = async ({ event, resolve }) => {
   const url = `${PUBLIC_BACKEND_URL}/api/v1/user/me`;
   const res = await event.fetch(url, {
     method: 'GET',
@@ -22,6 +20,3 @@ export const handleAuth: Handle = async ({ event, resolve }) => {
   }
   return resolve(event);
 };
-
-export const handle: Handle = sequence(handleAuth, Sentry.sentryHandle());
-export const handleError = Sentry.handleErrorWithSentry();

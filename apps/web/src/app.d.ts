@@ -7,9 +7,17 @@ declare global {
     interface Locals {
       user: User | null;
     }
+
     interface Error {
       server: { message: string; stack?: string; status?: number };
       client: { message: string; stack?: string; status?: number };
+    }
+
+    interface Platform {
+      env: Env;
+      ctx: ExecutionContext;
+      caches: CacheStorage;
+      cf?: IncomingRequestCfProperties;
     }
   }
 }

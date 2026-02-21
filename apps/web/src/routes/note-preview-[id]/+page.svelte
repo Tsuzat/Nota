@@ -8,11 +8,10 @@ import { IconRenderer } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { goto } from '$app/navigation';
+import { afterNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { PUBLIC_BACKEND_URL, PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import Metadata from '$lib/components/seo/Metadata.svelte';
-import { logerror } from '$lib/sentry/index.js';
 
 const { data } = $props();
 let content = $state<Content>();
@@ -20,8 +19,8 @@ let isLoading = $state(false);
 let name = $state<string>();
 let icon = $state<string>();
 
-$effect(() => {
-  if (data.id) loadData(data.id);
+afterNavigate(() => {
+  loadData(data.id);
 });
 
 async function loadData(id: string) {
@@ -39,7 +38,7 @@ async function loadData(id: string) {
         });
     }
   } catch (error) {
-    logerror('Error when loading note preview', { error });
+    console.error('Error when loading note preview', { error });
     toast.error('Something went wrong when loading notes');
     goto(resolve('/'));
   } finally {
