@@ -1,9 +1,8 @@
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-import { env } from "$env/dynamic/public";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
+import { env } from '$env/dynamic/public';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
-const isTauri = () =>
-  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 export const fetchFn = isTauri() ? tauriFetch : fetch;
 
@@ -19,85 +18,70 @@ export const fetchFn = isTauri() ? tauriFetch : fetch;
  * @param options The options to pass to the fetch function
  * @returns The response from the fetch function
  */
-export default async (
-  url: string,
-  options: RequestInit = {},
-): Promise<Response> => {
+export default async (url: string, options: RequestInit = {}): Promise<Response> => {
   // 1. Prepare Options
   const headers = new Headers(options.headers || {});
 
-  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
-    headers.set("Content-Type", "application/json");
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
   }
 
   // Inject Desktop Identifier if on Tauri
   if (isTauri()) {
-    headers.set(
-      "Authorization",
-      `Bearer ${localStorage.getItem("access_token")}`,
-    );
-    headers.set("X-Nota-Desktop-Identifier", env.PUBLIC_DESKTOP_APP_IDENTIFIER);
+    headers.set('Authorization', `Bearer ${localStorage.getItem('access_token')}`);
+    headers.set('X-Nota-Desktop-Identifier', env.PUBLIC_DESKTOP_APP_IDENTIFIER);
   }
 
   const currentOptions: RequestInit = {
     ...options,
     headers,
-    credentials: "include",
+    credentials: 'include',
   };
 
   // 2. Initial Request
   let response = await fetchFn(url, currentOptions);
 
   // 3. Handle 403 (Auto-Refresh) if access token expired or invalid
-  if (
-    response.status === 403 ||
-    localStorage.getItem("refresh_token") !== null
-  ) {
-    if (url.includes("/auth/refreshtoken")) {
+  if (response.status === 403 || localStorage.getItem('refresh_token') !== null) {
+    if (url.includes('/auth/refreshtoken')) {
       return response;
     }
     try {
-      const refreshResponse = await fetchFn(
-        `${PUBLIC_BACKEND_URL}/api/v1/auth/refreshtoken`,
-        {
-          method: "POST",
-          ...(isTauri() && {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("refresh_token")}`,
-              ...(isTauri() && {
-                "X-Nota-Desktop-Identifier": env.PUBLIC_DESKTOP_APP_IDENTIFIER,
-              }),
-            },
-          }),
-          credentials: "include",
-        },
-      );
+      const refreshResponse = await fetchFn(`${PUBLIC_BACKEND_URL}/api/v1/auth/refreshtoken`, {
+        method: 'POST',
+        ...(isTauri() && {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('refresh_token')}`,
+            'X-Nota-Desktop-Identifier': env.PUBLIC_DESKTOP_APP_IDENTIFIER,
+          },
+        }),
+        credentials: 'include',
+      });
 
       if (refreshResponse.ok) {
         // Retry Original Request
         if (isTauri()) {
           const resData = await refreshResponse.json();
-          localStorage.setItem("access_token", resData.data);
-          headers.set("Authorization", `Bearer ${resData.data}`);
+          localStorage.setItem('access_token', resData.data);
+          headers.set('Authorization', `Bearer ${resData.data}`);
           currentOptions.headers = headers;
         }
         response = await fetchFn(url, currentOptions);
         return response;
-      } else {
-        // If refresh fails, redirect to login
-        if (isTauri()) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-        }
+      }
+      // If refresh fails, redirect to login
+      if (isTauri()) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
       }
     } catch (e) {
       // If refresh fails, redirect to login
       if (isTauri()) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
       }
-      console.error("Auto-refresh failed", e);
+      console.error('Auto-refresh failed', e);
     }
   }
   return response;
