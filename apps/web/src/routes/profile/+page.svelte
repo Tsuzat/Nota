@@ -2,15 +2,15 @@
 import ProBadge from '@lib/components/custom/ProBadge.svelte';
 import LogOut from '@lucide/svelte/icons/log-out';
 import Trash2 from '@lucide/svelte/icons/trash-2';
-import { getAuthContext } from '@nota/client';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { invalidateAll } from '$app/navigation';
+import { resolve } from '$app/paths';
 
-const auth = getAuthContext();
-const user = $derived(auth.user);
+const { data } = $props();
+
+const user = $derived(data.user);
 
 const isPro = $derived((user?.subscription_plan || 'free') === 'pro');
 const ai_credits = $derived(user?.ai_credits || 0);
@@ -19,11 +19,6 @@ const sub_type = $derived(user?.subscription_plan || undefined);
 
 function handleDeleteAccount() {
   toast.warning('Account Deletion is coming soon.');
-}
-async function logout() {
-  await auth.logout();
-  await invalidateAll();
-  window.location.href = '/';
 }
 </script>
 
@@ -98,7 +93,7 @@ async function logout() {
               Manage Your Subscription
             </Button>
           {/if}
-          <Button onclick={logout} variant="outline">
+          <Button href={resolve('/signout')} variant="outline">
             <LogOut class="mr-2 h-4 w-4" />
             Sign Out
           </Button>

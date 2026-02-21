@@ -1,14 +1,18 @@
 <script lang="ts">
-import { getAuthContext } from '@nota/client';
 import Github from '@nota/ui/icons/customs/github.svelte';
 import Google from '@nota/ui/icons/customs/google.svelte';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { onMount } from 'svelte';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import Particles from '$lib/components/custom/utils/particles.svelte';
 
 let ref = $state<HTMLDivElement>();
-const auth = getAuthContext();
+
+const signInWithOAuth = async (provider: string) => {
+  const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signin/${provider}`;
+  window.location.href = url;
+};
 
 // variables for animation
 let mouseX = $state(0);
@@ -45,10 +49,6 @@ function handleMouseLeave(e: MouseEvent) {
 }
 
 onMount(() => {
-  if (auth.user) {
-    window.location.href = '/';
-    return;
-  }
   ref = document.getElementById('sign-in-card') as HTMLDivElement;
   ref.addEventListener('mousemove', handleMouseMove);
   ref.addEventListener('mouseleave', handleMouseLeave);
@@ -83,7 +83,7 @@ onMount(() => {
 							variant="outline"
 							size="lg"
 							class="w-full"
-							onclick={() => auth.signInWithOAuth('google')}
+							onclick={() => signInWithOAuth('google')}
 						>
 							<Google class="size-4" />
 							Sign In with Google
@@ -92,7 +92,7 @@ onMount(() => {
 							variant="outline"
 							size="lg"
 							class="w-full"
-							onclick={() => auth.signInWithOAuth('github')}
+							onclick={() => signInWithOAuth('github')}
 						>
 							<Github class="size-4" />
 							Sign In with Github

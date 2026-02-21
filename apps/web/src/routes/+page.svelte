@@ -38,8 +38,8 @@ import Reveal from '$lib/components/custom/utils/reveal.svelte';
 import { sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
 
-const auth = getAuthContext();
-const user = $derived(auth.user);
+const { data } = $props();
+const user = $derived(data.user);
 let tabPro = $state<'monthly' | 'yearly'>('monthly');
 
 const pricingList = {
@@ -173,7 +173,7 @@ async function copyToClipboard() {
       </DropdownMenu.Content>
     </DropdownMenu.Root>
     <ToggleMode />
-    {#if user === undefined}
+    {#if user === null}
       <Button href={resolve("/signin")}>Sign In</Button>
     {:else}
       <Dropdown.Root>
@@ -202,7 +202,7 @@ async function copyToClipboard() {
             <span>Profile</span>
           </Dropdown.Item>
           <Dropdown.Item onclick={() => {
-            auth.logout();
+            goto(resolve("/signout"));
           }}>
             <LogOut />
             Sign Out
