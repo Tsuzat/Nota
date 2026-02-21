@@ -305,8 +305,40 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 }
 
 func SignOut(c fiber.Ctx) error {
+	var accessToken string
+
+	accessToken = c.Cookies("access_token")
+	if accessToken == "" {
+		authHeader := strings.Split(string(c.Request().Header.Peek("Authorization")), "Bearer ")
+		if len(authHeader) == 2 {
+			accessToken = authHeader[1]
+		}
+	}
+
+	var sessionId *string
+	if accessToken != "" {
+		token, err := jwt.Parse(accessToken, func(token *jwt.Token) (any, error) {
+			return []byte(config.ACCESS_TOKEN_SECRET), nil
+		})
+		if err == nil {
+			if claims, ok := token.Claims.(jwt.MapClaims); ok {
+				if sid, ok := claims["session_id"].(string); ok && sid != "" {
+					sessionId = &sid
+				}
+			}
+		}
+	}
+
 	c.Cookie(config.GetCookieOptions("access_token", "", time.Now().Add(-time.Hour)))
 	c.Cookie(config.GetCookieOptions("refresh_token", "", time.Now().Add(-time.Hour)))
+
+	if sessionId != nil {
+		go config.DB.NewDelete().
+			Model(&models.Session{}).
+			Where("id = ?", *sessionId).
+			Exec(c.Context())
+	}
+
 	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Logged out successfully",
