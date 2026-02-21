@@ -51,14 +51,12 @@ async function selectCloudUserWorkspace(userWorkspace: UserWorkspace) {
   try {
     goto(resolve('/'));
     currentUserWorkspace.setCurrentUserWorkspace(userWorkspace);
-    toast.loading('Loading Workspaces', { id });
-    await cloudWorkspaces.fetch(userWorkspace.id);
-    toast.loading('Loading Notes', { id });
-    await cloudNotes.fetch(userWorkspace.id);
-    toast.dismiss(id);
-    toast.success(`Changed User Workspace to ${userWorkspace.name}`, { id });
+    const { workspaces, notes } = await cloudUserWorkspaces.fetchData(userWorkspace.id);
+    cloudWorkspaces.workspaces = workspaces;
+    cloudNotes.notes = notes;
     localWorkspaces.setWorkspaces([]);
     localNotes.setNotes([]);
+    toast.dismiss(id);
   } catch (error) {
     console.error(error);
     toast.error(`Something went wrong when switching to cloud workspace ${userWorkspace.name}`, { id });
