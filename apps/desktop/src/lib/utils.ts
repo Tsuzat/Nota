@@ -156,53 +156,60 @@ export async function importNotes(editor?: Editor, returnData?: boolean) {
     toast.error('Can not intialize import. Try to restart.');
     return;
   }
+
+  const extensions = ['json', 'md', 'markdown', 'html'];
   const path = await open({
     multiple: false,
-    filters: [
-      {
-        name: 'Nota Notes',
-        extensions: ['json'],
-      },
-    ],
+    filters: [{ name: 'Nota Notes', extensions }],
     defaultPath: await downloadDir(),
   });
-  if (path) {
-    try {
-      const extension = path.split('.').pop();
-      if (!extension || !['json'].includes(extension)) {
-        toast.error('Only JSON files are supported.');
-        return;
-      }
-      const data = await readFile(path);
-      const decoder = new TextDecoder();
-      const fileData = decoder.decode(data);
-      const content = JSON.parse(fileData) as Content;
-      if (returnData) {
-        // file name
-        const fileName = path
-          .split(ISMACOS ? '/' : '\\')
-          .pop()
-          ?.split('.')[0];
-        if (fileName) return { name: fileName, content };
-      }
-      editor?.commands.insertContent(content, { contentType: 'json' });
-      // switch (extension) {
-      // 	case 'json':
-      // 		content = JSON.parse(fileData);
-      // 		editor.commands.insertContent(content, { contentType: 'json' });
-      // 		break;
-      // 	case 'html':
-      // 		content = fileData;
-      // 		editor.commands.insertContent(content, { contentType: 'html' });
-      // 		break;
-      // 	default:
-      // 		content = editor.markdown.parse(fileData);
-      // 		editor.commands.insertContent(content, { contentType: 'json' });
-      // 		break;
-      // }
-    } catch (error) {
-      console.error(error);
-      toast.error('Something went wrong when importing the file.');
+
+  if (!path) return;
+
+  try {
+    const extension = path.split('.').pop()?.toLowerCase();
+    if (!extension || !extensions.includes(extension)) {
+      toast.error(`Only ${extensions.join(', ')} files are supported.`);
+      return;
     }
+
+    const fileData = new TextDecoder().decode(await readFile(path));
+
+    // Parse content based on file type
+    let content: Content | undefined;
+    switch (extension) {
+      case 'json':
+        content = JSON.parse(fileData) as Content;
+        break;
+      case 'md':
+      case 'markdown':
+        content = editor?.markdown?.parse(fileData) as Content | undefined;
+        break;
+      case 'html':
+        // HTML is handled as a raw string by the editor
+        content = fileData as unknown as Content;
+        break;
+    }
+
+    if (!content) return;
+
+    if (returnData) {
+      const fileName = path
+        .split(ISMACOS ? '/' : '\\')
+        .pop()
+        ?.split('.')[0];
+      if (fileName) return { name: fileName, content };
+      return;
+    }
+
+    // Insert content into the editor
+    if (extension === 'html') {
+      editor?.commands.setContent(fileData);
+    } else {
+      editor?.commands.setContent(content);
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error('Something went wrong when importing the file.');
   }
 }

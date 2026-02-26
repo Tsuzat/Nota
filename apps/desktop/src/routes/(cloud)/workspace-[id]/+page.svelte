@@ -77,16 +77,6 @@ async function trashNote(note: Note) {
   await cloudNotes.update(note.id, { trashed: true });
 }
 
-async function deleteNote(note: Note) {
-  const ok = await ask(`Delete note ${note.name}?`, {
-    title: 'Delete Note',
-    kind: 'info',
-    okLabel: 'Yes, Delete',
-  });
-  if (!ok) return;
-  await cloudNotes.delete(note.id);
-}
-
 async function importNote() {
   const id = toast.loading('Importing note...');
   if (!currentUserWorkspace) {
@@ -275,13 +265,13 @@ async function importNote() {
                     <icons.Trash2 class="mr-2 size-4" />
                     Trash Note
                   </DropdownMenu.Item>
-                  <DropdownMenu.Item
+                  <!-- <DropdownMenu.Item
                     variant="destructive"
                     onclick={() => deleteNote(note)}
                   >
                     <icons.Trash2 class="mr-2 size-4" />
                     Delete Note
-                  </DropdownMenu.Item>
+                  </DropdownMenu.Item> -->
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
             </div>
