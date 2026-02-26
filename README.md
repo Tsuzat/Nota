@@ -40,7 +40,7 @@
 
 > **Nota is designed to be the nimble sports car of note-taking—fast, precise, and enjoyable to drive—stripping away the bloat while keeping the power where it matters.**
 
-I love writing and taking notes, but I struggled to find a tool that felt *just right*. Apps like Notion and Obsidian are powerful, but often feel like driving a semi-truck when all you need is a sedan—feature-rich, but heavy and sluggish due to their Electron roots. On the other hand, lightweight alternatives often lack the polish or specific UI finesse I craved.
+I love writing and taking notes, but I struggled to find a tool that felt _just right_. Apps like Notion and Obsidian are powerful, but often feel like driving a semi-truck when all you need is a sedan—feature-rich, but heavy and sluggish due to their Electron roots. On the other hand, lightweight alternatives often lack the polish or specific UI finesse I craved.
 
 **Nota strikes a balance:**
 
@@ -101,12 +101,13 @@ Nota is built as a monorepo using **Bun Workspaces**.
 
 ```bash
 ├── apps
-│   ├── backend    # Hono API server + Drizzle ORM
-│   ├── desktop    # Tauri + SvelteKit desktop app
-│   └── web        # SvelteKit landing page & web app
+│   ├── backend-hono    # Hono API server + Drizzle ORM (deprecated)
+│   ├── backend         # Go, Bun ORM, Fiber API server
+│   ├── desktop         # Tauri + SvelteKit desktop app
+│   └── web             # SvelteKit landing page & web app
 ├── packages
-│   ├── client     # Shared API client & types
-│   └── ui         # Shared UI components & Editor
+│   ├── client          # Shared API client & types
+│   └── ui              # Shared UI components & Editor
 ```
 
 ## 🚀 Getting Started
@@ -114,6 +115,7 @@ Nota is built as a monorepo using **Bun Workspaces**.
 ### Prerequisites
 
 - [Bun](https://bun.sh/) (Runtime & Package Manager)
+- [Go](https://go.dev/) (for Backend app)
 - [Rust](https://www.rust-lang.org/) (for Desktop app)
 - [Docker](https://www.docker.com/) (optional, for local DB)
 
@@ -141,7 +143,7 @@ Nota is built as a monorepo using **Bun Workspaces**.
 
 ```bash
 cd apps/backend
-bun dev
+go run main.go
 ```
 
 **Web App**
