@@ -5,6 +5,7 @@ import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Popover from '@nota/ui/shadcn/popover';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 
@@ -24,6 +25,12 @@ const trashedNotes = $derived.by<LocalNote[] | Note[]>(() => {
 });
 
 async function deleteNote(note: LocalNote | Note) {
+  const confirm = await ask(`Are you sure you want to delete ${note.name} permanently? This action cannot be undone.`, {
+    title: `Delete ${note.name} Permanently?`,
+    kind: 'warning',
+    okLabel: 'Delete',
+  });
+  if (!confirm) return;
   try {
     if ('owner' in note) await cloudNotes.delete(note.id);
     else await localNotes.deleteNote(note);

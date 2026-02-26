@@ -1,7 +1,7 @@
-import { getContext, setContext } from "svelte";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import request from "./request";
-import { type Note, NoteSchema } from "./types";
+import { getContext, setContext } from 'svelte';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import request from './request';
+import { type Note, NoteSchema } from './types';
 
 interface UpdateNotes {
   name?: string;
@@ -31,9 +31,9 @@ class Notes {
   async fetch(userworkspaceId: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${userworkspaceId}`;
     const res = await request(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
     if (res.ok) {
@@ -47,22 +47,36 @@ class Notes {
   }
 
   /**
+   * Delete a note
+   * @param noteId Note ID
+   * @throws {Error} If the request fails with a non-200 status code
+   */
+  async delete(noteId: string) {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}`;
+    const res = await request(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (res.ok) {
+      this.notes = this.notes.filter((note) => note.id !== noteId);
+    } else {
+      throw new Error(await res.text());
+    }
+  }
+
+  /**
    * Create a new note
    * @param note Partial note object
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async create(
-    name: string,
-    icon: string,
-    workspaceId: string,
-    userworkspaceId: string,
-    isFavorite: boolean,
-  ) {
+  async create(name: string, icon: string, workspaceId: string, userworkspaceId: string, isFavorite: boolean) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note`;
     const res = await request(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name,
@@ -95,9 +109,9 @@ class Notes {
   async update(noteId: string, note: UpdateNotes) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}`;
     const res = await request(url, {
-      method: "PATCH",
+      method: 'PATCH',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(note),
     });
@@ -105,9 +119,7 @@ class Notes {
       const json = await res.json();
       const updatedNote = json.data as Note;
       const parsedNote = NoteSchema.parse(updatedNote);
-      this.notes = this.notes.map((note) =>
-        note.id === noteId ? parsedNote : note,
-      );
+      this.notes = this.notes.map((note) => (note.id === noteId ? parsedNote : note));
     } else {
       throw new Error(await res.text());
     }
@@ -137,9 +149,9 @@ class Notes {
   async duplicate(noteId: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/duplicate`;
     const res = await request(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
     if (res.ok) {
@@ -161,9 +173,9 @@ class Notes {
   async patch(noteId: string, patch: any) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/content`;
     const res = await request(url, {
-      method: "PATCH",
+      method: 'PATCH',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(patch),
     });
@@ -172,17 +184,12 @@ class Notes {
     }
   }
 
-  async import(
-    name: string,
-    workspaceId: string,
-    userworkspaceId: string,
-    content: any,
-  ) {
+  async import(name: string, workspaceId: string, userworkspaceId: string, content: any) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/import`;
     const res = await request(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name,
@@ -202,7 +209,7 @@ class Notes {
   }
 }
 
-const NOTANOTESKEY = Symbol("NOTANOTESKEY");
+const NOTANOTESKEY = Symbol('NOTANOTESKEY');
 
 /**
  * Set the notes context.
