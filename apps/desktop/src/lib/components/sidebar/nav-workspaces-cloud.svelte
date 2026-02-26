@@ -13,6 +13,8 @@ import { page } from '$app/state';
 import { getKeyboardShortcut, timeAgo } from '$lib/utils';
 import NewNotes from '../dialogs/new-notes.svelte';
 import NewWorkspace from '../dialogs/new-workspace.svelte';
+import { ask } from '@tauri-apps/plugin-dialog';
+import { toast } from '@lib/components/ui/sonner';
 
 let showMore = $state(false);
 
@@ -24,6 +26,20 @@ let open = $state(false);
 let openNewNotes = $state(false);
 
 let currentCloudWorkspace = $derived(cloudWorkspaces.workspaces[0]);
+
+async function trashNotes(noteId: string) {
+  const confirm = await ask('Are you sure you want to move this note to the trash?', {
+    title: `Move to Trash`,
+    kind: 'warning',
+  });
+  if (!confirm) {
+    return;
+  }
+  toast.promise(cloudNotes.update(noteId, { trashed: true }), {
+    loading: 'Moving to Trash...',
+    error: 'Failed to move note to Trash',
+  });
+}
 </script>
 
 <NewWorkspace bind:open />
@@ -126,18 +142,11 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.workspaces[0]);
 													<DropdownMenu.Separator />
 													<DropdownMenu.Item
 														variant="destructive"
-														onclick={() => cloudNotes.update(note.id, { trashed: true })}
+														onclick={() => trashNotes(note.id)}
 													>
 														<icons.Trash2 />
 														Move to Trash
-													</DropdownMenu.Item>
-													<DropdownMenu.Item
-														variant="destructive"
-														onclick={() => cloudNotes.delete(note.id)}
-													>
-														<icons.Trash2 />
-														Delete
-													</DropdownMenu.Item>
+													</DropdownMenu.Item>	
 													<DropdownMenu.Separator />
 													<DropdownMenu.Label class="text-muted-foreground text-sm">
 														Last Edited:

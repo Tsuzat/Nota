@@ -47,7 +47,7 @@ async function selectCloudUserWorkspace(userWorkspace: UserWorkspace) {
   if (activeWorkspace?.id === userWorkspace.id) {
     return toast.info("You're already in this workspace");
   }
-  const id = toast.loading(`Switching to cloud workspace ${userWorkspace.name}`);
+  const id = toast.loading(`Switching to cloud workspace ${userWorkspace.name}`, { duration: 10000 });
   try {
     goto(resolve('/'));
     currentUserWorkspace.setCurrentUserWorkspace(userWorkspace);
