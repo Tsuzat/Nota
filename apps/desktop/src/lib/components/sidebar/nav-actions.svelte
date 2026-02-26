@@ -6,7 +6,6 @@ import { icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
 import { cn } from '@nota/ui/utils';
-import { ask } from '@tauri-apps/plugin-dialog';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { exportContent, importNotes } from '$lib/utils';
@@ -127,26 +126,6 @@ let open = $state(false);
 				>
 					<icons.Trash2 />
 					<span>Move to Trash</span>
-				</Dropdown.Item>
-				<Dropdown.Item
-					variant="destructive"
-					onclick={async () => {
-						const shouldDelete = await ask(
-							'This action will permanently delete the note. Are you sure you want to continue?',
-							{
-								title: `Delete ${note.name}`,
-								okLabel: 'Delete',
-								cancelLabel: 'Cancel'
-							}
-						);
-						if (!shouldDelete) return;
-						if ('owner' in note) cloudNotes.delete(note.id);
-						else localNotes.deleteNote(note);
-						window.location.replace('/');
-					}}
-				>
-					<icons.Trash2 />
-					<span>Delete Note</span>
 				</Dropdown.Item>
 			</Dropdown.Group>
 		</Dropdown.Content>

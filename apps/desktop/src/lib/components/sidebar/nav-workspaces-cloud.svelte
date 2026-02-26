@@ -1,4 +1,5 @@
 <script lang="ts">
+import { toast } from '@lib/components/ui/sonner';
 import { getNotesContext, getWorkspacesContext } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
@@ -7,14 +8,13 @@ import * as Collapsible from '@nota/ui/shadcn/collapsible';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { cn } from '@nota/ui/utils';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { page } from '$app/state';
 import { getKeyboardShortcut, timeAgo } from '$lib/utils';
 import NewNotes from '../dialogs/new-notes.svelte';
 import NewWorkspace from '../dialogs/new-workspace.svelte';
-import { ask } from '@tauri-apps/plugin-dialog';
-import { toast } from '@lib/components/ui/sonner';
 
 let showMore = $state(false);
 
@@ -29,7 +29,7 @@ let currentCloudWorkspace = $derived(cloudWorkspaces.workspaces[0]);
 
 async function trashNotes(noteId: string) {
   const confirm = await ask('Are you sure you want to move this note to the trash?', {
-    title: `Move to Trash`,
+    title: 'Move to Trash',
     kind: 'warning',
   });
   if (!confirm) {
