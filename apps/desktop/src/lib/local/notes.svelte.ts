@@ -119,11 +119,14 @@ class Notes {
   }
 
   async deleteNote(note: LocalNote) {
-    const permission = await ask('You will still be able to access the note from the trash. Do you want to continue?', {
-      title: `Move ${note.name} to trash?`,
-      kind: 'info',
-      okLabel: 'Trash it',
-    });
+    const permission = await ask(
+      'Are you sure you want to permanently delete this note? This action cannot be undone.',
+      {
+        title: `Permanently delete ${note.name}?`,
+        kind: 'warning',
+        okLabel: 'Delete',
+      }
+    );
     if (!permission) return;
     try {
       if (page.url.pathname.endsWith(`local-note-${note.id}`)) goto(resolve('/'));
