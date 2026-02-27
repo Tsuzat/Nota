@@ -1,15 +1,14 @@
 <script lang="ts">
 import { SimpleToolTip, StreamDown } from '@lib/components/custom/index.js';
-import { Button } from '@lib/components/ui/button';
-import { Input } from '@lib/components/ui/input';
-import { Separator } from '@lib/components/ui/separator';
-import { cn } from '@lib/utils';
+import { Textarea } from '@lib/components/ui/textarea';
 import BubbleMenu from '@nota/ui/edra/components/BubbleMenu.svelte';
 import { removeAIHighlight } from '@nota/ui/edra/extensions/AIHighLight.js';
 import type { Editor, ShouldShowProps } from '@nota/ui/edra/types.js';
 import { icons } from '@nota/ui/icons/index.js';
+import { Button } from '@nota/ui/shadcn/button';
+import { Separator } from '@nota/ui/shadcn/separator';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { fade } from 'svelte/transition';
+import { fade, slide } from 'svelte/transition';
 import { callAI, callGemini } from '$lib/ai';
 import {
   CONTINUE_WRITING_PROMPT,
@@ -27,6 +26,7 @@ interface Props {
 }
 const { editor, parentElement }: Props = $props();
 const settings = getGlobalSettings();
+let inputTag = $state<HTMLTextAreaElement>(document.createElement('textarea'));
 
 function shouldShow(props: ShouldShowProps) {
   if (!props.editor.isEditable || props.editor.isDestroyed) return false;
@@ -200,87 +200,98 @@ function closeAI() {
   {editor}
   pluginKey="edra-bubble-menu"
   {shouldShow}
-  class="bg-popover flex max-h-120 max-w-3xl flex-col rounded-lg border p-0 transition-[height] duration-500"
+  class="bg-black/20 backdrop-blur-2xl flex max-h-120 max-w-3xl flex-col rounded-lg border p-0 transition-[height] duration-500"
   options={{
     shift: {
-      crossAxis: false,
-      mainAxis: true
+      crossAxis: true,
+      mainAxis: true,
     },
-    strategy: "absolute",
+    strategy: "fixed",
     autoPlacement: {
       allowedPlacements: ["bottom", "top"],
     },
     scrollTarget: parentElement,
+    onShow() {
+      inputTag?.focus();
+    },
+    onHide() {
+      inputTag?.blur();
+    },
   }}
 >
   {#if aiState === AIState.Idle}
     <form
       onsubmit={handleSubmit}
-      class="flex items-center justify-between gap-2 p-2"
+      class="flex items-center max-w-2xl justify-between min-w-80 p-1"
     >
-      <Input
+      <Textarea
         bind:value={inputValue}
+        bind:ref={inputTag}
         placeholder="Ask AI anything..."
-        type="text"
-        class="border-0 bg-transparent! ring-0!"
+        class="border-0 p-2 bg-transparent! outline-0 text-sm resize-none h-auto ring-0!"
       />
       <Button type="submit" size="icon-sm" class="rounded-full">
         <icons.ArrowUp />
       </Button>
     </form>
-    <div class:hidden={!getSelectionText()?.trim()} class="flex flex-col gap-1 overflow-auto">
-      <Separator orientation="horizontal" />
-      <small class="text-muted-foreground ml-4 p-1 text-start"
-        >Quick Actions</small
+    {#if getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0}
+      <div
+        transition:slide={{ axis: "y", duration: 500 }}
+        class="flex flex-col gap-1 overflow-auto"
       >
-      <button
-        title=""
-        onclick={makeTextShorter}
-        class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-      >
-        <icons.ArrowDownWideNarrow />
-        <span>Make Shorter</span>
-      </button>
-      <button
-        onclick={makeTextLonger}
-        class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-      >
-        <icons.TextWrap />
-        <span>Make Longer</span>
-      </button>
-      <button
-        title=""
-        onclick={summarizeText}
-        class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-      >
-        <icons.RefreshCcwDot />
-        <span>Summarize</span>
-      </button>
-      <button
-        title=""
-        onclick={continueWriting}
-        class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-      >
-        <icons.PenLine />
-        <span>Continue Writing</span>
-      </button>
-      <button
-        title=""
-        onclick={checkGrammer}
-        class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-      >
-        <icons.CheckCheck />
-        <span>Fix Grammer</span>
-      </button>
-      <button
-        title=""
-        onclick={solveProblem}
-        class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-      >
-        <icons.Brain />
-        <span>Solve Problem</span>
-      </button>
-    </div>
+        <Separator orientation="horizontal" />
+        <small class="text-muted-foreground ml-4 p-1 text-start"
+          >Quick Actions</small
+        >
+        <button
+          title=""
+          onclick={makeTextShorter}
+          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        >
+          <icons.ArrowDownWideNarrow />
+          <span>Make Shorter</span>
+        </button>
+        <button
+          onclick={makeTextLonger}
+          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        >
+          <icons.TextWrap />
+          <span>Make Longer</span>
+        </button>
+        <button
+          title=""
+          onclick={summarizeText}
+          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        >
+          <icons.RefreshCcwDot />
+          <span>Summarize</span>
+        </button>
+        <button
+          title=""
+          onclick={continueWriting}
+          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        >
+          <icons.PenLine />
+          <span>Continue Writing</span>
+        </button>
+        <button
+          title=""
+          onclick={checkGrammer}
+          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        >
+          <icons.CheckCheck />
+          <span>Fix Grammer</span>
+        </button>
+        <button
+          title=""
+          onclick={solveProblem}
+          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        >
+          <icons.Brain />
+          <span>Solve Problem</span>
+        </button>
+      </div>
+    {/if}
   {:else if aiState === AIState.Confirmation}
     {#if aiResponse === ""}
       <div transition:fade class="animated-gradient-border rounded-2xl p-px">
