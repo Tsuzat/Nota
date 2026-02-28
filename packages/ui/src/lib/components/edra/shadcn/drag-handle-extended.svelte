@@ -238,21 +238,33 @@
             Turn Into
           </DropdownMenu.SubTrigger>
           <DropdownMenu.SubContent class="max-h-96 overflow-auto duration-300">
-            {#each turnIntoCommand as command (command)}
-              {@const Icon = command.icon}
-              <DropdownMenu.Item
-                onclick={() => {
-                  if (currentNode && currentNodePos)
-                    command.turnInto?.(editor, currentNode, currentNodePos);
-                }}
-              >
-                <Icon />
-                <span>{command.tooltip}</span>
-                <DropdownMenu.Shortcut
-                  class="bg-background rounded border p-0.5"
-                  >{command.shortCut}</DropdownMenu.Shortcut
+            {#each Object.keys(commands) as cstring (cstring)}
+              <DropdownMenu.Group>
+                <DropdownMenu.Label class="capitalize"
+                  >{cstring}</DropdownMenu.Label
                 >
-              </DropdownMenu.Item>
+                {#each commands[cstring] as command (command)}
+                  {@const Icon = command.icon}
+                  <DropdownMenu.Item
+                    onclick={() => {
+                      if (currentNode && currentNodePos)
+                        command.turnInto?.(editor, currentNode, currentNodePos);
+                    }}
+                  >
+                    <Icon />
+                    <span>{command.tooltip}</span>
+                    {#if command.shortCut}
+                      <DropdownMenu.Shortcut
+                        class="bg-background rounded border p-0.5"
+                        >{command.shortCut}</DropdownMenu.Shortcut
+                      >
+                    {/if}
+                  </DropdownMenu.Item>
+                {/each}
+              </DropdownMenu.Group>
+              {#if cstring !== Object.keys(commands).at(-1)}
+                <DropdownMenu.Separator />
+              {/if}
             {/each}
           </DropdownMenu.SubContent>
         </DropdownMenu.Sub>
@@ -267,9 +279,7 @@
           class="max-h-96 overflow-auto duration-300"
         >
           <DropdownMenu.Group>
-            <DropdownMenu.Label class="text-muted-foreground text-sm"
-              >Text Colors</DropdownMenu.Label
-            >
+            <DropdownMenu.Label>Text Colors</DropdownMenu.Label>
             {#each quickcolors as color (color.label)}
               <DropdownMenu.Item
                 title={color.label}
@@ -295,9 +305,7 @@
           </DropdownMenu.Group>
           <DropdownMenu.Separator />
           <DropdownMenu.Group>
-            <DropdownMenu.Label class="text-muted-foreground text-sm"
-              >Highlight Color</DropdownMenu.Label
-            >
+            <DropdownMenu.Label>Highlight Color</DropdownMenu.Label>
             {#each quickcolors as color (color.label)}
               <DropdownMenu.Item
                 title={color.label}
@@ -343,7 +351,7 @@
             >
               <Icon />
               {alignment.tooltip}
-              <DropdownMenu.Shortcut>
+              <DropdownMenu.Shortcut class="bg-background rounded border p-0.5">
                 {alignment.shortCut}
               </DropdownMenu.Shortcut>
             </DropdownMenu.Item>
@@ -367,10 +375,10 @@
       <DropdownMenu.Sub>
         <DropdownMenu.SubTrigger>
           <Clipboard />
-          Copy As
+          Copy to Clipboard
         </DropdownMenu.SubTrigger>
         <DropdownMenu.Content side="right">
-          <DropdownMenu.Label>Copy to clipboard</DropdownMenu.Label>
+          <DropdownMenu.Label>Copy as</DropdownMenu.Label>
           {#if currentNodeId}
             <DropdownMenu.Item onclick={handleCopyNodeLink}>
               <LinkIcon />
@@ -403,7 +411,7 @@
       <DropdownMenu.Separator />
       <DropdownMenu.Item onclick={handleDelete}>
         <Delete class="text-destructive" />
-        Delete Node
+        Delete
       </DropdownMenu.Item>
     </DropdownMenu.Content>
   </DropdownMenu.Root>
