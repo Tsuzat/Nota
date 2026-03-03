@@ -1,39 +1,37 @@
 <script lang="ts">
-  import { Button, buttonVariants } from "@lib/components/ui/button";
-  import type { NodeViewProps } from "@tiptap/core";
-  import { NodeViewContent, NodeViewWrapper } from "svelte-tiptap";
+import { Button, buttonVariants } from '@lib/components/ui/button';
+import type { NodeViewProps } from '@tiptap/core';
+import { NodeViewContent, NodeViewWrapper } from 'svelte-tiptap';
 
-  const { editor, node, updateAttributes, extension }: NodeViewProps = $props();
+const { editor, node, updateAttributes, extension }: NodeViewProps = $props();
 
-  import * as Popover from "@lib/components/ui/popover";
-  import Check from "@lucide/svelte/icons/check";
-  import Copy from "@lucide/svelte/icons/copy";
-  import * as Command from "@lib/components/ui/command";
-  import { cn } from "@lib/utils";
-  import { icons } from "@lib/icons/index";
+import * as Popover from '@lib/components/ui/popover';
+import Check from '@lucide/svelte/icons/check';
+import Copy from '@lucide/svelte/icons/copy';
+import * as Command from '@lib/components/ui/command';
+import { cn } from '@lib/utils';
+import { icons } from '@lib/icons/index';
 
-  let preRef = $state<HTMLPreElement>();
+let preRef = $state<HTMLPreElement>();
 
-  let isCopying = $state(false);
+let isCopying = $state(false);
 
-  const languages: string[] = $derived(
-    extension.options.lowlight.listLanguages().sort()
-  );
+const languages: string[] = $derived(extension.options.lowlight.listLanguages().sort());
 
-  let defaultLanguage = $derived(node.attrs.language ?? "Plain Text");
+let defaultLanguage = $derived(node.attrs.language ?? 'Plain Text');
 
-  $effect(() => {
-    updateAttributes({ language: defaultLanguage });
-  });
+$effect(() => {
+  updateAttributes({ language: defaultLanguage });
+});
 
-  function copyCode() {
-    if (!preRef) return;
-    isCopying = true;
-    navigator.clipboard.writeText(preRef.innerText);
-    setTimeout(() => {
-      isCopying = false;
-    }, 1000);
-  }
+function copyCode() {
+  if (!preRef) return;
+  isCopying = true;
+  navigator.clipboard.writeText(preRef.innerText);
+  setTimeout(() => {
+    isCopying = false;
+  }, 1000);
+}
 </script>
 
 <NodeViewWrapper class="code-wrapper" draggable={false} spellcheck={false}>
@@ -45,12 +43,16 @@
       <Popover.Trigger
         contenteditable="false"
         disabled={!editor.isEditable}
-        class={buttonVariants({ variant: "ghost", class: "h-6! p-1 w-fit rounded-sm capitalize text-muted-foreground" })}
+        class={buttonVariants({
+          variant: "ghost",
+          class: "h-6! p-1 w-fit rounded-sm capitalize text-muted-foreground",
+        })}
       >
         {defaultLanguage}
       </Popover.Trigger>
-      <Popover.Content class="p-0 w-36 max-h-96 text-primary!" 
-      			portalProps={{ disabled: true, to: undefined }}
+      <Popover.Content
+        class="p-0 w-48 max-h-96 text-primary!"
+        portalProps={{ disabled: true, to: undefined }}
       >
         <Command.Root>
           <Command.Input placeholder="Search language..." />
@@ -65,10 +67,10 @@
                 >
                   <icons.Check
                     class={cn(
-                      language !== defaultLanguage && "text-transparent"
+                      language !== defaultLanguage && "text-transparent",
                     )}
                   />
-				  {language}
+                  {language}
                 </Command.Item>
               {/each}
             </Command.Group>
