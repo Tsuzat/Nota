@@ -282,7 +282,7 @@ function handleAIHighlight() {
           </DropdownMenu.Group>
           <DropdownMenu.Separator />
           <DropdownMenu.Group class="min-w-fit">
-            <DropdownMenu.Label>Highlights</DropdownMenu.Label>
+            <DropdownMenu.Label>Background</DropdownMenu.Label>
             {#each quickcolors as color (color.label)}
               <DropdownMenu.Item
                 title={color.value}
@@ -297,13 +297,13 @@ function handleAIHighlight() {
                     editor
                       .chain()
                       .setNodeSelection(currentNodePos)
-                      .setHighlight({ color: color.value })
+                      .setHighlight({ color: `${color.value}50` })
                       .run();
                 }}
               >
                 <span
                   class="size-4 rounded-full border"
-                  style={`background-color: ${color.value};`}
+                  style={`background-color: ${`${color.value}50`};`}
                 ></span>
                 <span class="capitalize">{color.label}</span>
               </DropdownMenu.Item>

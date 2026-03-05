@@ -141,15 +141,15 @@ export const isURL = (str: string): boolean => {
 
 export const quickcolors = [
   { label: 'Default', value: '' },
-  { label: 'Blue', value: '#0E0E99' },
-  { label: 'Brown', value: '#7D0404' },
-  { label: 'Green', value: '#077507' },
-  { label: 'Grey', value: '#636262' },
-  { label: 'Orange', value: '#A34603' },
-  { label: 'Pink', value: '#DB0762' },
-  { label: 'Purple', value: '#83069C' },
-  { label: 'Red', value: '#B30707' },
-  { label: 'Yellow', value: '#C4C404' },
+  { label: 'Blue', value: '#3B82F6' },
+  { label: 'Brown', value: '#92400E' },
+  { label: 'Green', value: '#16A34A' },
+  { label: 'Grey', value: '#6B7280' },
+  { label: 'Orange', value: '#F97316' },
+  { label: 'Pink', value: '#EC4899' },
+  { label: 'Purple', value: '#9333EA' },
+  { label: 'Red', value: '#DC2626' },
+  { label: 'Yellow', value: '#CA8A04' },
 ];
 
 export enum FileType {

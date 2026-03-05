@@ -67,7 +67,7 @@ const currentHighlight = $derived.by(() => editor.getAttributes('highlight').col
         </Button>
       {/each}
     </div>
-    <div class="text-muted-foreground my-2 text-xs">Highlight Colors</div>
+    <div class="text-muted-foreground my-2 text-xs">Background Colors</div>
     <div class="grid grid-cols-5 gap-2">
       {#each quickcolors as color (color)}
         <Button
@@ -86,7 +86,7 @@ const currentHighlight = $derived.by(() => editor.getAttributes('highlight').col
               editor
                 .chain()
                 .focus()
-                .toggleHighlight({ color: color.value })
+                .toggleHighlight({ color: `${color.value}50` })
                 .run();
           }}>A</Button
         >
