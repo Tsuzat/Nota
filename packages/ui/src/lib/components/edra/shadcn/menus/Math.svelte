@@ -24,29 +24,29 @@ function updateLatex() {
 </script>
 
 <BubbleMenu
-	{editor}
-	pluginKey="math-bubble-menu"
-	shouldShow={(props: ShouldShowProps) => {
-		if (!props.editor.isEditable) return false;
-		if (!props.state) return false;
-		return editor.isActive('blockMath');
-	}}
-	options={{
-		shift: {
-			crossAxis: true
-		},
-		autoPlacement: {
-			allowedPlacements: ['top', 'bottom']
-		},
-		strategy: 'absolute',
-		scrollTarget: parentElement
-	}}
-	class="bg-popover h-fit w-fit flex-col items-center gap-1 rounded-lg border shadow-lg"
+  {editor}
+  pluginKey="math-bubble-menu"
+  shouldShow={(props: ShouldShowProps) => {
+    if (!props.editor.isEditable) return false;
+    if (!props.state) return false;
+    return editor.isActive("blockMath");
+  }}
+  options={{
+    shift: {
+      crossAxis: true,
+    },
+    autoPlacement: {
+      allowedPlacements: ["top", "bottom"],
+    },
+    strategy: "absolute",
+    scrollTarget: parentElement,
+  }}
+  class="bg-background h-fit w-fit flex-col items-center gap-1 rounded-lg border shadow-lg"
 >
-	<Textarea
-		bind:value={latex}
-		oninput={updateLatex}
-		placeholder="Enter Math Expression"
-		class="h-48 w-96"
-	/>
+  <Textarea
+    bind:value={latex}
+    oninput={updateLatex}
+    placeholder="Enter Math Expression"
+    class="h-56 w-96"
+  />
 </BubbleMenu>

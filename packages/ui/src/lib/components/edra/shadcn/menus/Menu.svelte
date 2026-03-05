@@ -83,56 +83,56 @@ const isTableGripSelected = (node: HTMLElement) => {
 
 <!-- !ISSUE: APPLYING BACKDROP FILTER MESSES WITH POPOVERS IN LINK AND QUICKCOLORS, SO DO NOT APPLY IT -->
 <BubbleMenu
-	{editor}
-	pluginKey="edra-bubble-menu"
-	{shouldShow}
-	class={cn(
-		'edra-bubble-menu bg-popover z-50! flex h-fit w-fit items-center gap-0.5 rounded-lg border p-0',
-		className
-	)}
-	options={{
-		shift: true,
-		autoPlacement: {
-			allowedPlacements: ['top', 'top-end', 'top-start']
-		},
-		strategy: 'absolute',
-		scrollTarget: document.getElementById('nota-editor') ?? undefined
-	}}
+  {editor}
+  pluginKey="edra-bubble-menu"
+  {shouldShow}
+  class={cn(
+    "edra-bubble-menu bg-popover z-50! flex h-fit w-fit items-center gap-0.5 rounded-lg border p-0",
+    className,
+  )}
+  options={{
+    shift: true,
+    autoPlacement: {
+      allowedPlacements: ["top", "top-end", "top-start"],
+    },
+    strategy: "absolute",
+    scrollTarget: document.getElementById("nota-editor") ?? undefined,
+  }}
 >
-	{#if children}
-		{@render children()}
-	{:else}
-   {#if useAI}
-			<Button variant="ghost" onclick={() => addAIHighlight(editor)}>
-				<span
-					class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
-				>
-					Ask AI</span
-				>
-			</Button>
+  {#if children}
+    {@render children()}
+  {:else}
+    {#if useAI}
+      <Button variant="ghost" onclick={() => addAIHighlight(editor)}>
+        <span
+          class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+        >
+          Ask AI</span
+        >
+      </Button>
     {/if}
-		{#each toolbarCommands.filter((c) => !excludedCommands?.includes(c)) as cmd (cmd)}
-			{#if cmd === 'headings'}
-				<Headings {editor} />
-			{:else if cmd === 'alignment'}
-				<Alignment {editor} />
-			{:else if cmd === 'lists'}
-				<Lists {editor} />
-			{:else}
-				{@const commandGroup = commands[cmd]}
-				{#each commandGroup as command (command)}
-					{#if command.name === 'link'}
-						<Link {editor} />
-					{:else if command.name === 'paragraph'}
-						<span></span>
-					{:else}
-						<ToolBarIcon {editor} {command} />
-					{/if}
-				{/each}
-			{/if}
-		{/each}
-		<ToolBarIcon {editor} command={commands.math[0]} />
-		<FontSize {editor} />
-		<QuickColors {editor} />
-	{/if}
+    {#each toolbarCommands.filter((c) => !excludedCommands?.includes(c)) as cmd (cmd)}
+      {#if cmd === "headings"}
+        <Headings {editor} />
+      {:else if cmd === "alignment"}
+        <Alignment {editor} />
+      {:else if cmd === "lists"}
+        <Lists {editor} />
+      {:else}
+        {@const commandGroup = commands[cmd]}
+        {#each commandGroup as command (command)}
+          {#if command.name === "link"}
+            <Link {editor} />
+          {:else if command.name === "paragraph"}
+            <span></span>
+          {:else}
+            <ToolBarIcon {editor} {command} />
+          {/if}
+        {/each}
+      {/if}
+    {/each}
+    <ToolBarIcon {editor} command={commands.math[0]} />
+    <FontSize {editor} />
+    <QuickColors {editor} />
+  {/if}
 </BubbleMenu>
