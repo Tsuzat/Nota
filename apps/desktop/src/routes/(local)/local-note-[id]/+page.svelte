@@ -22,7 +22,7 @@ import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { DB } from '$lib/local/db.js';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { createFile, getAssetsByFileType, moveFileToAssets, selectLocalFile } from '$lib/local/util.js';
-import { ISMACOS, ISWINDOWS } from '$lib/utils';
+import { fixMathReplacer, ISMACOS, ISWINDOWS } from '$lib/utils';
 
 const sidebar = useSidebar();
 
@@ -57,7 +57,13 @@ async function loadData() {
       toast.error(`Notes content with id ${id} not found`);
       return goto(resolve('/'));
     }
-    content = JSON.parse(data[0].content) as Content;
+    const parsed = JSON.parse(data[0].content) as Content;
+    const { content: fixedContent, replaced } = fixMathReplacer(parsed);
+    content = fixedContent;
+    if (replaced) {
+      pendingContent = content;
+      await saveContent();
+    }
   } catch (error) {
     console.error(error);
     toast.error('Something went wrong when loading notes');

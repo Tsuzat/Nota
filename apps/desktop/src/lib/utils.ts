@@ -213,3 +213,45 @@ export async function importNotes(editor?: Editor, returnData?: boolean) {
     toast.error('Something went wrong when importing the file.');
   }
 }
+
+/**
+ * ! THIS TO BE DELETED EVENTUALLY AFTER 10 VERSIONS RELEASE - Added on 0.9.61-beta
+ *
+ * Recursively replaces all "inlineMathReplacer" node types with "inlineMath"
+ * in a parsed TipTap/ProseMirror JSON content tree.
+ *
+ * @param parsedContent - The parsed content (TipTap JSON)
+ * @returns An object with the fixed `content` and a `replaced` boolean
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function fixMathReplacer(parsedContent: Content): {
+  content: Content;
+  replaced: boolean;
+} {
+  let replaced = false;
+  let content = parsedContent;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function walk(node: any): any {
+    if (node === null || node === undefined || typeof node !== 'object') return node;
+
+    if (node.type === 'inlineMathReplacer') {
+      node.type = 'inlineMath';
+      replaced = true;
+    }
+
+    if (Array.isArray(node.content)) {
+      node.content = node.content.map(walk);
+    }
+
+    return node;
+  }
+
+  // Content can be a top-level doc node or an array
+  if (Array.isArray(content)) {
+    content = content.map(walk) as Content;
+  } else {
+    walk(content);
+  }
+
+  return { content, replaced };
+}

@@ -25,7 +25,7 @@ import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { ISMACOS, ISWINDOWS } from '$lib/utils';
+import { fixMathReplacer, ISMACOS, ISWINDOWS } from '$lib/utils';
 
 const { data } = $props();
 
@@ -142,9 +142,14 @@ async function loadData() {
     const data = await cloudNotes.fetchContent(id);
     if (data) {
       const dbContent = data as Content;
-      content = dbContent;
-      syncedContent = dbContent;
+      const { content: fixedContent, replaced } = fixMathReplacer(dbContent);
+      content = fixedContent;
+      syncedContent = fixedContent;
       isDirty = false;
+      if (replaced) {
+        isDirty = true;
+        await saveNoteContent();
+      }
     }
   } catch (error) {
     console.error(error);
