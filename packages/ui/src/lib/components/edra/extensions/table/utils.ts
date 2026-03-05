@@ -239,7 +239,7 @@ export const selectTable = (tr: Transaction) => {
   if (table) {
     const { map } = TableMap.get(table.node);
 
-    if (map && map.length) {
+    if (map?.length) {
       const head = table.start + map[0];
       const anchor = table.start + map[map.length - 1];
       const $head = tr.doc.resolve(head);
@@ -277,7 +277,7 @@ export const isColumnGripSelected = ({
     container = container.parentElement!;
   }
 
-  const gripColumn = container && container.querySelector && container.querySelector('a.grip-column.selected');
+  const gripColumn = container?.querySelector?.('a.grip-column.selected');
 
   return !!gripColumn;
 };
@@ -307,7 +307,7 @@ export const isRowGripSelected = ({
     container = container.parentElement!;
   }
 
-  const gripRow = container && container.querySelector && container.querySelector('a.grip-row.selected');
+  const gripRow = container?.querySelector?.('a.grip-row.selected');
 
   return !!gripRow;
 };
@@ -445,11 +445,11 @@ export const moveColumnLeft = (tr: Transaction) => {
   const sel = tr.selection as CellSelection;
   const sourceCells = getCellsInColumn(source)(sel);
   const targetCells = getCellsInColumn(target)(sel);
-  if (hasSpans(sourceCells, targetCells)) return tr;
+  if (hasSpans(sourceCells, targetCells) || !sourceCells || !targetCells) return tr;
 
-  for (let i = 0; i < sourceCells!.length; i++) {
-    const a = sourceCells![i];
-    const b = targetCells![i];
+  for (let i = 0; i < sourceCells.length; i++) {
+    const a = sourceCells[i];
+    const b = targetCells[i];
     const posA = tr.mapping.map(a.pos);
     const posB = tr.mapping.map(b.pos);
     const nodeA = tr.doc.nodeAt(posA);
@@ -474,11 +474,11 @@ export const moveColumnRight = (tr: Transaction) => {
   const sel = tr.selection as CellSelection;
   const sourceCells = getCellsInColumn(source)(sel);
   const targetCells = getCellsInColumn(target)(sel);
-  if (hasSpans(sourceCells, targetCells)) return tr;
+  if (hasSpans(sourceCells, targetCells) || !sourceCells || !targetCells) return tr;
 
-  for (let i = 0; i < sourceCells!.length; i++) {
-    const a = sourceCells![i];
-    const b = targetCells![i];
+  for (let i = 0; i < sourceCells.length; i++) {
+    const a = sourceCells[i];
+    const b = targetCells[i];
     const posA = tr.mapping.map(a.pos);
     const posB = tr.mapping.map(b.pos);
     const nodeA = tr.doc.nodeAt(posA);
@@ -502,10 +502,10 @@ export const moveRowUp = (tr: Transaction) => {
   const sel = tr.selection as CellSelection;
   const sourceRow = getCellsInRow(source)(sel);
   const targetRow = getCellsInRow(target)(sel);
-  if (hasSpans(sourceRow, targetRow)) return tr;
-  for (let i = 0; i < sourceRow!.length; i++) {
-    const a = sourceRow![i];
-    const b = targetRow![i];
+  if (hasSpans(sourceRow, targetRow) || !sourceRow || !targetRow) return tr;
+  for (let i = 0; i < sourceRow.length; i++) {
+    const a = sourceRow[i];
+    const b = targetRow[i];
     const posA = tr.mapping.map(a.pos);
     const posB = tr.mapping.map(b.pos);
     const nodeA = tr.doc.nodeAt(posA);
@@ -529,10 +529,10 @@ export const moveRowDown = (tr: Transaction) => {
   const sel = tr.selection as CellSelection;
   const sourceRow = getCellsInRow(source)(sel);
   const targetRow = getCellsInRow(target)(sel);
-  if (hasSpans(sourceRow, targetRow)) return tr;
-  for (let i = 0; i < sourceRow!.length; i++) {
-    const a = sourceRow![i];
-    const b = targetRow![i];
+  if (hasSpans(sourceRow, targetRow) || !sourceRow || !targetRow) return tr;
+  for (let i = 0; i < sourceRow.length; i++) {
+    const a = sourceRow[i];
+    const b = targetRow[i];
     const posA = tr.mapping.map(a.pos);
     const posB = tr.mapping.map(b.pos);
     const nodeA = tr.doc.nodeAt(posA);

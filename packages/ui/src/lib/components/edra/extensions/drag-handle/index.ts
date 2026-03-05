@@ -274,7 +274,9 @@ export function DragHandlePlugin(options: GlobalDragHandleOptions & { pluginKey:
 
           const compStyle = window.getComputedStyle(node);
           const parsedLineHeight = Number.parseInt(compStyle.lineHeight, 10);
-          const lineHeight = isNaN(parsedLineHeight) ? Number.parseInt(compStyle.fontSize) * 1.2 : parsedLineHeight;
+          const lineHeight = Number.isNaN(parsedLineHeight)
+            ? Number.parseInt(compStyle.fontSize, 10) * 1.2
+            : parsedLineHeight;
           const paddingTop = Number.parseInt(compStyle.paddingTop, 10);
 
           const rect = absoluteRect(node);
@@ -328,7 +330,7 @@ export function DragHandlePlugin(options: GlobalDragHandleOptions & { pluginKey:
             view.state.selection instanceof NodeSelection &&
             view.state.selection.node.type.name === 'listItem' &&
             !isDroppedInsideList &&
-            listType == 'OL'
+            listType === 'OL'
           ) {
             const newList = view.state.schema.nodes.orderedList?.createAndFill(null, droppedNode);
             const slice = new Slice(Fragment.from(newList), 0, 0);
