@@ -34,6 +34,7 @@ const { editor, useAI = true }: Props = $props();
 const alignments = commands.alignment;
 const turnIntos: Record<string, EdraToolBarCommands[]> = Object.entries(commands).reduce(
   (acc, [key, value]) => {
+    if (key === 'alignment') return acc;
     const turnIntoCommands = value.filter((c) => c.turnInto);
     if (turnIntoCommands.length > 0) {
       acc[key] = turnIntoCommands;
@@ -55,9 +56,6 @@ let currentNodeId = $derived.by(() => {
 const pluginKey = 'globalDragHandle';
 let element = $state(document.createElement('div'));
 
-const turnIntoCommand = Object.values(commands)
-  .flat()
-  .filter((c) => c.turnInto !== undefined);
 const editorElement = document.getElementById('nota-editor');
 
 onMount(() => {
@@ -216,7 +214,7 @@ function handleAIHighlight() {
             Turn Into
           </DropdownMenu.SubTrigger>
           <DropdownMenu.SubContent
-            class="max-h-96 w-fit overflow-auto duration-300"
+            class="max-h-96 w-fit overflow-y-scroll duration-300"
           >
             {#each Object.entries(turnIntos) as [key, turnIntoCommands] (key)}
               <DropdownMenu.Group>
@@ -255,13 +253,13 @@ function handleAIHighlight() {
         </DropdownMenu.SubTrigger>
         <DropdownMenu.Content
           side="right"
-          class="max-h-96 w-fit overflow-auto duration-300"
+          class="max-h-96 min-w-fit overflow-auto duration-300"
         >
           <DropdownMenu.Group>
-            <DropdownMenu.Label>Text Colors</DropdownMenu.Label>
+            <DropdownMenu.Label>Texts</DropdownMenu.Label>
             {#each quickcolors as color (color.label)}
               <DropdownMenu.Item
-                title={color.label}
+                title={color.value}
                 onclick={() => {
                   if (color.value === "" || color.label === "Default")
                     editor
@@ -283,11 +281,11 @@ function handleAIHighlight() {
             {/each}
           </DropdownMenu.Group>
           <DropdownMenu.Separator />
-          <DropdownMenu.Group>
-            <DropdownMenu.Label>Highlight Color</DropdownMenu.Label>
+          <DropdownMenu.Group class="min-w-fit">
+            <DropdownMenu.Label>Highlights</DropdownMenu.Label>
             {#each quickcolors as color (color.label)}
               <DropdownMenu.Item
-                title={color.label}
+                title={color.value}
                 onclick={() => {
                   if (color.value === "" || color.label === "Default")
                     editor
