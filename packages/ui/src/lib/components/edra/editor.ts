@@ -15,7 +15,6 @@ import { Table, TableCell, TableHeader, TableRow } from './extensions/table';
 import 'katex/dist/katex.min.css';
 import { Markdown } from '@tiptap/markdown';
 import { AIHighlight } from './extensions/AIHighLight';
-import { InlineMathReplacer } from './extensions/InlineMathReplacer';
 
 export default (
   element?: HTMLElement,
@@ -91,7 +90,6 @@ export default (
       TableHeader,
       TableRow,
       TableCell,
-      InlineMathReplacer,
       Markdown,
 
       ...(extensions ?? []),
