@@ -489,13 +489,15 @@ const commands: Record<string, EdraToolBarCommands[]> = {
       tooltip: 'Inline Expression',
       onClick: (editor) => {
         let latex = 'a^2 + b^2 = c^2';
-        const chain = editor.chain().focus();
-        if (isTextSelection(editor.view.state.selection)) {
-          const { from, to } = editor.view.state.selection;
-          latex = editor.view.state.doc.textBetween(from, to);
-          chain.deleteRange({ from, to });
+        const { from, to, empty } = editor.state.selection;
+        if (!empty) {
+          latex = editor.state.doc.textBetween(from, to);
         }
-        chain.insertInlineMath({ latex }).run();
+        editor.chain().focus().insertInlineMath({ latex }).run();
+      },
+      turnInto: (editor, node, pos) => {
+        const latex = node.textContent;
+        editor.chain().focus(pos).setNodeSelection(pos).deleteSelection().insertInlineMath({ latex, pos }).run();
       },
       isActive: (editor) => editor.isActive('inlineMath'),
     },
@@ -506,6 +508,10 @@ const commands: Record<string, EdraToolBarCommands[]> = {
       onClick: (editor) => {
         const latex = 'a^2 + b^2 = c^2';
         editor.chain().focus().insertBlockMath({ latex }).run();
+      },
+      turnInto: (editor, node, pos) => {
+        const latex = node.textContent;
+        editor.chain().focus(pos).setNodeSelection(pos).deleteSelection().insertBlockMath({ latex, pos }).run();
       },
       isActive: (editor) => editor.isActive('blockMath'),
     },
