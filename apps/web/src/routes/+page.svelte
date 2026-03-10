@@ -201,9 +201,11 @@ async function copyToClipboard() {
             <UserRound />
             <span>Profile</span>
           </Dropdown.Item>
-          <Dropdown.Item onclick={() => {
-            goto(resolve("/signout"));
-          }}>
+          <Dropdown.Item
+            onclick={() => {
+              goto(resolve("/signout"));
+            }}
+          >
             <LogOut />
             Sign Out
           </Dropdown.Item>
@@ -544,12 +546,14 @@ async function copyToClipboard() {
               variant="outline"
               onclick={() => {
                 if (!user) {
-                  return toast.warning("Please signin to continue", {action: {
-                    label: "Sign In",
-                    onClick: () => {
-                      goto(resolve("/signin"))
-                    }
-                  }});
+                  return toast.warning("Please signin to continue", {
+                    action: {
+                      label: "Sign In",
+                      onClick: () => {
+                        goto(resolve("/signin"));
+                      },
+                    },
+                  });
                 }
                 sendToPaymentPortal(tabPro, user);
               }}
@@ -562,8 +566,7 @@ async function copyToClipboard() {
         <Card.Root>
           <Card.Header>
             <Card.Title class="font-medium">AI Credits</Card.Title>
-            <span class="my-3 block text-2xl font-semibold"
-              >$5 / 5M tokens</span
+            <span class="my-3 block text-2xl font-semibold">$5 / 5M tokens</span
             >
           </Card.Header>
           <Card.Content class="space-y-4">
@@ -583,12 +586,10 @@ async function copyToClipboard() {
                 class="w-full"
                 onclick={() => {
                   if (!user) {
-                   goto(resolve("/signin"))
+                    return goto(resolve("/signin"));
                   }
                   toast.promise(
-                    request(
-                      `${PUBLIC_BACKEND_URL}/api/promotion/redeem-ai-credits`
-                    ),
+                    request(`${PUBLIC_BACKEND_URL}/api/v1/redeem/ai-credits`),
                     {
                       loading: "Redeeming AI Credits...",
                       success: () => {
@@ -596,7 +597,7 @@ async function copyToClipboard() {
                         return "AI Credits redeemed successfully";
                       },
                       error: "Failed to redeem AI Credits",
-                    }
+                    },
                   );
                 }}
               >
