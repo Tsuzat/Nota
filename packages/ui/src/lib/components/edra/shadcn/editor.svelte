@@ -40,6 +40,7 @@ import Math from './menus/Math.svelte';
 import MathInline from './menus/MathInline.svelte';
 import TableCol from './menus/TableCol.svelte';
 import TableRow from './menus/TableRow.svelte';
+import { Callout } from '../extensions/callout';
 
 const lowlight = createLowlight(all);
 
@@ -78,6 +79,7 @@ onMount(() => {
           return SvelteNodeViewRenderer(CodeBlock);
         },
       }),
+      Callout,
       ImagePlaceholder(ImagePlaceholderComp),
       ImageExtended(ImageExtendedComp),
       VideoPlaceholder(VideoPlaceHolderComp),

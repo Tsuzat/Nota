@@ -4,6 +4,7 @@ import SquareCode from '@lucide/svelte/icons/square-code';
 import type { Editor } from '@tiptap/core';
 import commands from '../../commands/toolbar-commands.js';
 import type { EdraToolBarCommands } from '../../commands/types.js';
+import { Lightbulb } from '@lucide/svelte';
 
 export interface Group {
   name: string;
@@ -49,6 +50,14 @@ export const GROUPS: Group[] = [
         tooltip: 'Horizontal Rule',
         onClick: (editor: Editor) => {
           editor.chain().focus().setHorizontalRule().run();
+        },
+      },
+      {
+        icon: Lightbulb,
+        name: 'callOut',
+        tooltip: 'Callout',
+        onClick: (editor: Editor) => {
+          editor.chain().focus().setCallout().run();
         },
       },
     ],

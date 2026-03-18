@@ -54,7 +54,7 @@ export function handleKeydown(e: KeyboardEvent) {
   }
 }
 
-export function timeAgo(date: string | number): string {
+export function timeAgo(date: string | number | Date): string {
   const now = new Date();
   // If date is a number, assume it's Unix timestamp in seconds and convert to milliseconds
   const then = typeof date === 'number' ? new Date(date * 1000) : new Date(date);
