@@ -43,7 +43,7 @@ export const TableHeader = TiptapTableHeader.extend({
             const decorations: Decoration[] = [];
             const cells = getCellsInRow(0)(selection);
 
-            if (cells) {
+            if (isEditable && cells) {
               cells.forEach(({ pos }: { pos: number }, index: number) => {
                 decorations.push(
                   Decoration.widget(pos + 1, () => {
@@ -82,26 +82,28 @@ export const TableHeader = TiptapTableHeader.extend({
               });
 
               // Add-column "+" button — anchored to the last column of the header row
-              const lastHeaderCell = cells[cells.length - 1];
-              decorations.push(
-                Decoration.widget(lastHeaderCell.pos + 1, () => {
-                  const btn = document.createElement('button');
-                  btn.className = 'add-column-btn';
-                  btn.type = 'button';
-                  btn.setAttribute('aria-label', 'Add column');
-                  btn.setAttribute('title', 'Add Column After');
-                  btn.textContent = '+';
-                  btn.addEventListener('mousedown', (event) => {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    // Select last column, then add after
-                    this.editor.view.dispatch(selectColumn(cells.length - 1)(this.editor.state.tr));
-                    this.editor.chain().focus().addColumnAfter().run();
-                  });
+              if (isEditable && cells.length > 0) {
+                const lastHeaderCell = cells[cells.length - 1];
+                decorations.push(
+                  Decoration.widget(lastHeaderCell.pos + 1, () => {
+                    const btn = document.createElement('button');
+                    btn.className = 'add-column-btn';
+                    btn.type = 'button';
+                    btn.setAttribute('aria-label', 'Add column');
+                    btn.setAttribute('title', 'Add Column After');
+                    btn.textContent = '+';
+                    btn.addEventListener('mousedown', (event) => {
+                      event.preventDefault();
+                      event.stopImmediatePropagation();
+                      // Select last column, then add after
+                      this.editor.view.dispatch(selectColumn(cells.length - 1)(this.editor.state.tr));
+                      this.editor.chain().focus().addColumnAfter().run();
+                    });
 
-                  return btn;
-                })
-              );
+                    return btn;
+                  })
+                );
+              }
             }
 
             return DecorationSet.create(doc, decorations);

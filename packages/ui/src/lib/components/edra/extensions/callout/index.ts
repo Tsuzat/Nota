@@ -49,7 +49,7 @@ export const Callout = Node.create({
         ({ commands, editor }) => {
           const { type = null } = editor.getAttributes(this.name);
           if (type) {
-            commands.lift(this.name);
+            return commands.lift(this.name);
           } else {
             return commands.toggleWrap(this.name);
           }
@@ -63,7 +63,7 @@ export const Callout = Node.create({
         find: /^\$callout\$$/,
         type: this.type,
         getAttributes: (match) => {
-          return { type: match[1] };
+          return { emoji: match[1] };
         },
       }),
     ];

@@ -82,7 +82,7 @@ export const TableCell = Node.create<TableCellOptions>({
             // const allCells = getCellsInTable(selection);
 
             // Row grips (left edge) — appear for first column cells
-            if (firstColCells) {
+            if (isEditable && firstColCells) {
               firstColCells.forEach(({ pos }: { pos: number }, index: number) => {
                 decorations.push(
                   Decoration.widget(pos + 1, () => {
@@ -149,7 +149,7 @@ export const TableCell = Node.create<TableCellOptions>({
             // }
 
             // Add-row "+" button — anchored to the last row (first column)
-            if (firstColCells && firstColCells.length > 0) {
+            if (isEditable && firstColCells && firstColCells.length > 0) {
               const lastRowCell = firstColCells[firstColCells.length - 1];
               decorations.push(
                 Decoration.widget(lastRowCell.pos + 1, () => {
