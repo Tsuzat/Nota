@@ -537,12 +537,8 @@ input[type="checkbox"]:checked::before {
   justify-content: end;
   width: 100%;
   padding: 0 0.25rem;
-  opacity: 0;
-  transition: opacity 300ms ease-in-out;
-}
-
-.code-wrapper:hover .code-wrapper-tile {
   opacity: 1;
+  transition: opacity 300ms ease-in-out;
 }
 
 .tiptap iframe {

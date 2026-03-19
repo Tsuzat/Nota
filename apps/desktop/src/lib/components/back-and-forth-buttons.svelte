@@ -7,33 +7,33 @@ import { getKeyboardShortcut } from '$lib/utils';
 </script>
 
 <div class="flex items-center">
-	{#if !useSidebar().open}
-		<SidebarTrigger />
-	{/if}
-	<SimpleToolTip>
-		<Button variant="ghost" size="icon-sm" onclick={() => history.back()}>
-			<icons.ArrowLeft />
-		</Button>
-		{#snippet child()}
-			<span
-				>Go Back
-				<span class="bg-background text-primary rounded p-0.5">
-					{getKeyboardShortcut('←', true)}
-				</span>
-			</span>
-		{/snippet}
-	</SimpleToolTip>
-	<SimpleToolTip>
-		<Button variant="ghost" size="icon-sm" onclick={() => history.forward()}>
-			<icons.ArrowRight />
-		</Button>
-		{#snippet child()}
-			<span
-				>Go Next
-				<span class="bg-background text-primary rounded p-0.5">
-					{getKeyboardShortcut('→', true)}
-				</span>
-			</span>
-		{/snippet}
-	</SimpleToolTip>
+  {#if !useSidebar().open}
+    <SidebarTrigger />
+  {/if}
+  <SimpleToolTip>
+    <Button variant="ghost" size="icon-sm" onclick={() => history.back()}>
+      <icons.ArrowLeft />
+    </Button>
+    {#snippet child()}
+      <span
+        >Go Back
+        <span class="bg-background text-primary rounded p-0.5">
+          {getKeyboardShortcut("←", true)}
+        </span>
+      </span>
+    {/snippet}
+  </SimpleToolTip>
+  <SimpleToolTip>
+    <Button variant="ghost" size="icon-sm" onclick={() => history.forward()}>
+      <icons.ArrowRight />
+    </Button>
+    {#snippet child()}
+      <span
+        >Go Next
+        <span class="bg-background text-primary rounded p-0.5">
+          {getKeyboardShortcut("→", true)}
+        </span>
+      </span>
+    {/snippet}
+  </SimpleToolTip>
 </div>

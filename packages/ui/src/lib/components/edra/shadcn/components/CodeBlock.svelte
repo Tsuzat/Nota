@@ -55,7 +55,7 @@ function copyCode() {
         portalProps={{ disabled: true, to: undefined }}
       >
         <Command.Root>
-          <Command.Input placeholder="Search language..." />
+          <Command.Input placeholder="Search Languages..." />
           <Command.List>
             <Command.Empty>No Language found.</Command.Empty>
             <Command.Group value="languages">

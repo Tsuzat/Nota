@@ -5,7 +5,7 @@ import { cn } from '@lib/utils.js';
 import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
 import type { Content, Editor } from '@nota/ui/edra/types.js';
-import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { IconPicker, IconRenderer } from '@nota/ui/icons/index.js';
 import { buttonVariants } from '@nota/ui/shadcn/button';
 import { Separator } from '@nota/ui/shadcn/separator';
 import { useSidebar } from '@nota/ui/shadcn/sidebar';
@@ -173,10 +173,10 @@ function handleKeydown(event: KeyboardEvent) {
     <header class="flex h-12 shrink-0 items-center gap-2">
       <div
         class={cn(
-          "z-20 ml-18 flex items-center gap-2 px-3",
-          ISMACOS && !sidebar.open && "ml-18",
+          "z-20 flex items-center gap-2 px-3",
+          ISMACOS && !sidebar.open && "ml-10",
           ISWINDOWS && !sidebar.open && "ml-0",
-          sidebar.open && "md:ml-0"
+          sidebar.open && "md:ml-0",
         )}
       >
         {#if ISWINDOWS && !sidebar.open}
@@ -185,7 +185,7 @@ function handleKeydown(event: KeyboardEvent) {
         <BackAndForthButtons />
         <Separator
           orientation="vertical"
-          class="mr-2 data-[orientation=vertical]:h-4"
+          class="data-[orientation=vertical]:h-4"
         />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="h-8 w-48 rounded-md" />
@@ -194,7 +194,7 @@ function handleKeydown(event: KeyboardEvent) {
       <div
         class={cn(
           "z-20 ml-auto flex items-center gap-2 px-3",
-          ISWINDOWS && "mr-30"
+          ISWINDOWS && "mr-30",
         )}
       >
         <Skeleton class="h-8 w-16 rounded-md" />
@@ -223,7 +223,7 @@ function handleKeydown(event: KeyboardEvent) {
         "z-20 ml-18 flex items-center gap-2 px-3",
         ISMACOS && !sidebar.open && "ml-18",
         ISWINDOWS && !sidebar.open && "ml-0",
-        sidebar.open && "md:ml-0"
+        sidebar.open && "md:ml-0",
       )}
     >
       {#if ISWINDOWS && !sidebar.open}
@@ -255,11 +255,11 @@ function handleKeydown(event: KeyboardEvent) {
     <div
       class={cn(
         "z-20 ml-auto flex items-center gap-2 px-3",
-        ISWINDOWS && "mr-30"
+        ISWINDOWS && "mr-30",
       )}
     >
       {#if editor && !editor?.isDestroyed}
-        <div class="text-muted-foreground truncate text-xs">
+        <div class="text-muted-foreground hidden sm:block truncate text-xs">
           {editor.storage.characterCount.words()} Words
         </div>
         <SearchAndReplace {editor} />
