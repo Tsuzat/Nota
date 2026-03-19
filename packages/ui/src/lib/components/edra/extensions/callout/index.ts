@@ -26,6 +26,48 @@ export const Callout = Node.create({
     };
   },
 
+  markdownTokenizer: {
+    name: 'callout',
+    level: 'block',
+
+    start: (src: string) => {
+      return src.indexOf('$');
+    },
+
+    tokenize: (src: string, tokens: any, lexer: any) => {
+      // Match $callout[emoji]\ncontent\n$
+      const match = /^\$callout\s*(.*)?\n([\s\S]*?)\n\$/.exec(src);
+
+      if (!match) {
+        return undefined;
+      }
+
+      return {
+        type: 'callout',
+        raw: match[0],
+        emoji: match[1]?.trim() || '💡',
+        text: match[2],
+        tokens: lexer.blockTokens(match[2]),
+      };
+    },
+  },
+
+  parseMarkdown: (token: any, helpers: any) => {
+    return {
+      type: 'callout',
+      attrs: {
+        emoji: token.emoji,
+      },
+      content: helpers.parseChildren(token.tokens || []),
+    };
+  },
+
+  renderMarkdown: (node: any, helpers: any) => {
+    const content = helpers.renderChildren(node);
+    const emoji = node.attrs?.emoji || '💡';
+    return `$callout${emoji}\n${content}\n$\n\n`;
+  },
+
   addOptions() {
     return {
       HTMLAttributes: {
@@ -60,10 +102,10 @@ export const Callout = Node.create({
   addInputRules() {
     return [
       wrappingInputRule({
-        find: /^\$callout\$$/,
+        find: /^\$callout\s*(.*)?\s$/,
         type: this.type,
         getAttributes: (match) => {
-          return { emoji: match[1] };
+          return { emoji: match[1]?.trim() || '💡' };
         },
       }),
     ];

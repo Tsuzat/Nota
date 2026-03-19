@@ -28,7 +28,7 @@ import Table from '@lucide/svelte/icons/table';
 import Underline from '@lucide/svelte/icons/underline';
 import Undo from '@lucide/svelte/icons/undo-2';
 import Video from '@lucide/svelte/icons/video';
-import { isTextSelection } from '@tiptap/core';
+import Workflow from '@lucide/svelte/icons/workflow';
 import { isMac } from '../utils.js';
 import type { EdraToolBarCommands } from './types.js';
 
@@ -514,6 +514,17 @@ const commands: Record<string, EdraToolBarCommands[]> = {
         editor.chain().focus(pos).setNodeSelection(pos).deleteSelection().insertBlockMath({ latex, pos }).run();
       },
       isActive: (editor) => editor.isActive('blockMath'),
+    },
+  ],
+  diagram: [
+    {
+      icon: Workflow,
+      name: 'mermaid',
+      tooltip: 'Mermaid Diagram',
+      onClick: (editor) => {
+        editor.chain().focus().setMermaid(' ').run();
+      },
+      isActive: (editor) => editor.isActive('mermaid'),
     },
   ],
 };

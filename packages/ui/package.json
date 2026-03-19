@@ -75,6 +75,7 @@
     "@tiptap/suggestion": "^3.13.0",
     "katex": "^0.16.27",
     "lowlight": "^3.3.0",
+    "mermaid": "^11.13.0",
     "svelte-streamdown": "^3.0.1",
     "svelte-tiptap": "^3.0.1",
     "tiptap-extension-auto-joiner": "^0.1.3"

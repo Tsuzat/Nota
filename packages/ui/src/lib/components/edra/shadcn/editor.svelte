@@ -41,6 +41,7 @@ import MathInline from './menus/MathInline.svelte';
 import TableCol from './menus/TableCol.svelte';
 import TableRow from './menus/TableRow.svelte';
 import { Callout } from '../extensions/callout';
+import { Mermaid } from '../extensions/mermaid';
 
 const lowlight = createLowlight(all);
 
@@ -117,6 +118,7 @@ onMount(() => {
           },
         },
       }),
+      Mermaid,
       TableOfContents.configure({
         getIndex: getHierarchicalIndexes,
         onUpdate: (indexes) => {

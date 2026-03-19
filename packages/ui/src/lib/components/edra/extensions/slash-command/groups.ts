@@ -44,6 +44,7 @@ export const GROUPS: Group[] = [
       ...commands.media,
       ...commands.table,
       ...commands.math,
+      ...commands.diagram,
       {
         icon: Minus,
         name: 'horizontalRule',

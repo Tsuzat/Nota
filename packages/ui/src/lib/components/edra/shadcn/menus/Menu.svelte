@@ -42,6 +42,7 @@ function shouldShow(props: ShouldShowProps) {
   if (editor.isActive('audio')) return false;
   if (editor.isActive('blockMath') || editor.isActive('inlineMath')) return false;
   if (editor.isActive('ai-highlight')) return false;
+  if (editor.isActive('mermaid')) return false;
   const {
     state: {
       doc,
