@@ -7,7 +7,7 @@ import { getKeyboardShortcut } from '$lib/utils';
 </script>
 
 <div class="flex items-center">
-  {#if !useSidebar().open}
+  {#if !useSidebar().open || useSidebar().isMobile}
     <SidebarTrigger />
   {/if}
   <SimpleToolTip>
