@@ -1,6 +1,7 @@
 <script lang="ts">
 import { SimpleToolTip, StreamDown } from '@lib/components/custom/index.js';
 import { Textarea } from '@lib/components/ui/textarea';
+import { cn } from '@lib/utils';
 import BubbleMenu from '@nota/ui/edra/components/BubbleMenu.svelte';
 import { removeAIHighlight } from '@nota/ui/edra/extensions/AIHighLight.js';
 import type { Editor, ShouldShowProps } from '@nota/ui/edra/types.js';
@@ -18,9 +19,8 @@ import {
   SOLVE_PROBLEM_PROMPT,
   SUMMARIZE_PROMPT,
 } from '$lib/ai/commands';
-import { getGlobalSettings } from '../settings';
-import { cn } from '@lib/utils';
 import { getKeyboardShortcut, ISMACOS } from '$lib/utils';
+import { getGlobalSettings } from '../settings';
 
 interface Props {
   editor: Editor;
