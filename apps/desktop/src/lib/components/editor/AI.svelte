@@ -1,13 +1,11 @@
 <script lang="ts">
 import { SimpleToolTip, StreamDown } from '@lib/components/custom/index.js';
 import { Textarea } from '@lib/components/ui/textarea';
-import { cn } from '@lib/utils';
 import BubbleMenu from '@nota/ui/edra/components/BubbleMenu.svelte';
 import { removeAIHighlight } from '@nota/ui/edra/extensions/AIHighLight.js';
 import type { Editor, ShouldShowProps } from '@nota/ui/edra/types.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
-import { Separator } from '@nota/ui/shadcn/separator';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { fade, slide } from 'svelte/transition';
 import { callAI, callGemini } from '$lib/ai';
@@ -19,7 +17,7 @@ import {
   SOLVE_PROBLEM_PROMPT,
   SUMMARIZE_PROMPT,
 } from '$lib/ai/commands';
-import { getKeyboardShortcut, ISMACOS } from '$lib/utils';
+import { getKeyboardShortcut } from '$lib/utils';
 import { getGlobalSettings } from '../settings';
 
 interface Props {
@@ -219,11 +217,11 @@ function handleKeydown(event: KeyboardEvent) {
   options={{
     shift: {
       crossAxis: true,
-      mainAxis: false,
+      mainAxis: true,
     },
     strategy: "fixed",
     autoPlacement: {
-      allowedPlacements: ["bottom", "top"],
+      allowedPlacements: ["bottom", "top", "right", "left"],
     },
     scrollTarget: parentElement,
     onShow() {
@@ -237,13 +235,13 @@ function handleKeydown(event: KeyboardEvent) {
   {#if aiState === AIState.Idle}
     <form
       onsubmit={handleSubmit}
-      class="flex bg-background/50 backdrop-blur-2xl border rounded-lg items-center max-w-2xl justify-between min-w-xl p-1"
+      class="flex bg-popover/75 backdrop-blur-2xl border rounded-lg items-center max-w-2xl justify-between min-w-xl p-1"
     >
       <Textarea
         bind:value={inputValue}
         bind:ref={inputTag}
         placeholder={`Ask AI anything and press ${getKeyboardShortcut("⏎", true)}`}
-        class="border-0 p-2 bg-transparent! outline-0 text-sm resize-none h-auto ring-0!"
+        class="border-0 p-2 w-2xl bg-transparent! max-w-3xl outline-0 text-sm resize-none h-auto ring-0!"
       />
       <Button type="submit" size="icon-sm" class="rounded-full">
         <icons.ArrowUp />
@@ -252,7 +250,7 @@ function handleKeydown(event: KeyboardEvent) {
     {#if getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0}
       <div
         transition:slide={{ axis: "y", duration: 500 }}
-        class="flex flex-col bg-popover rounded-lg gap-1 border overflow-auto mt-2"
+        class="flex flex-col w-96 mx-auto bg-popover rounded-lg gap-1 border overflow-auto mt-2"
       >
         <div class="flex items-center justify-between">
           <small class="text-muted-foreground ml-4 mt-2 p-1 text-start"
@@ -315,7 +313,7 @@ function handleKeydown(event: KeyboardEvent) {
     {/if}
   {:else if aiState === AIState.Confirmation}
     {#if aiResponse === ""}
-      <div transition:fade class="animated-gradient-border rounded-2xl p-px">
+      <div transition:fade class="animated-gradient-border bg-popover rounded-lg p-0.5">
         <div class="bg-popover inline-flex items-center gap-2 rounded p-2">
           <icons.Sparkle class="size-4!" />
           <span
@@ -337,7 +335,7 @@ function handleKeydown(event: KeyboardEvent) {
     {:else}
       <div
         transition:fade
-        class="flex items-center justify-between gap-2 px-2 py-1"
+        class="flex items-center bg-popover border rounded-lg justify-between gap-2 px-2 py-1"
       >
         <small>Actions:</small>
         <SimpleToolTip content="Go Back to Options">
@@ -375,8 +373,7 @@ function handleKeydown(event: KeyboardEvent) {
           </Button>
         </SimpleToolTip>
       </div>
-      <Separator />
-      <StreamDown content={aiResponse} class="w-full overflow-auto px-4 py-2" />
+      <StreamDown content={aiResponse} class="w-full bg-popover/75 backdrop-blur-2xl rounded-lg border mt-2 overflow-auto px-4 py-2" />
     {/if}
   {/if}
 </BubbleMenu>
