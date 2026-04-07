@@ -71,6 +71,17 @@ onMount(() => {
         }),
       ],
     },
+    nestedOptions: {
+      enabled: false,
+      rules: [],
+      defaultRules: true,
+      allowedContainers: undefined,
+      edgeDetection: {
+        threshold: 1,
+        edges: ['left', 'top'],
+        strength: 1,
+      },
+    },
     onNodeChange,
   });
   editor.registerPlugin(plugin.plugin);
