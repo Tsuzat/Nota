@@ -19,6 +19,8 @@ import {
   SUMMARIZE_PROMPT,
 } from '$lib/ai/commands';
 import { getGlobalSettings } from '../settings';
+import { cn } from '@lib/utils';
+import { getKeyboardShortcut, ISMACOS } from '$lib/utils';
 
 interface Props {
   editor: Editor;
@@ -194,17 +196,30 @@ function closeAI() {
   aiState = AIState.Idle;
   aiResponse = '';
 }
+
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeAI();
+  }
+  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+    event.preventDefault();
+    handleSubmit(event);
+  }
+}
 </script>
+
+<svelte:document onkeydown={handleKeydown} />
 
 <BubbleMenu
   {editor}
   pluginKey="edra-bubble-menu"
   {shouldShow}
-  class="bg-black/20 backdrop-blur-2xl flex max-h-120 max-w-3xl flex-col rounded-lg border p-0 transition-[height] duration-500"
+  class="bg-transparent flex max-h-120 max-w-3xl w-full flex-col p-0 transition-[height] duration-500"
   options={{
     shift: {
       crossAxis: true,
-      mainAxis: true,
+      mainAxis: false,
     },
     strategy: "fixed",
     autoPlacement: {
@@ -222,12 +237,12 @@ function closeAI() {
   {#if aiState === AIState.Idle}
     <form
       onsubmit={handleSubmit}
-      class="flex items-center max-w-2xl justify-between min-w-80 p-1"
+      class="flex bg-background/50 backdrop-blur-2xl border rounded-lg items-center max-w-2xl justify-between min-w-xl p-1"
     >
       <Textarea
         bind:value={inputValue}
         bind:ref={inputTag}
-        placeholder="Ask AI anything..."
+        placeholder={`Ask AI anything and press ${getKeyboardShortcut("⏎", true)}`}
         class="border-0 p-2 bg-transparent! outline-0 text-sm resize-none h-auto ring-0!"
       />
       <Button type="submit" size="icon-sm" class="rounded-full">
@@ -237,12 +252,18 @@ function closeAI() {
     {#if getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0}
       <div
         transition:slide={{ axis: "y", duration: 500 }}
-        class="flex flex-col gap-1 overflow-auto"
+        class="flex flex-col bg-popover rounded-lg gap-1 border overflow-auto mt-2"
       >
-        <Separator orientation="horizontal" />
-        <small class="text-muted-foreground ml-4 p-1 text-start"
-          >Quick Actions</small
-        >
+        <div class="flex items-center justify-between">
+          <small class="text-muted-foreground ml-4 mt-2 p-1 text-start"
+            >Quick Actions</small
+          >
+          <!-- <span
+            class="text-muted-foreground inline-flex items-center gap-1 mr-4 text-xs"
+            >Use
+            <icons.ArrowUpDown class="size-5 bg-muted p-0.5 rounded" /> to navigate</span
+          > -->
+        </div>
         <button
           title=""
           onclick={makeTextShorter}
