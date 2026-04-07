@@ -204,7 +204,7 @@ function handleKeydown(e: KeyboardEvent) {
           "z-20 ml-18 flex items-center gap-2 px-3",
           ISMACOS && !sidebar.open && "ml-18",
           ISWINDOWS && !sidebar.open && "ml-0",
-          sidebar.open && "md:ml-0"
+          sidebar.open && "md:ml-0",
         )}
       >
         {#if ISWINDOWS && !sidebar.open}
@@ -222,7 +222,7 @@ function handleKeydown(e: KeyboardEvent) {
       <div
         class={cn(
           "z-20 ml-auto flex items-center gap-2 px-3",
-          ISWINDOWS && "mr-30"
+          ISWINDOWS && "mr-30",
         )}
       >
         <Skeleton class="h-8 w-16 rounded-md" />
@@ -251,7 +251,7 @@ function handleKeydown(e: KeyboardEvent) {
         "z-20 ml-18 flex items-center gap-2 px-3",
         ISMACOS && !sidebar.open && "ml-18",
         ISWINDOWS && !sidebar.open && "ml-0",
-        sidebar.open && "md:ml-0"
+        sidebar.open && "md:ml-0",
       )}
     >
       {#if ISWINDOWS && !sidebar.open}
@@ -289,7 +289,7 @@ function handleKeydown(e: KeyboardEvent) {
     <div
       class={cn(
         "z-20 ml-auto flex items-center gap-2 px-3",
-        ISWINDOWS && "mr-30"
+        ISWINDOWS && "mr-30",
       )}
     >
       {#if note.is_public}

@@ -173,8 +173,8 @@ function handleKeydown(event: KeyboardEvent) {
     <header class="flex h-12 shrink-0 items-center gap-2">
       <div
         class={cn(
-          "z-20 flex items-center gap-2 px-3",
-          ISMACOS && !sidebar.open && "ml-10",
+          "z-20 ml-18 flex items-center gap-2 px-3",
+          ISMACOS && !sidebar.open && "ml-18",
           ISWINDOWS && !sidebar.open && "ml-0",
           sidebar.open && "md:ml-0",
         )}
