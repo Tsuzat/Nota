@@ -29,6 +29,10 @@
     "deep-link:default",
     "shell:default",
     "http:allow-fetch-read-body",
+    "dialog:allow-confirm",
+    "dialog:allow-open",
+    "dialog:allow-message",
+    "dialog:allow-save",
     {
       "identifier": "http:default",
       "allow": [

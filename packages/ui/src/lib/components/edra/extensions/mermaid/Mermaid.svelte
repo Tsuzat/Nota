@@ -129,7 +129,7 @@ $effect(() => {
 </script>
 
 <NodeViewWrapper
-  class="mermaid-node-wrapper my-8 w-full flex flex-col items-center group relative border rounded-lg overflow-hidden transition-all duration-300"
+  class="mermaid-node-wrapper my-4! w-full flex flex-col items-center group relative border rounded-lg overflow-hidden transition-all duration-300"
   contenteditable={false}
 >
   {#if isEditing}
@@ -172,14 +172,14 @@ $effect(() => {
         {#if mode === "both" || mode === "code"}
           <div
             class={cn(
-              "flex-1 h-full bg-muted dark:bg-muted/50 relative",
+              "flex-1 h-full bg-muted dark:bg-muted/20 relative",
               mode === "both" ? "border-r" : "",
             )}
           >
             <Textarea
               bind:value={localCode}
               placeholder="Enter mermaid code here..."
-              class="mermaid-code-editor w-full h-full p-4 font-mono text-sm bg-transparent text-[#d4d4d4] border-none focus-visible:ring-0 resize-none outline-none"
+              class="mermaid-code-editor w-full h-full p-4 rounded-none font-mono text-sm text-muted-foreground border-none focus-visible:ring-0 resize-none outline-none"
             />
           </div>
         {/if}

@@ -25,15 +25,19 @@ const trashedNotes = $derived.by<LocalNote[] | Note[]>(() => {
 });
 
 async function deleteNote(note: LocalNote | Note) {
-  const confirm = await ask(`Are you sure you want to delete ${note.name} permanently? This action cannot be undone.`, {
-    title: `Delete ${note.name} Permanently?`,
-    kind: 'warning',
-    okLabel: 'Delete',
-  });
-  if (!confirm) return;
   try {
-    if ('owner' in note) await cloudNotes.delete(note.id);
-    else await localNotes.deleteNote(note);
+    if ('owner' in note) {
+      const confirm = await ask(
+        `Are you sure you want to delete ${note.name} permanently? This action cannot be undone.`,
+        {
+          title: `Delete ${note.name} Permanently?`,
+          kind: 'warning',
+          okLabel: 'Delete',
+        }
+      );
+      if (!confirm) return;
+      await cloudNotes.delete(note.id);
+    } else await localNotes.deleteNote(note);
   } catch (error) {
     console.error(error);
     toast.error(`Something went wrong while deleting ${note.name}`);
@@ -51,44 +55,44 @@ async function restoreNote(note: LocalNote | Note) {
 </script>
 
 <Popover.Root bind:open>
-	<Popover.Trigger class="sr-only absolute right-0">Open</Popover.Trigger>
-	<Popover.Content
-		class="flex max-h-80 w-80 flex-col gap-1 overflow-y-auto p-1"
-		side="right"
-		portalProps={{ disabled: true, to: undefined }}
-	>
-		{#each trashedNotes as note (note.id)}
-			<div class="flex items-center gap-2 rounded-lg p-1.5">
-				<IconRenderer icon={note.icon} class="size-4" />
-				<div class="flex flex-col">
-					<span class="truncate">{note.name}</span>
-				</div>
-				<div class="ml-auto">
-					<SimpleToolTip content="Restore Note">
-						<Button
-							title="Restore Note"
-							variant="ghost"
-							onclick={() => restoreNote(note)}
-							size="icon-sm"
-						>
-							<icons.RotateCcw />
-						</Button>
-					</SimpleToolTip>
-					<SimpleToolTip content="Delete Permanently">
-						<Button
-							title="Delete Permanently"
-							variant="ghost"
-							onclick={() => deleteNote(note)}
-							size="icon-sm"
-						>
-							<icons.Trash2 />
-						</Button>
-					</SimpleToolTip>
-				</div>
-			</div>
-		{/each}
-		{#if trashedNotes.length === 0}
-			<div class="p-2 text-center">No trashed notes</div>
-		{/if}
-	</Popover.Content>
+  <Popover.Trigger class="sr-only absolute right-0">Open</Popover.Trigger>
+  <Popover.Content
+    class="flex max-h-80 w-80 flex-col gap-1 overflow-y-auto p-1"
+    side="right"
+    portalProps={{ disabled: true, to: undefined }}
+  >
+    {#each trashedNotes as note (note.id)}
+      <div class="flex items-center gap-2 rounded-lg p-1.5">
+        <IconRenderer icon={note.icon} class="size-4" />
+        <div class="flex flex-col">
+          <span class="truncate">{note.name}</span>
+        </div>
+        <div class="ml-auto">
+          <SimpleToolTip content="Restore Note">
+            <Button
+              title="Restore Note"
+              variant="ghost"
+              onclick={() => restoreNote(note)}
+              size="icon-sm"
+            >
+              <icons.RotateCcw />
+            </Button>
+          </SimpleToolTip>
+          <SimpleToolTip content="Delete Permanently">
+            <Button
+              title="Delete Permanently"
+              variant="ghost"
+              onclick={() => deleteNote(note)}
+              size="icon-sm"
+            >
+              <icons.Trash2 />
+            </Button>
+          </SimpleToolTip>
+        </div>
+      </div>
+    {/each}
+    {#if trashedNotes.length === 0}
+      <div class="p-2 text-center">No trashed notes</div>
+    {/if}
+  </Popover.Content>
 </Popover.Root>
