@@ -23,7 +23,7 @@ interface Props {
   editor: Editor;
 }
 const { editor }: Props = $props();
-let inputTag = $state<HTMLTextAreaElement>();
+let inputTag = $state<HTMLTextAreaElement>(document.createElement('textarea'));
 
 function shouldShow(props: ShouldShowProps) {
   if (!props.editor.isEditable || props.editor.isDestroyed) return false;
@@ -302,7 +302,10 @@ function handleKeydown(e: KeyboardEvent) {
     {/if}
   {:else if aiState === AIState.Confirmation}
     {#if aiResponse === ""}
-      <div transition:fade class="animated-gradient-border bg-popover rounded-lg p-0.5">
+      <div
+        transition:fade
+        class="animated-gradient-border bg-popover rounded-lg p-0.5"
+      >
         <div class="bg-popover inline-flex items-center gap-2 rounded p-2">
           <icons.Sparkle class="size-4!" />
           <span
@@ -362,7 +365,10 @@ function handleKeydown(e: KeyboardEvent) {
           </Button>
         </SimpleToolTip>
       </div>
-      <StreamDown content={aiResponse} class="w-full bg-popover/75 backdrop-blur-2xl rounded-lg border mt-2 overflow-auto px-4 py-2" />
+      <StreamDown
+        content={aiResponse}
+        class="w-full bg-popover/75 backdrop-blur-2xl rounded-lg border mt-2 overflow-auto px-4 py-2"
+      />
     {/if}
   {/if}
 </BubbleMenu>

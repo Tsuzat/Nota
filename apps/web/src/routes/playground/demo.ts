@@ -161,13 +161,6 @@ export default {
           type: 'text',
           marks: [
             {
-              type: 'textStyle',
-              attrs: {
-                color: '',
-                fontSize: null,
-              },
-            },
-            {
               type: 'highlight',
               attrs: {
                 color: '#7D0404',
@@ -186,8 +179,8 @@ export default {
             {
               type: 'textStyle',
               attrs: {
-                color: '#83069C',
-                fontSize: null,
+                color: 'rgb(131, 6, 156)',
+                fontSize: '',
               },
             },
           ],
@@ -290,8 +283,8 @@ export default {
             {
               type: 'textStyle',
               attrs: {
-                color: '#83069C',
-                fontSize: null,
+                color: 'rgb(131, 6, 156)',
+                fontSize: '',
               },
             },
           ],
@@ -357,6 +350,7 @@ export default {
                 target: '_tab',
                 rel: 'noopener noreferrer nofollow',
                 class: null,
+                title: null,
               },
             },
           ],
@@ -430,6 +424,119 @@ export default {
         {
           type: 'text',
           text: ': If the mass of the earth is to be twice and its radius is to be half, how much would I weigh if my current weight is 150 lbs.',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+    },
+    {
+      type: 'horizontalRule',
+    },
+    {
+      type: 'heading',
+      attrs: {
+        textAlign: null,
+        id: '9d849017-2dfb-4194-9f00-2094f0289793',
+        'data-toc-id': '9d849017-2dfb-4194-9f00-2094f0289793',
+        level: 3,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Mermaid Diagrams',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      attrs: {
+        textAlign: null,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'You can access the ',
+        },
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'bold',
+            },
+          ],
+          text: 'mermaid',
+        },
+        {
+          type: 'text',
+          text: ' from slash commands.',
+        },
+      ],
+    },
+    {
+      type: 'mermaid',
+      attrs: {
+        HTMLAttributes: {},
+      },
+      content: [
+        {
+          type: 'text',
+          text: ' sequenceDiagram\n    Alice ->> Bob: Hello Bob, how are you?\n    Bob-->>John: How about you John?\n    Bob--x Alice: I am good thanks!\n    Bob-x John: I am good thanks!\n    Note right of John: Bob thinks a long<br/>long time, so long<br/>that the text does<br/>not fit on a row.\n\n    Bob-->Alice: Checking with John...\n    Alice->John: Yes... John, how are you?\n',
+        },
+      ],
+    },
+    {
+      type: 'callout',
+      attrs: {
+        emoji: '💡',
+      },
+      content: [
+        {
+          type: 'paragraph',
+          attrs: {
+            textAlign: null,
+          },
+          content: [
+            {
+              type: 'text',
+              text: 'This is an amazing callout, use ',
+            },
+            {
+              type: 'text',
+              marks: [
+                {
+                  type: 'code',
+                },
+              ],
+              text: 'slash',
+            },
+            {
+              type: 'text',
+              text: ' command to access this. Or user ',
+            },
+            {
+              type: 'text',
+              marks: [
+                {
+                  type: 'code',
+                },
+              ],
+              text: '$callout💡',
+            },
+            {
+              type: 'text',
+              text: ' as shortcut. ',
+            },
+          ],
         },
       ],
     },
@@ -877,12 +984,6 @@ export default {
       ],
     },
     {
-      type: 'paragraph',
-      attrs: {
-        textAlign: null,
-      },
-    },
-    {
       type: 'image-placeholder',
     },
     {
@@ -897,9 +998,6 @@ export default {
       },
     },
     {
-      type: 'video-placeholder',
-    },
-    {
       type: 'video',
       attrs: {
         src: 'https://cdn.pixabay.com/video/2016/09/22/5631-183849543_large.mp4',
@@ -911,9 +1009,6 @@ export default {
       },
     },
     {
-      type: 'audio-placeholder',
-    },
-    {
       type: 'audio',
       attrs: {
         src: 'https://cdn.pixabay.com/audio/2024/10/30/audio_42e6870f29.mp3',
@@ -923,9 +1018,6 @@ export default {
         height: null,
         align: 'left',
       },
-    },
-    {
-      type: 'iframe-placeholder',
     },
     {
       type: 'iframe',
@@ -1229,6 +1321,7 @@ export default {
                         target: '_tab',
                         rel: 'noopener noreferrer nofollow',
                         class: null,
+                        title: null,
                       },
                     },
                   ],
@@ -1257,6 +1350,7 @@ export default {
                         target: '_tab',
                         rel: 'noopener noreferrer nofollow',
                         class: null,
+                        title: null,
                       },
                     },
                   ],
@@ -1267,12 +1361,6 @@ export default {
           ],
         },
       ],
-    },
-    {
-      type: 'paragraph',
-      attrs: {
-        textAlign: null,
-      },
     },
     {
       type: 'paragraph',

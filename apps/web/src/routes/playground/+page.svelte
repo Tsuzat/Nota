@@ -43,11 +43,11 @@ onMount(() => {
     <Button>Open Dialog</Button>
   </DialogTrigger>
   <DialogContent>
-    <DialogTitle>File Uploads is Not Available</DialogTitle>
+    <DialogTitle>Some features may not work as expected</DialogTitle>
     <DialogDescription>
       This is a playgroud. This is to give you an experience of Nota and it's
-      features. But, Some features may not work like Media Uploads, and
-      some more features. Please be logged in to use AI features.
+      features. But, Some features may not work like Media Uploads, and some
+      more features. Please be logged in to use AI features.
     </DialogDescription>
     <DialogFooter>
       <DialogClose class={buttonVariants({})}>Close</DialogClose>
