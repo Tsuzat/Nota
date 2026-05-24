@@ -27,6 +27,6 @@
     "@types/bun": "latest"
   },
   "dependencies": {
-    "zod": "^4.2.1"
+    "zod": "^4.4.3"
   }
 }

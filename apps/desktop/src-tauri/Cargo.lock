@@ -2653,7 +2653,7 @@ checksum = "72ef4a56884ca558e5ddb05a1d1e7e1bfd9a68d9ed024c21704cc98872dae1bb"
 
 [[package]]
 name = "nota"
-version = "0.9.67-beta"
+version = "0.9.68-beta"
 dependencies = [
  "serde",
  "serde_json",
