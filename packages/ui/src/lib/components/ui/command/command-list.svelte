@@ -8,6 +8,6 @@ let { ref = $bindable(null), class: className, ...restProps }: CommandPrimitive.
 <CommandPrimitive.List
 	bind:ref
 	data-slot="command-list"
-	class={cn("max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto", className)}
+	class={cn("no-scrollbar max-h-72 scroll-py-1 outline-none overflow-x-hidden overflow-y-auto", className)}
 	{...restProps}
 />

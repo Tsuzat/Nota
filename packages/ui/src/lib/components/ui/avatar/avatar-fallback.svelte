@@ -8,6 +8,9 @@ let { ref = $bindable(null), class: className, ...restProps }: AvatarPrimitive.F
 <AvatarPrimitive.Fallback
 	bind:ref
 	data-slot="avatar-fallback"
-	class={cn("bg-muted flex size-full items-center justify-center rounded-full", className)}
+	class={cn(
+		"bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs",
+		className
+	)}
 	{...restProps}
 />
