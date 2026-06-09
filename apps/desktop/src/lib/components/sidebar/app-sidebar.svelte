@@ -33,16 +33,16 @@ onMount(async () => {
 });
 </script>
 
-<SidebarRoot bind:ref variant="floating" class="p-1.75" {...restProps}>
-	<SidebarHeader>
-			<div class="flex items-center justify-between">
+<SidebarRoot bind:ref variant="sidebar" {...restProps}>
+	<SidebarHeader >
+			<!-- <div class="flex items-center justify-between">
 				{#if ISMACOS  && !IS_MAXIMUM}
 					<div></div>
 				{:else}
 					<AppLogoMenu />
 				{/if}
 				<SidebarTrigger class="z-100! absolute top-2 right-2" />
-			</div>
+			</div> -->
 		<UserworkspaceSwitcher />
 		<NavMain />
 	</SidebarHeader>

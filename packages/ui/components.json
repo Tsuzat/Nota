@@ -16,5 +16,5 @@
 	"style": "nova",
 	"iconLibrary": "lucide",
 	"menuColor": "default",
-	"menuAccent": "bold"
+	"menuAccent": "subtle"
 }

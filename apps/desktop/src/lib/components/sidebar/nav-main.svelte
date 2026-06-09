@@ -17,7 +17,7 @@ let isSearchHovered = $state(false);
 <Sidebar.Menu>
 	<Sidebar.MenuItem>
 		<Sidebar.MenuButton
-			class="border py-2"
+			class="border p-2"
 			onclick={() => (search.open = true)}
 			onmouseenter={() => (isSearchHovered = true)}
 			onmouseleave={() => (isSearchHovered = false)}
@@ -31,6 +31,7 @@ let isSearchHovered = $state(false);
 	</Sidebar.MenuItem>
 	<Sidebar.MenuItem>
 		<Sidebar.MenuButton
+		class="mt-1"
 			isActive={page.url.pathname.endsWith('/')}
 			onclick={() => goto(resolve('/'))}
 			onmouseenter={() => (isHomeHovered = true)}

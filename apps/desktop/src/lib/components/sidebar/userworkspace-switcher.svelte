@@ -64,7 +64,7 @@ async function selectCloudUserWorkspace(userWorkspace: UserWorkspace) {
 }
 </script>
 
-<Sidebar.Menu class="mt-4">
+<Sidebar.Menu >
 	<Sidebar.MenuItem>
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>

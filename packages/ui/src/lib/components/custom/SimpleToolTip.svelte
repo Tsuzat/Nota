@@ -4,13 +4,14 @@ import type { Snippet } from 'svelte';
 
 interface Props {
   content?: string;
+  keyboard?: string;
   children: Snippet<[]>;
   child?: Snippet<[]>;
   delayDuration?: number;
   side?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-const { content, children, child, delayDuration = 100, side }: Props = $props();
+const { content, keyboard, children, child, delayDuration = 100, side }: Props = $props();
 </script>
 
 <Tooltip.Provider {delayDuration}>
@@ -21,6 +22,11 @@ const { content, children, child, delayDuration = 100, side }: Props = $props();
     <Tooltip.Content {side}>
       {#if content}
         <p>{content}</p>
+      {/if}
+      {#if keyboard}
+        <span class="bg-background text-primary rounded p-0.5">
+          {keyboard}
+        </span>
       {/if}
       {@render child?.()}
     </Tooltip.Content>
