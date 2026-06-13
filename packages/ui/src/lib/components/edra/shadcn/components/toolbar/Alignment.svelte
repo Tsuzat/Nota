@@ -40,7 +40,7 @@ const AlignmentIcon = $derived.by(() => {
 			<ChevronDown class="text-muted-foreground size-2!" />
 		</DropdownMenu.Trigger>
 	</EdraToolTip>
-	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
+	<DropdownMenu.Content class="w-fit" portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
 		<DropdownMenu.Label>Alignments</DropdownMenu.Label>
 		{#each alignments as alignment (alignment)}
 			{@const Icon = alignment.icon}

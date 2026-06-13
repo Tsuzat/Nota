@@ -50,7 +50,7 @@ function handleSubmit(e: Event) {
 		class="h-fit w-80 rounded-lg p-0!"
 	>
 		<form class="flex items-center gap-0.5" onsubmit={handleSubmit}>
-			<Input placeholder="Type or paste a link" bind:value required type="url" />
+			<Input placeholder="Type or paste a link..." bind:value required type="url" />
 			<SimpleToolTip content="Insert link">
 				<Button type="submit" size="icon">
 					<Check />

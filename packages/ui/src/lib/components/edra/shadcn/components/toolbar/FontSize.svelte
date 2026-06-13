@@ -48,7 +48,7 @@ const currentLabel = $derived.by(() => {
 			<ChevronDown class="text-muted-foreground size-2!" />
 		</DropdownMenu.Trigger>
 	</EdraToolTip>
-	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
+	<DropdownMenu.Content class="w-fit" portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
 		<DropdownMenu.Label>Font Size</DropdownMenu.Label>
 		{#each FONT_SIZE as fontSize (fontSize)}
 			<DropdownMenu.Item
