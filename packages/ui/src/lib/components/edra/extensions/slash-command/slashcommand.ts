@@ -1,25 +1,16 @@
-import {
-  autoUpdate,
-  computePosition,
-  flip,
-  offset,
-  type Placement,
-} from "@floating-ui/dom";
-import { type Editor, Extension } from "@tiptap/core";
-import { EditorState, PluginKey } from "@tiptap/pm/state";
-import Suggestion, {
-  type SuggestionKeyDownProps,
-  type SuggestionProps,
-} from "@tiptap/suggestion";
-import type { Component } from "svelte";
-import SvelteRenderer from "../../svelte-renderer.svelte.js";
-import type { EdraToolBarCommands } from "../../commands/types.js";
-import { GROUPS } from "./groups.js";
+import { autoUpdate, computePosition, flip, offset, type Placement } from '@floating-ui/dom';
+import { type Editor, Extension } from '@tiptap/core';
+import { EditorState, PluginKey } from '@tiptap/pm/state';
+import Suggestion, { type SuggestionKeyDownProps, type SuggestionProps } from '@tiptap/suggestion';
+import type { Component } from 'svelte';
+import SvelteRenderer from '../../svelte-renderer.svelte.js';
+import type { EdraToolBarCommands } from '../../commands/types.js';
+import { GROUPS } from './groups.js';
 
-const extensionName = "slashCommand";
+const extensionName = 'slashCommand';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default (menuList: Component<any, any, "">): Extension =>
+export default (menuList: Component<any, any, ''>): Extension =>
   Extension.create({
     name: extensionName,
 
@@ -43,13 +34,13 @@ export default (menuList: Component<any, any, "">): Extension =>
 
     onCreate() {
       // Create popup container scoped to this editor instance
-      const el = document.createElement("div");
-      el.style.position = "fixed";
-      el.style.zIndex = "9999";
-      el.style.maxWidth = "16rem";
-      el.style.visibility = "hidden";
-      el.style.pointerEvents = "none";
-      el.className = "slash-command-popup";
+      const el = document.createElement('div');
+      el.style.position = 'fixed';
+      el.style.zIndex = '9999';
+      el.style.maxWidth = '16rem';
+      el.style.visibility = 'hidden';
+      el.style.pointerEvents = 'none';
+      el.className = 'slash-command-popup';
       document.body.appendChild(el);
       this.storage.popupElement = el;
     },
@@ -67,21 +58,13 @@ export default (menuList: Component<any, any, "">): Extension =>
       return [
         Suggestion({
           editor: this.editor,
-          char: "/",
+          char: '/',
           allowSpaces: true,
           pluginKey: new PluginKey(extensionName),
-          allow: ({
-            state,
-            range,
-          }: {
-            state: EditorState;
-            range: { from: number; to: number };
-          }) => {
+          allow: ({ state, range }: { state: EditorState; range: { from: number; to: number } }) => {
             const $from = state.doc.resolve(range.from);
-            const afterContent = $from.parent.textContent?.substring(
-              $from.parent.textContent?.indexOf("/"),
-            );
-            const isValidAfterContent = !afterContent?.endsWith("  ");
+            const afterContent = $from.parent.textContent?.substring($from.parent.textContent?.indexOf('/'));
+            const isValidAfterContent = !afterContent?.endsWith('  ');
 
             return isValidAfterContent;
           },
@@ -104,9 +87,7 @@ export default (menuList: Component<any, any, "">): Extension =>
 
             return GROUPS.map((group) => ({
               ...group,
-              commands: group.actions.filter((item) =>
-                item.tooltip!.toLowerCase().trim().includes(queryNormalized),
-              ),
+              commands: group.actions.filter((item) => item.tooltip!.toLowerCase().trim().includes(queryNormalized)),
             })).filter((group) => group.commands.length > 0);
           },
           render: () => {
@@ -125,10 +106,10 @@ export default (menuList: Component<any, any, "">): Extension =>
               };
 
               computePosition(referenceElement, storage.popupElement, {
-                placement: "bottom-start" as Placement,
+                placement: 'bottom-start' as Placement,
                 middleware: [
                   offset({ mainAxis: 8, crossAxis: 16 }),
-                  flip({ fallbackPlacements: ["top-start", "bottom-start"] }),
+                  flip({ fallbackPlacements: ['top-start', 'bottom-start'] }),
                 ],
               }).then(({ x, y }: { x: number; y: number }) => {
                 if (storage.popupElement) {
@@ -149,8 +130,8 @@ export default (menuList: Component<any, any, "">): Extension =>
 
                 if (storage.popupElement) {
                   storage.popupElement.appendChild(component.element);
-                  storage.popupElement.style.visibility = "visible";
-                  storage.popupElement.style.pointerEvents = "auto";
+                  storage.popupElement.style.visibility = 'visible';
+                  storage.popupElement.style.pointerEvents = 'auto';
 
                   updatePosition();
 
@@ -159,11 +140,10 @@ export default (menuList: Component<any, any, "">): Extension =>
                   if (currentClientRect) {
                     storage.popupCleanup = autoUpdate(
                       {
-                        getBoundingClientRect: () =>
-                          currentClientRect?.() || new DOMRect(),
+                        getBoundingClientRect: () => currentClientRect?.() || new DOMRect(),
                       },
                       storage.popupElement,
-                      updatePosition,
+                      updatePosition
                     );
                   }
                 }
@@ -175,8 +155,8 @@ export default (menuList: Component<any, any, "">): Extension =>
 
                 // Re-show popup if it was hidden (e.g., after Escape)
                 if (storage.popupElement) {
-                  storage.popupElement.style.visibility = "visible";
-                  storage.popupElement.style.pointerEvents = "auto";
+                  storage.popupElement.style.visibility = 'visible';
+                  storage.popupElement.style.pointerEvents = 'auto';
                 }
 
                 updatePosition();
@@ -190,10 +170,10 @@ export default (menuList: Component<any, any, "">): Extension =>
               },
 
               onKeyDown(props: SuggestionKeyDownProps) {
-                if (props.event.key === "Escape") {
+                if (props.event.key === 'Escape') {
                   if (storage.popupElement) {
-                    storage.popupElement.style.visibility = "hidden";
-                    storage.popupElement.style.pointerEvents = "none";
+                    storage.popupElement.style.visibility = 'hidden';
+                    storage.popupElement.style.pointerEvents = 'none';
                   }
                   return true;
                 }
@@ -205,9 +185,9 @@ export default (menuList: Component<any, any, "">): Extension =>
 
               onExit() {
                 if (storage.popupElement) {
-                  storage.popupElement.style.visibility = "hidden";
-                  storage.popupElement.style.pointerEvents = "none";
-                  storage.popupElement.innerHTML = "";
+                  storage.popupElement.style.visibility = 'hidden';
+                  storage.popupElement.style.pointerEvents = 'none';
+                  storage.popupElement.innerHTML = '';
                 }
 
                 if (storage.popupCleanup) {

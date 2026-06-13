@@ -46,7 +46,6 @@ import mermaid from 'mermaid';
 
 const lowlight = createLowlight(all);
 
-
 let tocItems = $state<TableOfContentData>();
 // Initialize mermaid
 mermaid.initialize({

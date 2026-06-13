@@ -3,15 +3,15 @@
   import { icons } from "@nota/ui/icons/index.js";
   import { Button } from "@nota/ui/shadcn/button";
   import { SidebarTrigger } from "@nota/ui/shadcn/sidebar";
-  import { getKeyboardShortcut, ISMACOS, ISWINDOWS } from "$lib/utils";
-  import AppMenu from "./app-menu.svelte";
+  import { getKeyboardShortcut} from "$lib/utils";
+  import { cn } from "@lib/utils";
+  interface Props {
+    class?: string
+  }
+  const {class: className}: Props = $props()
 </script>
 
-<div class:ml-24={ISMACOS}  class="flex items-center gap-1 ml-4">
-{#if ISWINDOWS}
-  <AppMenu />
-  <small>Nota</small>
-{/if}
+<div class={cn("flex items-center gap-1", className)}>
   <SimpleToolTip content="Toggle Sidebar" keyboard={getKeyboardShortcut("\\", true)} >
     <SidebarTrigger /> 
   </SimpleToolTip>

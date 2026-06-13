@@ -123,14 +123,7 @@
       localWorkspaces.setWorkspaces(data.localWorkspaces);
       localNotes.setNotes(data.localNotes);
     }
-  });
-
-  const sidebar = setSidebar({
-    open: () => open,
-    setOpen: (value: boolean) => {
-      localStorage.setItem("sidebar-state", value ? "open" : "closed");
-    },
-  });
+  }); 
 </script>
 
 <ModeWatcher />
@@ -140,58 +133,16 @@
 <GlobalSearch />
 <GlobalSettings />
 <NewUserWorkspace />
-<header
-  data-tauri-drag-region
-  class="bg-sidebar flex items-center justify-between h-10 w-full"
->
-  <div class:ml-24={ISMACOS} class="flex items-center gap-1 ml-4">
-    {#if ISWINDOWS}
-      <AppMenu />
-      <small>Nota</small>
-    {/if}
-    <SimpleToolTip
-      content="Toggle Sidebar"
-      keyboard={getKeyboardShortcut("\\", true)}
-    >
-      <Button variant="ghost" size="icon" onclick={() => (open = !open)}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="1em"
-          height="1em"
-          viewBox="0 0 56 56"
-        >
-          <path d="M0 0h56v56H0z" fill="none" />
-          <path
-            fill="currentColor"
-            d="M7.715 49.574h40.57c4.899 0 7.36-2.437 7.36-7.265V13.69c0-4.828-2.461-7.265-7.36-7.265H7.715C2.84 6.426.355 8.84.355 13.69v28.62c0 4.851 2.485 7.265 7.36 7.265m.07-3.773c-2.344 0-3.656-1.242-3.656-3.68V13.88c0-2.438 1.312-3.68 3.656-3.68h10.43v35.602ZM48.215 10.2c2.32 0 3.656 1.242 3.656 3.68v28.24c0 2.438-1.336 3.68-3.656 3.68h-26.32V10.199Zm-34.5 8.696c.703 0 1.336-.633 1.336-1.313c0-.703-.633-1.312-1.336-1.312h-5.04c-.702 0-1.312.609-1.312 1.312c0 .68.61 1.313 1.313 1.313Zm0 6.07c.703 0 1.336-.633 1.336-1.336s-.633-1.29-1.336-1.29h-5.04c-.702 0-1.312.587-1.312 1.29s.61 1.336 1.313 1.336Zm0 6.047c.703 0 1.336-.586 1.336-1.29c0-.702-.633-1.312-1.336-1.312h-5.04c-.702 0-1.312.61-1.312 1.313s.61 1.289 1.313 1.289Z"
-          />
-        </svg>
-      </Button>
-    </SimpleToolTip>
-    <SimpleToolTip content="Go Back" keyboard={getKeyboardShortcut("←", true)}>
-      <Button variant="ghost" size="icon" onclick={history.back}>
-        <icons.ArrowLeft />
-      </Button>
-    </SimpleToolTip>
-    <SimpleToolTip content="Go Next" keyboard={getKeyboardShortcut("→", true)}>
-      <Button variant="ghost" size="icon" onclick={history.forward}>
-        <icons.ArrowRight />
-      </Button>
-    </SimpleToolTip>
-  </div>
-  <div class:mr-4={ISMACOS} class="inline-flex items-center gap-2">
-    <ToggleMode />
-    {#if ISWINDOWS}
-      <WindowsButtons />
-    {/if}
-  </div>
-</header>
+
 <Sidebar.Provider
-  class="h-[calc(100svh-2.5rem)]! max-h-[calc(100svh-2.5rem)]! overflow-hidden! flex-1"
-  bind:open
+	bind:open
+	onOpenChange={(value: boolean) => {
+		localStorage.setItem('sidebar-state', value ? 'open' : 'closed');
+	}}
 >
-  <AppSideBar class="top-10 h-[calc(100svh-2.5rem)]" />
-  <Sidebar.Inset class="h-full overflow-hidden">
-    {@render children()}
-  </Sidebar.Inset>
+  <div data-tauri-drag-region class="absolute top-0 z-10! h-12 w-full"></div>
+	<AppSideBar />
+	<Sidebar.Inset class="flex h-screen w-full flex-col overflow-hidden">
+		{@render children()}
+	</Sidebar.Inset>
 </Sidebar.Provider>

@@ -9,6 +9,6 @@ async function showMenu() {
 }
 </script>
 
-<Button variant="ghost" size="icon-sm" onclick={showMenu}>
-	<img {src} alt="AppLogo" class="aspect-square size-5!" />
+<Button variant="ghost" size="icon" class="z-150!" onclick={showMenu}>
+	<img {src} alt="AppLogo" class="aspect-square size-4!" />
 </Button>

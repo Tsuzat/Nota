@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { Button } from '@lib/components/ui/button';
-	import { Input } from '@lib/components/ui/input';
-	import CornerDownLeft from '@lucide/svelte/icons/corner-down-left';
-	import { type Editor } from '@tiptap/core';
-	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import type { ShouldShowProps } from '../../types.js';
+import { Button } from '@lib/components/ui/button';
+import { Input } from '@lib/components/ui/input';
+import CornerDownLeft from '@lucide/svelte/icons/corner-down-left';
+import { type Editor } from '@tiptap/core';
+import BubbleMenu from '../../components/BubbleMenu.svelte';
+import type { ShouldShowProps } from '../../types.js';
 
-	interface Props {
-		editor: Editor;
-		parentElement?: HTMLElement;
-	}
-	const { editor, parentElement }: Props = $props();
+interface Props {
+  editor: Editor;
+  parentElement?: HTMLElement;
+}
+const { editor, parentElement }: Props = $props();
 
-	let latex = $derived(editor.getAttributes('inlineMath').latex);
+let latex = $derived(editor.getAttributes('inlineMath').latex);
 
-	function updateLatex() {
-		editor.commands.updateInlineMath({ latex });
-	}
+function updateLatex() {
+  editor.commands.updateInlineMath({ latex });
+}
 </script>
 
 <BubbleMenu

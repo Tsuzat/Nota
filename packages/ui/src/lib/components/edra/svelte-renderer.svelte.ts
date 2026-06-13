@@ -1,5 +1,5 @@
-import type { Editor, NodeViewProps } from "@tiptap/core";
-import { flushSync, mount, unmount, type Component } from "svelte";
+import type { Editor, NodeViewProps } from '@tiptap/core';
+import { flushSync, mount, unmount, type Component } from 'svelte';
 
 interface RendererOptions {
   editor: Editor;
@@ -26,8 +26,8 @@ class SvelteRenderer {
     this.currentProps = props;
     this.editor = editor;
 
-    this.element = document.createElement("div");
-    this.element.classList.add("svelte-renderer");
+    this.element = document.createElement('div');
+    this.element.classList.add('svelte-renderer');
 
     if (this.editor.isInitialized) {
       // On first render, we need to flush the render synchronously

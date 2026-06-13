@@ -1,23 +1,23 @@
 <script lang="ts">
-	import { Textarea } from '@lib/components/ui/textarea';
-	import { type Editor } from '@tiptap/core';
-	import BubbleMenu from '../../components/BubbleMenu.svelte';
-	import type { ShouldShowProps } from '../../types.js';
+import { Textarea } from '@lib/components/ui/textarea';
+import { type Editor } from '@tiptap/core';
+import BubbleMenu from '../../components/BubbleMenu.svelte';
+import type { ShouldShowProps } from '../../types.js';
 
-	interface Props {
-		editor: Editor;
-		parentElement?: HTMLElement;
-	}
+interface Props {
+  editor: Editor;
+  parentElement?: HTMLElement;
+}
 
-	const { editor, parentElement }: Props = $props();
+const { editor, parentElement }: Props = $props();
 
-	let latex = $derived(editor.getAttributes('blockMath').latex || '');
+let latex = $derived(editor.getAttributes('blockMath').latex || '');
 
-	function updateLatex() {
-		editor.commands.updateBlockMath({
-			latex: latex
-		});
-	}
+function updateLatex() {
+  editor.commands.updateBlockMath({
+    latex: latex,
+  });
+}
 </script>
 
 <BubbleMenu
