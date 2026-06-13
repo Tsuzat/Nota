@@ -1,7 +1,6 @@
 <script lang="ts">
 import { type FileType, getFileTypeExtensions, getFileTypeFromExtension } from '@lib/components/edra/utils.js';
 import { Skeleton } from '@lib/components/ui/skeleton/index.js';
-import { cn } from '@lib/utils.js';
 import { getNotesContext, getStorageContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
@@ -9,8 +8,6 @@ import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from 
 import type { Content, Editor } from '@nota/ui/edra/types.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
-import { Separator } from '@nota/ui/shadcn/separator';
-import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { basename } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -19,21 +16,16 @@ import { compare } from 'fast-json-patch';
 import { onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { fixMathReplacer, ISMACOS, ISWINDOWS } from '$lib/utils';
+import { fixMathReplacer } from '$lib/utils';
 
 const { data } = $props();
 
 afterNavigate(() => {
   if (data.id) loadData();
 });
-
-const sidebar = useSidebar();
 
 // editor related
 let editor = $state<Editor>();
@@ -198,41 +190,18 @@ function handleKeydown(e: KeyboardEvent) {
 
 {#if isLoading}
   <div class="flex size-full flex-col">
-    <header class="flex h-12 shrink-0 items-center gap-2">
-      <div
-        class={cn(
-          "z-20 ml-18 flex items-center gap-2 px-3",
-          ISMACOS && !sidebar.open && "ml-18",
-          ISWINDOWS && !sidebar.open && "ml-0",
-          sidebar.open && "md:ml-0",
-        )}
-      >
-        {#if ISWINDOWS && !sidebar.open}
-          <AppLogoMenu />
-        {/if}
-        <BackAndForthButtons />
-        <Separator
-          orientation="vertical"
-          class="mr-2 data-[orientation=vertical]:h-4"
-        />
+    <header class="flex h-12 shrink-0 items-center justify-between px-4 border-b">
+      <div class="flex items-center gap-2">
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="h-8 w-48 rounded-md" />
       </div>
 
-      <div
-        class={cn(
-          "z-20 ml-auto flex items-center gap-2 px-3",
-          ISWINDOWS && "mr-30",
-        )}
-      >
+      <div class="flex items-center gap-2">
         <Skeleton class="h-8 w-16 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
       </div>
-      {#if ISWINDOWS}
-        <WindowsButtons />
-      {/if}
     </header>
     <div class="flex-1 grow overflow-auto p-8">
       <div class="mx-auto w-full max-w-3xl space-y-4">
@@ -245,115 +214,94 @@ function handleKeydown(e: KeyboardEvent) {
     </div>
   </div>
 {:else if !isLoading && note !== undefined}
-  <header class="flex h-12 shrink-0 items-center gap-2">
-    <div
-      class={cn(
-        "z-20 ml-18 flex items-center gap-2 px-3",
-        ISMACOS && !sidebar.open && "ml-18",
-        ISWINDOWS && !sidebar.open && "ml-0",
-        sidebar.open && "md:ml-0",
-      )}
-    >
-      {#if ISWINDOWS && !sidebar.open}
-        <AppLogoMenu />
-      {/if}
-      <BackAndForthButtons />
-      <Separator
-        orientation="vertical"
-        class="mr-2 data-[orientation=vertical]:h-4"
-      />
-      <IconPicker
-        onSelect={(icon) => {
-          note!.icon = icon;
-        }}
-        onClose={() => {
-          updateNote(note!.name, note!.icon, note!.favorite);
-        }}
-      >
-        <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
-          <IconRenderer icon={note.icon} />
-        </div>
-      </IconPicker>
-      <input
-        value={note.name}
-        class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
-        onchange={(e) => {
-          const target = e.target as HTMLInputElement;
-          const value = target.value;
-          if (value.trim() === "") return;
-          updateNote(value, note!.icon, note!.favorite);
-        }}
-      />
-    </div>
+  <div class="flex size-full flex-col">
+    <header class="flex h-12 shrink-0 items-center justify-between px-4 border-b">
+      <div class="flex items-center gap-2">
+        <IconPicker
+          onSelect={(icon) => {
+            note!.icon = icon;
+          }}
+          onClose={() => {
+            updateNote(note!.name, note!.icon, note!.favorite);
+          }}
+        >
+          <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
+            <IconRenderer icon={note.icon} />
+          </div>
+        </IconPicker>
+        <input
+          value={note.name}
+          class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
+          onchange={(e) => {
+            const target = e.target as HTMLInputElement;
+            const value = target.value;
+            if (value.trim() === "") return;
+            updateNote(value, note!.icon, note!.favorite);
+          }}
+        />
+      </div>
 
-    <div
-      class={cn(
-        "z-20 ml-auto flex items-center gap-2 px-3",
-        ISWINDOWS && "mr-30",
-      )}
-    >
-      {#if note.is_public}
-        <SimpleToolTip>
+      <div class="flex items-center gap-2">
+        {#if note.is_public}
+          <SimpleToolTip>
+            <Button variant="ghost" size="icon-sm">
+              <icons.Globe />
+            </Button>
+            {#snippet child()}
+              <div class="flex flex-col items-center">
+                <span class="font-semibold"> This is a public note </span>
+                <span>Anyone with the link can view this note</span>
+              </div>
+            {/snippet}
+          </SimpleToolTip>
+        {/if}
+        {#if editor && !editor?.isDestroyed}
+          <div class="text-muted-foreground truncate text-xs">
+            {editor.storage.characterCount.words()} Words
+          </div>
+          <SearchAndReplace {editor} />
+        {/if}
+        <SimpleToolTip content={syncing ? syncingText : "Synced"}>
           <Button variant="ghost" size="icon-sm">
-            <icons.Globe />
+            {#if syncing}
+              <icons.Loader class="text-primary animate-spin" />
+            {:else}
+              <icons.Cloud />
+            {/if}
           </Button>
-          {#snippet child()}
-            <div class="flex flex-col items-center">
-              <span class="font-semibold"> This is a public note </span>
-              <span>Anyone with the link can view this note</span>
-            </div>
-          {/snippet}
         </SimpleToolTip>
+        <NavActions
+          starred={note.favorite as boolean}
+          toggleStar={() => updateNote(note!.name, note!.icon, !note!.favorite)}
+          {editor}
+          {note}
+        />
+      </div>
+    </header>
+    {#if useGlobalSettings.useToolBar && editor}
+      <EdraToolBar {editor} />
+    {/if}
+    {#if editor && !editor?.isDestroyed}
+      {#if useGlobalSettings.useBubbleMenu}
+        <EdraBubbleMenu {editor} />
       {/if}
-      {#if editor && !editor?.isDestroyed}
-        <div class="text-muted-foreground truncate text-xs">
-          {editor.storage.characterCount.words()} Words
-        </div>
-        <SearchAndReplace {editor} />
+      {#if useGlobalSettings.useDragHandle}
+        <EdraDragHandleExtended {editor} />
       {/if}
-      <SimpleToolTip content={syncing ? syncingText : "Synced"}>
-        <Button variant="ghost" size="icon-sm">
-          {#if syncing}
-            <icons.Loader class="text-primary animate-spin" />
-          {:else}
-            <icons.Cloud />
-          {/if}
-        </Button>
-      </SimpleToolTip>
-      <NavActions
-        starred={note.favorite as boolean}
-        toggleStar={() => updateNote(note!.name, note!.icon, !note!.favorite)}
-        {editor}
-        {note}
-      />
-    </div>
-    {#if ISWINDOWS}
-      <WindowsButtons />
+      <AI {editor} parentElement={element} />
     {/if}
-  </header>
-  {#if useGlobalSettings.useToolBar && editor}
-    <EdraToolBar {editor} />
-  {/if}
-  {#if editor && !editor?.isDestroyed}
-    {#if useGlobalSettings.useBubbleMenu}
-      <EdraBubbleMenu {editor} />
-    {/if}
-    {#if useGlobalSettings.useDragHandle}
-      <EdraDragHandleExtended {editor} />
-    {/if}
-    <AI {editor} parentElement={element} />
-  {/if}
-  <EdraEditor
-    bind:editor
-    bind:element
-    {content}
-    class="flex-1 grow flex-col overflow-auto p-8!"
-    {onUpdate}
-    {onFileSelect}
-    {onDropOrPaste}
-    {getAssets}
-    {getLocalFile}
-  />
+    <EdraEditor
+      bind:editor
+      bind:element
+      {content}
+      class="flex-1 grow flex-col overflow-auto p-8!"
+      {onUpdate}
+      {onFileSelect}
+      {onDropOrPaste}
+      {getAssets}
+      {getLocalFile}
+    />
+  </div>
 {:else}
   <div class="flex size-full flex-col items-center justify-center gap-4">
     <h4>Something went wrong.</h4>

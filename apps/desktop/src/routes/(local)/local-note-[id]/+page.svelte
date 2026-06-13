@@ -1,30 +1,22 @@
 <script lang="ts">
 import type { FileType } from '@lib/components/edra/utils.js';
 import { toast } from '@lib/components/ui/sonner/index.js';
-import { cn } from '@lib/utils.js';
 import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
 import type { Content, Editor } from '@nota/ui/edra/types.js';
 import { IconPicker, IconRenderer } from '@nota/ui/icons/index.js';
 import { buttonVariants } from '@nota/ui/shadcn/button';
-import { Separator } from '@nota/ui/shadcn/separator';
-import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { onDestroy, onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { DB } from '$lib/local/db.js';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { createFile, getAssetsByFileType, moveFileToAssets, selectLocalFile } from '$lib/local/util.js';
-import { fixMathReplacer, ISMACOS, ISWINDOWS } from '$lib/utils';
-
-const sidebar = useSidebar();
+import { fixMathReplacer } from '$lib/utils';
 
 // editor related
 let editor = $state<Editor>();
@@ -170,41 +162,18 @@ function handleKeydown(event: KeyboardEvent) {
 
 {#if isLoading}
   <div class="flex size-full flex-col">
-    <header class="flex h-12 shrink-0 items-center gap-2">
-      <div
-        class={cn(
-          "z-20 ml-18 flex items-center gap-2 px-3",
-          ISMACOS && !sidebar.open && "ml-18",
-          ISWINDOWS && !sidebar.open && "ml-0",
-          sidebar.open && "md:ml-0",
-        )}
-      >
-        {#if ISWINDOWS && !sidebar.open}
-          <AppLogoMenu />
-        {/if}
-        <BackAndForthButtons />
-        <Separator
-          orientation="vertical"
-          class="data-[orientation=vertical]:h-4"
-        />
+    <header class="flex h-12 shrink-0 items-center justify-between px-4 border-b">
+      <div class="flex items-center gap-2">
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="h-8 w-48 rounded-md" />
       </div>
 
-      <div
-        class={cn(
-          "z-20 ml-auto flex items-center gap-2 px-3",
-          ISWINDOWS && "mr-30",
-        )}
-      >
+      <div class="flex items-center gap-2">
         <Skeleton class="h-8 w-16 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
       </div>
-      {#if ISWINDOWS}
-        <WindowsButtons />
-      {/if}
     </header>
     <div class="flex-1 grow overflow-auto p-8">
       <div class="mx-auto w-full max-w-3xl space-y-4">
@@ -217,89 +186,68 @@ function handleKeydown(event: KeyboardEvent) {
     </div>
   </div>
 {:else if !isLoading && note !== undefined}
-  <header class="flex h-12 shrink-0 items-center gap-2">
-    <div
-      class={cn(
-        "z-20 ml-18 flex items-center gap-2 px-3",
-        ISMACOS && !sidebar.open && "ml-18",
-        ISWINDOWS && !sidebar.open && "ml-0",
-        sidebar.open && "md:ml-0",
-      )}
-    >
-      {#if ISWINDOWS && !sidebar.open}
-        <AppLogoMenu />
-      {/if}
-      <BackAndForthButtons />
-      <Separator
-        orientation="vertical"
-        class="mr-2 data-[orientation=vertical]:h-4"
-      />
-      <IconPicker onSelect={updateIcon}>
-        <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
-          <IconRenderer icon={note.icon} />
-        </div>
-      </IconPicker>
-      <input
-        value={note.name}
-        class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
-        onchange={async (e) => {
-          const target = e.target as HTMLInputElement;
-          const value = target.value;
-          if (value.trim() === "") return;
-          e.preventDefault();
-          await updateName(target.value);
-        }}
-      />
-    </div>
+  <div class="flex size-full flex-col">
+    <header class="flex h-12 shrink-0 items-center justify-between px-4 border-b">
+      <div class="flex items-center gap-2">
+        <IconPicker onSelect={updateIcon}>
+          <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
+            <IconRenderer icon={note.icon} />
+          </div>
+        </IconPicker>
+        <input
+          value={note.name}
+          class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
+          onchange={async (e) => {
+            const target = e.target as HTMLInputElement;
+            const value = target.value;
+            if (value.trim() === "") return;
+            e.preventDefault();
+            await updateName(target.value);
+          }}
+        />
+      </div>
 
-    <div
-      class={cn(
-        "z-20 ml-auto flex items-center gap-2 px-3",
-        ISWINDOWS && "mr-30",
-      )}
-    >
-      {#if editor && !editor?.isDestroyed}
-        <div class="text-muted-foreground hidden sm:block truncate text-xs">
-          {editor.storage.characterCount.words()} Words
-        </div>
-        <SearchAndReplace {editor} />
+      <div class="flex items-center gap-2">
+        {#if editor && !editor?.isDestroyed}
+          <div class="text-muted-foreground hidden sm:block truncate text-xs">
+            {editor.storage.characterCount.words()} Words
+          </div>
+          <SearchAndReplace {editor} />
+        {/if}
+        <NavActions
+          starred={note.favorite as boolean}
+          {toggleStar}
+          {editor}
+          {note}
+        />
+      </div>
+    </header>
+    {#if editor && !editor?.isDestroyed}
+      {#if globalSettings.useToolBar && editor}
+        <EdraToolBar {editor} useAI={globalSettings.useAI} />
       {/if}
-      <NavActions
-        starred={note.favorite as boolean}
-        {toggleStar}
-        {editor}
-        {note}
-      />
-    </div>
-    {#if ISWINDOWS}
-      <WindowsButtons />
+      {#if globalSettings.useBubbleMenu}
+        <EdraBubbleMenu {editor} useAI={globalSettings.useAI} />
+      {/if}
+      {#if globalSettings.useDragHandle}
+        <EdraDragHandleExtended {editor} useAI={globalSettings.useAI} />
+      {/if}
+      {#if globalSettings.useAI}
+        <AI {editor} parentElement={element} />
+      {/if}
     {/if}
-  </header>
-  {#if editor && !editor?.isDestroyed}
-    {#if globalSettings.useToolBar && editor}
-      <EdraToolBar {editor} useAI={globalSettings.useAI} />
-    {/if}
-    {#if globalSettings.useBubbleMenu}
-      <EdraBubbleMenu {editor} useAI={globalSettings.useAI} />
-    {/if}
-    {#if globalSettings.useDragHandle}
-      <EdraDragHandleExtended {editor} useAI={globalSettings.useAI} />
-    {/if}
-    {#if globalSettings.useAI}
-      <AI {editor} parentElement={element} />
-    {/if}
-  {/if}
-  <EdraEditor
-    bind:editor
-    bind:element
-    {content}
-    class="flex-1 grow flex-col overflow-auto p-8!"
-    {onUpdate}
-    {onFileSelect}
-    {onDropOrPaste}
-    {getAssets}
-    {getLocalFile}
-  />
+    <EdraEditor
+      bind:editor
+      bind:element
+      {content}
+      class="flex-1 grow flex-col overflow-auto p-8!"
+      {onUpdate}
+      {onFileSelect}
+      {onDropOrPaste}
+      {getAssets}
+      {getLocalFile}
+    />
+  </div>
 {:else}
   <div class="flex size-full flex-col items-center justify-center gap-4">
     <h4>Something went wrong.</h4>

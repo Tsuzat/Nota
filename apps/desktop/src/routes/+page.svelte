@@ -5,20 +5,16 @@ import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import { Separator } from '@nota/ui/shadcn/separator';
 import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { cn } from '@nota/ui/utils';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import { getNewUserWorkspace, useCurrentUserWorkspaceContext } from '$lib/components/user-workspace';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
-import { ISMACOS, ISWINDOWS, timeAgo } from '$lib/utils';
+import { ISMACOS, timeAgo } from '$lib/utils';
 
 const sidebar = useSidebar();
 const localUserWorkspaces = getLocalUserWorkspaces();
@@ -71,28 +67,8 @@ async function handleDelete(workspace: LocalUserWorkspace | UserWorkspace) {
 {#if currentUserWorkspace === null}
   <h2>No User Workspace Selected</h2>
 {:else}
-  <header class="flex h-12 shrink-0 items-center gap-2">
-    <div
-      class={cn(
-        "z-20 ml-18 flex items-center gap-2 px-3",
-        ISMACOS && !sidebar.open && "ml-18",
-        ISWINDOWS || (sidebar.open && "ml-0")
-      )}
-    >
-      {#if ISWINDOWS && !sidebar.open}
-        <AppLogoMenu />
-      {/if}
-      <BackAndForthButtons />
-      <Separator
-        orientation="vertical"
-        class="mr-2 data-[orientation=vertical]:h-4"
-      />
-      <h3>{currentUserWorkspace?.name}</h3>
-    </div>
-    <div class={cn("z-20 ml-auto px-3", ISWINDOWS && "mr-30")}></div>
-    {#if ISWINDOWS}
-      <WindowsButtons />
-    {/if}
+  <header class="flex h-12 shrink-0 items-center px-6">
+    <h3 class="text-lg font-semibold">{currentUserWorkspace?.name}</h3>
   </header>
   <div
     class="mx-auto flex h-[calc(100vh-3rem)] w-full max-w-3xl flex-1 grow flex-col gap-8 overflow-auto"

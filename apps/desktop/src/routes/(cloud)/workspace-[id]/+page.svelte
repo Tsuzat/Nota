@@ -1,24 +1,18 @@
 <script lang="ts">
 import type { Content } from '@lib/components/edra/types.js';
-import { cn } from '@lib/utils.js';
 import { getNotesContext, getWorkspacesContext, type Note, type Workspace } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import { Separator } from '@nota/ui/shadcn/separator';
-import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import { useCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte.js';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
 
 let { data } = $props();
 
@@ -112,35 +106,6 @@ async function importNote() {
 
 {#if workspace}
   <NewNotes bind:open={openNewNote} {workspace} />
-  <header class="flex h-12 shrink-0 items-center gap-2">
-    <div
-      class={cn(
-        "z-20 ml-18 flex items-center gap-2 px-3",
-        ISMACOS && !useSidebar().open && "ml-18",
-        ISWINDOWS && !useSidebar().open && "ml-0",
-        useSidebar().open && "md:ml-0"
-      )}
-    >
-      {#if ISWINDOWS && !useSidebar().open}
-        <AppLogoMenu />
-      {/if}
-      <BackAndForthButtons />
-      <Separator
-        orientation="vertical"
-        class="mr-2 data-[orientation=vertical]:h-4"
-      />
-    </div>
-    <div
-      class={cn(
-        "z-20 ml-auto flex items-center gap-2 px-3",
-        ISWINDOWS && "mr-30"
-      )}
-    ></div>
-    {#if ISWINDOWS}
-      <Separator orientation="vertical" class="h-4" />
-      <WindowsButtons />
-    {/if}
-  </header>
   <main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
     <div class="mb-4 flex items-center gap-2">
       <IconPicker
