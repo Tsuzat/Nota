@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SimpleToolTip, StreamDown } from "@lib/components/custom";
+  import { StreamDown } from "@lib/components/custom";
   import BubbleMenu from "@nota/ui/edra/components/BubbleMenu.svelte";
   import { removeAIHighlight } from "@nota/ui/edra/extensions/AIHighLight.js";
   import type { Editor, ShouldShowProps } from "@nota/ui/edra/types.js";
@@ -19,9 +19,8 @@
     IMPROVE_WRITING_PROMPT,
     SIMPLIFY_LANGUAGE_PROMPT,
   } from "$lib/ai/commands";
-  import { generatePrompt } from "$lib/ai/prompts";
   import { getGlobalSettings } from "../settings";
-  import { Input } from "@lib/components/ui/input";
+  import { Textarea } from "@lib/components/ui/textarea";
 
   interface Props {
     editor: Editor;
@@ -136,26 +135,7 @@
       inputValue = "";
       if (inputTag) inputTag.style.height = "auto"; // reset height
     }
-  }
-
-  async function handleRefineSubmit(e: Event) {
-    e.preventDefault();
-    if (!refineValue || refineValue.trim().length === 0) return;
-    const text = getSelectionText();
-    if (!text) return;
-    const previousResponse = aiResponse;
-    try {
-      aiResponse = ""; // Clear to trigger thinking/loading state
-      const prompt = `Selected text:\n"""\n${text}\n"""\n\nPrevious AI response:\n"""\n${previousResponse}\n"""\n\nFollow-up request: ${refineValue}`;
-      await generateAIContent(prompt);
-    } catch (error) {
-      aiState = AIState.Idle;
-      console.error(error);
-      toast.error("Something went wrong during refinement! Check console.");
-    } finally {
-      refineValue = "";
-    }
-  }
+  } 
 
   async function generateAIContent(prompt: string) {
     generating = true;
@@ -234,6 +214,10 @@
     setTimeout(() => {
       inputTag?.focus();
     }, 50);
+  }
+
+  function retry() {
+    handleSubmit()
   }
 
   function closeAI() {
@@ -371,7 +355,7 @@
   {editor}
   pluginKey="edra-bubble-menu"
   {shouldShow}
-  class="bg-transparent flex max-h-120 max-w-3xl w-full flex-col p-0 transition-[height] duration-500 z-100"
+  class="bg-popover/75 backdrop-blur-2xl rounded-lg flex max-h-120 max-w-3xl w-full flex-col p-0 transition-[height] duration-500 z-100"
   options={{
     strategy: "fixed",
     placement: "bottom",
@@ -387,7 +371,7 @@
 >
   {#if aiState === AIState.Idle}
     <div
-      class="shadow-2xl bg-popover/75 w-xl border backdrop-blur-2xl rounded-xl flex flex-col overflow-hidden"
+      class="shadow-2xl w-xl border backdrop-blur-2xl rounded-xl flex flex-col overflow-hidden"
     >
       <!-- Input Area -->
       <div class="px-3 py-3">
@@ -395,14 +379,13 @@
           bind:value={inputValue}
           bind:this={inputTag}
           oninput={handleInput}
-          rows="1"
+          rows={1}
           placeholder="Ask AI anything..."
-          class="w-full bg-transparent border-0 outline-hidden text-[15px] resize-none h-auto max-h-40 placeholder:text-[#a0a0a0] text-[#ececec]"
+          class="w-full border-0 outline-hidden resize-none h-auto max-h-40"
         ></textarea>
       </div>
 
-      {#if getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0}
-        <div class="h-px w-full bg-white/5"></div>
+      {#if getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0} 
         <!-- Quick Actions List -->
         <div
           transition:slide={{ axis: "y", duration: 250 }}
@@ -417,89 +400,43 @@
   {:else if aiState === AIState.Confirmation}
     {#if aiResponse === ""}
       <!-- Thinking state -->
-      <div
-        transition:fade
-        class="animated-gradient-border bg-[#1f1f1f] rounded-xl p-px w-full overflow-hidden shadow-2xl"
-      >
-        <div
-          class="bg-[#1f1f1f] flex items-center justify-between gap-3 rounded-xl p-4"
-        >
-          <div class="flex items-center gap-3">
-            <icons.Sparkles
-              class="size-5 text-[#a0a0a0] animate-[spin_3s_linear_infinite]"
-            />
-            <div class="flex flex-col gap-0.5">
-              <span class="text-[15px] font-medium text-[#ececec]">
-                Nota AI is writing...
-              </span>
-            </div>
-          </div>
+     <div transition:fade class="animated-gradient-border rounded-lg p-0.5">
+        <div class="flex bg-popover items-center gap-2 rounded-lg p-2">
+          <icons.Sparkle class="size-4!" />
+          <span
+            class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
+          >
+            AI is thinking</span
+          >
           <div class="flex h-5 items-center space-x-1">
             {#each Array(3) as _unused, i (i)}
               <div
-                class="bg-white/40 h-1.5 w-1.5 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
+                class="bg-primary h-1 w-1 animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full"
                 style:animation-delay="{i * 160}ms"
               ></div>
             {/each}
+            <span class="sr-only">Loading</span>
           </div>
         </div>
-      </div>
+      </div> 
     {:else}
       <!-- Response state -->
       <div
         transition:fade
-        class="bg-[#1f1f1f] border border-white/10 shadow-2xl rounded-xl w-full flex flex-col overflow-hidden"
+        class="border shadow-2xl rounded-xl w-full flex flex-col overflow-hidden"
       >
         <!-- Streamed text content -->
         <div
-          class="max-h-96 overflow-y-auto px-5 py-4 text-[15px] text-[#ececec] prose dark:prose-invert max-w-none"
+          class="max-h-96 overflow-y-auto p-2"
         >
           <StreamDown content={aiResponse} />
         </div>
-
-        <!-- Refinement input, only show when NOT generating -->
-        {#if !generating}
-          <form
-            onsubmit={handleRefineSubmit}
-            class="flex items-center gap-2.5 px-4 py-3 bg-black/20"
-          >
-            <icons.Sparkles class="size-4 shrink-0" />
-            <Input
-              bind:value={refineValue}
-              bind:ref={refineInputTag}
-              onkeydown={(e: KeyboardEvent) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleRefineSubmit(e);
-                }
-              }}
-              placeholder="Ask AI to edit or improve..."
-              class="w-full"
-            />
-            <Button
-              type="submit"
-              size="icon"
-              class="size-6 rounded-md "
-            >
-              <icons.ArrowUp  />
-            </Button>
-          </form>
-        {:else}
-          <!-- Generating loading indicator at the bottom -->
-          <div class="h-px w-full bg-white/5"></div>
-          <div
-            class="flex items-center gap-2 px-5 py-3 bg-black/20 text-[13px] text-[#a0a0a0]"
-          >
-            <icons.Sparkles class="size-3.5 animate-pulse shrink-0" />
-            <span>Generating response...</span>
-          </div>
-        {/if}
         <!-- Action bar -->
-        <div class="flex items-center justify-between px-3 py-2 bg-[#1a1a1a]">
+        <div class="flex items-center border-t justify-between p-2">
           <!-- Left side: Replace, Insert, Copy -->
           <div class="flex items-center gap-1.5">
             <Button
-              size="sm"
+              size="xs"
               onclick={replaceSelection}
               disabled={generating}
             >
@@ -508,7 +445,7 @@
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="xs"
               onclick={insertNext}
               disabled={generating}
             >
@@ -517,7 +454,7 @@
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="xs"
               onclick={() => {
                 window.navigator.clipboard.writeText(aiResponse);
                 toast.success("Copied to clipboard");
@@ -533,17 +470,17 @@
           <div class="flex items-center gap-1.5">
             <Button
               variant="outline"
-              size="sm"
-              onclick={discardChanges}
+              size="xs"
+              onclick={retry}
               disabled={generating}
             >
               <icons.RotateCcw />
               Retry
             </Button>
             <Button
-              variant="ghost"
-              size="sm"
-              onclick={closeAI}
+              variant="destructive"
+              size="xs"
+              onclick={discardChanges}
               disabled={generating}
             >
               <icons.Trash2 />
