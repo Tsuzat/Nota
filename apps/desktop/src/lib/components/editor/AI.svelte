@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { StreamDown } from "@lib/components/custom";
   import BubbleMenu from "@nota/ui/edra/components/BubbleMenu.svelte";
   import { removeAIHighlight } from "@nota/ui/edra/extensions/AIHighLight.js";
   import type { Editor, ShouldShowProps } from "@nota/ui/edra/types.js";
@@ -12,15 +11,14 @@
   import {
     CONTINUE_WRITING_PROMPT,
     FIX_GRAMMAR_PROMPT,
+    IMPROVE_WRITING_PROMPT,
     MAKE_LONGER_PROMPT,
     MAKE_SHORTER_PROMPT,
+    SIMPLIFY_LANGUAGE_PROMPT,
     SOLVE_PROBLEM_PROMPT,
     SUMMARIZE_PROMPT,
-    IMPROVE_WRITING_PROMPT,
-    SIMPLIFY_LANGUAGE_PROMPT,
   } from "$lib/ai/commands";
   import { getGlobalSettings } from "../settings";
-  import { Textarea } from "@lib/components/ui/textarea";
 
   interface Props {
     editor: Editor;
@@ -29,22 +27,6 @@
   const { editor, parentElement }: Props = $props();
   const settings = getGlobalSettings();
   let inputTag = $state<HTMLTextAreaElement | null>(null);
-  let refineInputTag = $state<HTMLInputElement | null>(null);
-
-  function shouldShow(props: ShouldShowProps) {
-    if (!props.editor.isEditable || props.editor.isDestroyed) return false;
-    const { view, editor } = props;
-    if (!view || editor.view.dragging) {
-      return false;
-    }
-    if (editor.isActive("ai-highlight")) {
-      return true;
-    }
-    removeAIHighlight(editor);
-    aiState = AIState.Idle;
-    aiResponse = "";
-    return false;
-  }
 
   enum AIState {
     Idle = "Idle",
@@ -52,11 +34,33 @@
   }
 
   let inputValue = $state("");
-  let refineValue = $state("");
   let aiState = $state(AIState.Idle);
   let aiResponse = $state("");
   let activeOptionIndex = $state(0);
   let generating = $state(false);
+
+  // Position tracking for inline editor streaming
+  let originalFrom = $state(0);
+  let aiContentFrom = $state(0);
+  let aiContentTo = $state(0);
+  let lastPrompt = $state("");
+  let updateTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function shouldShow(props: ShouldShowProps) {
+    if (!props.editor.isEditable || props.editor.isDestroyed) return false;
+    const { view, editor } = props;
+    if (!view || editor.view.dragging) return false;
+
+    // Always show during AI confirmation (streaming or action bar)
+    if (aiState === AIState.Confirmation) return true;
+
+    if (editor.isActive("ai-highlight")) return true;
+
+    removeAIHighlight(editor);
+    aiState = AIState.Idle;
+    aiResponse = "";
+    return false;
+  }
 
   function getSelectionText(): string | undefined {
     const { from, to } = editor.view.state.selection;
@@ -124,106 +128,221 @@
     const text = getSelectionText();
     if (!text) return;
     try {
-      aiState = AIState.Confirmation;
       const prompt = `${text}\n\n\n${inputValue}`;
+      inputValue = "";
+      if (inputTag) inputTag.style.height = "auto";
+      aiState = AIState.Confirmation;
       await generateAIContent(prompt);
     } catch (error) {
       aiState = AIState.Idle;
       console.error(error);
       toast.error("Something went wrong! Check console.");
-    } finally {
-      inputValue = "";
-      if (inputTag) inputTag.style.height = "auto"; // reset height
     }
-  } 
+  }
 
   async function generateAIContent(prompt: string) {
     generating = true;
+    lastPrompt = prompt;
+    aiResponse = "";
+
+    // Save current selection positions
+    const { from, to } = editor.state.selection;
+    originalFrom = from;
+
+    // Calculate insertion position: right after the top-level block containing the selection end
+    const to_ = editor.state.doc.resolve(to);
+    const depth = Math.min(to_.depth, 1) || 1;
+    aiContentFrom = to_.after(depth);
+    aiContentTo = aiContentFrom;
+
     try {
+      const onChunk = (chunk: string) => {
+        aiResponse += chunk;
+        scheduleEditorUpdate();
+      };
+      const onError = (error: Error) => {
+        toast.error("Something went wrong when calling AI.", {
+          description: error.message,
+        });
+        console.error(error);
+        cleanupAIContent();
+        aiState = AIState.Idle;
+        aiResponse = "";
+        generating = false;
+      };
+
       if (settings.useMyOwnAI) {
-        await callGemini(
-          prompt,
-          (chunk) => {
-            aiResponse += chunk;
-          },
-          (error) => {
-            toast.error("Something went wrong when calling AI.", {
-              description: error.message,
-            });
-            console.error(error);
-            aiState = AIState.Idle;
-            aiResponse = "";
-          },
-        );
+        await callGemini(prompt, onChunk, onError);
       } else {
-        await callAI(
-          prompt,
-          (chunk) => {
-            aiResponse += chunk;
-          },
-          (error) => {
-            toast.error("Something went wrong when calling AI.", {
-              description: error.message,
-            });
-            console.error(error);
-            aiState = AIState.Idle;
-            aiResponse = "";
-          },
-        );
+        await callAI(prompt, onChunk, onError);
       }
+
+      // Final flush to ensure all content is rendered in the editor
+      flushEditorUpdate();
     } finally {
       generating = false;
     }
   }
 
+  /** Throttle editor updates to ~100ms to avoid excessive transactions */
+  function scheduleEditorUpdate() {
+    if (updateTimer) return;
+    updateTimer = setTimeout(() => {
+      flushEditorUpdate();
+      updateTimer = null;
+    }, 100);
+  }
+
+  /** Insert or replace the AI content region in the editor with the accumulated response */
+  function flushEditorUpdate() {
+    if (updateTimer) {
+      clearTimeout(updateTimer);
+      updateTimer = null;
+    }
+    if (!aiResponse) return;
+
+    try {
+      const oldDocSize = editor.state.doc.content.size;
+
+      if (aiContentFrom >= aiContentTo) {
+        // First insert — no existing AI content to replace
+        editor
+          .chain()
+          .command(({ tr }) => {
+            tr.setMeta("addToHistory", false);
+            return true;
+          })
+          .insertContentAt(aiContentFrom, aiResponse, {
+            contentType: "markdown",
+          })
+          .run();
+      } else {
+        // Replace existing AI content with the updated (longer) response
+        editor
+          .chain()
+          .command(({ tr }) => {
+            tr.setMeta("addToHistory", false);
+            return true;
+          })
+          .insertContentAt(
+            { from: aiContentFrom, to: aiContentTo },
+            aiResponse,
+            { contentType: "markdown" },
+          )
+          .run();
+      }
+
+      const newDocSize = editor.state.doc.content.size;
+      // The content AFTER the AI region is unchanged, so:
+      // newAiContentTo = newDocSize - (oldDocSize - oldAiContentTo)
+      aiContentTo = newDocSize - (oldDocSize - aiContentTo);
+
+      // Highlight the AI-generated content with a distinct color
+      const tr = editor.state.tr;
+      tr.setMeta("addToHistory", false);
+      tr.addMark(
+        aiContentFrom,
+        aiContentTo,
+        editor.state.schema.marks["ai-highlight"].create({
+          color: "#e8f5e940",
+        }),
+      );
+      editor.view.dispatch(tr);
+
+      // Move cursor to end of AI content so bubble menu follows it
+      if (aiContentTo > 1) {
+        editor.commands.setTextSelection(aiContentTo - 1);
+      }
+    } catch (error) {
+      console.error("Error updating editor with AI content:", error);
+    }
+  }
+
+  /** Remove AI-generated content from the editor (without adding to undo history) */
+  function cleanupAIContent() {
+    if (aiContentFrom < aiContentTo) {
+      try {
+        editor
+          .chain()
+          .command(({ tr }) => {
+            tr.setMeta("addToHistory", false);
+            return true;
+          })
+          .deleteRange({ from: aiContentFrom, to: aiContentTo })
+          .run();
+        aiContentTo = aiContentFrom;
+      } catch (error) {
+        console.error("Error cleaning up AI content:", error);
+      }
+    }
+  }
+
+  /** Replace: delete original selection, keep AI text */
   function replaceSelection() {
-    const { from, to } = editor.view.state.selection;
     try {
+      const response = aiResponse;
+
+      // Delete everything from original selection start to AI content end
+      editor.chain().deleteRange({ from: originalFrom, to: aiContentTo }).run();
+
+      // Insert the AI response at the original position
       editor
         .chain()
-        .focus()
-        .insertContentAt({ from, to }, aiResponse, { contentType: "markdown" })
+        .insertContentAt(originalFrom, response, {
+          contentType: "markdown",
+        })
         .run();
+
+      removeAIHighlight(editor);
+      aiState = AIState.Idle;
+      aiResponse = "";
     } catch (error) {
       console.error(error);
-      toast.error(
-        "Unable to insert the data. Copy content and paste manually.",
-      );
+      toast.error("Unable to replace. Copy content and paste manually.");
     }
   }
 
+  /** Insert below: AI text is already below the selection — just accept */
   function insertNext() {
-    const { to } = editor.view.state.selection;
-    try {
-      editor
-        .chain()
-        .focus()
-        .insertContentAt(to + 1, aiResponse, { contentType: "markdown" })
-        .run();
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        "Unable to insert the data. Copy content and paste manually.",
-      );
-    }
-  }
-
-  function discardChanges() {
-    aiResponse = "";
-    aiState = AIState.Idle;
-    setTimeout(() => {
-      inputTag?.focus();
-    }, 50);
-  }
-
-  function retry() {
-    handleSubmit()
-  }
-
-  function closeAI() {
     removeAIHighlight(editor);
     aiState = AIState.Idle;
     aiResponse = "";
+  }
+
+  /** Copy AI response to clipboard */
+  function copyToClipboard() {
+    window.navigator.clipboard.writeText(aiResponse);
+    toast.success("Copied to clipboard");
+  }
+
+  /** Retry: delete AI content, re-run with same prompt */
+  function retry() {
+    cleanupAIContent();
+    aiResponse = "";
+    if (lastPrompt) {
+      generateAIContent(lastPrompt);
+    }
+  }
+
+  /** Discard: delete AI content, keep original, reset */
+  function discardChanges() {
+    cleanupAIContent();
+    removeAIHighlight(editor);
+    aiState = AIState.Idle;
+    aiResponse = "";
+  }
+
+  /** Close AI: full cleanup */
+  function closeAI() {
+    if (generating) {
+      // If still generating, just mark for cleanup
+      generating = false;
+    }
+    cleanupAIContent();
+    removeAIHighlight(editor);
+    aiState = AIState.Idle;
+    aiResponse = "";
+    lastPrompt = "";
   }
 
   const quickActions = [
@@ -287,7 +406,11 @@
   }
 
   function handleKeydown(event: KeyboardEvent) {
-    if (!editor.isActive("ai-highlight")) return;
+    if (
+      !editor.isActive("ai-highlight") &&
+      aiState !== AIState.Confirmation
+    )
+      return;
 
     if (event.key === "Escape") {
       event.preventDefault();
@@ -314,8 +437,7 @@
         }
         if (event.key === "Enter") {
           event.preventDefault();
-          const action = quickActions[activeOptionIndex];
-          action.handler();
+          quickActions[activeOptionIndex].handler();
           return;
         }
       } else {
@@ -385,7 +507,7 @@
         ></textarea>
       </div>
 
-      {#if getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0} 
+      {#if getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0}
         <!-- Quick Actions List -->
         <div
           transition:slide={{ axis: "y", duration: 250 }}
@@ -398,15 +520,15 @@
       {/if}
     </div>
   {:else if aiState === AIState.Confirmation}
-    {#if aiResponse === ""}
-      <!-- Thinking state -->
-     <div transition:fade class="animated-gradient-border rounded-lg p-0.5">
+    {#if generating}
+      <!-- AI is writing — content streams directly into editor -->
+      <div transition:fade class="animated-gradient-border rounded-lg p-0.5">
         <div class="flex bg-popover items-center gap-2 rounded-lg p-2">
           <icons.Sparkle class="size-4!" />
           <span
             class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
           >
-            AI is thinking</span
+            AI is writing</span
           >
           <div class="flex h-5 items-center space-x-1">
             {#each Array(3) as _unused, i (i)}
@@ -418,75 +540,42 @@
             <span class="sr-only">Loading</span>
           </div>
         </div>
-      </div> 
+      </div>
     {:else}
-      <!-- Response state -->
+      <!-- Action bar — AI has finished streaming into editor -->
       <div
         transition:fade
-        class="border shadow-2xl rounded-xl w-full flex flex-col overflow-hidden"
+        class="flex items-center border shadow-2xl justify-between p-2 rounded-lg"
       >
-        <!-- Streamed text content -->
-        <div
-          class="max-h-96 overflow-y-auto p-2"
-        >
-          <StreamDown content={aiResponse} />
+        <!-- Left: Replace, Insert, Copy -->
+        <div class="flex items-center gap-1.5">
+          <Button size="xs" onclick={replaceSelection}>
+            <icons.Check />
+            Replace
+          </Button>
+          <Button variant="outline" size="xs" onclick={insertNext}>
+            <icons.CornerDownLeft />
+            Insert
+          </Button>
+          <Button
+            variant="outline"
+            size="xs"
+            onclick={copyToClipboard}
+          >
+            <icons.Copy />
+            Copy
+          </Button>
         </div>
-        <!-- Action bar -->
-        <div class="flex items-center border-t justify-between p-2">
-          <!-- Left side: Replace, Insert, Copy -->
-          <div class="flex items-center gap-1.5">
-            <Button
-              size="xs"
-              onclick={replaceSelection}
-              disabled={generating}
-            >
-              <icons.Check />
-              Replace
-            </Button>
-            <Button
-              variant="outline"
-              size="xs"
-              onclick={insertNext}
-              disabled={generating}
-            >
-              <icons.CornerDownLeft  />
-              Insert
-            </Button>
-            <Button
-              variant="outline"
-              size="xs"
-              onclick={() => {
-                window.navigator.clipboard.writeText(aiResponse);
-                toast.success("Copied to clipboard");
-              }}
-              disabled={generating}
-            >
-              <icons.Copy />
-              Copy
-            </Button>
-          </div>
-
-          <!-- Right side: Retry, Discard -->
-          <div class="flex items-center gap-1.5">
-            <Button
-              variant="outline"
-              size="xs"
-              onclick={retry}
-              disabled={generating}
-            >
-              <icons.RotateCcw />
-              Retry
-            </Button>
-            <Button
-              variant="destructive"
-              size="xs"
-              onclick={discardChanges}
-              disabled={generating}
-            >
-              <icons.Trash2 />
-              Discard
-            </Button>
-          </div>
+        <!-- Right: Retry, Discard -->
+        <div class="flex items-center gap-1.5">
+          <Button variant="outline" size="xs" onclick={retry}>
+            <icons.RotateCcw />
+            Retry
+          </Button>
+          <Button variant="destructive" size="xs" onclick={discardChanges}>
+            <icons.Trash2 />
+            Discard
+          </Button>
         </div>
       </div>
     {/if}
