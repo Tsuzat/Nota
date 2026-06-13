@@ -21,6 +21,7 @@
   } from "$lib/ai/commands";
   import { generatePrompt } from "$lib/ai/prompts";
   import { getGlobalSettings } from "../settings";
+  import { Input } from "@lib/components/ui/input";
 
   interface Props {
     editor: Editor;
@@ -458,31 +459,29 @@
 
         <!-- Refinement input, only show when NOT generating -->
         {#if !generating}
-          <div class="h-px w-full bg-white/5"></div>
           <form
             onsubmit={handleRefineSubmit}
             class="flex items-center gap-2.5 px-4 py-3 bg-black/20"
           >
-            <icons.Sparkles class="size-4 text-[#a0a0a0] shrink-0" />
-            <input
+            <icons.Sparkles class="size-4 shrink-0" />
+            <Input
               bind:value={refineValue}
-              bind:this={refineInputTag}
-              onkeydown={(e) => {
+              bind:ref={refineInputTag}
+              onkeydown={(e: KeyboardEvent) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleRefineSubmit(e);
                 }
               }}
               placeholder="Ask AI to edit or improve..."
-              class="border-0 bg-transparent outline-none text-[14px] text-[#ececec] flex-1 placeholder:text-[#a0a0a0] focus:ring-0 p-0"
+              class="w-full"
             />
             <Button
               type="submit"
               size="icon"
-              variant="ghost"
-              class="size-6 rounded-md text-[#a0a0a0] hover:text-white hover:bg-white/10 shrink-0 cursor-pointer"
+              class="size-6 rounded-md "
             >
-              <icons.ArrowUp class="size-3.5" />
+              <icons.ArrowUp  />
             </Button>
           </form>
         {:else}
@@ -571,10 +570,10 @@
   .animated-gradient-border {
     background: conic-gradient(
       from var(--angle),
-      #3f3f3f,
-      #6b6b6b,
-      #a3a3a3,
-      #3f3f3f
+      #e50909,
+      #c8b207,
+      #e608e6,
+      #6eec07
     );
     animation: rotate 3s linear infinite;
     border-radius: 12px !important;
