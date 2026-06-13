@@ -38,6 +38,7 @@
   import WindowsButtons from "$lib/components/windows-buttons.svelte";
   import BackAndForthButtons from "$lib/components/back-and-forth-buttons.svelte";
   import { ISMACOS, ISWINDOWS } from "$lib/utils";
+  import { setSidebar } from "@lib/components/ui/sidebar/context.svelte";
 
   // Local Workspaces and Notes
   const localUserWorkspaces = setLocalUserWorkspaces();
@@ -123,6 +124,13 @@
       localNotes.setNotes(data.localNotes);
     }
   });
+
+  const sidebar = setSidebar({
+    open: () => open,
+    setOpen: (value: boolean) => {
+      localStorage.setItem("sidebar-state", value ? "open" : "closed");
+    },
+  });
 </script>
 
 <ModeWatcher />
@@ -132,27 +140,23 @@
 <GlobalSearch />
 <GlobalSettings />
 <NewUserWorkspace />
-
-<Sidebar.Provider
-  bind:open
-  onOpenChange={(value: boolean) => {
-    localStorage.setItem("sidebar-state", value ? "open" : "closed");
-  }}
->
+<main class="flex flex-col min-h-screen max-h-screen w-screen">
   <div
     data-tauri-drag-region
-    class="fixed bg-sidebar flex items-center justify-between top-0 z-10! h-10 w-full"
+    class="bg-sidebar flex items-center justify-between h-10 w-full"
   >
     <BackAndForthButtons />
     <div class:mr-4={ISMACOS} class="inline-flex items-center gap-2">
       <ToggleMode />
       {#if ISWINDOWS}
-      <WindowsButtons />
+        <WindowsButtons />
       {/if}
     </div>
   </div>
-  <AppSideBar class="mt-10" />
-  <Sidebar.Inset class="mt-10 ">
-    {@render children()}
-  </Sidebar.Inset>
-</Sidebar.Provider>
+  <Sidebar.Provider class="min-h-[calc(100svh-2.5rem)]" bind:open>
+    <AppSideBar class="top-10 h-[calc(100svh-2.5rem)]" />
+    <Sidebar.Inset>
+      {@render children()}
+    </Sidebar.Inset>
+  </Sidebar.Provider>
+</main>
