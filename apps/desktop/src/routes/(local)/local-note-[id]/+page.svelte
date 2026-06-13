@@ -193,11 +193,11 @@ function handleKeydown(event: KeyboardEvent) {
       {#snippet left()}
         <IconPicker onSelect={updateIcon}>
           <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
-            <IconRenderer icon={note.icon} />
+            <IconRenderer icon={note!.icon} />
           </div>
         </IconPicker>
         <input
-          value={note.name}
+          value={note!.name}
           class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
           onchange={async (e) => {
             const target = e.target as HTMLInputElement;
@@ -217,10 +217,10 @@ function handleKeydown(event: KeyboardEvent) {
           <SearchAndReplace {editor} />
         {/if}
         <NavActions
-          starred={note.favorite as boolean}
+          starred={note!.favorite as boolean}
           {toggleStar}
           {editor}
-          {note}
+          note={note!}
         />
       {/snippet}
     </Topbar>

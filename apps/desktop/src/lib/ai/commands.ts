@@ -71,3 +71,26 @@ Rules:
 `;
   return generatePrompt(userPrompt, undefined, text);
 };
+
+export const IMPROVE_WRITING_PROMPT = (text: string) => {
+  const userPrompt = `
+Improve the writing of the text below to make it more clear, engaging, and professional.
+Rules:
+1. Enhance clarity, flow, and sentence structure.
+2. Keep the original intent and tone.
+3. Output ONLY the improved text.
+`;
+  return generatePrompt(userPrompt, undefined, text);
+};
+
+export const SIMPLIFY_LANGUAGE_PROMPT = (text: string) => {
+  const userPrompt = `
+Rewrite the text below using simpler, more plain language.
+Rules:
+1. Make it easier to read and understand.
+2. Avoid complex jargon and long sentence structures.
+3. Retain the core meaning.
+4. Output ONLY the simplified text.
+`;
+  return generatePrompt(userPrompt, undefined, text);
+};
