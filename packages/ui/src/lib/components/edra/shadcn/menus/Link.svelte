@@ -1,5 +1,4 @@
 <script lang="ts">
-import SimpleTooltip from '@lib/components/custom/SimpleToolTip.svelte';
 import { Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
 import Check from '@lucide/svelte/icons/check';
@@ -9,7 +8,8 @@ import Trash from '@lucide/svelte/icons/trash';
 import ExternalLink from '@lucide/svelte/icons/external-link';
 import type { Editor } from '@tiptap/core';
 import BubbleMenu from '../../components/BubbleMenu.svelte';
-import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
+    import type { ShouldShowProps } from '../../types';
+  import { SimpleToolTip } from '@lib/components/custom';
 
 interface Props {
   editor: Editor;
@@ -64,7 +64,7 @@ function handleSubmit(e: Event) {
         <ExternalLink />
       </Button>
     </SimpleToolTip>
-    <SimpleTooltip content="Edit Link">
+    <SimpleToolTip content="Edit Link">
       <Button
         variant="ghost"
         size="icon"
@@ -75,8 +75,8 @@ function handleSubmit(e: Event) {
       >
         <Edit />
       </Button>
-    </SimpleTooltip>
-    <SimpleTooltip content="Copy Link">
+    </SimpleToolTip>
+    <SimpleToolTip content="Copy Link">
       <Button
         variant="ghost"
         title="Copy Link"
@@ -87,8 +87,8 @@ function handleSubmit(e: Event) {
       >
         <Copy />
       </Button>
-    </SimpleTooltip>
-    <SimpleTooltip content="Remove Link">
+    </SimpleToolTip>
+    <SimpleToolTip content="Remove Link">
       <Button
         variant="ghost"
         title="Remove Link"
@@ -98,7 +98,7 @@ function handleSubmit(e: Event) {
       >
         <Trash />
       </Button>
-    </SimpleTooltip>
+    </SimpleToolTip>
   {:else}
     <form onsubmit={handleSubmit} class="flex max-w-120 items-center gap-0.5">
       <Input
@@ -107,11 +107,11 @@ function handleSubmit(e: Event) {
         type="url"
         placeholder="Type or paste a link"
       />
-      <SimpleTooltip content="Set new link">
+      <SimpleToolTip content="Set new link">
         <Button type="submit" size="icon">
           <Check />
         </Button>
-      </SimpleTooltip>
+      </SimpleToolTip>
     </form>
   {/if}
 </BubbleMenu>

@@ -1,7 +1,5 @@
 <script lang="ts">
-import SimpleToolTip from '@lib/components/custom/SimpleToolTip.svelte';
-import { buttonVariants } from '@lib/components/ui/button';
-import Button from '@lib/components/ui/button/button.svelte';
+import { buttonVariants, Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
 import * as Popover from '@lib/components/ui/popover';
 import { cn } from '@lib/utils';
@@ -10,6 +8,7 @@ import ChevronDown from '@lucide/svelte/icons/chevron-down';
 import Link from '@lucide/svelte/icons/link';
 import type { Editor } from '@tiptap/core';
 import EdraToolTip from '../EdraToolTip.svelte';
+  import { SimpleToolTip } from '@lib/components/custom';
 
 interface Props {
   editor: Editor;

@@ -6,24 +6,20 @@ import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from 
 import type { Content, Editor } from '@nota/ui/edra/types.js';
 import { IconPicker, IconRenderer } from '@nota/ui/icons/index.js';
 import { buttonVariants } from '@nota/ui/shadcn/button';
-import { useSidebar } from '@nota/ui/shadcn/sidebar';
-import { Separator } from '@nota/ui/shadcn/separator';
 import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { onDestroy, onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
+import Topbar from '$lib/components/topbar.svelte';
 import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { DB } from '$lib/local/db.js';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { createFile, getAssetsByFileType, moveFileToAssets, selectLocalFile } from '$lib/local/util.js';
 import { ISMACOS, ISWINDOWS, fixMathReplacer } from '$lib/utils';
 
-const sidebar = useSidebar();
+
 
 // editor related
 let editor = $state<Editor>();
@@ -169,33 +165,18 @@ function handleKeydown(event: KeyboardEvent) {
 
 {#if isLoading}
   <div class="flex size-full flex-col">
-    <header
-      class="flex h-12 shrink-0 items-center justify-between px-4"
-      class:pl-24={ISMACOS && !sidebar.open}
-    >
-      <div class="flex items-center gap-2">
-        {#if !sidebar.open}
-          {#if ISWINDOWS}
-            <AppLogoMenu />
-          {/if}
-          <BackAndForthButtons />
-          <Separator orientation="vertical" class="h-4 mx-1" />
-        {/if}
+    <Topbar showSeparator={true}>
+      {#snippet left()}
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="h-8 w-48 rounded-md" />
-      </div>
-
-      <div class="flex items-center gap-2">
+      {/snippet}
+      {#snippet right()}
         <Skeleton class="h-8 w-16 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
-        {#if ISWINDOWS}
-          <Separator orientation="vertical" class="h-4 mx-1" />
-          <WindowsButtons />
-        {/if}
-      </div>
-    </header>
+      {/snippet}
+    </Topbar>
     <div class="flex-1 grow overflow-auto p-8">
       <div class="mx-auto w-full max-w-3xl space-y-4">
         <Skeleton class="h-8 w-3/4 rounded-md" />
@@ -208,18 +189,8 @@ function handleKeydown(event: KeyboardEvent) {
   </div>
 {:else if !isLoading && note !== undefined}
   <div class="flex size-full flex-col">
-    <header
-      class="flex h-12 shrink-0 items-center justify-between px-4"
-      class:pl-24={ISMACOS && !sidebar.open}
-    >
-      <div class="flex items-center gap-2">
-        {#if !sidebar.open}
-          {#if ISWINDOWS}
-            <AppLogoMenu />
-          {/if}
-          <BackAndForthButtons />
-          <Separator orientation="vertical" class="h-4 mx-1" />
-        {/if}
+    <Topbar showSeparator={true}>
+      {#snippet left()}
         <IconPicker onSelect={updateIcon}>
           <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
             <IconRenderer icon={note.icon} />
@@ -236,9 +207,9 @@ function handleKeydown(event: KeyboardEvent) {
             await updateName(target.value);
           }}
         />
-      </div>
+      {/snippet}
 
-      <div class="flex items-center gap-2">
+      {#snippet right()}
         {#if editor && !editor?.isDestroyed}
           <div class="text-muted-foreground hidden sm:block truncate text-xs">
             {editor.storage.characterCount.words()} Words
@@ -251,12 +222,8 @@ function handleKeydown(event: KeyboardEvent) {
           {editor}
           {note}
         />
-        {#if ISWINDOWS}
-          <Separator orientation="vertical" class="h-4 mx-1" />
-          <WindowsButtons />
-        {/if}
-      </div>
-    </header>
+      {/snippet}
+    </Topbar>
     {#if editor && !editor?.isDestroyed}
       {#if globalSettings.useToolBar && editor}
         <EdraToolBar {editor} useAI={globalSettings.useAI} />

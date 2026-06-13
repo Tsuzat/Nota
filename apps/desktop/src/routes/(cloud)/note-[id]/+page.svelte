@@ -8,8 +8,6 @@ import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from 
 import type { Content, Editor } from '@nota/ui/edra/types.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
-import { useSidebar } from '@nota/ui/shadcn/sidebar';
-import { Separator } from '@nota/ui/shadcn/separator';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { basename } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -18,15 +16,13 @@ import { compare } from 'fast-json-patch';
 import { onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
+import Topbar from '$lib/components/topbar.svelte';
 import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
 import { ISMACOS, ISWINDOWS, fixMathReplacer } from '$lib/utils';
 
-const sidebar = useSidebar();
+
 
 const { data } = $props();
 
@@ -197,33 +193,18 @@ function handleKeydown(e: KeyboardEvent) {
 
 {#if isLoading}
   <div class="flex size-full flex-col">
-    <header
-      class="flex h-12 shrink-0 items-center justify-between px-4"
-      class:pl-24={ISMACOS && !sidebar.open}
-    >
-      <div class="flex items-center gap-2">
-        {#if !sidebar.open}
-          {#if ISWINDOWS}
-            <AppLogoMenu />
-          {/if}
-          <BackAndForthButtons />
-          <Separator orientation="vertical" class="h-4 mx-1" />
-        {/if}
+    <Topbar showSeparator={true}>
+      {#snippet left()}
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="h-8 w-48 rounded-md" />
-      </div>
-
-      <div class="flex items-center gap-2">
+      {/snippet}
+      {#snippet right()}
         <Skeleton class="h-8 w-16 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
-        {#if ISWINDOWS}
-          <Separator orientation="vertical" class="h-4 mx-1" />
-          <WindowsButtons />
-        {/if}
-      </div>
-    </header>
+      {/snippet}
+    </Topbar>
     <div class="flex-1 grow overflow-auto p-8">
       <div class="mx-auto w-full max-w-3xl space-y-4">
         <Skeleton class="h-8 w-3/4 rounded-md" />
@@ -236,20 +217,10 @@ function handleKeydown(e: KeyboardEvent) {
   </div>
 {:else if !isLoading && note !== undefined}
   <div class="flex size-full flex-col">
-    <header
-      class="flex h-12 shrink-0 items-center justify-between px-4"
-      class:pl-24={ISMACOS && !sidebar.open}
-    >
-      <div class="flex items-center gap-2">
-        {#if !sidebar.open}
-          {#if ISWINDOWS}
-            <AppLogoMenu />
-          {/if}
-          <BackAndForthButtons />
-          <Separator orientation="vertical" class="h-4 mx-1" />
-        {/if}
+    <Topbar showSeparator={true}>
+      {#snippet left()}
         <IconPicker
-          onSelect={(icon) => {
+          onSelect={(icon: string) => {
             note!.icon = icon;
           }}
           onClose={() => {
@@ -257,23 +228,24 @@ function handleKeydown(e: KeyboardEvent) {
           }}
         >
           <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
-            <IconRenderer icon={note.icon} />
+            <IconRenderer icon={note!.icon} />
           </div>
         </IconPicker>
         <input
-          value={note.name}
+          value={note!.name}
           class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
-          onchange={(e) => {
+          onchange={async (e) => {
             const target = e.target as HTMLInputElement;
             const value = target.value;
             if (value.trim() === "") return;
-            updateNote(value, note!.icon, note!.favorite);
+            e.preventDefault();
+            await updateNote(value, note!.icon, note!.favorite);
           }}
         />
-      </div>
+      {/snippet}
 
-      <div class="flex items-center gap-2">
-        {#if note.is_public}
+      {#snippet right()}
+        {#if note!.is_public}
           <SimpleToolTip>
             <Button variant="ghost" size="icon-sm">
               <icons.Globe />
@@ -287,13 +259,13 @@ function handleKeydown(e: KeyboardEvent) {
           </SimpleToolTip>
         {/if}
         {#if editor && !editor?.isDestroyed}
-          <div class="text-muted-foreground truncate text-xs">
+          <div class="text-muted-foreground hidden sm:block truncate text-xs">
             {editor.storage.characterCount.words()} Words
           </div>
           <SearchAndReplace {editor} />
         {/if}
         <SimpleToolTip content={syncing ? syncingText : "Synced"}>
-          <Button variant="ghost" size="icon-sm">
+          <Button variant="ghost" size="icon">
             {#if syncing}
               <icons.Loader class="text-primary animate-spin" />
             {:else}
@@ -302,17 +274,13 @@ function handleKeydown(e: KeyboardEvent) {
           </Button>
         </SimpleToolTip>
         <NavActions
-          starred={note.favorite as boolean}
+          starred={note!.favorite as boolean}
           toggleStar={() => updateNote(note!.name, note!.icon, !note!.favorite)}
           {editor}
-          {note}
+          note={note!}
         />
-        {#if ISWINDOWS}
-          <Separator orientation="vertical" class="h-4 mx-1" />
-          <WindowsButtons />
-        {/if}
-      </div>
-    </header>
+      {/snippet}
+    </Topbar>
     {#if useGlobalSettings.useToolBar && editor}
       <EdraToolBar {editor} />
     {/if}
