@@ -373,10 +373,7 @@
   class="bg-transparent flex max-h-120 max-w-3xl w-full flex-col p-0 transition-[height] duration-500 z-100"
   options={{
     strategy: "fixed",
-    autoPlacement: {
-      allowedPlacements: ["bottom", "top"],
-      autoAlignment: true
-    },
+    placement: "bottom",
     scrollTarget: parentElement,
     onShow() {
       activeOptionIndex = 0;
@@ -389,7 +386,7 @@
 >
   {#if aiState === AIState.Idle}
     <div
-      class="shadow-2xl bg-popover/75 w-2xl border backdrop-blur-2xl rounded-xl flex flex-col overflow-hidden"
+      class="shadow-2xl bg-popover/75 w-xl border backdrop-blur-2xl rounded-xl flex flex-col overflow-hidden"
     >
       <!-- Input Area -->
       <div class="px-3 py-3">
@@ -421,7 +418,7 @@
       <!-- Thinking state -->
       <div
         transition:fade
-        class="animated-gradient-border bg-[#1f1f1f] rounded-xl p-px w-[500px] overflow-hidden shadow-2xl"
+        class="animated-gradient-border bg-[#1f1f1f] rounded-xl p-px w-full overflow-hidden shadow-2xl"
       >
         <div
           class="bg-[#1f1f1f] flex items-center justify-between gap-3 rounded-xl p-4"
@@ -450,7 +447,7 @@
       <!-- Response state -->
       <div
         transition:fade
-        class="bg-[#1f1f1f] border border-white/10 shadow-2xl rounded-xl w-[500px] flex flex-col overflow-hidden"
+        class="bg-[#1f1f1f] border border-white/10 shadow-2xl rounded-xl w-full flex flex-col overflow-hidden"
       >
         <!-- Streamed text content -->
         <div
@@ -498,61 +495,61 @@
             <span>Generating response...</span>
           </div>
         {/if}
-
         <!-- Action bar -->
-        <div class="h-px w-full bg-white/5"></div>
-        <div class="flex items-center gap-2 px-3 py-2.5 bg-[#1a1a1a]">
-          <Button
-            size="sm"
-            onclick={replaceSelection}
-            disabled={generating}
-            class="gap-1.5 font-medium cursor-pointer bg-white text-black hover:bg-white/90 border-0 h-8"
-          >
-            <icons.Check class="size-4" />
-            Replace selection
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onclick={insertNext}
-            disabled={generating}
-            class="gap-1.5 cursor-pointer bg-transparent border-white/10 text-[#d4d4d4] hover:text-white hover:bg-white/10 h-8"
-          >
-            <icons.CornerDownLeft class="size-4" />
-            Insert below
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onclick={discardChanges}
-            disabled={generating}
-            class="gap-1.5 cursor-pointer bg-transparent border-white/10 text-[#d4d4d4] hover:text-white hover:bg-white/10 h-8"
-          >
-            <icons.RotateCcw class="size-4" />
-            Try again
-          </Button>
+        <div class="flex items-center justify-between px-3 py-2 bg-[#1a1a1a]">
+          <!-- Left side: Replace, Insert, Copy -->
+          <div class="flex items-center gap-1.5">
+            <Button
+              size="sm"
+              onclick={replaceSelection}
+              disabled={generating}
+            >
+              <icons.Check />
+              Replace
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onclick={insertNext}
+              disabled={generating}
+            >
+              <icons.CornerDownLeft  />
+              Insert
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onclick={() => {
+                window.navigator.clipboard.writeText(aiResponse);
+                toast.success("Copied to clipboard");
+              }}
+              disabled={generating}
+            >
+              <icons.Copy />
+              Copy
+            </Button>
+          </div>
 
-          <div class="ml-auto flex items-center gap-1">
-            <SimpleToolTip content="Copy to Clipboard">
-              <Button
-                variant="ghost"
-                size="icon"
-                class="size-8 rounded-md cursor-pointer text-[#a0a0a0] hover:text-white hover:bg-white/10"
-                onclick={() => window.navigator.clipboard.writeText(aiResponse)}
-              >
-                <icons.Copy class="size-4" />
-              </Button>
-            </SimpleToolTip>
-            <SimpleToolTip content="Discard Changes">
-              <Button
-                variant="ghost"
-                size="icon"
-                class="size-8 rounded-md cursor-pointer text-[#a0a0a0] hover:text-red-400 hover:bg-red-400/10"
-                onclick={closeAI}
-              >
-                <icons.Trash2 class="size-4" />
-              </Button>
-            </SimpleToolTip>
+          <!-- Right side: Retry, Discard -->
+          <div class="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onclick={discardChanges}
+              disabled={generating}
+            >
+              <icons.RotateCcw />
+              Retry
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onclick={closeAI}
+              disabled={generating}
+            >
+              <icons.Trash2 />
+              Discard
+            </Button>
           </div>
         </div>
       </div>
