@@ -6,16 +6,22 @@ import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import { useSidebar } from '@nota/ui/shadcn/sidebar';
+import { Separator } from '@nota/ui/shadcn/separator';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
+import AppLogoMenu from '$lib/components/app-menu.svelte';
+import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import { useCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte.js';
-import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import WindowsButtons from '$lib/components/windows-buttons.svelte';
+import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
 
 let { data } = $props();
 
+const sidebar = useSidebar();
 const cloudWorkspaces = getWorkspacesContext();
 const cloudNotes = getNotesContext();
 const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
@@ -106,6 +112,22 @@ async function importNote() {
 
 {#if workspace}
   <NewNotes bind:open={openNewNote} {workspace} />
+  <header
+    class="flex h-12 shrink-0 items-center justify-between px-4"
+    class:pl-24={ISMACOS && !sidebar.open}
+  >
+    <div class="flex items-center gap-2">
+      {#if !sidebar.open}
+        {#if ISWINDOWS}
+          <AppLogoMenu />
+        {/if}
+        <BackAndForthButtons />
+      {/if}
+    </div>
+    {#if ISWINDOWS}
+      <WindowsButtons />
+    {/if}
+  </header>
   <main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
     <div class="mb-4 flex items-center gap-2">
       <IconPicker

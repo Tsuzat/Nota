@@ -11,7 +11,7 @@
   const {class: className}: Props = $props()
 </script>
 
-<div class={cn("flex items-center gap-1", className)}>
+<div class={cn("flex items-center gap-1 z-500!", className)}>
   <SimpleToolTip content="Toggle Sidebar" keyboard={getKeyboardShortcut("\\", true)} >
     <SidebarTrigger /> 
   </SimpleToolTip>

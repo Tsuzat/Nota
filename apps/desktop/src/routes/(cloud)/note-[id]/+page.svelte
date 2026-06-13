@@ -8,6 +8,8 @@ import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from 
 import type { Content, Editor } from '@nota/ui/edra/types.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import { useSidebar } from '@nota/ui/shadcn/sidebar';
+import { Separator } from '@nota/ui/shadcn/separator';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { basename } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -16,10 +18,15 @@ import { compare } from 'fast-json-patch';
 import { onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
+import AppLogoMenu from '$lib/components/app-menu.svelte';
+import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
 import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import { fixMathReplacer } from '$lib/utils';
+import WindowsButtons from '$lib/components/windows-buttons.svelte';
+import { ISMACOS, ISWINDOWS, fixMathReplacer } from '$lib/utils';
+
+const sidebar = useSidebar();
 
 const { data } = $props();
 
@@ -190,8 +197,18 @@ function handleKeydown(e: KeyboardEvent) {
 
 {#if isLoading}
   <div class="flex size-full flex-col">
-    <header class="flex h-12 shrink-0 items-center justify-between px-4 border-b">
+    <header
+      class="flex h-12 shrink-0 items-center justify-between px-4"
+      class:pl-24={ISMACOS && !sidebar.open}
+    >
       <div class="flex items-center gap-2">
+        {#if !sidebar.open}
+          {#if ISWINDOWS}
+            <AppLogoMenu />
+          {/if}
+          <BackAndForthButtons />
+          <Separator orientation="vertical" class="h-4 mx-1" />
+        {/if}
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="h-8 w-48 rounded-md" />
       </div>
@@ -201,6 +218,10 @@ function handleKeydown(e: KeyboardEvent) {
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
         <Skeleton class="size-8 rounded-md" />
+        {#if ISWINDOWS}
+          <Separator orientation="vertical" class="h-4 mx-1" />
+          <WindowsButtons />
+        {/if}
       </div>
     </header>
     <div class="flex-1 grow overflow-auto p-8">
@@ -215,8 +236,18 @@ function handleKeydown(e: KeyboardEvent) {
   </div>
 {:else if !isLoading && note !== undefined}
   <div class="flex size-full flex-col">
-    <header class="flex h-12 shrink-0 items-center justify-between px-4 border-b">
+    <header
+      class="flex h-12 shrink-0 items-center justify-between px-4"
+      class:pl-24={ISMACOS && !sidebar.open}
+    >
       <div class="flex items-center gap-2">
+        {#if !sidebar.open}
+          {#if ISWINDOWS}
+            <AppLogoMenu />
+          {/if}
+          <BackAndForthButtons />
+          <Separator orientation="vertical" class="h-4 mx-1" />
+        {/if}
         <IconPicker
           onSelect={(icon) => {
             note!.icon = icon;
@@ -276,6 +307,10 @@ function handleKeydown(e: KeyboardEvent) {
           {editor}
           {note}
         />
+        {#if ISWINDOWS}
+          <Separator orientation="vertical" class="h-4 mx-1" />
+          <WindowsButtons />
+        {/if}
       </div>
     </header>
     {#if useGlobalSettings.useToolBar && editor}
