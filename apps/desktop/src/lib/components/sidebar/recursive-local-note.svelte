@@ -74,10 +74,10 @@
 
 {#if hasChildren}
   <Collapsible.Root>
-    <Sidebar.MenuSubItem>
-      <Sidebar.MenuSubButton {isActive} onclick={() => goto(href)}>
+    <Sidebar.MenuSubItem class="group/menu-item">
+      <Sidebar.MenuSubButton class="peer/menu-button pl-7" {isActive} onclick={() => goto(href)}>
         {#snippet child({ props: spanProps })}
-          <span {...spanProps} class="flex w-full items-center gap-2">
+          <span {...spanProps}>
             <IconRenderer class="size-4 shrink-0" icon={props.note.icon} />
             <span class="cursor-default flex-1 truncate">{props.note.name}</span>
           </span>
@@ -108,10 +108,10 @@
     </Collapsible.Content>
   </Collapsible.Root>
 {:else}
-  <Sidebar.MenuSubItem>
-    <Sidebar.MenuSubButton {isActive} onclick={() => goto(href)}>
+  <Sidebar.MenuSubItem class="group/menu-item">
+    <Sidebar.MenuSubButton class="peer/menu-button" {isActive} onclick={() => goto(href)}>
       {#snippet child({ props: spanProps })}
-        <span {...spanProps} class="flex w-full items-center gap-2">
+        <span {...spanProps}>
           <IconRenderer class="size-4 shrink-0" icon={props.note.icon} />
           <span class="cursor-default flex-1 truncate">{props.note.name}</span>
         </span>

@@ -1,29 +1,31 @@
 import { getContext, setContext } from 'svelte';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
-
 import request from './request';
-
-import type { Workspace } from './types';
-
-import { WorkspaceSchema } from './types';
+import { type Workspace, WorkspaceSchema } from './types';
 
 class Workspaces {
   #workspaces = $state<Workspace[]>([]);
+
   get workspaces() {
     return this.#workspaces;
   }
+
   set workspaces(workspaces: Workspace[]) {
     this.#workspaces = workspaces;
   }
 
   /**
    * Fetch all workspaces from the backend
-   * @param userworkspaceId UserWorkspace ID
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async fetch(userworkspaceId: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace/${userworkspaceId}`;
-    const res = await request(url);
+  async fetch() {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace`;
+    const res = await request(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     if (res.ok) {
       const json = await res.json();
       const workspaces = json.data as Workspace[];
@@ -36,10 +38,11 @@ class Workspaces {
 
   /**
    * Create a new workspace
-   * @param workspace Partial workspace object
+   * @param name Workspace name
+   * @param icon Workspace icon
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async create(icon: string, name: string, userworkspaceId: string, description?: string) {
+  async create(name: string, icon: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace`;
     const res = await request(url, {
       method: 'POST',
@@ -47,10 +50,8 @@ class Workspaces {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        icon,
         name,
-        userworkspace: userworkspaceId,
-        description: description || '',
+        icon,
       }),
     });
     if (res.ok) {
@@ -64,7 +65,38 @@ class Workspaces {
   }
 
   /**
-   * Delete a workspace by ID
+   * Update a workspace
+   * @param workspaceId Workspace ID
+   * @param name Workspace name
+   * @param icon Workspace icon
+   * @throws {Error} If the request fails with a non-200 status code
+   */
+  async update(workspaceId: string, name: string, icon: string) {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace/${workspaceId}`;
+    const res = await request(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+        icon,
+      }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const updatedWorkspace = json.data as Workspace;
+      const parsedWorkspace = WorkspaceSchema.parse(updatedWorkspace);
+      this.workspaces = this.workspaces.map((workspace) =>
+        workspace.id === workspaceId ? parsedWorkspace : workspace
+      );
+    } else {
+      throw new Error(await res.text());
+    }
+  }
+
+  /**
+   * Delete a workspace
    * @param workspaceId Workspace ID
    * @throws {Error} If the request fails with a non-200 status code
    */
@@ -82,50 +114,20 @@ class Workspaces {
       throw new Error(await res.text());
     }
   }
-
-  /**
-   * Update a workspace by ID
-   * @param icon The new icon of the workspace
-   * @param name The new name of the workspace
-   * @param id The ID of the workspace to update
-   * @throws {Error} If the request fails with a non-200 status code
-   */
-  async update(icon: string, name: string, id: string, description?: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace/${id}`;
-    const res = await request(url, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        icon,
-        name,
-        description: description || '',
-      }),
-    });
-    if (res.ok) {
-      const json = await res.json();
-      const updatedWorkspace = json.data as Workspace;
-      const parsedWorkspace = WorkspaceSchema.parse(updatedWorkspace);
-      this.workspaces = this.workspaces.map((workspace) => (workspace.id === id ? parsedWorkspace : workspace));
-    } else {
-      throw new Error(await res.text());
-    }
-  }
 }
 
-const NOTAWORKSPACEKEY = Symbol('NOTAWORKSPACEKEY');
+const NOTAWORKSPACESKEY = Symbol('NOTAWORKSPACESKEY');
 
 /**
  * Set the workspaces context.
  */
 export const setWorkspacesContext = () => {
-  return setContext(NOTAWORKSPACEKEY, new Workspaces());
+  return setContext(NOTAWORKSPACESKEY, new Workspaces());
 };
 
 /**
  * Get the workspaces context.
  */
 export function getWorkspacesContext() {
-  return getContext<ReturnType<typeof setWorkspacesContext>>(NOTAWORKSPACEKEY);
+  return getContext<ReturnType<typeof setWorkspacesContext>>(NOTAWORKSPACESKEY);
 }

@@ -46,16 +46,6 @@ export const SessionSchema = z.object({
 });
 export type Session = z.infer<typeof SessionSchema>;
 
-export const UserWorkspaceSchema = z.object({
-  id: z.uuid(),
-  icon: z.string(),
-  name: z.string(),
-  owner: z.uuid(),
-  created_at: z.coerce.date(),
-  updated_at: z.coerce.date(),
-});
-export type UserWorkspace = z.infer<typeof UserWorkspaceSchema>;
-
 export const WorkspaceSchema = z.object({
   id: z.uuid(),
   name: z.string(),
@@ -64,25 +54,38 @@ export const WorkspaceSchema = z.object({
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
   owner: z.uuid(),
-  userworkspace: z.uuid(),
 });
 export type Workspace = z.infer<typeof WorkspaceSchema>;
 
 export const NoteSchema = z.object({
   id: z.uuid(),
+  workspace_id: z.uuid(),
+  parent_note_id: z.uuid().nullable().optional(),
   name: z.string(),
   icon: z.string().default('📝'),
-  workspace: z.uuid(),
-  userworkspace: z.uuid(),
   owner: z.uuid(),
-  favorite: z.boolean().default(false),
-  trashed: z.boolean().default(false),
+  pinned: z.boolean().default(false),
+  deleted_at: z.coerce.date().nullable().optional(),
   created_at: z.coerce.date().default(() => new Date()),
   updated_at: z.coerce.date().default(() => new Date()),
   is_public: z.boolean().default(false),
   content: z.record(z.any(), z.any()).default({}).nullable().optional(),
 });
 export type Note = z.infer<typeof NoteSchema>;
+
+export const AssetSchema = z.object({
+  id: z.uuid(),
+  workspace_id: z.uuid(),
+  note_id: z.uuid().nullable().optional(),
+  name: z.string(),
+  path: z.string(),
+  mime_type: z.string(),
+  size: z.number().int(),
+  created_at: z.coerce.date().default(() => new Date()),
+  updated_at: z.coerce.date().default(() => new Date()),
+  deleted_at: z.coerce.date().nullable().optional(),
+});
+export type Asset = z.infer<typeof AssetSchema>;
 
 export const NotaFileSchema = z.object({
   key: z.string(),
@@ -91,9 +94,3 @@ export const NotaFileSchema = z.object({
   url: z.url(),
 });
 export type NotaFile = z.infer<typeof NotaFileSchema>;
-
-export const UserWorkspaceDataSchema = UserWorkspaceSchema.extend({
-  workspaces: z.array(WorkspaceSchema),
-  notes: z.array(NoteSchema),
-});
-export type UserWorkspaceData = z.infer<typeof UserWorkspaceDataSchema>;

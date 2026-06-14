@@ -1,3 +1,8 @@
-export { icons } from '@lucide/svelte';
-export { default as IconRenderer } from './icon-renderer.svelte';
-export { default as IconPicker } from './icon-picker.svelte';
+export { icons } from "@lucide/svelte";
+export { default as IconRenderer } from "./icon-renderer.svelte";
+export { default as IconPicker } from "./icon-picker.svelte";
+export { default as MovingDownload } from "./moving-icons/download.svelte";
+export { default as MovingHome } from "./moving-icons/home.svelte";
+export { default as MovingLogin } from "./moving-icons/login.svelte";
+export { default as MovingSettings } from "./moving-icons/settings.svelte";
+export { default as MovingTrash } from "./moving-icons/trash.svelte";

@@ -6,10 +6,11 @@ import { type Note, NoteSchema } from './types';
 interface UpdateNotes {
   name?: string;
   icon?: string;
-  favorite?: boolean;
-  trashed?: boolean;
+  pinned?: boolean;
+  deleted_at?: Date | null;
   is_public?: boolean;
-  workspace?: string;
+  workspace_id?: string;
+  parent_note_id?: string | null;
 }
 
 class Notes {
@@ -25,11 +26,10 @@ class Notes {
 
   /**
    * Fetch all notes from the backend
-   * @param userworkspaceId UserWorkspace ID
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async fetch(userworkspaceId: string) {
-    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${userworkspaceId}`;
+  async fetch() {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note`;
     const res = await request(url, {
       method: 'GET',
       headers: {
@@ -71,7 +71,7 @@ class Notes {
    * @param note Partial note object
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async create(name: string, icon: string, workspaceId: string, userworkspaceId: string, isFavorite: boolean) {
+  async create(name: string, icon: string, workspaceId: string, parentNoteId: string | null = null, isPinned: boolean = false) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note`;
     const res = await request(url, {
       method: 'POST',
@@ -81,9 +81,9 @@ class Notes {
       body: JSON.stringify({
         name,
         icon,
-        workspace: workspaceId,
-        userworkspace: userworkspaceId,
-        favorite: isFavorite,
+        workspace_id: workspaceId,
+        parent_note_id: parentNoteId,
+        pinned: isPinned,
       }),
     });
     if (res.ok) {
@@ -98,12 +98,6 @@ class Notes {
 
   /**
    * Update a note
-   * @param name Note name
-   * @param icon Note icon
-   * @param favorite Whether the note is favorite
-   * @param trashed Whether the note is trashed
-   * @param is_public Whether the note is public
-   * @param id Note ID
    * @throws {Error} If the request fails with a non-200 status code
    */
   async update(noteId: string, note: UpdateNotes) {
@@ -184,7 +178,7 @@ class Notes {
     }
   }
 
-  async import(name: string, workspaceId: string, userworkspaceId: string, content: any) {
+  async import(name: string, workspaceId: string, content: any) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/import`;
     const res = await request(url, {
       method: 'POST',
@@ -193,8 +187,7 @@ class Notes {
       },
       body: JSON.stringify({
         name,
-        workspace: workspaceId,
-        userworkspace: userworkspaceId,
+        workspace_id: workspaceId,
         content,
       }),
     });
