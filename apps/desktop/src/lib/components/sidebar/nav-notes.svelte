@@ -7,51 +7,28 @@
   import { getNotesContext } from "@nota/client";
   import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
   import { openNewNote } from "../dialogs";
+  import NoteTile from "./note-tile.svelte";
 
-  import RecursiveLocalNote from "./recursive-local-note.svelte";
-  import RecursiveCloudNote from "./recursive-cloud-note.svelte";
-
-  const localNotes = getLocalNotes();
+  const currentWorkspace = $derived(getCurrentWorkspace().get());
   const cloudNotes = getNotesContext();
-  const currentWorkspace = getCurrentWorkspace();
-
-  const activeWorkspace = $derived(currentWorkspace?.get());
-  const isCloud = $derived(activeWorkspace && "owner" in activeWorkspace);
-
-  const localRootNotes = $derived(
-    activeWorkspace && !isCloud
-      ? localNotes
-          .getNotes()
-          .filter(
-            (n) =>
-              n.workspace_id === activeWorkspace.id &&
-              !n.parent_note_id &&
-              !n.deleted_at,
-          )
-      : []
-  );
-
-  const cloudRootNotes = $derived(
-    activeWorkspace && isCloud
-      ? cloudNotes.notes.filter(
-          (n) =>
-            n.workspace_id === activeWorkspace.id &&
-            !n.parent_note_id &&
-            !n.deleted_at,
-        )
-      : []
-  );
+  const localNotes = getLocalNotes();
+  const notes = $derived.by(() => {
+    if (currentWorkspace === undefined) return [];
+    if ("owner" in currentWorkspace)
+      return cloudNotes.notes.filter((n) => !n.deleted_at);
+    return localNotes.getNotes().filter((n) => !n.deleted_at);
+  });
 </script>
 
-{#if activeWorkspace}
+{#if currentWorkspace}
   <Sidebar.Group>
     <Sidebar.GroupLabel class="justify-between">
       <span>Notes</span>
       <SimpleToolTip>
         <Button
           variant="ghost"
-          class="size-6"
-          onclick={() => openNewNote(activeWorkspace)}
+          size="icon-sm"
+          onclick={() => openNewNote(currentWorkspace)}
         >
           <icons.Plus />
         </Button>
@@ -64,7 +41,18 @@
     </Sidebar.GroupLabel>
     <Sidebar.GroupContent>
       <Sidebar.Menu>
-        {#if isCloud}
+        {#if notes.length > 0}
+          {#each notes as note (note.id)}
+            <NoteTile {note} />
+          {/each}
+        {:else}
+          <div
+            class="text-xs text-sidebar-foreground/50 px-3 py-4 text-center select-none font-medium"
+          >
+            No notes in this workspace
+          </div>
+        {/if}
+        <!-- {#if isCloud}
           {#each cloudRootNotes as note (note.id)}
             <RecursiveCloudNote {note} workspace={activeWorkspace as any} />
           {/each}
@@ -82,7 +70,7 @@
               No notes in this workspace
             </div>
           {/if}
-        {/if}
+        {/if} -->
       </Sidebar.Menu>
     </Sidebar.GroupContent>
   </Sidebar.Group>

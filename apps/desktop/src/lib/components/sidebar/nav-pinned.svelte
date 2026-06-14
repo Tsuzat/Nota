@@ -12,22 +12,24 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { page } from '$app/state';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+import {  getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { timeAgo } from '$lib/utils';
 import { Menu, MenuItem as TauriMenuItem, PredefinedMenuItem } from '@tauri-apps/api/menu';
+  import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
+  import NoteTile from './note-tile.svelte';
 
 const sidebar = useSidebar();
 let showMore = $state(false);
-const localNotes = getLocalNotes();
-const cloudNotes = getNotesContext();
+const localNotes = getLocalNotes()
+const cloudNotes = getNotesContext()
+const currentWorkspace = $derived(getCurrentWorkspace().get())
 
 const notes = $derived.by(() => {
-  let allNotes: (LocalNote | Note)[] = [
-    ...localNotes.getNotes(),
-    ...cloudNotes.notes
-  ];
-  return allNotes.filter((n) => n.pinned && !n.deleted_at);
-});
+	if (!currentWorkspace) return []
+	if ('owner' in currentWorkspace) return cloudNotes.notes.filter((n) => n.pinned && !n.deleted_at)
+	else return localNotes.getNotes().filter((n) => n.pinned && !n.deleted_at)
+})
+
 
 async function togglePin(note: LocalNote | Note) {
   try {
@@ -121,78 +123,8 @@ async function handleContextMenu(e: MouseEvent, note: LocalNote | Note) {
 				{@const href = isCloud
 					? resolve('/(cloud)/note-[id]', { id: note.id })
 					: resolve('/(local)/local-note-[id]', { id: note.id })}
-				{@const isActive = page.url.pathname.endsWith(href)}
 				<div transition:slide={{ easing: linear, duration: 200 }}>
-					<Sidebar.MenuItem onclick={() => goto(href)} oncontextmenu={(e) => handleContextMenu(e, note)}>
-						<Sidebar.MenuButton {isActive}>
-							{#snippet child({ props })}
-								<span title={note.name} {...props}>
-									<IconRenderer icon={note.icon} />
-									<span class="cursor-default">{note.name}</span>
-								</span>
-							{/snippet}
-						</Sidebar.MenuButton>
-						<DropdownMenu.Root>
-							<DropdownMenu.Trigger>
-								{#snippet child({ props })}
-									<Sidebar.MenuAction showOnHover {...props}>
-										<icons.Ellipsis />
-										<span class="sr-only">More</span>
-									</Sidebar.MenuAction>
-								{/snippet}
-							</DropdownMenu.Trigger>
-							<DropdownMenu.Content
-								class="w-fit rounded-lg"
-								side={sidebar.isMobile ? 'bottom' : 'right'}
-								align={sidebar.isMobile ? 'end' : 'start'}
-							>
-								<DropdownMenu.Item onclick={() => togglePin(note)}>
-									<icons.PinOff />
-									Unpin
-								</DropdownMenu.Item>
-								{#if isCloud}
-									<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { is_public: !note.is_public })}>
-										<icons.Globe />
-										{note.is_public ? 'Make Private' : 'Make Public'}
-									</DropdownMenu.Item>
-								{/if}
-								{#if isCloud}
-									<DropdownMenu.Item
-										onclick={() =>
-											window.navigator.clipboard.writeText(
-												`${PUBLIC_NOTA_FRONTEND_URL}/note-preview-${note.id}`
-											)}
-									>
-										<icons.Link />
-										Copy Url
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onclick={async () => {
-											const url = `${PUBLIC_NOTA_FRONTEND_URL}/note-preview-${note.id}`;
-											await openUrl(url);
-										}}
-									>
-										<icons.ArrowUpRight />
-										Open In Browser
-									</DropdownMenu.Item>
-								{/if}
-								<DropdownMenu.Separator />
-								<DropdownMenu.Item variant="destructive" onclick={() => trashNote(note)}>
-									<icons.Trash2 />
-									Move To Trash
-								</DropdownMenu.Item>
-								<DropdownMenu.Item onclick={() => deleteNote(note)} variant="destructive">
-									<icons.Trash2 />
-									Delete
-								</DropdownMenu.Item>
-								<DropdownMenu.Separator />
-								<DropdownMenu.Label class="text-muted-foreground text-sm">
-									Last Edited:
-									{'owner' in note ? timeAgo(note.updated_at.toISOString()) : timeAgo(note.updated_at)}
-								</DropdownMenu.Label>
-							</DropdownMenu.Content>
-						</DropdownMenu.Root>
-					</Sidebar.MenuItem>
+					<NoteTile {note} />	
 				</div>
 			{/each}
 			<Sidebar.MenuItem>

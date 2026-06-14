@@ -90,35 +90,16 @@
   $effect(() => {
     if (
       data.localWorkspaces === undefined ||
-      data.localNotes === undefined
+      data.localNotes === undefined ||
+      data.currentWorkspace === undefined
     ) {
       toast.error("Something went wrong when loading the local data");
     } else {
+      currentWorkspace.set(data.currentWorkspace)
       localWorkspaces.setWorkspaces(data.localWorkspaces ?? []);
       localNotes.setNotes(data.localNotes ?? []);
     }
   }); 
-
-  $effect(() => {
-    const active = currentWorkspace.get();
-    const locals = localWorkspaces.getWorkspaces();
-    const clouds = cloudWorkspaces.workspaces;
-
-    if (active) {
-      const existsLocal = locals.some((w) => w.id === active.id);
-      const existsCloud = clouds.some((w) => w.id === active.id);
-
-      if (!existsLocal && !existsCloud) {
-        if (locals.length > 0) {
-          currentWorkspace.set(locals[0]);
-        }
-      }
-    } else {
-      if (locals.length > 0) {
-        currentWorkspace.set(locals[0]);
-      }
-    }
-  });
 </script>
 
 <ModeWatcher />

@@ -54,6 +54,25 @@ class Notes {
     }
   }
 
+  async fetchNotesForWorkspace(workspaceId: string) {
+    try {
+      let res = await DB.select<LocalNote[]>(
+        'SELECT id, workspace_id, parent_note_id, name, icon, pinned, deleted_at, created_at, updated_at FROM notes WHERE workspace_id = $1',
+        [workspaceId]
+      );
+      res = res.map((r) => {
+        return {
+          ...r,
+          pinned: r.pinned === 'true' || (r.pinned as any) === 1 || r.pinned === true,
+        };
+      });
+      this.setNotes(res);
+    } catch (e) {
+      toast.error('Something went wrong when getting the notes');
+      console.error(e);
+    }
+  }
+
   async createNote(
     name: string,
     icon: string,

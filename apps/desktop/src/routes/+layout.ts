@@ -25,10 +25,11 @@ async function loadLocalWorkspaces(): Promise<LocalWorkSpace[] | null> {
   }
 }
 
-async function loadLocalNotes(): Promise<LocalNote[] | null> {
+async function loadLocalNotes(workspaceId: string): Promise<LocalNote[] | null> {
   try {
     let res = await DB.select<LocalNote[]>(
-      "SELECT id, workspace_id, parent_note_id, name, icon, pinned, deleted_at, created_at, updated_at FROM notes",
+      "SELECT id, workspace_id, parent_note_id, name, icon, pinned, deleted_at, created_at, updated_at FROM notes WHERE workspace_id = $1",
+      [workspaceId]
     );
     res = res.map((r) => {
       return {
@@ -67,7 +68,8 @@ export const load = async () => {
     }
   }
 
-  const localNotes = await loadLocalNotes();
+  const currentWorkspace = localWorkspaces?.[0];
+  const localNotes = currentWorkspace ? await loadLocalNotes(currentWorkspace.id) : [];
 
   if (localNotes === null) {
     toast.error("Something went wrong when loading the notes");
@@ -76,6 +78,7 @@ export const load = async () => {
 
   return {
     localWorkspaces,
+    currentWorkspace,
     localNotes,
   };
 };
