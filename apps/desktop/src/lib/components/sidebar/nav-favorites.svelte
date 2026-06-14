@@ -14,40 +14,41 @@ import { page } from '$app/state';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { timeAgo } from '$lib/utils';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 
 const sidebar = useSidebar();
 let showMore = $state(false);
 const localNotes = getLocalNotes();
 const cloudNotes = getNotesContext();
-const currentUserWorkspace = useCurrentUserWorkspaceContext();
+
 const notes = $derived.by(() => {
-  let notes: LocalNote[] | Note[] = [];
-  if (currentUserWorkspace.getIsLocal()) notes = localNotes.getNotes();
-  else notes = cloudNotes.notes;
-  return notes.filter((n) => n.favorite && !n.trashed);
+  let allNotes: (LocalNote | Note)[] = [
+    ...localNotes.getNotes(),
+    ...cloudNotes.notes
+  ];
+  return allNotes.filter((n) => n.pinned && !n.deleted_at);
 });
 
-async function toggleStar(note: LocalNote | Note) {
+async function togglePin(note: LocalNote | Note) {
   try {
-    note.favorite = !note.favorite;
-    if ('owner' in note) await cloudNotes.update(note.id, { favorite: note.favorite });
+    note.pinned = !note.pinned;
+    if ('owner' in note) await cloudNotes.update(note.id, { pinned: note.pinned });
     else await localNotes.updateNote(note);
   } catch (e) {
-    toast.error('Could not update note starred');
+    toast.error('Could not update note pinned state');
     console.error(e);
   }
 }
 
 async function trashNote(note: LocalNote | Note) {
   try {
-    if ('owner' in note) await cloudNotes.update(note.id, { trashed: true });
+    if ('owner' in note) await cloudNotes.update(note.id, { deleted_at: new Date() });
     else await localNotes.trashNote(note);
   } catch (e) {
-    toast.error('Could not update note trashed');
+    toast.error('Could not move note to trash');
     console.error(e);
   }
 }
+
 async function deleteNote(note: LocalNote | Note) {
   try {
     if ('owner' in note) await cloudNotes.delete(note.id);
@@ -61,9 +62,9 @@ async function deleteNote(note: LocalNote | Note) {
 
 {#if notes.length > 0}
 	<Sidebar.Group class="group-data-[collapsible=icon]:hidden">
-		<Sidebar.GroupLabel>Favorites</Sidebar.GroupLabel>
+		<Sidebar.GroupLabel>Pinned</Sidebar.GroupLabel>
 		<Sidebar.Menu>
-			{#each notes.filter((n) => n.favorite && !n.trashed) as note (note.id)}
+			{#each notes as note (note.id)}
 				{@const isCloud = 'owner' in note}
 				{@const href = isCloud
 					? resolve('/(cloud)/note-[id]', { id: note.id })
@@ -93,9 +94,9 @@ async function deleteNote(note: LocalNote | Note) {
 								side={sidebar.isMobile ? 'bottom' : 'right'}
 								align={sidebar.isMobile ? 'end' : 'start'}
 							>
-								<DropdownMenu.Item onclick={() => toggleStar(note)}>
-									<icons.StarOff />
-									Unfavorites
+								<DropdownMenu.Item onclick={() => togglePin(note)}>
+									<icons.PinOff />
+									Unpin
 								</DropdownMenu.Item>
 								{#if isCloud}
 									<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { is_public: !note.is_public })}>

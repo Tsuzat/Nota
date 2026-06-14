@@ -8,7 +8,6 @@
     setAuthContext,
     setNotesContext,
     setStorageContext,
-    setUserWorkspacesContext,
     setWorkspacesContext,
   } from "@nota/client";
   import { ModeWatcher } from "@nota/ui";
@@ -21,14 +20,8 @@
   import GlobalSignin from "$lib/components/global-signin/global-signin.svelte";
   import { GlobalSettings, setGlobalSettings } from "$lib/components/settings";
   import AppSideBar from "$lib/components/sidebar/app-sidebar.svelte";
-  import {
-    NewUserWorkspace,
-    setNewUserWorkspace,
-  } from "$lib/components/user-workspace";
-  import { setCurrentUserWorkspaceContext } from "$lib/components/user-workspace/userworkspace.svelte";
   import { useDeepLinkAuth } from "$lib/handleOAuth";
   import { setLocalNotes } from "$lib/local/notes.svelte";
-  import { setLocalUserWorkspaces } from "$lib/local/userworkspaces.svelte";
   import { setLocalWorkspaces } from "$lib/local/workspaces.svelte";
   import { setTheme } from "$lib/theme";
   import { downloadAndInstall } from "$lib/updater";
@@ -42,18 +35,13 @@
   import NewNotes from "$lib/components/dialogs/new-notes.svelte";
 
   // Local Workspaces and Notes
-  const localUserWorkspaces = setLocalUserWorkspaces();
   const localWorkspaces = setLocalWorkspaces();
   const localNotes = setLocalNotes();
 
   // Cloud Workspaces and Notes
-  const cloudUserWorkspaces = setUserWorkspacesContext();
   const cloudWorkspaces = setWorkspacesContext();
   const cloudNotes = setNotesContext();
   const cloudStorage = setStorageContext();
-
-  const currentUserWorkspace = setCurrentUserWorkspaceContext();
-  setNewUserWorkspace();
 
   const authContext = setAuthContext();
   const user = $derived(authContext.user);
@@ -62,11 +50,9 @@
 
   $effect(() => {
     if (!user) {
-      cloudUserWorkspaces.userWorkspaces = [];
       cloudWorkspaces.workspaces = [];
       cloudNotes.notes = [];
     } else {
-      cloudUserWorkspaces.fetch();
       cloudStorage.fetch();
     }
   });
@@ -104,23 +90,15 @@
         });
       }
     });
-    // const window = getCurrentWindow();
-    // window.show().then(() => {
-    //   if (ISWINDOWS) window.setDecorations(false);
-    // });
   });
 
   $effect(() => {
     if (
-      data.localUserWorkspaces === undefined ||
-      data.currentUserWorkspace === undefined ||
       data.localWorkspaces === undefined ||
       data.localNotes === undefined
     ) {
       toast.error("Something went wrong when loading the local data");
     } else {
-      currentUserWorkspace.setCurrentUserWorkspace(data.currentUserWorkspace);
-      localUserWorkspaces.setUserWorkspaces(data.localUserWorkspaces);
       localWorkspaces.setWorkspaces(data.localWorkspaces);
       localNotes.setNotes(data.localNotes);
     }
@@ -133,7 +111,6 @@
 <GlobalSignin />
 <GlobalSearch />
 <GlobalSettings />
-<NewUserWorkspace />
 <NewNotes />
 
 <Sidebar.Provider

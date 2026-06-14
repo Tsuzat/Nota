@@ -7,7 +7,6 @@ import * as Dialog from '@nota/ui/shadcn/dialog';
 import { Input } from '@nota/ui/shadcn/input';
 import type { Snippet } from 'svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 
 interface Props {
   open?: boolean;
@@ -24,19 +23,9 @@ let loading = $state(false);
 
 const localWorspaces = getLocalWorkspaces();
 const cloudWorkspaces = getWorkspacesContext();
-const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
 const user = $derived(getAuthContext().user);
 
-$effect(() => {
-  if (useCurrentUserWorkspaceContext().getIsLocal()) type = 'local';
-  else type = 'cloud';
-});
-
 async function createLocalWorkspace() {
-  if (currentUserWorkspace === null || 'owner' in currentUserWorkspace) {
-    toast.error('Can find current user workspace. Please select one user workspace.');
-    return;
-  }
   // verify icon, name
   if (!icon || !name) {
     toast.error('Please select an icon and name');
@@ -44,7 +33,7 @@ async function createLocalWorkspace() {
   }
   try {
     loading = true;
-    await localWorspaces.createWorkspace(icon, name, currentUserWorkspace.id);
+    await localWorspaces.createWorkspace(icon, name);
     open = false;
   } catch (e) {
     loading = false;
@@ -56,16 +45,9 @@ async function createLocalWorkspace() {
   }
 }
 
-/**
- * ! To be implemented
- */
 async function createCloudWorkspace() {
   if (user === null) {
     toast.error('No user found. Please login again.');
-    return;
-  }
-  if (currentUserWorkspace === null || !('owner' in currentUserWorkspace)) {
-    toast.error('No cloud user workspace found');
     return;
   }
   // verify icon, name, dir
@@ -75,7 +57,7 @@ async function createCloudWorkspace() {
   }
   try {
     loading = true;
-    await cloudWorkspaces.create(icon, name, currentUserWorkspace.id);
+    await cloudWorkspaces.create(name, icon);
     open = false;
   } catch (error) {
     console.error(error);
@@ -117,12 +99,7 @@ function handleKeydown(event: KeyboardEvent) {
 	<Dialog.Content class="" showCloseButton={false}>
 		<Dialog.Header>
 			<Dialog.Title>New Workspace</Dialog.Title>
-			<Dialog.Description
-				>Create a local or remote workspace for
-				<strong>
-					{currentUserWorkspace?.name}
-				</strong>
-			</Dialog.Description>
+			<Dialog.Description>Create a new workspace</Dialog.Description>
 		</Dialog.Header>
 		<form onsubmit={handleSubmit} class="flex flex-col gap-2">
 			<div class="flex w-full items-center gap-2">

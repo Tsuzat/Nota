@@ -11,20 +11,17 @@ import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import Topbar from '$lib/components/topbar.svelte';
-import { useCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte.js';
-import {  importNotes, timeAgo, writeStringToFile } from '$lib/utils';
-  import { openNewNote } from '$lib/components/dialogs/index.js';
+import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import { openNewNote } from '$lib/components/dialogs/index.js';
 
 let { data } = $props();
 
-
 const cloudWorkspaces = getWorkspacesContext();
 const cloudNotes = getNotesContext();
-const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
 
 // Derived state
 const workspace = $derived(cloudWorkspaces.workspaces.find((w) => w.id === data.id));
-const notes = $derived(cloudNotes.notes.filter((n) => n.workspace === data.id && !n.trashed));
+const notes = $derived(cloudNotes.notes.filter((n) => n.workspace_id === data.id && !n.deleted_at && !n.parent_note_id));
 
 function openNote(note: Note) {
   goto(resolve('/(cloud)/note-[id]', { id: note.id }));
@@ -45,8 +42,8 @@ async function moveToWorkspace(note: Note, newWorkspace: Workspace) {
     okLabel: 'Yes, Move',
   });
   if (!ok) return;
-  note.workspace = newWorkspace.id;
-  await cloudNotes.update(note.id, { workspace: newWorkspace.id });
+  note.workspace_id = newWorkspace.id;
+  await cloudNotes.update(note.id, { workspace_id: newWorkspace.id });
 }
 
 async function exportNote(note: Note) {
@@ -68,26 +65,12 @@ async function trashNote(note: Note) {
     okLabel: 'Yes, Trash',
   });
   if (!ok) return;
-  note.trashed = true;
-  await cloudNotes.update(note.id, { trashed: true });
+  note.deleted_at = new Date();
+  await cloudNotes.update(note.id, { deleted_at: note.deleted_at });
 }
 
 async function importNote() {
   const id = toast.loading('Importing note...');
-  if (!currentUserWorkspace) {
-    toast.error('Current user workspace not found.', { id });
-    return;
-  }
-  if (!workspace) {
-    toast.error('Workspace not found.', { id });
-    return;
-  }
-  if (workspace.userworkspace !== currentUserWorkspace.id) {
-    toast.error('You can only import notes to your current workspace.', {
-      id,
-    });
-    return;
-  }
   const data = await importNotes(undefined, true);
   if (!data) {
     toast.error('Something went wrong. We could not import the note.', {
@@ -100,7 +83,7 @@ async function importNote() {
     return;
   }
   toast.loading('Pushing note to cloud...', { id });
-  await cloudNotes.import(data.name, workspace.id, currentUserWorkspace.id, data.content);
+  await cloudNotes.import(data.name, workspace.id, data.content);
   toast.success('Note pushed to cloud.', { id });
 }
 </script>

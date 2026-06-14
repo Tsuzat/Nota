@@ -1,9 +1,11 @@
 <script lang="ts" module>
   let open = $state(false);
-  let workspace = $state<LocalWorkSpace | Workspace | null>(null)
-  export const openNewNote = (w: LocalWorkSpace | Workspace) => {
+  let workspace = $state<LocalWorkSpace | Workspace | null>(null);
+  let parentNoteId = $state<string | null>(null);
+  export const openNewNote = (w: LocalWorkSpace | Workspace, pNoteId: string | null = null) => {
     open = true;
-	workspace = w
+    workspace = w;
+    parentNoteId = pNoteId;
   };
 </script>
 
@@ -23,19 +25,15 @@
   import type { Snippet } from "svelte";
   import { getLocalNotes } from "$lib/local/notes.svelte";
   import type { LocalWorkSpace } from "$lib/local/workspaces.svelte";
-  import { useCurrentUserWorkspaceContext } from "../user-workspace/userworkspace.svelte";
 
 
   let name: string | undefined = $state<string>();
   let icon: string = $state("lucide:FileText");
-  let isFavorite = $state(false);
+  let isPinned = $state(false);
 
   let loading = $state(false);
 
   const localNotes = getLocalNotes();
-  const currentUserWorkspace = $derived(
-    useCurrentUserWorkspaceContext().getCurrentUserWorkspace(),
-  );
   const cloudNotes = getNotesContext();
   const user = $derived(getAuthContext().user);
 
@@ -45,25 +43,21 @@
 		toast.error("No workspace provided")
 		return;
 	}
-    if (currentUserWorkspace === null) {
-      toast.error("Can find current user workspace");
-      return;
-    }
     if (name === undefined || name.trim() === "" || icon.trim() === "") {
       toast.error("Please fill in all the fields");
       return;
     }
     try {
       loading = true;
-      if (!("owner" in workspace) && !("owner" in currentUserWorkspace))
+      if (!("owner" in workspace)) {
         await localNotes.createNote(
           name,
           icon,
-          isFavorite,
+          isPinned,
           workspace,
-          currentUserWorkspace.id,
+          parentNoteId,
         );
-      else {
+      } else {
         if (!user) {
           toast.error(
             "User is not logged in. Please login to create cloud notes",
@@ -74,11 +68,14 @@
           name,
           icon,
           workspace.id,
-          currentUserWorkspace.id,
-          isFavorite,
+          parentNoteId,
+          isPinned,
         );
       }
       open = false;
+      name = "";
+      isPinned = false;
+      parentNoteId = null;
     } catch (e) {
       loading = false;
       console.error(e);
@@ -105,11 +102,11 @@
     </Dialog.Trigger>
   <Dialog.Content class="w-96" showCloseButton={false}>
     <Dialog.Header>
-      <Dialog.Title>New Notes</Dialog.Title>
+      <Dialog.Title>New Note</Dialog.Title>
       <Dialog.Description
-        >Create a new notes for
+        >Create a new note for
         <strong>
-          {workspace!.name}
+          {workspace?.name}
         </strong>
       </Dialog.Description>
     </Dialog.Header>
@@ -123,8 +120,8 @@
         <Input bind:value={name} placeholder="Note Name" type="text" required />
       </div>
       <div class="flex items-center gap-2">
-        <Checkbox id="toggle" bind:checked={isFavorite} />
-        <Label for="toggle">Add to Favorites</Label>
+        <Checkbox id="toggle" bind:checked={isPinned} />
+        <Label for="toggle">Pin Note</Label>
       </div>
       <Button type="submit">
         {#if loading}

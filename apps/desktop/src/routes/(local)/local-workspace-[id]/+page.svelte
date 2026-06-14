@@ -12,18 +12,18 @@ import { resolve } from '$app/paths';
 import { DB } from '$lib/local/db';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import {  importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import NewNotes from '$lib/components/dialogs/new-notes.svelte';
+import { openNewNote as openNewNoteDialog } from '$lib/components/dialogs';
 
 let { data } = $props();
-
 
 const localWorkspaces = getLocalWorkspaces();
 const localNotes = getLocalNotes();
 
 // Derived state
 const workspace = $derived(localWorkspaces.getWorkspaces().find((w) => String(w.id) === data.id));
-const notes = $derived(localNotes.getNotes().filter((n) => String(n.workspace) === data.id && !n.trashed));
-let openNewNote = $state(false);
+const notes = $derived(localNotes.getNotes().filter((n) => String(n.workspace_id) === data.id && !n.deleted_at && !n.parent_note_id));
 
 function openNote(note: LocalNote) {
   goto(resolve('/(local)/local-note-[id]', { id: note.id }));
@@ -48,7 +48,7 @@ async function moveToWorkspace(note: LocalNote, newWorkspace: LocalWorkSpace) {
     okLabel: 'Yes, Move',
   });
   if (!ok) return;
-  note.workspace = newWorkspace.id;
+  note.workspace_id = newWorkspace.id;
   await localNotes.updateNote(note);
 }
 
@@ -81,7 +81,7 @@ async function importNote() {
     return;
   }
   toast.info('Storing note locally...', { id });
-  await localNotes.createNote(data.name, 'lucide:FileText', false, workspace, workspace.userworkspace);
+  await localNotes.createNote(data.name, 'lucide:FileText', false, workspace, null);
 }
 </script>
 
@@ -137,7 +137,7 @@ async function importNote() {
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			<Button
 				class="group bg-muted/30 hover:bg-muted/50 flex h-48 flex-col items-center justify-center rounded-xl border border-dashed transition-colors"
-				onclick={() => (openNewNote = true)}
+				onclick={() => openNewNoteDialog(workspace)}
 			>
 				<div
 					class="bg-background mb-2 flex size-10 items-center justify-center rounded-full shadow-sm transition-all duration-500 group-hover:scale-110"

@@ -3,17 +3,15 @@ import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Collapsible from '@nota/ui/shadcn/collapsible';
-import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
-import { cn } from '@nota/ui/utils';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { page } from '$app/state';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { getKeyboardShortcut, timeAgo } from '$lib/utils';
+import { getKeyboardShortcut } from '$lib/utils';
 import NewWorkspace from '../dialogs/new-workspace.svelte';
-  import { openNewNote } from '../dialogs';
+import { openNewNote } from '../dialogs';
+import RecursiveLocalNote from './recursive-local-note.svelte';
 
 let showMore = $state(false);
 
@@ -23,7 +21,6 @@ const localNotes = getLocalNotes();
 
 let open = $state(false);
 
-let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
 </script>
 
 <NewWorkspace bind:open />
@@ -88,64 +85,9 @@ let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
 								<Sidebar.MenuSub>
 									{@const notes = localNotes
 										.getNotes()
-										.filter((n) => n.workspace === workspace.id && !n.trashed)}
+										.filter((n) => n.workspace_id === workspace.id && !n.parent_note_id && !n.deleted_at)}
 									{#each notes as note (note.id)}
-										{@const href = resolve('/(local)/local-note-[id]', {
-											id: note.id
-										})}
-										{@const isActive = page.url.pathname.endsWith(href)}
-										<Sidebar.MenuSubItem>
-											<Sidebar.MenuSubButton {isActive} onclick={() => goto(href)}>
-												{#snippet child({ props })}
-													<span {...props}>
-														<IconRenderer icon={note.icon} />
-														<span class="cursor-default">{note.name}</span>
-													</span>
-												{/snippet}
-											</Sidebar.MenuSubButton>
-											<DropdownMenu.Root>
-												<DropdownMenu.Trigger>
-													{#snippet child({ props })}
-														<Sidebar.MenuAction showOnHover {...props}>
-															<icons.Ellipsis />
-															<span class="sr-only">More</span>
-														</Sidebar.MenuAction>
-													{/snippet}
-												</DropdownMenu.Trigger>
-												<DropdownMenu.Content>
-													<DropdownMenu.Item onclick={() => localNotes.toggleFavorite(note)}>
-														{@const favorite = note.favorite}
-														<icons.Star class={cn(favorite && 'fill-yellow-500 text-yellow-500')} />
-														{favorite ? 'Unfavorite' : 'Favorite'}
-													</DropdownMenu.Item>
-													<DropdownMenu.Item
-														onclick={() => localNotes.duplicateNote(workspace, note)}
-													>
-														<icons.Copy />
-														Duplicate
-													</DropdownMenu.Item>
-													<DropdownMenu.Separator />
-													<DropdownMenu.Item
-														variant="destructive"
-														onclick={() => localNotes.trashNote(note)}
-													>
-														<icons.Trash2 />
-														Move to Trash
-													</DropdownMenu.Item>
-													<DropdownMenu.Item
-														variant="destructive"
-														onclick={() => localNotes.deleteNote(note)}
-													>
-														<icons.Trash2 />
-														Delete
-													</DropdownMenu.Item>
-													<DropdownMenu.Separator />
-													<DropdownMenu.Label class="text-muted-foreground text-sm">
-														Last Edited: {timeAgo(note.updated_at)}
-													</DropdownMenu.Label>
-												</DropdownMenu.Content>
-											</DropdownMenu.Root>
-										</Sidebar.MenuSubItem>
+										<RecursiveLocalNote {note} {workspace} />
 									{/each}
 								</Sidebar.MenuSub>
 							</Collapsible.Content>

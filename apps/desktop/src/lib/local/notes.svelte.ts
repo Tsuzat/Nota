@@ -11,12 +11,12 @@ import type { LocalWorkSpace } from './workspaces.svelte';
 
 export interface LocalNote {
   id: string;
+  workspace_id: string;
+  parent_note_id: string | null;
   name: string;
   icon: string;
-  workspace: string;
-  userworkspace: string;
-  favorite: boolean | string;
-  trashed: boolean | string;
+  pinned: boolean | string;
+  deleted_at: number | null;
   created_at: number;
   updated_at: number;
 }
@@ -36,17 +36,15 @@ class Notes {
     this.#notes = notes;
   }
 
-  async fetchNotes(userWorkspaceId: string) {
+  async fetchNotes() {
     try {
       let res = await DB.select<LocalNote[]>(
-        'SELECT id, name, icon, workspace, userworkspace, favorite, trashed, created_at, updated_at FROM notes WHERE userworkspace = $1',
-        [userWorkspaceId]
+        'SELECT id, workspace_id, parent_note_id, name, icon, pinned, deleted_at, created_at, updated_at FROM notes'
       );
       res = res.map((r) => {
         return {
           ...r,
-          favorite: r.favorite === 'true',
-          trashed: r.trashed === 'true',
+          pinned: r.pinned === 'true' || (r.pinned as any) === 1 || r.pinned === true,
         };
       });
       this.setNotes(res);
@@ -59,23 +57,24 @@ class Notes {
   async createNote(
     name: string,
     icon: string,
-    favorite: boolean | string,
+    pinned: boolean | string,
     workspace: LocalWorkSpace,
-    userworkspace: string,
+    parent_note_id: string | null = null,
     content?: Content
   ) {
     try {
       const id = getNewUUID(this.#notes.map((t) => t.id));
       const res = await DB.execute(
-        'INSERT INTO notes (id, name, icon, workspace, userworkspace, favorite, content) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-        [id, name, icon, workspace.id, userworkspace, favorite, JSON.stringify(content ?? {})]
+        'INSERT INTO notes (id, workspace_id, parent_note_id, name, icon, pinned, content) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        [id, workspace.id, parent_note_id, name, icon, pinned, JSON.stringify(content ?? {})]
       );
       if (res.rowsAffected === 1) {
         const notes = await DB.select<LocalNote[]>(
-          'SELECT id, name, icon, workspace, userworkspace, favorite, trashed, created_at, updated_at FROM notes WHERE id = $1',
+          'SELECT id, workspace_id, parent_note_id, name, icon, pinned, deleted_at, created_at, updated_at FROM notes WHERE id = $1',
           [id]
         );
         const newNotes = notes[0];
+        newNotes.pinned = newNotes.pinned === 'true' || (newNotes.pinned as any) === 1 || newNotes.pinned === true;
         this.setNotes([...this.getNotes(), newNotes]);
         const resolved = resolve('/(local)/local-note-[id]', {
           id: newNotes.id,
@@ -94,13 +93,15 @@ class Notes {
       console.error(e);
     }
   }
+
   async updateNote(note: LocalNote) {
     try {
-      const res = await DB.execute('UPDATE notes SET name = $1, icon = $2, favorite = $3, trashed = $4 WHERE id = $5', [
+      const res = await DB.execute('UPDATE notes SET name = $1, icon = $2, pinned = $3, deleted_at = $4, parent_note_id = $5 WHERE id = $6', [
         note.name,
         note.icon,
-        note.favorite,
-        note.trashed,
+        note.pinned,
+        note.deleted_at,
+        note.parent_note_id,
         note.id,
       ]);
       if (res.rowsAffected === 1) {
@@ -113,8 +114,9 @@ class Notes {
       console.error(e);
     }
   }
-  async toggleFavorite(note: LocalNote) {
-    const updatedNote = { ...note, favorite: !note.favorite };
+
+  async togglePinned(note: LocalNote) {
+    const updatedNote = { ...note, pinned: !note.pinned };
     await this.updateNote(updatedNote);
   }
 
@@ -149,17 +151,17 @@ class Notes {
       okLabel: 'Trash it',
     });
     if (!permission) return;
-    const updatedNote = { ...note, trashed: true };
+    const updatedNote = { ...note, deleted_at: Math.floor(Date.now() / 1000) };
     this.updateNote(updatedNote);
   }
 
   async restoreNote(note: LocalNote) {
-    const updatedNote = { ...note, trashed: false };
+    const updatedNote = { ...note, deleted_at: null };
     this.updateNote(updatedNote);
   }
 
   async duplicateNote(workspace: LocalWorkSpace, note: LocalNote) {
-    await this.createNote(`${note.name} (Copy)`, note.icon, note.favorite, workspace, note.userworkspace);
+    await this.createNote(`${note.name} (Copy)`, note.icon, note.pinned, workspace, note.parent_note_id);
   }
 }
 

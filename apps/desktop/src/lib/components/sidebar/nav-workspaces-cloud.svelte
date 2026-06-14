@@ -34,7 +34,7 @@ async function trashNotes(noteId: string) {
   if (!confirm) {
     return;
   }
-  toast.promise(cloudNotes.update(noteId, { trashed: true }), {
+  toast.promise(cloudNotes.update(noteId, { deleted_at: new Date() }), {
     loading: 'Moving to Trash...',
     error: 'Failed to move note to Trash',
   });
@@ -100,7 +100,7 @@ async function trashNotes(noteId: string) {
 								<Sidebar.MenuSub>
 									{@const notes = cloudNotes
 										.notes
-										.filter((n) => n.workspace === workspace.id && !n.trashed)}
+										.filter((n) => n.workspace_id === workspace.id && !n.deleted_at)}
 									{#each notes as note (note.id)}
 										{@const href = resolve("/(cloud)/note-[id]", {id: note.id})}
 										{@const isActive = page.url.pathname.endsWith(href)}
@@ -123,10 +123,10 @@ async function trashNotes(noteId: string) {
 													{/snippet}
 												</DropdownMenu.Trigger>
 												<DropdownMenu.Content>
-													<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { favorite: !note.favorite })}>
-														{@const favorite = note.favorite}
-														<icons.Star class={cn(favorite && 'fill-yellow-500 text-yellow-500')} />
-														{favorite ? 'Unfavorite' : 'Favorite'}
+													<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { pinned: !note.pinned })}>
+														{@const pinned = note.pinned}
+														<icons.Star class={cn(pinned && 'fill-yellow-500 text-yellow-500')} />
+														{pinned ? 'Unpin' : 'Pin'}
 													</DropdownMenu.Item>
 													<DropdownMenu.Item onclick={() => cloudNotes.update(note.id, { is_public: !note.is_public })}>
 														<icons.Globe />
