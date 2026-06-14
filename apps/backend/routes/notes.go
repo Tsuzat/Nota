@@ -9,7 +9,6 @@ import (
 func InitNotesRouter() {
 	config.APP.Get("/api/v1/db/note/preview/:id<guid>", app.GetNotePreview)
 	group := config.APP.Group("/api/v1/db/note", middleware.Authenticate, middleware.CheckPro)
-	// Get All notes by userworkspace id
 	group.Get("/:id<guid>", app.GetNotes)
 	group.Post("/", app.CreateNote)
 	// update note by it's id

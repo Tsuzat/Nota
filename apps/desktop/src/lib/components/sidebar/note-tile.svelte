@@ -29,11 +29,8 @@
       ? resolve("/(cloud)/note-[id]", { id: note.id })
       : resolve("/(local)/local-note-[id]", { id: note.id })}
   {@const isActive = page.url.pathname.endsWith(href)}
-  <Sidebar.MenuItem
-    class={cn(isActive && "bg-muted")}
-    style={`margin-left: ${depth}rem`}
-  >
-    <Sidebar.MenuButton>
+  <Sidebar.MenuItem class="my-px" style={`margin-left: ${depth}rem`}>
+    <Sidebar.MenuButton class={cn(isActive && "bg-muted")}>
       {#snippet child({ props })}
         {@const href =
           "owner" in note
@@ -66,7 +63,7 @@
             <NoteTile {note} depth={depth + 1} />
           {/each}
         {:else}
-          <div class="ml-6 flex items-center gap-1 text-muted-foreground">
+          <div class="ml-6 flex my-px items-center gap-1 text-muted-foreground">
             <icons.File class="size-4" />
             <small>No Sub Notes...</small>
           </div>

@@ -52,25 +52,6 @@
             No notes in this workspace
           </div>
         {/if}
-        <!-- {#if isCloud}
-          {#each cloudRootNotes as note (note.id)}
-            <RecursiveCloudNote {note} workspace={activeWorkspace as any} />
-          {/each}
-          {#if cloudRootNotes.length === 0}
-            <div class="text-xs text-sidebar-foreground/50 px-3 py-4 text-center select-none font-medium">
-              No notes in this workspace
-            </div>
-          {/if}
-        {:else}
-          {#each localRootNotes as note (note.id)}
-            <RecursiveLocalNote {note} workspace={activeWorkspace as any} />
-          {/each}
-          {#if localRootNotes.length === 0}
-            <div class="text-xs text-sidebar-foreground/50 px-3 py-4 text-center select-none font-medium">
-              No notes in this workspace
-            </div>
-          {/if}
-        {/if} -->
       </Sidebar.Menu>
     </Sidebar.GroupContent>
   </Sidebar.Group>

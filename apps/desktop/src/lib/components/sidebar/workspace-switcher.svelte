@@ -2,29 +2,40 @@
   import { IconRenderer, icons } from '@nota/ui/icons/index.js';
   import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
   import * as Sidebar from '@nota/ui/shadcn/sidebar';
-  import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-  import { getWorkspacesContext } from '@nota/client';
+  import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
+  import { getNotesContext, getWorkspacesContext, type Workspace } from '@nota/client';
   import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { cn } from '@nota/ui/utils';
   import NewWorkspace from '../dialogs/new-workspace.svelte';
+  import { getLocalNotes } from '$lib/local/notes.svelte';
+  import { toast } from '@lib/components/ui/sonner';
 
   const localWorkspaces = getLocalWorkspaces();
   const cloudWorkspaces = getWorkspacesContext();
   const currentWorkspace = getCurrentWorkspace();
+  const cloudNotes = getNotesContext();
+  const localNotes = getLocalNotes();
 
   const activeWorkspace = $derived(currentWorkspace?.get());
   const isCloud = $derived(activeWorkspace && "owner" in activeWorkspace);
 
   let open = $state(false);
 
-  function switchWorkspace(workspace: any, type: 'local' | 'cloud') {
+  async function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
+    const id = toast.loading(`Switching workspace to ${workspace.name}`)
     currentWorkspace.set(workspace);
-    const href = type === 'local' 
-      ? resolve('/(local)/local-workspace-[id]', { id: workspace.id })
-      : resolve('/(cloud)/workspace-[id]', { id: workspace.id });
-    goto(href);
+    if ('owner' in workspace) {
+      await cloudNotes.fetchByWorkspace(workspace.id);
+    } else {
+      await localNotes.fetchNotesForWorkspace(workspace.id)
+    }
+    const href = 'owner' in workspace
+      ? resolve('/(cloud)/workspace-[id]', { id: workspace.id })
+      : resolve('/(local)/local-workspace-[id]', { id: workspace.id });
+    await goto(href);
+    toast.success(`Switched to ${workspace.name}`, { id })
   }
 </script>
 
@@ -60,8 +71,8 @@
           </DropdownMenu.Label>
           {#each localWorkspaces.getWorkspaces() as ws (ws.id)}
             <DropdownMenu.Item 
-              class={cn("flex items-center gap-2 cursor-pointer", activeWorkspace.id === ws.id && "bg-sidebar-accent text-sidebar-accent-foreground")}
-              onclick={() => switchWorkspace(ws, 'local')}
+              class={cn("flex items-center gap-2 my-0.25 cursor-pointer", activeWorkspace.id === ws.id && "bg-sidebar-accent text-sidebar-accent-foreground")}
+              onclick={() => switchWorkspace(ws)}
             >
               <IconRenderer class="size-4" icon={ws.icon || 'lucide:Folder'} />
               <span class="truncate flex-1 font-medium">{ws.name}</span>
@@ -79,7 +90,7 @@
             {#each cloudWorkspaces.workspaces as ws (ws.id)}
               <DropdownMenu.Item 
                 class={cn("flex items-center gap-2 cursor-pointer", activeWorkspace.id === ws.id && "bg-sidebar-accent text-sidebar-accent-foreground")}
-                onclick={() => switchWorkspace(ws, 'cloud')}
+                onclick={() => switchWorkspace(ws)}
               >
                 <IconRenderer class="size-4" icon={ws.icon || 'lucide:Folder'} />
                 <span class="truncate flex-1 font-medium">{ws.name}</span>

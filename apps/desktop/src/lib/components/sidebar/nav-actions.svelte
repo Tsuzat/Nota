@@ -26,7 +26,7 @@ const globalSettings = getGlobalSettings();
 const workspace = $derived(
   getLocalWorkspaces()
     .getWorkspaces()
-    .find((w) => w.id === note.workspace)
+    .find((w) => w.id === note.workspace_id)
 );
 
 let open = $state(false);
@@ -130,7 +130,7 @@ let open = $state(false);
       <Dropdown.Group>
         <Dropdown.Item
           onclick={() => {
-            if ("owner" in note) cloudNotes.update(note.id, { trashed: true });
+            if ("owner" in note) cloudNotes.update(note.id, {deleted_at: new Date()});
             else localNotes.trashNote(note);
           }}
         >
