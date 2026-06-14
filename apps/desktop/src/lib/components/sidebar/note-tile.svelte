@@ -8,7 +8,6 @@
   import { resolve } from "$app/paths";
   import { cn } from "@lib/utils";
   import { page } from "$app/state";
-
   interface Props {
     note: LocalNote | Note;
     depth?: number;
