@@ -39,6 +39,7 @@
   import { setSidebar } from "@lib/components/ui/sidebar/context.svelte";
   import AppMenu from "$lib/components/app-menu.svelte";
   import { SimpleToolTip, ToggleMode } from "@lib/components/custom";
+  import NewNotes from "$lib/components/dialogs/new-notes.svelte";
 
   // Local Workspaces and Notes
   const localUserWorkspaces = setLocalUserWorkspaces();
@@ -133,6 +134,7 @@
 <GlobalSearch />
 <GlobalSettings />
 <NewUserWorkspace />
+<NewNotes />
 
 <Sidebar.Provider
 	bind:open

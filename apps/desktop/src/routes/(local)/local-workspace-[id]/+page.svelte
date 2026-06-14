@@ -6,14 +6,13 @@ import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import Topbar from '$lib/components/topbar.svelte';
-import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { DB } from '$lib/local/db';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import {  importNotes, timeAgo, writeStringToFile } from '$lib/utils';
 
 let { data } = $props();
 
@@ -87,7 +86,6 @@ async function importNote() {
 </script>
 
 {#if workspace}
-	<NewNotes bind:open={openNewNote} {workspace} />
 	<Topbar showSeparator={false} />
 	<main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
 		<div class="mb-4 flex items-center gap-2">

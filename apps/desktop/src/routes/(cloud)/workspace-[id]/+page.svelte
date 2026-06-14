@@ -11,9 +11,9 @@ import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import Topbar from '$lib/components/topbar.svelte';
-import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import { useCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte.js';
-import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import {  importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+  import { openNewNote } from '$lib/components/dialogs/index.js';
 
 let { data } = $props();
 
@@ -25,7 +25,6 @@ const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurren
 // Derived state
 const workspace = $derived(cloudWorkspaces.workspaces.find((w) => w.id === data.id));
 const notes = $derived(cloudNotes.notes.filter((n) => n.workspace === data.id && !n.trashed));
-let openNewNote = $state(false);
 
 function openNote(note: Note) {
   goto(resolve('/(cloud)/note-[id]', { id: note.id }));
@@ -107,7 +106,6 @@ async function importNote() {
 </script>
 
 {#if workspace}
-  <NewNotes bind:open={openNewNote} {workspace} />
   <Topbar showSeparator={false} />
   <main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
     <div class="mb-4 flex items-center gap-2">
@@ -168,7 +166,7 @@ async function importNote() {
     >
       <Button
         class="group bg-muted/30 hover:bg-muted/50 flex h-48 flex-col items-center justify-center rounded-xl border border-dashed transition-colors"
-        onclick={() => (openNewNote = true)}
+        onclick={() => openNewNote(workspace)}
       >
         <div
           class="bg-background mb-2 flex size-10 items-center justify-center rounded-full shadow-sm transition-all duration-500 group-hover:scale-110"

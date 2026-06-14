@@ -192,7 +192,7 @@ function handleKeydown(event: KeyboardEvent) {
     <Topbar showSeparator={true}>
       {#snippet left()}
         <IconPicker onSelect={updateIcon}>
-          <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
+          <div class={buttonVariants({ variant: "ghost", size: "icon" })}>
             <IconRenderer icon={note!.icon} />
           </div>
         </IconPicker>

@@ -13,8 +13,8 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { page } from '$app/state';
 import { getKeyboardShortcut, timeAgo } from '$lib/utils';
-import NewNotes from '../dialogs/new-notes.svelte';
 import NewWorkspace from '../dialogs/new-workspace.svelte';
+import { openNewNote } from '../dialogs';
 
 let showMore = $state(false);
 
@@ -23,7 +23,6 @@ const workspaces = $derived(cloudWorkspaces.workspaces.slice(0, showMore ? undef
 const cloudNotes = getNotesContext();
 
 let open = $state(false);
-let openNewNotes = $state(false);
 
 let currentCloudWorkspace = $derived(cloudWorkspaces.workspaces[0]);
 
@@ -44,7 +43,6 @@ async function trashNotes(noteId: string) {
 
 <NewWorkspace bind:open />
 
-<NewNotes bind:open={openNewNotes} workspace={currentCloudWorkspace} />
 <Sidebar.Group>
 	<Sidebar.GroupLabel class="justify-between">
 		Cloud Workspaces
@@ -91,8 +89,7 @@ async function trashNotes(noteId: string) {
 										variant="ghost"
 										class="size-6"
 										onclick={() => {
-											currentCloudWorkspace = workspace;
-											openNewNotes = true;
+											openNewNote(workspace);
 										}}
 									>
 										<icons.Plus />

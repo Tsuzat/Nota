@@ -227,7 +227,7 @@ function handleKeydown(e: KeyboardEvent) {
             updateNote(note!.name, note!.icon, note!.favorite);
           }}
         >
-          <div class={buttonVariants({ variant: "ghost", size: "icon-sm" })}>
+          <div class={buttonVariants({ variant: "ghost", size: "icon" })}>
             <IconRenderer icon={note!.icon} />
           </div>
         </IconPicker>

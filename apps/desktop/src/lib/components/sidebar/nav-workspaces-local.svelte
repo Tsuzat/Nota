@@ -12,8 +12,8 @@ import { page } from '$app/state';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { getKeyboardShortcut, timeAgo } from '$lib/utils';
-import NewNotes from '../dialogs/new-notes.svelte';
 import NewWorkspace from '../dialogs/new-workspace.svelte';
+  import { openNewNote } from '../dialogs';
 
 let showMore = $state(false);
 
@@ -22,14 +22,12 @@ const workspaces = $derived(localWorkspaces.getWorkspaces().slice(0, showMore ? 
 const localNotes = getLocalNotes();
 
 let open = $state(false);
-let openNewNotes = $state(false);
 
 let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
 </script>
 
 <NewWorkspace bind:open />
 
-<NewNotes bind:open={openNewNotes} workspace={currentLocalWorkspace} />
 <Sidebar.Group>
 	<Sidebar.GroupLabel class="justify-between">
 		Local Workspaces
@@ -79,8 +77,7 @@ let currentLocalWorkspace = $derived(localWorkspaces.getWorkspaces()[0]);
 										variant="ghost"
 										class="size-6"
 										onclick={() => {
-											currentLocalWorkspace = workspace;
-											openNewNotes = true;
+											openNewNote(workspace)
 										}}
 									>
 										<icons.Plus />
