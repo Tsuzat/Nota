@@ -1,6 +1,5 @@
 <script lang="ts">
-import Home from '@nota/ui/icons/moving-icons/home.svelte';
-import Search from '@nota/ui/icons/moving-icons/search.svelte';
+import { MovingHome, MovingSearch} from '@nota/ui/icons/index.js'
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
@@ -22,7 +21,7 @@ let isSearchHovered = $state(false);
 			onmouseenter={() => (isSearchHovered = true)}
 			onmouseleave={() => (isSearchHovered = false)}
 		>
-			<Search size={18} isHovered={isSearchHovered} />
+			<MovingSearch size={18} isHovered={isSearchHovered} />
 			<span>Search</span>
 			<Sidebar.MenuBadge class="bg-muted text-muted-foreground rounded-md p-1">
 				{getKeyboardShortcut('K', true)}
@@ -37,7 +36,7 @@ let isSearchHovered = $state(false);
 			onmouseenter={() => (isHomeHovered = true)}
 			onmouseleave={() => (isHomeHovered = false)}
 		>
-			<Home size={18} isHovered={isHomeHovered} />
+			<MovingHome size={18} isHovered={isHomeHovered} />
 			<span>Home</span>
 		</Sidebar.MenuButton>
 	</Sidebar.MenuItem>

@@ -5,27 +5,43 @@
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
-  import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
+  import { getNotesContext, type Note, type Workspace } from '@nota/client';
   import { openNewNote } from '../dialogs';
-  import type { LocalWorkSpace } from '$lib/local/workspaces.svelte';
   import { Menu, MenuItem, PredefinedMenuItem } from '@tauri-apps/api/menu';
+  import { toast } from '@nota/ui/shadcn/sonner';
+  import { ask } from '@tauri-apps/plugin-dialog';
 
-  import RecursiveLocalNote from './recursive-local-note.svelte';
+  import RecursiveCloudNote from './recursive-cloud-note.svelte';
 
   let props: {
-    note: LocalNote;
-    workspace: LocalWorkSpace;
+    note: Note;
+    workspace: Workspace;
     depth?: number;
   } = $props();
 
-  const localNotes = getLocalNotes();
+  const cloudNotes = getNotesContext();
   const childNotes = $derived(
-    localNotes.getNotes().filter((n) => n.parent_note_id === props.note.id && !n.deleted_at)
+    cloudNotes.notes.filter((n) => n.parent_note_id === props.note.id && !n.deleted_at)
   );
 
-  const href = $derived(resolve('/(local)/local-note-[id]', { id: props.note.id }));
+  const href = $derived(resolve('/(cloud)/note-[id]', { id: props.note.id }));
   const isActive = $derived(page.url.pathname.endsWith(href));
   const hasChildren = $derived(childNotes.length > 0);
+
+  async function trashNotes(noteId: string) {
+    const confirm = await ask('Are you sure you want to move this note to the trash?', {
+      title: 'Move to Trash',
+      kind: 'warning',
+    });
+    if (!confirm) {
+      return;
+    }
+    toast.promise(cloudNotes.update(noteId, { deleted_at: new Date() }), {
+      loading: 'Moving to Trash...',
+      success: 'Moved to Trash',
+      error: 'Failed to move note to Trash',
+    });
+  }
 
   async function handleContextMenu(e: MouseEvent) {
     e.preventDefault();
@@ -40,20 +56,20 @@
         await PredefinedMenuItem.new({ item: 'Separator' }),
         await MenuItem.new({
           text: props.note.pinned ? 'Unpin' : 'Pin',
-          action: () => localNotes.togglePinned(props.note)
+          action: () => cloudNotes.update(props.note.id, { pinned: !props.note.pinned })
         }),
         await MenuItem.new({
           text: 'Duplicate',
-          action: () => localNotes.duplicateNote(props.workspace, props.note)
+          action: () => cloudNotes.duplicate(props.note.id)
         }),
         await PredefinedMenuItem.new({ item: 'Separator' }),
         await MenuItem.new({
           text: 'Move to Trash',
-          action: () => localNotes.trashNote(props.note)
+          action: () => trashNotes(props.note.id)
         }),
         await MenuItem.new({
           text: 'Delete Permanently',
-          action: () => localNotes.deleteNote(props.note)
+          action: () => cloudNotes.delete(props.note.id)
         })
       ]
     });
@@ -68,7 +84,7 @@
       <Sidebar.MenuSubButton class="peer/menu-button pr-8" {isActive} onclick={() => goto(href)}>
         {#snippet child({ props: spanProps })}
           <span {...spanProps}>
-            <IconRenderer class="size-4 shrink-0" icon={props.note.icon} />
+            <IconRenderer class="size-4 shrink-0" icon={props.note.icon || 'lucide:File'} />
             <span class="cursor-default flex-1 truncate">{props.note.name}</span>
           </span>
         {/snippet}
@@ -90,7 +106,7 @@
     <Collapsible.Content>
       <Sidebar.MenuSub>
         {#each childNotes as childNote (childNote.id)}
-          <RecursiveLocalNote note={childNote} workspace={props.workspace} depth={(props.depth ?? 0) + 1} />
+          <RecursiveCloudNote note={childNote} workspace={props.workspace} depth={(props.depth ?? 0) + 1} />
         {/each}
       </Sidebar.MenuSub>
     </Collapsible.Content>
@@ -100,7 +116,7 @@
     <Sidebar.MenuSubButton class="peer/menu-button" {isActive} onclick={() => goto(href)}>
       {#snippet child({ props: spanProps })}
         <span {...spanProps}>
-          <IconRenderer class="size-4 shrink-0" icon={props.note.icon} />
+          <IconRenderer class="size-4 shrink-0" icon={props.note.icon || 'lucide:File'} />
           <span class="cursor-default flex-1 truncate">{props.note.name}</span>
         </span>
       {/snippet}

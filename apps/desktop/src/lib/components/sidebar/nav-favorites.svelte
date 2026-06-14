@@ -14,6 +14,7 @@ import { page } from '$app/state';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { timeAgo } from '$lib/utils';
+import { Menu, MenuItem as TauriMenuItem, PredefinedMenuItem } from '@tauri-apps/api/menu';
 
 const sidebar = useSidebar();
 let showMore = $state(false);
@@ -58,6 +59,57 @@ async function deleteNote(note: LocalNote | Note) {
     console.error(e);
   }
 }
+
+async function handleContextMenu(e: MouseEvent, note: LocalNote | Note) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const isCloud = 'owner' in note;
+  const menuItems: any[] = [];
+
+  menuItems.push(
+    await TauriMenuItem.new({
+      text: 'Unpin',
+      action: () => togglePin(note)
+    })
+  );
+
+  if (isCloud) {
+    menuItems.push(
+      await TauriMenuItem.new({
+        text: note.is_public ? 'Make Private' : 'Make Public',
+        action: () => cloudNotes.update(note.id, { is_public: !note.is_public })
+      }),
+      await TauriMenuItem.new({
+        text: 'Copy Url',
+        action: () => window.navigator.clipboard.writeText(`${PUBLIC_NOTA_FRONTEND_URL}/note-preview-${note.id}`)
+      }),
+      await TauriMenuItem.new({
+        text: 'Open In Browser',
+        action: async () => {
+          const url = `${PUBLIC_NOTA_FRONTEND_URL}/note-preview-${note.id}`;
+          await openUrl(url);
+        }
+      })
+    );
+  }
+
+  menuItems.push(await PredefinedMenuItem.new({ item: 'Separator' }));
+
+  menuItems.push(
+    await TauriMenuItem.new({
+      text: 'Move To Trash',
+      action: () => trashNote(note)
+    }),
+    await TauriMenuItem.new({
+      text: 'Delete Permanently',
+      action: () => deleteNote(note)
+    })
+  );
+
+  const menu = await Menu.new({ items: menuItems });
+  await menu.popup();
+}
 </script>
 
 {#if notes.length > 0}
@@ -71,7 +123,7 @@ async function deleteNote(note: LocalNote | Note) {
 					: resolve('/(local)/local-note-[id]', { id: note.id })}
 				{@const isActive = page.url.pathname.endsWith(href)}
 				<div transition:slide={{ easing: linear, duration: 200 }}>
-					<Sidebar.MenuItem onclick={() => goto(href)}>
+					<Sidebar.MenuItem onclick={() => goto(href)} oncontextmenu={(e) => handleContextMenu(e, note)}>
 						<Sidebar.MenuButton {isActive}>
 							{#snippet child({ props })}
 								<span title={note.name} {...props}>

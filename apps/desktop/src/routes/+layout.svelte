@@ -25,18 +25,13 @@
   import { setLocalWorkspaces } from "$lib/local/workspaces.svelte";
   import { setTheme } from "$lib/theme";
   import { downloadAndInstall } from "$lib/updater";
-  import { Button } from "@lib/components/ui/button";
-  import { icons } from "@lib/icons";
-  import WindowsButtons from "$lib/components/windows-buttons.svelte";
-  import { getKeyboardShortcut, ISMACOS, ISWINDOWS } from "$lib/utils";
-  import { setSidebar } from "@lib/components/ui/sidebar/context.svelte";
-  import AppMenu from "$lib/components/app-menu.svelte";
-  import { SimpleToolTip, ToggleMode } from "@lib/components/custom";
+  import { setCurrentWorkspace } from "$lib/currentworkspace.svelte";
   import NewNotes from "$lib/components/dialogs/new-notes.svelte";
 
   // Local Workspaces and Notes
   const localWorkspaces = setLocalWorkspaces();
   const localNotes = setLocalNotes();
+  const currentWorkspace = setCurrentWorkspace();
 
   // Cloud Workspaces and Notes
   const cloudWorkspaces = setWorkspacesContext();
@@ -99,10 +94,31 @@
     ) {
       toast.error("Something went wrong when loading the local data");
     } else {
-      localWorkspaces.setWorkspaces(data.localWorkspaces);
-      localNotes.setNotes(data.localNotes);
+      localWorkspaces.setWorkspaces(data.localWorkspaces ?? []);
+      localNotes.setNotes(data.localNotes ?? []);
     }
   }); 
+
+  $effect(() => {
+    const active = currentWorkspace.get();
+    const locals = localWorkspaces.getWorkspaces();
+    const clouds = cloudWorkspaces.workspaces;
+
+    if (active) {
+      const existsLocal = locals.some((w) => w.id === active.id);
+      const existsCloud = clouds.some((w) => w.id === active.id);
+
+      if (!existsLocal && !existsCloud) {
+        if (locals.length > 0) {
+          currentWorkspace.set(locals[0]);
+        }
+      }
+    } else {
+      if (locals.length > 0) {
+        currentWorkspace.set(locals[0]);
+      }
+    }
+  });
 </script>
 
 <ModeWatcher />

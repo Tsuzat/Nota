@@ -6,30 +6,19 @@
     SidebarHeader,
     SidebarRail,
     Root as SidebarRoot,
-    SidebarTrigger,
   } from "@nota/ui/shadcn/sidebar";
-  import { type ComponentProps, onMount } from "svelte";
-  import { APPWINDOW } from "$lib/contants";
+  import { type ComponentProps,  } from "svelte";
   import { ISMACOS } from "$lib/utils";
   import AppLogoMenu from "../app-menu.svelte";
   import NavFavorites from "./nav-favorites.svelte";
   import NavMain from "./nav-main.svelte";
   import NavSecondary from "./nav-secondary.svelte";
-  import NavWorkspacesCloud from "./nav-workspaces-cloud.svelte";
-  import NavWorkspacesLocal from "./nav-workspaces-local.svelte";
+  import WorkspaceSwitcher from "./workspace-switcher.svelte";
+  import NavNotes from "./nav-notes.svelte";
   import BackAndForthButtons from "../back-and-forth-buttons.svelte";
 
   let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> =
-    $props();
-
-  let IS_MAXIMUM = $state(false);
-
-  onMount(async () => {
-    IS_MAXIMUM = await APPWINDOW.isFullscreen();
-    APPWINDOW.listen("tauri://resize", async () => {
-      IS_MAXIMUM = await APPWINDOW.isFullscreen();
-    });
-  });
+    $props(); 
 </script>
 
 <SidebarRoot bind:ref variant="sidebar" {...restProps}>
@@ -40,11 +29,12 @@
       {/if}
       <BackAndForthButtons class="ml-auto" />
     </div>
+    <WorkspaceSwitcher />
     <NavMain />
   </SidebarHeader>
   <SidebarContent>
     <NavFavorites />
-    <NavWorkspacesLocal />
+    <NavNotes />
   </SidebarContent>
   <SidebarFooter class="p-0">
     <NavSecondary />

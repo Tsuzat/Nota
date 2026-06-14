@@ -6,3 +6,4 @@ export { default as MovingHome } from "./moving-icons/home.svelte";
 export { default as MovingLogin } from "./moving-icons/login.svelte";
 export { default as MovingSettings } from "./moving-icons/settings.svelte";
 export { default as MovingTrash } from "./moving-icons/trash.svelte";
+export { default as MovingSearch } from "./moving-icons/search.svelte";
