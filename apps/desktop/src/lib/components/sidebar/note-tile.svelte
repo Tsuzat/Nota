@@ -1,6 +1,8 @@
 <script lang="ts">
+
   import * as Sidebar from "@nota/ui/shadcn/sidebar";
   import * as Collapsible from "@nota/ui/shadcn/collapsible";
+  import * as DropdownMenu from "@nota/ui/shadcn/dropdown-menu";
   import { getLocalNotes, type LocalNote } from "$lib/local/notes.svelte";
   import { getNotesContext, type Note } from "@nota/client";
   import { IconRenderer, icons } from "@lib/icons";
@@ -37,7 +39,7 @@
             : resolve("/(local)/local-note-[id]", { id: note.id })}
         <a {href} {...props}>
           <IconRenderer class="size-4 shrink-0" icon={note.icon} />
-          <span>{note.name}</span>
+          <span class="truncate">{note.name}</span>
         </a>
       {/snippet}
     </Sidebar.MenuButton>
@@ -52,9 +54,35 @@
         </Sidebar.MenuAction>
       {/snippet}
     </Collapsible.Trigger>
-    <Sidebar.MenuAction showOnHover>
+    <Sidebar.MenuAction class="right-6" showOnHover>
       <icons.Plus />
     </Sidebar.MenuAction>
+
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>
+        {#snippet child({ props })}
+          <Sidebar.MenuAction showOnHover {...props}>
+            <icons.Ellipsis />
+          </Sidebar.MenuAction>
+        {/snippet}
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content side={Sidebar.useSidebar().isMobile ? "bottom" : "right"} class="w-fit">
+        <DropdownMenu.Item onclick={() => {}}>
+          <icons.Pin />
+          <span>Pin Note</span>
+        </DropdownMenu.Item>
+        <DropdownMenu.Item>
+          <icons.Pencil />
+          <span>Edit Note</span>
+        </DropdownMenu.Item>
+        <DropdownMenu.Separator />
+
+        <DropdownMenu.Item variant="destructive">
+          <icons.Trash2 />
+          <span>Delete Note</span>
+        </DropdownMenu.Item>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
     <Collapsible.Content>
       <Sidebar.MenuItem>
         {#if childNotes.length > 0}

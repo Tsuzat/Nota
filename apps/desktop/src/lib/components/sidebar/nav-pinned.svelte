@@ -26,7 +26,7 @@
   <Sidebar.Group class="group-data-[collapsible=icon]:hidden">
     <Sidebar.GroupLabel>Pinned</Sidebar.GroupLabel>
     <Sidebar.Menu>
-      {#each notes as note (note.id)}
+      {#each notes.slice(0, showMore ? notes.length : 3) as note (note.id)}
         <NoteTile {note} />
       {/each}
       <Sidebar.MenuItem>
