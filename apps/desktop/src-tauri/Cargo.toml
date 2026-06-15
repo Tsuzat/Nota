@@ -41,7 +41,6 @@ tauri-plugin-dialog = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-http = "2"
 tauri-plugin-stronghold = "2"
-keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
 rand = "0.8.6"
 sha2 = "0.10"
 tar = "0.4.46"

@@ -1,4 +1,4 @@
-use keyring::Entry;
+// Using local key file for Stronghold password
 use rand::RngCore;
 use sha2::{Digest, Sha256};
 
@@ -9,21 +9,25 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn get_or_create_stronghold_password() -> Result<String, String> {
-    let entry = Entry::new("app.nota", "stronghold-key")
+fn get_or_create_stronghold_password(app: tauri::AppHandle) -> Result<String, String> {
+    use std::fs;
+    use tauri::Manager;
+
+    let local_data_dir = app.path().app_local_data_dir()
         .map_err(|e| e.to_string())?;
 
-    match entry.get_password() {
-        Ok(password) => Ok(password),
-        Err(keyring::Error::NoEntry) => {
-            let mut key = [0u8; 32];
-            rand::thread_rng().fill_bytes(&mut key);
-            let password: String = key.iter().map(|b| format!("{:02x}", b)).collect();
-            entry.set_password(&password)
-                .map_err(|e| e.to_string())?;
-            Ok(password)
-        }
-        Err(e) => Err(e.to_string()),
+    fs::create_dir_all(&local_data_dir).map_err(|e| e.to_string())?;
+
+    let key_path = local_data_dir.join("nota.key");
+    if key_path.exists() {
+        let password = fs::read_to_string(&key_path).map_err(|e| e.to_string())?;
+        Ok(password)
+    } else {
+        let mut key = [0u8; 32];
+        rand::thread_rng().fill_bytes(&mut key);
+        let password: String = key.iter().map(|b| format!("{:02x}", b)).collect();
+        fs::write(&key_path, &password).map_err(|e| e.to_string())?;
+        Ok(password)
     }
 }
 
