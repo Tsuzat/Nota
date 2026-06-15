@@ -23,19 +23,14 @@ const notes = $derived.by(() => {
   <Sidebar.Group>
     <Sidebar.GroupLabel class="justify-between">
       <span>Notes</span>
-      <SimpleToolTip>
+      <SimpleToolTip content="Create New Note">
         <Button
           variant="ghost"
           size="icon-sm"
-          onclick={() => openNewNote(currentWorkspace)}
+          onclick={() => openNewNote()}
         >
           <icons.Plus />
-        </Button>
-        {#snippet child()}
-          <div class="inline-flex items-center gap-1">
-            <span>Create Note</span>
-          </div>
-        {/snippet}
+        </Button> 
       </SimpleToolTip>
     </Sidebar.GroupLabel>
     <Sidebar.GroupContent>

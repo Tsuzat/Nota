@@ -30,7 +30,6 @@ const notes = $derived.by(() => {
   if ('owner' in currentWorkspace) return cloudNotes.notes;
   return localNotes.getNotes();
 });
-$inspect(notes);
 </script>
 
 <SidebarRoot bind:ref variant="sidebar" {...restProps}>

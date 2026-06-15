@@ -4,13 +4,14 @@ import '../app.css';
 
 let { children, data } = $props();
 
-import { setAuthContext, setNotesContext, setStorageContext, setWorkspacesContext, secureStorage } from '@nota/client';
+import { secureStorage, setAuthContext, setNotesContext, setStorageContext, setWorkspacesContext } from '@nota/client';
 import { ModeWatcher } from '@nota/ui';
 import { Toaster, toast } from '@nota/ui/shadcn/sonner';
 import { check } from '@tauri-apps/plugin-updater';
 import { onMount } from 'svelte';
 import MoveNote from '$lib/components/dialogs/move-note.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
+import NewWorkspace from '$lib/components/dialogs/new-workspace.svelte';
 import RenameNote from '$lib/components/dialogs/rename-note.svelte';
 import { setGlobalSearch } from '$lib/components/global-search';
 import GlobalSearch from '$lib/components/global-search/global-search.svelte';
@@ -104,6 +105,7 @@ $effect(() => {
 <GlobalSearch />
 <GlobalSettings />
 <NewNotes />
+<NewWorkspace />
 <MoveNote />
 <RenameNote />
 

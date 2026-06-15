@@ -87,7 +87,7 @@ let open = $state(false);
         <Dropdown.Item
           onclick={() => {
             if ("owner" in note) cloudNotes.duplicate(note.id);
-            else if (workspace) localNotes.duplicateNote(workspace, note);
+            else if (workspace) localNotes.duplicateNote(note.id);
           }}
         >
           <icons.Copy />

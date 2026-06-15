@@ -4,6 +4,7 @@ import { Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
 import { BarSpinner } from '@lib/icons';
 import { cn } from '@lib/utils';
+import { secureStorage } from '@nota/client';
 import * as Label from '@nota/ui/shadcn/label';
 import * as Select from '@nota/ui/shadcn/select';
 import { toast } from '@nota/ui/shadcn/sonner';
@@ -11,7 +12,6 @@ import * as Switch from '@nota/ui/shadcn/switch';
 import { onMount } from 'svelte';
 import { fade } from 'svelte/transition';
 import { GEMINI_MODELS } from '$lib/ai';
-import { secureStorage } from '@nota/client';
 import { getGlobalSettings } from '../constants.svelte';
 
 const settings = getGlobalSettings();
@@ -21,10 +21,11 @@ let saving = $state(false);
 let validating = $state(false);
 let isValidKey = $state(false);
 let validationError = $state('');
-let hasStoredKey = $derived(apiKeyInput !== '');
+let hasStoredKey = $state(false);
 
 onMount(async () => {
-  apiKeyInput = await secureStorage.getItem('gemini_api_key') || '';
+  apiKeyInput = (await secureStorage.getItem('gemini_api_key')) || '';
+  hasStoredKey = apiKeyInput !== '';
 });
 
 const availableModels = $derived(Object.values(GEMINI_MODELS));
@@ -39,13 +40,20 @@ const modelDescriptions: Record<string, string> = {
 async function handleValidate() {
   validating = true;
   validationError = '';
-  const ai = new GoogleGenAI({ apiKey: apiKeyInput.trim() });
-  const res = await ai.models.get({
-    model: GEMINI_MODELS.GEMINI_2_5_FLASH_LITE,
-  });
-  isValidKey = res.name !== undefined;
-  validationError = res.name === undefined ? 'Key validation failed' : '';
-  validating = false;
+  isValidKey = false;
+  try {
+    const ai = new GoogleGenAI({ apiKey: apiKeyInput.trim() });
+    const res = await ai.models.get({
+      model: GEMINI_MODELS.GEMINI_2_5_FLASH_LITE,
+    });
+    isValidKey = res.name !== undefined;
+    validationError = res.name === undefined ? 'Key validation failed' : '';
+  } catch (e: any) {
+    isValidKey = false;
+    validationError = e.message || 'Invalid API key or network error';
+  } finally {
+    validating = false;
+  }
 }
 
 async function handleSaveKey() {
@@ -56,6 +64,7 @@ async function handleSaveKey() {
   saving = true;
   try {
     await secureStorage.setItem('gemini_api_key', apiKeyInput.trim());
+    hasStoredKey = true;
     toast.success('API key saved successfully');
   } catch (e) {
     toast.error('Failed to store API key');
@@ -67,6 +76,8 @@ async function handleSaveKey() {
 async function handleClearKey() {
   await secureStorage.removeItem('gemini_api_key');
   apiKeyInput = '';
+  hasStoredKey = false;
+  isValidKey = false;
   toast.warning('Stored API key removed');
 }
 
