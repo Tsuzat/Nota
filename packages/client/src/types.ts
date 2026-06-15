@@ -1,9 +1,9 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const SubscriptionPlanSchema = z.enum(["free", "pro", ""]);
+export const SubscriptionPlanSchema = z.enum(['free', 'pro', '']);
 export type SubscriptionPlan = z.infer<typeof SubscriptionPlanSchema>;
 
-export const SubscriptionTypeSchema = z.enum(["monthly", "yearly", ""]);
+export const SubscriptionTypeSchema = z.enum(['monthly', 'yearly', '']);
 export type SubscriptionType = z.infer<typeof SubscriptionTypeSchema>;
 
 export const UserSchema = z.object({
@@ -11,11 +11,11 @@ export const UserSchema = z.object({
   email: z.email(),
   name: z.string().nullable().optional(),
   avatar_url: z.string().nullable().optional(),
-  provider: z.enum(["google", "github", "email"]),
+  provider: z.enum(['google', 'github', 'email']),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
   is_verified: z.boolean().default(false),
-  subscription_plan: SubscriptionPlanSchema.default("free"),
+  subscription_plan: SubscriptionPlanSchema.default('free'),
   ai_credits: z.number().int().default(0),
   subscription_type: SubscriptionTypeSchema.nullable().optional(),
   external_customer_id: z.string().nullable().optional(),
@@ -49,7 +49,7 @@ export type Session = z.infer<typeof SessionSchema>;
 export const WorkspaceSchema = z.object({
   id: z.uuid(),
   name: z.string(),
-  icon: z.string().default("📁"),
+  icon: z.string().default('📁'),
   description: z.string().nullable().optional(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
@@ -62,7 +62,7 @@ export const NoteSchema = z.object({
   workspace_id: z.uuid(),
   parent_note_id: z.uuid().nullable().optional(),
   name: z.string(),
-  icon: z.string().default("📝"),
+  icon: z.string().default('📝'),
   owner: z.uuid(),
   pinned: z.boolean().default(false),
   deleted_at: z.coerce.date().nullable().optional(),

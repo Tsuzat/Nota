@@ -186,14 +186,16 @@ class Notes {
         [workspaceId, parentNoteId, noteId],
       );
 
-      for (const desc of descendants) {
-        await DB.execute("UPDATE notes SET workspace_id = $1 WHERE id = $2", [
-          workspaceId,
-          desc.id,
-        ]);
+      const currentWorkspaceId = note.workspace_id;
+      if (workspaceId !== currentWorkspaceId) {
+        for (const desc of descendants) {
+          await DB.execute("UPDATE notes SET workspace_id = $1 WHERE id = $2", [
+            workspaceId,
+            desc.id,
+          ]);
+        }
       }
 
-      const currentWorkspaceId = note.workspace_id;
       if (workspaceId !== currentWorkspaceId) {
         const descIds = new Set(descendants.map((d) => d.id));
         this.setNotes(
