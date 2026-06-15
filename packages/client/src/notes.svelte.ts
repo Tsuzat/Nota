@@ -221,6 +221,51 @@ class Notes {
       throw new Error(await res.text());
     }
   }
+
+  /**
+   * Move a note and its descendants recursively to a new workspace / parent
+   */
+  async moveNote(
+    noteId: string,
+    workspaceId: string,
+    parentNoteId: string | null,
+  ) {
+    const note = this.#notes.find((n) => n.id === noteId);
+    if (!note) return;
+
+    const descendants: Note[] = [];
+    const queue = [noteId];
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      const children = this.#notes.filter(
+        (n) => n.parent_note_id === currentId,
+      );
+      for (const child of children) {
+        descendants.push(child);
+        queue.push(child.id);
+      }
+    }
+
+    // Update main note
+    await this.update(noteId, {
+      workspace_id: workspaceId,
+      parent_note_id: parentNoteId,
+    });
+
+    // Update descendants recursively
+    for (const desc of descendants) {
+      await this.update(desc.id, { workspace_id: workspaceId });
+    }
+
+    // Refresh store on client side
+    const currentWorkspaceId = note.workspace_id;
+    if (workspaceId !== currentWorkspaceId) {
+      const descIds = new Set(descendants.map((d) => d.id));
+      this.notes = this.notes.filter(
+        (n) => n.id !== noteId && !descIds.has(n.id),
+      );
+    }
+  }
 }
 
 const NOTANOTESKEY = Symbol("NOTANOTESKEY");

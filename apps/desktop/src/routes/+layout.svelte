@@ -27,6 +27,8 @@
   import { downloadAndInstall } from "$lib/updater";
   import { setCurrentWorkspace } from "$lib/currentworkspace.svelte";
   import NewNotes from "$lib/components/dialogs/new-notes.svelte";
+  import MoveNote from "$lib/components/dialogs/move-note.svelte";
+  import RenameNote from "$lib/components/dialogs/rename-note.svelte";
 
   // Local Workspaces and Notes
   const localWorkspaces = setLocalWorkspaces();
@@ -109,6 +111,8 @@
 <GlobalSearch />
 <GlobalSettings />
 <NewNotes />
+<MoveNote />
+<RenameNote />
 
 <Sidebar.Provider
 	bind:open
