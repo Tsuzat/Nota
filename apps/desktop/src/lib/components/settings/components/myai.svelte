@@ -2,8 +2,9 @@
 import { GoogleGenAI } from '@google/genai';
 import { Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
-import { icons } from '@lib/icons';
+import { BarSpinner } from '@lib/icons';
 import { cn } from '@lib/utils';
+import { secureStorage } from '@nota/client';
 import * as Label from '@nota/ui/shadcn/label';
 import * as Select from '@nota/ui/shadcn/select';
 import { toast } from '@nota/ui/shadcn/sonner';
@@ -11,7 +12,6 @@ import * as Switch from '@nota/ui/shadcn/switch';
 import { onMount } from 'svelte';
 import { fade } from 'svelte/transition';
 import { GEMINI_MODELS } from '$lib/ai';
-import { decrypt, encrypt } from '..';
 import { getGlobalSettings } from '../constants.svelte';
 
 const settings = getGlobalSettings();
@@ -21,10 +21,11 @@ let saving = $state(false);
 let validating = $state(false);
 let isValidKey = $state(false);
 let validationError = $state('');
-let hasStoredKey = $derived(apiKeyInput !== '');
+let hasStoredKey = $state(false);
 
 onMount(async () => {
-  apiKeyInput = await decrypt(localStorage.getItem('geminiApiKeyEnc') || '');
+  apiKeyInput = (await secureStorage.getItem('gemini_api_key')) || '';
+  hasStoredKey = apiKeyInput !== '';
 });
 
 const availableModels = $derived(Object.values(GEMINI_MODELS));
@@ -33,19 +34,26 @@ const modelDescriptions: Record<string, string> = {
   [GEMINI_MODELS.GEMINI_2_5_FLASH]: 'Balanced speed and quality for general usage.',
   [GEMINI_MODELS.GEMINI_2_5_PRO]: 'Higher quality outputs for complex reasoning.',
   [GEMINI_MODELS.GEMINI_3_FLASH]: 'Latest fast model for everyday assistance.',
-  [GEMINI_MODELS.GEMINI_3_PRO]: 'Latest advanced model with stronger capabilities.',
+  [GEMINI_MODELS.GEMINI_3_1_FLASH_LITE]: 'Latest advanced model with stronger capabilities.',
 };
 
 async function handleValidate() {
   validating = true;
   validationError = '';
-  const ai = new GoogleGenAI({ apiKey: apiKeyInput.trim() });
-  const res = await ai.models.get({
-    model: GEMINI_MODELS.GEMINI_2_5_FLASH_LITE,
-  });
-  isValidKey = res.name !== undefined;
-  validationError = res.name === undefined ? 'Key validation failed' : '';
-  validating = false;
+  isValidKey = false;
+  try {
+    const ai = new GoogleGenAI({ apiKey: apiKeyInput.trim() });
+    const res = await ai.models.get({
+      model: GEMINI_MODELS.GEMINI_2_5_FLASH_LITE,
+    });
+    isValidKey = res.name !== undefined;
+    validationError = res.name === undefined ? 'Key validation failed' : '';
+  } catch (e: any) {
+    isValidKey = false;
+    validationError = e.message || 'Invalid API key or network error';
+  } finally {
+    validating = false;
+  }
 }
 
 async function handleSaveKey() {
@@ -55,8 +63,9 @@ async function handleSaveKey() {
   }
   saving = true;
   try {
-    const encrypted = await encrypt(apiKeyInput.trim());
-    localStorage.setItem('geminiApiKeyEnc', encrypted);
+    await secureStorage.setItem('gemini_api_key', apiKeyInput.trim());
+    hasStoredKey = true;
+    toast.success('API key saved successfully');
   } catch (e) {
     toast.error('Failed to store API key');
   } finally {
@@ -64,10 +73,11 @@ async function handleSaveKey() {
   }
 }
 
-function handleClearKey() {
-  localStorage.removeItem('geminiApiKeyEnc');
-  hasStoredKey = false;
+async function handleClearKey() {
+  await secureStorage.removeItem('gemini_api_key');
   apiKeyInput = '';
+  hasStoredKey = false;
+  isValidKey = false;
   toast.warning('Stored API key removed');
 }
 
@@ -129,7 +139,7 @@ function handleSelectModel(value: string) {
           >
             {#if validating}
               <span class="inline-flex items-center gap-2">
-                <icons.Loader class="h-4 w-4 animate-spin" />
+                <BarSpinner />
                 <span>Validating</span>
               </span>
             {:else}

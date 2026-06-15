@@ -95,13 +95,13 @@ function handleKeyDown(e: KeyboardEvent) {
 >
 	<Popover.Trigger>
 		<EdraToolTip tooltip="Search and Replace" shortCut={getKeyboardShortcut('F', true)}>
-			<Button variant="ghost" size="icon-sm">
+			<Button variant="ghost" size="icon">
 				<Search />
 			</Button>
 		</EdraToolTip>
 	</Popover.Trigger>
 	<Popover.Content
-		class="flex w-fit items-center gap-1 p-2"
+		class="flex flex-row w-fit items-center gap-1 p-2"
 		portalProps={{ disabled: true, to: undefined }}
 	>
 		<Button

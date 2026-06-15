@@ -2,6 +2,7 @@ import { getContext, setContext } from 'svelte';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import request from './request';
 import { type User, UserSchema } from './types';
+import { secureStorage } from './secureStorage';
 
 class Auth {
   #user = $state<User>();
@@ -118,8 +119,8 @@ class Auth {
     if (res.ok) {
       localStorage.removeItem('pkce_verifier');
       const { access_token, refresh_token } = await res.json();
-      localStorage.setItem('access_token', access_token);
-      localStorage.setItem('refresh_token', refresh_token);
+      await secureStorage.setItem('access_token', access_token);
+      await secureStorage.setItem('refresh_token', refresh_token);
       await this.init();
     } else {
       throw new Error(await res.text());
@@ -143,8 +144,8 @@ class Auth {
       const {
         data: { access_token, refresh_token },
       } = await res.json();
-      localStorage.setItem('access_token', access_token);
-      localStorage.setItem('refresh_token', refresh_token);
+      await secureStorage.setItem('access_token', access_token);
+      await secureStorage.setItem('refresh_token', refresh_token);
       await this.init();
     } else {
       throw new Error(await res.text());
@@ -159,8 +160,8 @@ class Auth {
   async logout() {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signout`;
     this.#user = undefined;
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    await secureStorage.removeItem('access_token');
+    await secureStorage.removeItem('refresh_token');
     await request(url);
   }
 }

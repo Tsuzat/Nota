@@ -18,6 +18,7 @@
     "sql:default",
     "sql:allow-execute",
     "dialog:default",
+    "stronghold:default",
     "fs:allow-mkdir",
     "fs:allow-remove",
     "fs:allow-read",

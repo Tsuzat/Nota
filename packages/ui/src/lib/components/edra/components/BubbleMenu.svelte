@@ -64,7 +64,7 @@ onMount(() => {
 <div
   bind:this={element}
   class={`bubble-menu-wrapper ${className}`}
-  {style}
+  style="visibility: hidden; position: absolute; {style}"
   {...restProps}
 >
   {@render children?.()}

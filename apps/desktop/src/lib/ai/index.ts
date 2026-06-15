@@ -1,6 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import { aiGenerate } from '@nota/client';
-import { decrypt } from '$lib/components/settings';
+import { aiGenerate, secureStorage } from '@nota/client';
 import { systemInstruction } from './prompts';
 
 /**
@@ -59,15 +58,9 @@ export const callGemini = async (
   onChunck: (chunk: string) => void,
   onError?: (error: Error) => void
 ) => {
-  const apiKeyRaw = localStorage.getItem('geminiApiKeyEnc');
-  if (apiKeyRaw === null) {
+  const GEMINI_API_KEY = await secureStorage.getItem('gemini_api_key');
+  if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === '') {
     onError?.(new Error('Please set Gemini API key on settings.'));
-    return;
-  }
-  const GEMINI_API_KEY = await decrypt(apiKeyRaw);
-  if (GEMINI_API_KEY.trim() === '') {
-    const err = new Error('Gemini API key not found');
-    onError?.(err);
     return;
   }
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
@@ -95,4 +88,5 @@ export enum GEMINI_MODELS {
   GEMINI_2_5_FLASH = 'gemini-2.5-flash',
   GEMINI_2_5_PRO = 'gemini-2.5-pro',
   GEMINI_3_FLASH = 'gemini-3-flash-preview',
+  GEMINI_3_1_FLASH_LITE = 'gemini-3.1-flash-lite',
 }

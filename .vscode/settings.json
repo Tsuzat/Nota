@@ -4,5 +4,8 @@
   "biome.requireConfiguration": true,
   "[go]": {
     "editor.defaultFormatter": "golang.go"
+  },
+  "[svelte]": {
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }

@@ -26,7 +26,7 @@ const globalSettings = getGlobalSettings();
 const workspace = $derived(
   getLocalWorkspaces()
     .getWorkspaces()
-    .find((w) => w.id === note.workspace)
+    .find((w) => w.id === note.workspace_id)
 );
 
 let open = $state(false);
@@ -34,7 +34,7 @@ let open = $state(false);
 
 <div class="flex items-center gap-2 text-sm">
   <SimpleToolTip content="Toggle Favorite">
-    <Button variant="ghost" size="icon-sm" onclick={toggleStar}>
+    <Button variant="ghost" size="icon" onclick={toggleStar}>
       <icons.Star class={cn(starred && "fill-yellow-500 text-yellow-500")} />
     </Button>
   </SimpleToolTip>
@@ -42,7 +42,7 @@ let open = $state(false);
     <Dropdown.Trigger
       class={buttonVariants({
         variant: "ghost",
-        size: "icon-sm",
+        size: "icon",
         class: "data-[state=open]:bg-accent",
       })}
     >
@@ -87,7 +87,7 @@ let open = $state(false);
         <Dropdown.Item
           onclick={() => {
             if ("owner" in note) cloudNotes.duplicate(note.id);
-            else if (workspace) localNotes.duplicateNote(workspace, note);
+            else if (workspace) localNotes.duplicateNote(note.id);
           }}
         >
           <icons.Copy />
@@ -130,7 +130,7 @@ let open = $state(false);
       <Dropdown.Group>
         <Dropdown.Item
           onclick={() => {
-            if ("owner" in note) cloudNotes.update(note.id, { trashed: true });
+            if ("owner" in note) cloudNotes.update(note.id, {deleted_at: new Date()});
             else localNotes.trashNote(note);
           }}
         >

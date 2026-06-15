@@ -1,46 +1,52 @@
 export default `
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS userworkspaces (
-    id UUID PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
-    icon TEXT NOT NULL
-);
-
-INSERT INTO userworkspaces (id, name, icon)
-SELECT 
-    '92e7887a-7ede-464b-888c-621e2fc3d43c',
-    'Personal',
-    'lucide:User'
-WHERE NOT EXISTS (SELECT 1 FROM userworkspaces);
-
 CREATE TABLE IF NOT EXISTS workspaces (
     id UUID PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
     icon TEXT NOT NULL,
     created_at INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'now')),
     updated_at INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'now')),
-    userworkspace UUID NOT NULL,
-    content TEXT NOT NULL DEFAULT '{}',
-    FOREIGN KEY (userworkspace) REFERENCES userworkspaces (id) ON DELETE CASCADE
+    content TEXT NOT NULL DEFAULT '{}'
 );
 
 CREATE TABLE IF NOT EXISTS notes (
     id UUID PRIMARY KEY NOT NULL,
+    workspace_id UUID NOT NULL,
+    parent_note_id UUID,
     name TEXT NOT NULL,
     icon TEXT NOT NULL,
-    workspace UUID NOT NULL,
-    userworkspace UUID NOT NULL,
-    favorite BOOLEAN NOT NULL DEFAULT FALSE,
-    trashed BOOLEAN NOT NULL DEFAULT FALSE,
+    content TEXT NOT NULL DEFAULT '{}',
+    pinned BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted_at INTEGER,
     created_at INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'now')),
     updated_at INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'now')),
-    content TEXT NOT NULL DEFAULT '{}',
-    FOREIGN KEY (workspace) REFERENCES workspaces (id) ON DELETE CASCADE,
-    FOREIGN KEY (userworkspace) REFERENCES userworkspaces (id) ON DELETE CASCADE
+    FOREIGN KEY (workspace_id) REFERENCES workspaces (id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_note_id) REFERENCES notes (id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_workspaces_userworkspace ON workspaces (userworkspace);
+CREATE TABLE IF NOT EXISTS assets (
+    id UUID PRIMARY KEY NOT NULL,
+    workspace_id UUID NOT NULL,
+    note_id UUID,
+    name TEXT NOT NULL,
+    path TEXT NOT NULL,
+    mime_type TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    created_at INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'now')),
+    updated_at INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'now')),
+    deleted_at INTEGER,
+    FOREIGN KEY (workspace_id) REFERENCES workspaces (id) ON DELETE CASCADE,
+    FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_notes_workspace_id ON notes (workspace_id);
+CREATE INDEX IF NOT EXISTS idx_notes_parent_note_id ON notes (parent_note_id);
+CREATE INDEX IF NOT EXISTS idx_notes_deleted_at ON notes (deleted_at);
+
+CREATE INDEX IF NOT EXISTS idx_assets_workspace_id ON assets (workspace_id);
+CREATE INDEX IF NOT EXISTS idx_assets_note_id ON assets (note_id);
+CREATE INDEX IF NOT EXISTS idx_assets_deleted_at ON assets (deleted_at);
 
 CREATE TRIGGER IF NOT EXISTS trigger_update_workspaces_updated_at
   AFTER UPDATE ON workspaces
@@ -58,5 +64,11 @@ CREATE TRIGGER IF NOT EXISTS trigger_update_notes_updated_at
       UPDATE notes SET updated_at = STRFTIME('%s', 'now') WHERE id = NEW.id;
   END;
 
-CREATE INDEX IF NOT EXISTS idx_notes_userworkspace ON notes (userworkspace);
+CREATE TRIGGER IF NOT EXISTS trigger_update_assets_updated_at
+  AFTER UPDATE ON assets
+  FOR EACH ROW
+  WHEN NEW.updated_at = OLD.updated_at
+  BEGIN
+      UPDATE assets SET updated_at = STRFTIME('%s', 'now') WHERE id = NEW.id;
+  END;
 `;

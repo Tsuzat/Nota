@@ -16,11 +16,9 @@ import (
 
 func GetNotes(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	// this is the userworkspace id, the notes belong to
 	id := c.Params("id")
 
 	notes := []models.Note{}
-	// check it on redis cache first ??
 	cacheKey := fmt.Sprintf("notes:%s:%s", id, user.Id)
 	if utils.GetCache(cacheKey, &notes) == nil {
 		return c.JSON(models.APIResponse{
@@ -29,12 +27,11 @@ func GetNotes(c fiber.Ctx) error {
 			Data:    notes,
 		})
 	}
-	// there might be an error when unmarshalling the cache data or the cache data is empty
-	// so we need to query the database
+
 	if err := config.DB.NewSelect().
 		Model(&notes).
-		Column("id", "name", "icon", "workspace", "userworkspace", "owner", "favorite", "trashed", "created_at", "updated_at", "is_public").
-		Where("userworkspace = ? AND owner = ?", id, user.Id).
+		Column("id", "name", "icon", "workspace_id", "parent_note_id", "owner", "pinned", "deleted_at", "created_at", "updated_at", "is_public").
+		Where("workspace_id = ? AND owner = ?", id, user.Id).
 		Scan(c.Context()); err != nil {
 		log.Error("Error when getting notes: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -62,12 +59,12 @@ func CreateNote(c fiber.Ctx) error {
 		})
 	}
 	note := models.Note{
-		Name:          req.Name,
-		Icon:          req.Icon,
-		Workspace:     req.Workspace,
-		UserWorkspace: req.UserWorkspace,
-		Owner:         user.Id,
-		Favorite:      req.Favorite,
+		Name:         req.Name,
+		Icon:         req.Icon,
+		WorkspaceId:  req.WorkspaceId,
+		ParentNoteId: req.ParentNoteId,
+		Owner:        user.Id,
+		Pinned:       req.Pinned,
 	}
 	if _, err := config.DB.NewInsert().Model(&note).Exec(c.Context()); err != nil {
 		log.Error("Error when creating note: ", err)
@@ -78,10 +75,7 @@ func CreateNote(c fiber.Ctx) error {
 		})
 	}
 	// invalidate the cache
-	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
-	go utils.DeleteCache(cacheKey)
-	// invalidate the userworkspacesdata too
-	cacheKey = fmt.Sprintf("userworkspacedata:%s", note.UserWorkspace)
+	cacheKey := fmt.Sprintf("notes:%s:%s", note.WorkspaceId, user.Id)
 	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
@@ -114,16 +108,28 @@ func UpdateNote(c fiber.Ctx) error {
 		query.Set("icon = ?", *req.Icon)
 		hasUpdates = true
 	}
-	if req.Favorite != nil {
-		query.Set("favorite = ?", *req.Favorite)
+	if req.Pinned != nil {
+		query.Set("pinned = ?", *req.Pinned)
 		hasUpdates = true
 	}
 	if req.IsPublic != nil {
 		query.Set("is_public = ?", *req.IsPublic)
 		hasUpdates = true
 	}
-	if req.Trashed != nil {
-		query.Set("trashed = ?", *req.Trashed)
+	if req.DeletedAt != nil {
+		query.Set("deleted_at = ?", *req.DeletedAt)
+		hasUpdates = true
+	} else if req.DeletedAt == nil && c.Request().Header.Peek("X-Remove-DeletedAt") != nil {
+		// Just a simple way to set it to null if needed
+		query.Set("deleted_at = NULL")
+		hasUpdates = true
+	}
+	if req.WorkspaceId != nil {
+		query.Set("workspace_id = ?", *req.WorkspaceId)
+		hasUpdates = true
+	}
+	if req.ParentNoteId != nil {
+		query.Set("parent_note_id = ?", *req.ParentNoteId)
 		hasUpdates = true
 	}
 
@@ -150,14 +156,12 @@ func UpdateNote(c fiber.Ctx) error {
 		})
 	}
 	// invalidate the cache
-	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
+	cacheKey := fmt.Sprintf("notes:%s:%s", note.WorkspaceId, user.Id)
 	go utils.DeleteCache(cacheKey)
 	// invalidate the cache for note preview
 	cacheKey = fmt.Sprintf("note:%s:preview", id)
 	go utils.DeleteCache(cacheKey)
-	// invalidate the userworkspacesdata too
-	cacheKey = fmt.Sprintf("userworkspacedata:%s", note.UserWorkspace)
-	go utils.DeleteCache(cacheKey)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Note updated successfully",
@@ -168,12 +172,12 @@ func UpdateNote(c fiber.Ctx) error {
 func DeleteNote(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")
-	var userworkspace string
+	var workspaceId string
 	if _, err := config.DB.NewDelete().
 		Model(&models.Note{}).
-		Returning("userworkspace").
+		Returning("workspace_id").
 		Where("id = ? AND owner = ?", id, user.Id).
-		Exec(c.Context(), &userworkspace); err != nil {
+		Exec(c.Context(), &workspaceId); err != nil {
 		log.Error("Error when deleting note: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -182,14 +186,12 @@ func DeleteNote(c fiber.Ctx) error {
 		})
 	}
 	// invalidate the cache
-	cacheKey := fmt.Sprintf("notes:%s:%s", userworkspace, user.Id)
+	cacheKey := fmt.Sprintf("notes:%s:%s", workspaceId, user.Id)
 	go utils.DeleteCache(cacheKey)
 	// invalidate the cache for note preview
 	cacheKey = fmt.Sprintf("note:%s:preview", id)
 	go utils.DeleteCache(cacheKey)
-	// invalidate the userworkspacesdata too
-	cacheKey = fmt.Sprintf("userworkspacedata:%s", userworkspace)
-	go utils.DeleteCache(cacheKey)
+
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Note deleted successfully",
@@ -370,11 +372,11 @@ func DuplicateNote(c fiber.Ctx) error {
 	note := new(models.Note)
 
 	if err := config.DB.NewRaw(
-		`INSERT INTO notes (name, icon, workspace, userworkspace, owner, content, favorite, trashed, created_at, updated_at)
-		 SELECT name || ' (copy)', icon, workspace, userworkspace, owner, content, false, false, NOW(), NOW()
+		`INSERT INTO notes (name, icon, workspace_id, parent_note_id, owner, content, pinned, deleted_at, created_at, updated_at)
+		 SELECT name || ' (copy)', icon, workspace_id, parent_note_id, owner, content, false, NULL, NOW(), NOW()
 		 FROM notes
 		 WHERE id = ? AND owner = ?
-		 RETURNING id, name, icon, workspace, userworkspace, owner, favorite, trashed, created_at, updated_at`,
+		 RETURNING id, name, icon, workspace_id, parent_note_id, owner, pinned, deleted_at, created_at, updated_at`,
 		id, user.Id,
 	).Scan(c.Context(), note); err != nil {
 		log.Error("Error when duplicating note: ", err)
@@ -384,11 +386,8 @@ func DuplicateNote(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
-	// invalidate the GetNotes cache for the userworkspace
-	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
-	go utils.DeleteCache(cacheKey)
-	// invalidate the userworkspacesdata too
-	cacheKey = fmt.Sprintf("userworkspacedata:%s", note.UserWorkspace)
+	// invalidate the GetNotes cache
+	cacheKey := fmt.Sprintf("notes:%s:%s", note.WorkspaceId, user.Id)
 	go utils.DeleteCache(cacheKey)
 	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
 		Status:  fiber.StatusCreated,
@@ -409,15 +408,15 @@ func ImportNote(c fiber.Ctx) error {
 		})
 	}
 	note := &models.Note{
-		Name:          req.Name,
-		Workspace:     req.Workspace,
-		UserWorkspace: req.UserWorkspace,
-		Owner:         user.Id,
-		Content:       req.Content,
+		Name:         req.Name,
+		WorkspaceId:  req.WorkspaceId,
+		ParentNoteId: req.ParentNoteId,
+		Owner:        user.Id,
+		Content:      req.Content,
 	}
 	if _, err := config.DB.NewInsert().
 		Model(note).
-		Returning("id, name, icon, workspace, userworkspace, owner, favorite, trashed, created_at, updated_at").
+		Returning("id, name, icon, workspace_id, parent_note_id, owner, pinned, deleted_at, created_at, updated_at").
 		Exec(c.Context()); err != nil {
 		log.Error("Error when importing note: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -426,11 +425,8 @@ func ImportNote(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
-	// Invalidate the GetNotes cache for the userworkspace
-	cacheKey := fmt.Sprintf("notes:%s:%s", note.UserWorkspace, user.Id)
-	go utils.DeleteCache(cacheKey)
-	// invalidate the userworkspacesdata too
-	cacheKey = fmt.Sprintf("userworkspacedata:%s", note.UserWorkspace)
+	// Invalidate the GetNotes cache
+	cacheKey := fmt.Sprintf("notes:%s:%s", note.WorkspaceId, user.Id)
 	go utils.DeleteCache(cacheKey)
 	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
 		Status:  fiber.StatusCreated,

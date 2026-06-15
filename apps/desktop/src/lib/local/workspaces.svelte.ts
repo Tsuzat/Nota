@@ -10,7 +10,6 @@ export interface LocalWorkSpace {
   icon: string;
   created_at: number;
   updated_at: number;
-  userworkspace: string;
 }
 
 class WorkSpaces {
@@ -28,11 +27,9 @@ class WorkSpaces {
     this.#workspaces = workspaces;
   }
 
-  async fetchWorkspaces(userWorkspaceId: string) {
+  async fetchWorkspaces() {
     try {
-      const res = await DB.select<LocalWorkSpace[]>('SELECT * FROM workspaces WHERE userworkspace = $1', [
-        userWorkspaceId,
-      ]);
+      const res = await DB.select<LocalWorkSpace[]>('SELECT id, name, icon, created_at, updated_at FROM workspaces');
       this.setWorkspaces(res);
     } catch (e) {
       toast.error('Something went wrong when getting the workspaces');
@@ -40,19 +37,17 @@ class WorkSpaces {
     }
   }
 
-  async createWorkspace(icon: string, name: string, userWorkspaceId: string) {
+  async createWorkspace(icon: string, name: string) {
     try {
       // insert into database
       const id = getNewUUID(this.#workspaces.map((t) => t.id));
-      console.log({ id, name, icon, userWorkspaceId });
-      const res = await DB.execute('INSERT INTO workspaces (id, name, icon, userworkspace) VALUES ($1, $2, $3, $4)', [
-        id,
-        name,
-        icon,
-        userWorkspaceId,
-      ]);
+      console.log({ id, name, icon });
+      const res = await DB.execute('INSERT INTO workspaces (id, name, icon) VALUES ($1, $2, $3)', [id, name, icon]);
       if (res.rowsAffected === 1) {
-        const newWorkspace = await DB.select<LocalWorkSpace[]>('SELECT * FROM workspaces WHERE id = $1', [id]);
+        const newWorkspace = await DB.select<LocalWorkSpace[]>(
+          'SELECT id, name, icon, created_at, updated_at FROM workspaces WHERE id = $1',
+          [id]
+        );
         this.setWorkspaces([...this.getWorkspaces(), newWorkspace[0]]);
       } else {
         toast.warning('Could not create workspace.');
@@ -70,7 +65,7 @@ class WorkSpaces {
         this.setWorkspaces(this.getWorkspaces().filter((w) => w.id !== workspace.id));
         toast.success('Workspace deleted successfully');
         const localNotes = getLocalNotes();
-        localNotes.setNotes(localNotes.getNotes().filter((n) => n.workspace !== workspace.id));
+        localNotes.setNotes(localNotes.getNotes().filter((n) => n.workspace_id !== workspace.id));
       } else {
         toast.warning('Could not delete workspace from database.');
       }

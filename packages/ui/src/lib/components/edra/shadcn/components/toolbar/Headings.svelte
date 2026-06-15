@@ -39,7 +39,7 @@ const HeadingIcon = $derived.by(() => {
 			<ChevronDown class="text-muted-foreground size-2!" />
 		</DropdownMenu.Trigger>
 	</EdraToolTip>
-	<DropdownMenu.Content portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
+	<DropdownMenu.Content class="w-fit" portalProps={{ to: document.getElementById('nota-editor') ?? 'undefined' }}>
 		<DropdownMenu.Item onclick={() => editor.chain().focus().setParagraph().run()}>
 			<Paragraph />
 			<span>Paragraph</span>

@@ -13,10 +13,9 @@ import (
 
 func GetWorkspaces(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	userworkspaceId := c.Params("id")
 	workspaces := []models.Workspace{}
 
-	cacheKey := fmt.Sprintf("workspaces:%s:%s", userworkspaceId, user.Id)
+	cacheKey := fmt.Sprintf("workspaces:%s", user.Id)
 	if utils.GetCache(cacheKey, &workspaces) == nil {
 		return c.JSON(models.APIResponse{
 			Status:  fiber.StatusOK,
@@ -27,7 +26,7 @@ func GetWorkspaces(c fiber.Ctx) error {
 
 	err := config.DB.NewSelect().
 		Model(&workspaces).
-		Where("owner = ? AND userworkspace = ?", user.Id, userworkspaceId).
+		Where("owner = ?", user.Id).
 		Scan(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -59,26 +58,22 @@ func CreateWorkspace(c fiber.Ctx) error {
 			})
 	}
 	workspace := &models.Workspace{
-		Icon:          req.Icon,
-		Name:          req.Name,
-		Description:   req.Description,
-		Owner:         user.Id,
-		UserWorkspace: req.UserWorkspace,
+		Icon:        req.Icon,
+		Name:        req.Name,
+		Description: req.Description,
+		Owner:       user.Id,
 	}
 	_, err := config.DB.NewInsert().Model(workspace).Exec(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
-			Error:  "Something went wrong when creating the userworkspace",
+			Error:  "Something went wrong when creating the workspace",
 			Data:   err.Error(),
 		})
 	}
 
 	// Invalidate cache
-	cacheKey := fmt.Sprintf("workspaces:%s:%s", workspace.UserWorkspace, user.Id)
-	go utils.DeleteCache(cacheKey)
-	// invalidate the userworkspacesdata too
-	cacheKey = fmt.Sprintf("userworkspacedata:%s", workspace.UserWorkspace)
+	cacheKey := fmt.Sprintf("workspaces:%s", user.Id)
 	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
@@ -102,7 +97,7 @@ func UpdateWorkspace(c fiber.Ctx) error {
 	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
-			Error:  "Invalid userworkspace id",
+			Error:  "Invalid workspace id",
 			Data:   "id is required",
 		})
 	}
@@ -130,10 +125,7 @@ func UpdateWorkspace(c fiber.Ctx) error {
 	}
 
 	// Invalidate cache
-	cacheKey := fmt.Sprintf("workspaces:%s:%s", workspace.UserWorkspace, user.Id)
-	go utils.DeleteCache(cacheKey)
-	// invalidate the userworkspacesdata too
-	cacheKey = fmt.Sprintf("userworkspacedata:%s", workspace.UserWorkspace)
+	cacheKey := fmt.Sprintf("workspaces:%s", user.Id)
 	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
@@ -145,12 +137,10 @@ func UpdateWorkspace(c fiber.Ctx) error {
 func DeleteWorkspace(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")
-	var userworkspaceId string
 	_, err := config.DB.NewDelete().
 		Model(&models.Workspace{}).
 		Where("id = ? and owner = ?", id, user.Id).
-		Returning("userworkspace").
-		Exec(c.Context(), &userworkspaceId)
+		Exec(c.Context())
 	if err != nil {
 		log.Error("Error while deleting workspace: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -161,10 +151,7 @@ func DeleteWorkspace(c fiber.Ctx) error {
 	}
 
 	// Invalidate cache
-	cacheKey := fmt.Sprintf("workspaces:%s:%s", userworkspaceId, user.Id)
-	go utils.DeleteCache(cacheKey)
-	// invalidate the userworkspacesdata too
-	cacheKey = fmt.Sprintf("userworkspacedata:%s", userworkspaceId)
+	cacheKey := fmt.Sprintf("workspaces:%s", user.Id)
 	go utils.DeleteCache(cacheKey)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,

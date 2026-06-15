@@ -11,41 +11,11 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { DB, initializeLocalDB } from '$lib/local/db';
 import type { LocalNote } from '$lib/local/notes.svelte';
-import type { LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import type { LocalWorkSpace } from '$lib/local/workspaces.svelte';
 
-async function loadLocalUserWorkspaces(): Promise<LocalUserWorkspace[] | null> {
-  let localUserWorkspaces: LocalUserWorkspace[] = [];
+async function loadLocalWorkspaces(): Promise<LocalWorkSpace[] | null> {
   try {
-    localUserWorkspaces = await DB.select<LocalUserWorkspace[]>('SELECT * FROM userworkspaces');
-    return localUserWorkspaces;
-  } catch (e) {
-    console.error(e);
-    return null;
-  }
-}
-
-async function loadCurrentUserWorkspace(localWorkspaces: LocalUserWorkspace[]): Promise<LocalUserWorkspace | null> {
-  // find the current user workspace id in local storage
-  try {
-    const currentUserWorkspaceId = localStorage.getItem('currentUserWorkspaceId');
-    if (currentUserWorkspaceId) {
-      const currentUserWorkspace = localWorkspaces.find((w) => String(w.id) === currentUserWorkspaceId);
-      if (currentUserWorkspace) return currentUserWorkspace;
-    }
-    localStorage.setItem('currentUserWorkspaceId', localWorkspaces[0].id);
-    return localWorkspaces[0];
-  } catch (e) {
-    console.error(e);
-    return null;
-  }
-}
-
-async function loadLocalWorkspaces(currentUserWorkspaceId: string): Promise<LocalWorkSpace[] | null> {
-  try {
-    const res = await DB.select<LocalWorkSpace[]>('SELECT * FROM workspaces WHERE userworkspace = $1', [
-      currentUserWorkspaceId,
-    ]);
+    const res = await DB.select<LocalWorkSpace[]>('SELECT id, name, icon, created_at, updated_at FROM workspaces');
     return res;
   } catch (error) {
     console.error(error);
@@ -53,14 +23,16 @@ async function loadLocalWorkspaces(currentUserWorkspaceId: string): Promise<Loca
   }
 }
 
-async function loadLocalNotes(currentUserWorkspaceId: string): Promise<LocalNote[] | null> {
+async function loadLocalNotes(workspaceId: string): Promise<LocalNote[] | null> {
   try {
-    let res = await DB.select<LocalNote[]>('SELECT * FROM notes WHERE userworkspace = $1', [currentUserWorkspaceId]);
+    let res = await DB.select<LocalNote[]>(
+      'SELECT id, workspace_id, parent_note_id, name, icon, pinned, deleted_at, created_at, updated_at FROM notes WHERE workspace_id = $1',
+      [workspaceId]
+    );
     res = res.map((r) => {
       return {
         ...r,
-        favorite: r.favorite === 'true',
-        trashed: r.trashed === 'true',
+        pinned: r.pinned === 'true' || (r.pinned as any) === 1 || r.pinned === true,
       };
     });
     return res;
@@ -72,26 +44,30 @@ async function loadLocalNotes(currentUserWorkspaceId: string): Promise<LocalNote
 
 export const load = async () => {
   await initializeLocalDB();
-  const localUserWorkspaces = await loadLocalUserWorkspaces();
-  if (localUserWorkspaces === null) {
-    toast.error('Something went wrong when loading the user workspaces');
-    return goto(resolve('/'));
-  }
-  const currentUserWorkspace = await loadCurrentUserWorkspace(localUserWorkspaces);
 
-  if (currentUserWorkspace === null) {
-    toast.error('Something went wrong when loading the current user workspace');
-    return goto(resolve('/'));
-  }
-
-  const localWorkspaces = await loadLocalWorkspaces(currentUserWorkspace.id);
+  let localWorkspaces = await loadLocalWorkspaces();
 
   if (localWorkspaces === null) {
     toast.error('Something went wrong when loading the workspaces');
     return goto(resolve('/'));
   }
 
-  const localNotes = await loadLocalNotes(currentUserWorkspace.id);
+  if (localWorkspaces.length === 0) {
+    const defaultWorkspaceId = crypto.randomUUID();
+    try {
+      await DB.execute('INSERT INTO workspaces (id, name, icon) VALUES ($1, $2, $3)', [
+        defaultWorkspaceId,
+        'Personal',
+        '📁',
+      ]);
+      localWorkspaces = await loadLocalWorkspaces();
+    } catch (e) {
+      console.error('Failed to seed default workspace in layout load', e);
+    }
+  }
+
+  const currentWorkspace = localWorkspaces?.[0];
+  const localNotes = currentWorkspace ? await loadLocalNotes(currentWorkspace.id) : [];
 
   if (localNotes === null) {
     toast.error('Something went wrong when loading the notes');
@@ -99,9 +75,8 @@ export const load = async () => {
   }
 
   return {
-    localUserWorkspaces,
-    currentUserWorkspace,
     localWorkspaces,
+    currentWorkspace,
     localNotes,
   };
 };

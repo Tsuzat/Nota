@@ -1,84 +1,34 @@
 <script lang="ts">
 import { toast } from '@lib/components/ui/sonner';
-import { getNotesContext, getUserWorkspacesContext, getWorkspacesContext, type UserWorkspace } from '@nota/client';
+import { getNotesContext, getWorkspacesContext } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import * as Command from '@nota/ui/shadcn/command';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { getLocalNotes } from '$lib/local/notes.svelte';
-import { getLocalUserWorkspaces, type LocalUserWorkspace } from '$lib/local/userworkspaces.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 import { getGlobalSearch } from './constants.svelte';
 
 const search = getGlobalSearch();
-const currentUserWorkspace = useCurrentUserWorkspaceContext();
-const isLocal = $derived(currentUserWorkspace.getIsLocal());
-const activeWorkspace = $derived(currentUserWorkspace.getCurrentUserWorkspace());
-const localUserWorkspaces = getLocalUserWorkspaces();
 const localWorkspaces = getLocalWorkspaces();
 const localNotes = getLocalNotes();
 
-const cloudUserWorkspaces = getUserWorkspacesContext();
 const cloudWorkspaces = getWorkspacesContext();
 const cloudNotes = getNotesContext();
 
 const workspaces = $derived.by(() => {
-  if (isLocal) return getLocalWorkspaces().getWorkspaces();
-  return cloudWorkspaces.workspaces;
+  return [...localWorkspaces.getWorkspaces(), ...cloudWorkspaces.workspaces];
 });
 
 const notes = $derived.by(() => {
-  if (isLocal) return getLocalNotes().getNotes();
-  return cloudNotes.notes;
+  return [...localNotes.getNotes(), ...cloudNotes.notes];
 });
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
     search.open = true;
-  }
-}
-
-async function selectLocalUserWorkspace(workspace: LocalUserWorkspace) {
-  if (activeWorkspace?.id === workspace.id) {
-    return toast.info("You're already in this workspace");
-  }
-  const id = toast.loading(`Changing User Workspace to ${workspace.name}`);
-  try {
-    goto(resolve('/'));
-    currentUserWorkspace.setCurrentUserWorkspace(workspace);
-    await localWorkspaces.fetchWorkspaces(workspace.id);
-    await localNotes.fetchNotes(workspace.id);
-    toast.success(`Changed User Workspace to ${workspace.name}`, { id });
-    cloudWorkspaces.workspaces = [];
-    cloudNotes.notes = [];
-  } catch (error) {
-    console.error(error);
-    toast.error(`Something went wrong when changing the user workspace to ${workspace.name}`, { id });
-  }
-}
-
-async function selectCloudUserWorkspace(workspace: UserWorkspace) {
-  if (activeWorkspace?.id === workspace.id) {
-    return toast.info("You're already in this workspace");
-  }
-  const id = toast.loading(`Switching to cloud workspace ${workspace.name}`);
-  try {
-    goto(resolve('/'));
-    currentUserWorkspace.setCurrentUserWorkspace(workspace);
-    toast.loading(`Loading Workspaces for ${workspace.name}`, { id });
-    await cloudWorkspaces.fetch(workspace.id);
-    toast.loading(`Loading Notes for ${workspace.name}`, { id });
-    await cloudNotes.fetch(workspace.id);
-    toast.dismiss(id);
-    toast.success(`Changed User Workspace to ${workspace.name}`, { id });
-    localWorkspaces.setWorkspaces([]);
-    localNotes.setNotes([]);
-  } catch (error) {
-    console.error(error);
-    toast.error(`Something went wrong when switching to cloud workspace ${workspace.name}`, { id });
   }
 }
 </script>
@@ -90,73 +40,38 @@ async function selectCloudUserWorkspace(workspace: UserWorkspace) {
 	<Command.List>
 		<Command.Empty>No results found.</Command.Empty>
 		<Command.Group heading="Suggestions">
-			<Command.Item>
+			<Command.Item
+				onselect={() => {
+					goto(resolve('/'));
+					search.open = false;
+				}}
+				onclick={() => {
+					goto(resolve('/'));
+					search.open = false;
+				}}
+			>
 				<icons.House class="mr-2 size-4" />
 				<span>Home</span>
 			</Command.Item>
 		</Command.Group>
 		<Command.Separator />
-		<Command.Group value="User Workspaces" heading="User Workspaces">
-			{#each localUserWorkspaces.getUserWorkspaces() as localUserWorkspace (localUserWorkspace.id)}
-				{@const onselect = () => selectLocalUserWorkspace(localUserWorkspace)}
-				<Command.Item
-					itemid={localUserWorkspace.id.toString()}
-					value={localUserWorkspace.name}
-					{onselect}
-					onclick={onselect}
-				>
-					<IconRenderer icon={localUserWorkspace.icon} class="mr-2 size-4" />
-					<span>{localUserWorkspace.name}</span>
-					<Command.Shortcut class="flex gap-1">
-						{#if activeWorkspace?.id === localUserWorkspace.id}
-							<SimpleToolTip content="Current Active Workspace">
-								<icons.CircleCheck class="text-primary size-4" />
-							</SimpleToolTip>
-						{/if}
-						<SimpleToolTip content="Local User Workspace">
-							<icons.Monitor class="size-4" />
-						</SimpleToolTip>
-					</Command.Shortcut>
-				</Command.Item>
-			{/each}
-			{#each cloudUserWorkspaces.userWorkspaces as cloudUserWorkspace (cloudUserWorkspace.id)}
-				{@const onselect = () => selectCloudUserWorkspace(cloudUserWorkspace)}
-				<Command.Item
-					itemid={cloudUserWorkspace.id}
-					value={cloudUserWorkspace.name}
-					{onselect}
-					onclick={onselect}
-				>
-					<IconRenderer icon={cloudUserWorkspace.icon} class="mr-2 size-4" />
-					<span>{cloudUserWorkspace.name}</span>
-					<Command.Shortcut class="flex gap-1">
-						{#if activeWorkspace?.id === cloudUserWorkspace.id}
-							<SimpleToolTip content="Current Active Workspace">
-								<icons.CircleCheck class="text-primary size-4" />
-							</SimpleToolTip>
-						{/if}
-						<SimpleToolTip content="Cloud User Workspace">
-							<icons.Cloud class="size-4" />
-						</SimpleToolTip>
-					</Command.Shortcut>
-				</Command.Item>
-			{/each}
-		</Command.Group>
 		<Command.Group
 			value="Workspaces"
-			heading={(isLocal ? 'Local' : 'Cloud') + ' Workspaces : ' + workspaces.length}
+			heading={'Workspaces : ' + workspaces.length}
 		>
 			{#each workspaces as workspace (workspace.id)}
+				{@const isCloud = 'owner' in workspace}
 				{@const onselect = () => {
 					goto(
 						resolve(
-							isLocal ? '/(local)/local-workspace-[id]' : '/(cloud)/workspace-[id]',
+							!isCloud ? '/(local)/local-workspace-[id]' : '/(cloud)/workspace-[id]',
 							{
-								id: workspace.id
+								id: workspace.id.toString()
 							}
 						)
 					);
-
+					if (isCloud) cloudNotes.fetchByWorkspace(workspace.id);
+					else localNotes.fetchNotesForWorkspace(workspace.id)
 					search.open = false;
 				}}
 				<Command.Item
@@ -173,13 +88,14 @@ async function selectCloudUserWorkspace(workspace: UserWorkspace) {
 		<Command.Separator />
 		<Command.Group
 			value="Notes"
-			heading={(isLocal ? 'Local' : 'Cloud') + ' Notes : ' + notes.length}
+			heading={'Notes : ' + notes.length}
 		>
 			{#each notes as note (note.id)}
+				{@const isCloud = 'owner' in note}
 				{@const onselect = () => {
 					goto(
-						resolve(isLocal ? '/(local)/local-note-[id]' : '/(cloud)/note-[id]', {
-							id: note.id
+						resolve(!isCloud ? '/(local)/local-note-[id]' : '/(cloud)/note-[id]', {
+							id: note.id.toString()
 						})
 					);
 					search.open = false;
@@ -188,12 +104,12 @@ async function selectCloudUserWorkspace(workspace: UserWorkspace) {
 					<IconRenderer icon={note.icon} class="mr-2 size-4" />
 					<span>{note.name}</span>
 					<Command.Shortcut class="flex gap-1">
-						{#if note.favorite}
-							<SimpleToolTip content="Favorite">
-								<icons.Star class="size-3 fill-amber-500 text-amber-500" />
+						{#if note.pinned}
+							<SimpleToolTip content="Pinned">
+								<icons.Pin class="size-3 fill-amber-500 text-amber-500" />
 							</SimpleToolTip>
 						{/if}
-						{#if note.trashed}
+						{#if note.deleted_at}
 							<SimpleToolTip content="Trash">
 								<icons.Trash2 class="size-3" />
 							</SimpleToolTip>

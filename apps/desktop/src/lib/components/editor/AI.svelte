@@ -1,23 +1,23 @@
 <script lang="ts">
-import { SimpleToolTip, StreamDown } from '@lib/components/custom/index.js';
-import { Textarea } from '@lib/components/ui/textarea';
 import BubbleMenu from '@nota/ui/edra/components/BubbleMenu.svelte';
 import { removeAIHighlight } from '@nota/ui/edra/extensions/AIHighLight.js';
 import type { Editor, ShouldShowProps } from '@nota/ui/edra/types.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
+import { Kbd } from '@nota/ui/shadcn/kbd';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { fade, slide } from 'svelte/transition';
 import { callAI, callGemini } from '$lib/ai';
 import {
   CONTINUE_WRITING_PROMPT,
   FIX_GRAMMAR_PROMPT,
+  IMPROVE_WRITING_PROMPT,
   MAKE_LONGER_PROMPT,
   MAKE_SHORTER_PROMPT,
+  SIMPLIFY_LANGUAGE_PROMPT,
   SOLVE_PROBLEM_PROMPT,
   SUMMARIZE_PROMPT,
 } from '$lib/ai/commands';
-import { getKeyboardShortcut } from '$lib/utils';
 import { getGlobalSettings } from '../settings';
 
 interface Props {
@@ -26,22 +26,7 @@ interface Props {
 }
 const { editor, parentElement }: Props = $props();
 const settings = getGlobalSettings();
-let inputTag = $state<HTMLTextAreaElement>(document.createElement('textarea'));
-
-function shouldShow(props: ShouldShowProps) {
-  if (!props.editor.isEditable || props.editor.isDestroyed) return false;
-  const { view, editor } = props;
-  if (!view || editor.view.dragging) {
-    return false;
-  }
-  if (editor.isActive('ai-highlight')) {
-    return true;
-  }
-  removeAIHighlight(editor);
-  aiState = AIState.Idle;
-  aiResponse = '';
-  return false;
-}
+let inputTag = $state<HTMLTextAreaElement | null>(null);
 
 enum AIState {
   Idle = 'Idle',
@@ -51,6 +36,31 @@ enum AIState {
 let inputValue = $state('');
 let aiState = $state(AIState.Idle);
 let aiResponse = $state('');
+let activeOptionIndex = $state(0);
+let generating = $state(false);
+
+// Position tracking for inline editor streaming
+let originalFrom = $state(0);
+let aiContentFrom = $state(0);
+let aiContentTo = $state(0);
+let lastPrompt = $state('');
+let updateTimer: ReturnType<typeof setTimeout> | null = null;
+
+function shouldShow(props: ShouldShowProps) {
+  if (!props.editor.isEditable || props.editor.isDestroyed) return false;
+  const { view, editor } = props;
+  if (!view || editor.view.dragging) return false;
+
+  // Always show during AI confirmation (streaming or action bar)
+  if (aiState === AIState.Confirmation) return true;
+
+  if (editor.isActive('ai-highlight')) return true;
+
+  removeAIHighlight(editor);
+  aiState = AIState.Idle;
+  aiResponse = '';
+  return false;
+}
 
 function getSelectionText(): string | undefined {
   const { from, to } = editor.view.state.selection;
@@ -58,7 +68,9 @@ function getSelectionText(): string | undefined {
   if (editor.markdown) return editor.markdown.serialize(slice.toJSON());
 }
 
-async function processText(type: 'shorter' | 'longer' | 'summarize' | 'grammer' | 'continue' | 'solve') {
+async function processText(
+  type: 'shorter' | 'longer' | 'summarize' | 'grammer' | 'continue' | 'solve' | 'improve' | 'simplify'
+) {
   const id = Symbol('AI_THINKING_TOAST').toString();
   const selectedText = getSelectionText();
   if (!selectedText || selectedText.trim().length === 0) {
@@ -86,6 +98,12 @@ async function processText(type: 'shorter' | 'longer' | 'summarize' | 'grammer' 
       case 'solve':
         prompt = SOLVE_PROBLEM_PROMPT(selectedText);
         break;
+      case 'improve':
+        prompt = IMPROVE_WRITING_PROMPT(selectedText);
+        break;
+      case 'simplify':
+        prompt = SIMPLIFY_LANGUAGE_PROMPT(selectedText);
+        break;
     }
     aiState = AIState.Confirmation;
     await generateAIContent(prompt);
@@ -96,135 +114,357 @@ async function processText(type: 'shorter' | 'longer' | 'summarize' | 'grammer' 
   }
 }
 
-const makeTextShorter = () => processText('shorter');
-
-const makeTextLonger = () => processText('longer');
-
-const summarizeText = () => processText('summarize');
-
-const checkGrammer = () => processText('grammer');
-
-const continueWriting = () => processText('continue');
-
-const solveProblem = () => processText('solve');
-
-async function handleSubmit(e: Event) {
-  e.preventDefault();
+async function handleSubmit(e?: Event) {
+  if (e) e.preventDefault();
   if (!inputValue || inputValue.trim().length === 0) return;
   const text = getSelectionText();
   if (!text) return;
   try {
-    aiState = AIState.Confirmation;
     const prompt = `${text}\n\n\n${inputValue}`;
+    inputValue = '';
+    if (inputTag) inputTag.style.height = 'auto';
+    aiState = AIState.Confirmation;
     await generateAIContent(prompt);
   } catch (error) {
     aiState = AIState.Idle;
     console.error(error);
     toast.error('Something went wrong! Check console.');
-  } finally {
-    inputValue = '';
   }
 }
 
 async function generateAIContent(prompt: string) {
-  if (settings.useMyOwnAI) {
-    await callGemini(
-      prompt,
-      (chunk) => {
-        aiResponse += chunk;
-      },
-      (error) => {
-        toast.error('Something went wrong when calling AI.', {
-          description: error.message,
-        });
-        console.error(error);
-        aiState = AIState.Idle;
-        aiResponse = '';
-      }
-    );
-  } else {
-    await callAI(
-      prompt,
-      (chunk) => {
-        aiResponse += chunk;
-      },
-      (error) => {
-        toast.error('Something went wrong when calling AI.', {
-          description: error.message,
-        });
-        console.error(error);
-        aiState = AIState.Idle;
-        aiResponse = '';
-      }
-    );
+  generating = true;
+  lastPrompt = prompt;
+  aiResponse = '';
+
+  // Save current selection positions
+  const { from, to } = editor.state.selection;
+  originalFrom = from;
+
+  // Calculate insertion position: right after the top-level block containing the selection end
+  const to_ = editor.state.doc.resolve(to);
+  const depth = Math.min(to_.depth, 1) || 1;
+  aiContentFrom = to_.after(depth);
+  aiContentTo = aiContentFrom;
+
+  try {
+    const onChunk = (chunk: string) => {
+      aiResponse += chunk;
+      scheduleEditorUpdate();
+    };
+    const onError = (error: Error) => {
+      toast.error('Something went wrong when calling AI.', {
+        description: error.message,
+      });
+      console.error(error);
+      cleanupAIContent();
+      aiState = AIState.Idle;
+      aiResponse = '';
+      generating = false;
+    };
+
+    if (settings.useMyOwnAI) {
+      await callGemini(prompt, onChunk, onError);
+    } else {
+      await callAI(prompt, onChunk, onError);
+    }
+
+    // Final flush to ensure all content is rendered in the editor
+    flushEditorUpdate();
+  } finally {
+    generating = false;
   }
 }
 
-function replaceSelection() {
-  const { from, to } = editor.view.state.selection;
+/** Throttle editor updates to ~100ms to avoid excessive transactions */
+function scheduleEditorUpdate() {
+  if (updateTimer) return;
+  updateTimer = setTimeout(() => {
+    flushEditorUpdate();
+    updateTimer = null;
+  }, 100);
+}
+
+/** Insert or replace the AI content region in the editor with the accumulated response */
+function flushEditorUpdate() {
+  if (updateTimer) {
+    clearTimeout(updateTimer);
+    updateTimer = null;
+  }
+  if (!aiResponse) return;
+
   try {
-    editor.chain().focus().insertContentAt({ from, to }, aiResponse, { contentType: 'markdown' }).run();
+    const oldDocSize = editor.state.doc.content.size;
+
+    if (aiContentFrom >= aiContentTo) {
+      // First insert — no existing AI content to replace
+      editor
+        .chain()
+        .command(({ tr }) => {
+          tr.setMeta('addToHistory', false);
+          return true;
+        })
+        .insertContentAt(aiContentFrom, aiResponse, {
+          contentType: 'markdown',
+        })
+        .run();
+    } else {
+      // Replace existing AI content with the updated (longer) response
+      editor
+        .chain()
+        .command(({ tr }) => {
+          tr.setMeta('addToHistory', false);
+          return true;
+        })
+        .insertContentAt({ from: aiContentFrom, to: aiContentTo }, aiResponse, { contentType: 'markdown' })
+        .run();
+    }
+
+    const newDocSize = editor.state.doc.content.size;
+    // The content AFTER the AI region is unchanged, so:
+    // newAiContentTo = newDocSize - (oldDocSize - oldAiContentTo)
+    aiContentTo = newDocSize - (oldDocSize - aiContentTo);
+
+    // Highlight the AI-generated content with a distinct color
+    const tr = editor.state.tr;
+    tr.setMeta('addToHistory', false);
+    tr.addMark(
+      aiContentFrom,
+      aiContentTo,
+      editor.state.schema.marks['ai-highlight'].create({
+        color: '#e8f5e940',
+      })
+    );
+    editor.view.dispatch(tr);
+
+    // Move cursor to end of AI content so bubble menu follows it
+    if (aiContentTo > 1) {
+      editor.commands.setTextSelection(aiContentTo - 1);
+    }
   } catch (error) {
-    console.error(error);
-    toast.error('Unable to insert the data. Copy content and paste manually.');
+    console.error('Error updating editor with AI content:', error);
   }
 }
 
-function insertNext() {
-  const { to } = editor.view.state.selection;
+/** Remove AI-generated content from the editor (without adding to undo history) */
+function cleanupAIContent() {
+  if (aiContentFrom < aiContentTo) {
+    try {
+      editor
+        .chain()
+        .command(({ tr }) => {
+          tr.setMeta('addToHistory', false);
+          return true;
+        })
+        .deleteRange({ from: aiContentFrom, to: aiContentTo })
+        .run();
+      aiContentTo = aiContentFrom;
+    } catch (error) {
+      console.error('Error cleaning up AI content:', error);
+    }
+  }
+}
+
+/** Replace: delete original selection, keep AI text */
+function replaceSelection() {
   try {
+    const response = aiResponse;
+
+    // Delete everything from original selection start to AI content end
+    editor.chain().deleteRange({ from: originalFrom, to: aiContentTo }).run();
+
+    // Insert the AI response at the original position
     editor
       .chain()
-      .focus()
-      .insertContentAt(to + 1, aiResponse, { contentType: 'markdown' })
+      .insertContentAt(originalFrom, response, {
+        contentType: 'markdown',
+      })
       .run();
+
+    removeAIHighlight(editor);
+    aiState = AIState.Idle;
+    aiResponse = '';
   } catch (error) {
     console.error(error);
-    toast.error('Unable to insert the data. Copy content and paste manually.');
+    toast.error('Unable to replace. Copy content and paste manually.');
   }
 }
 
-function discardChanges() {
-  aiResponse = '';
-  aiState = AIState.Idle;
-}
-
-function closeAI() {
+/** Insert below: AI text is already below the selection — just accept */
+function insertNext() {
   removeAIHighlight(editor);
   aiState = AIState.Idle;
   aiResponse = '';
 }
 
+/** Copy AI response to clipboard */
+function copyToClipboard() {
+  window.navigator.clipboard.writeText(aiResponse);
+  toast.success('Copied to clipboard');
+}
+
+/** Retry: delete AI content, re-run with same prompt */
+function retry() {
+  cleanupAIContent();
+  aiResponse = '';
+  if (lastPrompt) {
+    generateAIContent(lastPrompt);
+  }
+}
+
+/** Discard: delete AI content, keep original, reset */
+function discardChanges() {
+  cleanupAIContent();
+  removeAIHighlight(editor);
+  aiState = AIState.Idle;
+  aiResponse = '';
+}
+
+/** Close AI: full cleanup */
+function closeAI() {
+  if (generating) {
+    // If still generating, just mark for cleanup
+    generating = false;
+  }
+  cleanupAIContent();
+  removeAIHighlight(editor);
+  aiState = AIState.Idle;
+  aiResponse = '';
+  lastPrompt = '';
+}
+
+const quickActions = [
+  {
+    id: 'improve',
+    label: 'Improve writing',
+    icon: icons.Sparkles,
+    handler: () => processText('improve'),
+  },
+  {
+    id: 'grammer',
+    label: 'Fix spelling & grammar',
+    icon: icons.CheckCheck,
+    handler: () => processText('grammer'),
+  },
+  {
+    id: 'shorter',
+    label: 'Make shorter',
+    icon: icons.ArrowDownWideNarrow,
+    handler: () => processText('shorter'),
+  },
+  {
+    id: 'longer',
+    label: 'Make longer',
+    icon: icons.TextWrap,
+    handler: () => processText('longer'),
+  },
+  {
+    id: 'simplify',
+    label: 'Simplify language',
+    icon: icons.Feather,
+    handler: () => processText('simplify'),
+  },
+  {
+    id: 'summarize',
+    label: 'Summarize',
+    icon: icons.RefreshCcwDot,
+    handler: () => processText('summarize'),
+  },
+  {
+    id: 'continue',
+    label: 'Continue writing',
+    icon: icons.PenLine,
+    handler: () => processText('continue'),
+  },
+  {
+    id: 'solve',
+    label: 'Solve problem',
+    icon: icons.Brain,
+    handler: () => processText('solve'),
+  },
+];
+
+function scrollActiveOptionIntoView() {
+  setTimeout(() => {
+    const activeEl = document.querySelector('.quick-action-active');
+    if (activeEl) {
+      activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, 0);
+}
+
 function handleKeydown(event: KeyboardEvent) {
+  if (!editor.isActive('ai-highlight') && aiState !== AIState.Confirmation) return;
+
   if (event.key === 'Escape') {
     event.preventDefault();
     closeAI();
+    return;
   }
-  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-    event.preventDefault();
-    handleSubmit(event);
+
+  if (aiState === AIState.Idle) {
+    const showQuickActions = getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0;
+    if (showQuickActions) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        activeOptionIndex = (activeOptionIndex + 1) % quickActions.length;
+        scrollActiveOptionIntoView();
+        return;
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        activeOptionIndex = (activeOptionIndex - 1 + quickActions.length) % quickActions.length;
+        scrollActiveOptionIntoView();
+        return;
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        quickActions[activeOptionIndex].handler();
+        return;
+      }
+    } else {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleSubmit();
+        return;
+      }
+    }
   }
+}
+
+function handleInput(e: Event) {
+  const target = e.target as HTMLTextAreaElement;
+  target.style.height = `${target.scrollHeight}px`;
 }
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
 
+{#snippet MenuButton(action: (typeof quickActions)[0], idx: number)}
+  {@const Icon = action.icon}
+  <button
+    onclick={action.handler}
+    class="focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive not-data-[variant=destructive]:focus:**:text-accent-foreground gap-1.5 rounded-md px-1.5 py-1 text-sm data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4 group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 w-full transition-colors {activeOptionIndex === idx ? 'bg-accent text-accent-foreground quick-action-active' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}"
+  >
+    <Icon />
+    <span class="flex-1 text-start font-medium ml-2">{action.label}</span>
+    {#if activeOptionIndex === idx}
+      <Kbd>Enter</Kbd>
+    {/if}
+  </button>
+{/snippet}
+
 <BubbleMenu
   {editor}
   pluginKey="edra-bubble-menu"
   {shouldShow}
-  class="bg-transparent flex max-h-120 max-w-3xl w-full flex-col p-0 transition-[height] duration-500"
+  class="bg-popover/75 backdrop-blur-2xl rounded-lg flex max-h-120 max-w-3xl w-full flex-col p-0 transition-[height] duration-500 z-100"
   options={{
-    shift: {
-      crossAxis: true,
-      mainAxis: true,
-    },
     strategy: "fixed",
-    autoPlacement: {
-      allowedPlacements: ["bottom", "top", "right", "left"],
-    },
+    placement: "bottom",
     scrollTarget: parentElement,
     onShow() {
+      activeOptionIndex = 0;
       inputTag?.focus();
     },
     onHide() {
@@ -233,93 +473,43 @@ function handleKeydown(event: KeyboardEvent) {
   }}
 >
   {#if aiState === AIState.Idle}
-    <form
-      onsubmit={handleSubmit}
-      class="flex bg-popover/75 backdrop-blur-2xl border rounded-lg items-center max-w-2xl justify-between min-w-xl p-1"
+    <div
+      class="shadow-2xl w-xl border backdrop-blur-2xl rounded-xl flex flex-col overflow-hidden"
     >
-      <Textarea
-        bind:value={inputValue}
-        bind:ref={inputTag}
-        placeholder={`Ask AI anything and press ${getKeyboardShortcut("⏎", true)}`}
-        class="border-0 p-2 w-2xl bg-transparent! max-w-3xl outline-0 text-sm resize-none h-auto ring-0!"
-      />
-      <Button type="submit" size="icon-sm" class="rounded-full">
-        <icons.ArrowUp />
-      </Button>
-    </form>
-    {#if getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0}
-      <div
-        transition:slide={{ axis: "y", duration: 500 }}
-        class="flex flex-col w-96 mx-auto bg-popover rounded-lg gap-1 border overflow-auto mt-2"
-      >
-        <div class="flex items-center justify-between">
-          <small class="text-muted-foreground ml-4 mt-2 p-1 text-start"
-            >Quick Actions</small
-          >
-          <!-- <span
-            class="text-muted-foreground inline-flex items-center gap-1 mr-4 text-xs"
-            >Use
-            <icons.ArrowUpDown class="size-5 bg-muted p-0.5 rounded" /> to navigate</span
-          > -->
-        </div>
-        <button
-          title=""
-          onclick={makeTextShorter}
-          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-        >
-          <icons.ArrowDownWideNarrow />
-          <span>Make Shorter</span>
-        </button>
-        <button
-          onclick={makeTextLonger}
-          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-        >
-          <icons.TextWrap />
-          <span>Make Longer</span>
-        </button>
-        <button
-          title=""
-          onclick={summarizeText}
-          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-        >
-          <icons.RefreshCcwDot />
-          <span>Summarize</span>
-        </button>
-        <button
-          title=""
-          onclick={continueWriting}
-          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-        >
-          <icons.PenLine />
-          <span>Continue Writing</span>
-        </button>
-        <button
-          title=""
-          onclick={checkGrammer}
-          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-        >
-          <icons.CheckCheck />
-          <span>Fix Grammer</span>
-        </button>
-        <button
-          title=""
-          onclick={solveProblem}
-          class="hover:bg-accent hover:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 dark:data-[variant=destructive]:hover:bg-destructive/20 data-[variant=destructive]:hover:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-        >
-          <icons.Brain />
-          <span>Solve Problem</span>
-        </button>
+      <!-- Input Area -->
+      <div class="px-3 py-3">
+        <textarea
+          bind:value={inputValue}
+          bind:this={inputTag}
+          oninput={handleInput}
+          rows={1}
+          placeholder="Ask AI anything..."
+          class="w-full border-0 outline-hidden resize-none h-auto max-h-40"
+        ></textarea>
       </div>
-    {/if}
+
+      {#if getSelectionText()?.trim()?.length && inputValue.trim()?.length === 0}
+        <!-- Quick Actions List -->
+        <div
+          transition:slide={{ axis: "y", duration: 250 }}
+          class="flex flex-col p-1.5 max-h-72 overflow-y-auto"
+        >
+          {#each quickActions as action, idx (action.id)}
+            {@render MenuButton(action, idx)}
+          {/each}
+        </div>
+      {/if}
+    </div>
   {:else if aiState === AIState.Confirmation}
-    {#if aiResponse === ""}
-      <div transition:fade class="animated-gradient-border bg-popover rounded-lg p-0.5">
-        <div class="bg-popover inline-flex items-center gap-2 rounded p-2">
+    {#if generating}
+      <!-- AI is writing — content streams directly into editor -->
+      <div transition:fade class="animated-gradient-border rounded-lg p-0.5">
+        <div class="flex bg-popover items-center gap-2 rounded-lg p-2">
           <icons.Sparkle class="size-4!" />
           <span
             class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
           >
-            AI is thinking</span
+            AI is writing</span
           >
           <div class="flex h-5 items-center space-x-1">
             {#each Array(3) as _unused, i (i)}
@@ -333,47 +523,42 @@ function handleKeydown(event: KeyboardEvent) {
         </div>
       </div>
     {:else}
+      <!-- Action bar — AI has finished streaming into editor -->
       <div
         transition:fade
-        class="flex items-center bg-popover border rounded-lg justify-between gap-2 px-2 py-1"
+        class="flex items-center border shadow-2xl justify-between p-2 rounded-lg"
       >
-        <small>Actions:</small>
-        <SimpleToolTip content="Go Back to Options">
-          <Button variant="secondary" size="sm" onclick={discardChanges}>
-            <icons.ArrowLeft />
-            Go Back
+        <!-- Left: Replace, Insert, Copy -->
+        <div class="flex items-center gap-1.5">
+          <Button size="xs" onclick={replaceSelection}>
+            <icons.Check />
+            Replace
           </Button>
-        </SimpleToolTip>
-        <SimpleToolTip content="Copy Content to Clipboard">
+          <Button variant="outline" size="xs" onclick={insertNext}>
+            <icons.CornerDownLeft />
+            Insert
+          </Button>
           <Button
-            variant="secondary"
-            size="sm"
-            onclick={() => window.navigator.clipboard.writeText(aiResponse)}
+            variant="outline"
+            size="xs"
+            onclick={copyToClipboard}
           >
-            <icons.Clipboard />
+            <icons.Copy />
             Copy
           </Button>
-        </SimpleToolTip>
-        <SimpleToolTip content="Replace Editor Selection">
-          <Button variant="secondary" size="sm" onclick={replaceSelection}>
-            <icons.CheckCheck />
-            Replace Selection
+        </div>
+        <!-- Right: Retry, Discard -->
+        <div class="flex items-center gap-1.5">
+          <Button variant="outline" size="xs" onclick={retry}>
+            <icons.RotateCcw />
+            Retry
           </Button>
-        </SimpleToolTip>
-        <SimpleToolTip content="Insert Content After Selection">
-          <Button variant="secondary" size="sm" onclick={insertNext}>
-            <icons.ArrowDown />
-            Insert Next
+          <Button variant="destructive" size="xs" onclick={discardChanges}>
+            <icons.Trash2 />
+            Discard
           </Button>
-        </SimpleToolTip>
-        <SimpleToolTip content="Close AI Menu">
-          <Button variant="destructive" size="sm" onclick={closeAI}>
-            <icons.X />
-            Close
-          </Button>
-        </SimpleToolTip>
+        </div>
       </div>
-      <StreamDown content={aiResponse} class="w-full bg-popover/75 backdrop-blur-2xl rounded-lg border mt-2 overflow-auto px-4 py-2" />
     {/if}
   {/if}
 </BubbleMenu>
@@ -392,13 +577,12 @@ function handleKeydown(event: KeyboardEvent) {
   .animated-gradient-border {
     background: conic-gradient(
       from var(--angle),
-      #9229f3,
-      #004cff,
-      #00a930,
-      #f7a312,
-      #ff0a0a
+      #e50909,
+      #c8b207,
+      #e608e6,
+      #6eec07
     );
-    animation: rotate 2s linear infinite;
-    border-radius: 4px !important;
+    animation: rotate 3s linear infinite;
+    border-radius: 12px !important;
   }
 </style>

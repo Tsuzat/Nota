@@ -1,35 +1,29 @@
 <script lang="ts">
 import type { Content } from '@lib/components/edra/types.js';
-import { cn } from '@lib/utils.js';
 import { getNotesContext, getWorkspacesContext, type Note, type Workspace } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import { Separator } from '@nota/ui/shadcn/separator';
-import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
-import NewNotes from '$lib/components/dialogs/new-notes.svelte';
-import { useCurrentUserWorkspaceContext } from '$lib/components/user-workspace/userworkspace.svelte.js';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
-import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import { openNewNote } from '$lib/components/dialogs/index.js';
+import Topbar from '$lib/components/topbar.svelte';
+import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
 
 let { data } = $props();
 
 const cloudWorkspaces = getWorkspacesContext();
 const cloudNotes = getNotesContext();
-const currentUserWorkspace = $derived(useCurrentUserWorkspaceContext().getCurrentUserWorkspace());
 
 // Derived state
 const workspace = $derived(cloudWorkspaces.workspaces.find((w) => w.id === data.id));
-const notes = $derived(cloudNotes.notes.filter((n) => n.workspace === data.id && !n.trashed));
-let openNewNote = $state(false);
+const notes = $derived(
+  cloudNotes.notes.filter((n) => n.workspace_id === data.id && !n.deleted_at && !n.parent_note_id)
+);
 
 function openNote(note: Note) {
   goto(resolve('/(cloud)/note-[id]', { id: note.id }));
@@ -50,8 +44,8 @@ async function moveToWorkspace(note: Note, newWorkspace: Workspace) {
     okLabel: 'Yes, Move',
   });
   if (!ok) return;
-  note.workspace = newWorkspace.id;
-  await cloudNotes.update(note.id, { workspace: newWorkspace.id });
+  note.workspace_id = newWorkspace.id;
+  await cloudNotes.update(note.id, { workspace_id: newWorkspace.id });
 }
 
 async function exportNote(note: Note) {
@@ -73,26 +67,12 @@ async function trashNote(note: Note) {
     okLabel: 'Yes, Trash',
   });
   if (!ok) return;
-  note.trashed = true;
-  await cloudNotes.update(note.id, { trashed: true });
+  note.deleted_at = new Date();
+  await cloudNotes.update(note.id, { deleted_at: note.deleted_at });
 }
 
 async function importNote() {
   const id = toast.loading('Importing note...');
-  if (!currentUserWorkspace) {
-    toast.error('Current user workspace not found.', { id });
-    return;
-  }
-  if (!workspace) {
-    toast.error('Workspace not found.', { id });
-    return;
-  }
-  if (workspace.userworkspace !== currentUserWorkspace.id) {
-    toast.error('You can only import notes to your current workspace.', {
-      id,
-    });
-    return;
-  }
   const data = await importNotes(undefined, true);
   if (!data) {
     toast.error('Something went wrong. We could not import the note.', {
@@ -105,46 +85,17 @@ async function importNote() {
     return;
   }
   toast.loading('Pushing note to cloud...', { id });
-  await cloudNotes.import(data.name, workspace.id, currentUserWorkspace.id, data.content);
+  await cloudNotes.import(data.name, workspace.id, data.content);
   toast.success('Note pushed to cloud.', { id });
 }
 </script>
 
 {#if workspace}
-  <NewNotes bind:open={openNewNote} {workspace} />
-  <header class="flex h-12 shrink-0 items-center gap-2">
-    <div
-      class={cn(
-        "z-20 ml-18 flex items-center gap-2 px-3",
-        ISMACOS && !useSidebar().open && "ml-18",
-        ISWINDOWS && !useSidebar().open && "ml-0",
-        useSidebar().open && "md:ml-0"
-      )}
-    >
-      {#if ISWINDOWS && !useSidebar().open}
-        <AppLogoMenu />
-      {/if}
-      <BackAndForthButtons />
-      <Separator
-        orientation="vertical"
-        class="mr-2 data-[orientation=vertical]:h-4"
-      />
-    </div>
-    <div
-      class={cn(
-        "z-20 ml-auto flex items-center gap-2 px-3",
-        ISWINDOWS && "mr-30"
-      )}
-    ></div>
-    {#if ISWINDOWS}
-      <Separator orientation="vertical" class="h-4" />
-      <WindowsButtons />
-    {/if}
-  </header>
+  <Topbar showSeparator={false} />
   <main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
     <div class="mb-4 flex items-center gap-2">
       <IconPicker
-        onSelect={(icon) => (workspace.icon = icon)}
+        onSelect={(icon: string) => (workspace.icon = icon)}
         onClose={() => updateWorkspace(workspace.icon, workspace.name)}
       >
         <div
@@ -200,7 +151,7 @@ async function importNote() {
     >
       <Button
         class="group bg-muted/30 hover:bg-muted/50 flex h-48 flex-col items-center justify-center rounded-xl border border-dashed transition-colors"
-        onclick={() => (openNewNote = true)}
+        onclick={() => openNewNote()}
       >
         <div
           class="bg-background mb-2 flex size-10 items-center justify-center rounded-full shadow-sm transition-all duration-500 group-hover:scale-110"

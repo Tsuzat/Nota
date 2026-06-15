@@ -8,6 +8,6 @@ let { ref = $bindable(null), class: className, ...restProps }: AccordionPrimitiv
 <AccordionPrimitive.Item
 	bind:ref
 	data-slot="accordion-item"
-	class={cn("border-b last:border-b-0", className)}
+	class={cn("not-last:border-b", className)}
 	{...restProps}
 />

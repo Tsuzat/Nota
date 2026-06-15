@@ -7,7 +7,6 @@ import * as Popover from '@nota/ui/shadcn/popover';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-import { useCurrentUserWorkspaceContext } from '../user-workspace/userworkspace.svelte';
 
 interface Props {
   open?: boolean;
@@ -15,13 +14,11 @@ interface Props {
 
 let { open = $bindable(false) }: Props = $props();
 
-const currentUserWorkspace = useCurrentUserWorkspaceContext();
-
 const localNotes = getLocalNotes();
 const cloudNotes = getNotesContext();
-const trashedNotes = $derived.by<LocalNote[] | Note[]>(() => {
-  if (currentUserWorkspace.getIsLocal()) return localNotes.getNotes().filter((n) => n.trashed);
-  return cloudNotes.notes.filter((n) => n.trashed);
+
+const trashedNotes = $derived.by<(LocalNote | Note)[]>(() => {
+  return [...localNotes.getNotes().filter((n) => n.deleted_at), ...cloudNotes.notes.filter((n) => n.deleted_at)];
 });
 
 async function deleteNote(note: LocalNote | Note) {
@@ -45,7 +42,7 @@ async function deleteNote(note: LocalNote | Note) {
 }
 async function restoreNote(note: LocalNote | Note) {
   try {
-    if ('owner' in note) await cloudNotes.update(note.id, { trashed: false });
+    if ('owner' in note) await cloudNotes.update(note.id, { deleted_at: null });
     else await localNotes.restoreNote(note);
   } catch (error) {
     console.error(error);

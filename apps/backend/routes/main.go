@@ -43,7 +43,6 @@ func RoutesInit() {
 	InitPaymentRouter()
 	InitAIRouter()
 	UserRouteInit()
-	InitUserWorkspaceRoutes()
 	InitWorkspaceRoutes()
 	InitNotesRouter()
 

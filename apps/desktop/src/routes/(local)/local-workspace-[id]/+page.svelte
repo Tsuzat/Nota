@@ -1,24 +1,20 @@
 <script lang="ts">
 import { toast } from '@lib/components/ui/sonner/index.js';
-import { cn } from '@lib/utils.js';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import { Separator } from '@nota/ui/shadcn/separator';
-import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AppLogoMenu from '$lib/components/app-menu.svelte';
-import BackAndForthButtons from '$lib/components/back-and-forth-buttons.svelte';
+import { openNewNote as openNewNoteDialog } from '$lib/components/dialogs';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
-import WindowsButtons from '$lib/components/windows-buttons.svelte';
+import Topbar from '$lib/components/topbar.svelte';
 import { DB } from '$lib/local/db';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import { ISMACOS, ISWINDOWS, importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
 
 let { data } = $props();
 
@@ -27,8 +23,9 @@ const localNotes = getLocalNotes();
 
 // Derived state
 const workspace = $derived(localWorkspaces.getWorkspaces().find((w) => String(w.id) === data.id));
-const notes = $derived(localNotes.getNotes().filter((n) => String(n.workspace) === data.id && !n.trashed));
-let openNewNote = $state(false);
+const notes = $derived(
+  localNotes.getNotes().filter((n) => String(n.workspace_id) === data.id && !n.deleted_at && !n.parent_note_id)
+);
 
 function openNote(note: LocalNote) {
   goto(resolve('/(local)/local-note-[id]', { id: note.id }));
@@ -53,7 +50,7 @@ async function moveToWorkspace(note: LocalNote, newWorkspace: LocalWorkSpace) {
     okLabel: 'Yes, Move',
   });
   if (!ok) return;
-  note.workspace = newWorkspace.id;
+  note.workspace_id = newWorkspace.id;
   await localNotes.updateNote(note);
 }
 
@@ -86,32 +83,12 @@ async function importNote() {
     return;
   }
   toast.info('Storing note locally...', { id });
-  await localNotes.createNote(data.name, 'lucide:FileText', false, workspace, workspace.userworkspace);
+  await localNotes.createNote(data.name, 'lucide:FileText', false, workspace.id, null);
 }
 </script>
 
 {#if workspace}
-	<NewNotes bind:open={openNewNote} {workspace} />
-	<header class="flex h-12 shrink-0 items-center gap-2">
-		<div
-			class={cn(
-				'z-20 ml-18 flex items-center gap-2 px-3',
-				ISMACOS && !useSidebar().open && 'ml-18',
-				ISWINDOWS && !useSidebar().open && 'ml-0',
-				useSidebar().open && 'md:ml-0'
-			)}
-		>
-			{#if ISWINDOWS && !useSidebar().open}
-				<AppLogoMenu />
-			{/if}
-			<BackAndForthButtons />
-			<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
-		</div>
-		{#if ISWINDOWS}
-			<Separator orientation="vertical" class="h-4" />
-			<WindowsButtons />
-		{/if}
-	</header>
+	<Topbar showSeparator={false} />
 	<main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
 		<div class="mb-4 flex items-center gap-2">
 			<IconPicker onSelect={updateIcon}>
@@ -162,7 +139,7 @@ async function importNote() {
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			<Button
 				class="group bg-muted/30 hover:bg-muted/50 flex h-48 flex-col items-center justify-center rounded-xl border border-dashed transition-colors"
-				onclick={() => (openNewNote = true)}
+				onclick={() => openNewNoteDialog()}
 			>
 				<div
 					class="bg-background mb-2 flex size-10 items-center justify-center rounded-full shadow-sm transition-all duration-500 group-hover:scale-110"
@@ -226,7 +203,7 @@ async function importNote() {
 									</DropdownMenu.Item>
 									<DropdownMenu.Item
 										variant="destructive"
-										onclick={() => localNotes.deleteNote(note)}
+										onclick={() => localNotes.delete(note.id)}
 									>
 										<icons.Trash2 class="mr-2 size-4" />
 										Delete Note

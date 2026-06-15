@@ -10,6 +10,6 @@ let { ref = $bindable(null), class: className, ...restProps }: ComponentProps<ty
 	bind:ref
 	data-slot="sidebar-separator"
 	data-sidebar="separator"
-	class={cn("bg-sidebar-border", className)}
+	class={cn("bg-sidebar-border mx-2 w-auto", className)}
 	{...restProps}
 />

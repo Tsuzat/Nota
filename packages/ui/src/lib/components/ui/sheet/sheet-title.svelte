@@ -8,6 +8,6 @@ let { ref = $bindable(null), class: className, ...restProps }: SheetPrimitive.Ti
 <SheetPrimitive.Title
 	bind:ref
 	data-slot="sheet-title"
-	class={cn("text-foreground font-semibold", className)}
+	class={cn("text-foreground text-base font-medium", className)}
 	{...restProps}
 />

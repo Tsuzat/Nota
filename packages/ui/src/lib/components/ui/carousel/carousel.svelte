@@ -13,6 +13,7 @@ let {
   ...restProps
 }: WithElementRef<CarouselProps> = $props();
 
+// svelte-ignore state_referenced_locally
 let carouselState = $state<EmblaContext>({
   api: undefined,
   scrollPrev,
