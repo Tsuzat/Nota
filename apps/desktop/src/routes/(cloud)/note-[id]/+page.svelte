@@ -6,7 +6,7 @@ import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
 import type { Content, Editor } from '@nota/ui/edra/types.js';
-import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { BarSpinner, IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { basename } from '@tauri-apps/api/path';
@@ -159,14 +159,14 @@ function onUpdate() {
   isDirty = true;
 }
 
-async function updateNote(name: string, icon: string, favorite: boolean) {
+async function updateNote(name: string, icon: string, pinned: boolean) {
   if (note === undefined) return;
   syncing = true;
   try {
-    await cloudNotes.update(note.id, { name, icon, favorite });
+    await cloudNotes.update(note.id, { name, icon, pinned });
     note.name = name;
     note.icon = icon;
-    note.favorite = favorite;
+    note.pinned = pinned;
   } catch (e) {
     toast.error('Could not update note');
     console.error(e);
@@ -224,7 +224,7 @@ function handleKeydown(e: KeyboardEvent) {
             note!.icon = icon;
           }}
           onClose={() => {
-            updateNote(note!.name, note!.icon, note!.favorite);
+            updateNote(note!.name, note!.icon, note!.pinned);
           }}
         >
           <div class={buttonVariants({ variant: "ghost", size: "icon" })}>
@@ -239,7 +239,7 @@ function handleKeydown(e: KeyboardEvent) {
             const value = target.value;
             if (value.trim() === "") return;
             e.preventDefault();
-            await updateNote(value, note!.icon, note!.favorite);
+            await updateNote(value, note!.icon, note!.pinned);
           }}
         />
       {/snippet}
@@ -267,15 +267,15 @@ function handleKeydown(e: KeyboardEvent) {
         <SimpleToolTip content={syncing ? syncingText : "Synced"}>
           <Button variant="ghost" size="icon">
             {#if syncing}
-              <icons.Loader class="text-primary animate-spin" />
+              <BarSpinner />
             {:else}
               <icons.Cloud />
             {/if}
           </Button>
         </SimpleToolTip>
         <NavActions
-          starred={note!.favorite as boolean}
-          toggleStar={() => updateNote(note!.name, note!.icon, !note!.favorite)}
+          starred={note!.pinned as boolean}
+          toggleStar={() => updateNote(note!.name, note!.icon, !note!.pinned)}
           {editor}
           note={note!}
         />

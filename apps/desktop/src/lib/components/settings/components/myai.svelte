@@ -2,7 +2,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
-import { icons } from '@lib/icons';
+import { BarSpinner} from '@lib/icons';
 import { cn } from '@lib/utils';
 import * as Label from '@nota/ui/shadcn/label';
 import * as Select from '@nota/ui/shadcn/select';
@@ -33,7 +33,7 @@ const modelDescriptions: Record<string, string> = {
   [GEMINI_MODELS.GEMINI_2_5_FLASH]: 'Balanced speed and quality for general usage.',
   [GEMINI_MODELS.GEMINI_2_5_PRO]: 'Higher quality outputs for complex reasoning.',
   [GEMINI_MODELS.GEMINI_3_FLASH]: 'Latest fast model for everyday assistance.',
-  [GEMINI_MODELS.GEMINI_3_PRO]: 'Latest advanced model with stronger capabilities.',
+  [GEMINI_MODELS.GEMINI_3_1_FLASH_LITE]: 'Latest advanced model with stronger capabilities.',
 };
 
 async function handleValidate() {
@@ -129,7 +129,7 @@ function handleSelectModel(value: string) {
           >
             {#if validating}
               <span class="inline-flex items-center gap-2">
-                <icons.Loader class="h-4 w-4 animate-spin" />
+                <BarSpinner />
                 <span>Validating</span>
               </span>
             {:else}
