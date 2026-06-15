@@ -1,5 +1,5 @@
 <script lang="ts">
-import { SimpleToolTip, StreamDown } from '@lib/components/custom/index.js';
+import { SimpleToolTip } from '@lib/components/custom/index.js';
 import { getKeyboardShortcut } from '@lib/components/edra/utils';
 import { Button } from '@lib/components/ui/button';
 import { Textarea } from '@lib/components/ui/textarea';
@@ -364,11 +364,7 @@ function handleKeydown(e: KeyboardEvent) {
             Close
           </Button>
         </SimpleToolTip>
-      </div>
-      <StreamDown
-        content={aiResponse}
-        class="w-full bg-popover/75 backdrop-blur-2xl rounded-lg border mt-2 overflow-auto px-4 py-2"
-      />
+      </div> 
     {/if}
   {/if}
 </BubbleMenu>

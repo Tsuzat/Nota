@@ -78,7 +78,6 @@
     "katex": "^0.16.47",
     "lowlight": "^3.3.0",
     "mermaid": "^11.15.0",
-    "svelte-streamdown": "^3.0.1",
     "svelte-tiptap": "^3.0.1",
     "tiptap-extension-auto-joiner": "^0.1.3"
   }
