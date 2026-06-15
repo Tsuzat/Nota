@@ -5,21 +5,21 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 vite build",
+    "build": "wrangler types && vite build",
     "start": "vite preview",
     "preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
     "format": "biome format . --write",
     "lint": "biome check .",
     "ci": "biome ci .",
     "prepare": "svelte-kit sync || echo ''",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "gen": "wrangler types"
   },
   "dependencies": {
     "@lucide/svelte": "^0.561.0",
-    "@nota/ui": "workspace:*",
-    "@nota/client": "workspace:*"
+    "@nota/client": "workspace:*",
+    "@nota/ui": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^7.2.8",
@@ -33,6 +33,6 @@
     "tailwindcss": "^4.3.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.3",
-    "wrangler": "^4.94.0"
+    "wrangler": "^4.97.0"
   }
 }

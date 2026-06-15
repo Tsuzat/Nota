@@ -18,6 +18,10 @@ declare global {
       ctx: ExecutionContext;
       caches: CacheStorage;
       cf?: IncomingRequestCfProperties;
+      env: Env;
+      ctx: ExecutionContext;
+      caches: CacheStorage;
+      cf?: IncomingRequestCfProperties;
     }
   }
 }
