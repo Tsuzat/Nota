@@ -10,6 +10,7 @@
   import { resolve } from "$app/paths";
   import { cn } from "@lib/utils";
   import { page } from "$app/state";
+  import { openNewNote } from "../dialogs";
   interface Props {
     note: LocalNote | Note;
     depth?: number;
@@ -54,9 +55,6 @@
         </Sidebar.MenuAction>
       {/snippet}
     </Collapsible.Trigger>
-    <!-- <Sidebar.MenuAction class="right-6" showOnHover>
-      <icons.Plus />
-    </Sidebar.MenuAction> -->
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         {#snippet child({ props })}
@@ -66,6 +64,10 @@
         {/snippet}
       </DropdownMenu.Trigger>
       <DropdownMenu.Content side={Sidebar.useSidebar().isMobile ? "bottom" : "right"} class="w-fit">
+      <DropdownMenu.Item onclick={() => openNewNote(note.workspace_id)}>
+        <icons.Plus />
+        Add Sub Note
+      </DropdownMenu.Item>
         <DropdownMenu.Item onclick={() => {}}>
           <icons.Pin />
           <span>Pin Note</span>
