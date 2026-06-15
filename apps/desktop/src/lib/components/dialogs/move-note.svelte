@@ -1,14 +1,14 @@
 <script lang="ts" module>
-  import type { LocalNote } from "$lib/local/notes.svelte";
-  import type { Note } from "@nota/client";
+import type { Note } from '@nota/client';
+import type { LocalNote } from '$lib/local/notes.svelte';
 
-  let open = $state(false);
-  let noteToMove = $state<LocalNote | Note | null>(null);
+let open = $state(false);
+let noteToMove = $state<LocalNote | Note | null>(null);
 
-  export const openMoveNote = (note: LocalNote | Note) => {
-    open = true;
-    noteToMove = note;
-  };
+export const openMoveNote = (note: LocalNote | Note) => {
+  open = true;
+  noteToMove = note;
+};
 </script>
 
 <script lang="ts">

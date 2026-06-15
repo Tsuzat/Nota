@@ -1,42 +1,43 @@
 <script lang="ts">
-  import { IconRenderer, icons } from '@nota/ui/icons/index.js';
-  import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-  import * as Sidebar from '@nota/ui/shadcn/sidebar';
-  import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-  import { getNotesContext, getWorkspacesContext, type Workspace } from '@nota/client';
-  import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
-  import { goto } from '$app/navigation';
-  import { resolve } from '$app/paths';
-  import { cn } from '@nota/ui/utils';
-  import NewWorkspace from '../dialogs/new-workspace.svelte';
-  import { getLocalNotes } from '$lib/local/notes.svelte';
-  import { toast } from '@lib/components/ui/sonner';
+import { toast } from '@lib/components/ui/sonner';
+import { getNotesContext, getWorkspacesContext, type Workspace } from '@nota/client';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import * as Sidebar from '@nota/ui/shadcn/sidebar';
+import { cn } from '@nota/ui/utils';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
+import { getLocalNotes } from '$lib/local/notes.svelte';
+import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
+import NewWorkspace from '../dialogs/new-workspace.svelte';
 
-  const localWorkspaces = getLocalWorkspaces();
-  const cloudWorkspaces = getWorkspacesContext();
-  const currentWorkspace = getCurrentWorkspace();
-  const cloudNotes = getNotesContext();
-  const localNotes = getLocalNotes();
+const localWorkspaces = getLocalWorkspaces();
+const cloudWorkspaces = getWorkspacesContext();
+const currentWorkspace = getCurrentWorkspace();
+const cloudNotes = getNotesContext();
+const localNotes = getLocalNotes();
 
-  const activeWorkspace = $derived(currentWorkspace?.get());
-  const isCloud = $derived(activeWorkspace && "owner" in activeWorkspace);
+const activeWorkspace = $derived(currentWorkspace?.get());
+const isCloud = $derived(activeWorkspace && 'owner' in activeWorkspace);
 
-  let open = $state(false);
+let open = $state(false);
 
-  async function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
-    const id = toast.loading(`Switching workspace to ${workspace.name}`)
-    currentWorkspace.set(workspace);
-    if ('owner' in workspace) {
-      await cloudNotes.fetchByWorkspace(workspace.id);
-    } else {
-      await localNotes.fetchNotesForWorkspace(workspace.id)
-    }
-    const href = 'owner' in workspace
+async function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
+  const id = toast.loading(`Switching workspace to ${workspace.name}`);
+  currentWorkspace.set(workspace);
+  if ('owner' in workspace) {
+    await cloudNotes.fetchByWorkspace(workspace.id);
+  } else {
+    await localNotes.fetchNotesForWorkspace(workspace.id);
+  }
+  const href =
+    'owner' in workspace
       ? resolve('/(cloud)/workspace-[id]', { id: workspace.id })
       : resolve('/(local)/local-workspace-[id]', { id: workspace.id });
-    await goto(href);
-    toast.success(`Switched to ${workspace.name}`, { id })
-  }
+  await goto(href);
+  toast.success(`Switched to ${workspace.name}`, { id });
+}
 </script>
 
 <NewWorkspace bind:open />

@@ -1,10 +1,10 @@
 <script lang="ts" module>
-  let open = $state(false);
-  let parentNoteId = $state<string | null>(null);
-  export const openNewNote = (pNoteId: string | null = null) => {
-    open = true;
-    parentNoteId = pNoteId;
-  };
+let open = $state(false);
+let parentNoteId = $state<string | null>(null);
+export const openNewNote = (pNoteId: string | null = null) => {
+  open = true;
+  parentNoteId = pNoteId;
+};
 </script>
 
 <script lang="ts">

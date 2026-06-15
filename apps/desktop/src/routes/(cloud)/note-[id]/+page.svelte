@@ -16,13 +16,11 @@ import { compare } from 'fast-json-patch';
 import { onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import Topbar from '$lib/components/topbar.svelte';
-import AI from '$lib/components/editor/AI.svelte';
+import AI from '$lib/components/editor/ai.svelte';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import { ISMACOS, ISWINDOWS, fixMathReplacer } from '$lib/utils';
-
-
+import Topbar from '$lib/components/topbar.svelte';
+import { fixMathReplacer, ISMACOS, ISWINDOWS } from '$lib/utils';
 
 const { data } = $props();
 

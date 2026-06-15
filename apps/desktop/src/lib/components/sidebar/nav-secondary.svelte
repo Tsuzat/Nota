@@ -1,6 +1,6 @@
 <script lang="ts">
 import { getAuthContext, getNotesContext } from '@nota/client';
-import { icons, MovingSettings, MovingTrash, MovingLogin } from '@nota/ui/icons/index.js';
+import { icons, MovingLogin, MovingSettings, MovingTrash } from '@nota/ui/icons/index.js';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
@@ -18,7 +18,9 @@ let isLoginHovered = $state(false);
 let isSettingsHovered = $state(false);
 
 const trashedNotes = $derived.by(() => {
-  const localTrash = getLocalNotes().getNotes().filter((n) => n.deleted_at).length;
+  const localTrash = getLocalNotes()
+    .getNotes()
+    .filter((n) => n.deleted_at).length;
   const cloudTrash = getNotesContext().notes.filter((n) => n.deleted_at).length;
   return localTrash + cloudTrash;
 });

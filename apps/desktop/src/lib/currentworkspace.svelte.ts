@@ -1,6 +1,6 @@
-import type { Workspace } from "@nota/client";
-import type { LocalWorkSpace } from "./local/workspaces.svelte";
-import { getContext, setContext } from "svelte";
+import type { Workspace } from '@nota/client';
+import { getContext, setContext } from 'svelte';
+import type { LocalWorkSpace } from './local/workspaces.svelte';
 
 class CurrentWorkspace {
   #currentWorkspace = $state<LocalWorkSpace | Workspace>();
@@ -18,7 +18,7 @@ class CurrentWorkspace {
   }
 }
 
-const CURRENTWORKSPACEKEY = Symbol("CURRENTWORKSPACEKEY");
+const CURRENTWORKSPACEKEY = Symbol('CURRENTWORKSPACEKEY');
 
 export const setCurrentWorkspace = (workspace?: LocalWorkSpace | Workspace) => {
   return setContext(CURRENTWORKSPACEKEY, new CurrentWorkspace(workspace));

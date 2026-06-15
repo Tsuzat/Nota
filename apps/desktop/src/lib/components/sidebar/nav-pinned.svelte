@@ -1,24 +1,21 @@
 <script lang="ts">
-  import { getNotesContext, type Note } from "@nota/client";
-  import { icons } from "@nota/ui/icons/index.js";
-  import * as Sidebar from "@nota/ui/shadcn/sidebar";
-  import { getLocalNotes} from "$lib/local/notes.svelte";
-  
-  import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
-  import NoteTile from "./note-tile.svelte";
+import { getNotesContext, type Note } from '@nota/client';
+import { icons } from '@nota/ui/icons/index.js';
+import * as Sidebar from '@nota/ui/shadcn/sidebar';
+import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
+import { getLocalNotes } from '$lib/local/notes.svelte';
+import NoteTile from './note-tile.svelte';
 
-  let showMore = $state(false);
-  const localNotes = getLocalNotes();
-  const cloudNotes = getNotesContext();
-  const currentWorkspace = $derived(getCurrentWorkspace().get());
+let showMore = $state(false);
+const localNotes = getLocalNotes();
+const cloudNotes = getNotesContext();
+const currentWorkspace = $derived(getCurrentWorkspace().get());
 
-  const notes = $derived.by(() => {
-    if (!currentWorkspace) return [];
-    if ("owner" in currentWorkspace)
-      return cloudNotes.notes.filter((n) => n.pinned && !n.deleted_at);
-    else return localNotes.getNotes().filter((n) => n.pinned && !n.deleted_at);
-  });
-
+const notes = $derived.by(() => {
+  if (!currentWorkspace) return [];
+  if ('owner' in currentWorkspace) return cloudNotes.notes.filter((n) => n.pinned && !n.deleted_at);
+  return localNotes.getNotes().filter((n) => n.pinned && !n.deleted_at);
+});
 </script>
 
 {#if notes.length > 0}

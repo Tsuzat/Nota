@@ -13,6 +13,6 @@
 *[data-tauri-drag-region] [role="button"],
 *[data-tauri-drag-region] select,
 .no-drag {
-  app-region: no-drag !important;
-  -webkit-app-region: no-drag !important;
+  app-region: no-drag;
+  -webkit-app-region: no-drag;
 }

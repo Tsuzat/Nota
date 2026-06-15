@@ -224,7 +224,7 @@ class Notes {
     const descendants: Note[] = [];
     const queue = [noteId];
     while (queue.length > 0) {
-      const currentId = queue.shift()!;
+      const currentId = queue.shift();
       const children = this.#notes.filter((n) => n.parent_note_id === currentId);
       for (const child of children) {
         descendants.push(child);

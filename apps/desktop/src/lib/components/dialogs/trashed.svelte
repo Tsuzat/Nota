@@ -18,10 +18,7 @@ const localNotes = getLocalNotes();
 const cloudNotes = getNotesContext();
 
 const trashedNotes = $derived.by<(LocalNote | Note)[]>(() => {
-  return [
-    ...localNotes.getNotes().filter((n) => n.deleted_at),
-    ...cloudNotes.notes.filter((n) => n.deleted_at)
-  ];
+  return [...localNotes.getNotes().filter((n) => n.deleted_at), ...cloudNotes.notes.filter((n) => n.deleted_at)];
 });
 
 async function deleteNote(note: LocalNote | Note) {

@@ -2,7 +2,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
-import { BarSpinner} from '@lib/icons';
+import { BarSpinner } from '@lib/icons';
 import { cn } from '@lib/utils';
 import * as Label from '@nota/ui/shadcn/label';
 import * as Select from '@nota/ui/shadcn/select';

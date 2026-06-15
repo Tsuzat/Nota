@@ -1,29 +1,22 @@
 <script lang="ts">
-  import { useSidebar } from "@nota/ui/shadcn/sidebar";
-  import BackAndForthButtons from "./back-and-forth-buttons.svelte";
-  import WindowsButtons from "./windows-buttons.svelte";
-  import { ISMACOS, ISWINDOWS } from "$lib/utils";
-  import type { Snippet } from "svelte";
+import { useSidebar } from '@nota/ui/shadcn/sidebar';
+import type { Snippet } from 'svelte';
+import { ISMACOS, ISWINDOWS } from '$lib/utils';
+import BackAndForthButtons from './back-and-forth-buttons.svelte';
+import WindowsButtons from './windows-buttons.svelte';
 
-  interface Props {
-    showAppMenu?: boolean;
-    showSeparator?: boolean;
-    class?: string;
-    left?: Snippet;
-    right?: Snippet;
-    children?: Snippet;
-  }
+interface Props {
+  showAppMenu?: boolean;
+  showSeparator?: boolean;
+  class?: string;
+  left?: Snippet;
+  right?: Snippet;
+  children?: Snippet;
+}
 
-  const {
-    showAppMenu = true,
-    showSeparator = false,
-    class: className = "",
-    left,
-    right,
-    children,
-  }: Props = $props();
+const { showAppMenu = true, showSeparator = false, class: className = '', left, right, children }: Props = $props();
 
-  const sidebar = useSidebar();
+const sidebar = useSidebar();
 </script>
 
 <header

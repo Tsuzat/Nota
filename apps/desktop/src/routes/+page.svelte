@@ -17,7 +17,6 @@ const recentNotes = $derived.by(() => {
     .toSorted((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime())
     .slice(0, 10);
 });
-
 </script>
 
 <Topbar showSeparator={true}>

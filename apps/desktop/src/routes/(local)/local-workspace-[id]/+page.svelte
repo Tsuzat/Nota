@@ -5,16 +5,16 @@ import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import Topbar from '$lib/components/topbar.svelte';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
+import { openNewNote as openNewNoteDialog } from '$lib/components/dialogs';
+import NewNotes from '$lib/components/dialogs/new-notes.svelte';
+import Topbar from '$lib/components/topbar.svelte';
 import { DB } from '$lib/local/db';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
 import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
-import NewNotes from '$lib/components/dialogs/new-notes.svelte';
-import { openNewNote as openNewNoteDialog } from '$lib/components/dialogs';
 
 let { data } = $props();
 
@@ -23,7 +23,9 @@ const localNotes = getLocalNotes();
 
 // Derived state
 const workspace = $derived(localWorkspaces.getWorkspaces().find((w) => String(w.id) === data.id));
-const notes = $derived(localNotes.getNotes().filter((n) => String(n.workspace_id) === data.id && !n.deleted_at && !n.parent_note_id));
+const notes = $derived(
+  localNotes.getNotes().filter((n) => String(n.workspace_id) === data.id && !n.deleted_at && !n.parent_note_id)
+);
 
 function openNote(note: LocalNote) {
   goto(resolve('/(local)/local-note-[id]', { id: note.id }));
@@ -81,7 +83,7 @@ async function importNote() {
     return;
   }
   toast.info('Storing note locally...', { id });
-  await localNotes.createNote(data.name, 'lucide:FileText', false, workspace, null);
+  await localNotes.createNote(data.name, 'lucide:FileText', false, workspace.id, null);
 }
 </script>
 
@@ -137,7 +139,7 @@ async function importNote() {
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			<Button
 				class="group bg-muted/30 hover:bg-muted/50 flex h-48 flex-col items-center justify-center rounded-xl border border-dashed transition-colors"
-				onclick={() => openNewNoteDialog(workspace)}
+				onclick={() => openNewNoteDialog()}
 			>
 				<div
 					class="bg-background mb-2 flex size-10 items-center justify-center rounded-full shadow-sm transition-all duration-500 group-hover:scale-110"
@@ -201,7 +203,7 @@ async function importNote() {
 									</DropdownMenu.Item>
 									<DropdownMenu.Item
 										variant="destructive"
-										onclick={() => localNotes.deleteNote(note)}
+										onclick={() => localNotes.delete(note.id)}
 									>
 										<icons.Trash2 class="mr-2 size-4" />
 										Delete Note

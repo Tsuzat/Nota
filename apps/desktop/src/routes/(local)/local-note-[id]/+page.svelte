@@ -10,16 +10,14 @@ import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { onDestroy, onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import Topbar from '$lib/components/topbar.svelte';
-import AI from '$lib/components/editor/AI.svelte';
+import AI from '$lib/components/editor/ai.svelte';
 import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
+import Topbar from '$lib/components/topbar.svelte';
 import { DB } from '$lib/local/db.js';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { createFile, getAssetsByFileType, moveFileToAssets, selectLocalFile } from '$lib/local/util.js';
-import { ISMACOS, ISWINDOWS, fixMathReplacer } from '$lib/utils';
-
-
+import { fixMathReplacer, ISMACOS, ISWINDOWS } from '$lib/utils';
 
 // editor related
 let editor = $state<Editor>();
@@ -136,7 +134,7 @@ async function updateName(name: string) {
 async function toggleStar() {
   if (note === undefined) return;
   try {
-    note = { ...note, favorite: !note.favorite };
+    note = { ...note, pinned: !note.pinned };
     await localNotes.updateNote(note);
   } catch (e) {
     toast.error('Could not update note starred');
@@ -217,7 +215,7 @@ function handleKeydown(event: KeyboardEvent) {
           <SearchAndReplace {editor} />
         {/if}
         <NavActions
-          starred={note!.favorite as boolean}
+          starred={note!.pinned as boolean}
           {toggleStar}
           {editor}
           note={note!}

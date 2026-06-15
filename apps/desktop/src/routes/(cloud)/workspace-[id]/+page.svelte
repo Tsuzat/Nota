@@ -10,9 +10,9 @@ import { toast } from '@nota/ui/shadcn/sonner';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
+import { openNewNote } from '$lib/components/dialogs/index.js';
 import Topbar from '$lib/components/topbar.svelte';
 import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
-import { openNewNote } from '$lib/components/dialogs/index.js';
 
 let { data } = $props();
 
@@ -21,7 +21,9 @@ const cloudNotes = getNotesContext();
 
 // Derived state
 const workspace = $derived(cloudWorkspaces.workspaces.find((w) => w.id === data.id));
-const notes = $derived(cloudNotes.notes.filter((n) => n.workspace_id === data.id && !n.deleted_at && !n.parent_note_id));
+const notes = $derived(
+  cloudNotes.notes.filter((n) => n.workspace_id === data.id && !n.deleted_at && !n.parent_note_id)
+);
 
 function openNote(note: Note) {
   goto(resolve('/(cloud)/note-[id]', { id: note.id }));
@@ -149,7 +151,7 @@ async function importNote() {
     >
       <Button
         class="group bg-muted/30 hover:bg-muted/50 flex h-48 flex-col items-center justify-center rounded-xl border border-dashed transition-colors"
-        onclick={() => openNewNote(workspace)}
+        onclick={() => openNewNote()}
       >
         <div
           class="bg-background mb-2 flex size-10 items-center justify-center rounded-full shadow-sm transition-all duration-500 group-hover:scale-110"

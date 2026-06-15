@@ -1,5 +1,5 @@
 <script lang="ts">
-import { MovingHome, MovingSearch} from '@nota/ui/icons/index.js'
+import { MovingHome, MovingSearch } from '@nota/ui/icons/index.js';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';

@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { SimpleToolTip } from "@nota/ui/custom/index.js";
-  import { icons } from "@nota/ui/icons/index.js";
-  import { Button } from "@nota/ui/shadcn/button";
-  import { SidebarTrigger } from "@nota/ui/shadcn/sidebar";
-  import { getKeyboardShortcut, ISWINDOWS } from "$lib/utils";
-  import { cn } from "@lib/utils";
-  import AppLogoMenu from "./app-menu.svelte";
-  import { Separator } from "@nota/ui/shadcn/separator";
-  import { fly, fade } from "svelte/transition";
-  import { cubicOut } from "svelte/easing";
+import { cn } from '@lib/utils';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
+import { icons } from '@nota/ui/icons/index.js';
+import { Button } from '@nota/ui/shadcn/button';
+import { Separator } from '@nota/ui/shadcn/separator';
+import { SidebarTrigger } from '@nota/ui/shadcn/sidebar';
+import { cubicOut } from 'svelte/easing';
+import { fade, fly } from 'svelte/transition';
+import { getKeyboardShortcut, ISWINDOWS } from '$lib/utils';
+import AppLogoMenu from './app-menu.svelte';
 
-  interface Props {
-    class?: string;
-    showAppMenu?: boolean;
-    showSeparator?: boolean;
-  }
-  const { class: className, showAppMenu = false, showSeparator = false }: Props = $props();
+interface Props {
+  class?: string;
+  showAppMenu?: boolean;
+  showSeparator?: boolean;
+}
+const { class: className, showAppMenu = false, showSeparator = false }: Props = $props();
 </script>
 
 <div
