@@ -8,8 +8,8 @@ import Trash from '@lucide/svelte/icons/trash';
 import ExternalLink from '@lucide/svelte/icons/external-link';
 import type { Editor } from '@tiptap/core';
 import BubbleMenu from '../../components/BubbleMenu.svelte';
-    import type { ShouldShowProps } from '../../types';
-  import { SimpleToolTip } from '@lib/components/custom';
+import type { ShouldShowProps } from '../../types';
+import { SimpleToolTip } from '@lib/components/custom';
 
 interface Props {
   editor: Editor;

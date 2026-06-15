@@ -8,7 +8,7 @@ import ChevronDown from '@lucide/svelte/icons/chevron-down';
 import Link from '@lucide/svelte/icons/link';
 import type { Editor } from '@tiptap/core';
 import EdraToolTip from '../EdraToolTip.svelte';
-  import { SimpleToolTip } from '@lib/components/custom';
+import { SimpleToolTip } from '@lib/components/custom';
 
 interface Props {
   editor: Editor;

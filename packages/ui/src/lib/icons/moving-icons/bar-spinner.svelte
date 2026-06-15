@@ -1,21 +1,15 @@
 <script lang="ts">
-	import { cn } from '@lib/utils.js';
-	import type { HTMLAttributes } from 'svelte/elements';
+import { cn } from '@lib/utils.js';
+import type { HTMLAttributes } from 'svelte/elements';
 
-	type Props = HTMLAttributes<HTMLDivElement> & {
-		size?: number;
-		color?: string;
-	};
+type Props = HTMLAttributes<HTMLDivElement> & {
+  size?: number;
+  color?: string;
+};
 
-	let bars = Array.from({ length: 10 }, (_, index) => index);
+let bars = Array.from({ length: 10 }, (_, index) => index);
 
-	let {
-		size = 16,
-		color = 'currentColor',
-		class: className,
-		style: styleAttribute,
-		...restProps
-	}: Props = $props();
+let { size = 16, color = 'currentColor', class: className, style: styleAttribute, ...restProps }: Props = $props();
 </script>
 
 <div

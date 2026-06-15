@@ -78,11 +78,7 @@ export function handleKeyDown(e: KeyboardEvent): boolean {
     return true;
   }
 
-  if (
-    e.key === 'ArrowUp' ||
-    ((e.ctrlKey || e.metaKey) && e.key === 'k') ||
-    (e.shiftKey && e.key === 'Tab')
-  ) {
+  if (e.key === 'ArrowUp' || ((e.ctrlKey || e.metaKey) && e.key === 'k') || (e.shiftKey && e.key === 'Tab')) {
     e.preventDefault();
     navigateUp();
     return true;
