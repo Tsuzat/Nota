@@ -47,21 +47,20 @@
       {#snippet child({ props })}
         <Sidebar.MenuAction
           {...props}
-          class="bg-sidebar-accent size-5! text-sidebar-accent-foreground inset-s-1 data-[state=open]:rotate-90"
+          class="bg-sidebar-accent size-6 top-1! text-sidebar-accent-foreground inset-s-1 data-[state=open]:rotate-90"
           showOnHover
         >
           <icons.ChevronRight />
         </Sidebar.MenuAction>
       {/snippet}
     </Collapsible.Trigger>
-    <Sidebar.MenuAction class="right-6" showOnHover>
+    <!-- <Sidebar.MenuAction class="right-6" showOnHover>
       <icons.Plus />
-    </Sidebar.MenuAction>
-
+    </Sidebar.MenuAction> -->
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         {#snippet child({ props })}
-          <Sidebar.MenuAction showOnHover {...props}>
+          <Sidebar.MenuAction class="size-6 top-1!" showOnHover {...props}>
             <icons.Ellipsis />
           </Sidebar.MenuAction>
         {/snippet}

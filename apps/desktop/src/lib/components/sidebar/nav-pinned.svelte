@@ -2,8 +2,7 @@
   import { getNotesContext, type Note } from "@nota/client";
   import { icons } from "@nota/ui/icons/index.js";
   import * as Sidebar from "@nota/ui/shadcn/sidebar";
-  import { toast } from "@nota/ui/shadcn/sonner";
-  import { getLocalNotes, type LocalNote } from "$lib/local/notes.svelte";
+  import { getLocalNotes} from "$lib/local/notes.svelte";
   
   import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
   import NoteTile from "./note-tile.svelte";

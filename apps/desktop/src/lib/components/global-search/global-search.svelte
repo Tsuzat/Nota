@@ -70,7 +70,8 @@ function handleKeydown(e: KeyboardEvent) {
 							}
 						)
 					);
-
+					if (isCloud) cloudNotes.fetchByWorkspace(workspace.id);
+					else localNotes.fetchNotesForWorkspace(workspace.id)
 					search.open = false;
 				}}
 				<Command.Item
