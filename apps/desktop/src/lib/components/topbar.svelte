@@ -21,8 +21,9 @@ const sidebar = useSidebar();
 
 <header
   data-tauri-drag-region
-  class="flex h-12 shrink-0 items-center justify-between px-4 transition-[padding-left] duration-200 ease-in-out select-none {className}"
+  class="flex h-12 shrink-0 items-center justify-between overflow-hidden px-4 transition-[padding-left] duration-200 ease-in-out select-none {className}"
   class:pl-24={ISMACOS && !sidebar.open}
+  onwheel={(e) => e.preventDefault()}
 >
   <div class="flex items-center gap-2" data-tauri-drag-region>
     {#if !sidebar.open}
