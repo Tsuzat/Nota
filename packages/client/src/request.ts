@@ -1,6 +1,7 @@
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 import { env } from '$env/dynamic/public';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { secureStorage } from './secureStorage';
 
 const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
@@ -28,7 +29,7 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
 
   // Inject Desktop Identifier if on Tauri
   if (isTauri()) {
-    headers.set('Authorization', `Bearer ${localStorage.getItem('access_token')}`);
+    headers.set('Authorization', `Bearer ${await secureStorage.getItem('access_token')}`);
     headers.set('X-Nota-Desktop-Identifier', env.PUBLIC_DESKTOP_APP_IDENTIFIER ?? '');
   }
 
@@ -42,7 +43,7 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
   let response = await fetchFn(url, currentOptions);
 
   // 3. Handle 403 (Auto-Refresh) if access token expired or invalid
-  if (response.status === 403 || localStorage.getItem('refresh_token') !== null) {
+  if (response.status === 403 || (await secureStorage.getItem('refresh_token')) !== null) {
     if (url.includes('/auth/refreshtoken')) {
       return response;
     }
@@ -52,7 +53,7 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
         ...(isTauri() && {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('refresh_token')}`,
+            Authorization: `Bearer ${await secureStorage.getItem('refresh_token')}`,
             'X-Nota-Desktop-Identifier': env.PUBLIC_DESKTOP_APP_IDENTIFIER ?? '',
           },
         }),
@@ -63,7 +64,7 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
         // Retry Original Request
         if (isTauri()) {
           const resData = await refreshResponse.json();
-          localStorage.setItem('access_token', resData.data);
+          await secureStorage.setItem('access_token', resData.data);
           headers.set('Authorization', `Bearer ${resData.data}`);
           currentOptions.headers = headers;
         }
@@ -72,14 +73,14 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
       }
       // If refresh fails, redirect to login
       if (isTauri()) {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        await secureStorage.removeItem('access_token');
+        await secureStorage.removeItem('refresh_token');
       }
     } catch (e) {
       // If refresh fails, redirect to login
       if (isTauri()) {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        await secureStorage.removeItem('access_token');
+        await secureStorage.removeItem('refresh_token');
       }
       console.error('Auto-refresh failed', e);
     }

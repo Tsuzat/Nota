@@ -11,7 +11,7 @@ import * as Switch from '@nota/ui/shadcn/switch';
 import { onMount } from 'svelte';
 import { fade } from 'svelte/transition';
 import { GEMINI_MODELS } from '$lib/ai';
-import { decrypt, encrypt } from '..';
+import { secureStorage } from '@nota/client';
 import { getGlobalSettings } from '../constants.svelte';
 
 const settings = getGlobalSettings();
@@ -24,7 +24,7 @@ let validationError = $state('');
 let hasStoredKey = $derived(apiKeyInput !== '');
 
 onMount(async () => {
-  apiKeyInput = await decrypt(localStorage.getItem('geminiApiKeyEnc') || '');
+  apiKeyInput = await secureStorage.getItem('gemini_api_key') || '';
 });
 
 const availableModels = $derived(Object.values(GEMINI_MODELS));
@@ -55,8 +55,8 @@ async function handleSaveKey() {
   }
   saving = true;
   try {
-    const encrypted = await encrypt(apiKeyInput.trim());
-    localStorage.setItem('geminiApiKeyEnc', encrypted);
+    await secureStorage.setItem('gemini_api_key', apiKeyInput.trim());
+    toast.success('API key saved successfully');
   } catch (e) {
     toast.error('Failed to store API key');
   } finally {
@@ -64,9 +64,8 @@ async function handleSaveKey() {
   }
 }
 
-function handleClearKey() {
-  localStorage.removeItem('geminiApiKeyEnc');
-  hasStoredKey = false;
+async function handleClearKey() {
+  await secureStorage.removeItem('gemini_api_key');
   apiKeyInput = '';
   toast.warning('Stored API key removed');
 }

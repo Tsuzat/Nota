@@ -1,0 +1,6 @@
+[[permission]]
+identifier = "allow-stronghold-password"
+description = "Enables get_or_create_stronghold_password command"
+
+[[permission.commands.allow]]
+name = "get_or_create_stronghold_password"

@@ -4,7 +4,7 @@ import '../app.css';
 
 let { children, data } = $props();
 
-import { setAuthContext, setNotesContext, setStorageContext, setWorkspacesContext } from '@nota/client';
+import { setAuthContext, setNotesContext, setStorageContext, setWorkspacesContext, secureStorage } from '@nota/client';
 import { ModeWatcher } from '@nota/ui';
 import { Toaster, toast } from '@nota/ui/shadcn/sonner';
 import { check } from '@tauri-apps/plugin-updater';
@@ -58,8 +58,10 @@ setGlobalSearch();
 const useSettings = setGlobalSettings();
 
 onMount(async () => {
+  await secureStorage.init();
   setTheme(useSettings.themeColor);
-  if (localStorage.getItem('access_token')) {
+  const token = await secureStorage.getItem('access_token');
+  if (token) {
     toast.promise(authContext.init(), {
       loading: 'Signing you in...',
       success: 'Successfully signed in',

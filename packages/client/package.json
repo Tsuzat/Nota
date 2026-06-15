@@ -29,7 +29,9 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.11.0",
     "@tauri-apps/plugin-http": "^2.5.6",
+    "@tauri-apps/plugin-stronghold": "^2.3.1",
     "zod": "^4.3.5"
   }
 }

@@ -40,6 +40,13 @@ tauri-plugin-process = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-http = "2"
+tauri-plugin-stronghold = "2"
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
+rand = "0.8"
+sha2 = "0.10"
+
+[profile.dev.package.scrypt]
+opt-level = 3
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"

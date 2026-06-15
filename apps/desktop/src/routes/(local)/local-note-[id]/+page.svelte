@@ -10,7 +10,7 @@ import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { onDestroy, onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AI from '$lib/components/editor/ai.svelte';
+import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/constants.svelte.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import Topbar from '$lib/components/topbar.svelte';
