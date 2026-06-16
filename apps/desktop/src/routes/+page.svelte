@@ -24,36 +24,20 @@ const settings = getGlobalSettings();
 
 // Recent notes: merged & sorted by updated_at (top 12)
 const recentNotes = $derived.by(() => {
-  const allNotes = [...localNotes, ...cloudNotes].filter(
-    (n) => !('deleted_at' in n && n.deleted_at)
-  );
+  const allNotes = [...localNotes, ...cloudNotes].filter((n) => !('deleted_at' in n && n.deleted_at));
   return allNotes
-    .toSorted(
-      (a, b) =>
-        new Date(b.updated_at ?? 0).getTime() -
-        new Date(a.updated_at ?? 0).getTime()
-    )
+    .toSorted((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime())
     .slice(0, 12);
 });
 
 // Pinned notes
 const pinnedNotes = $derived.by(() => {
-  const allNotes = [...localNotes, ...cloudNotes].filter(
-    (n) => n.pinned && !('deleted_at' in n && n.deleted_at)
-  );
-  return allNotes.toSorted(
-    (a, b) =>
-      new Date(b.updated_at ?? 0).getTime() -
-      new Date(a.updated_at ?? 0).getTime()
-  );
+  const allNotes = [...localNotes, ...cloudNotes].filter((n) => n.pinned && !('deleted_at' in n && n.deleted_at));
+  return allNotes.toSorted((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime());
 });
 
 // Total notes count (non-deleted)
-const totalNotes = $derived(
-  [...localNotes, ...cloudNotes].filter(
-    (n) => !('deleted_at' in n && n.deleted_at)
-  ).length
-);
+const totalNotes = $derived([...localNotes, ...cloudNotes].filter((n) => !('deleted_at' in n && n.deleted_at)).length);
 
 // Dynamic greeting
 function getGreeting(): string {

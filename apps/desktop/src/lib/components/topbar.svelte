@@ -1,10 +1,10 @@
 <script lang="ts">
+import { Separator } from '@lib/components/ui/separator';
 import { useSidebar } from '@nota/ui/shadcn/sidebar';
 import type { Snippet } from 'svelte';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
 import BackAndForthButtons from './back-and-forth-buttons.svelte';
 import WindowsButtons from './windows-buttons.svelte';
-  import { Separator } from '@lib/components/ui/separator';
 
 interface Props {
   showAppMenu?: boolean;

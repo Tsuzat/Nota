@@ -84,29 +84,10 @@ async function importNote() {
   toast.info('Storing note locally...', { id });
   await localNotes.createNote(data.name, 'lucide:FileText', false, workspace.id, null);
 }
-
-async function trashWorkspace() {
-	if (!workspace) return;
-	const confirm = await ask(`Are you sure you want to trash "${workspace.name}"?`, {
-		title: 'Trash Workspace',
-		kind: 'error',
-		okLabel: 'Yes, Trash',
-	});
-	if (!confirm) return;
-	await localWorkspaces.deleteWorkspace(workspace);
-	goto(resolve('/(local)'));
-}
 </script>
 
 {#if workspace}
-	<Topbar showSeparator={false}>
-		{#snippet right()}
-			<Button variant="destructive" onclick={trashWorkspace}>
-				<icons.Trash2 />
-				Trash Workspace
-			</Button>	
-		{/snippet}
-	</Topbar>
+	<Topbar showSeparator={false} />
 	<main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
 		<div class="mb-4 flex items-center gap-2">
 			<IconPicker onSelect={updateIcon}>
