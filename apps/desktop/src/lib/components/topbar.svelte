@@ -4,6 +4,7 @@ import type { Snippet } from 'svelte';
 import { ISMACOS, ISWINDOWS } from '$lib/utils';
 import BackAndForthButtons from './back-and-forth-buttons.svelte';
 import WindowsButtons from './windows-buttons.svelte';
+  import { Separator } from '@lib/components/ui/separator';
 
 interface Props {
   showAppMenu?: boolean;
@@ -25,9 +26,10 @@ const sidebar = useSidebar();
   class:pl-24={ISMACOS && !sidebar.open}
   onwheel={(e) => e.preventDefault()}
 >
-  <div class="flex items-center gap-2" data-tauri-drag-region>
+  <div class="flex items-center" data-tauri-drag-region>
     {#if !sidebar.open}
       <BackAndForthButtons {showAppMenu} {showSeparator} />
+      <Separator orientation="vertical" class="h-4! mr-2" />
     {/if}
     {#if left}
       {@render left()}

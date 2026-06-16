@@ -33,9 +33,9 @@ let open = $state(false);
 </script>
 
 <div class="flex items-center gap-2 text-sm">
-  <SimpleToolTip content="Toggle Favorite">
+  <SimpleToolTip content="Toggle Pin">
     <Button variant="ghost" size="icon" onclick={toggleStar}>
-      <icons.Star class={cn(starred && "fill-yellow-500 text-yellow-500")} />
+      <icons.Pin class={cn(starred && "fill-yellow-500 text-yellow-500")} />
     </Button>
   </SimpleToolTip>
   <Dropdown.Root bind:open>
