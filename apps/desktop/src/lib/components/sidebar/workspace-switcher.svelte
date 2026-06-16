@@ -10,7 +10,7 @@ import { resolve } from '$app/paths';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import NewWorkspace from '../dialogs/new-workspace.svelte';
+import { openNewWorkspace } from '../dialogs/new-workspace.svelte';
 
 const localWorkspaces = getLocalWorkspaces();
 const cloudWorkspaces = getWorkspacesContext();
@@ -21,7 +21,6 @@ const localNotes = getLocalNotes();
 const activeWorkspace = $derived(currentWorkspace?.get());
 const isCloud = $derived(activeWorkspace && 'owner' in activeWorkspace);
 
-let open = $state(false);
 
 async function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
   const id = toast.loading(`Switching workspace to ${workspace.name}`);
@@ -40,7 +39,6 @@ async function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
 }
 </script>
 
-<NewWorkspace bind:open />
 
 {#if activeWorkspace}
   <Sidebar.Menu>
@@ -103,7 +101,7 @@ async function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
           {/if}
 
           <DropdownMenu.Separator />
-          <DropdownMenu.Item class="flex items-center gap-2 cursor-pointer" onclick={() => (open = true)}>
+          <DropdownMenu.Item class="flex items-center gap-2 cursor-pointer" onclick={openNewWorkspace}>
             <icons.Plus class="size-4 text-muted-foreground" />
             <span class="font-medium text-muted-foreground">Add New Workspace</span>
           </DropdownMenu.Item>
