@@ -76,16 +76,13 @@ function getNoteHref(note: (typeof recentNotes)[number]): string {
 </script>
 
 <Topbar showSeparator={true}>
-  <h3 class="text-lg font-semibold">Dashboard</h3>
+  <h3 class="text-lg font-semibold">Home</h3>
 </Topbar>
 
 <div
   class="flex h-[calc(100vh-3rem)] w-full flex-1 grow overflow-auto"
 >
-<div class="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-4">
-  <!-- ═══════════════════════════════════════════════════ -->
-  <!-- Greeting Section                                    -->
-  <!-- ═══════════════════════════════════════════════════ -->
+<div class="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-4">
   <section class="flex flex-col gap-1">
     <h2
       class="text-foreground scroll-m-0 pb-0 text-2xl font-semibold tracking-tight"
@@ -104,9 +101,6 @@ function getNoteHref(note: (typeof recentNotes)[number]): string {
     </p>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════ -->
-  <!-- Quick Actions                                       -->
-  <!-- ═══════════════════════════════════════════════════ -->
   <section class="flex flex-wrap items-center gap-2">
     <Button
       variant="outline"
@@ -146,9 +140,6 @@ function getNoteHref(note: (typeof recentNotes)[number]): string {
 
   <Separator />
 
-  <!-- ═══════════════════════════════════════════════════ -->
-  <!-- Pinned Notes Section                                -->
-  <!-- ═══════════════════════════════════════════════════ -->
   {#if pinnedNotes.length > 0}
     <section class="flex flex-col gap-3">
       <div class="flex items-center gap-2">
@@ -216,9 +207,6 @@ function getNoteHref(note: (typeof recentNotes)[number]): string {
     <Separator />
   {/if}
 
-  <!-- ═══════════════════════════════════════════════════ -->
-  <!-- Recent Notes Section                                -->
-  <!-- ═══════════════════════════════════════════════════ -->
   <section class="flex flex-col gap-3 pb-6">
     <div class="flex items-center gap-2">
       <icons.Clock class="text-muted-foreground size-4" />
@@ -303,9 +291,7 @@ function getNoteHref(note: (typeof recentNotes)[number]): string {
         {/each}
       </div>
     {:else}
-      <!-- ═══════════════════════════════════════════════ -->
-      <!-- Empty State                                     -->
-      <!-- ═══════════════════════════════════════════════ -->
+    
       <div
         class="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed py-16"
       >

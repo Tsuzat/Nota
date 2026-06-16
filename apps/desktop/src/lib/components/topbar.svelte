@@ -29,7 +29,6 @@ const sidebar = useSidebar();
   <div class="flex items-center" data-tauri-drag-region>
     {#if !sidebar.open}
       <BackAndForthButtons {showAppMenu} {showSeparator} />
-      <Separator orientation="vertical" class="h-4! mr-2" />
     {/if}
     {#if left}
       {@render left()}

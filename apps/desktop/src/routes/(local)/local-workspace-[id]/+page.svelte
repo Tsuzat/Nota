@@ -9,7 +9,6 @@ import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { openNewNote as openNewNoteDialog } from '$lib/components/dialogs';
-import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import Topbar from '$lib/components/topbar.svelte';
 import { DB } from '$lib/local/db';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
@@ -85,10 +84,29 @@ async function importNote() {
   toast.info('Storing note locally...', { id });
   await localNotes.createNote(data.name, 'lucide:FileText', false, workspace.id, null);
 }
+
+async function trashWorkspace() {
+	if (!workspace) return;
+	const confirm = await ask(`Are you sure you want to trash "${workspace.name}"?`, {
+		title: 'Trash Workspace',
+		kind: 'error',
+		okLabel: 'Yes, Trash',
+	});
+	if (!confirm) return;
+	await localWorkspaces.deleteWorkspace(workspace);
+	goto(resolve('/(local)'));
+}
 </script>
 
 {#if workspace}
-	<Topbar showSeparator={false} />
+	<Topbar showSeparator={false}>
+		{#snippet right()}
+			<Button variant="destructive" onclick={trashWorkspace}>
+				<icons.Trash2 />
+				Trash Workspace
+			</Button>	
+		{/snippet}
+	</Topbar>
 	<main class="mx-auto w-full max-w-3xl flex-1 grow overflow-auto p-2">
 		<div class="mb-4 flex items-center gap-2">
 			<IconPicker onSelect={updateIcon}>

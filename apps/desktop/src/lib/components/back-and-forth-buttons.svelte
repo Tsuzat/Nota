@@ -40,6 +40,6 @@ const { class: className, showAppMenu = false, showSeparator = false }: Props = 
     </Button>
   </SimpleToolTip>
   {#if showSeparator}
-    <Separator orientation="vertical" class="h-4 mx-1" />
+    <Separator orientation="vertical" class="h-4! mx-1" />
   {/if}
 </div>
