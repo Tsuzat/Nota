@@ -43,15 +43,18 @@ import TableRow from './menus/TableRow.svelte';
 import { Callout } from '../extensions/callout';
 import { Mermaid } from '../extensions/mermaid';
 import mermaid from 'mermaid';
+  import { mode } from 'mode-watcher';
 
 const lowlight = createLowlight(all);
 
 let tocItems = $state<TableOfContentData>();
-// Initialize mermaid
+// Initialize mermaid with theme-aware config
+
 mermaid.initialize({
   startOnLoad: false,
-  theme: 'default',
+  theme: mode.current === "dark" ? 'dark' : 'default',
   securityLevel: 'loose',
+  fontFamily: 'inherit',
 });
 
 let {

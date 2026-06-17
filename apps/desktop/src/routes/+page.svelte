@@ -18,6 +18,7 @@ import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
 import { getKeyboardShortcut, timeAgo } from '$lib/utils';
+  import { Kbd } from '@lib/components/ui/kbd';
 
 const localNotes = $derived(getLocalNotes().getNotes());
 const cloudNotes = $derived(getNotesContext().notes);
@@ -151,6 +152,7 @@ function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
       <Button variant="outline" class="gap-2" onclick={() => openNewNote()}>
         <icons.Plus class="size-4" />
         New Note
+        <Kbd>{getKeyboardShortcut("N", true)}</Kbd>
       </Button>
       <Button variant="outline" class="gap-2" onclick={openGlobalSearch}>
         <icons.Search class="size-4" />
@@ -195,13 +197,14 @@ function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
           </span>
         </div>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           class="gap-1.5 text-xs"
-          onclick={() => openNewWorkspace()}
+          onclick={openNewWorkspace}
         >
           <icons.Plus class="size-3.5" />
-          New
+          New Workspace
+          <Kbd>{getKeyboardShortcut("W", true)}</Kbd>
         </Button>
       </div>
 

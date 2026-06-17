@@ -1,89 +1,114 @@
 <script lang="ts">
-import { onMount, onDestroy } from 'svelte';
+import { onMount, onDestroy, tick } from 'svelte';
 import type { NodeViewProps } from '@tiptap/core';
 import { NodeViewWrapper } from 'svelte-tiptap';
 import mermaid from 'mermaid';
-import * as Select from '@lib/components/ui/select';
-import { Textarea } from '@lib/components/ui/textarea';
 import { Button } from '@lib/components/ui/button';
+import { cn } from '@lib/utils';
 import Workflow from '@lucide/svelte/icons/workflow';
 import Pencil from '@lucide/svelte/icons/pencil';
-import { cn } from '@lib/utils';
+import Copy from '@lucide/svelte/icons/copy';
+import Check from '@lucide/svelte/icons/check';
+import Maximize2 from '@lucide/svelte/icons/maximize-2';
+import Minimize2 from '@lucide/svelte/icons/minimize-2';
+import Eye from '@lucide/svelte/icons/eye';
+import Code from '@lucide/svelte/icons/code';
+import Columns2 from '@lucide/svelte/icons/columns-2';
+import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 
 const { node, editor, getPos }: NodeViewProps = $props();
+
+// The committed code from the document
 const code = $derived(node.textContent);
 
-let container: HTMLDivElement | null = $state(null);
-let error: string | null = $state(null);
-let localCode = $derived(node.textContent);
+// Local editing state
+let editCode = $state('');
 let isEditing = $state(false);
-let mode = $state('both'); // 'both' | 'code' | 'image'
-let debounceTimeout: any;
+let mode = $state<'both' | 'code' | 'preview'>('both');
+let isExpanded = $state(false);
+let copied = $state(false);
 
-const modes = [
-  { value: 'both', label: 'Both' },
-  { value: 'code', label: 'Code' },
-  { value: 'image', label: 'Image' },
-];
+// Render state
+let container: HTMLDivElement | null = $state(null);
+let previewContainer: HTMLDivElement | null = $state(null);
+let error: string | null = $state(null);
+let isRendering = $state(false);
 
-let dialogContainer: HTMLDivElement | null = $state(null);
+// Debounce
+let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+let renderCounter = 0;
 
-async function renderDiagram(containerEl: HTMLDivElement | null, sourceCode: string) {
-  if (!containerEl) return;
-
-  const id = `mermaid-${Math.random().toString(36).slice(2, 11)}`;
-  try {
-    const { svg, bindFunctions } = await mermaid.render(id, sourceCode);
-    containerEl.innerHTML = svg;
-    if (bindFunctions) {
-      bindFunctions(containerEl);
-    }
+async function renderMermaid(target: HTMLDivElement | null, source: string) {
+  if (!target || !source.trim()) {
+    if (target) target.innerHTML = '';
     error = null;
-    containerEl.classList.remove('ProseMirror-info');
-    containerEl.classList.remove('ProseMirror-error');
+    return;
+  }
+
+  const thisRender = ++renderCounter;
+  isRendering = true;
+
+  const id = `mermaid-${crypto.randomUUID().slice(0, 8)}`;
+  try {
+    const { svg, bindFunctions } = await mermaid.render(id, source);
+    // Stale check — discard if a newer render was triggered
+    if (thisRender !== renderCounter) return;
+    target.innerHTML = svg;
+    bindFunctions?.(target);
+    error = null;
   } catch (err) {
-    console.error('Mermaid render error:', err);
-    error = (err as Error).message;
-    if (containerEl) {
-      containerEl.innerHTML = error;
-      containerEl.classList.remove('ProseMirror-info');
-      containerEl.classList.add('ProseMirror-error');
+    if (thisRender !== renderCounter) return;
+    error = (err as Error).message?.replace(/[\s\S]*?Syntax error in text[\s\S]*?mermaid version[\s\S]*$/m, '').trim()
+      || (err as Error).message || 'Failed to render diagram';
+    // Clean up mermaid's orphaned SVG
+    document.getElementById(id)?.remove();
+  } finally {
+    if (thisRender === renderCounter) {
+      isRendering = false;
     }
-    // Cleanup mermaid's generated SVG if it exists
-    const svgEl = document.getElementById(id);
-    if (svgEl) svgEl.remove();
   }
 }
 
-function debounceRender(containerEl: HTMLDivElement | null, sourceCode: string) {
-  if (debounceTimeout) clearTimeout(debounceTimeout);
-  debounceTimeout = setTimeout(() => {
-    renderDiagram(containerEl, sourceCode);
-  }, 500);
+function debouncedRender(target: HTMLDivElement | null, source: string, delay = 400) {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => renderMermaid(target, source), delay);
 }
 
+// Render inline preview when code changes (not editing)
+$effect(() => {
+  if (!isEditing && code !== undefined && container) {
+    debouncedRender(container, code, 300);
+  }
+});
+
+// Render editor preview when editCode changes
+$effect(() => {
+  if (isEditing && (mode === 'both' || mode === 'preview') && previewContainer && editCode) {
+    debouncedRender(previewContainer, editCode, 500);
+  }
+});
+
 onMount(() => {
-  renderDiagram(container, code);
+  if (container && code) {
+    renderMermaid(container, code);
+  }
 });
 
 onDestroy(() => {
-  if (debounceTimeout) clearTimeout(debounceTimeout);
+  if (debounceTimer) clearTimeout(debounceTimer);
 });
 
-$effect(() => {
-  if (code !== undefined) {
-    debounceRender(container, code);
-  }
-});
-
-$effect(() => {
-  if (isEditing && (mode === 'both' || mode === 'image') && localCode !== undefined && dialogContainer) {
-    renderDiagram(dialogContainer, localCode);
-  }
-});
+function enterEditMode() {
+  if (!editor.isEditable) return;
+  editCode = code;
+  isEditing = true;
+  error = null;
+}
 
 function handleSave() {
-  if (!localCode || localCode.trim() === '') {
+  const trimmed = editCode.trim();
+  if (!trimmed) {
+    // Delete the node if empty
     editor
       .chain()
       .focus()
@@ -100,159 +125,245 @@ function handleSave() {
         { from: getPos() ?? 0, to: (getPos() ?? 0) + node.nodeSize },
         {
           type: 'mermaid',
-          content: [
-            {
-              type: 'text',
-              text: localCode,
-            },
-          ],
+          content: [{ type: 'text', text: trimmed }],
         }
       )
       .run();
   }
   isEditing = false;
+  isExpanded = false;
 }
 
-function enterEditMode() {
-  if (!editor.isEditable) return;
-  localCode = code;
-  isEditing = true;
+function handleCancel() {
+  isEditing = false;
+  isExpanded = false;
+  error = null;
 }
 
-// Update localCode when node content changes externally
-$effect(() => {
-  const currentCode = node.textContent;
-  if (!isEditing && localCode !== currentCode) {
-    localCode = currentCode;
+function handleEditorKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    handleCancel();
   }
-});
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    handleSave();
+  }
+  // Prevent tiptap from handling Tab
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const target = e.target as HTMLTextAreaElement;
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+    editCode = editCode.substring(0, start) + '  ' + editCode.substring(end);
+    tick().then(() => {
+      target.selectionStart = target.selectionEnd = start + 2;
+    });
+  }
+}
+
+async function copyCode() {
+  const source = isEditing ? editCode : code;
+  if (!source) return;
+  await navigator.clipboard.writeText(source);
+  copied = true;
+  setTimeout(() => (copied = false), 2000);
+}
+
+const lineCount = $derived((isEditing ? editCode : code)?.split('\n').length ?? 0);
 </script>
 
 <NodeViewWrapper
-  class="mermaid-node-wrapper my-4! w-full flex flex-col items-center group relative border rounded-lg overflow-hidden transition-all duration-300"
+  class="mermaid-node-wrapper my-4! w-full flex flex-col items-center group relative rounded-lg overflow-hidden transition-all duration-200"
   contenteditable={false}
 >
   {#if isEditing}
-    <div class="w-full h-125 flex flex-col bg-background">
-      <div
-        class="px-4 py-2 border-b flex flex-row items-center justify-between space-y-0"
-      >
+    <!-- Editing Mode -->
+    <div class={cn(
+      "w-full flex flex-col border rounded-lg overflow-hidden bg-background",
+      isExpanded ? "fixed inset-4 z-50 shadow-2xl" : "h-112"
+    )}>
+      <!-- Toolbar -->
+      <div class="border-b bg-muted/30 px-3 py-1.5 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <Workflow class="w-4 h-4 text-muted-foreground" />
-          <span
-            class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
-            >Mermaid Editor</span
-          >
+          <Workflow class="size-3.5 text-primary" />
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Mermaid</span>
+          <span class="text-muted-foreground/50 text-[10px]">{lineCount} lines</span>
         </div>
-        <div class="flex items-center gap-2">
-          <Select.Root type="single" bind:value={mode}>
-            <Select.Trigger class="h-8 w-25 text-xs">
-              {modes.find((m) => m.value === mode)?.label}
-            </Select.Trigger>
-            <Select.Content>
-              {#each modes as m (m.value)}
-                <Select.Item value={m.value} label={m.label} class="text-xs">
-                  {m.label}
-                </Select.Item>
-              {/each}
-            </Select.Content>
-          </Select.Root>
-          <Button
-            size="sm"
-            variant="ghost"
-            class="h-8 text-xs"
-            onclick={() => (isEditing = false)}>Cancel</Button
-          >
-          <Button size="sm" class="h-8 text-xs" onclick={handleSave}
-            >Apply</Button
-          >
+        <div class="flex items-center gap-1">
+          <!-- View mode toggles -->
+          <div class="bg-muted/50 flex items-center rounded-md p-0.5 mr-1">
+            <button
+              class={cn("rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors", mode === 'code' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+              onclick={() => (mode = 'code')}
+              title="Code only"
+            >
+              <Code class="size-3" />
+            </button>
+            <button
+              class={cn("rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors", mode === 'both' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+              onclick={() => (mode = 'both')}
+              title="Split view"
+            >
+              <Columns2 class="size-3" />
+            </button>
+            <button
+              class={cn("rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors", mode === 'preview' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+              onclick={() => (mode = 'preview')}
+              title="Preview only"
+            >
+              <Eye class="size-3" />
+            </button>
+          </div>
+
+          <Button size="icon-sm" variant="ghost" class="size-7" onclick={copyCode} title="Copy code">
+            {#if copied}
+              <Check class="size-3 text-green-500" />
+            {:else}
+              <Copy class="size-3" />
+            {/if}
+          </Button>
+          <Button size="icon-sm" variant="ghost" class="size-7" onclick={() => (isExpanded = !isExpanded)} title={isExpanded ? 'Minimize' : 'Maximize'}>
+            {#if isExpanded}
+              <Minimize2 class="size-3" />
+            {:else}
+              <Maximize2 class="size-3" />
+            {/if}
+          </Button>
+
+          <div class="bg-border mx-1 h-4 w-px"></div>
+
+          <Button size="sm" variant="ghost" class="h-6 text-[11px] px-2" onclick={handleCancel}>
+            Cancel
+          </Button>
+          <Button size="sm" class="h-6 text-[11px] px-2" onclick={handleSave}>
+            Apply
+          </Button>
         </div>
       </div>
-      <div class="flex-1 flex overflow-hidden">
-        {#if mode === "both" || mode === "code"}
-          <div
-            class={cn(
-              "flex-1 h-full bg-muted dark:bg-muted/20 relative",
-              mode === "both" ? "border-r" : "",
-            )}
-          >
-            <Textarea
-              bind:value={localCode}
-              placeholder="Enter mermaid code here..."
-              class="mermaid-code-editor w-full h-full p-4 rounded-none font-mono text-sm text-muted-foreground border-none focus-visible:ring-0 resize-none outline-none"
-            />
+
+      <!-- Editor Content -->
+      <div class="flex flex-1 min-h-0 overflow-hidden">
+        {#if mode === 'both' || mode === 'code'}
+          <div class={cn("flex-1 min-h-0 relative", mode === 'both' ? 'border-r' : '')}>
+            <textarea
+              bind:value={editCode}
+              onkeydown={handleEditorKeydown}
+              placeholder="graph TD&#10;  A[Start] --> B[End]"
+              spellcheck={false}
+              class="mermaid-code-editor size-full resize-none border-none bg-muted/20 p-4 font-mono text-[13px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/40"
+            ></textarea>
+            <!-- Keyboard hints -->
+            <div class="absolute bottom-2 right-2 flex items-center gap-2 text-[9px] text-muted-foreground/50">
+              <span>⌘↵ Apply</span>
+              <span>Esc Cancel</span>
+            </div>
           </div>
         {/if}
-        {#if mode === "both" || mode === "image"}
-          <div
-            class="flex-1 size-full bg-background overflow-auto flex items-center justify-center p-8"
-          >
+        {#if mode === 'both' || mode === 'preview'}
+          <div class="flex-1 min-h-0 overflow-auto bg-background flex items-center justify-center p-6 relative">
+            {#if error}
+              <div class="flex flex-col items-center gap-2 text-center max-w-xs">
+                <div class="bg-destructive/10 flex size-8 items-center justify-center rounded-lg">
+                  <TriangleAlert class="text-destructive size-4" />
+                </div>
+                <p class="text-destructive text-xs font-medium">Syntax Error</p>
+                <p class="text-muted-foreground font-mono text-[10px] leading-relaxed max-h-24 overflow-auto">{error}</p>
+              </div>
+            {:else if isRendering && !previewContainer?.innerHTML}
+              <div class="flex flex-col items-center gap-2">
+                <div class="size-5 animate-spin rounded-full border-2 border-muted-foreground/20 border-t-primary"></div>
+                <span class="text-muted-foreground text-[10px]">Rendering...</span>
+              </div>
+            {/if}
             <div
-              bind:this={dialogContainer}
-              class="mermaid-preview flex items-center size-full justify-center overflow-auto [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:mx-auto"
+              bind:this={previewContainer}
+              class={cn(
+                "mermaid-preview flex items-center justify-center [&_svg]:max-w-full [&_svg]:h-auto",
+                error ? 'hidden' : ''
+              )}
             ></div>
           </div>
         {/if}
       </div>
     </div>
+    <!-- Fullscreen backdrop -->
+    {#if isExpanded}
+      <button
+        class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+        onclick={() => (isExpanded = false)}
+        aria-label="Close fullscreen"
+      ></button>
+    {/if}
   {:else}
-    <div class="w-full relative group/preview cursor-pointer">
-      {#if !code || code.trim() === ""}
+    <!-- Preview Mode -->
+    <div class="relative w-full group/preview">
+      {#if !code || code.trim() === ''}
         <button
-          class={cn(
-            "flex items-center gap-2 justify-start overflow-x-auto p-4 rounded-lg bg-muted hover:bg-muted/50 transition-colors w-full min-h-12",
-          )}
+          class="flex w-full items-center gap-2 rounded-lg border border-dashed bg-muted/30 p-4 transition-colors hover:bg-muted/50 min-h-14"
           onclick={enterEditMode}
         >
-          <Workflow class="w-4 h-4" />
-
-          <span contenteditable={false}>Click to enter mermaid code</span>
+          <Workflow class="size-4 text-muted-foreground" />
+          <span class="text-muted-foreground text-sm" contenteditable={false}>Click to add a Mermaid diagram</span>
         </button>
       {:else}
-        <div
-          bind:this={container}
-          class="mermaid-container overflow-x-auto p-4 transition-colors w-full flex justify-center min-h-25 items-center [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:mx-auto"
-        ></div>
-        <div
-          class="absolute top-2 right-2 opacity-0 group-hover/preview:opacity-100 transition-opacity"
-        >
-          <Button
-            size="icon-sm"
-            variant="secondary"
-            class="h-8 w-8 rounded-full shadow-lg"
-            onclick={enterEditMode}
-          >
-            <Pencil class="h-3.5 w-3.5" />
-          </Button>
+        <div class="border rounded-lg overflow-hidden">
+          <div
+            bind:this={container}
+            class="mermaid-container overflow-x-auto p-6 w-full flex justify-center min-h-24 items-center [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:mx-auto"
+          ></div>
+          {#if error}
+            <div class="border-t bg-destructive/5 px-4 py-2 flex items-center gap-2">
+              <TriangleAlert class="text-destructive size-3.5 shrink-0" />
+              <p class="text-destructive text-xs truncate">{error}</p>
+            </div>
+          {/if}
         </div>
+        <!-- Hover actions -->
+        {#if editor.isEditable}
+          <div class="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/preview:opacity-100 transition-opacity">
+            <Button
+              size="icon-sm"
+              variant="secondary"
+              class="size-7 rounded-md shadow-md"
+              onclick={copyCode}
+              title="Copy code"
+            >
+              {#if copied}
+                <Check class="size-3 text-green-500" />
+              {:else}
+                <Copy class="size-3" />
+              {/if}
+            </Button>
+            <Button
+              size="icon-sm"
+              variant="secondary"
+              class="size-7 rounded-md shadow-md"
+              onclick={enterEditMode}
+              title="Edit diagram"
+            >
+              <Pencil class="size-3" />
+            </Button>
+          </div>
+        {/if}
       {/if}
     </div>
   {/if}
 </NodeViewWrapper>
 
 <style>
-  .mermaid-code-editor::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  .mermaid-code-editor {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+    tab-size: 2;
   }
-  .mermaid-code-editor::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .mermaid-code-editor::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 4px;
-  }
-  .mermaid-code-editor::-webkit-scrollbar-thumb:hover {
-    background: #444;
+  .mermaid-code-editor::selection {
+    background: hsl(var(--primary) / 0.2);
   }
   :global(.ProseMirror-error) {
     color: hsl(var(--destructive));
     font-family: monospace;
     font-size: 0.75rem;
     white-space: pre-wrap;
-  }
-  :global(.ProseMirror-info) {
-    color: hsl(var(--muted-foreground));
-    font-style: italic;
   }
 </style>
