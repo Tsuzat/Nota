@@ -9,8 +9,8 @@ import { ModeWatcher } from '@nota/ui';
 import DeleteWorkspaceDialog from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
 import { Toaster, toast } from '@nota/ui/shadcn/sonner';
 import { check } from '@tauri-apps/plugin-updater';
-import { onMount} from 'svelte';
-import { setupAppMenu } from '$lib/menu';
+import { onMount } from 'svelte';
+import AboutDialog from '$lib/components/dialogs/about.svelte';
 import MoveNote from '$lib/components/dialogs/move-note.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import NewWorkspace from '$lib/components/dialogs/new-workspace.svelte';
@@ -24,6 +24,7 @@ import { setCurrentWorkspace } from '$lib/currentworkspace.svelte';
 import { useDeepLinkAuth } from '$lib/handleOAuth';
 import { setLocalNotes } from '$lib/local/notes.svelte';
 import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
+import { setupAppMenu } from '$lib/menu';
 import { setTheme } from '$lib/theme';
 import { downloadAndInstall } from '$lib/updater';
 
@@ -134,6 +135,7 @@ $effect(() => {
 <NewWorkspace />
 <MoveNote />
 <RenameNote />
+<AboutDialog />
 <DeleteWorkspaceDialog />
 
 <Sidebar.Provider

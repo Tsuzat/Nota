@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Kbd } from '@lib/components/ui/kbd';
 import { getAuthContext, getNotesContext, getWorkspacesContext, type Workspace } from '@nota/client';
 import { openDeleteWorkspaceDialog } from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
@@ -18,7 +19,6 @@ import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
 import { getKeyboardShortcut, timeAgo } from '$lib/utils';
-  import { Kbd } from '@lib/components/ui/kbd';
 
 const localNotes = $derived(getLocalNotes().getNotes());
 const cloudNotes = $derived(getNotesContext().notes);
