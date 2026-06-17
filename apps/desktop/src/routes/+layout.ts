@@ -6,17 +6,15 @@ export const ssr = false;
 export const prerender = false;
 export const csr = true;
 
-import { toast } from "@nota/ui/shadcn/sonner";
-import { goto } from "$app/navigation";
-import { resolve } from "$app/paths";
-import { DB, initializeLocalDB } from "$lib/local/db";
-import type { LocalWorkSpace } from "$lib/local/workspaces.svelte";
+import { toast } from '@nota/ui/shadcn/sonner';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { DB, initializeLocalDB } from '$lib/local/db';
+import type { LocalWorkSpace } from '$lib/local/workspaces.svelte';
 
 async function loadLocalWorkspaces(): Promise<LocalWorkSpace[] | null> {
   try {
-    const res = await DB.select<LocalWorkSpace[]>(
-      "SELECT id, name, icon, created_at, updated_at FROM workspaces",
-    );
+    const res = await DB.select<LocalWorkSpace[]>('SELECT id, name, icon, created_at, updated_at FROM workspaces');
     return res;
   } catch (error) {
     console.error(error);
@@ -30,20 +28,21 @@ export const load = async () => {
   let localWorkspaces = await loadLocalWorkspaces();
 
   if (localWorkspaces === null) {
-    toast.error("Something went wrong when loading the workspaces");
-    return goto(resolve("/"));
+    toast.error('Something went wrong when loading the workspaces');
+    return goto(resolve('/'));
   }
 
   if (localWorkspaces.length === 0) {
     const defaultWorkspaceId = crypto.randomUUID();
     try {
-      await DB.execute(
-        "INSERT INTO workspaces (id, name, icon) VALUES ($1, $2, $3)",
-        [defaultWorkspaceId, "Personal", "📁"],
-      );
+      await DB.execute('INSERT INTO workspaces (id, name, icon) VALUES ($1, $2, $3)', [
+        defaultWorkspaceId,
+        'Personal',
+        '📁',
+      ]);
       localWorkspaces = await loadLocalWorkspaces();
     } catch (e) {
-      console.error("Failed to seed default workspace in layout load", e);
+      console.error('Failed to seed default workspace in layout load', e);
     }
   }
 

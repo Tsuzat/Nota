@@ -6,9 +6,9 @@ import { Button } from '@nota/ui/shadcn/button';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
+import { getKeyboardShortcut } from '$lib/utils';
 import { openNewNote } from '../dialogs';
 import NoteTile from './note-tile.svelte';
-  import { getKeyboardShortcut } from '$lib/utils';
 
 const currentWorkspace = $derived(getCurrentWorkspace().get());
 const cloudNotes = getNotesContext();

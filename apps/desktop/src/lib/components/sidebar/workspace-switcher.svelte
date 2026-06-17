@@ -1,39 +1,39 @@
 <script lang="ts">
-  import Button from "@lib/components/ui/button/button.svelte";
-  import { getNotesContext, getWorkspacesContext, type Workspace } from "@nota/client";
-  import { IconRenderer, icons } from "@nota/ui/icons/index.js";
-  import * as DropdownMenu from "@nota/ui/shadcn/dropdown-menu";
-  import * as Sidebar from "@nota/ui/shadcn/sidebar";
-  import { cn } from "@nota/ui/utils";
-  import { goto } from "$app/navigation";
-  import { resolve } from "$app/paths";
-  import { getLocalWorkspaces, type LocalWorkSpace } from "$lib/local/workspaces.svelte";
-  import { openNewWorkspace } from "../dialogs/new-workspace.svelte";
-  import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
-  import { toast } from "@lib/components/ui/sonner";
-  import { Kbd } from "@lib/components/ui/kbd";
-  import { getKeyboardShortcut } from "$lib/utils";
+import Button from '@lib/components/ui/button/button.svelte';
+import { Kbd } from '@lib/components/ui/kbd';
+import { toast } from '@lib/components/ui/sonner';
+import { getNotesContext, getWorkspacesContext, type Workspace } from '@nota/client';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import * as Sidebar from '@nota/ui/shadcn/sidebar';
+import { cn } from '@nota/ui/utils';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
+import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
+import { getKeyboardShortcut } from '$lib/utils';
+import { openNewWorkspace } from '../dialogs/new-workspace.svelte';
 
-  const localWorkspaces = getLocalWorkspaces();
-  const cloudWorkspaces = getWorkspacesContext();
-  const currentWorkspace = getCurrentWorkspace();
+const localWorkspaces = getLocalWorkspaces();
+const cloudWorkspaces = getWorkspacesContext();
+const currentWorkspace = getCurrentWorkspace();
 
-  const activeWorkspace = $derived(currentWorkspace?.get());
-  const isCloud = $derived(activeWorkspace && "owner" in activeWorkspace);
-  const href = $derived.by(() => {
-    if (!activeWorkspace) return "";
-    return "owner" in activeWorkspace
-      ? resolve("/(cloud)/workspace-[id]", { id: activeWorkspace.id })
-      : resolve("/(local)/local-workspace-[id]", { id: activeWorkspace.id });
-  });
+const activeWorkspace = $derived(currentWorkspace?.get());
+const isCloud = $derived(activeWorkspace && 'owner' in activeWorkspace);
+const href = $derived.by(() => {
+  if (!activeWorkspace) return '';
+  return 'owner' in activeWorkspace
+    ? resolve('/(cloud)/workspace-[id]', { id: activeWorkspace.id })
+    : resolve('/(local)/local-workspace-[id]', { id: activeWorkspace.id });
+});
 
-  function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
-    if (currentWorkspace.get()?.id === workspace.id) {
-      return toast.info("Already in this workspace.")
-    }
-    currentWorkspace.set(workspace)
-    goto(href)
+function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
+  if (currentWorkspace.get()?.id === workspace.id) {
+    return toast.info('Already in this workspace.');
   }
+  currentWorkspace.set(workspace);
+  goto(href);
+}
 </script>
 
 {#if activeWorkspace}

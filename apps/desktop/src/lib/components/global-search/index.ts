@@ -1,4 +1,4 @@
 export {
   default as GlobalSearch,
   openGlobalSearch,
-} from "./global-search.svelte";
+} from './global-search.svelte';

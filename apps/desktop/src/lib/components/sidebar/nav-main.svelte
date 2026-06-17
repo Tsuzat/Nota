@@ -5,8 +5,7 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { page } from '$app/state';
 import { getKeyboardShortcut } from '$lib/utils';
-  import { openGlobalSearch } from '../global-search';
-
+import { openGlobalSearch } from '../global-search';
 
 let isHomeHovered = $state(false);
 let isSearchHovered = $state(false);

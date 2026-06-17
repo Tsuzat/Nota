@@ -1,153 +1,128 @@
 <script lang="ts">
-  import {
-    getAuthContext,
-    getNotesContext,
-    getWorkspacesContext,
-    type Workspace,
-  } from "@nota/client";
-  import { openDeleteWorkspaceDialog } from "@nota/ui/custom/DeleteWorkspaceDialog.svelte";
-  import { IconRenderer, icons } from "@nota/ui/icons/index.js";
-  import { Button } from "@nota/ui/shadcn/button";
-  import * as Card from "@nota/ui/shadcn/card";
-  import { Separator } from "@nota/ui/shadcn/separator";
-  import { toast } from "@nota/ui/shadcn/sonner";
-  import { goto } from "$app/navigation";
-  import { resolve } from "$app/paths";
-  import { openNewNote } from "$lib/components/dialogs";
-  import { openNewWorkspace } from "$lib/components/dialogs/new-workspace.svelte";
-  import { getGlobalSettings } from "$lib/components/settings";
-  import Topbar from "$lib/components/topbar.svelte";
-  import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
-  import { getLocalNotes } from "$lib/local/notes.svelte";
-  import {
-    getLocalWorkspaces,
-    type LocalWorkSpace,
-  } from "$lib/local/workspaces.svelte";
-  import { getKeyboardShortcut, timeAgo } from "$lib/utils";
-  import { openGlobalSearch } from "$lib/components/global-search";
-  import { hr } from "zod/locales";
+import { getAuthContext, getNotesContext, getWorkspacesContext, type Workspace } from '@nota/client';
+import { openDeleteWorkspaceDialog } from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { Button } from '@nota/ui/shadcn/button';
+import * as Card from '@nota/ui/shadcn/card';
+import { Separator } from '@nota/ui/shadcn/separator';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { hr } from 'zod/locales';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { openNewNote } from '$lib/components/dialogs';
+import { openNewWorkspace } from '$lib/components/dialogs/new-workspace.svelte';
+import { openGlobalSearch } from '$lib/components/global-search';
+import { getGlobalSettings } from '$lib/components/settings';
+import Topbar from '$lib/components/topbar.svelte';
+import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
+import { getLocalNotes } from '$lib/local/notes.svelte';
+import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
+import { getKeyboardShortcut, timeAgo } from '$lib/utils';
 
-  const localNotes = $derived(getLocalNotes().getNotes());
-  const cloudNotes = $derived(getNotesContext().notes);
-  const auth = getAuthContext();
-  const user = $derived(auth.user);
-  const currentWorkspaceCtx = getCurrentWorkspace();
-  const workspace = $derived(currentWorkspaceCtx.get());
-  const settings = getGlobalSettings();
-  const localWorkspaces = getLocalWorkspaces();
-  const cloudWorkspaces = getWorkspacesContext();
+const localNotes = $derived(getLocalNotes().getNotes());
+const cloudNotes = $derived(getNotesContext().notes);
+const auth = getAuthContext();
+const user = $derived(auth.user);
+const currentWorkspaceCtx = getCurrentWorkspace();
+const workspace = $derived(currentWorkspaceCtx.get());
+const settings = getGlobalSettings();
+const localWorkspaces = getLocalWorkspaces();
+const cloudWorkspaces = getWorkspacesContext();
 
-  // All workspaces combined for display
-  const allLocalWorkspaces = $derived(localWorkspaces.getWorkspaces());
-  const allCloudWorkspaces = $derived(cloudWorkspaces.workspaces);
+// All workspaces combined for display
+const allLocalWorkspaces = $derived(localWorkspaces.getWorkspaces());
+const allCloudWorkspaces = $derived(cloudWorkspaces.workspaces);
 
-  // Recent notes: merged & sorted by updated_at (top 12)
-  const recentNotes = $derived.by(() => {
-    const allNotes = [...localNotes, ...cloudNotes].filter(
-      (n) => !("deleted_at" in n && n.deleted_at),
-    );
-    return allNotes
-      .toSorted(
-        (a, b) =>
-          new Date(b.updated_at ?? 0).getTime() -
-          new Date(a.updated_at ?? 0).getTime(),
-      )
-      .slice(0, 12);
+// Recent notes: merged & sorted by updated_at (top 12)
+const recentNotes = $derived.by(() => {
+  const allNotes = [...localNotes, ...cloudNotes].filter((n) => !('deleted_at' in n && n.deleted_at));
+  return allNotes
+    .toSorted((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime())
+    .slice(0, 12);
+});
+
+// Pinned notes
+const pinnedNotes = $derived.by(() => {
+  const allNotes = [...localNotes, ...cloudNotes].filter((n) => n.pinned && !('deleted_at' in n && n.deleted_at));
+  return allNotes.toSorted((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime());
+});
+
+// Total notes count (non-deleted)
+const totalNotes = $derived([...localNotes, ...cloudNotes].filter((n) => !('deleted_at' in n && n.deleted_at)).length);
+
+// Dynamic greeting
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
+}
+
+function isCloudNote(note: (typeof recentNotes)[number]): boolean {
+  return 'owner' in note;
+}
+
+function getNoteHref(note: (typeof recentNotes)[number]): string {
+  if ('owner' in note) {
+    return resolve('/(cloud)/note-[id]', { id: String(note.id) });
+  }
+  return resolve('/(local)/local-note-[id]', { id: String(note.id) });
+}
+
+function isActiveWorkspace(id: string): boolean {
+  const active = currentWorkspaceCtx.get();
+  if (!active) return false;
+  return String(active.id) === String(id);
+}
+
+// --- Delete local workspace ---
+function tryDeleteLocalWorkspace(ws: { id: string; name: string }) {
+  const isCurrent = isActiveWorkspace(ws.id);
+  const isLastLocal = allLocalWorkspaces.length <= 1;
+
+  let blockedReason: string | undefined;
+  if (isCurrent) {
+    blockedReason = 'This is your currently active workspace. Switch to another workspace before deleting it.';
+  } else if (isLastLocal) {
+    blockedReason =
+      'You must have at least one local workspace. Create another local workspace before deleting this one.';
+  }
+
+  openDeleteWorkspaceDialog({
+    workspaceName: ws.name,
+    blockedReason,
+    onConfirm: async () => {
+      await localWorkspaces.deleteWorkspace(ws as any);
+    },
   });
+}
 
-  // Pinned notes
-  const pinnedNotes = $derived.by(() => {
-    const allNotes = [...localNotes, ...cloudNotes].filter(
-      (n) => n.pinned && !("deleted_at" in n && n.deleted_at),
-    );
-    return allNotes.toSorted(
-      (a, b) =>
-        new Date(b.updated_at ?? 0).getTime() -
-        new Date(a.updated_at ?? 0).getTime(),
-    );
+// --- Delete cloud workspace ---
+function tryDeleteCloudWorkspace(ws: { id: string; name: string }) {
+  const isCurrent = isActiveWorkspace(ws.id);
+
+  openDeleteWorkspaceDialog({
+    workspaceName: ws.name,
+    blockedReason: isCurrent
+      ? 'This is your currently active workspace. Switch to another workspace before deleting it.'
+      : undefined,
+    onConfirm: async () => {
+      try {
+        await cloudWorkspaces.delete(ws.id);
+      } catch (e) {
+        toast.error('Could not delete cloud workspace.');
+        console.error(e);
+        throw e;
+      }
+    },
   });
-
-  // Total notes count (non-deleted)
-  const totalNotes = $derived(
-    [...localNotes, ...cloudNotes].filter(
-      (n) => !("deleted_at" in n && n.deleted_at),
-    ).length,
-  );
-
-  // Dynamic greeting
-  function getGreeting(): string {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 17) return "Good Afternoon";
-    return "Good Evening";
+}
+function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
+  if (currentWorkspaceCtx.get()?.id === workspace.id) {
+    return toast.info('Already in this workspace.');
   }
-
-  function isCloudNote(note: (typeof recentNotes)[number]): boolean {
-    return "owner" in note;
-  }
-
-  function getNoteHref(note: (typeof recentNotes)[number]): string {
-    if ("owner" in note) {
-      return resolve("/(cloud)/note-[id]", { id: String(note.id) });
-    }
-    return resolve("/(local)/local-note-[id]", { id: String(note.id) });
-  }
-
-  function isActiveWorkspace(id: string): boolean {
-    const active = currentWorkspaceCtx.get();
-    if (!active) return false;
-    return String(active.id) === String(id);
-  }
-
-  // --- Delete local workspace ---
-  function tryDeleteLocalWorkspace(ws: { id: string; name: string }) {
-    const isCurrent = isActiveWorkspace(ws.id);
-    const isLastLocal = allLocalWorkspaces.length <= 1;
-
-    let blockedReason: string | undefined;
-    if (isCurrent) {
-      blockedReason =
-        "This is your currently active workspace. Switch to another workspace before deleting it.";
-    } else if (isLastLocal) {
-      blockedReason =
-        "You must have at least one local workspace. Create another local workspace before deleting this one.";
-    }
-
-    openDeleteWorkspaceDialog({
-      workspaceName: ws.name,
-      blockedReason,
-      onConfirm: async () => {
-        await localWorkspaces.deleteWorkspace(ws as any);
-      },
-    });
-  }
-
-  // --- Delete cloud workspace ---
-  function tryDeleteCloudWorkspace(ws: { id: string; name: string }) {
-    const isCurrent = isActiveWorkspace(ws.id);
-
-    openDeleteWorkspaceDialog({
-      workspaceName: ws.name,
-      blockedReason: isCurrent
-        ? "This is your currently active workspace. Switch to another workspace before deleting it."
-        : undefined,
-      onConfirm: async () => {
-        try {
-          await cloudWorkspaces.delete(ws.id);
-        } catch (e) {
-          toast.error("Could not delete cloud workspace.");
-          console.error(e);
-          throw e;
-        }
-      },
-    });
-  }
-  function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
-    if (currentWorkspaceCtx.get()?.id === workspace.id) {
-      return toast.info("Already in this workspace.");
-    }
-    currentWorkspaceCtx.set(workspace);
-  }
+  currentWorkspaceCtx.set(workspace);
+}
 </script>
 
 <Topbar showSeparator={true}></Topbar>

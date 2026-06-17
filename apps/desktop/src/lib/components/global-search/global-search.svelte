@@ -1,8 +1,8 @@
 <script lang="ts" module>
-	let open = $state(false)
-	export const openGlobalSearch = () => {
-		open = true
-	}
+let open = $state(false);
+export const openGlobalSearch = () => {
+  open = true;
+};
 </script>
 
 <script lang="ts">
