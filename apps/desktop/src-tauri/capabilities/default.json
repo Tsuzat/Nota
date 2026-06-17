@@ -15,6 +15,7 @@
     "core:window:allow-close",
     "core:window:allow-set-decorations",
     "core:window:allow-show",
+    "core:menu:default",
     "sql:default",
     "sql:allow-execute",
     "dialog:default",

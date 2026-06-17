@@ -9,7 +9,8 @@ import { ModeWatcher } from '@nota/ui';
 import DeleteWorkspaceDialog from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
 import { Toaster, toast } from '@nota/ui/shadcn/sonner';
 import { check } from '@tauri-apps/plugin-updater';
-import { onMount } from 'svelte';
+import { onMount} from 'svelte';
+import { setupAppMenu } from '$lib/menu';
 import MoveNote from '$lib/components/dialogs/move-note.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import NewWorkspace from '$lib/components/dialogs/new-workspace.svelte';
@@ -61,6 +62,9 @@ const useSettings = setGlobalSettings();
 onMount(async () => {
   await secureStorage.init();
   setTheme(useSettings.themeColor);
+
+  // Initialize native app menu
+  setupAppMenu();
   const token = await secureStorage.getItem('access_token');
   if (token) {
     toast.promise(authContext.init(), {
