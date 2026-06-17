@@ -46,6 +46,7 @@ $effect(() => {
     cloudWorkspaces.workspaces = [];
     cloudNotes.notes = [];
   } else {
+    cloudWorkspaces.fetch();
     cloudStorage.fetch();
   }
 });

@@ -137,7 +137,7 @@ export interface EmojiItem {
 	}
 </script>
 
-<Tabs.Root bind:value={selectedCategory} class="flex h-96 w-full flex-col-reverse gap-0">
+<Tabs.Root bind:value={selectedCategory} class="flex h-96 w-full flex-col gap-0">
 	<Tabs.List class="flex w-full items-center justify-evenly rounded-sm">
 		{#each categories as catergory, idx (idx)}
 			<Tabs.Trigger value={catergory}>
