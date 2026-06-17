@@ -11,7 +11,6 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { page } from '$app/state';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
-import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { openMoveNote, openNewNote, openRenameNote } from '../dialogs';
 import NoteTile from './note-tile.svelte';
 

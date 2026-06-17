@@ -10,7 +10,6 @@ import { toast } from "@nota/ui/shadcn/sonner";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { DB, initializeLocalDB } from "$lib/local/db";
-import type { LocalNote } from "$lib/local/notes.svelte";
 import type { LocalWorkSpace } from "$lib/local/workspaces.svelte";
 
 async function loadLocalWorkspaces(): Promise<LocalWorkSpace[] | null> {
@@ -18,28 +17,6 @@ async function loadLocalWorkspaces(): Promise<LocalWorkSpace[] | null> {
     const res = await DB.select<LocalWorkSpace[]>(
       "SELECT id, name, icon, created_at, updated_at FROM workspaces",
     );
-    return res;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
-
-async function loadLocalNotes(
-  workspaceId: string,
-): Promise<LocalNote[] | null> {
-  try {
-    let res = await DB.select<LocalNote[]>(
-      "SELECT id, workspace_id, parent_note_id, name, icon, pinned, deleted_at, created_at, updated_at FROM notes WHERE workspace_id = $1",
-      [workspaceId],
-    );
-    res = res.map((r) => {
-      return {
-        ...r,
-        pinned:
-          r.pinned === "true" || (r.pinned as any) === 1 || r.pinned === true,
-      };
-    });
     return res;
   } catch (error) {
     console.error(error);
@@ -71,18 +48,8 @@ export const load = async () => {
   }
 
   const currentWorkspace = localWorkspaces?.[0];
-  const localNotes = currentWorkspace
-    ? await loadLocalNotes(currentWorkspace.id)
-    : [];
-
-  if (localNotes === null) {
-    toast.error("Something went wrong when loading the notes");
-    return goto(resolve("/"));
-  }
-
   return {
     localWorkspaces,
     currentWorkspace,
-    localNotes,
   };
 };

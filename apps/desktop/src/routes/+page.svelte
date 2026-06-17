@@ -3,6 +3,7 @@
     getAuthContext,
     getNotesContext,
     getWorkspacesContext,
+    type Workspace,
   } from "@nota/client";
   import { openDeleteWorkspaceDialog } from "@nota/ui/custom/DeleteWorkspaceDialog.svelte";
   import { IconRenderer, icons } from "@nota/ui/icons/index.js";
@@ -14,13 +15,17 @@
   import { resolve } from "$app/paths";
   import { openNewNote } from "$lib/components/dialogs";
   import { openNewWorkspace } from "$lib/components/dialogs/new-workspace.svelte";
-  import { getGlobalSearch } from "$lib/components/global-search";
   import { getGlobalSettings } from "$lib/components/settings";
   import Topbar from "$lib/components/topbar.svelte";
   import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
   import { getLocalNotes } from "$lib/local/notes.svelte";
-  import { getLocalWorkspaces } from "$lib/local/workspaces.svelte";
+  import {
+    getLocalWorkspaces,
+    type LocalWorkSpace,
+  } from "$lib/local/workspaces.svelte";
   import { getKeyboardShortcut, timeAgo } from "$lib/utils";
+  import { openGlobalSearch } from "$lib/components/global-search";
+  import { hr } from "zod/locales";
 
   const localNotes = $derived(getLocalNotes().getNotes());
   const cloudNotes = $derived(getNotesContext().notes);
@@ -28,7 +33,6 @@
   const user = $derived(auth.user);
   const currentWorkspaceCtx = getCurrentWorkspace();
   const workspace = $derived(currentWorkspaceCtx.get());
-  const search = getGlobalSearch();
   const settings = getGlobalSettings();
   const localWorkspaces = getLocalWorkspaces();
   const cloudWorkspaces = getWorkspacesContext();
@@ -138,6 +142,12 @@
       },
     });
   }
+  function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
+    if (currentWorkspaceCtx.get()?.id === workspace.id) {
+      return toast.info("Already in this workspace.");
+    }
+    currentWorkspaceCtx.set(workspace);
+  }
 </script>
 
 <Topbar showSeparator={true}></Topbar>
@@ -167,11 +177,7 @@
         <icons.Plus class="size-4" />
         New Note
       </Button>
-      <Button
-        variant="outline"
-        class="gap-2"
-        onclick={() => (search.open = true)}
-      >
+      <Button variant="outline" class="gap-2" onclick={openGlobalSearch}>
         <icons.Search class="size-4" />
         Search
         <kbd
@@ -234,7 +240,7 @@
           <div class="group relative">
             <Card.Root
               onclick={() => {
-                currentWorkspaceCtx.set(ws);
+                switchWorkspace(ws);
                 goto(href);
               }}
               class="hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md {isActive
@@ -288,7 +294,10 @@
           })}
           <div class="group relative">
             <Card.Root
-              onclick={() => goto(href)}
+              onclick={() => {
+                switchWorkspace(ws);
+                goto(href);
+              }}
               class="hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md {isActive
                 ? 'ring-primary/50 ring-2'
                 : ''}"

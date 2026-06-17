@@ -13,19 +13,6 @@ class CurrentWorkspace {
 
   public set(workspace?: LocalWorkSpace | Workspace) {
     this.#currentWorkspace = workspace;
-    if (!workspace) return;
-    const id = toast.loading(`Loading workspace ${workspace.name}...`);
-    try {
-      if ("owner" in workspace) {
-        getNotesContext().fetchByWorkspace(workspace.id);
-      } else {
-        getLocalNotes().fetchNotesForWorkspace(workspace.id);
-      }
-    } catch (e) {
-      toast.error(`Failed to load workspace ${workspace.name}.`, { id });
-    } finally {
-      toast.dismiss(id);
-    }
   }
 
   public get() {

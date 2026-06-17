@@ -9,7 +9,7 @@ export const openNewWorkspace = () => {
 <script lang="ts">
   import { toast } from "@nota/ui/shadcn/sonner";
   import { getAuthContext, getWorkspacesContext } from "@nota/client";
-  import { BarSpinner, IconPicker, IconRenderer } from "@nota/ui/icons/index.js";
+  import { BarSpinner, IconPicker, IconRenderer, icons } from "@nota/ui/icons/index.js";
   import { Button, buttonVariants } from "@nota/ui/shadcn/button";
   import * as Dialog from "@nota/ui/shadcn/dialog";
   import { Input } from "@nota/ui/shadcn/input";
@@ -22,21 +22,26 @@ export const openNewWorkspace = () => {
 
   let loading = $state(false);
 
-  const localWorspaces = getLocalWorkspaces();
+  const localWorkspaces = getLocalWorkspaces();
   const cloudWorkspaces = getWorkspacesContext();
   const user = $derived(getAuthContext().user);
   let isLocal = $state(true);
 
+  const canSubmit = $derived(
+    name !== undefined && name.trim() !== "" && icon.trim() !== "" && !loading
+  );
+
   async function createLocalWorkspace() {
-    // verify icon, name
     if (!icon || !name) {
       toast.error("Please select an icon and name");
       return;
     }
     try {
       loading = true;
-      await localWorspaces.createWorkspace(icon, name);
+      await localWorkspaces.createWorkspace(icon, name);
       open = false;
+      name = "";
+      icon = "emoji:📂";
     } catch (e) {
       loading = false;
       console.error(e);
@@ -52,7 +57,6 @@ export const openNewWorkspace = () => {
       toast.error("No user found. Please login again.");
       return;
     }
-    // verify icon, name, dir
     if (!icon || !name || name.trim() === "") {
       toast.error("Please provide an icon and name");
       return;
@@ -61,6 +65,8 @@ export const openNewWorkspace = () => {
       loading = true;
       await cloudWorkspaces.create(name, icon);
       open = false;
+      name = "";
+      icon = "emoji:📂";
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong.");
@@ -83,7 +89,7 @@ export const openNewWorkspace = () => {
       event.preventDefault();
       open = false;
     }
-    if ((event.metaKey || event.ctrlKey) && event.key === "n") {
+    if ((event.metaKey || event.ctrlKey) && event.key === "w") {
       event.preventDefault();
       open = true;
     }
@@ -95,12 +101,27 @@ export const openNewWorkspace = () => {
 <Dialog.Root bind:open>
   <Dialog.Trigger class="sr-only">open</Dialog.Trigger>
 
-  <Dialog.Content showCloseButton={true}>
+  <Dialog.Content class="max-w-md gap-5" showCloseButton={true}>
     <Dialog.Header>
-      <Dialog.Title>New Workspace</Dialog.Title>
-      <Dialog.Description>Create a new workspace</Dialog.Description>
+      <div class="flex items-center gap-3">
+        <div class="bg-primary/10 flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <icons.FolderPlus class="text-primary size-4" />
+        </div>
+        <div>
+          <Dialog.Title class="text-base">New Workspace</Dialog.Title>
+          <Dialog.Description class="text-muted-foreground text-xs">
+            {#if isLocal}
+              Create a local workspace stored on this device
+            {:else}
+              Create a cloud workspace synced across devices
+            {/if}
+          </Dialog.Description>
+        </div>
+      </div>
     </Dialog.Header>
-    <form onsubmit={handleSubmit} class="flex flex-col gap-2">
+
+    <form onsubmit={handleSubmit} class="flex flex-col gap-4">
+      <!-- Icon + Name row -->
       <div class="flex w-full items-center gap-2">
         <IconPicker {icon} side="right" onSelect={(ic) => (icon = ic)}>
           <div class={buttonVariants({ variant: "outline", size: "icon" })}>
@@ -112,20 +133,41 @@ export const openNewWorkspace = () => {
           placeholder="Workspace Name"
           type="text"
           required
+          autofocus
         />
       </div>
+
+      <!-- Storage type toggle -->
       {#if user}
-        <div class="flex items-center gap-2">
-          <Switch id="toggle" bind:checked={isLocal} />
-          <Label for="toggle">{isLocal ? "Local" : "Cloud"} Workspace</Label>
+        <div class="bg-muted/40 flex items-center justify-between rounded-lg p-3">
+          <div class="flex items-center gap-2">
+            {#if isLocal}
+              <icons.HardDrive class="text-muted-foreground size-4" />
+            {:else}
+              <icons.Cloud class="text-muted-foreground size-4" />
+            {/if}
+            <Label for="storage-toggle" class="text-sm font-medium">
+              {isLocal ? "Local" : "Cloud"} Workspace
+            </Label>
+          </div>
+          <Switch id="storage-toggle" bind:checked={isLocal} />
         </div>
       {/if}
-      <Button type="submit">
-        {#if loading}
-          <BarSpinner />
-        {/if}
-        Create Workspace
-      </Button>
+
+      <!-- Footer -->
+      <Dialog.Footer>
+        <Dialog.Close>
+          {#snippet child({ props })}
+            <Button variant="outline" {...props}>Cancel</Button>
+          {/snippet}
+        </Dialog.Close>
+        <Button type="submit" disabled={!canSubmit}>
+          {#if loading}
+            <BarSpinner />
+          {/if}
+          Create Workspace
+        </Button>
+      </Dialog.Footer>
     </form>
   </Dialog.Content>
 </Dialog.Root>

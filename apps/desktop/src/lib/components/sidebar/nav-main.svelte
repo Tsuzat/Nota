@@ -5,9 +5,8 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { page } from '$app/state';
 import { getKeyboardShortcut } from '$lib/utils';
-import { getGlobalSearch } from '../global-search/constants.svelte';
+  import { openGlobalSearch } from '../global-search';
 
-const search = getGlobalSearch();
 
 let isHomeHovered = $state(false);
 let isSearchHovered = $state(false);
@@ -17,7 +16,7 @@ let isSearchHovered = $state(false);
 	<Sidebar.MenuItem>
 		<Sidebar.MenuButton
 			class="border p-2"
-			onclick={() => (search.open = true)}
+			onclick={openGlobalSearch}
 			onmouseenter={() => (isSearchHovered = true)}
 			onmouseleave={() => (isSearchHovered = false)}
 		>

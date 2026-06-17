@@ -6,6 +6,7 @@ import CircleCheckIcon from '@lucide/svelte/icons/circle-check';
 import OctagonXIcon from '@lucide/svelte/icons/octagon-x';
 import InfoIcon from '@lucide/svelte/icons/info';
 import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
+  import { BarSpinner } from '@lib/icons';
 
 let { ...restProps }: SonnerProps = $props();
 </script>
@@ -17,7 +18,7 @@ let { ...restProps }: SonnerProps = $props();
 	{...restProps}
 >
 	{#snippet loadingIcon()}
-		<Loader2Icon class="size-4 animate-spin" />
+		<BarSpinner />
 	{/snippet}
 	{#snippet successIcon()}
 		<CircleCheckIcon class="size-4" />

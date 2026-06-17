@@ -1,22 +1,22 @@
-import { toast } from '@nota/ui/shadcn/sonner';
-import { BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs';
-import Database from '@tauri-apps/plugin-sql';
-import schema from './schema';
+import { toast } from "@nota/ui/shadcn/sonner";
+import { BaseDirectory, exists, mkdir } from "@tauri-apps/plugin-fs";
+import Database from "@tauri-apps/plugin-sql";
+import schema from "./schema";
 
 export let DB: Database;
 
 export async function initializeLocalDB() {
   if (DB) return;
   try {
-    DB = await Database.load('sqlite:nota.db');
+    DB = await Database.load("sqlite:nota.db");
 
     // Check if migration is needed (if userworkspaces table exists)
     //!!!! REMOVE THIS IN UPCOMING VERSIONS
     const res = await DB.select<{ name: string }[]>(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='userworkspaces'"
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='userworkspaces'",
     );
     if (res.length > 0) {
-      console.log('Running database migration from old schema...');
+      console.log("Running database migration from old schema...");
       const migrationScript = `
         PRAGMA foreign_keys = OFF;
         
@@ -44,15 +44,15 @@ export async function initializeLocalDB() {
             FOREIGN KEY (parent_note_id) REFERENCES new_notes (id) ON DELETE CASCADE
         );
 
-        INSERT INTO new_workspaces (id, name, icon, created_at, updated_at, content)
+        INSERT OR IGNORE INTO new_workspaces (id, name, icon, created_at, updated_at, content)
         SELECT id, name, icon, created_at, updated_at, content FROM workspaces;
 
-        INSERT INTO new_notes (id, workspace_id, parent_note_id, name, icon, content, pinned, deleted_at, created_at, updated_at)
+        INSERT OR IGNORE INTO new_notes (id, workspace_id, parent_note_id, name, icon, content, pinned, deleted_at, created_at, updated_at)
         SELECT id, workspace, NULL, name, icon, content, favorite, CASE WHEN trashed THEN STRFTIME('%s', 'now') ELSE NULL END, created_at, updated_at FROM notes;
 
-        DROP TABLE notes;
-        DROP TABLE workspaces;
-        DROP TABLE userworkspaces;
+        DROP TABLE IF EXISTS notes;
+        DROP TABLE IF EXISTS workspaces;
+        DROP TABLE IF EXISTS userworkspaces;
 
         ALTER TABLE new_workspaces RENAME TO workspaces;
         ALTER TABLE new_notes RENAME TO notes;
@@ -60,23 +60,23 @@ export async function initializeLocalDB() {
         PRAGMA foreign_keys = ON;
       `;
       await DB.execute(migrationScript);
-      console.log('Migration completed successfully.');
+      console.log("Migration completed successfully.");
     }
 
     await DB.execute(schema);
     await checkAndCreateAssetsDir();
-    console.log('Sqlite database loaded successfully');
+    console.log("Sqlite database loaded successfully");
   } catch (e) {
     console.error(e);
-    toast.error('Failed to load database');
+    toast.error("Failed to load database");
   }
 }
 
 export async function checkAndCreateAssetsDir() {
-  const existsAssets = await exists('assets', {
+  const existsAssets = await exists("assets", {
     baseDir: BaseDirectory.AppData,
   });
   if (!existsAssets) {
-    await mkdir('assets', { baseDir: BaseDirectory.AppData });
+    await mkdir("assets", { baseDir: BaseDirectory.AppData });
   }
 }

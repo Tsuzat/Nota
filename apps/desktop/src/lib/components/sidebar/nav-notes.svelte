@@ -8,6 +8,7 @@ import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { openNewNote } from '../dialogs';
 import NoteTile from './note-tile.svelte';
+  import { getKeyboardShortcut } from '$lib/utils';
 
 const currentWorkspace = $derived(getCurrentWorkspace().get());
 const cloudNotes = getNotesContext();
@@ -23,7 +24,7 @@ const notes = $derived.by(() => {
   <Sidebar.Group>
     <Sidebar.GroupLabel class="justify-between">
       <span>Notes</span>
-      <SimpleToolTip content="Create New Note">
+      <SimpleToolTip content="Create New Note" keyboard={getKeyboardShortcut("N", true)}>
         <Button
           variant="ghost"
           size="icon-sm"

@@ -165,7 +165,7 @@ function handleKeydown(event: KeyboardEvent) {
   <div class="flex size-full flex-col">
     <Topbar showSeparator={true}>
       {#snippet left()}
-        <Skeleton class="size-8 rounded-md" />
+        <Skeleton class="size-8 rounded-md mr-2" />
         <Skeleton class="h-8 w-48 rounded-md" />
       {/snippet}
       {#snippet right()}
@@ -190,7 +190,7 @@ function handleKeydown(event: KeyboardEvent) {
     <Topbar showSeparator={true}>
       {#snippet left()}
         <IconPicker onSelect={updateIcon}>
-          <div class={buttonVariants({ variant: "ghost", size: "icon" })}>
+          <div class={buttonVariants({ variant: "ghost", size: "icon", class: "mr-2" })}>
             <IconRenderer icon={note!.icon} />
           </div>
         </IconPicker>
