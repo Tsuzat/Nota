@@ -9,6 +9,7 @@ import { resolve } from '$app/paths';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { getGlobalSearch } from './constants.svelte';
+  import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 
 const search = getGlobalSearch();
 const localWorkspaces = getLocalWorkspaces();
@@ -35,7 +36,7 @@ function handleKeydown(e: KeyboardEvent) {
 
 <svelte:document onkeydown={handleKeydown} />
 
-<Command.Dialog bind:open={search.open} class="rounded-lg border">
+<Command.Dialog bind:open={search.open} class="border">
 	<Command.Input class="h-10 p-2 transition-colors" placeholder="Type a something to search..." />
 	<Command.List>
 		<Command.Empty>No results found.</Command.Empty>
@@ -70,8 +71,7 @@ function handleKeydown(e: KeyboardEvent) {
 							}
 						)
 					);
-					if (isCloud) cloudNotes.fetchByWorkspace(workspace.id);
-					else localNotes.fetchNotesForWorkspace(workspace.id)
+					getCurrentWorkspace().set(workspace);
 					search.open = false;
 				}}
 				<Command.Item

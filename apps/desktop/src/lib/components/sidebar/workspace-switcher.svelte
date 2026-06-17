@@ -29,15 +29,11 @@ const href = $derived.by(() => {
 });
 
 async function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
-  const id = toast.loading(`Switching workspace to ${workspace.name}`);
-  currentWorkspace.set(workspace);
-  if ('owner' in workspace) {
-    await cloudNotes.fetchByWorkspace(workspace.id);
-  } else {
-    await localNotes.fetchNotesForWorkspace(workspace.id);
+  if (currentWorkspace.get()?.id === workspace.id) {
+    return;
   }
+  currentWorkspace.set(workspace);
   await goto(href);
-  toast.success(`Switched to ${workspace.name}`, { id });
 }
 </script>
 

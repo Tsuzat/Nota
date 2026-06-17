@@ -13,6 +13,7 @@ import MoveNote from '$lib/components/dialogs/move-note.svelte';
 import NewNotes from '$lib/components/dialogs/new-notes.svelte';
 import NewWorkspace from '$lib/components/dialogs/new-workspace.svelte';
 import RenameNote from '$lib/components/dialogs/rename-note.svelte';
+import DeleteWorkspaceDialog from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
 import { setGlobalSearch } from '$lib/components/global-search';
 import GlobalSearch from '$lib/components/global-search/global-search.svelte';
 import { setGlobalSignInContext } from '$lib/components/global-signin';
@@ -109,6 +110,7 @@ $effect(() => {
 <NewWorkspace />
 <MoveNote />
 <RenameNote />
+<DeleteWorkspaceDialog />
 
 <Sidebar.Provider
 	bind:open
