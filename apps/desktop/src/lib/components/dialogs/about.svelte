@@ -20,7 +20,7 @@ onMount(async () => {
     appVersion = await getVersion();
     tauriVersion = await getTauriVersion();
   } catch {
-    appVersion = "0.9.68-beta";
+    appVersion = "Unknown";
   }
 });
 
@@ -57,7 +57,7 @@ const links: { label: string; href: string }[] = [
       <div class="flex flex-col items-center gap-1 text-center">
         <Dialog.Title class="text-xl font-bold tracking-tight">Nota</Dialog.Title>
         <Dialog.Description class="text-muted-foreground text-sm">
-          A modern note-taking application
+          A fast, modern note taking app with native AI features
         </Dialog.Description>
       </div>
 
