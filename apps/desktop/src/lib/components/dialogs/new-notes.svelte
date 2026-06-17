@@ -51,7 +51,7 @@ export const openNewNote = (pNoteId: string | null = null) => {
           name,
           icon,
           isPinned,
-          workspace,
+          workspace.id,
           parentNoteId,
         );
       } else {
