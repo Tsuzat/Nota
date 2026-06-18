@@ -10,8 +10,6 @@
   import Pencil from "@lucide/svelte/icons/pencil";
   import Copy from "@lucide/svelte/icons/copy";
   import Check from "@lucide/svelte/icons/check";
-  import Maximize2 from "@lucide/svelte/icons/maximize-2";
-  import Minimize2 from "@lucide/svelte/icons/minimize-2";
   import Eye from "@lucide/svelte/icons/eye";
   import Code from "@lucide/svelte/icons/code";
   import Columns2 from "@lucide/svelte/icons/columns-2";
@@ -26,7 +24,6 @@
   let editCode = $state("");
   let isEditing = $state(false);
   let mode = $state<"both" | "code" | "preview">("both");
-  let isExpanded = $state(false);
   let copied = $state(false);
 
   // Render state
@@ -148,12 +145,10 @@
         .run();
     }
     isEditing = false;
-    isExpanded = false;
   }
 
   function handleCancel() {
     isEditing = false;
-    isExpanded = false;
     error = null;
   }
 
@@ -199,10 +194,7 @@
   {#if isEditing}
     <!-- Editing Mode -->
     <div
-      class={cn(
-        "w-full flex flex-col border rounded-lg overflow-hidden bg-background",
-        isExpanded ? "fixed inset-4 z-50 shadow-2xl" : "h-112",
-      )}
+      class="w-full flex flex-col border rounded-lg overflow-hidden bg-background h-112"
     >
       <!-- Toolbar -->
       <div
@@ -244,18 +236,7 @@
               <Copy />
             {/if}
           </Button>
-          <Button
-            size="icon-sm"
-            variant="ghost"
-            onclick={() => (isExpanded = !isExpanded)}
-            title={isExpanded ? "Minimize" : "Maximize"}
-          >
-            {#if isExpanded}
-              <Minimize2  />
-            {:else}
-              <Maximize2  />
-            {/if}
-          </Button>
+
 
           <div class="bg-border mx-1 h-4 w-px"></div>
 
@@ -332,14 +313,7 @@
         {/if}
       </div>
     </div>
-    <!-- Fullscreen backdrop -->
-    {#if isExpanded}
-      <button
-        class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-        onclick={() => (isExpanded = false)}
-        aria-label="Close fullscreen"
-      ></button>
-    {/if}
+
   {:else}
     <!-- Preview Mode -->
     <div class="relative w-full group/preview">
