@@ -55,7 +55,7 @@ let note = $state<Note>();
 let syncing = $state(false);
 let syncingText = $state('');
 
-const onFileSelect = async (path: string) => {
+const onFileSelect = async (_path: string) => {
   // Paths are Tauri-specific, so on web this is not typically called, but we stub it
   return '';
 };

@@ -47,16 +47,16 @@ async function exportAs(type: 'JSON' | 'HTML' | 'TEXT' | 'MD') {
     let dataStr = '';
     let ext = '';
     if (type === 'JSON') {
-      dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(editor.getJSON(), null, 2));
+      dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(editor.getJSON(), null, 2))}`;
       ext = 'json';
     } else if (type === 'HTML') {
-      dataStr = 'data:text/html;charset=utf-8,' + encodeURIComponent(editor.getHTML());
+      dataStr = `data:text/html;charset=utf-8,${encodeURIComponent(editor.getHTML())}`;
       ext = 'html';
     } else if (type === 'TEXT') {
-      dataStr = 'data:text/plain;charset=utf-8,' + encodeURIComponent(editor.getText());
+      dataStr = `data:text/plain;charset=utf-8,${encodeURIComponent(editor.getText())}`;
       ext = 'txt';
     } else if (type === 'MD') {
-      dataStr = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(editor.getMarkdown());
+      dataStr = `data:text/markdown;charset=utf-8,${encodeURIComponent(editor.getMarkdown())}`;
       ext = 'md';
     }
     downloadData(dataStr, `${note.name}.${ext}`);

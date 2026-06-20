@@ -59,7 +59,7 @@ async function exportNote(note: Note) {
   const id = toast.loading(`Exporting ${note.name}...`);
   try {
     const content = await cloudNotes.fetchContent(note.id);
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ name: note.name, content }));
+    const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify({ name: note.name, content }))}`;
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
     downloadAnchor.setAttribute('download', `${note.name}.json`);
