@@ -2,7 +2,7 @@
 import Button from '@lib/components/ui/button/button.svelte';
 import { Kbd } from '@lib/components/ui/kbd';
 import { toast } from '@lib/components/ui/sonner';
-import { getNotesContext, getWorkspacesContext, type Workspace } from '@nota/client';
+import { getWorkspacesContext, type Workspace } from '@nota/client';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';

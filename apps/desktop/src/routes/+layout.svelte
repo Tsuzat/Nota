@@ -63,7 +63,6 @@ const useSettings = setGlobalSettings();
 onMount(async () => {
   await secureStorage.init();
   setTheme(useSettings.themeColor);
-
   // Initialize native app menu
   setupAppMenu();
   const token = await secureStorage.getItem('access_token');
@@ -103,24 +102,18 @@ $effect(() => {
 
 $effect(() => {
   const currentWS = currentWorkspace.get();
-  const id = toast.loading('Loading workspace data...');
-  try {
-    if (currentWS !== undefined) {
-      if ('owner' in currentWS) {
-        cloudNotes.fetchByWorkspace(currentWS.id);
-        localNotes.setNotes([]);
-      } else {
-        localNotes.fetchNotesForWorkspace(currentWS.id);
-        cloudNotes.notes = [];
-      }
-    }
-  } catch (e) {
-    console.error(e);
-    toast.error('Something went wrong. Change workspace or restart the app', {
-      id,
+  if (currentWS !== undefined) {
+    localNotes.setNotes([]);
+    cloudNotes.notes = [];
+    const promise =
+      'owner' in currentWS
+        ? cloudNotes.fetchByWorkspace(currentWS.id)
+        : localNotes.fetchNotesForWorkspace(currentWS.id);
+    toast.promise(promise, {
+      loading: 'Loading workspace data...',
+      success: 'Workspace loaded.',
+      error: 'Failed to load workspace data',
     });
-  } finally {
-    toast.dismiss(id);
   }
 });
 </script>
