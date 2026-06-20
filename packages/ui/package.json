@@ -24,6 +24,7 @@
     "./shadcn/*": "./src/lib/components/ui/*/index.js",
     "./edra/*": "./src/lib/components/edra/*",
     "./utils": "./src/lib/utils.ts",
+    "./utils/timeago": "./src/lib/utils/timeago.ts",
     "./shadcn/css": "./src/app.css"
   },
   "peerDependencies": {

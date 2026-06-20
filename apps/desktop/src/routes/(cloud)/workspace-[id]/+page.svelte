@@ -12,7 +12,8 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { openNewNote } from '$lib/components/dialogs/index.js';
 import Topbar from '$lib/components/topbar.svelte';
-import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import { importNotes, writeStringToFile } from '$lib/utils';
+import { timeAgo } from '@nota/ui/utils';
 
 let { data } = $props();
 

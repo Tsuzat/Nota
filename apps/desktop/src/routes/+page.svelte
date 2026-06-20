@@ -7,7 +7,6 @@ import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { Separator } from '@nota/ui/shadcn/separator';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { hr } from 'zod/locales';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { openNewNote } from '$lib/components/dialogs';
@@ -18,7 +17,8 @@ import Topbar from '$lib/components/topbar.svelte';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import { getKeyboardShortcut, timeAgo } from '$lib/utils';
+import { getKeyboardShortcut } from '$lib/utils';
+import { timeAgo } from '@nota/ui/utils';
 
 const localNotes = $derived(getLocalNotes().getNotes());
 const cloudNotes = $derived(getNotesContext().notes);

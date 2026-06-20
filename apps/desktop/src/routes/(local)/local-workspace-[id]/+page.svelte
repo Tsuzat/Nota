@@ -13,7 +13,8 @@ import Topbar from '$lib/components/topbar.svelte';
 import { DB } from '$lib/local/db';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
-import { importNotes, timeAgo, writeStringToFile } from '$lib/utils';
+import { importNotes, writeStringToFile } from '$lib/utils';
+import { timeAgo } from '@nota/ui/utils';
 
 let { data } = $props();
 

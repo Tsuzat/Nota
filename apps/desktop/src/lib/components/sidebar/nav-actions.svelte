@@ -8,7 +8,8 @@ import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
 import { cn } from '@nota/ui/utils';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { exportContent, importNotes, timeAgo } from '$lib/utils';
+import { exportContent, importNotes } from '$lib/utils';
+import { timeAgo } from '@nota/ui/utils';
 import { getGlobalSettings } from '../settings';
 
 interface Props {
