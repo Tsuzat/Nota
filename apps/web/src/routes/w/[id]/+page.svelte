@@ -6,12 +6,12 @@ import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { timeAgo } from '@nota/ui/utils';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { page } from '$app/state';
 import { openNewNote } from '$lib/components/dialogs/index.js';
 import Topbar from '$lib/components/topbar.svelte';
-import { timeAgo } from '@nota/ui/utils';
 
 const cloudWorkspaces = getWorkspacesContext();
 const cloudNotes = getNotesContext();
@@ -19,7 +19,9 @@ const cloudNotes = getNotesContext();
 const activeWorkspaceId = $derived(page.params.id);
 const workspace = $derived(cloudWorkspaces.workspaces.find((w) => String(w.id) === String(activeWorkspaceId)));
 const notes = $derived(
-  cloudNotes.notes.filter((n) => String(n.workspace_id) === String(activeWorkspaceId) && !n.deleted_at && !n.parent_note_id)
+  cloudNotes.notes.filter(
+    (n) => String(n.workspace_id) === String(activeWorkspaceId) && !n.deleted_at && !n.parent_note_id
+  )
 );
 
 let fileInput = $state<HTMLInputElement | null>(null);
@@ -57,10 +59,10 @@ async function exportNote(note: Note) {
   const id = toast.loading(`Exporting ${note.name}...`);
   try {
     const content = await cloudNotes.fetchContent(note.id);
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ name: note.name, content }));
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ name: note.name, content }));
     const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `${note.name}.json`);
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `${note.name}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -96,10 +98,10 @@ async function handleFileImport(e: Event) {
     const text = await file.text();
     const data = JSON.parse(text);
     if (!data.name || !data.content) {
-      throw new Error("Invalid note format. Missing name or content.");
+      throw new Error('Invalid note format. Missing name or content.');
     }
     if (!workspace) {
-      throw new Error("Workspace not found.");
+      throw new Error('Workspace not found.');
     }
     await cloudNotes.import(data.name, workspace.id, data.content);
     toast.success('Note imported successfully', { id });

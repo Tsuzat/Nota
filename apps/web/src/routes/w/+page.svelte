@@ -1,7 +1,7 @@
 <script lang="ts">
+import { icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
 import { openNewWorkspace } from '$lib/components/dialogs/new-workspace.svelte';
-import { icons } from '@nota/ui/icons/index.js';
 </script>
 
 <div class="flex h-screen w-full flex-col items-center justify-center p-6 bg-background text-foreground">

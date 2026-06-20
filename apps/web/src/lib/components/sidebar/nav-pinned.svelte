@@ -10,9 +10,7 @@ const cloudNotes = getNotesContext();
 const activeWorkspaceId = $derived(page.params.id);
 
 const notes = $derived(
-  cloudNotes.notes.filter(
-    (n) => String(n.workspace_id) === String(activeWorkspaceId) && n.pinned && !n.deleted_at
-  )
+  cloudNotes.notes.filter((n) => String(n.workspace_id) === String(activeWorkspaceId) && n.pinned && !n.deleted_at)
 );
 </script>
 

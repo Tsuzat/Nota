@@ -1,10 +1,10 @@
-import { redirect, type Handle } from "@sveltejs/kit";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
+import { type Handle, redirect } from '@sveltejs/kit';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
 export const handle: Handle = async ({ event, resolve }) => {
   const url = `${PUBLIC_BACKEND_URL}/api/v1/user/me`;
   const res = await event.fetch(url, {
-    method: "GET",
+    method: 'GET',
     headers: event.request.headers,
   });
   if (res.ok) {
@@ -12,7 +12,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       const data = await res.json();
       event.locals.user = data.data;
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error('Error fetching user data:', error);
       event.locals.user = null;
     }
   } else {
@@ -20,9 +20,9 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   // Redirect logic for workspace route (/w) - Auth check only
-  if (event.url.pathname.startsWith("/w")) {
+  if (event.url.pathname.startsWith('/w')) {
     if (!event.locals.user) {
-      throw redirect(302, "/signin");
+      throw redirect(302, '/signin');
     }
   }
 

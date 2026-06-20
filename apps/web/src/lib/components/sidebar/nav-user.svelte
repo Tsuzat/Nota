@@ -42,7 +42,7 @@ async function handleLogout() {
     error: (err) => {
       console.error(err);
       return 'Something went wrong.';
-    }
+    },
   });
 }
 </script>

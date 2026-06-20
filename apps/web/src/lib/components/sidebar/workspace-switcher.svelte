@@ -1,9 +1,9 @@
 <script lang="ts">
 import { getWorkspacesContext, type Workspace } from '@nota/client';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
-import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { cn } from '@nota/ui/utils';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';

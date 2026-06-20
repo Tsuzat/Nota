@@ -1,21 +1,21 @@
 <script lang="ts">
-import { type FileType, getFileTypeExtensions, getFileTypeFromExtension } from '@nota/ui/edra/utils.js';
-import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { getNotesContext, getStorageContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
 import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
 import type { Content, Editor } from '@nota/ui/edra/types.js';
+import { type FileType, getFileTypeExtensions, getFileTypeFromExtension } from '@nota/ui/edra/utils.js';
 import { BarSpinner, IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { compare } from 'fast-json-patch';
 import { onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AI from '$lib/editor/Ai.svelte';
 import NavActions from '$lib/components/nav-actions.svelte';
 import Topbar from '$lib/components/topbar.svelte';
+import AI from '$lib/editor/Ai.svelte';
 
 const { data } = $props();
 
@@ -81,7 +81,7 @@ const getLocalFile = async (fileType: FileType) => {
   return new Promise<string | null>((resolve) => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = extensions.map(ext => `.${ext}`).join(',');
+    input.accept = extensions.map((ext) => `.${ext}`).join(',');
     input.onchange = async () => {
       const file = input.files?.[0];
       if (!file) {

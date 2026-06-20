@@ -1,11 +1,11 @@
 <script lang="ts">
-import { IconRenderer, icons } from '@nota/ui/icons/index.js';
-import { cn } from '@nota/ui/utils';
 import { getAuthContext, getNotesContext, getWorkspacesContext, type Note } from '@nota/client';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import * as Collapsible from '@nota/ui/shadcn/collapsible';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { cn } from '@nota/ui/utils';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { page } from '$app/state';

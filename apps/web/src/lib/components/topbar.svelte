@@ -1,8 +1,7 @@
 <script lang="ts">
-import { useSidebar } from '@nota/ui/shadcn/sidebar';
-import type { Snippet } from 'svelte';
-import { SidebarTrigger } from '@nota/ui/shadcn/sidebar';
 import { Separator } from '@nota/ui/shadcn/separator';
+import { SidebarTrigger, useSidebar } from '@nota/ui/shadcn/sidebar';
+import type { Snippet } from 'svelte';
 
 interface Props {
   showSeparator?: boolean;

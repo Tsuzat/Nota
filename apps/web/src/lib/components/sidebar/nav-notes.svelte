@@ -11,9 +11,7 @@ const cloudNotes = getNotesContext();
 const cloudWorkspaces = getWorkspacesContext();
 
 const activeWorkspaceId = $derived(page.params.id);
-const currentWorkspace = $derived(
-  cloudWorkspaces.workspaces.find((w) => String(w.id) === String(activeWorkspaceId))
-);
+const currentWorkspace = $derived(cloudWorkspaces.workspaces.find((w) => String(w.id) === String(activeWorkspaceId)));
 
 const notes = $derived(
   cloudNotes.notes.filter(

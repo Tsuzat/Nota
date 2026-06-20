@@ -5,9 +5,8 @@ import type { Editor } from '@nota/ui/edra/types.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
-import { cn } from '@nota/ui/utils';
-import { timeAgo } from '@nota/ui/utils';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { cn, timeAgo } from '@nota/ui/utils';
 
 interface Props {
   starred?: boolean;
@@ -26,7 +25,7 @@ let {
   editor,
   useToolBar = $bindable(true),
   useBubbleMenu = $bindable(true),
-  useDragHandle = $bindable(true)
+  useDragHandle = $bindable(true),
 }: Props = $props();
 
 const cloudNotes = getNotesContext();
@@ -34,8 +33,8 @@ let open = $state(false);
 
 function downloadData(dataStr: string, fileName: string) {
   const downloadAnchor = document.createElement('a');
-  downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", fileName);
+  downloadAnchor.setAttribute('href', dataStr);
+  downloadAnchor.setAttribute('download', fileName);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
@@ -48,16 +47,16 @@ async function exportAs(type: 'JSON' | 'HTML' | 'TEXT' | 'MD') {
     let dataStr = '';
     let ext = '';
     if (type === 'JSON') {
-      dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(editor.getJSON(), null, 2));
+      dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(editor.getJSON(), null, 2));
       ext = 'json';
     } else if (type === 'HTML') {
-      dataStr = "data:text/html;charset=utf-8," + encodeURIComponent(editor.getHTML());
+      dataStr = 'data:text/html;charset=utf-8,' + encodeURIComponent(editor.getHTML());
       ext = 'html';
     } else if (type === 'TEXT') {
-      dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(editor.getText());
+      dataStr = 'data:text/plain;charset=utf-8,' + encodeURIComponent(editor.getText());
       ext = 'txt';
     } else if (type === 'MD') {
-      dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(editor.getMarkdown());
+      dataStr = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(editor.getMarkdown());
       ext = 'md';
     }
     downloadData(dataStr, `${note.name}.${ext}`);
