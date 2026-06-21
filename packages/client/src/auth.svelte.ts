@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte";
 import { PUBLIC_BACKEND_URL } from "$env/static/public";
 import request from "./request";
-import { type User, UserSchema } from "./types";
+import { type User, UserSchema, type Session, SessionSchema } from "./types";
 import { secureStorage } from "./secureStorage";
 import { isTauri } from "@tauri-apps/api/core";
 
@@ -166,6 +166,49 @@ class Auth {
       await secureStorage.removeItem("refresh_token");
     }
     await request(url);
+  }
+  /**
+   * Get all active sessions for the current user
+   */
+  async getSessions(): Promise<Session[]> {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/session/all`;
+    const res = await request(url);
+    if (res.ok) {
+      const json = await res.json();
+      return json.data.map((s: any) => SessionSchema.parse(s));
+    }
+    throw new Error(await res.text());
+  }
+
+  /**
+   * Revoke a specific session by ID
+   */
+  async revokeSession(id: string): Promise<void> {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/session/revoke/${id}`;
+    const res = await request(url, { method: "POST" });
+    if (!res.ok) throw new Error(await res.text());
+  }
+
+  /**
+   * Revoke all sessions including the current one
+   */
+  async revokeAllSessions(): Promise<void> {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/session/revoke/all`;
+    const res = await request(url, { method: "POST" });
+    if (!res.ok) throw new Error(await res.text());
+  }
+
+  /**
+   * Revoke all other sessions except the current one
+   */
+  async revokeOtherSessions(currentSessionId?: string): Promise<void> {
+    const sessions = await this.getSessions();
+    // If we don't know current session ID, this might revoke all if they aren't careful, 
+    // but typically UI will pass it if known.
+    const toRevoke = currentSessionId 
+      ? sessions.filter(s => s.id !== currentSessionId)
+      : sessions;
+    await Promise.all(toRevoke.map(s => this.revokeSession(s.id)));
   }
 }
 

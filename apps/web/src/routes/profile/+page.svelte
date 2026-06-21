@@ -28,31 +28,55 @@ function handleDeleteAccount() {
   toast.warning('Account Deletion is coming soon.');
 }
 
-// Mock Sessions
-let mockSessions = $state([
-  {
-    id: '1',
-    device: 'MacBook Pro',
-    os: 'macOS',
-    browser: 'Chrome',
-    location: 'San Francisco, CA',
-    last_active: new Date().toISOString(),
-    is_current: true,
-  },
-  {
-    id: '2',
-    device: 'iPhone 15 Pro',
-    os: 'iOS',
-    browser: 'Safari',
-    location: 'San Francisco, CA',
-    last_active: new Date(Date.now() - 86400000).toISOString(),
-    is_current: false,
-  }
-]);
+import { onMount } from 'svelte';
+import { getAuthContext } from '@nota/client';
+import { parseSession, type ParsedSession, type Session } from '@nota/client';
 
-function revokeSession(id: string) {
-  mockSessions = mockSessions.filter(s => s.id !== id);
-  toast.success('Session revoked successfully.');
+const auth = getAuthContext();
+let sessions: (Session & ParsedSession)[] = $state([]);
+let isLoadingSessions = $state(true);
+
+onMount(async () => {
+  try {
+    const rawSessions = await auth.getSessions();
+    // Assuming the one with the latest refreshed_at or created_at might be current if we don't know the ID
+    // For now we'll just parse them
+    sessions = rawSessions.map(s => ({
+      ...s,
+      ...parseSession(s.user_agent, s)
+    })).sort((a, b) => new Date(b.refreshed_at || b.created_at).getTime() - new Date(a.refreshed_at || a.created_at).getTime());
+    
+    // Naively mark the most recently active one as current if we don't have currentSessionId
+    if (sessions.length > 0 && !sessions.some(s => s.isCurrent)) {
+      sessions[0].isCurrent = true;
+    }
+  } catch (err) {
+    toast.error('Failed to load sessions');
+  } finally {
+    isLoadingSessions = false;
+  }
+});
+
+async function revokeSession(id: string) {
+  try {
+    await auth.revokeSession(id);
+    sessions = sessions.filter(s => s.id !== id);
+    toast.success('Session revoked successfully.');
+  } catch (err) {
+    toast.error('Failed to revoke session.');
+  }
+}
+
+async function revokeAllOtherSessions() {
+  try {
+    // Current is either the one marked isCurrent or the first one
+    const currentSession = sessions.find(s => s.isCurrent) || sessions[0];
+    await auth.revokeOtherSessions(currentSession?.id);
+    sessions = sessions.filter(s => s.id === currentSession?.id);
+    toast.success('All other sessions revoked successfully.');
+  } catch (err) {
+    toast.error('Failed to revoke other sessions.');
+  }
 }
 </script>
 
@@ -254,37 +278,64 @@ function revokeSession(id: string) {
         <!-- Sessions Tab -->
         <Tabs.Content value="sessions" class="space-y-8 mt-6">
           <Card.Root class="border-border/50 bg-card/50 backdrop-blur-xs">
-            <Card.Header>
-              <Card.Title>Active Sessions</Card.Title>
-              <Card.Description>Manage the devices where you are currently logged in.</Card.Description>
+            <Card.Header class="flex flex-row items-center justify-between">
+              <div>
+                <Card.Title>Active Sessions</Card.Title>
+                <Card.Description>Manage the devices where you are currently logged in.</Card.Description>
+              </div>
+              {#if sessions.length > 1}
+                <Button variant="outline" size="sm" onclick={revokeAllOtherSessions}>
+                  Revoke All Other Sessions
+                </Button>
+              {/if}
             </Card.Header>
             <Card.Content class="grid gap-4">
-              {#if mockSessions.length === 0}
+              {#if isLoadingSessions}
+                <div class="flex items-center justify-center py-8">
+                  <icons.BarSpinner class="size-6 text-muted-foreground" />
+                </div>
+              {:else if sessions.length === 0}
                 <div class="text-center text-sm text-muted-foreground py-8">No active sessions found.</div>
               {:else}
-                {#each mockSessions as session (session.id)}
-                  <div class="flex items-center justify-between border rounded-lg p-4 bg-background/50">
+                {#each sessions as session (session.id)}
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between border rounded-lg p-4 bg-background/50 gap-4">
                     <div class="flex items-center gap-4">
-                      <div class="bg-muted p-2 rounded-full">
-                        <MonitorSmartphone class="size-5" />
+                      <div class="bg-muted p-2 rounded-full flex items-center justify-center size-10">
+                        {#if session.browserName === 'Chrome'}
+                          <icons.ChromeBrowser class="size-6" />
+                        {:else if session.browserName === 'Safari'}
+                          <icons.SafariBrowser class="size-6" />
+                        {:else if session.browserName === 'Edge'}
+                          <icons.EdgeBrowser class="size-6" />
+                        {:else if session.browserName === 'Firefox'}
+                          <icons.FirefoxBrowser class="size-6" />
+                        {:else if session.browserName === 'Brave'}
+                          <icons.BraveBrowser class="size-6" />
+                        {:else if session.browserName === 'Zen'}
+                          <icons.ZenBrowser class="size-6" />
+                        {:else}
+                          <MonitorSmartphone class="size-5 text-muted-foreground" />
+                        {/if}
                       </div>
                       <div>
                         <div class="font-medium flex items-center gap-2">
-                          {session.device} ({session.browser})
-                          {#if session.is_current}
+                          {session.osName} &bull; {session.browserName}
+                          {#if session.isCurrent}
                             <span class="bg-primary/10 text-primary text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Current Device</span>
                           {/if}
                         </div>
                         <div class="text-sm text-muted-foreground flex items-center gap-3 mt-1">
-                          <span class="flex items-center gap-1"><MapPin class="size-3" /> {session.location}</span>
-                          <span class="text-muted-foreground/60">&bull;</span>
-                          <span>Last active: {new Date(session.last_active).toLocaleDateString()}</span>
+                          {#if session.ip}
+                            <span class="flex items-center gap-1"><MapPin class="size-3" /> {session.ip}</span>
+                            <span class="text-muted-foreground/60">&bull;</span>
+                          {/if}
+                          <span>Active {session.createdAgo}</span>
                         </div>
                       </div>
                     </div>
-                    {#if !session.is_current}
-                      <Button variant="ghost" size="icon" class="text-destructive hover:bg-destructive/10 hover:text-destructive" onclick={() => revokeSession(session.id)}>
-                        <ShieldX class="size-4" />
+                    {#if !session.isCurrent}
+                      <Button variant="ghost" size="sm" class="text-destructive hover:bg-destructive/10 hover:text-destructive w-full sm:w-auto" onclick={() => revokeSession(session.id)}>
+                        Revoke
                       </Button>
                     {/if}
                   </div>

@@ -4,6 +4,7 @@ export { getNotesContext, setNotesContext } from './notes.svelte';
 export { default as request } from './request';
 export { secureStorage } from './secureStorage';
 export { getStorageContext, setStorageContext } from './storage.svelte';
+export * from './session-parser';
 export type { NotaFile, Note, Session, User, Workspace } from './types';
 export {
   NotaFileSchema,
