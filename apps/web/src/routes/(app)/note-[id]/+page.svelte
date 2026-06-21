@@ -360,19 +360,17 @@
       <AI {editor} />
     {/if}
     <div class="flex-1 grow flex flex-col overflow-auto items-center">
-      <div class="w-full max-w-[800px] px-8 py-12 md:py-16">
         <EdraEditor
           bind:editor
           bind:element
           {content}
-          class="w-full min-h-[50vh] prose prose-stone dark:prose-invert max-w-none focus:outline-none"
+          class="w-full min-h-[50vh] max-w-3xl"
           {onUpdate}
           {onFileSelect}
           {onDropOrPaste}
           {getAssets}
           {getLocalFile}
         />
-      </div>
     </div>
   </div>
 {:else}

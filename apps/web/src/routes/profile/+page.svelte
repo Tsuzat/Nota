@@ -89,6 +89,9 @@ async function revokeAllOtherSessions() {
   <Topbar>
     {#snippet left()}
       <div class="flex items-center gap-2">
+      <Button href={resolve("/")} variant="outline" size="icon">
+        <icons.ChevronLeft />
+      </Button>
         <icons.User class="size-4" />
         <span class="font-medium text-sm">Profile</span>
       </div>

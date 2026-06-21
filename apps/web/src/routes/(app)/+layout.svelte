@@ -8,6 +8,7 @@
   import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
   import { onMount } from 'svelte';
   import { setCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
+  import ConfirmDelete from '@lib/components/custom/dialogs/confirm-delete.svelte';
 
   let { children, data } = $props();
   let open = $state(true);
@@ -47,6 +48,7 @@
 <NewWorkspace />
 <NewNote />
 <GlobalSearch />
+<ConfirmDelete />
 
 <Sidebar.Provider
   bind:open

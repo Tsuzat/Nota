@@ -7,3 +7,8 @@ export {
   default as DeleteWorkspaceDialog,
   openDeleteWorkspaceDialog,
 } from "./DeleteWorkspaceDialog.svelte";
+
+export {
+  default as ConfirmDelete,
+  confirmDelete,
+} from "./dialogs/confirm-delete.svelte";

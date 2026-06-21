@@ -42,8 +42,8 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
   // 2. Initial Request
   let response = await fetchFn(url, currentOptions);
 
-  // 3. Handle 403 (Auto-Refresh) if access token expired or invalid
-  if (response.status === 403 || (await secureStorage.getItem('refresh_token')) !== null) {
+  // 3. Handle 401/403 (Auto-Refresh) if access token expired or invalid
+  if (response.status === 401 || response.status === 403) {
     if (url.includes('/auth/refreshtoken')) {
       return response;
     }
