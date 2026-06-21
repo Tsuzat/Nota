@@ -20,7 +20,7 @@ const sidebar = useSidebar();
   class="flex h-12 shrink-0 items-center justify-between overflow-hidden px-4 select-none {className}"
 >
   <div class="flex items-center gap-2">
-    {#if !sidebar.open}
+    {#if sidebar && !sidebar.open}
       <SidebarTrigger />
       {#if showSeparator}
         <Separator orientation="vertical" class="h-4! mx-1" />
