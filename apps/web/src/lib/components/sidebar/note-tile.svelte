@@ -22,7 +22,7 @@ const cloudNotes = getNotesContext();
 const cloudWorkspaces = getWorkspacesContext();
 const user = $derived(getAuthContext().user);
 
-const href = $derived(resolve(`/w/${note.workspace_id}/notes/${note.id}`));
+const href = $derived(resolve("/(app)/note-[id]", { id: note.id }));
 const isActive = $derived(page.url.pathname.endsWith(href));
 
 const childNotes = $derived(
@@ -82,7 +82,7 @@ async function moveNoteToWorkspace(targetWorkspaceId: string) {
     toast.success('Moved note successfully');
     // If we are currently viewing the note, navigate back to the workspace or to the new URL
     if (page.url.pathname.includes(note.id)) {
-      goto(resolve('/w/[id]', { id: targetWorkspaceId }));
+      goto(resolve('/(app)/workspace-[id]', { id: targetWorkspaceId }));
     }
   } catch (err) {
     console.error(err);
@@ -97,7 +97,7 @@ async function trashNote() {
     await cloudNotes.update(note.id, { deleted_at: new Date() });
     toast.success('Moved to Trash');
     if (page.url.pathname.includes(note.id)) {
-      goto(resolve('/w/[id]', { id: String(note.workspace_id) }));
+      goto(resolve('/(app)/workspace-[id]', { id: String(note.workspace_id) }));
     }
   } catch (err) {
     console.error(err);
@@ -110,7 +110,7 @@ async function deleteNote() {
   if (!confirmed) return;
   try {
     if (page.url.pathname.includes(note.id)) {
-      goto(resolve('/w/[id]', { id: String(note.workspace_id) }));
+      goto(resolve('/(app)/workspace-[id]', { id: String(note.workspace_id) }));
     }
     await cloudNotes.delete(note.id);
     toast.success('Permanently deleted');

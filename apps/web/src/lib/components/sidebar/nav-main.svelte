@@ -10,12 +10,12 @@ let isHomeHovered = $state(false);
 <Sidebar.Menu>
   <Sidebar.MenuItem>
     <Sidebar.MenuButton
-      onclick={() => goto(resolve('/'))}
+      onclick={() => goto(resolve('/home'))}
       onmouseenter={() => (isHomeHovered = true)}
       onmouseleave={() => (isHomeHovered = false)}
     >
       <MovingHome size={18} isHovered={isHomeHovered} />
-      <span>Landing Home</span>
+      <span>Home</span>
     </Sidebar.MenuButton>
   </Sidebar.MenuItem>
 </Sidebar.Menu>

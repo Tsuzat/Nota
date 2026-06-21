@@ -19,7 +19,7 @@ function switchWorkspace(workspace: Workspace) {
   if (String(activeWorkspaceId) === String(workspace.id)) {
     return;
   }
-  goto(resolve('/w/[id]', { id: String(workspace.id) }));
+  goto(resolve('/(app)/workspace-[id]', { id: workspace.id}));
 }
 </script>
 

@@ -7,6 +7,8 @@ import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { resolve } from '$app/paths';
+import Topbar from '$lib/components/topbar.svelte';
+import { icons } from '@nota/ui/icons/index.js';
 
 const { data } = $props();
 
@@ -27,12 +29,22 @@ function handleDeleteAccount() {
     <h2>Please sign in to view your profile.</h2>
   </main>
 {:else}
-  <div class="container mx-auto max-w-4xl p-4 md:p-8">
-    
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold tracking-tight">Profile</h1>
-      <p class="text-muted-foreground">Manage your account and settings.</p>
-    </div>
+<div class="flex h-screen w-full flex-col bg-background text-foreground">
+  <Topbar>
+    {#snippet left()}
+      <div class="flex items-center gap-2">
+        <icons.User class="size-4" />
+        <span class="font-medium text-sm">Profile</span>
+      </div>
+    {/snippet}
+  </Topbar>
+
+  <div class="flex-1 overflow-auto p-6 md:p-10">
+    <div class="mx-auto max-w-3xl space-y-8">
+      <div class="space-y-1">
+        <h1 class="text-3xl font-bold tracking-tight">Your Profile</h1>
+        <p class="text-muted-foreground">Manage your account and settings.</p>
+      </div>
 
     <div class="grid gap-8">
       <Card.Root>
@@ -79,7 +91,7 @@ function handleDeleteAccount() {
             </div>
           </div>
         </Card.Content>
-        <Card.Footer class="flex justify-end gap-2">
+        <Card.Footer class="flex justify-end gap-2 border-t pt-6 bg-muted/20">
           {#if !isPro}
             <Button variant="outline" href="/#pricing"
               >Upgrade to
@@ -98,6 +110,40 @@ function handleDeleteAccount() {
             Sign Out
           </Button>
         </Card.Footer>
+      </Card.Root>
+
+      <Card.Root>
+        <Card.Header>
+          <Card.Title>Storage & Billing</Card.Title>
+          <Card.Description>Manage your storage limit and billing cycle.</Card.Description>
+        </Card.Header>
+        <Card.Content class="grid gap-6">
+          <div class="grid gap-2">
+            <div class="text-sm font-medium">Storage Usage</div>
+            <div class="flex items-center gap-4">
+              <div class="w-full bg-secondary rounded-full h-2.5 dark:bg-gray-700">
+                <div class="bg-primary h-2.5 rounded-full" style="width: {Math.min(100, ((user.used_storage || 0) / (user.assigned_storage || 1)) * 100)}%"></div>
+              </div>
+              <div class="text-sm font-medium min-w-max text-muted-foreground">
+                {(user.used_storage / 1024 / 1024).toFixed(2)} MB / {(user.assigned_storage / 1024 / 1024).toFixed(2)} MB
+              </div>
+            </div>
+          </div>
+          <div class="grid gap-2">
+            <div class="text-sm font-medium">Subscription Cycle</div>
+            <div class="text-muted-foreground text-sm">
+              {#if user.next_billing_at}
+                Next billing date: {new Date(user.next_billing_at).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              {:else}
+                No active billing cycle
+              {/if}
+            </div>
+          </div>
+        </Card.Content>
       </Card.Root>
 
       <Card.Root class="border-destructive">
@@ -122,6 +168,8 @@ function handleDeleteAccount() {
           </div>
         </Card.Content>
       </Card.Root>
+      </div>
     </div>
   </div>
+</div>
 {/if}
