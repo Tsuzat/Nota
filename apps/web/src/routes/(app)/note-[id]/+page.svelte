@@ -16,7 +16,7 @@
   import NavActions from '$lib/components/nav-actions.svelte';
   import Topbar from '$lib/components/topbar.svelte';
   import AI from '$lib/editor/Ai.svelte';
-  import { currentWorkspace } from '$lib/currentworkspace.svelte';
+  import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
 
   const { data } = $props();
 

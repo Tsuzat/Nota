@@ -6,16 +6,14 @@ import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { page } from '$app/state';
 import { openNewNote } from '../dialogs/index.js';
 import NoteTile from './note-tile.svelte';
+import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
 
 const cloudNotes = getNotesContext();
-const cloudWorkspaces = getWorkspacesContext();
-
-const activeWorkspaceId = $derived(page.params.id);
-const currentWorkspace = $derived(cloudWorkspaces.workspaces.find((w) => String(w.id) === String(activeWorkspaceId)));
+const currentWorkspace = getCurrentWorkspaceContext();
 
 const notes = $derived(
   cloudNotes.notes.filter(
-    (n) => String(n.workspace_id) === String(activeWorkspaceId) && !n.deleted_at && !n.parent_note_id
+    (n) => n.workspace_id === currentWorkspace.value?.id && !n.deleted_at && !n.parent_note_id
   )
 );
 </script>
@@ -27,7 +25,7 @@ const notes = $derived(
       <Button
         variant="ghost"
         size="icon-sm"
-        onclick={() => openNewNote(String(currentWorkspace.id))}
+        onclick={() => openNewNote(currentWorkspace.value!.id)}
       >
         <icons.Plus class="size-4" />
       </Button>

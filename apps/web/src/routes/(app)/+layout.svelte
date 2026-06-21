@@ -7,49 +7,33 @@
   import GlobalSearch from '$lib/components/global-search.svelte';
   import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
   import { onMount } from 'svelte';
-  import { page } from '$app/state';
-  import { currentWorkspace } from '$lib/currentworkspace.svelte';
+  import { setCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
 
   let { children, data } = $props();
   let open = $state(true);
 
   const cloudWorkspaces = setWorkspacesContext();
   const cloudNotes = setNotesContext();
+  const currentWorkspace = setCurrentWorkspaceContext();
   const storage = setStorageContext();
 
   onMount(() => {
     cloudWorkspaces.workspaces = data.workspaces
-
+    currentWorkspace.value = data.workspaces[0];
+    storage.fetch()
     const stored = localStorage.getItem("sidebar-state");
     if (stored) {
       open = stored === "open";
     }
   })
 
-  // Track the current workspace
-  $effect(() => {
-    const routeId = page.route.id;
-    const workspaces = cloudWorkspaces.workspaces;
-
-    if (routeId?.includes('/workspace-[id]')) {
-      const activeId = page.params.id;
-      const found = workspaces.find((w) => String(w.id) === String(activeId));
-      if (found) {
-        currentWorkspace.value = found;
-      }
-    } else if (!currentWorkspace.value && workspaces.length > 0) {
-      // Fallback
-      currentWorkspace.value = workspaces[0];
-    }
-  });
 
   // Fetch notes for the active workspace whenever it changes
   $effect(() => {
-    const activeId = currentWorkspace.value?.id;
-    if (activeId && page.route.id?.includes('/workspace-[id]')) {
+    if (currentWorkspace.value?.id) {
       // We are in a workspace view, fetch notes for this workspace
       cloudNotes.notes = [];
-      const promise = cloudNotes.fetchByWorkspace(String(activeId));
+      const promise = cloudNotes.fetchByWorkspace(currentWorkspace.value.id);
       toast.promise(promise, {
         loading: 'Loading notes...',
         success: 'Notes loaded.',

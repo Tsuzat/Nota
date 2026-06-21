@@ -1,11 +1,9 @@
 <script lang="ts" module>
 let open = $state(false);
 let parentNoteId = $state<string | null>(null);
-let workspaceId = $state<string | null>(null);
 
-export const openNewNote = (wId: string | null = null, pNoteId: string | null = null) => {
+export const openNewNote = (pNoteId: string | null = null) => {
   open = true;
-  workspaceId = wId;
   parentNoteId = pNoteId;
 };
 </script>
@@ -20,6 +18,7 @@ export const openNewNote = (wId: string | null = null, pNoteId: string | null = 
   import { Input } from "@nota/ui/shadcn/input";
   import { Label } from "@nota/ui/shadcn/label";
   import { page } from "$app/state";
+  import { getCurrentWorkspaceContext } from "$lib/currentworkspace.svelte";
 
   let name: string | undefined = $state<string>();
   let icon: string = $state("lucide:FileText");
@@ -29,11 +28,7 @@ export const openNewNote = (wId: string | null = null, pNoteId: string | null = 
   const cloudNotes = getNotesContext();
   const cloudWorkspaces = getWorkspacesContext();
   const user = $derived(getAuthContext().user);
-
-  const activeWorkspaceId = $derived(workspaceId ?? page.params.id);
-  const workspace = $derived(
-    cloudWorkspaces.workspaces.find((w) => String(w.id) === String(activeWorkspaceId))
-  );
+  const currentWorkspace = getCurrentWorkspaceContext()
 
   const canSubmit = $derived(
     name !== undefined && name.trim() !== "" && icon.trim() !== "" && !loading
@@ -41,7 +36,7 @@ export const openNewNote = (wId: string | null = null, pNoteId: string | null = 
 
   async function handleSubmit(e: Event) {
     e.preventDefault();
-    if (!activeWorkspaceId) {
+    if (!currentWorkspace.value?.id) {
       toast.error("No workspace selected");
       return;
     }
@@ -58,7 +53,7 @@ export const openNewNote = (wId: string | null = null, pNoteId: string | null = 
       await cloudNotes.create(
         name,
         icon,
-        activeWorkspaceId,
+        currentWorkspace.value!.id,
         parentNoteId,
         isPinned
       );
@@ -66,7 +61,6 @@ export const openNewNote = (wId: string | null = null, pNoteId: string | null = 
       name = "";
       isPinned = false;
       parentNoteId = null;
-      workspaceId = null;
     } catch (e) {
       loading = false;
       console.error(e);
@@ -101,8 +95,8 @@ export const openNewNote = (wId: string | null = null, pNoteId: string | null = 
           <Dialog.Description class="text-muted-foreground text-xs">
             {#if parentNoteId}
               Create a sub-note inside the current note
-            {:else if workspace}
-              Create a note in <strong class="text-foreground">{workspace.name}</strong>
+            {:else if currentWorkspace.value}
+              Create a note in <strong class="text-foreground">{currentWorkspace.value.name}</strong>
             {:else}
               Create a new note
             {/if}

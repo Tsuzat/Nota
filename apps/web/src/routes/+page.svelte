@@ -1,24 +1,6 @@
 <script lang="ts">
 import { BorderBeam, SimpleToolTip, ToggleMode } from '@lib/components/custom';
 import { toast } from '@lib/components/ui/sonner/index.js';
-import { Menu } from '@lucide/svelte';
-import BookOpen from '@lucide/svelte/icons/book-open';
-import Check from '@lucide/svelte/icons/check';
-import Code from '@lucide/svelte/icons/code';
-import Github from '@lucide/svelte/icons/github';
-import GraduationCap from '@lucide/svelte/icons/graduation-cap';
-import GripVertical from '@lucide/svelte/icons/grip-vertical';
-import Loader from '@lucide/svelte/icons/loader';
-import LogOut from '@lucide/svelte/icons/log-out';
-import MousePointerClick from '@lucide/svelte/icons/mouse-pointer-click';
-import Pen from '@lucide/svelte/icons/pen';
-import PenTool from '@lucide/svelte/icons/pen-tool';
-import Sparkles from '@lucide/svelte/icons/sparkles';
-import Terminal from '@lucide/svelte/icons/terminal';
-import User from '@lucide/svelte/icons/user';
-import UserRound from '@lucide/svelte/icons/user-round';
-import X from '@lucide/svelte/icons/x';
-import Zap from '@lucide/svelte/icons/zap';
 import { request } from '@nota/client';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 import * as Avatar from '@nota/ui/shadcn/avatar';
@@ -37,6 +19,7 @@ import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
 import { sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
+import { BarSpinner, icons, Github } from '@nota/ui/icons/index.js';
 
 const { data } = $props();
 const user = $derived(data.user);
@@ -155,7 +138,7 @@ async function copyToClipboard() {
           class: "sm:hidden",
         })}
       >
-        <Menu />
+        <icons.Menu />
       </DropdownMenu.Trigger>
       <DropdownMenu.Content class="w-fit">
         <a href="#features">
@@ -188,7 +171,7 @@ async function copyToClipboard() {
             >
               <Avatar.Image src={user.avatar_url} />
               <Avatar.Fallback>
-                <User />
+                <icons.User />
               </Avatar.Fallback>
             </Avatar.Root>
           </SimpleToolTip>
@@ -197,8 +180,12 @@ async function copyToClipboard() {
           <Dropdown.Label class="text-xs">
             {user.email}
           </Dropdown.Label>
+          <Dropdown.Item onclick={() => goto(resolve("/home"))}>
+            <icons.House />
+            <span>Home</span>
+          </Dropdown.Item>
           <Dropdown.Item onclick={() => goto(resolve("/profile"))}>
-            <UserRound />
+            <icons.UserRound />
             <span>Profile</span>
           </Dropdown.Item>
           <Dropdown.Item
@@ -206,7 +193,7 @@ async function copyToClipboard() {
               goto(resolve("/signout"));
             }}
           >
-            <LogOut />
+            <icons.LogOut />
             Sign Out
           </Dropdown.Item>
         </Dropdown.Content>
@@ -229,7 +216,7 @@ async function copyToClipboard() {
   </p>
   <div class="flex flex-col items-center gap-4 sm:flex-row">
     <Button variant="outline" href={resolve("/playground")}>
-      <Pen />
+      <icons.Pen />
       Playground
     </Button>
     <Button
@@ -242,7 +229,7 @@ async function copyToClipboard() {
     </Button>
     {#await getArtefacts()}
       <Button variant="outline">
-        <Loader class="animate-spin" />
+        <BarSpinner />
         Loading
       </Button>
     {:then artefacts}
@@ -251,7 +238,7 @@ async function copyToClipboard() {
         <ArtifactDownloader platforms={artefacts.platforms} />
       {:else}
         <Button variant="outline">
-          <X />
+          <icons.X />
           No Downloadables
         </Button>
       {/if}
@@ -290,7 +277,7 @@ async function copyToClipboard() {
         <Card.Root class="bg-background/60 backdrop-blur-sm">
           <Card.Header>
             <Card.Title class="flex items-center gap-2">
-              <Zap class="size-5 text-orange-500" />
+              <icons.Zap class="size-5 text-orange-500" />
               Local First & Private
             </Card.Title>
             <Card.Description>Your data, your control</Card.Description>
@@ -303,7 +290,7 @@ async function copyToClipboard() {
         <Card.Root class="bg-background/60 backdrop-blur-sm">
           <Card.Header>
             <Card.Title class="flex items-center gap-2">
-              <Code class="size-5 text-blue-500" />
+              <icons.Code class="size-5 text-blue-500" />
               Bring Your Own Keys
             </Card.Title>
             <Card.Description>Supports Gemini API</Card.Description>
@@ -316,7 +303,7 @@ async function copyToClipboard() {
         <Card.Root class="bg-background/60 backdrop-blur-sm">
           <Card.Header>
             <Card.Title class="flex items-center gap-2">
-              <Sparkles class="size-5 text-yellow-500" />
+              <icons.Sparkles class="size-5 text-yellow-500" />
               Native AI Features
             </Card.Title>
             <Card.Description>Fast and amazing experience</Card.Description>
@@ -329,7 +316,7 @@ async function copyToClipboard() {
         <Card.Root class="bg-background/60 backdrop-blur-sm">
           <Card.Header>
             <Card.Title class="flex items-center gap-2">
-              <PenTool class="size-5 text-purple-500" />
+              <icons.PenTool class="size-5 text-purple-500" />
               Free Forever
             </Card.Title>
             <Card.Description>For local usage</Card.Description>
@@ -349,7 +336,7 @@ async function copyToClipboard() {
       <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div class="flex flex-col items-center gap-4 text-center">
           <div class="rounded-full bg-blue-500/10 p-4 text-blue-500">
-            <Terminal class="size-8" />
+            <icons.Terminal class="size-8" />
           </div>
           <h3 class="text-xl font-semibold">For Developers</h3>
           <p class="text-muted-foreground">
@@ -359,7 +346,7 @@ async function copyToClipboard() {
         </div>
         <div class="flex flex-col items-center gap-4 text-center">
           <div class="rounded-full bg-green-500/10 p-4 text-green-500">
-            <BookOpen class="size-8" />
+            <icons.BookOpen class="size-8" />
           </div>
           <h3 class="text-xl font-semibold">For Writers</h3>
           <p class="text-muted-foreground">
@@ -369,7 +356,7 @@ async function copyToClipboard() {
         </div>
         <div class="flex flex-col items-center gap-4 text-center">
           <div class="rounded-full bg-pink-500/10 p-4 text-pink-500">
-            <GraduationCap class="size-8" />
+            <icons.GraduationCap class="size-8" />
           </div>
           <h3 class="text-xl font-semibold">For Students</h3>
           <p class="text-muted-foreground">
@@ -396,7 +383,7 @@ async function copyToClipboard() {
           <div
             class="flex size-12 items-center justify-center rounded-lg bg-purple-500/10"
           >
-            <GripVertical class="size-6 text-purple-500" />
+            <icons.GripVertical class="size-6 text-purple-500" />
           </div>
           <h3 class="text-2xl font-bold">Smart Drag Handle</h3>
           <p class="text-muted-foreground text-lg">
@@ -418,7 +405,7 @@ async function copyToClipboard() {
           <div
             class="flex size-12 items-center justify-center rounded-lg bg-blue-500/10"
           >
-            <MousePointerClick class="size-6 text-blue-500" />
+            <icons.MousePointerClick class="size-6 text-blue-500" />
           </div>
           <h3 class="text-2xl font-bold">Contextual Menu</h3>
           <p class="text-muted-foreground text-lg">
@@ -440,7 +427,7 @@ async function copyToClipboard() {
           <div
             class="flex size-12 items-center justify-center rounded-lg bg-orange-500/10"
           >
-            <Sparkles class="size-6 text-orange-500" />
+            <icons.Sparkles class="size-6 text-orange-500" />
           </div>
           <h3 class="text-2xl font-bold">Native AI Integration</h3>
           <p class="text-muted-foreground text-lg">
@@ -480,7 +467,7 @@ async function copyToClipboard() {
             <ul class="list-outside space-y-3 text-sm">
               {#each pricingList.free as item, idx (idx)}
                 <li class="flex items-center gap-2">
-                  <Check class="size-3!" />
+                  <icons.Check class="size-3!" />
                   {item}
                 </li>
               {/each}
@@ -534,7 +521,7 @@ async function copyToClipboard() {
             <ul class="list-outside space-y-3 text-sm">
               {#each list as item, idx (idx)}
                 <li class="flex items-center gap-2">
-                  <Check class="size-3!" />
+                  <icons.Check class="size-3!" />
                   {item}
                 </li>
               {/each}
@@ -574,7 +561,7 @@ async function copyToClipboard() {
             <ul class="list-outside space-y-3 text-sm">
               {#each pricingList.ai_credits as item, idx (idx)}
                 <li class="flex items-center gap-2">
-                  <Check class="size-3" />
+                  <icons.Check class="size-3" />
                   {item}
                 </li>
               {/each}

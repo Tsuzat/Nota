@@ -41,7 +41,7 @@
     <div class="mx-auto max-w-5xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="space-y-1">
-          <h1 class="text-3xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h1 class="text-3xl font-bold tracking-tight bg-linear-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
             Your Workspaces
           </h1>
           <p class="text-muted-foreground">Manage your cloud workspaces and notes beautifully.</p>
@@ -71,7 +71,7 @@
           {#each workspaces as workspace (workspace.id)}
             <div class="group relative flex flex-col rounded-2xl border bg-card/50 backdrop-blur-sm p-6 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:bg-card hover:border-primary/30">
               <div class="flex items-start justify-between mb-6">
-                <div class="bg-gradient-to-br from-primary/20 to-primary/5 flex size-14 items-center justify-center rounded-2xl shadow-inner transition-transform duration-300 group-hover:scale-110">
+                <div class="bg-linear-to-br from-primary/20 to-primary/5 flex size-14 items-center justify-center rounded-2xl shadow-inner transition-transform duration-300 group-hover:scale-110">
                   <IconRenderer class="size-7 text-primary" icon={workspace.icon || "lucide:Folder"} />
                 </div>
                 

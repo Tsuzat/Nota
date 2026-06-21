@@ -42,7 +42,7 @@ onMount(async () => {
     // For now we'll just parse them
     sessions = rawSessions.map(s => ({
       ...s,
-      ...parseSession(s.user_agent, s)
+      ...parseSession(s.user_agent ?? "", s)
     })).sort((a, b) => new Date(b.refreshed_at || b.created_at).getTime() - new Date(a.refreshed_at || a.created_at).getTime());
     
     // Naively mark the most recently active one as current if we don't have currentSessionId

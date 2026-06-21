@@ -1,35 +1,34 @@
 <script lang="ts">
-import { getWorkspacesContext, type Workspace } from '@nota/client';
-import { IconRenderer, icons } from '@nota/ui/icons/index.js';
-import { Button, buttonVariants } from '@nota/ui/shadcn/button';
-import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import * as Sidebar from '@nota/ui/shadcn/sidebar';
-import { cn } from '@nota/ui/utils';
-import { goto } from '$app/navigation';
-import { resolve } from '$app/paths';
-import { page } from '$app/state';
-import { openNewWorkspace } from '../dialogs/new-workspace.svelte';
+  import { getWorkspacesContext, type Workspace } from "@nota/client";
+  import { IconRenderer, icons } from "@nota/ui/icons/index.js";
+  import { buttonVariants } from "@nota/ui/shadcn/button";
+  import * as DropdownMenu from "@nota/ui/shadcn/dropdown-menu";
+  import * as Sidebar from "@nota/ui/shadcn/sidebar";
+  import { cn } from "@nota/ui/utils";
+  import { goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
+  import { page } from "$app/state";
+  import { openNewWorkspace } from "../dialogs/new-workspace.svelte";
+  import { getCurrentWorkspaceContext } from "$lib/currentworkspace.svelte";
 
-const cloudWorkspaces = getWorkspacesContext();
+  const cloudWorkspaces = getWorkspacesContext();
 
-const activeWorkspaceId = $derived(page.params.id);
-const activeWorkspace = $derived(cloudWorkspaces.workspaces.find((w) => String(w.id) === String(activeWorkspaceId)));
+  const currentWorkspace = getCurrentWorkspaceContext();
 
-function switchWorkspace(workspace: Workspace) {
-  if (String(activeWorkspaceId) === String(workspace.id)) {
-    return;
+  function switchWorkspace(workspace: Workspace) {
+    currentWorkspace.value = workspace;
+    goto(resolve("/(app)/workspace-[id]", { id: workspace.id }));
   }
-  goto(resolve('/(app)/workspace-[id]', { id: workspace.id}));
-}
 </script>
 
-{#if activeWorkspace}
+{#if currentWorkspace.value !== undefined}
+  {@const activeWorkspace = currentWorkspace.value}
   <div class="flex items-center gap-1!">
     <Sidebar.MenuButton
       size="lg"
       class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground w-full select-none cursor-pointer"
       onclick={() => {
-        switchWorkspace(activeWorkspace);
+        goto(resolve("/(app)/workspace-[id]", { id: activeWorkspace.id }));
       }}
     >
       <div
@@ -48,8 +47,10 @@ function switchWorkspace(workspace: Workspace) {
       </div>
     </Sidebar.MenuButton>
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger class={buttonVariants({variant: "ghost", class: "h-full"})}>
-            <icons.ChevronsUpDown class="size-4 text-muted-foreground" />
+      <DropdownMenu.Trigger
+        class={buttonVariants({ variant: "ghost", class: "h-full" })}
+      >
+        <icons.ChevronsUpDown class="size-4 text-muted-foreground" />
       </DropdownMenu.Trigger>
       <DropdownMenu.Content
         class="w-(--bits-dropdown-menu-anchor-width) min-w-56"
@@ -62,11 +63,11 @@ function switchWorkspace(workspace: Workspace) {
             Workspaces
           </DropdownMenu.Label>
           {#each cloudWorkspaces.workspaces as ws (ws.id)}
-            {@const isActive = String(activeWorkspaceId) === String(ws.id)}
+            {@const isActive = activeWorkspace.id === ws.id}
             <DropdownMenu.Item
               class={cn(
                 "flex items-center gap-2 cursor-pointer my-0.25",
-                isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
               )}
               onclick={() => switchWorkspace(ws)}
             >

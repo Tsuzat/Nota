@@ -178,7 +178,7 @@ function formatDate(val: number | Date | null | undefined) {
         <DropdownMenu.Label class="text-xs text-muted-foreground px-2 py-1"
           >Note</DropdownMenu.Label
         >
-        <DropdownMenu.Item onclick={() => openNewNote(String(note.workspace_id), note.id)}>
+        <DropdownMenu.Item onclick={() => openNewNote(note.id)}>
           <icons.Plus />
           <span>Add Sub Note</span>
         </DropdownMenu.Item>
