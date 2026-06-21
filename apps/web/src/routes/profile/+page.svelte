@@ -4,14 +4,13 @@ import LogOut from '@lucide/svelte/icons/log-out';
 import Trash2 from '@lucide/svelte/icons/trash-2';
 import MonitorSmartphone from '@lucide/svelte/icons/monitor-smartphone';
 import MapPin from '@lucide/svelte/icons/map-pin';
-import ShieldX from '@lucide/svelte/icons/shield-x';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { resolve } from '$app/paths';
 import Topbar from '$lib/components/topbar.svelte';
-import { icons } from '@nota/ui/icons/index.js';
+import { BarSpinner, BraveBrowser, ChromeBrowser, EdgeBrowser, FirefoxBrowser, icons, SafariBrowser, ZenBrowser } from '@nota/ui/icons/index.js';
 import * as Tabs from '@nota/ui/shadcn/tabs';
 import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
 
@@ -71,8 +70,9 @@ async function revokeAllOtherSessions() {
   try {
     // Current is either the one marked isCurrent or the first one
     const currentSession = sessions.find(s => s.isCurrent) || sessions[0];
-    await auth.revokeOtherSessions(currentSession?.id);
-    sessions = sessions.filter(s => s.id === currentSession?.id);
+    if (!currentSession) return;
+    await auth.deleteAllOtherSessions(currentSession.id);
+    sessions = sessions.filter(s => s.id === currentSession.id);
     toast.success('All other sessions revoked successfully.');
   } catch (err) {
     toast.error('Failed to revoke other sessions.');
@@ -292,7 +292,7 @@ async function revokeAllOtherSessions() {
             <Card.Content class="grid gap-4">
               {#if isLoadingSessions}
                 <div class="flex items-center justify-center py-8">
-                  <icons.BarSpinner class="size-6 text-muted-foreground" />
+                  <BarSpinner class="size-6 text-muted-foreground" />
                 </div>
               {:else if sessions.length === 0}
                 <div class="text-center text-sm text-muted-foreground py-8">No active sessions found.</div>
@@ -302,17 +302,17 @@ async function revokeAllOtherSessions() {
                     <div class="flex items-center gap-4">
                       <div class="bg-muted p-2 rounded-full flex items-center justify-center size-10">
                         {#if session.browserName === 'Chrome'}
-                          <icons.ChromeBrowser class="size-6" />
+                          <ChromeBrowser class="size-6" />
                         {:else if session.browserName === 'Safari'}
-                          <icons.SafariBrowser class="size-6" />
+                          <SafariBrowser class="size-6" />
                         {:else if session.browserName === 'Edge'}
-                          <icons.EdgeBrowser class="size-6" />
+                          <EdgeBrowser class="size-6" />
                         {:else if session.browserName === 'Firefox'}
-                          <icons.FirefoxBrowser class="size-6" />
+                          <FirefoxBrowser class="size-6" />
                         {:else if session.browserName === 'Brave'}
-                          <icons.BraveBrowser class="size-6" />
+                          <BraveBrowser class="size-6" />
                         {:else if session.browserName === 'Zen'}
-                          <icons.ZenBrowser class="size-6" />
+                          <ZenBrowser class="size-6" />
                         {:else}
                           <MonitorSmartphone class="size-5 text-muted-foreground" />
                         {/if}

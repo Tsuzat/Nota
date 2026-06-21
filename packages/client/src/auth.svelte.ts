@@ -199,16 +199,12 @@ class Auth {
   }
 
   /**
-   * Revoke all other sessions except the current one
+   * Delete all other sessions except the current one
    */
-  async revokeOtherSessions(currentSessionId?: string): Promise<void> {
-    const sessions = await this.getSessions();
-    // If we don't know current session ID, this might revoke all if they aren't careful, 
-    // but typically UI will pass it if known.
-    const toRevoke = currentSessionId 
-      ? sessions.filter(s => s.id !== currentSessionId)
-      : sessions;
-    await Promise.all(toRevoke.map(s => this.revokeSession(s.id)));
+  async deleteAllOtherSessions(keepSessionId: string): Promise<void> {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/session/others/${keepSessionId}`;
+    const res = await request(url, { method: "DELETE" });
+    if (!res.ok) throw new Error(await res.text());
   }
 }
 
