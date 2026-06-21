@@ -1,13 +1,18 @@
 package app
-
 import (
+	"context"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"os"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/db"
@@ -100,7 +105,7 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 	}
 	// Check if the user exists
 	user, err := db.GetUserByEmail(req.Email)
-	if err != nil && err.Error() != "sql: no rows in result set" {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Error("User retrieval error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -163,8 +168,8 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 		})
 	}
 	// Setup Cookies
-	c.Cookie(config.GetCookieOptions("access_token", accessToken, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
-	c.Cookie(config.GetCookieOptions("refresh_token", refreshToken, time.Now().Add(time.Hour*24*time.Duration(config.REFRESH_TOKEN_EXPIRY))))
+	c.Cookie(config.GetCookieOptions("access_token", accessToken, time.Now().Add(config.AccessTokenDuration)))
+	c.Cookie(config.GetCookieOptions("refresh_token", refreshToken, time.Now().Add(config.RefreshTokenDuration)))
 	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "User signed in successfully.",
@@ -176,18 +181,25 @@ func SignInOAuth(c fiber.Ctx) error {
 	provider := c.Req().Params("provider")
 	codeChallenge := c.Req().Query("code_challenge")
 	isDesktop := c.Locals("isDesktop").(bool) || c.Req().Query("isdesktop") == "true"
+	isProd := os.Getenv("ENV") == "production"
 	if isDesktop {
 		c.Cookie(&fiber.Cookie{
-			Name:   "auth_platform",
-			Value:  "desktop",
-			MaxAge: 60 * 5,
+			Name:     "auth_platform",
+			Value:    "desktop",
+			MaxAge:   60 * 5,
+			HTTPOnly: true,
+			Secure:   isProd,
+			SameSite: "Lax",
 		})
 	}
 	if codeChallenge != "" {
 		c.Cookie(&fiber.Cookie{
-			Name:   "code_challenge",
-			Value:  codeChallenge,
-			MaxAge: 60 * 5,
+			Name:     "code_challenge",
+			Value:    codeChallenge,
+			MaxAge:   60 * 5,
+			HTTPOnly: true,
+			Secure:   isProd,
+			SameSite: "Lax",
 		})
 	}
 	if provider == "" {
@@ -208,11 +220,23 @@ func SignInOAuth(c fiber.Ctx) error {
 }
 
 func SignInWithGoogle(c fiber.Ctx) error {
-	url := getGoogleAuthConfig().AuthCodeURL("state")
+	state := uuid.New().String()
+	utils.SetCache("oauth_state:"+state, true, time.Minute*5)
+	url := getGoogleAuthConfig().AuthCodeURL(state)
 	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(url)
 }
 
 func SingInWithGoogleCallBack(c fiber.Ctx) error {
+	state := c.FormValue("state")
+	var valid bool
+	if err := utils.GetCache("oauth_state:"+state, &valid); err != nil || !valid {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Invalid or expired OAuth state",
+		})
+	}
+	utils.DeleteCache("oauth_state:" + state)
+
 	token, err := getGoogleAuthConfig().Exchange(c.RequestCtx(), c.FormValue("code"))
 	if err != nil {
 		log.Error("OAuth Exchange error:", err)
@@ -293,8 +317,8 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 			Error:  "Unable to generate refresh token",
 		})
 	}
-	c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
-	c.Cookie(config.GetCookieOptions("refresh_token", refresh_token, time.Now().Add(time.Hour*24*time.Duration(config.REFRESH_TOKEN_EXPIRY))))
+	c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(config.AccessTokenDuration)))
+	c.Cookie(config.GetCookieOptions("refresh_token", refresh_token, time.Now().Add(config.RefreshTokenDuration)))
 	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(config.FRONTEND_URL)
 }
 
@@ -312,6 +336,9 @@ func SignOut(c fiber.Ctx) error {
 	var sessionId *string
 	if accessToken != "" {
 		token, err := jwt.Parse(accessToken, func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
 			return []byte(config.ACCESS_TOKEN_SECRET), nil
 		})
 		if err == nil {
@@ -330,7 +357,7 @@ func SignOut(c fiber.Ctx) error {
 		go config.DB.NewDelete().
 			Model(&models.Session{}).
 			Where("id = ?", *sessionId).
-			Exec(c.Context())
+			Exec(context.Background())
 	}
 
 	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
@@ -341,11 +368,23 @@ func SignOut(c fiber.Ctx) error {
 }
 
 func SignInWithGithub(c fiber.Ctx) error {
-	url := getGithubAuthConfig().AuthCodeURL("state")
+	state := uuid.New().String()
+	utils.SetCache("oauth_state:"+state, true, time.Minute*5)
+	url := getGithubAuthConfig().AuthCodeURL(state)
 	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(url)
 }
 
 func SignInWithGithubCallBack(c fiber.Ctx) error {
+	state := c.FormValue("state")
+	var valid bool
+	if err := utils.GetCache("oauth_state:"+state, &valid); err != nil || !valid {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Invalid or expired OAuth state",
+		})
+	}
+	utils.DeleteCache("oauth_state:" + state)
+
 	token, err := getGithubAuthConfig().Exchange(c.RequestCtx(), c.FormValue("code"))
 	if err != nil {
 		log.Error("OAuth Exchange error:", err)
@@ -416,7 +455,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 	}
 	sessionId, err := db.CreateSession(user.Id, c)
 	if err != nil {
-		c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Unable to create session",
 		})
@@ -436,7 +475,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 		})
 	}
 	c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
-	c.Cookie(config.GetCookieOptions("refresh_token", refresh_token, time.Now().Add(time.Hour*24*time.Duration(config.REFRESH_TOKEN_EXPIRY))))
+	c.Cookie(config.GetCookieOptions("refresh_token", refresh_token, time.Now().Add(config.RefreshTokenDuration)))
 	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(config.FRONTEND_URL)
 }
 
@@ -460,6 +499,9 @@ func RefreshAccessToken(c fiber.Ctx) error {
 	}
 	// decode the token
 	token, err := jwt.Parse(refresh_token, func(token *jwt.Token) (any, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return []byte(config.REFRESH_TOKEN_SECRET), nil
 	})
 	// If there is an error, return 401
@@ -516,7 +558,7 @@ func RefreshAccessToken(c fiber.Ctx) error {
 	}
 	isDesktop := c.Locals("isDesktop").(bool)
 	if !isDesktop {
-		c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
+		c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(config.AccessTokenDuration)))
 	}
 	var data any
 	if isDesktop {

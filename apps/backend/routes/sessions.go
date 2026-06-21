@@ -12,6 +12,7 @@ func InitSessionRouter() {
 	group.Get("/all", app.GetUserSessions)
 	group.Post("/revoke/:id<guid>", app.RevokeSession)
 	group.Post("/revoke/all", app.RevokeAllSessions)
+	group.Delete("/others/:id<guid>", app.DeleteAllOtherSessions)
 	group.Delete("/:id<guid>", app.DeleteSession)
 	group.Delete("/all", app.DeleteAllSessions)
 }

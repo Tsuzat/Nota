@@ -16,6 +16,8 @@ var ACCESS_TOKEN_SECRET string
 var ACCESS_TOKEN_EXPIRY int64
 var REFRESH_TOKEN_SECRET string
 var REFRESH_TOKEN_EXPIRY int64
+var AccessTokenDuration time.Duration
+var RefreshTokenDuration time.Duration
 var BACKEND_URL string
 var FRONTEND_URL string
 var COOKIE_DOMAIN string
@@ -85,6 +87,10 @@ func ConstsInit() {
 	ACCESS_TOKEN_EXPIRY, _ = strconv.ParseInt(os.Getenv("ACCESS_TOKEN_EXPIRY"), 10, 64)
 	REFRESH_TOKEN_SECRET = os.Getenv("REFRESH_TOKEN_SECRET")
 	REFRESH_TOKEN_EXPIRY, _ = strconv.ParseInt(os.Getenv("REFRESH_TOKEN_EXPIRY"), 10, 64)
+	
+	AccessTokenDuration = time.Minute * time.Duration(ACCESS_TOKEN_EXPIRY)
+	RefreshTokenDuration = time.Hour * 24 * time.Duration(REFRESH_TOKEN_EXPIRY)
+
 	BACKEND_URL = os.Getenv("BACKEND_URL")
 	FRONTEND_URL = os.Getenv("FRONTEND_URL")
 	COOKIE_DOMAIN = os.Getenv("COOKIE_DOMAIN")

@@ -28,18 +28,18 @@ func GetUserSessions(c fiber.Ctx) error {
 func RevokeSession(c fiber.Ctx) error {
 	id := c.Params("id")
 	user := c.Locals("user").(*models.User)
-	if !db.CheckSessionOwner(id, user.Id) {
-		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
-			Status: fiber.StatusForbidden,
-			Error:  "You are not authorized to revoke this session",
-		})
-	}
-	err := db.RevokeSession(id)
+	ok, err := db.RevokeSessionByOwner(id, user.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Something went wrong when revoking session",
 			Data:   err.Error(),
+		})
+	}
+	if !ok {
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+			Status: fiber.StatusForbidden,
+			Error:  "You are not authorized to revoke this session or it doesn't exist",
 		})
 	}
 	return c.JSON(models.APIResponse{
@@ -67,18 +67,18 @@ func RevokeAllSessions(c fiber.Ctx) error {
 func DeleteSession(c fiber.Ctx) error {
 	id := c.Params("id")
 	user := c.Locals("user").(*models.User)
-	if !db.CheckSessionOwner(id, user.Id) {
-		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
-			Status: fiber.StatusForbidden,
-			Error:  "You are not authorized to delete this session",
-		})
-	}
-	err := db.DeleteSession(id)
+	ok, err := db.DeleteSessionByOwner(id, user.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Something went wrong when deleting session",
 			Data:   err.Error(),
+		})
+	}
+	if !ok {
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+			Status: fiber.StatusForbidden,
+			Error:  "You are not authorized to delete this session or it doesn't exist",
 		})
 	}
 	return c.JSON(models.APIResponse{
@@ -100,5 +100,32 @@ func DeleteAllSessions(c fiber.Ctx) error {
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "All sessions deleted",
+	})
+}
+
+func DeleteAllOtherSessions(c fiber.Ctx) error {
+	keepId := c.Params("id")
+	user := c.Locals("user").(*models.User)
+	
+	// Just verify the user owns the session they want to keep
+	session, err := db.GetSession(keepId)
+	if err != nil || session.UserId != user.Id {
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+			Status: fiber.StatusForbidden,
+			Error:  "Invalid session",
+		})
+	}
+	
+	err = db.DeleteAllOtherUserSessions(user.Id, keepId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Something went wrong when deleting sessions",
+			Data:   err.Error(),
+		})
+	}
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "All other sessions deleted",
 	})
 }

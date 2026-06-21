@@ -1,12 +1,14 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/db"
 	"github.com/Tsuzat/Nota/models"
+	"github.com/Tsuzat/Nota/utils"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 	"github.com/golang-jwt/jwt/v5"
@@ -30,6 +32,9 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 	}
 	// decode the token
 	token, err := jwt.Parse(access_token, func(token *jwt.Token) (any, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return []byte(config.ACCESS_TOKEN_SECRET), nil
 	})
 	// If there is an error, return 401
@@ -45,17 +50,32 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 	if !ok {
 		return nil, fiber.ErrUnauthorized
 	}
-	// Get the user from the database and attach it to the context so that we can use it in the route
 	id, sessionId := claims["id"].(string), claims["session_id"].(string)
-	if !db.IsValidSession(sessionId) {
+
+	var validSession bool
+	if err := utils.GetCache("session:"+sessionId, &validSession); err != nil {
+		validSession = db.IsValidSession(sessionId)
+		if validSession {
+			go utils.SetCache("session:"+sessionId, true, 5*time.Minute)
+		}
+	}
+
+	if !validSession {
 		c.Cookie(config.GetCookieOptions("access_token", "", time.Now().Add(-time.Hour)))
 		c.Cookie(config.GetCookieOptions("refresh_token", "", time.Now().Add(-time.Hour)))
 		return nil, fiber.ErrUnauthorized
 	}
-	user, err := db.GetUserById(id)
-	if err != nil {
-		return nil, err
-	} else if !user.IsVerified {
+
+	user := new(models.User)
+	if err := utils.GetCache("user:"+id, user); err != nil {
+		user, err = db.GetUserById(id)
+		if err != nil {
+			return nil, err
+		}
+		go utils.SetCache("user:"+id, user, 5*time.Minute)
+	}
+
+	if !user.IsVerified {
 		return nil, fiber.ErrUnauthorized
 	}
 	return user, nil

@@ -25,7 +25,7 @@ type User struct {
 	AiCredits                       int       `json:"ai_credits" bun:"ai_credits,notnull,default:0"`
 	SubscriptionType                string    `json:"subscription_type" bun:"subscription_type,nullzero"`
 	ExternalCustomerId              string    `json:"external_customer_id" bun:"external_customer_id"`
-	Password                        string    `json:"password" bun:"encrypted_password"`
+	Password                        string    `json:"-" bun:"encrypted_password"`
 	EmailVerified                   bool      `json:"email_verified" bun:"email_verified,notnull,default:false"`
 	EmailVerifiedAt                 time.Time `json:"email_verified_at" bun:"email_verified_at"`
 	EmailVerificationToken          string    `json:"email_verification_token" bun:"email_verification_token"`
@@ -46,8 +46,8 @@ func (user *User) GenerateAccessToken(sessionId string) (string, error) {
 		"email":      user.Email,
 		"name":       user.Name,
 		"session_id": sessionId,
-		"isa":        time.Now().Unix(),
-		"exp":        time.Now().Add(time.Minute * time.Duration(config.ACCESS_TOKEN_EXPIRY)).Unix(),
+		"iat":        time.Now().Unix(),
+		"exp":        time.Now().Add(config.AccessTokenDuration).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(config.ACCESS_TOKEN_SECRET))
 	if err != nil {
@@ -64,8 +64,8 @@ func (user *User) GenerateRefreshToken(sessionId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":         user.Id,
 		"session_id": sessionId,
-		"isa":        time.Now().Unix(),
-		"exp":        time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)).Unix(),
+		"iat":        time.Now().Unix(),
+		"exp":        time.Now().Add(config.RefreshTokenDuration).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(config.REFRESH_TOKEN_SECRET))
 	if err != nil {

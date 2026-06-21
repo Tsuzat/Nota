@@ -11,7 +11,23 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 	"google.golang.org/genai"
+	"sync"
 )
+
+var (
+	genAIClient *genai.Client
+	genAIErr    error
+	genAIOnce   sync.Once
+)
+
+func getGenAIClient() (*genai.Client, error) {
+	genAIOnce.Do(func() {
+		genAIClient, genAIErr = genai.NewClient(context.Background(), &genai.ClientConfig{
+			APIKey: config.GEMINI_API_KEY,
+		})
+	})
+	return genAIClient, genAIErr
+}
 
 const MODEL = "gemini-3-flash-preview"
 
@@ -86,9 +102,7 @@ func GenerateContent(c fiber.Ctx) error {
 	}
 
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		APIKey: config.GEMINI_API_KEY,
-	})
+	client, err := getGenAIClient()
 	if err != nil {
 		log.Error("Failed to create GenAI client:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{

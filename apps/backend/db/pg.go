@@ -22,7 +22,7 @@ func ConnectDB() error {
 	))
 	// Configure connection pool
 	sqldb.SetMaxOpenConns(100)
-	sqldb.SetMaxIdleConns(10)
+	sqldb.SetMaxIdleConns(25)
 	sqldb.SetConnMaxLifetime(5 * time.Minute)
 	sqldb.SetConnMaxIdleTime(5 * time.Minute)
 	config.DB = bun.NewDB(sqldb, pgdialect.New())

@@ -154,25 +154,35 @@ func ListFiles(c fiber.Ctx) error {
 
 	searchPrefix := userId + "/"
 
-	listOutput, err := utils.S3CLIENT.ListObjectsV2(c.Context(), &s3.ListObjectsV2Input{
-		Bucket: aws.String(config.BUCKET_NAME),
-		Prefix: aws.String(searchPrefix),
-	})
-
-	if err != nil {
-		log.Error("List files error:", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to list files"})
-	}
-
 	endpoint := strings.TrimSuffix(config.R2_PUBLIC_ENDPOINT, "/")
 
-	for _, item := range listOutput.Contents {
-		files = append(files, map[string]any{
-			"key":          *item.Key,
-			"size":         item.Size,
-			"lastModified": item.LastModified,
-			"url":          fmt.Sprintf("%s/%s", endpoint, *item.Key),
+	var continuationToken *string
+	for {
+		listOutput, err := utils.S3CLIENT.ListObjectsV2(c.Context(), &s3.ListObjectsV2Input{
+			Bucket:            aws.String(config.BUCKET_NAME),
+			Prefix:            aws.String(searchPrefix),
+			ContinuationToken: continuationToken,
 		})
+
+		if err != nil {
+			log.Error("List files error:", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to list files"})
+		}
+
+		for _, item := range listOutput.Contents {
+			files = append(files, map[string]any{
+				"key":          *item.Key,
+				"size":         item.Size,
+				"lastModified": item.LastModified,
+				"url":          fmt.Sprintf("%s/%s", endpoint, *item.Key),
+			})
+		}
+
+		if listOutput.IsTruncated != nil && *listOutput.IsTruncated {
+			continuationToken = listOutput.NextContinuationToken
+		} else {
+			break
+		}
 	}
 
 	jsonBytes, _ := config.APP.Config().JSONEncoder(files)

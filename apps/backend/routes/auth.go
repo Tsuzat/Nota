@@ -1,12 +1,17 @@
 package routes
 
 import (
+	"time"
 	"github.com/Tsuzat/Nota/app"
 	"github.com/Tsuzat/Nota/config"
+	"github.com/gofiber/fiber/v3/middleware/limiter"
 )
 
 func InitAuthRouter() {
-	group := config.APP.Group("/api/v1/auth")
+	group := config.APP.Group("/api/v1/auth", limiter.New(limiter.Config{
+		Max:        20,
+		Expiration: 1 * time.Minute,
+	}))
 
 	group.Post("/signup-email", app.SignUpWithEmailAndPassword)
 	group.Post("/signin-email", app.SignInWithEmailAndPassword)

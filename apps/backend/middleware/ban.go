@@ -77,19 +77,42 @@ var honeypotPaths = []string{
 	"/bootstrap/cache",
 }
 
+var (
+	honeypotExact  = make(map[string]bool)
+	honeypotPrefix []string
+	honeypotSuffix []string
+)
+
+func init() {
+	for _, p := range honeypotPaths {
+		lower := strings.ToLower(p)
+		honeypotExact[lower] = true
+		honeypotPrefix = append(honeypotPrefix, lower+"/")
+		honeypotSuffix = append(honeypotSuffix, lower)
+	}
+}
+
 func BanMiddleware(c fiber.Ctx) error {
 	path := strings.ToLower(c.Path())
-	suspicious := false
-	for _, badPath := range honeypotPaths {
-		p := strings.ToLower(badPath)
-		if path == p || strings.HasPrefix(path, p+"/") || strings.HasSuffix(path, p) {
-			suspicious = true
-			break
+	
+	if honeypotExact[path] {
+		log.Warnf("[SECURITY] Dropping suspicious request to path: %s", path)
+		return c.Drop()
+	}
+
+	for _, pre := range honeypotPrefix {
+		if strings.HasPrefix(path, pre) {
+			log.Warnf("[SECURITY] Dropping suspicious request to path: %s", path)
+			return c.Drop()
 		}
 	}
-	if !suspicious {
-		return c.Next()
+
+	for _, suf := range honeypotSuffix {
+		if strings.HasSuffix(path, suf) {
+			log.Warnf("[SECURITY] Dropping suspicious request to path: %s", path)
+			return c.Drop()
+		}
 	}
-	log.Warnf("[SECURITY] Dropping suspicious request to path: %s", path)
-	return c.Drop()
+
+	return c.Next()
 }

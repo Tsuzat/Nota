@@ -6,6 +6,7 @@ import (
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/models"
+	"github.com/Tsuzat/Nota/utils"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 )
@@ -19,7 +20,7 @@ func GetPKCESessionToken(userId string, pkceChallenge string, c fiber.Ctx) (stri
 		UserAgent:           c.UserAgent(),
 		PkceChallenge:       pkceChallenge,
 		PkceChallengeMethod: "256",
-		ExpiresAt:           time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
+		ExpiresAt:           time.Now().Add(config.RefreshTokenDuration),
 		CreatedAt:           time.Now(),
 		UpdatedAt:           time.Now(),
 		RefreshedAt:         time.Now(),
@@ -40,7 +41,7 @@ func CreateSession(userId string, c fiber.Ctx) (string, error) {
 		UserId:      userId,
 		Ip:          c.IP(),
 		UserAgent:   c.UserAgent(),
-		ExpiresAt:   time.Now().Add(time.Hour * 24 * time.Duration(config.REFRESH_TOKEN_EXPIRY)),
+		ExpiresAt:   time.Now().Add(config.RefreshTokenDuration),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		RefreshedAt: time.Now(),
@@ -73,6 +74,7 @@ func DeleteSession(id string) error {
 	if err != nil {
 		return err
 	}
+	utils.DeleteCache("session:" + id)
 	return nil
 }
 
@@ -90,17 +92,18 @@ func DeleteAllUserSessions(userId string) error {
 func RevokeSession(id string) error {
 	ctx := context.Background()
 	session := &models.Session{Id: id}
-	_, err := config.DB.NewUpdate().Model(session).WherePK().Set("revoke = true").Exec(ctx)
+	_, err := config.DB.NewUpdate().Model(session).WherePK().Set("revoked = true").Exec(ctx)
 	if err != nil {
 		return err
 	}
+	utils.DeleteCache("session:" + id)
 	return nil
 }
 
 // RevokeAllUserSessions revokes all sessions of a user by setting their revoke flag to true
 func RevokeAllUserSessions(userID string) error {
 	ctx := context.Background()
-	_, err := config.DB.NewUpdate().Model((*models.Session)(nil)).Where("user_id = ?", userID).Set("revoke = true").Exec(ctx)
+	_, err := config.DB.NewUpdate().Model((*models.Session)(nil)).Where("user_id = ?", userID).Set("revoked = true").Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -131,9 +134,51 @@ func CheckSessionOwner(sessionId string, userId string) bool {
 func GetSessions(userId string) ([]*models.Session, error) {
 	ctx := context.Background()
 	sessions := []*models.Session{}
-	err := config.DB.NewSelect().Model(&sessions).Where("user_id = ?", userId).Scan(ctx)
+	err := config.DB.NewSelect().
+		Model(&sessions).
+		Where("user_id = ? AND revoked = false AND expires_at > NOW()", userId).
+		OrderExpr("refreshed_at DESC NULLS LAST").
+		Limit(50).
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return sessions, nil
+}
+
+// DeleteAllOtherUserSessions deletes all sessions of a user except the given one
+func DeleteAllOtherUserSessions(userId string, keepSessionId string) error {
+	ctx := context.Background()
+	_, err := config.DB.NewDelete().
+		Model((*models.Session)(nil)).
+		Where("user_id = ? AND id != ?", userId, keepSessionId).
+		Exec(ctx)
+	return err
+}
+
+func RevokeSessionByOwner(sessionId string, userId string) (bool, error) {
+	res, err := config.DB.NewUpdate().
+		Model((*models.Session)(nil)).
+		Set("revoked = true").
+		Where("id = ? AND user_id = ?", sessionId, userId).
+		Exec(context.Background())
+	if err != nil {
+		return false, err
+	}
+	utils.DeleteCache("session:" + sessionId)
+	rows, _ := res.RowsAffected()
+	return rows > 0, nil
+}
+
+func DeleteSessionByOwner(sessionId string, userId string) (bool, error) {
+	res, err := config.DB.NewDelete().
+		Model((*models.Session)(nil)).
+		Where("id = ? AND user_id = ?", sessionId, userId).
+		Exec(context.Background())
+	if err != nil {
+		return false, err
+	}
+	utils.DeleteCache("session:" + sessionId)
+	rows, _ := res.RowsAffected()
+	return rows > 0, nil
 }

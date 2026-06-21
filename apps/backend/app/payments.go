@@ -14,6 +14,7 @@ import (
 	"github.com/polarsource/polar-go/models/components"
 	"github.com/polarsource/polar-go/models/operations"
 	svix "github.com/svix/svix-webhooks/go"
+	"sync"
 )
 
 func getCreditsToAdd(productId string) int {
@@ -54,14 +55,22 @@ func getSubscriptionTime(productId string) string {
 	return "monthly"
 }
 
+var (
+	polarClient *polar.Polar
+	polarOnce   sync.Once
+)
+
 func getPolarClient() *polar.Polar {
-	opts := []polar.SDKOption{
-		polar.WithSecurity(config.POLAR_API_KEY),
-	}
-	if config.POLAR_SERVER == "sandbox" {
-		opts = append(opts, polar.WithServerURL("https://sandbox-api.polar.sh"))
-	}
-	return polar.New(opts...)
+	polarOnce.Do(func() {
+		opts := []polar.SDKOption{
+			polar.WithSecurity(config.POLAR_API_KEY),
+		}
+		if config.POLAR_SERVER == "sandbox" {
+			opts = append(opts, polar.WithServerURL("https://sandbox-api.polar.sh"))
+		}
+		polarClient = polar.New(opts...)
+	})
+	return polarClient
 }
 
 // Checkout generates a Polar checkout URL and redirects the user
