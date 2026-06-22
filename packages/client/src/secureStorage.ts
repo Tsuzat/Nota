@@ -1,8 +1,9 @@
-import { Stronghold } from '@tauri-apps/plugin-stronghold';
-import { appLocalDataDir, join } from '@tauri-apps/api/path';
-import { invoke } from '@tauri-apps/api/core';
+import { Stronghold } from "@tauri-apps/plugin-stronghold";
+import { appLocalDataDir, join } from "@tauri-apps/api/path";
+import { invoke } from "@tauri-apps/api/core";
 
-const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+const isTauri = () =>
+  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 class SecureStorage {
   private stronghold: Stronghold | null = null;
@@ -14,32 +15,37 @@ class SecureStorage {
     if (this.initPromise) return this.initPromise;
 
     const initTimeout = new Promise<void>((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout initializing secure storage')), 3000)
+      setTimeout(
+        () => reject(new Error("Timeout initializing secure storage")),
+        3000,
+      ),
     );
 
     this.initPromise = Promise.race([
       (async () => {
         try {
-          const password = await invoke<string>('get_or_create_stronghold_password');
+          const password = await invoke<string>(
+            "get_or_create_stronghold_password",
+          );
           const localDataDir = await appLocalDataDir();
-          const path = await join(localDataDir, 'nota.stronghold');
+          const path = await join(localDataDir, "nota.stronghold");
           this.stronghold = await Stronghold.load(path, password);
 
           // Load or create the client and get the store
           let client;
           try {
-            client = await this.stronghold.loadClient('nota_client');
+            client = await this.stronghold.loadClient("nota_client");
           } catch (e) {
-            client = await this.stronghold.createClient('nota_client');
+            client = await this.stronghold.createClient("nota_client");
           }
           this.store = client.getStore();
         } catch (e) {
-          console.error('Failed to initialize Stronghold secure storage:', e);
+          console.error("Failed to initialize Stronghold secure storage:", e);
         }
       })(),
       initTimeout,
     ]).catch((e) => {
-      console.error('Tauri Stronghold initialization timed out/failed:', e);
+      console.error("Tauri Stronghold initialization timed out/failed:", e);
       // Stronghold will remain null, falling back to localStorage
     });
 
@@ -57,7 +63,9 @@ class SecureStorage {
     }
     const store = await this.getStore();
     if (!store) {
-      console.warn(`Stronghold not available. Falling back to localStorage for getItem(${key})`);
+      console.warn(
+        `Stronghold not available. Falling back to localStorage for getItem(${key})`,
+      );
       return localStorage.getItem(key);
     }
     try {
@@ -77,7 +85,9 @@ class SecureStorage {
     }
     const store = await this.getStore();
     if (!store) {
-      console.warn(`Stronghold not available. Falling back to localStorage for setItem(${key})`);
+      console.warn(
+        `Stronghold not available. Falling back to localStorage for setItem(${key})`,
+      );
       localStorage.setItem(key, value);
       return;
     }
@@ -98,7 +108,9 @@ class SecureStorage {
     }
     const store = await this.getStore();
     if (!store) {
-      console.warn(`Stronghold not available. Falling back to localStorage for removeItem(${key})`);
+      console.warn(
+        `Stronghold not available. Falling back to localStorage for removeItem(${key})`,
+      );
       localStorage.removeItem(key);
       return;
     }

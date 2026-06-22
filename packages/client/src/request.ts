@@ -19,9 +19,14 @@ export const fetchFn = isTauri() ? tauriFetch : fetch;
  * @param options The options to pass to the fetch function
  * @returns The response from the fetch function
  */
-export default async (url: string, options: RequestInit = {}): Promise<Response> => {
+interface CustomRequestInit extends RequestInit {
+  fetch?: typeof fetch;
+}
+
+export default async (url: string, options: CustomRequestInit = {}): Promise<Response> => {
   // 1. Prepare Options
   const headers = new Headers(options.headers || {});
+  const customFetch = options.fetch || fetchFn;
 
   if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
@@ -40,7 +45,7 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
   };
 
   // 2. Initial Request
-  let response = await fetchFn(url, currentOptions);
+  let response = await customFetch(url, currentOptions);
 
   // 3. Handle 401/403 (Auto-Refresh) if access token expired or invalid
   if (response.status === 401 || response.status === 403) {
@@ -48,7 +53,7 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
       return response;
     }
     try {
-      const refreshResponse = await fetchFn(`${PUBLIC_BACKEND_URL}/api/v1/auth/refreshtoken`, {
+      const refreshResponse = await customFetch(`${PUBLIC_BACKEND_URL}/api/v1/auth/refreshtoken`, {
         method: 'POST',
         ...(isTauri() && {
           headers: {
@@ -68,7 +73,7 @@ export default async (url: string, options: RequestInit = {}): Promise<Response>
           headers.set('Authorization', `Bearer ${resData.data}`);
           currentOptions.headers = headers;
         }
-        response = await fetchFn(url, currentOptions);
+        response = await customFetch(url, currentOptions);
         return response;
       }
       // If refresh fails, redirect to login

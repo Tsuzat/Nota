@@ -1,13 +1,17 @@
 import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import type { Note } from "@nota/client";
+import { type Note, request as apiRequest } from "@nota/client";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
-export const load: PageServerLoad = async ({ params, parent, fetch }) => {
+export const load: PageServerLoad = async ({ params, parent, fetch, request }) => {
   const p = await parent();
   let note: Note | undefined;
-  const noteRes = await fetch(
+  const noteRes = await apiRequest(
     `${PUBLIC_BACKEND_URL}/api/v1/db/note/${params.id}/meta`,
+    {
+      headers: request.headers,
+      fetch,
+    }
   );
   if (noteRes.ok) {
     const data: any = await noteRes.json();
