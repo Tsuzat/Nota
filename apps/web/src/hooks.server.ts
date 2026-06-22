@@ -1,4 +1,4 @@
-import { type Handle, redirect } from "@sveltejs/kit";
+import { type Handle } from "@sveltejs/kit";
 import { PUBLIC_BACKEND_URL } from "$env/static/public";
 import { request as apiRequest } from "@nota/client";
 
@@ -8,6 +8,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     headers: event.request.headers,
     fetch: event.fetch,
   });
+
   if (res.ok) {
     try {
       const data: any = await res.json();
@@ -19,5 +20,23 @@ export const handle: Handle = async ({ event, resolve }) => {
   } else {
     event.locals.user = null;
   }
+
+  // Forward refreshed access_token cookie to the browser.
+  // request.ts attaches the Set-Cookie from the refresh response
+  // onto the final response headers — we parse it and use
+  // event.cookies.set() which MUST happen before resolve().
+  const setCookie = res.headers.get("Set-Cookie");
+  if (setCookie) {
+    const match = setCookie.match(/access_token=([^;]+)/);
+    if (match) {
+      event.cookies.set("access_token", match[1], {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+    }
+  }
+
   return resolve(event);
 };
