@@ -14,6 +14,27 @@ import (
 	"github.com/gofiber/fiber/v3/log"
 )
 
+func GetNoteMeta(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+	id := c.Params("id")
+	var note models.Note
+	if err := config.DB.NewSelect().
+		Model(&note).
+		Column("id", "name", "icon", "workspace_id", "parent_note_id", "owner", "pinned", "deleted_at", "created_at", "updated_at", "is_public").
+		Where("id = ? AND owner = ?", id, user.Id).
+		Scan(c.Context()); err != nil {
+		log.Error("Error when getting note: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "Note retrieved successfully",
+		Data:    note,
+	})
+}
+
 func GetNotes(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getNotesContext, getStorageContext, type Note } from "@nota/client";
+  import { getNotesContext, getStorageContext, getWorkspacesContext, type Note } from "@nota/client";
   import { SimpleToolTip } from "@nota/ui/custom/index.js";
   import SearchAndReplace from "@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte";
   import {
@@ -64,10 +64,11 @@
   // cloud related
   const cloudNotes = getNotesContext();
   const cloudStorage = getStorageContext();
+  const cloudWorkspace = getWorkspacesContext();
 
   // notes related
   let isLoading = $state(false);
-  let note = $state<Note>();
+  let note = $derived(data.note);
   let syncing = $state(false);
   let syncingText = $state("");
 
@@ -139,6 +140,7 @@
     syncing = true;
     syncingText = `Syncing ${patch.length} changes`;
     try {
+      console.log(patch)
       await cloudNotes.patch(note.id, patch);
       syncedContent = currentContent;
       isDirty = false;
@@ -157,34 +159,8 @@
     return () => clearInterval(saveInterval);
   });
 
-  function fixMathReplacer(parsedContent: Content): {
-    content: Content;
-    replaced: boolean;
-  } {
-    let replaced = false;
-    let content = parsedContent;
-    function walk(node: any): any {
-      if (node === null || node === undefined || typeof node !== "object")
-        return node;
-      if (node.type === "inlineMathReplacer") {
-        node.type = "inlineMath";
-        replaced = true;
-      }
-      if (Array.isArray(node.content)) {
-        node.content = node.content.map(walk);
-      }
-      return node;
-    }
-    if (Array.isArray(content)) {
-      content = content.map(walk) as Content;
-    } else {
-      walk(content);
-    }
-    return { content, replaced };
-  }
-
+  
   async function loadData() {
-    const noteId = data.id;
     isLoading = true;
 
     // If we land here directly, fetch all notes to populate contexts and find this note
@@ -196,35 +172,23 @@
       }
     }
 
-    note = cloudNotes.notes.find((n) => String(n.id) === String(noteId));
-
-    if (note === undefined) {
-      toast.error(`Note with id ${noteId} not found`);
-      isLoading = false;
-      return goto(resolve("/home"));
-    }
-
     // Attempt to set current workspace context if it's unset
     if (
       !currentWorkspace.value ||
-      String(currentWorkspace.value.id) !== String(note.workspace_id)
+      currentWorkspace.value.id !== note.workspace_id
     ) {
       // Will rely on layout fallback or let it be null. But maybe we shouldn't force it here
       // The layout can't know the workspace for `/note-[id]` directly.
+      const workspace = data.workspaces.find((w) => w.id === data.id) ?? data.workspaces[0];
+      currentWorkspace.value = workspace
+      cloudWorkspace.workspaces = data.workspaces
     }
 
     try {
-      const data = await cloudNotes.fetchContent(noteId);
+      const data = await cloudNotes.fetchContent(note.id);
       if (data) {
-        const dbContent = data as Content;
-        const { content: fixedContent, replaced } = fixMathReplacer(dbContent);
-        content = fixedContent;
-        syncedContent = fixedContent;
+        content = data as Content;
         isDirty = false;
-        if (replaced) {
-          isDirty = true;
-          await saveNoteContent();
-        }
       }
     } catch (error) {
       console.error(error);
