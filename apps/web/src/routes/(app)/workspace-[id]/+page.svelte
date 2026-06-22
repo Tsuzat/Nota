@@ -1,117 +1,117 @@
 <script lang="ts">
-  import { getNotesContext, getWorkspacesContext, type Note, type Workspace } from '@nota/client';
-  import { SimpleToolTip } from '@nota/ui/custom/index.js';
-  import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
-  import { Button, buttonVariants } from '@nota/ui/shadcn/button';
-  import * as Card from '@nota/ui/shadcn/card';
-  import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-  import { toast } from '@nota/ui/shadcn/sonner';
-  import { timeAgo } from '@nota/ui/utils';
-  import { goto } from '$app/navigation';
-  import { resolve } from '$app/paths';
-  import { page } from '$app/state';
-  import { openNewNote } from '$lib/components/dialogs/index.js';
-  import Topbar from '$lib/components/topbar.svelte';
+import { getNotesContext, getWorkspacesContext, type Note, type Workspace } from '@nota/client';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
+import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import * as Card from '@nota/ui/shadcn/card';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { timeAgo } from '@nota/ui/utils';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { page } from '$app/state';
+import { openNewNote } from '$lib/components/dialogs/index.js';
+import Topbar from '$lib/components/topbar.svelte';
 
-  const cloudWorkspaces = getWorkspacesContext();
-  const cloudNotes = getNotesContext();
+const cloudWorkspaces = getWorkspacesContext();
+const cloudNotes = getNotesContext();
 
-  const activeWorkspaceId = $derived(page.params.id);
-  const workspace = $derived(cloudWorkspaces.workspaces.find((w) => String(w.id) === String(activeWorkspaceId)));
-  const notes = $derived(
-    cloudNotes.notes.filter(
-      (n) => String(n.workspace_id) === String(activeWorkspaceId) && !n.deleted_at && !n.parent_note_id
-    )
-  );
+const activeWorkspaceId = $derived(page.params.id);
+const workspace = $derived(cloudWorkspaces.workspaces.find((w) => String(w.id) === String(activeWorkspaceId)));
+const notes = $derived(
+  cloudNotes.notes.filter(
+    (n) => String(n.workspace_id) === String(activeWorkspaceId) && !n.deleted_at && !n.parent_note_id
+  )
+);
 
-  let fileInput = $state<HTMLInputElement | null>(null);
+let fileInput = $state<HTMLInputElement | null>(null);
 
-  function openNote(note: Note) {
-    goto(resolve("/(app)/note-[id]", {id: note.id}));
+function openNote(note: Note) {
+  goto(resolve('/(app)/note-[id]', { id: note.id }));
+}
+
+async function updateWorkspace(icon: string, name: string) {
+  if (!workspace) return;
+  workspace.icon = icon;
+  workspace.name = name;
+  try {
+    await cloudWorkspaces.update(workspace.id, name, icon);
+    toast.success('Workspace updated successfully');
+  } catch (e) {
+    console.error(e);
+    toast.error('Failed to update workspace');
   }
+}
 
-  async function updateWorkspace(icon: string, name: string) {
-    if (!workspace) return;
-    workspace.icon = icon;
-    workspace.name = name;
-    try {
-      await cloudWorkspaces.update(workspace.id, name, icon);
-      toast.success('Workspace updated successfully');
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to update workspace');
+async function moveToWorkspace(note: Note, newWorkspace: Workspace) {
+  const confirmed = confirm(`Move note "${note.name}" to workspace "${newWorkspace.name}"?`);
+  if (!confirmed) return;
+  try {
+    await cloudNotes.moveNote(note.id, String(newWorkspace.id), null);
+    toast.success('Note moved successfully');
+  } catch (e) {
+    console.error(e);
+    toast.error('Failed to move note');
+  }
+}
+
+async function exportNote(note: Note) {
+  const id = toast.loading(`Exporting ${note.name}...`);
+  try {
+    const content = await cloudNotes.fetchContent(note.id);
+    const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify({ name: note.name, content }))}`;
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `${note.name}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    toast.success('Note exported successfully', { id });
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Unknown error', { id });
+  }
+}
+
+async function trashNote(note: Note) {
+  const confirmed = confirm(`Trash note "${note.name}"? You can restore it later from the trash.`);
+  if (!confirmed) return;
+  try {
+    await cloudNotes.update(note.id, { deleted_at: new Date() });
+    toast.success('Moved to Trash');
+  } catch (e) {
+    console.error(e);
+    toast.error('Failed to trash note');
+  }
+}
+
+async function triggerImport() {
+  fileInput?.click();
+}
+
+async function handleFileImport(e: Event) {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (!file) return;
+
+  const id = toast.loading('Importing note...');
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.name || !data.content) {
+      throw new Error('Invalid note format. Missing name or content.');
     }
-  }
-
-  async function moveToWorkspace(note: Note, newWorkspace: Workspace) {
-    const confirmed = confirm(`Move note "${note.name}" to workspace "${newWorkspace.name}"?`);
-    if (!confirmed) return;
-    try {
-      await cloudNotes.moveNote(note.id, String(newWorkspace.id), null);
-      toast.success('Note moved successfully');
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to move note');
+    if (!workspace) {
+      throw new Error('Workspace not found.');
     }
+    await cloudNotes.import(data.name, workspace.id, data.content);
+    toast.success('Note imported successfully', { id });
+  } catch (err) {
+    console.error(err);
+    toast.error(err instanceof Error ? err.message : 'Import failed', { id });
+  } finally {
+    target.value = ''; // clear input
   }
-
-  async function exportNote(note: Note) {
-    const id = toast.loading(`Exporting ${note.name}...`);
-    try {
-      const content = await cloudNotes.fetchContent(note.id);
-      const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify({ name: note.name, content }))}`;
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute('href', dataStr);
-      downloadAnchor.setAttribute('download', `${note.name}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-      toast.success('Note exported successfully', { id });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Unknown error', { id });
-    }
-  }
-
-  async function trashNote(note: Note) {
-    const confirmed = confirm(`Trash note "${note.name}"? You can restore it later from the trash.`);
-    if (!confirmed) return;
-    try {
-      await cloudNotes.update(note.id, { deleted_at: new Date() });
-      toast.success('Moved to Trash');
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to trash note');
-    }
-  }
-
-  async function triggerImport() {
-    fileInput?.click();
-  }
-
-  async function handleFileImport(e: Event) {
-    const target = e.target as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-
-    const id = toast.loading('Importing note...');
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (!data.name || !data.content) {
-        throw new Error('Invalid note format. Missing name or content.');
-      }
-      if (!workspace) {
-        throw new Error('Workspace not found.');
-      }
-      await cloudNotes.import(data.name, workspace.id, data.content);
-      toast.success('Note imported successfully', { id });
-    } catch (err) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : 'Import failed', { id });
-    } finally {
-      target.value = ''; // clear input
-    }
-  }
+}
 </script>
 
 <input

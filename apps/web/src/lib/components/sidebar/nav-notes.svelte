@@ -4,17 +4,15 @@ import { icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { page } from '$app/state';
+import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
 import { openNewNote } from '../dialogs/index.js';
 import NoteTile from './note-tile.svelte';
-import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
 
 const cloudNotes = getNotesContext();
 const currentWorkspace = getCurrentWorkspaceContext();
 
 const notes = $derived(
-  cloudNotes.notes.filter(
-    (n) => n.workspace_id === currentWorkspace.value?.id && !n.deleted_at && !n.parent_note_id
-  )
+  cloudNotes.notes.filter((n) => n.workspace_id === currentWorkspace.value?.id && !n.deleted_at && !n.parent_note_id)
 );
 </script>
 

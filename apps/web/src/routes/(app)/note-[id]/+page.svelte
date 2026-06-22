@@ -1,236 +1,214 @@
 <script lang="ts">
-  import { getNotesContext, getStorageContext, getWorkspacesContext, type Note } from "@nota/client";
-  import { SimpleToolTip } from "@nota/ui/custom/index.js";
-  import SearchAndReplace from "@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte";
-  import {
-    EdraBubbleMenu,
-    EdraDragHandleExtended,
-    EdraEditor,
-    EdraToolBar,
-  } from "@nota/ui/edra/shadcn/index.js";
-  import type { Content, Editor } from "@nota/ui/edra/types.js";
-  import { type FileType, getFileTypeExtensions } from "@nota/ui/edra/utils.js";
-  import {
-    BarSpinner,
-    IconPicker,
-    IconRenderer,
-    icons,
-  } from "@nota/ui/icons/index.js";
-  import { Button, buttonVariants } from "@nota/ui/shadcn/button";
-  import { Skeleton } from "@nota/ui/shadcn/skeleton";
-  import { toast } from "@nota/ui/shadcn/sonner";
-  import { compare } from "fast-json-patch";
-  import { onMount } from "svelte";
-  import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
-  import { resolve } from "$app/paths";
-  import NavActions from "$lib/components/nav-actions.svelte";
-  import Topbar from "$lib/components/topbar.svelte";
-  import AI from "$lib/editor/Ai.svelte";
-  import { getCurrentWorkspaceContext } from "$lib/currentworkspace.svelte";
+import { getNotesContext, getStorageContext, getWorkspacesContext, type Note } from '@nota/client';
+import { SimpleToolTip } from '@nota/ui/custom/index.js';
+import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
+import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
+import type { Content, Editor } from '@nota/ui/edra/types.js';
+import { type FileType, getFileTypeExtensions } from '@nota/ui/edra/utils.js';
+import { BarSpinner, IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import { Skeleton } from '@nota/ui/shadcn/skeleton';
+import { toast } from '@nota/ui/shadcn/sonner';
+import { compare } from 'fast-json-patch';
+import { onMount } from 'svelte';
+import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import NavActions from '$lib/components/nav-actions.svelte';
+import Topbar from '$lib/components/topbar.svelte';
+import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
+import AI from '$lib/editor/Ai.svelte';
 
-  const { data } = $props();
+const { data } = $props();
 
-  afterNavigate(() => {
-    if (data.id) loadData();
-  });
+afterNavigate(() => {
+  if (data.id) loadData();
+});
 
-  const currentWorkspace = getCurrentWorkspaceContext();
+const currentWorkspace = getCurrentWorkspaceContext();
 
-  // editor related
-  let editor = $state<Editor>();
-  let content = $state<Content>();
-  let syncedContent = $state<Content>();
-  let isDirty = $state(false);
+// editor related
+let editor = $state<Editor>();
+let content = $state<Content>();
+let syncedContent = $state<Content>();
+let isDirty = $state(false);
 
-  // settings related
-  let useToolBar = $state(localStorage.getItem("use-toolbar") !== "false");
-  let useBubbleMenu = $state(
-    localStorage.getItem("use-bubble-menu") !== "false",
-  );
-  let useDragHandle = $state(
-    localStorage.getItem("use-drag-handle") !== "false",
-  );
+// settings related
+let useToolBar = $state(localStorage.getItem('use-toolbar') !== 'false');
+let useBubbleMenu = $state(localStorage.getItem('use-bubble-menu') !== 'false');
+let useDragHandle = $state(localStorage.getItem('use-drag-handle') !== 'false');
 
-  $effect(() => {
-    localStorage.setItem("use-toolbar", String(useToolBar));
-  });
-  $effect(() => {
-    localStorage.setItem("use-bubble-menu", String(useBubbleMenu));
-  });
-  $effect(() => {
-    localStorage.setItem("use-drag-handle", String(useDragHandle));
-  });
+$effect(() => {
+  localStorage.setItem('use-toolbar', String(useToolBar));
+});
+$effect(() => {
+  localStorage.setItem('use-bubble-menu', String(useBubbleMenu));
+});
+$effect(() => {
+  localStorage.setItem('use-drag-handle', String(useDragHandle));
+});
 
-  // cloud related
-  const cloudNotes = getNotesContext();
-  const cloudStorage = getStorageContext();
-  const cloudWorkspace = getWorkspacesContext();
+// cloud related
+const cloudNotes = getNotesContext();
+const cloudStorage = getStorageContext();
+const cloudWorkspace = getWorkspacesContext();
 
-  // notes related
-  let isLoading = $state(false);
-  let note = $derived(data.note);
-  let syncing = $state(false);
-  let syncingText = $state("");
+// notes related
+let isLoading = $state(false);
+let note = $derived(data.note);
+let syncing = $state(false);
+let syncingText = $state('');
 
-  const onFileSelect = async (_path: string) => {
-    return "";
-  };
+const onFileSelect = async (_path: string) => {
+  return '';
+};
 
-  const onDropOrPaste = async (file: File) => await cloudStorage.upload(file);
+const onDropOrPaste = async (file: File) => await cloudStorage.upload(file);
 
-  const getAssets = async (fileType: FileType) => {
-    const files = cloudStorage.files;
-    const extensions = new Set(getFileTypeExtensions(fileType));
-    const assets: string[] = [];
-    for (const file of files) {
-      const key = file.key;
-      const fileExtension = key.split(".").pop();
-      if (fileExtension !== undefined && extensions.has(fileExtension)) {
-        assets.push(file.url);
-      }
-    }
-    return assets;
-  };
-
-  const getLocalFile = async (fileType: FileType) => {
-    const extensions = getFileTypeExtensions(fileType);
-    return new Promise<string | null>((resolve) => {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = extensions.map((ext) => `.${ext}`).join(",");
-      input.onchange = async () => {
-        const file = input.files?.[0];
-        if (!file) {
-          resolve(null);
-          return;
-        }
-        try {
-          const url = await cloudStorage.upload(file);
-          resolve(url);
-        } catch (e) {
-          console.error(e);
-          toast.error("Failed to upload file");
-          resolve(null);
-        }
-      };
-      input.onerror = () => resolve(null);
-      input.oncancel = () => resolve(null);
-      input.click();
-    });
-  };
-
-  async function saveNoteContent() {
-    if (!isDirty || note === undefined || editor === undefined) return;
-
-    const currentContent = editor.getJSON();
-    if (
-      syncedContent === undefined ||
-      syncedContent === null ||
-      typeof syncedContent === "string"
-    ) {
-      syncedContent = {};
-    }
-    const patch = compare(syncedContent as object, currentContent);
-
-    if (patch.length === 0) {
-      isDirty = false;
-      return;
-    }
-
-    syncing = true;
-    syncingText = `Syncing ${patch.length} changes`;
-    try {
-      console.log(patch)
-      await cloudNotes.patch(note.id, patch);
-      syncedContent = currentContent;
-      isDirty = false;
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong when saving content to cloud");
-    } finally {
-      syncing = false;
+const getAssets = async (fileType: FileType) => {
+  const files = cloudStorage.files;
+  const extensions = new Set(getFileTypeExtensions(fileType));
+  const assets: string[] = [];
+  for (const file of files) {
+    const key = file.key;
+    const fileExtension = key.split('.').pop();
+    if (fileExtension !== undefined && extensions.has(fileExtension)) {
+      assets.push(file.url);
     }
   }
+  return assets;
+};
 
-  onMount(() => {
-    const saveInterval = setInterval(() => {
-      saveNoteContent();
-    }, 120000);
-    return () => clearInterval(saveInterval);
-  });
-
-  
-  async function loadData() {
-    isLoading = true;
-
-    // If we land here directly, fetch all notes to populate contexts and find this note
-    if (cloudNotes.notes.length === 0) {
+const getLocalFile = async (fileType: FileType) => {
+  const extensions = getFileTypeExtensions(fileType);
+  return new Promise<string | null>((resolve) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = extensions.map((ext) => `.${ext}`).join(',');
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) {
+        resolve(null);
+        return;
+      }
       try {
-        await cloudNotes.fetch();
+        const url = await cloudStorage.upload(file);
+        resolve(url);
       } catch (e) {
-        console.error("Failed to fetch notes on direct navigation:", e);
+        console.error(e);
+        toast.error('Failed to upload file');
+        resolve(null);
       }
-    }
-
-    // Attempt to set current workspace context if it's unset
-    if (
-      !currentWorkspace.value ||
-      currentWorkspace.value.id !== note.workspace_id
-    ) {
-      // Will rely on layout fallback or let it be null. But maybe we shouldn't force it here
-      // The layout can't know the workspace for `/note-[id]` directly.
-      const workspace = data.workspaces.find((w) => w.id === data.id) ?? data.workspaces[0];
-      currentWorkspace.value = workspace
-      cloudWorkspace.workspaces = data.workspaces
-    }
-
-    try {
-      const data = await cloudNotes.fetchContent(note.id);
-      if (data) {
-        content = data as Content;
-        isDirty = false;
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong when loading note content");
-      goto(resolve("/home"));
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  function onUpdate() {
-    isDirty = true;
-  }
-
-  async function updateNote(name: string, icon: string, pinned: boolean) {
-    if (note === undefined) return;
-    syncing = true;
-    try {
-      await cloudNotes.update(note.id, { name, icon, pinned });
-      note.name = name;
-      note.icon = icon;
-      note.pinned = pinned;
-    } catch (e) {
-      toast.error("Could not update note");
-      console.error(e);
-    } finally {
-      syncing = false;
-    }
-  }
-
-  beforeNavigate(async () => {
-    if (isDirty) {
-      await saveNoteContent();
-    }
+    };
+    input.onerror = () => resolve(null);
+    input.oncancel = () => resolve(null);
+    input.click();
   });
+};
 
-  function handleKeydown(e: KeyboardEvent) {
-    if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      saveNoteContent();
+async function saveNoteContent() {
+  if (!isDirty || note === undefined || editor === undefined) return;
+
+  const currentContent = editor.getJSON();
+  if (syncedContent === undefined || syncedContent === null || typeof syncedContent === 'string') {
+    syncedContent = {};
+  }
+  const patch = compare(syncedContent as object, currentContent);
+
+  if (patch.length === 0) {
+    isDirty = false;
+    return;
+  }
+
+  syncing = true;
+  syncingText = `Syncing ${patch.length} changes`;
+  try {
+    console.log(patch);
+    await cloudNotes.patch(note.id, patch);
+    syncedContent = currentContent;
+    isDirty = false;
+  } catch (error) {
+    console.error(error);
+    toast.error('Something went wrong when saving content to cloud');
+  } finally {
+    syncing = false;
+  }
+}
+
+onMount(() => {
+  const saveInterval = setInterval(() => {
+    saveNoteContent();
+  }, 120000);
+  return () => clearInterval(saveInterval);
+});
+
+async function loadData() {
+  isLoading = true;
+
+  // If we land here directly, fetch all notes to populate contexts and find this note
+  if (cloudNotes.notes.length === 0) {
+    try {
+      await cloudNotes.fetch();
+    } catch (e) {
+      console.error('Failed to fetch notes on direct navigation:', e);
     }
   }
+
+  // Attempt to set current workspace context if it's unset
+  if (!currentWorkspace.value || currentWorkspace.value.id !== note.workspace_id) {
+    // Will rely on layout fallback or let it be null. But maybe we shouldn't force it here
+    // The layout can't know the workspace for `/note-[id]` directly.
+    const workspace = data.workspaces.find((w) => w.id === data.id) ?? data.workspaces[0];
+    currentWorkspace.value = workspace;
+    cloudWorkspace.workspaces = data.workspaces;
+  }
+
+  try {
+    const data = await cloudNotes.fetchContent(note.id);
+    if (data) {
+      content = data as Content;
+      isDirty = false;
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error('Something went wrong when loading note content');
+    goto(resolve('/home'));
+  } finally {
+    isLoading = false;
+  }
+}
+
+function onUpdate() {
+  isDirty = true;
+}
+
+async function updateNote(name: string, icon: string, pinned: boolean) {
+  if (note === undefined) return;
+  syncing = true;
+  try {
+    await cloudNotes.update(note.id, { name, icon, pinned });
+    note.name = name;
+    note.icon = icon;
+    note.pinned = pinned;
+  } catch (e) {
+    toast.error('Could not update note');
+    console.error(e);
+  } finally {
+    syncing = false;
+  }
+}
+
+beforeNavigate(async () => {
+  if (isDirty) {
+    await saveNoteContent();
+  }
+});
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    saveNoteContent();
+  }
+}
 </script>
 
 <svelte:document onkeydown={handleKeydown} />

@@ -1,18 +1,27 @@
 <script lang="ts">
 import ProBadge from '@lib/components/custom/ProBadge.svelte';
+import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
 import LogOut from '@lucide/svelte/icons/log-out';
-import Trash2 from '@lucide/svelte/icons/trash-2';
-import MonitorSmartphone from '@lucide/svelte/icons/monitor-smartphone';
 import MapPin from '@lucide/svelte/icons/map-pin';
+import MonitorSmartphone from '@lucide/svelte/icons/monitor-smartphone';
+import Trash2 from '@lucide/svelte/icons/trash-2';
+import {
+  BarSpinner,
+  BraveBrowser,
+  ChromeBrowser,
+  EdgeBrowser,
+  FirefoxBrowser,
+  icons,
+  SafariBrowser,
+  ZenBrowser,
+} from '@nota/ui/icons/index.js';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import { toast } from '@nota/ui/shadcn/sonner';
+import * as Tabs from '@nota/ui/shadcn/tabs';
 import { resolve } from '$app/paths';
 import Topbar from '$lib/components/topbar.svelte';
-import { BarSpinner, BraveBrowser, ChromeBrowser, EdgeBrowser, FirefoxBrowser, icons, SafariBrowser, ZenBrowser } from '@nota/ui/icons/index.js';
-import * as Tabs from '@nota/ui/shadcn/tabs';
-import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
 
 const { data } = $props();
 
@@ -27,9 +36,8 @@ function handleDeleteAccount() {
   toast.warning('Account Deletion is coming soon.');
 }
 
+import { getAuthContext, type ParsedSession, parseSession, type Session } from '@nota/client';
 import { onMount } from 'svelte';
-import { getAuthContext } from '@nota/client';
-import { parseSession, type ParsedSession, type Session } from '@nota/client';
 
 const auth = getAuthContext();
 let sessions: (Session & ParsedSession)[] = $state([]);
@@ -40,13 +48,18 @@ onMount(async () => {
     const rawSessions = await auth.getSessions();
     // Assuming the one with the latest refreshed_at or created_at might be current if we don't know the ID
     // For now we'll just parse them
-    sessions = rawSessions.map(s => ({
-      ...s,
-      ...parseSession(s.user_agent ?? "", s)
-    })).sort((a, b) => new Date(b.refreshed_at || b.created_at).getTime() - new Date(a.refreshed_at || a.created_at).getTime());
-    
+    sessions = rawSessions
+      .map((s) => ({
+        ...s,
+        ...parseSession(s.user_agent ?? '', s),
+      }))
+      .sort(
+        (a, b) =>
+          new Date(b.refreshed_at || b.created_at).getTime() - new Date(a.refreshed_at || a.created_at).getTime()
+      );
+
     // Naively mark the most recently active one as current if we don't have currentSessionId
-    if (sessions.length > 0 && !sessions.some(s => s.isCurrent)) {
+    if (sessions.length > 0 && !sessions.some((s) => s.isCurrent)) {
       sessions[0].isCurrent = true;
     }
   } catch (err) {
@@ -59,7 +72,7 @@ onMount(async () => {
 async function revokeSession(id: string) {
   try {
     await auth.revokeSession(id);
-    sessions = sessions.filter(s => s.id !== id);
+    sessions = sessions.filter((s) => s.id !== id);
     toast.success('Session revoked successfully.');
   } catch (err) {
     toast.error('Failed to revoke session.');
@@ -69,10 +82,10 @@ async function revokeSession(id: string) {
 async function revokeAllOtherSessions() {
   try {
     // Current is either the one marked isCurrent or the first one
-    const currentSession = sessions.find(s => s.isCurrent) || sessions[0];
+    const currentSession = sessions.find((s) => s.isCurrent) || sessions[0];
     if (!currentSession) return;
     await auth.deleteAllOtherSessions(currentSession.id);
-    sessions = sessions.filter(s => s.id === currentSession.id);
+    sessions = sessions.filter((s) => s.id === currentSession.id);
     toast.success('All other sessions revoked successfully.');
   } catch (err) {
     toast.error('Failed to revoke other sessions.');

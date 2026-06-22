@@ -2,6 +2,7 @@
 import { BorderBeam, SimpleToolTip, ToggleMode } from '@lib/components/custom';
 import { toast } from '@lib/components/ui/sonner/index.js';
 import { request } from '@nota/client';
+import { BarSpinner, Github, icons } from '@nota/ui/icons/index.js';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
@@ -19,7 +20,6 @@ import Particles from '$lib/components/custom/utils/particles.svelte';
 import Reveal from '$lib/components/custom/utils/reveal.svelte';
 import { sendToPaymentPortal } from '$lib/utils.js';
 import { getArtefacts } from './data.remote.js';
-import { BarSpinner, icons, Github } from '@nota/ui/icons/index.js';
 
 const { data } = $props();
 const user = $derived(data.user);

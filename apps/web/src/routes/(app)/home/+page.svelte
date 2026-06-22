@@ -1,38 +1,34 @@
 <script lang="ts">
-  import { getWorkspacesContext, type Workspace } from "@nota/client";
-  import { IconRenderer, icons } from "@nota/ui/icons/index.js";
-  import { Button, buttonVariants } from "@nota/ui/shadcn/button";
-  import * as DropdownMenu from "@nota/ui/shadcn/dropdown-menu";
-  import * as Card from "@nota/ui/shadcn/card";
-  import { timeAgo } from "@nota/ui/utils";
-  import { goto } from "$app/navigation";
-  import { openNewWorkspace } from "$lib/components/dialogs/new-workspace.svelte";
-  import Topbar from "$lib/components/topbar.svelte";
-  import { confirmDelete } from "@lib/components/custom";
-  import { getCurrentWorkspaceContext } from "$lib/currentworkspace.svelte";
-  import { toast } from "@lib/components/ui/sonner";
+import { confirmDelete } from '@lib/components/custom';
+import { toast } from '@lib/components/ui/sonner';
+import { getWorkspacesContext, type Workspace } from '@nota/client';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import * as Card from '@nota/ui/shadcn/card';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import { timeAgo } from '@nota/ui/utils';
+import { goto } from '$app/navigation';
+import { openNewWorkspace } from '$lib/components/dialogs/new-workspace.svelte';
+import Topbar from '$lib/components/topbar.svelte';
+import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
 
-  const cloudWorkspaces = getWorkspacesContext();
-  const workspaces = $derived(cloudWorkspaces.workspaces);
-  const currentWorkspace = getCurrentWorkspaceContext();
+const cloudWorkspaces = getWorkspacesContext();
+const workspaces = $derived(cloudWorkspaces.workspaces);
+const currentWorkspace = getCurrentWorkspaceContext();
 
-  async function deleteWorkspace(workspace: Workspace) {
-    if (cloudWorkspaces.workspaces.length === 1) {
-      return toast.error("There must exist at least one workspace", {
-        description:
-          "This is the last workspace. Create another workspace in order to delete this one.",
-      });
-    }
-    if (currentWorkspace.value?.id == workspace.id) {
-      return toast.error("Cannot delete current workspace", {
-        description: "You first need to switch to another workspace",
-      });
-    }
-    confirmDelete(
-      workspace.name,
-      async () => await cloudWorkspaces.delete(workspace.id),
-    );
+async function deleteWorkspace(workspace: Workspace) {
+  if (cloudWorkspaces.workspaces.length === 1) {
+    return toast.error('There must exist at least one workspace', {
+      description: 'This is the last workspace. Create another workspace in order to delete this one.',
+    });
   }
+  if (currentWorkspace.value?.id === workspace.id) {
+    return toast.error('Cannot delete current workspace', {
+      description: 'You first need to switch to another workspace',
+    });
+  }
+  confirmDelete(workspace.name, async () => await cloudWorkspaces.delete(workspace.id));
+}
 </script>
 
 <div class="flex h-screen w-full flex-col text-foreground">

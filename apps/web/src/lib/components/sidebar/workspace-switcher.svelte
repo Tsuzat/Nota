@@ -1,24 +1,24 @@
 <script lang="ts">
-  import { getWorkspacesContext, type Workspace } from "@nota/client";
-  import { IconRenderer, icons } from "@nota/ui/icons/index.js";
-  import { buttonVariants } from "@nota/ui/shadcn/button";
-  import * as DropdownMenu from "@nota/ui/shadcn/dropdown-menu";
-  import * as Sidebar from "@nota/ui/shadcn/sidebar";
-  import { cn } from "@nota/ui/utils";
-  import { goto } from "$app/navigation";
-  import { resolve } from "$app/paths";
-  import { page } from "$app/state";
-  import { openNewWorkspace } from "../dialogs/new-workspace.svelte";
-  import { getCurrentWorkspaceContext } from "$lib/currentworkspace.svelte";
+import { getWorkspacesContext, type Workspace } from '@nota/client';
+import { IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { buttonVariants } from '@nota/ui/shadcn/button';
+import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import * as Sidebar from '@nota/ui/shadcn/sidebar';
+import { cn } from '@nota/ui/utils';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { page } from '$app/state';
+import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
+import { openNewWorkspace } from '../dialogs/new-workspace.svelte';
 
-  const cloudWorkspaces = getWorkspacesContext();
+const cloudWorkspaces = getWorkspacesContext();
 
-  const currentWorkspace = getCurrentWorkspaceContext();
+const currentWorkspace = getCurrentWorkspaceContext();
 
-  function switchWorkspace(workspace: Workspace) {
-    currentWorkspace.value = workspace;
-    goto(resolve("/(app)/workspace-[id]", { id: workspace.id }));
-  }
+function switchWorkspace(workspace: Workspace) {
+  currentWorkspace.value = workspace;
+  goto(resolve('/(app)/workspace-[id]', { id: workspace.id }));
+}
 </script>
 
 {#if currentWorkspace.value !== undefined}

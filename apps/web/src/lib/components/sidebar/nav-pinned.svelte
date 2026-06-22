@@ -3,12 +3,12 @@ import { getNotesContext } from '@nota/client';
 import { icons } from '@nota/ui/icons/index.js';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { page } from '$app/state';
+import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
 import NoteTile from './note-tile.svelte';
-  import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
 
 let showMore = $state(false);
 const cloudNotes = getNotesContext();
-const currentWorkspace = getCurrentWorkspaceContext()
+const currentWorkspace = getCurrentWorkspaceContext();
 
 const notes = $derived(
   cloudNotes.notes.filter((n) => n.workspace_id === currentWorkspace.value?.id && n.pinned && !n.deleted_at)

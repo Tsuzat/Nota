@@ -22,7 +22,7 @@ const cloudNotes = getNotesContext();
 const cloudWorkspaces = getWorkspacesContext();
 const user = $derived(getAuthContext().user);
 
-const href = $derived(resolve("/(app)/note-[id]", { id: note.id }));
+const href = $derived(resolve('/(app)/note-[id]', { id: note.id }));
 const isActive = $derived(page.url.pathname.endsWith(href));
 
 const childNotes = $derived(

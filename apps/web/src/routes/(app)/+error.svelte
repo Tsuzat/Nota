@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Button } from "@nota/ui/shadcn/button";
-  import { resolve } from "$app/paths";
+import { Button } from '@nota/ui/shadcn/button';
+import { resolve } from '$app/paths';
 </script>
 
 <div class="flex h-screen w-full flex-col items-center justify-center bg-background text-foreground">

@@ -1,6 +1,6 @@
-import { type Handle } from "@sveltejs/kit";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import { request as apiRequest } from "@nota/client";
+import { request as apiRequest } from '@nota/client';
+import type { Handle } from '@sveltejs/kit';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
 export const handle: Handle = async ({ event, resolve }) => {
   const url = `${PUBLIC_BACKEND_URL}/api/v1/user/me`;
@@ -14,7 +14,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       const data: any = await res.json();
       event.locals.user = data.data;
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error('Error fetching user data:', error);
       event.locals.user = null;
     }
   } else {
@@ -25,15 +25,15 @@ export const handle: Handle = async ({ event, resolve }) => {
   // request.ts attaches the Set-Cookie from the refresh response
   // onto the final response headers — we parse it and use
   // event.cookies.set() which MUST happen before resolve().
-  const setCookie = res.headers.get("Set-Cookie");
+  const setCookie = res.headers.get('Set-Cookie');
   if (setCookie) {
     const match = setCookie.match(/access_token=([^;]+)/);
     if (match) {
-      event.cookies.set("access_token", match[1], {
-        path: "/",
+      event.cookies.set('access_token', match[1], {
+        path: '/',
         httpOnly: true,
         secure: true,
-        sameSite: "lax",
+        sameSite: 'lax',
       });
     }
   }

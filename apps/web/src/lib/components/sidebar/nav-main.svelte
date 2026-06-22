@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { MovingHome, MovingSearch } from "@nota/ui/icons/index.js";
-  import * as Sidebar from "@nota/ui/shadcn/sidebar";
-  import { goto } from "$app/navigation";
-  import { resolve } from "$app/paths";
-  import { openGlobalSearch } from "../global-search.svelte";
+import { MovingHome, MovingSearch } from '@nota/ui/icons/index.js';
+import * as Sidebar from '@nota/ui/shadcn/sidebar';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { openGlobalSearch } from '../global-search.svelte';
 
-  let isHomeHovered = $state(false);
-  let isSearchHovered = $state(false);
+let isHomeHovered = $state(false);
+let isSearchHovered = $state(false);
 </script>
 
 <Sidebar.Menu>

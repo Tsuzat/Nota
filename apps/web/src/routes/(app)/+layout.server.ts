@@ -1,11 +1,11 @@
-import { redirect } from "@sveltejs/kit";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import type { LayoutServerLoad } from "./$types";
-import { request as apiRequest, type Workspace } from "@nota/client";
+import { request as apiRequest, type Workspace } from '@nota/client';
+import { redirect } from '@sveltejs/kit';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ fetch, request, locals }) => {
   if (!locals.user) {
-    throw redirect(302, "/signin");
+    throw redirect(302, '/signin');
   }
 
   let workspaces: Workspace[] = [];

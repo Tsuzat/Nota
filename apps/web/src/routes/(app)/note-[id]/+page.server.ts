@@ -1,18 +1,15 @@
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import { type Note, request as apiRequest } from "@nota/client";
-import type { PageServerLoad } from "./$types";
-import { error } from "@sveltejs/kit";
+import { request as apiRequest, type Note } from '@nota/client';
+import { error } from '@sveltejs/kit';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, parent, fetch, request }) => {
   const p = await parent();
   let note: Note | undefined;
-  const noteRes = await apiRequest(
-    `${PUBLIC_BACKEND_URL}/api/v1/db/note/${params.id}/meta`,
-    {
-      headers: request.headers,
-      fetch,
-    }
-  );
+  const noteRes = await apiRequest(`${PUBLIC_BACKEND_URL}/api/v1/db/note/${params.id}/meta`, {
+    headers: request.headers,
+    fetch,
+  });
   if (noteRes.ok) {
     const data: any = await noteRes.json();
     note = data.data as Note;
@@ -21,11 +18,10 @@ export const load: PageServerLoad = async ({ params, parent, fetch, request }) =
       id: params.id,
       note,
     };
-  } else {
-    return error(404, {
-      message: "Notes Not found",
-      server: { message: "Notes Not found" },
-      client: { message: "Notes Not found" },
-    });
   }
+  return error(404, {
+    message: 'Notes Not found',
+    server: { message: 'Notes Not found' },
+    client: { message: 'Notes Not found' },
+  });
 };
