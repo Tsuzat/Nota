@@ -302,7 +302,7 @@ function handleKeydown(e: KeyboardEvent) {
         {/if}
         {#if editor && !editor?.isDestroyed}
           <div
-            class="text-muted-foreground hidden sm:flex items-center bg-muted/30 px-3 py-1 rounded-full text-[11px] font-medium tracking-wide"
+            class="text-muted-foreground hidden sm:flex items-center text-xs font-medium tracking-wide"
           >
             {editor.storage.characterCount.words()} Words
           </div>
@@ -351,7 +351,7 @@ function handleKeydown(e: KeyboardEvent) {
     <EdraEditor
       bind:editor
       {content}
-      class="w-full max-w-3xl flex-1 grow min-h-[50vh] mx-auto overflow-auto"
+      class="w-full flex-1 grow overflow-auto p-8 md:p-12"
       {onUpdate}
       {onFileSelect}
       {onDropOrPaste}

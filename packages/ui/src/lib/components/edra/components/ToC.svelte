@@ -4,7 +4,6 @@ import { cn } from '@lib/utils';
 import type { Editor } from '@tiptap/core';
 import { type TableOfContentData } from '@tiptap/extension-table-of-contents';
 import { TextSelection } from '@tiptap/pm/state';
-import { pushState } from '$app/navigation';
 
 interface Props {
   editor: Editor;
@@ -16,7 +15,7 @@ const { editor, items }: Props = $props();
 const onItemClick = (e: Event, id: string) => {
   e.preventDefault();
 
-  const element = editor.view.dom.querySelector(`[data-toc-id="${id}"`);
+  const element = editor.view.dom.querySelector(`[data-toc-id="${id}"]`);
 
   if (!element) {
     return;
@@ -28,12 +27,17 @@ const onItemClick = (e: Event, id: string) => {
   tr.setSelection(new TextSelection(tr.doc.resolve(pos)));
   editor.view.dispatch(tr);
   editor.view.focus();
-  pushState('', {
-    showModal: true,
-  });
-  element.scrollIntoView({
-    behavior: 'smooth',
-  });
+
+  const container = element.closest('.edra-editor') || element.closest('#nota-editor');
+  if (container) {
+    const containerRect = container.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+    const relativeTop = elementRect.top - containerRect.top + container.scrollTop;
+    container.scrollTo({
+      top: relativeTop - 24,
+      behavior: 'smooth'
+    });
+  }
 };
 </script>
 

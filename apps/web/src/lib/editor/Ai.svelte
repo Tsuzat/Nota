@@ -393,7 +393,7 @@ function handleKeydown(event: KeyboardEvent) {
         return;
       }
     } else {
-      if (event.key === 'Enter' && !event.shiftKey) {
+      if ((event.key === 'Enter' || event.key === 'Return') && !event.shiftKey) {
         event.preventDefault();
         handleSubmit();
         return;

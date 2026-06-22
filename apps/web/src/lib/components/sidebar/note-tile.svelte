@@ -26,8 +26,42 @@ const href = $derived(resolve('/(app)/note-[id]', { id: note.id }));
 const isActive = $derived(page.url.pathname.endsWith(href));
 
 const childNotes = $derived(
-  cloudNotes.notes.filter((n) => String(n.parent_note_id) === String(note.id) && !n.deleted_at)
+  cloudNotes.notes.filter((n) => n.parent_note_id === note.id && !n.deleted_at)
 );
+
+interface TargetNoteItem {
+  id: string;
+  name: string;
+  icon: string;
+  depth: number;
+}
+
+function getMoveTargetNotes(workspaceId: string, currentNoteId: string): TargetNoteItem[] {
+  const result: TargetNoteItem[] = [];
+
+  function traverse(parentId: string | null, currentDepth: number) {
+    const children = cloudNotes.notes.filter(
+      (n) =>
+        n.workspace_id === workspaceId &&
+        n.parent_note_id === parentId &&
+        !n.deleted_at &&
+        n.id !== currentNoteId
+    );
+
+    for (const child of children) {
+      result.push({
+        id: child.id,
+        name: child.name,
+        icon: child.icon,
+        depth: currentDepth,
+      });
+      traverse(child.id, currentDepth + 1);
+    }
+  }
+
+  traverse(null, 0);
+  return result;
+}
 
 async function togglePin() {
   try {
@@ -76,9 +110,9 @@ async function renameNote() {
   }
 }
 
-async function moveNoteToWorkspace(targetWorkspaceId: string) {
+async function moveNote(targetWorkspaceId: string, parentNoteId: string | null) {
   try {
-    await cloudNotes.moveNote(note.id, targetWorkspaceId, null);
+    await cloudNotes.moveNote(note.id, targetWorkspaceId, parentNoteId);
     toast.success('Moved note successfully');
     // If we are currently viewing the note, navigate back to the workspace or to the new URL
     if (page.url.pathname.includes(note.id)) {
@@ -97,7 +131,7 @@ async function trashNote() {
     await cloudNotes.update(note.id, { deleted_at: new Date() });
     toast.success('Moved to Trash');
     if (page.url.pathname.includes(note.id)) {
-      goto(resolve('/(app)/workspace-[id]', { id: String(note.workspace_id) }));
+      goto(resolve('/(app)/workspace-[id]', { id: note.workspace_id }));
     }
   } catch (err) {
     console.error(err);
@@ -110,7 +144,7 @@ async function deleteNote() {
   if (!confirmed) return;
   try {
     if (page.url.pathname.includes(note.id)) {
-      goto(resolve('/(app)/workspace-[id]', { id: String(note.workspace_id) }));
+      goto(resolve('/(app)/workspace-[id]', { id: note.workspace_id }));
     }
     await cloudNotes.delete(note.id);
     toast.success('Permanently deleted');
@@ -147,7 +181,7 @@ function formatDate(val: number | Date | null | undefined) {
     <Sidebar.MenuButton class={cn(isActive && "bg-muted")}>
       {#snippet child({ props })}
         <a {href} {...props}>
-          <IconRenderer class="size-4 shrink-0" icon={note.icon} />
+          <IconRenderer class="size-4! shrink-0" icon={note.icon} />
           <span class="truncate">{note.name}</span>
         </a>
       {/snippet}
@@ -211,21 +245,60 @@ function formatDate(val: number | Date | null | undefined) {
           <span>Rename</span>
         </DropdownMenu.Item>
 
-        {#if cloudWorkspaces.workspaces.length > 1}
-          <DropdownMenu.Sub>
-            <DropdownMenu.SubTrigger>Move to...</DropdownMenu.SubTrigger>
-            <DropdownMenu.SubContent>
-              {#each cloudWorkspaces.workspaces as ws (ws.id)}
-                {#if String(ws.id) !== String(note.workspace_id)}
-                  <DropdownMenu.Item onclick={() => moveNoteToWorkspace(String(ws.id))}>
-                    {ws.name}
+        <DropdownMenu.Sub>
+          <DropdownMenu.SubTrigger class="cursor-pointer">
+            <icons.ArrowDownUp class="size-4" />
+            <span>Move to...</span>
+          </DropdownMenu.SubTrigger>
+          <DropdownMenu.SubContent class="max-h-80 overflow-y-auto w-64">
+            <!-- Workspaces Section -->
+            {@const otherWorkspaces = cloudWorkspaces.workspaces.filter(ws => ws.id !== note.workspace_id)}
+            {@const showCurrentWorkspace = note.parent_note_id !== null}
+            {#if showCurrentWorkspace || otherWorkspaces.length > 0}
+              <DropdownMenu.Label class="text-xs text-muted-foreground font-semibold px-2 py-1.5">
+                Workspaces
+              </DropdownMenu.Label>
+              {#if showCurrentWorkspace}
+                {@const currentWS = cloudWorkspaces.workspaces.find(ws => ws.id === note.workspace_id)}
+                {#if currentWS}
+                  <DropdownMenu.Item onclick={() => moveNote(currentWS.id, null)} class="cursor-pointer">
+                    <IconRenderer class="size-4 shrink-0 mr-2 text-muted-foreground" icon={currentWS.icon || "lucide:Folder"} />
+                    <span class="truncate font-semibold">{currentWS.name} (Root)</span>
+                  </DropdownMenu.Item>
+                {/if}
+              {/if}
+              {#each otherWorkspaces as ws (ws.id)}
+                <DropdownMenu.Item onclick={() => moveNote(ws.id, null)} class="cursor-pointer">
+                  <IconRenderer class="size-4 shrink-0 mr-2 text-muted-foreground" icon={ws.icon || "lucide:Folder"} />
+                  <span class="truncate">{ws.name}</span>
+                </DropdownMenu.Item>
+              {/each}
+            {/if}
+
+            <!-- Notes in current workspace Section -->
+            {@const targetNotes = getMoveTargetNotes(note.workspace_id, note.id)}
+            {#if targetNotes.length > 0}
+              {#if showCurrentWorkspace || otherWorkspaces.length > 0}
+                <DropdownMenu.Separator />
+              {/if}
+              <DropdownMenu.Label class="text-xs text-muted-foreground font-semibold px-2 py-1.5">
+                Notes in Workspace
+              </DropdownMenu.Label>
+              {#each targetNotes as targetNote (targetNote.id)}
+                {#if note.parent_note_id !== targetNote.id}
+                  <DropdownMenu.Item 
+                    onclick={() => moveNote(note.workspace_id, targetNote.id)}
+                    class="cursor-pointer flex items-center gap-2"
+                    style="padding-left: calc(0.5rem + {targetNote.depth * 0.75}rem);"
+                  >
+                    <IconRenderer class="size-4 shrink-0" icon={targetNote.icon} />
+                    <span class="truncate">{targetNote.name}</span>
                   </DropdownMenu.Item>
                 {/if}
               {/each}
-            </DropdownMenu.SubContent>
-          </DropdownMenu.Sub>
-        {/if}
-
+            {/if}
+          </DropdownMenu.SubContent>
+        </DropdownMenu.Sub>
         <DropdownMenu.Separator />
 
         <DropdownMenu.Item onclick={trashNote} variant="destructive">

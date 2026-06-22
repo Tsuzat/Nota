@@ -1,8 +1,8 @@
-import { mergeAttributes, Node, wrappingInputRule } from '@tiptap/core';
-import { SvelteNodeViewRenderer } from 'svelte-tiptap';
-import CalloutWrapper from './CalloutWrapper.svelte';
+import { mergeAttributes, Node, wrappingInputRule } from "@tiptap/core";
+import { SvelteNodeViewRenderer } from "svelte-tiptap";
+import CalloutWrapper from "./CalloutWrapper.svelte";
 
-declare module '@tiptap/core' {
+declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     callout: {
       setCallout: () => ReturnType;
@@ -11,9 +11,9 @@ declare module '@tiptap/core' {
 }
 
 export const Callout = Node.create({
-  name: 'callout',
-  content: 'paragraph+',
-  group: 'block',
+  name: "callout",
+  content: "paragraph+",
+  group: "block",
   defining: true,
   selectable: true,
   draggable: true,
@@ -21,17 +21,17 @@ export const Callout = Node.create({
   addAttributes() {
     return {
       emoji: {
-        default: '💡',
+        default: "💡",
       },
     };
   },
 
   markdownTokenizer: {
-    name: 'callout',
-    level: 'block',
+    name: "callout",
+    level: "block",
 
     start: (src: string) => {
-      return src.indexOf('$');
+      return src.indexOf("$");
     },
 
     tokenize: (src: string, tokens: any, lexer: any) => {
@@ -43,9 +43,9 @@ export const Callout = Node.create({
       }
 
       return {
-        type: 'callout',
+        type: "callout",
         raw: match[0],
-        emoji: match[1]?.trim() || '💡',
+        emoji: match[1]?.trim() || "💡",
         text: match[2],
         tokens: lexer.blockTokens(match[2]),
       };
@@ -54,7 +54,7 @@ export const Callout = Node.create({
 
   parseMarkdown: (token: any, helpers: any) => {
     return {
-      type: 'callout',
+      type: "callout",
       attrs: {
         emoji: token.emoji,
       },
@@ -64,24 +64,28 @@ export const Callout = Node.create({
 
   renderMarkdown: (node: any, helpers: any) => {
     const content = helpers.renderChildren(node);
-    const emoji = node.attrs?.emoji || '💡';
+    const emoji = node.attrs?.emoji || "💡";
     return `$callout${emoji}\n${content}\n$\n\n`;
   },
 
   addOptions() {
     return {
       HTMLAttributes: {
-        class: 'callout',
+        class: "callout",
       },
     };
   },
 
   parseHTML() {
-    return [{ tag: 'div[class=callout]' }];
+    return [{ tag: "div[class=callout]" }];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
+    return [
+      "div",
+      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
+      0,
+    ];
   },
 
   addCommands() {
@@ -105,7 +109,7 @@ export const Callout = Node.create({
         find: /^\$callout\s*(.*)?\s$/,
         type: this.type,
         getAttributes: (match) => {
-          return { emoji: match[1]?.trim() || '💡' };
+          return { emoji: match[1]?.trim() || "💡" };
         },
       }),
     ];

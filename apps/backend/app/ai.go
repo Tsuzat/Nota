@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"sync"
+
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 	"google.golang.org/genai"
-	"sync"
 )
 
 var (
