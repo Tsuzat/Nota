@@ -14,8 +14,11 @@ import (
 func setupTestConfig() {
 	config.ACCESS_TOKEN_SECRET = "test-access-secret-key-12345"
 	config.ACCESS_TOKEN_EXPIRY = 15 // 15 minutes
+	config.AccessTokenDuration = time.Minute * 15
+
 	config.REFRESH_TOKEN_SECRET = "test-refresh-secret-key-12345"
 	config.REFRESH_TOKEN_EXPIRY = 7 // 7 days
+	config.RefreshTokenDuration = time.Hour * 24 * 7
 }
 
 func TestGenerateAccessToken(t *testing.T) {
