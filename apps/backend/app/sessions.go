@@ -5,6 +5,7 @@ import (
 
 	"github.com/Tsuzat/Nota/db"
 	"github.com/Tsuzat/Nota/models"
+	"github.com/Tsuzat/Nota/utils"
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -42,6 +43,7 @@ func RevokeSession(c fiber.Ctx) error {
 			Error:  "You are not authorized to revoke this session or it doesn't exist",
 		})
 	}
+	utils.DeleteCache("session:" + id)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Session revoked",
@@ -50,7 +52,13 @@ func RevokeSession(c fiber.Ctx) error {
 
 func RevokeAllSessions(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	err := db.RevokeAllUserSessions(user.Id)
+	sessions, err := db.GetSessions(user.Id)
+	if err == nil {
+		for _, s := range sessions {
+			utils.DeleteCache("session:" + s.Id)
+		}
+	}
+	err = db.RevokeAllUserSessions(user.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -81,6 +89,7 @@ func DeleteSession(c fiber.Ctx) error {
 			Error:  "You are not authorized to delete this session or it doesn't exist",
 		})
 	}
+	utils.DeleteCache("session:" + id)
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Session deleted",
@@ -89,7 +98,13 @@ func DeleteSession(c fiber.Ctx) error {
 
 func DeleteAllSessions(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	err := db.DeleteAllUserSessions(user.Id)
+	sessions, err := db.GetSessions(user.Id)
+	if err == nil {
+		for _, s := range sessions {
+			utils.DeleteCache("session:" + s.Id)
+		}
+	}
+	err = db.DeleteAllUserSessions(user.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
@@ -106,7 +121,7 @@ func DeleteAllSessions(c fiber.Ctx) error {
 func DeleteAllOtherSessions(c fiber.Ctx) error {
 	keepId := c.Params("id")
 	user := c.Locals("user").(*models.User)
-	
+
 	// Just verify the user owns the session they want to keep
 	session, err := db.GetSession(keepId)
 	if err != nil || session.UserId != user.Id {
@@ -115,7 +130,16 @@ func DeleteAllOtherSessions(c fiber.Ctx) error {
 			Error:  "Invalid session",
 		})
 	}
-	
+
+	sessions, err := db.GetSessions(user.Id)
+	if err == nil {
+		for _, s := range sessions {
+			if s.Id != keepId {
+				utils.DeleteCache("session:" + s.Id)
+			}
+		}
+	}
+
 	err = db.DeleteAllOtherUserSessions(user.Id, keepId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{

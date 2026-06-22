@@ -13,8 +13,11 @@ import { page } from '$app/state';
 import { openNewNote } from '$lib/components/dialogs/index.js';
 import Topbar from '$lib/components/topbar.svelte';
 
+import { getCurrentWorkspaceContext } from '$lib/currentworkspace.svelte';
+
 const cloudWorkspaces = getWorkspacesContext();
 const cloudNotes = getNotesContext();
+const currentWorkspace = getCurrentWorkspaceContext();
 
 const activeWorkspaceId = $derived(page.params.id);
 const workspace = $derived(cloudWorkspaces.workspaces.find((w) => String(w.id) === String(activeWorkspaceId)));
@@ -23,6 +26,12 @@ const notes = $derived(
     (n) => String(n.workspace_id) === String(activeWorkspaceId) && !n.deleted_at && !n.parent_note_id
   )
 );
+
+$effect(() => {
+  if (workspace) {
+    currentWorkspace.value = workspace;
+  }
+});
 
 let fileInput = $state<HTMLInputElement | null>(null);
 

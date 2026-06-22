@@ -141,6 +141,14 @@ onMount(() => {
   return () => clearInterval(saveInterval);
 });
 
+$effect(() => {
+  if (note) {
+    const workspace = data.workspaces.find((w) => w.id === note.workspace_id) ?? data.workspaces[0];
+    currentWorkspace.value = workspace;
+    cloudWorkspace.workspaces = data.workspaces;
+  }
+});
+
 async function loadData() {
   isLoading = true;
 
@@ -151,15 +159,6 @@ async function loadData() {
     } catch (e) {
       console.error('Failed to fetch notes on direct navigation:', e);
     }
-  }
-
-  // Attempt to set current workspace context if it's unset
-  if (!currentWorkspace.value || currentWorkspace.value.id !== note.workspace_id) {
-    // Will rely on layout fallback or let it be null. But maybe we shouldn't force it here
-    // The layout can't know the workspace for `/note-[id]` directly.
-    const workspace = data.workspaces.find((w) => w.id === data.id) ?? data.workspaces[0];
-    currentWorkspace.value = workspace;
-    cloudWorkspace.workspaces = data.workspaces;
   }
 
   try {

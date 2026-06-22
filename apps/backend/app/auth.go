@@ -354,6 +354,7 @@ func SignOut(c fiber.Ctx) error {
 	c.Cookie(config.GetCookieOptions("refresh_token", "", time.Now().Add(-time.Hour)))
 
 	if sessionId != nil {
+		utils.DeleteCache("session:" + *sessionId)
 		go config.DB.NewDelete().
 			Model(&models.Session{}).
 			Where("id = ?", *sessionId).

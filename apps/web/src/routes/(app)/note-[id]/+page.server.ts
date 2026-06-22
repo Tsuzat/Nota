@@ -19,9 +19,16 @@ export const load: PageServerLoad = async ({ params, parent, fetch, request }) =
       note,
     };
   }
-  return error(404, {
-    message: 'Notes Not found',
-    server: { message: 'Notes Not found' },
-    client: { message: 'Notes Not found' },
+  if (noteRes.status === 403 || noteRes.status === 401) {
+    error(403, {
+      message: 'You do not have permission to access this note.',
+      server: { message: 'Forbidden' },
+      client: { message: 'Forbidden' },
+    });
+  }
+  error(404, {
+    message: 'Note not found',
+    server: { message: 'Note not found' },
+    client: { message: 'Note not found' },
   });
 };
