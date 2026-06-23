@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/Tsuzat/Nota/models"
 	"github.com/gofiber/fiber/v3"
@@ -35,17 +34,6 @@ func SanitizationMiddleware(c fiber.Ctx) error {
 			return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 				Status: fiber.StatusBadRequest,
 				Error:  "Malicious input detected in query parameter: " + key,
-			})
-		}
-	}
-
-	contentType := string(c.Request().Header.ContentType())
-	if strings.Contains(contentType, "application/json") || strings.Contains(contentType, "text/plain") {
-		body := string(c.Body())
-		if isSuspicious(body) {
-			return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
-				Status: fiber.StatusBadRequest,
-				Error:  "Malicious input detected in request body",
 			})
 		}
 	}
