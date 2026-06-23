@@ -16,13 +16,11 @@ const localNotes = getLocalNotes();
 const notes = $derived.by(() => {
   if (currentWorkspace === undefined) return [];
   if ('owner' in currentWorkspace) {
-    return cloudNotes.notes.filter(
-      (n) => n.workspace_id === currentWorkspace.id && !n.deleted_at && !n.parent_note_id
-    );
+    return cloudNotes.notes.filter((n) => n.workspace_id === currentWorkspace.id && !n.deleted_at && !n.parent_note_id);
   }
-  return localNotes.getNotes().filter(
-    (n) => n.workspace_id === currentWorkspace.id && !n.deleted_at && !n.parent_note_id
-  );
+  return localNotes
+    .getNotes()
+    .filter((n) => n.workspace_id === currentWorkspace.id && !n.deleted_at && !n.parent_note_id);
 });
 </script>
 

@@ -14,13 +14,9 @@ const currentWorkspace = $derived(getCurrentWorkspace().get());
 const notes = $derived.by(() => {
   if (!currentWorkspace) return [];
   if ('owner' in currentWorkspace) {
-    return cloudNotes.notes.filter(
-      (n) => n.workspace_id === currentWorkspace.id && n.pinned && !n.deleted_at
-    );
+    return cloudNotes.notes.filter((n) => n.workspace_id === currentWorkspace.id && n.pinned && !n.deleted_at);
   }
-  return localNotes.getNotes().filter(
-    (n) => n.workspace_id === currentWorkspace.id && n.pinned && !n.deleted_at
-  );
+  return localNotes.getNotes().filter((n) => n.workspace_id === currentWorkspace.id && n.pinned && !n.deleted_at);
 });
 </script>
 

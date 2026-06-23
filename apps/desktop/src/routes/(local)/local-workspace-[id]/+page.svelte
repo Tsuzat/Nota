@@ -5,6 +5,7 @@ import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
+import { timeAgo } from '@nota/ui/utils';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
@@ -14,7 +15,6 @@ import { DB } from '$lib/local/db';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces, type LocalWorkSpace } from '$lib/local/workspaces.svelte';
 import { importNotes, writeStringToFile } from '$lib/utils';
-import { timeAgo } from '@nota/ui/utils';
 
 let { data } = $props();
 

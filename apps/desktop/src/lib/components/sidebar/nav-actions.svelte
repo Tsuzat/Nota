@@ -5,11 +5,10 @@ import type { Editor } from '@nota/ui/edra/types.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
-import { cn } from '@nota/ui/utils';
+import { cn, timeAgo } from '@nota/ui/utils';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { exportContent, importNotes } from '$lib/utils';
-import { timeAgo } from '@nota/ui/utils';
 import { getGlobalSettings } from '../settings';
 
 interface Props {
