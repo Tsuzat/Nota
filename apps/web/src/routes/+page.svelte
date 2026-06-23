@@ -109,7 +109,7 @@ async function copyToClipboard() {
 
 <Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
 
-<header class="mx-auto flex max-w-4xl items-center justify-between gap-4 p-4">
+<header class="mx-auto sticky z-100 top-2 flex max-w-4xl items-center justify-between gap-4 rounded-xl p-4 backdrop-blur-md bg-background/75 border">
   <a class="flex items-center gap-4" href={resolve("/")}>
     <enhanced:img src="../../static/favicon.webp" alt="Nota" class="size-10" />
     <h3 class="font-bold">Nota</h3>
@@ -267,7 +267,7 @@ async function copyToClipboard() {
   </div>
   <div class="block dark:hidden">
     <enhanced:img
-      class="z-10 block aspect-auto h-auto w-full dark:hidden"
+      class="z-10 block aspect-auto h-auto w-full"
       src="../../static/previews/light.webp"
       alt="nota"
     />
