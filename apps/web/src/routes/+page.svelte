@@ -34,7 +34,7 @@ const pricingList = {
     'Regular Updates and Bug Fixes',
     'Bring your own AI API Key',
     '1 Cloud Workspaces',
-    '3 Cloud Notes'
+    '3 Cloud Notes',
   ],
   monthly: [
     'All the features of Free Tier',

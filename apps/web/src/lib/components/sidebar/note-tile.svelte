@@ -25,9 +25,7 @@ const user = $derived(getAuthContext().user);
 const href = $derived(resolve('/(app)/note-[id]', { id: note.id }));
 const isActive = $derived(page.url.pathname.endsWith(href));
 
-const childNotes = $derived(
-  cloudNotes.notes.filter((n) => n.parent_note_id === note.id && !n.deleted_at)
-);
+const childNotes = $derived(cloudNotes.notes.filter((n) => n.parent_note_id === note.id && !n.deleted_at));
 
 interface TargetNoteItem {
   id: string;
@@ -41,11 +39,7 @@ function getMoveTargetNotes(workspaceId: string, currentNoteId: string): TargetN
 
   function traverse(parentId: string | null, currentDepth: number) {
     const children = cloudNotes.notes.filter(
-      (n) =>
-        n.workspace_id === workspaceId &&
-        n.parent_note_id === parentId &&
-        !n.deleted_at &&
-        n.id !== currentNoteId
+      (n) => n.workspace_id === workspaceId && n.parent_note_id === parentId && !n.deleted_at && n.id !== currentNoteId
     );
 
     for (const child of children) {
