@@ -213,7 +213,7 @@ function handleKeydown(e: KeyboardEvent) {
 <svelte:document onkeydown={handleKeydown} />
 
 {#if isLoading}
-  <div class="flex size-full flex-col bg-background animate-in fade-in">
+  <div class="flex size-full min-h-0 overflow-hidden flex-col bg-background animate-in fade-in">
     <Topbar showSeparator={true}>
       {#snippet left()}
         <Skeleton class="size-8 rounded-md mr-2 bg-muted/60" />
@@ -226,7 +226,7 @@ function handleKeydown(e: KeyboardEvent) {
         <Skeleton class="size-8 rounded-md bg-muted/60" />
       {/snippet}
     </Topbar>
-    <div class="flex-1 grow overflow-auto p-8 md:p-12">
+    <div class="flex-1 grow overflow-auto p-8 md:p-12 min-h-0">
       <div class="mx-auto w-full max-w-4xl space-y-6">
         <Skeleton class="h-12 w-3/4 rounded-xl bg-muted/40" />
         <div class="space-y-4 pt-6">
@@ -240,7 +240,7 @@ function handleKeydown(e: KeyboardEvent) {
   </div>
 {:else if !isLoading && note !== undefined}
   <div
-    class="flex size-full flex-col bg-background/95 supports-backdrop-filter:bg-background/60"
+    class="flex size-full min-h-0 overflow-hidden flex-col bg-background/95 supports-backdrop-filter:bg-background/60"
   >
     <Topbar showSeparator={true}>
       {#snippet left()}
@@ -350,7 +350,7 @@ function handleKeydown(e: KeyboardEvent) {
     <EdraEditor
       bind:editor
       {content}
-      class="w-full flex-1 grow overflow-auto p-8 md:p-12"
+      class="w-full flex-1 grow overflow-auto p-8 md:p-12 min-h-0"
       {onUpdate}
       {onFileSelect}
       {onDropOrPaste}

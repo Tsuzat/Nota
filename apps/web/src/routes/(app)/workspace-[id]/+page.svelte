@@ -133,7 +133,7 @@ async function handleFileImport(e: Event) {
 
 {#if workspace}
   <Topbar showSeparator={false} />
-  <main class="mx-auto w-full max-w-5xl flex-1 grow overflow-auto p-4 md:p-10 animate-in fade-in duration-500">
+  <main class="mx-auto w-full max-w-5xl flex-1 grow overflow-auto p-4 md:p-10 animate-in fade-in duration-500 min-h-0">
     <div class="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b pb-6">
       <div class="flex items-center gap-6">
         <IconPicker

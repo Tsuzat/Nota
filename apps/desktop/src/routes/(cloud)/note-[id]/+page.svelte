@@ -190,7 +190,7 @@ function handleKeydown(e: KeyboardEvent) {
 <svelte:document onkeydown={handleKeydown} />
 
 {#if isLoading}
-  <div class="flex size-full flex-col">
+  <div class="flex size-full min-h-0 overflow-hidden flex-col">
     <Topbar showSeparator={true}>
       {#snippet left()}
         <Skeleton class="size-8 rounded-md mr-2" />
@@ -203,7 +203,7 @@ function handleKeydown(e: KeyboardEvent) {
         <Skeleton class="size-8 rounded-md" />
       {/snippet}
     </Topbar>
-    <div class="flex-1 grow overflow-auto p-8">
+    <div class="flex-1 grow overflow-auto p-8 min-h-0">
       <div class="mx-auto w-full max-w-3xl space-y-4">
         <Skeleton class="h-8 w-3/4 rounded-md" />
         <Skeleton class="h-8 w-full rounded-md" />
@@ -214,7 +214,7 @@ function handleKeydown(e: KeyboardEvent) {
     </div>
   </div>
 {:else if !isLoading && note !== undefined}
-  <div class="flex size-full flex-col">
+  <div class="flex size-full min-h-0 overflow-hidden flex-col">
     <Topbar showSeparator={true}>
       {#snippet left()}
         <IconPicker
@@ -295,7 +295,7 @@ function handleKeydown(e: KeyboardEvent) {
       bind:editor
       bind:element
       {content}
-      class="flex-1 grow flex-col overflow-auto p-8!"
+      class="flex-1 grow flex-col overflow-auto p-8! min-h-0"
       {onUpdate}
       {onFileSelect}
       {onDropOrPaste}
