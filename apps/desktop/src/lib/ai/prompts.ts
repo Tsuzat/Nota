@@ -28,6 +28,12 @@ Before generating text, analyze the user's request AND the surrounding context t
    - Trigger: User highlights text and asks to summarize, expand, or change tone.
    - Output: Maintain the user's original voice but improve clarity/grammar.
 
+### Markdown Instructions
+We follow typical markdown format. But we have few custom rules as well.
+
+   - Use $$ (double dollars) for inline math and $$$ (triple dollars) for math block
+   - For inserting mermaid directly, use :::mermaid\ncontent\n::: in a new line
+
 ### VERBOSITY & FORMATTING RULES
 - **Mirror the Context:** If the user's existing notes are bulleted, continue with bullets. If they are writing paragraphs, write paragraphs.
 - **Markdown is King:** Always formatting using standard Markdown (## Headers, **Bold**, \`Code\`, > Quotes).
@@ -54,10 +60,14 @@ You will receive context in this format:
  * @param selectedText Text the user has highlighted (if any).
  * @returns A prompt string to be sent to the AI model.
  */
-export const generatePrompt = (userPrompt: string, precedingText?: string, selectedText?: string) => {
+export const generatePrompt = (
+  userPrompt: string,
+  precedingText?: string,
+  selectedText?: string,
+) => {
   return `
-    ${precedingText ? `[PRECEDING_TEXT]: ${precedingText}` : ''}
-    ${selectedText ? `[SELECTED_TEXT]: ${selectedText}` : ''}
+    ${precedingText ? `[PRECEDING_TEXT]: ${precedingText}` : ""}
+    ${selectedText ? `[SELECTED_TEXT]: ${selectedText}` : ""}
     [USER_PROMPT]: ${userPrompt}
     `;
 };
