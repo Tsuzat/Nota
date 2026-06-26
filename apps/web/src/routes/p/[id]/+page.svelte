@@ -49,7 +49,7 @@ async function loadData(id: string) {
 
 <Metadata 
   title={name || 'Preview Note'} 
-  url={`${PUBLIC_NOTA_FRONTEND_URL}/note-preview-${data.id}`}
+  url={`${PUBLIC_NOTA_FRONTEND_URL}/p/${data.id}`}
 />
 
 {#if content !== undefined && name !== undefined && icon !== undefined}
