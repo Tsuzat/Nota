@@ -16,8 +16,8 @@ type Session struct {
 	RefreshedAt         time.Time `json:"refreshed_at" bun:"refreshed_at"`
 	UserAgent           string    `json:"user_agent" bun:"user_agent"`
 	Ip                  string    `json:"ip" bun:"ip"`
-	PkceChallenge       string    `json:"pkce_challenge" bun:"pkce_challenge,default:null"`
-	PkceChallengeMethod string    `json:"pkce_challenge_method" bun:"pkce_challenge_method"`
+	PkceChallenge       string    `json:"pkce_challenge" bun:"pkce_challenge,nullzero,default:null"`
+	PkceChallengeMethod string    `json:"pkce_challenge_method" bun:"pkce_challenge_method,nullzero"`
 	State               string    `json:"state" bun:"state"`
 	Browser             string    `json:"browser" bun:"browser"`
 	Os                  string    `json:"os" bun:"os"`

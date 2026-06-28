@@ -1,12 +1,12 @@
 <script lang="ts">
 import ProBadge from '@lib/components/custom/ProBadge.svelte';
 import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
+import Globe from '@lucide/svelte/icons/globe';
 import LogOut from '@lucide/svelte/icons/log-out';
 import MapPin from '@lucide/svelte/icons/map-pin';
+import Monitor from '@lucide/svelte/icons/monitor';
 import MonitorSmartphone from '@lucide/svelte/icons/monitor-smartphone';
 import Trash2 from '@lucide/svelte/icons/trash-2';
-import Globe from '@lucide/svelte/icons/globe';
-import Monitor from '@lucide/svelte/icons/monitor';
 import {
   BarSpinner,
   BraveBrowser,
