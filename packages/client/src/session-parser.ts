@@ -1,4 +1,4 @@
-import type { Session } from './types';
+import type { Session } from "./types";
 
 export interface ParsedSession {
   browserName: string;
@@ -11,68 +11,50 @@ export interface ParsedSession {
   platform: string;
 }
 
-export function parseSession(userAgent: string, session: Session, currentSessionId?: string): ParsedSession {
-  let browserName = 'Unknown Browser';
-  let osName = 'Unknown OS';
-  let deviceType = 'Desktop';
-  
-  if (!userAgent) userAgent = '';
+export function parseSession(
+  userAgent: string,
+  session: Session,
+  currentSessionId?: string,
+): ParsedSession {
+  const browserName = session.browser || "Unknown Browser";
+  const osName = session.os || "Unknown OS";
 
-  const ua = userAgent.toLowerCase();
-
-  // Browser detection
-  if (ua.includes('zen')) {
-    browserName = 'Zen';
-  } else if (ua.includes('brave')) {
-    browserName = 'Brave';
-  } else if (ua.includes('edg')) {
-    browserName = 'Edge';
-  } else if (ua.includes('firefox') || ua.includes('fxios')) {
-    browserName = 'Firefox';
-  } else if (ua.includes('chrome') || ua.includes('crios')) {
-    browserName = 'Chrome';
-  } else if (ua.includes('safari') && !ua.includes('chrome') && !ua.includes('crios')) {
-    browserName = 'Safari';
-  }
-
-  // OS detection
-  if (ua.includes('mac') || ua.includes('macintosh') || ua.includes('mac os x')) {
-    osName = 'macOS';
-  } else if (ua.includes('win') || ua.includes('windows')) {
-    osName = 'Windows';
-  } else if (ua.includes('android')) {
-    osName = 'Android';
-    deviceType = 'Mobile';
-  } else if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
-    osName = 'iOS';
-    deviceType = 'Mobile';
-  } else if (ua.includes('linux')) {
-    osName = 'Linux';
+  let deviceType = "Desktop";
+  if (session.device === "mobile") {
+    deviceType = "Mobile";
+  } else if (session.device === "web") {
+    // If it's web, it might be on mobile or desktop, check OS if we want to be specific, or rely on backend
+    if (osName === "iOS" || osName === "Android") {
+      deviceType = "Mobile";
+    }
   }
 
   const now = new Date();
   const created = new Date(session.created_at);
   const expires = session.expires_at ? new Date(session.expires_at) : null;
-  
+
   const isActive = !session.revoked && (!expires || expires > now);
   const isCurrent = currentSessionId === session.id;
 
   // Simple relative time (created ago)
   const diffInSeconds = Math.floor((now.getTime() - created.getTime()) / 1000);
-  let createdAgo = '';
-  if (diffInSeconds < 60) createdAgo = 'just now';
-  else if (diffInSeconds < 3600) createdAgo = `${Math.floor(diffInSeconds / 60)}m ago`;
-  else if (diffInSeconds < 86400) createdAgo = `${Math.floor(diffInSeconds / 3600)}h ago`;
+  let createdAgo = "";
+  if (diffInSeconds < 60) createdAgo = "just now";
+  else if (diffInSeconds < 3600)
+    createdAgo = `${Math.floor(diffInSeconds / 60)}m ago`;
+  else if (diffInSeconds < 86400)
+    createdAgo = `${Math.floor(diffInSeconds / 3600)}h ago`;
   else createdAgo = `${Math.floor(diffInSeconds / 86400)}d ago`;
 
-  const location = session.country || '';
-  let platform = 'web';
-  if (session.device === 'desktop' || session.device === 'web') {
+  const location = session.country || "";
+  let platform = "web";
+  if (session.device === "desktop" || session.device === "web" || session.device === "mobile") {
     platform = session.device;
   } else {
     // Fallback for legacy sessions
-    if (ua.includes('tauri') || ua.includes('nota-desktop')) {
-      platform = 'desktop';
+    const ua = (userAgent || "").toLowerCase();
+    if (ua.includes("tauri") || ua.includes("nota-desktop")) {
+      platform = "desktop";
     }
   }
 
@@ -84,6 +66,6 @@ export function parseSession(userAgent: string, session: Session, currentSession
     deviceType,
     createdAgo,
     location,
-    platform
+    platform,
   };
 }

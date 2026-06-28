@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"strconv"
-	"strings"
 	"time"
 
+	"github.com/Tsuzat/Nota/utils"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 )
@@ -12,45 +12,7 @@ import (
 func RequestLogger(c fiber.Ctx) error {
 	start := time.Now()
 
-	ua := c.Get("User-Agent")
-	if ua == "" {
-		ua = "Unknown"
-	}
-
-	browser := "Unknown Browser"
-	osName := "Unknown OS"
-
-	lowerUA := strings.ToLower(ua)
-
-	switch {
-	case strings.Contains(lowerUA, "edg"):
-		browser = "Edge"
-	case strings.Contains(lowerUA, "chrome") || strings.Contains(lowerUA, "crios"):
-		browser = "Chrome"
-	case strings.Contains(lowerUA, "firefox") || strings.Contains(lowerUA, "fxios"):
-		browser = "Firefox"
-	case strings.Contains(lowerUA, "safari"):
-		browser = "Safari"
-	}
-
-	switch {
-	case strings.Contains(lowerUA, "windows"):
-		osName = "Windows"
-	case strings.Contains(lowerUA, "macintosh") || strings.Contains(lowerUA, "mac os x"):
-		osName = "macOS"
-	case strings.Contains(lowerUA, "android"):
-		osName = "Android"
-	case strings.Contains(lowerUA, "iphone") || strings.Contains(lowerUA, "ipad") || strings.Contains(lowerUA, "ipod"):
-		osName = "iOS"
-	}
-
-	location := c.Get("CF-IPCountry")
-	if location == "" {
-		location = c.Get("X-Vercel-IP-Country")
-	}
-	if location == "" {
-		location = "Unknown"
-	}
+	clientInfo := utils.GetClientInfo(c, false)
 
 	err := c.Next()
 
@@ -64,11 +26,11 @@ func RequestLogger(c fiber.Ctx) error {
 		"path", c.Path(),
 		"status", status,
 		"duration_ms", duration,
-		"ip", c.IP(),
-		"location", location,
-		"os", osName,
-		"browser", browser,
-		"user_agent", ua,
+		"ip", clientInfo.IP,
+		"location", clientInfo.Location,
+		"os", clientInfo.OS,
+		"browser", clientInfo.Browser,
+		"user_agent", clientInfo.UserAgent,
 	)
 
 	return err

@@ -52,11 +52,17 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 	}
 	id, sessionId := claims["id"].(string), claims["session_id"].(string)
 
+	var session models.Session
 	var validSession bool
-	if err := utils.GetCache("session:"+sessionId, &validSession); err != nil {
-		validSession = db.IsValidSession(sessionId)
-		if validSession {
-			go utils.SetCache("session:"+sessionId, true, 5*time.Minute)
+	if err := utils.GetCache("session:"+sessionId, &session); err == nil {
+		validSession = !session.Revoked && session.ExpiresAt.After(time.Now())
+	} else {
+		dbSession, err := db.GetSession(sessionId)
+		if err == nil && dbSession != nil {
+			validSession = !dbSession.Revoked && dbSession.ExpiresAt.After(time.Now())
+			if validSession {
+				go utils.SetCache("session:"+sessionId, dbSession, 5*time.Minute)
+			}
 		}
 	}
 

@@ -11,65 +11,60 @@ import (
 	"github.com/gofiber/fiber/v3/log"
 )
 
-// GetPKCESessionToken creates a new session in the database for PKCE authentication
 func GetPKCESessionToken(userId string, pkceChallenge string, c fiber.Ctx, isDesktop bool) (string, error) {
-	var id string
-	device := "web"
-	if isDesktop {
-		device = "desktop"
-	}
-	location := utils.GetLocationFromIP(c.IP())
+	clientInfo := utils.GetClientInfo(c, isDesktop)
 
-	_, err := config.DB.NewInsert().Model(&models.Session{
+	session := &models.Session{
 		UserId:              userId,
-		Ip:                  c.IP(),
-		UserAgent:           c.UserAgent(),
+		Ip:                  clientInfo.IP,
+		UserAgent:           clientInfo.UserAgent,
+		Browser:             clientInfo.Browser,
+		Os:                  clientInfo.OS,
 		PkceChallenge:       pkceChallenge,
 		PkceChallengeMethod: "256",
-		Device:              device,
-		Country:             location,
+		Device:              clientInfo.Device,
+		Country:             clientInfo.Location,
 		ExpiresAt:           time.Now().Add(config.RefreshTokenDuration),
 		CreatedAt:           time.Now(),
 		UpdatedAt:           time.Now(),
 		RefreshedAt:         time.Now(),
-	}).
+	}
+
+	_, err := config.DB.NewInsert().Model(session).
 		Returning("id").
-		Exec(c.Context(), &id)
+		Exec(c.Context())
 	if err != nil {
 		log.Error("Error while inserting the session info", err)
 		return "", err
 	}
-	go utils.SetCache("session:"+id, true, 30*time.Minute)
-	return id, nil
+	go utils.SetCache("session:"+session.Id, session, 30*time.Minute)
+	return session.Id, nil
 }
 
-// CreateSession creates a new session in the database
 func CreateSession(userId string, c fiber.Ctx, isDesktop bool) (string, error) {
 	ctx := context.Background()
-	device := "web"
-	if isDesktop {
-		device = "desktop"
-	}
-	location := utils.GetLocationFromIP(c.IP())
+	clientInfo := utils.GetClientInfo(c, isDesktop)
 
 	session := &models.Session{
 		UserId:      userId,
-		Ip:          c.IP(),
-		UserAgent:   c.UserAgent(),
-		Device:      device,
-		Country:     location,
+		Ip:          clientInfo.IP,
+		UserAgent:   clientInfo.UserAgent,
+		Browser:     clientInfo.Browser,
+		Os:          clientInfo.OS,
+		Device:      clientInfo.Device,
+		Country:     clientInfo.Location,
 		ExpiresAt:   time.Now().Add(config.RefreshTokenDuration),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		RefreshedAt: time.Now(),
 	}
 
-	_, err := config.DB.NewInsert().Model(session).Exec(ctx)
+	_, err := config.DB.NewInsert().Model(session).Returning("id").Exec(ctx)
 	if err != nil {
 		log.Error("Error while inserting the session info", err)
 		return "", err
 	}
-	go utils.SetCache("session:"+session.Id, true, 30*time.Minute)
+	go utils.SetCache("session:"+session.Id, session, 30*time.Minute)
 	return session.Id, nil
 }
 
