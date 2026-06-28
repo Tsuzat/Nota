@@ -192,6 +192,10 @@ func SignInOAuth(c fiber.Ctx) error {
 			Secure:   isProd,
 			SameSite: "Lax",
 		})
+	} else {
+		// Clear any stale desktop cookies from a previous login
+		c.Cookie(&fiber.Cookie{Name: "auth_platform", Value: "", MaxAge: -1, HTTPOnly: true, Secure: isProd, SameSite: "Lax"})
+		c.Cookie(&fiber.Cookie{Name: "code_challenge", Value: "", MaxAge: -1, HTTPOnly: true, Secure: isProd, SameSite: "Lax"})
 	}
 	if codeChallenge != "" {
 		c.Cookie(&fiber.Cookie{
@@ -236,7 +240,7 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 			Error:  "Invalid or expired OAuth state",
 		})
 	}
-	utils.DeleteCache("oauth_state:" + state)
+	defer utils.DeleteCache("oauth_state:" + state)
 
 	token, err := getGoogleAuthConfig().Exchange(c.RequestCtx(), c.FormValue("code"))
 	if err != nil {
@@ -285,6 +289,10 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 	platform := string(c.Request().Header.Cookie("auth_platform"))
 	codeChallenge := string(c.Request().Header.Cookie("code_challenge"))
 	isDesktop := platform == "desktop"
+	// Clear one-time-use cookies immediately after reading
+	secureCookie := os.Getenv("ENV") == "production"
+	c.Cookie(&fiber.Cookie{Name: "auth_platform", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
+	c.Cookie(&fiber.Cookie{Name: "code_challenge", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
 	if isDesktop {
 		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c, true)
 		if err != nil {
@@ -386,7 +394,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 			Error:  "Invalid or expired OAuth state",
 		})
 	}
-	utils.DeleteCache("oauth_state:" + state)
+	defer utils.DeleteCache("oauth_state:" + state)
 
 	token, err := getGithubAuthConfig().Exchange(c.RequestCtx(), c.FormValue("code"))
 	if err != nil {
@@ -446,6 +454,10 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 	platform := string(c.Request().Header.Cookie("auth_platform"))
 	codeChallenge := string(c.Request().Header.Cookie("code_challenge"))
 	isDesktop := platform == "desktop"
+	// Clear one-time-use cookies immediately after reading
+	secureCookie := os.Getenv("ENV") == "production"
+	c.Cookie(&fiber.Cookie{Name: "auth_platform", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
+	c.Cookie(&fiber.Cookie{Name: "code_challenge", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
 	if isDesktop {
 		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c, true)
 		if err != nil {

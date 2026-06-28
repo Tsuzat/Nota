@@ -101,7 +101,6 @@ Nota is built as a monorepo using **Bun Workspaces**.
 
 ```bash
 ├── apps
-│   ├── backend-hono    # Hono API server + Drizzle ORM (deprecated)
 │   ├── backend         # Go, Bun ORM, Fiber API server
 │   ├── desktop         # Tauri + SvelteKit desktop app
 │   └── web             # SvelteKit landing page & web app
