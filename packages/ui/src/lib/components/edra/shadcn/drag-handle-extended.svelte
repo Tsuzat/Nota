@@ -190,7 +190,7 @@ function handleAIHighlight() {
 
 <div
   bind:this={element}
-  class="z-0! flex items-center gap-0 pr-2 transition-all duration-300"
+  class="z-0! transition-all duration-300"
   style="visibility: hidden;"
 >
   <Button
