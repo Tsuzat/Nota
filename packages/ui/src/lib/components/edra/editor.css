@@ -4,6 +4,14 @@
   margin-inline: auto;
 }
 
+/* Performance: let the browser skip painting off-screen blocks.
+   Only affects elements outside the viewport — visible content renders normally.
+   contain-intrinsic-block-size caches real height after first render. */
+.edra-editor .tiptap.ProseMirror > * {
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 3rem;
+}
+
 .tiptap :first-child {
   margin-top: 0;
 }

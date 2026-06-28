@@ -10,7 +10,7 @@ import '../onedark.css';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Mathematics from '@tiptap/extension-mathematics';
 import TableOfContents, { getHierarchicalIndexes, type TableOfContentData } from '@tiptap/extension-table-of-contents';
-import { all, createLowlight } from 'lowlight';
+import { common, createLowlight } from 'lowlight';
 import { toast } from 'svelte-sonner';
 import { SvelteNodeViewRenderer } from 'svelte-tiptap';
 import ToC from '../components/ToC.svelte';
@@ -45,7 +45,7 @@ import { Mermaid } from '../extensions/mermaid';
 import mermaid from 'mermaid';
   import { mode } from 'mode-watcher';
 
-const lowlight = createLowlight(all);
+const lowlight = createLowlight(common);
 
 let tocItems = $state<TableOfContentData>();
 // Initialize mermaid with theme-aware config
@@ -71,6 +71,8 @@ let {
   getAssets,
   getLocalFile,
 }: EdraEditorProps = $props();
+
+let _rafId: number | undefined;
 
 onMount(() => {
   editor = initEditor(
@@ -121,8 +123,13 @@ onMount(() => {
     {
       onUpdate,
       onTransaction(props) {
-        editor = undefined;
-        editor = props.editor;
+        // Batch rapid transactions (typing, initial load) into one Svelte reactive
+        // update per animation frame instead of one per transaction
+        cancelAnimationFrame(_rafId!);
+        _rafId = requestAnimationFrame(() => {
+          editor = undefined;
+          editor = props.editor;
+        });
       },
       onContentError: (error) => {
         toast.error('Unable to load the content', {
@@ -143,6 +150,7 @@ onMount(() => {
 });
 
 onDestroy(() => {
+  cancelAnimationFrame(_rafId!);
   if (editor) editor.destroy();
 });
 </script>
