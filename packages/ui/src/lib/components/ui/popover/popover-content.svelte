@@ -20,6 +20,8 @@ let {
 	<PopoverPrimitive.Content
 		bind:ref
 		data-slot="popover-content"
+		onfocusout={(e) => {e.preventDefault(); e.stopPropagation();}}
+		onEscapeKeydown={(e) => {e.preventDefault(); e.stopPropagation()}}
 		{sideOffset}
 		{align}
 		class={cn(

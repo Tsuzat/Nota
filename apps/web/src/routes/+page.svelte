@@ -1,6 +1,7 @@
 <script lang="ts">
 import { BorderBeam, SimpleToolTip, ToggleMode } from '@lib/components/custom';
 import { toast } from '@lib/components/ui/sonner/index.js';
+import { cn } from '@lib/utils.js';
 import { request } from '@nota/client';
 import { BarSpinner, Github, icons } from '@nota/ui/icons/index.js';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
@@ -24,6 +25,15 @@ import { getArtefacts } from './data.remote.js';
 const { data } = $props();
 const user = $derived(data.user);
 let tabPro = $state<'monthly' | 'yearly'>('monthly');
+let isScrolled = $state(false);
+
+function onscroll() {
+  if (window.scrollY > 10) {
+    isScrolled = true;
+  } else {
+    isScrolled = false;
+  }
+}
 
 const pricingList = {
   free: [
@@ -107,9 +117,16 @@ async function copyToClipboard() {
 }
 </script>
 
-<Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
+<Particles class="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
 
-<header class="mx-auto sticky z-100 top-2 flex max-w-4xl items-center justify-between gap-4 rounded-xl p-4 backdrop-blur-md bg-background/75 border">
+<svelte:document {onscroll} />
+
+<header
+  class={cn(
+    'mx-auto sticky top-0 transition-all rounded-xl duration-500 p-2 z-10 flex max-w-5xl items-center justify-between gap-4',
+    isScrolled && "max-w-4xl top-2 bg-background/75 backdrop-blur-lg border"
+  )}
+>
   <a class="flex items-center gap-4" href={resolve("/")}>
     <enhanced:img src="../../static/favicon.webp" alt="Nota" class="size-10" />
     <h3 class="font-bold">Nota</h3>

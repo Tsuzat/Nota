@@ -13,6 +13,7 @@ import {
 import { type Editor, EdraBubbleMenu, EdraDragHandleExtended, EdraEditor } from '@nota/ui/edra/shadcn/index.ts';
 import type { FileType } from '@nota/ui/edra/utils.ts';
 import { onMount } from 'svelte';
+import Particles from '$lib/components/custom/utils/particles.svelte';
 import AI from '$lib/editor/Ai.svelte';
 import defalutContent from './demo';
 
@@ -54,6 +55,8 @@ onMount(() => {
     </DialogFooter>
   </DialogContent>
 </Dialog>
+
+<Particles class="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
 
 <main class="flex h-screen w-full flex-col overflow-hidden">
   <header

@@ -59,8 +59,7 @@ onMount(() => {
 });
 </script>
 
-<Particles className="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
-
+<Particles class="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
 
 <div
 	class="inset-0 flex h-screen w-screen flex-col items-center justify-center gap-8"

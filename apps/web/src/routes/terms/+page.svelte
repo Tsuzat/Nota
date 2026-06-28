@@ -1,6 +1,9 @@
 <script>
 import * as Card from '@nota/ui/shadcn/card';
+import Particles from '$lib/components/custom/utils/particles.svelte';
 </script>
+
+<Particles class="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
 
 <div class="container mx-auto max-w-4xl py-12 md:py-24">
 	<Card.Root class="border-none bg-transparent shadow-none">

@@ -38,6 +38,7 @@ function handleDeleteAccount() {
 
 import { getAuthContext, type ParsedSession, parseSession, type Session } from '@nota/client';
 import { onMount } from 'svelte';
+import Particles from '$lib/components/custom/utils/particles.svelte';
 
 const auth = getAuthContext();
 let sessions: (Session & ParsedSession)[] = $state([]);
@@ -92,6 +93,9 @@ async function revokeAllOtherSessions() {
   }
 }
 </script>
+
+<Particles class="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
+
 
 {#if !user}
   <main class="container mx-auto max-w-4xl p-4 md:p-8">
