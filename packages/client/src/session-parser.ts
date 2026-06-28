@@ -7,6 +7,8 @@ export interface ParsedSession {
   isCurrent: boolean;
   deviceType: string;
   createdAgo: string;
+  location: string;
+  platform: string;
 }
 
 export function parseSession(userAgent: string, session: Session, currentSessionId?: string): ParsedSession {
@@ -63,12 +65,25 @@ export function parseSession(userAgent: string, session: Session, currentSession
   else if (diffInSeconds < 86400) createdAgo = `${Math.floor(diffInSeconds / 3600)}h ago`;
   else createdAgo = `${Math.floor(diffInSeconds / 86400)}d ago`;
 
+  const location = session.country || '';
+  let platform = 'web';
+  if (session.device === 'desktop' || session.device === 'web') {
+    platform = session.device;
+  } else {
+    // Fallback for legacy sessions
+    if (ua.includes('tauri') || ua.includes('nota-desktop')) {
+      platform = 'desktop';
+    }
+  }
+
   return {
     browserName,
     osName,
     isActive,
     isCurrent,
     deviceType,
-    createdAgo
+    createdAgo,
+    location,
+    platform
   };
 }

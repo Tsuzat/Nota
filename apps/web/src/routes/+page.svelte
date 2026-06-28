@@ -61,8 +61,8 @@ const pricingList = {
     'Unlimited Cloud Notes, Workspaces',
     'Notes collaborate with anyone [Comming Soon]',
     'Notes Previews on Browser',
-    '50K AI Credits at once',
-    '1 GB Storage for Media Files',
+    '700K AI Credits at once',
+    '1.5 GB Storage for Media Files',
     'All data is encrypted',
     'Priority support and 24/7 help',
   ],
@@ -573,7 +573,7 @@ async function copyToClipboard() {
         <Card.Root>
           <Card.Header>
             <Card.Title class="font-medium">AI Credits</Card.Title>
-            <span class="my-3 block text-2xl font-semibold">$5 / 5M tokens</span
+            <span class="my-3 block text-2xl font-semibold">$5 / 1M tokens</span
             >
           </Card.Header>
           <Card.Content class="space-y-4">

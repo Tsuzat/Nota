@@ -5,6 +5,8 @@ import LogOut from '@lucide/svelte/icons/log-out';
 import MapPin from '@lucide/svelte/icons/map-pin';
 import MonitorSmartphone from '@lucide/svelte/icons/monitor-smartphone';
 import Trash2 from '@lucide/svelte/icons/trash-2';
+import Globe from '@lucide/svelte/icons/globe';
+import Monitor from '@lucide/svelte/icons/monitor';
 import {
   BarSpinner,
   BraveBrowser,
@@ -96,13 +98,12 @@ async function revokeAllOtherSessions() {
 
 <Particles class="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
 
-
 {#if !user}
   <main class="container mx-auto max-w-4xl p-4 md:p-8">
     <h2>Please sign in to view your profile.</h2>
   </main>
 {:else}
-<div class="flex h-screen w-full flex-col bg-background text-foreground">
+<div class="flex h-screen w-full flex-col text-foreground">
   <Topbar>
     {#snippet left()}
       <div class="flex items-center gap-2">
@@ -338,15 +339,31 @@ async function revokeAllOtherSessions() {
                         {/if}
                       </div>
                       <div>
-                        <div class="font-medium flex items-center gap-2">
-                          {session.osName} &bull; {session.browserName}
+                        <div class="font-medium flex items-center gap-2 flex-wrap">
+                          <span>{session.osName} &bull; {session.browserName}</span>
+                          {#if session.platform === 'desktop'}
+                            <span class="inline-flex items-center gap-1 bg-blue-500/10 text-blue-500 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border border-blue-500/20">
+                              <Monitor class="size-4" /> Desktop
+                            </span>
+                          {:else}
+                            <span class="inline-flex items-center gap-1 bg-green-500/10 text-green-500 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border border-green-500/20">
+                              <Globe class="size-4" /> Web
+                            </span>
+                          {/if}
                           {#if session.isCurrent}
                             <span class="bg-primary/10 text-primary text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Current Device</span>
                           {/if}
                         </div>
                         <div class="text-sm text-muted-foreground flex items-center gap-3 mt-1">
-                          {#if session.ip}
-                            <span class="flex items-center gap-1"><MapPin class="size-3" /> {session.ip}</span>
+                          {#if session.location}
+                            <span class="flex items-center gap-1" title="IP: {session.ip}">
+                              <MapPin class="size-4 text-red-500" /> {session.location}
+                            </span>
+                            <span class="text-muted-foreground/60">&bull;</span>
+                          {:else if session.ip}
+                            <span class="flex items-center gap-1">
+                              <MapPin class="size-4" /> {session.ip}
+                            </span>
                             <span class="text-muted-foreground/60">&bull;</span>
                           {/if}
                           <span>Active {session.createdAgo}</span>

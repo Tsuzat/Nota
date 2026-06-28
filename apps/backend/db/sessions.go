@@ -12,14 +12,22 @@ import (
 )
 
 // GetPKCESessionToken creates a new session in the database for PKCE authentication
-func GetPKCESessionToken(userId string, pkceChallenge string, c fiber.Ctx) (string, error) {
+func GetPKCESessionToken(userId string, pkceChallenge string, c fiber.Ctx, isDesktop bool) (string, error) {
 	var id string
+	device := "web"
+	if isDesktop {
+		device = "desktop"
+	}
+	location := utils.GetLocationFromIP(c.IP())
+
 	_, err := config.DB.NewInsert().Model(&models.Session{
 		UserId:              userId,
 		Ip:                  c.IP(),
 		UserAgent:           c.UserAgent(),
 		PkceChallenge:       pkceChallenge,
 		PkceChallengeMethod: "256",
+		Device:              device,
+		Country:             location,
 		ExpiresAt:           time.Now().Add(config.RefreshTokenDuration),
 		CreatedAt:           time.Now(),
 		UpdatedAt:           time.Now(),
@@ -31,16 +39,25 @@ func GetPKCESessionToken(userId string, pkceChallenge string, c fiber.Ctx) (stri
 		log.Error("Error while inserting the session info", err)
 		return "", err
 	}
+	go utils.SetCache("session:"+id, true, 30*time.Minute)
 	return id, nil
 }
 
 // CreateSession creates a new session in the database
-func CreateSession(userId string, c fiber.Ctx) (string, error) {
+func CreateSession(userId string, c fiber.Ctx, isDesktop bool) (string, error) {
 	ctx := context.Background()
+	device := "web"
+	if isDesktop {
+		device = "desktop"
+	}
+	location := utils.GetLocationFromIP(c.IP())
+
 	session := &models.Session{
 		UserId:      userId,
 		Ip:          c.IP(),
 		UserAgent:   c.UserAgent(),
+		Device:      device,
+		Country:     location,
 		ExpiresAt:   time.Now().Add(config.RefreshTokenDuration),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -52,6 +69,7 @@ func CreateSession(userId string, c fiber.Ctx) (string, error) {
 		log.Error("Error while inserting the session info", err)
 		return "", err
 	}
+	go utils.SetCache("session:"+session.Id, true, 30*time.Minute)
 	return session.Id, nil
 }
 

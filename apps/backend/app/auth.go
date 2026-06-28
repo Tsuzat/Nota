@@ -1,4 +1,5 @@
 package app
+
 import (
 	"context"
 	"crypto/sha256"
@@ -131,7 +132,8 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 			Error:  "Password is incorrect",
 		})
 	}
-	sessionId, err := db.CreateSession(user.Id, c)
+	isDesktop := c.Locals("isDesktop").(bool)
+	sessionId, err := db.CreateSession(user.Id, c, isDesktop)
 	if err != nil {
 		log.Error("Error while creating session for user: ", user.Id)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -156,7 +158,6 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 			Error:  "Failed to generate refresh token. Please try again.",
 		})
 	}
-	isDesktop := c.Locals("isDesktop").(bool)
 	if isDesktop {
 		return c.JSON(models.APIResponse{
 			Status:  fiber.StatusOK,
@@ -283,8 +284,9 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 
 	platform := string(c.Request().Header.Cookie("auth_platform"))
 	codeChallenge := string(c.Request().Header.Cookie("code_challenge"))
-	if platform == "desktop" {
-		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c)
+	isDesktop := platform == "desktop"
+	if isDesktop {
+		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c, true)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 				Status: fiber.StatusInternalServerError,
@@ -294,7 +296,7 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 		}
 		return c.Redirect().Status(fiber.StatusPermanentRedirect).To(fmt.Sprintf("nota://auth/callback?code=%s", sessionId))
 	}
-	sessionId, err := db.CreateSession(user.Id, c)
+	sessionId, err := db.CreateSession(user.Id, c, false)
 	if err != nil {
 		log.Error("Error while creating session: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
@@ -443,8 +445,9 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 
 	platform := string(c.Request().Header.Cookie("auth_platform"))
 	codeChallenge := string(c.Request().Header.Cookie("code_challenge"))
-	if platform == "desktop" {
-		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c)
+	isDesktop := platform == "desktop"
+	if isDesktop {
+		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c, true)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 				Status: fiber.StatusInternalServerError,
@@ -454,7 +457,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 		}
 		return c.Redirect().Status(fiber.StatusPermanentRedirect).To(fmt.Sprintf("nota://auth/callback?code=%s", sessionId))
 	}
-	sessionId, err := db.CreateSession(user.Id, c)
+	sessionId, err := db.CreateSession(user.Id, c, false)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,

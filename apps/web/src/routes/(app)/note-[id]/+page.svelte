@@ -142,7 +142,7 @@ onMount(() => {
 });
 
 $effect(() => {
-  if (note) {
+  if (note && currentWorkspace.value === undefined) {
     const workspace = data.workspaces.find((w) => w.id === note.workspace_id) ?? data.workspaces[0];
     currentWorkspace.value = workspace;
     cloudWorkspace.workspaces = data.workspaces;
@@ -151,15 +151,6 @@ $effect(() => {
 
 async function loadData() {
   isLoading = true;
-
-  // If we land here directly, fetch all notes to populate contexts and find this note
-  if (cloudNotes.notes.length === 0) {
-    try {
-      await cloudNotes.fetch();
-    } catch (e) {
-      console.error('Failed to fetch notes on direct navigation:', e);
-    }
-  }
 
   try {
     const data = await cloudNotes.fetchContent(note.id);
