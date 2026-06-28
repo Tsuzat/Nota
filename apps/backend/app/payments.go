@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"net/http"
 
+	"sync"
+
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/goccy/go-json"
@@ -14,17 +16,16 @@ import (
 	"github.com/polarsource/polar-go/models/components"
 	"github.com/polarsource/polar-go/models/operations"
 	svix "github.com/svix/svix-webhooks/go"
-	"sync"
 )
 
 func getCreditsToAdd(productId string) int {
 	switch productId {
 	case config.POLAR_MONTLY_SUB:
-		return 2_000_000
+		return 50_000
 	case config.POLAR_YEARLY_SUB:
-		return 25_000_000
+		return 700_000
 	case config.POLAR_AI_CREDITS:
-		return 5_000_000
+		return 1000_000
 	default:
 		return 0
 	}
