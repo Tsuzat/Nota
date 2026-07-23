@@ -1,16 +1,13 @@
 <script lang="ts" module>
-  let open = $state(false);
-  let confirmationText = $state("delete");
-  let onConfirm = $state<() => Promise<void>>();
+let open = $state(false);
+let confirmationText = $state('delete');
+let onConfirm = $state<() => Promise<void>>();
 
-  export function confirmDelete(
-    inputText: string,
-    onConfirmCb: () => Promise<void>,
-  ) {
-    open = true;
-    confirmationText = inputText;
-    onConfirm = onConfirmCb;
-  }
+export function confirmDelete(inputText: string, onConfirmCb: () => Promise<void>) {
+  open = true;
+  confirmationText = inputText;
+  onConfirm = onConfirmCb;
+}
 </script>
 
 <script lang="ts">
