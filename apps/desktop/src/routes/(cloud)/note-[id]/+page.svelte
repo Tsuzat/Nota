@@ -17,7 +17,7 @@ import { resolve } from '$app/paths';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import Topbar from '$lib/components/topbar.svelte';
-import { callAI, callGemini } from '$lib/ai/index.js';
+import { callAI } from '@nota/client';
 
 // --- Services & Context ---
 const cloudNotes = getNotesContext();
@@ -85,7 +85,7 @@ const editor = createEditor({
   onFileUpload: async (file) => await cloudStorage.upload(file),
   selectFile: getLocalFile,
   getAssets,
-  callAI: useGlobalSettings.useAI ? (useGlobalSettings.useMyOwnAI ? callGemini : callAI) : undefined,
+  callAI: useGlobalSettings.useAI ? callAI : undefined,
 });
 
 // --- Hooks ---
@@ -235,7 +235,7 @@ function handleKeydown(e: KeyboardEvent) {
           }}
         >
           <div class={buttonVariants({ variant: "ghost", size: "icon", class: "mr-2" })}>
-            <IconRenderer icon={note?.icon} />
+            <IconRenderer icon={note!.icon} />
           </div>
         </IconPicker>
         <input

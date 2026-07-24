@@ -13,7 +13,7 @@ import { DB } from '$lib/local/db.js';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { createFile, getAssetsByFileType, selectLocalFile } from '$lib/local/util.js';
 import { type Content, Edra, createEditor } from '@nota/ui/edra/index.js';
-import { callAI, callGemini } from '$lib/ai/index.js';
+  import { callAI } from '@nota/client';
 
 // --- Services & Context ---
 const globalSettings = getGlobalSettings();
@@ -33,7 +33,7 @@ const editor = createEditor({
   onFileUpload: createFile,
   selectFile: selectLocalFile,
   getAssets: getAssetsByFileType,
-  callAI: globalSettings.useAI ? (globalSettings.useMyOwnAI ? callGemini : callAI) : undefined,
+  callAI: globalSettings.useAI ? callAI : undefined,
 });
 
 afterNavigate(() => {
@@ -174,7 +174,7 @@ function handleKeydown(event: KeyboardEvent) {
       {#snippet left()}
         <IconPicker onSelect={updateIcon}>
           <div class={buttonVariants({ variant: "ghost", size: "icon", class: "mr-2" })}>
-            <IconRenderer icon={note?.icon} />
+            <IconRenderer icon={note!.icon} />
           </div>
         </IconPicker>
         <input

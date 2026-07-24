@@ -20,9 +20,13 @@
     "svelte": "^5.0.0"
   },
   "devDependencies": {
+    "@ai-sdk/anthropic": "^4.0.19",
+    "@ai-sdk/google": "^4.0.23",
+    "@ai-sdk/openai": "^4.0.20",
     "@sveltejs/adapter-auto": "^7.0.0",
     "@sveltejs/kit": "^2.49.5",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "ai": "^7.0.37",
     "svelte": "^5.46.4",
     "svelte-check": "^4.3.5",
     "typescript": "^5.9.3",
