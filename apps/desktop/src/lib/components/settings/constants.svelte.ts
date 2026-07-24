@@ -1,6 +1,5 @@
 import { getContext, setContext } from 'svelte';
 
-
 function getLocalStorageValue(key: string, defaultValue: boolean): boolean {
   const data = localStorage.getItem(key);
   if (!data) {
@@ -17,7 +16,8 @@ class GlobalSettings {
   #useBubbleMenu = $state(getLocalStorageValue('useBubbleMenu', true));
   #useDragHandle = $state(getLocalStorageValue('useDragHandle', true));
   #themeColor = $state(localStorage.getItem('themeColor') || 'default');
-  #aiProvider = $state(localStorage.getItem('ai_provider') || 'server');
+  #aiProvider = $state(localStorage.getItem('ai_provider') || 'google');
+  #useOwnKeys = $state(getLocalStorageValue('useOwnKeys', false));
 
   constructor(open = false) {
     this.#open = open;
@@ -34,6 +34,13 @@ class GlobalSettings {
   set useAI(value) {
     this.#useAI = value;
     localStorage.setItem('useAI', String(value));
+  }
+  get useOwnKeys() {
+    return this.#useOwnKeys;
+  }
+  set useOwnKeys(value) {
+    this.#useOwnKeys = value;
+    localStorage.setItem('useOwnKeys', String(value));
   }
   get useToolBar() {
     return this.#useToolBar;

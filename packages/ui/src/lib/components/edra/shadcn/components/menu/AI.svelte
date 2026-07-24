@@ -29,8 +29,53 @@ import {
   Sparkles,
   TextWrap,
   Send,
+  ChevronDown,
+  FileText,
 } from '@lucide/svelte';
-import { Button } from '@lib/components/ui/button/index.js';
+import { Button, buttonVariants } from '@lib/components/ui/button/index.js';
+import * as Popover from '@lib/components/ui/popover/index.js';
+import * as Command from '@lib/components/ui/command/index.js';
+
+export interface SelectableModel {
+  id: string;
+  displayName: string;
+  provider: string;
+  modelString: string;
+  contextWindow: number;
+  isCustom?: boolean;
+}
+
+interface Props {
+  availableModels?: SelectableModel[];
+}
+
+let { availableModels = [] }: Props = $props();
+
+let selectedModelId = $state(
+  typeof localStorage !== 'undefined' ? localStorage.getItem('active_ai_model_id') || '' : ''
+);
+let includeDocContext = $state(false);
+let modelPopoverOpen = $state(false);
+
+$effect(() => {
+  if (availableModels && availableModels.length > 0) {
+    const exists = availableModels.some((m) => m.id === selectedModelId);
+    if (!exists) {
+      selectedModelId = availableModels[0].id;
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('active_ai_model_id', selectedModelId);
+      }
+    }
+  }
+});
+
+function selectModel(id: string) {
+  selectedModelId = id;
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('active_ai_model_id', id);
+  }
+  modelPopoverOpen = false;
+}
 
 let inputTag = $state<HTMLTextAreaElement | null>(null);
 const editor = getEditor();
@@ -172,8 +217,16 @@ async function generateAIContent(prompt: string, isRetry = false) {
       generating = false;
     };
 
+    let finalPrompt = prompt;
+    if (includeDocContext) {
+      const docText = editor.getText();
+      if (docText.trim().length > 0) {
+        finalPrompt = `Document Context:\n"""\n${docText}\n"""\n\nPrompt/Task:\n${prompt}`;
+      }
+    }
+
     if (activeCallAI) {
-      await activeCallAI(prompt, onChunk, onError);
+      await activeCallAI(finalPrompt, onChunk, onError);
     }
     // Final flush to ensure all content is rendered in the editor
     flushEditorUpdate();
@@ -514,6 +567,70 @@ function handleInput(e: Event) {
 					class="h-auto max-h-40 w-full resize-none border-0 outline-hidden"></textarea>
 				<Button type="submit" size="icon-lg" class="rounded-full"><Send /></Button>
 			</form>
+
+			<!-- Options Bar: Model Selector & Context Toggle -->
+			<div
+				class="flex items-center justify-between border-t px-3 py-1.5 text-xs text-muted-foreground bg-muted/20 select-none"
+			>
+				{#if availableModels.length > 0}
+					{@const currentModel = availableModels.find((m) => m.id === selectedModelId) || availableModels[0]}
+					<Popover.Root bind:open={modelPopoverOpen}>
+						<Popover.Trigger
+							contenteditable="false"
+							class={buttonVariants({ variant: "ghost", size: "sm", class: "z-10!"})}
+						>
+							<span>{currentModel ? currentModel.displayName : 'Select Model'}</span>
+							<ChevronDown class="size-3 opacity-70" />
+						</Popover.Trigger>
+						<Popover.Content
+							portalProps={{ disabled: true, to: undefined }}
+							onCloseAutoFocus={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+							}}
+							onEscapeKeydown={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+							}}
+							class="w-64 p-0! z-50 text-primary!"
+							align="start"
+						>
+							<Command.Root class="p-0!">
+								<Command.Input placeholder="Search model..." />
+								<Command.List class="max-h-48 overflow-y-auto">
+									<Command.Empty>No model found.</Command.Empty>
+									<Command.Group>
+										{#each availableModels as model (model.id)}
+											<Command.Item
+												value={model.displayName}
+												onSelect={() => selectModel(model.id)}
+												onclick={() => selectModel(model.id)}
+												class="flex items-center justify-between text-xs cursor-pointer text-primary"
+											>
+												<span>{model.displayName}</span>
+												{#if model.id === selectedModelId}
+													<Check class="size-3.5" />
+												{/if}
+											</Command.Item>
+										{/each}
+									</Command.Group>
+								</Command.List>
+							</Command.Root>
+						</Popover.Content>
+					</Popover.Root>
+				{:else}
+					<span class="px-2 py-1 text-xs opacity-70">Nota Server AI</span>
+				{/if}
+
+				<Button
+					variant={includeDocContext ? 'default' : 'ghost'}
+					size="sm"
+					onclick={() => (includeDocContext = !includeDocContext)}
+				>
+					<FileText class="size-3.5" />
+					<span>Include Doc</span>
+				</Button>
+			</div>
 
 			{#if isAIActive() && inputValue.trim()?.length === 0}
 				<!-- Quick Actions List -->

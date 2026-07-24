@@ -13,7 +13,7 @@ import { DB } from '$lib/local/db.js';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { createFile, getAssetsByFileType, selectLocalFile } from '$lib/local/util.js';
 import { type Content, Edra, createEditor } from '@nota/ui/edra/index.js';
-  import { callAI } from '@nota/client';
+import { callAI, getAllConfiguredModels, type SelectableModel } from '@nota/client';
 
 // --- Services & Context ---
 const globalSettings = getGlobalSettings();
@@ -24,6 +24,7 @@ const { data } = $props();
 let note = $state<LocalNote>();
 let isLoading = $state(false);
 let isDirty = $state(false);
+let availableModels = $state<SelectableModel[]>([]);
 
 // --- Editor Setup ---
 const editor = createEditor({
@@ -38,6 +39,9 @@ const editor = createEditor({
 
 afterNavigate(() => {
   if (data.id) loadData();
+  getAllConfiguredModels().then((m) => {
+    availableModels = m;
+  });
 });
 
 onMount(() => {
@@ -202,7 +206,7 @@ function handleKeydown(event: KeyboardEvent) {
         <Edra.BubbleMenu />
       {/if}
       {#if globalSettings.useAI}
-        <Edra.UseAI />
+        <Edra.UseAI  {availableModels} />
       {/if}
       <Edra.Content class="min-w-full overflow-auto w-full cursor-auto px-8 py-4 text-base transition-all duration-300 *:outline-none" />
       {#if globalSettings.useDragHandle}
