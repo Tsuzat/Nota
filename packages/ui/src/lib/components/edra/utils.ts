@@ -1,19 +1,19 @@
 import type { Editor } from '@tiptap/core';
 import type { Node } from '@tiptap/pm/model';
-import { Decoration, DecorationSet, type EditorView } from '@tiptap/pm/view';
-import { toast } from 'svelte-sonner';
-import { browser } from '$app/environment';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
+const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+import strings from './strings.js';
 
 /**
  * Check if the current browser is in mac or not
  */
-export const isMac = browser
+export const ISMAC = isBrowser
   ? navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('Mac OS X')
   : false;
 
 export const getKeyboardShortcut = (key: string, ctrl = false, shift = false, alt = false) => {
   const modifiers: string[] = [];
-  if (isMac) {
+  if (ISMAC) {
     if (ctrl) modifiers.push('⌘');
     if (shift) modifiers.push('⇧');
     if (alt) modifiers.push('⌥');
@@ -27,62 +27,10 @@ export const getKeyboardShortcut = (key: string, ctrl = false, shift = false, al
 };
 
 /**
- * Function to handle paste event of an image
- * @param editor Editor - editor instance
- * @param maxSize number - max size of the image to be pasted in MB, default is 2MB
+ * Find colors in the document
+ * @param doc Node - node to find colors in
+ * @returns DecorationSet - set of decorations for the colors found in the node
  */
-export function getHandlePasteImage(onDropOrPaste?: (file: File) => Promise<string>) {
-  return (view: EditorView, event: ClipboardEvent) => {
-    const item = event.clipboardData?.items[0];
-    if (item?.type.indexOf('image') !== 0) {
-      return;
-    }
-    const file = item.getAsFile();
-    if (file === null || file.size === undefined) return;
-    const id = toast.loading('Processing Pasted Image', { duration: 10000 });
-    onDropOrPaste?.(file)
-      .then((src) => {
-        const node = view.state.schema.nodes.image.create({ src });
-        const transaction = view.state.tr.replaceSelectionWith(node);
-        view.dispatch(transaction);
-        toast.success('Uploaded Successfully', { id, duration: 300 });
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error('Something went wrong while pasting image', {
-          id,
-          duration: 300,
-        });
-      });
-    return true;
-  };
-}
-
-export function getHandleDropImage(onDropOrPaste?: (file: File) => Promise<string>) {
-  return (view: EditorView, event: DragEvent) => {
-    const files = Array.from(event.dataTransfer?.files ?? []);
-    if (files.length === 0) return;
-    const file = files[0];
-    if (file === null || file.size === undefined) return;
-    const id = toast.loading('Processing Dropped Image', { duration: 10000 });
-    onDropOrPaste?.(file)
-      .then((src) => {
-        const node = view.state.schema.nodes.image.create({ src });
-        const transaction = view.state.tr.replaceSelectionWith(node);
-        view.dispatch(transaction);
-        toast.success('Uploaded Successfully', { id, duration: 300 });
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error('Something went wrong when handling dropped image', {
-          id,
-          duration: 300,
-        });
-      });
-    return true;
-  };
-}
-
 export const findColors = (doc: Node) => {
   const hexColor = /(#[0-9a-f]{3,6})\b/gi;
   const decorations: Decoration[] = [];
@@ -129,27 +77,25 @@ export const duplicateContent = (editor: Editor, node: Node) => {
 };
 
 export const isURL = (str: string): boolean => {
-  let isUrl = true;
   try {
     new URL(str);
-    isUrl = true;
+    return true;
   } catch {
-    isUrl = false;
+    return false;
   }
-  return isUrl;
 };
 
 export const quickcolors = [
-  { label: 'Default', value: '' },
-  { label: 'Blue', value: '#3B82F6' },
-  { label: 'Brown', value: '#92400E' },
-  { label: 'Green', value: '#16A34A' },
-  { label: 'Grey', value: '#6B7280' },
-  { label: 'Orange', value: '#F97316' },
-  { label: 'Pink', value: '#EC4899' },
-  { label: 'Purple', value: '#9333EA' },
-  { label: 'Red', value: '#DC2626' },
-  { label: 'Yellow', value: '#CA8A04' },
+  { label: strings.toolbar.color.default, value: '' },
+  { label: strings.toolbar.color.blue, value: '#0E0E99' },
+  { label: strings.toolbar.color.brown, value: '#7D0404' },
+  { label: strings.toolbar.color.green, value: '#077507' },
+  { label: strings.toolbar.color.gray, value: '#636262' },
+  { label: strings.toolbar.color.orange, value: '#A34603' },
+  { label: strings.toolbar.color.pink, value: '#DB0762' },
+  { label: strings.toolbar.color.purple, value: '#83069C' },
+  { label: strings.toolbar.color.red, value: '#B30707' },
+  { label: strings.toolbar.color.yellow, value: '#C4C404' },
 ];
 
 export enum FileType {

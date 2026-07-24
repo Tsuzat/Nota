@@ -3,9 +3,7 @@ import { type FileType, getFileTypeExtensions, getFileTypeFromExtension } from '
 import { Skeleton } from '@lib/components/ui/skeleton/index.js';
 import { getNotesContext, getStorageContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
-import SearchAndReplace from '@nota/ui/edra/shadcn/components/toolbar/SearchAndReplace.svelte';
-import { EdraBubbleMenu, EdraDragHandleExtended, EdraEditor, EdraToolBar } from '@nota/ui/edra/shadcn/index.js';
-import type { Content, Editor } from '@nota/ui/edra/types.js';
+import { type Content, Edra, createEditor } from '@nota/ui/edra/index.js';
 import { BarSpinner, IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { toast } from '@nota/ui/shadcn/sonner';
@@ -13,39 +11,30 @@ import { basename } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
 import { compare } from 'fast-json-patch';
-import { onMount } from 'svelte';
+import { onDestroy, onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import AI from '$lib/components/editor/AI.svelte';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import Topbar from '$lib/components/topbar.svelte';
-import { fixMathReplacer, ISMACOS, ISWINDOWS } from '$lib/utils';
+import { callAI, callGemini } from '$lib/ai/index.js';
 
-const { data } = $props();
-
-afterNavigate(() => {
-  if (data.id) loadData();
-});
-
-// editor related
-let editor = $state<Editor>();
-let element = $state<HTMLElement>();
-let content = $state<Content>();
-let syncedContent = $state<Content>();
-let isDirty = $state(false);
-
-// cloud related
+// --- Services & Context ---
 const cloudNotes = getNotesContext();
 const cloudStorage = getStorageContext();
 const useGlobalSettings = getGlobalSettings();
 
-// notes related
+// --- State ---
+const { data } = $props();
+let syncedContent = $state<Content>();
+let isDirty = $state(false);
+
 let isLoading = $state(false);
 let note = $state<Note>();
 let syncing = $state(false);
 let syncingText = $state('');
 
+// --- File Handling Utilities ---
 const onFileSelect = async (path: string) => {
   const bytes = await readFile(path);
   const name = await basename(path);
@@ -56,7 +45,7 @@ const onFileSelect = async (path: string) => {
   const file = new File([bytes], name, { type: extension });
   return await cloudStorage.upload(file);
 };
-const onDropOrPaste = async (file: File) => await cloudStorage.upload(file);
+
 const getAssets = async (fileType: FileType) => {
   const files = cloudStorage.files;
   const extensions = new Set(getFileTypeExtensions(fileType));
@@ -70,6 +59,7 @@ const getAssets = async (fileType: FileType) => {
   }
   return assets;
 };
+
 const getLocalFile = async (fileType: FileType) => {
   const extensions = getFileTypeExtensions(fileType);
   const file = await open({
@@ -87,8 +77,43 @@ const getLocalFile = async (fileType: FileType) => {
   return await onFileSelect(file);
 };
 
+// --- Editor Setup ---
+const editor = createEditor({
+  onUpdate: () => {
+    isDirty = true;
+  },
+  onFileUpload: async (file) => await cloudStorage.upload(file),
+  selectFile: getLocalFile,
+  getAssets,
+  callAI: useGlobalSettings.useAI ? (useGlobalSettings.useMyOwnAI ? callGemini : callAI) : undefined,
+});
+
+// --- Hooks ---
+afterNavigate(() => {
+  if (data.id) loadData();
+});
+
+onMount(() => {
+  // auto save is called in every 2 mins
+  const saveInterval = setInterval(() => {
+    saveNoteContent();
+  }, 120000);
+  return () => clearInterval(saveInterval);
+});
+
+beforeNavigate(async () => {
+  if (isDirty) {
+    await saveNoteContent();
+  }
+});
+
+onDestroy(() => {
+  editor?.destroy();
+});
+
+// --- Data Operations ---
 async function saveNoteContent() {
-  if (!isDirty || note === undefined || editor === undefined) return;
+  if (!isDirty || !note || !editor) return;
 
   const currentContent = editor.getJSON();
   if (syncedContent === undefined || syncedContent === null || typeof syncedContent === 'string') {
@@ -115,50 +140,32 @@ async function saveNoteContent() {
   }
 }
 
-onMount(() => {
-  // auto save is called in every 2 mins
-  const saveInterval = setInterval(() => {
-    saveNoteContent();
-  }, 120000);
-  return () => clearInterval(saveInterval);
-});
-
 async function loadData() {
   const id = data.id;
   isLoading = true;
   note = cloudNotes.notes.find((n) => n.id === id);
-  if (note === undefined) {
-    toast.error(`Notes with id ${id} not found`);
+  if (!note) {
+    toast.error(`Note with id ${id} not found`);
     return goto(resolve('/'));
   }
   try {
     const data = await cloudNotes.fetchContent(id);
     if (data) {
       const dbContent = data as Content;
-      const { content: fixedContent, replaced } = fixMathReplacer(dbContent);
-      content = fixedContent;
-      syncedContent = fixedContent;
-      isDirty = false;
-      if (replaced) {
-        isDirty = true;
-        await saveNoteContent();
-      }
+      editor?.commands.setContent(dbContent, { contentType: 'json' });
+      syncedContent = dbContent;
     }
   } catch (error) {
     console.error(error);
-    toast.error('Something went wrong when loading notes');
+    toast.error('Something went wrong when loading note');
     goto(resolve('/'));
   } finally {
     isLoading = false;
   }
 }
 
-function onUpdate() {
-  isDirty = true;
-}
-
 async function updateNote(name: string, icon: string, pinned: boolean) {
-  if (note === undefined) return;
+  if (!note) return;
   syncing = true;
   try {
     await cloudNotes.update(note.id, { name, icon, pinned });
@@ -173,11 +180,13 @@ async function updateNote(name: string, icon: string, pinned: boolean) {
   }
 }
 
-beforeNavigate(async () => {
-  if (isDirty) {
-    await saveNoteContent();
-  }
-});
+async function handleNameChange(e: Event) {
+  if (!note) return;
+  const target = e.target as HTMLInputElement;
+  const value = target.value.trim();
+  if (!value) return;
+  await updateNote(value, note.icon, note.pinned);
+}
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
@@ -190,10 +199,10 @@ function handleKeydown(e: KeyboardEvent) {
 <svelte:document onkeydown={handleKeydown} />
 
 {#if isLoading}
-  <div class="flex size-full min-h-0 overflow-hidden flex-col">
+  <div class="flex size-full min-h-0 flex-col overflow-hidden">
     <Topbar showSeparator={true}>
       {#snippet left()}
-        <Skeleton class="size-8 rounded-md mr-2" />
+        <Skeleton class="mr-2 size-8 rounded-md" />
         <Skeleton class="h-8 w-48 rounded-md" />
       {/snippet}
       {#snippet right()}
@@ -203,7 +212,7 @@ function handleKeydown(e: KeyboardEvent) {
         <Skeleton class="size-8 rounded-md" />
       {/snippet}
     </Topbar>
-    <div class="flex-1 grow overflow-auto p-8 min-h-0">
+    <div class="min-h-0 flex-1 grow overflow-auto p-8">
       <div class="mx-auto w-full max-w-3xl space-y-4">
         <Skeleton class="h-8 w-3/4 rounded-md" />
         <Skeleton class="h-8 w-full rounded-md" />
@@ -213,37 +222,31 @@ function handleKeydown(e: KeyboardEvent) {
       </div>
     </div>
   </div>
-{:else if !isLoading && note !== undefined}
-  <div class="flex size-full min-h-0 overflow-hidden flex-col">
+{:else if note && editor}
+  <div class="relative flex max-h-screen! min-h-screen! w-full! flex-col overflow-hidden!">
     <Topbar showSeparator={true}>
       {#snippet left()}
         <IconPicker
           onSelect={(icon: string) => {
-            note!.icon = icon;
+            if (note) note.icon = icon;
           }}
           onClose={() => {
-            updateNote(note!.name, note!.icon, note!.pinned);
+            if (note) updateNote(note.name, note.icon, note.pinned);
           }}
         >
           <div class={buttonVariants({ variant: "ghost", size: "icon", class: "mr-2" })}>
-            <IconRenderer icon={note!.icon} />
+            <IconRenderer icon={note?.icon} />
           </div>
         </IconPicker>
         <input
-          value={note!.name}
+          value={note?.name}
           class="hover:bg-muted truncate rounded px-1 py-0.5 text-lg font-bold focus:outline-none"
-          onchange={async (e) => {
-            const target = e.target as HTMLInputElement;
-            const value = target.value;
-            if (value.trim() === "") return;
-            e.preventDefault();
-            await updateNote(value, note!.icon, note!.pinned);
-          }}
+          onchange={handleNameChange}
         />
       {/snippet}
 
       {#snippet right()}
-        {#if note!.is_public}
+        {#if note?.is_public}
           <SimpleToolTip>
             <Button variant="ghost" size="icon-sm">
               <icons.Globe />
@@ -256,12 +259,6 @@ function handleKeydown(e: KeyboardEvent) {
             {/snippet}
           </SimpleToolTip>
         {/if}
-        {#if editor && !editor?.isDestroyed}
-          <div class="text-muted-foreground hidden sm:block truncate text-xs">
-            {editor.storage.characterCount.words()} Words
-          </div>
-          <SearchAndReplace {editor} />
-        {/if}
         <SimpleToolTip content={syncing ? syncingText : "Synced"}>
           <Button variant="ghost" size="icon">
             {#if syncing}
@@ -272,40 +269,35 @@ function handleKeydown(e: KeyboardEvent) {
           </Button>
         </SimpleToolTip>
         <NavActions
-          starred={note!.pinned as boolean}
-          toggleStar={() => updateNote(note!.name, note!.icon, !note!.pinned)}
+          starred={Boolean(note?.pinned)}
+          toggleStar={() => {
+            if (note) updateNote(note.name, note.icon, !note.pinned);
+          }}
           {editor}
           note={note!}
         />
       {/snippet}
     </Topbar>
-    {#if useGlobalSettings.useToolBar && editor}
-      <EdraToolBar {editor} />
-    {/if}
-    {#if editor && !editor?.isDestroyed}
+    <Edra {editor}>
+      <Edra.ToC />
+      {#if useGlobalSettings.useToolBar}
+        <Edra.Toolbar />
+      {/if}
       {#if useGlobalSettings.useBubbleMenu}
-        <EdraBubbleMenu {editor} />
+        <Edra.BubbleMenu />
       {/if}
+      {#if useGlobalSettings.useAI}
+        <Edra.UseAI />
+      {/if}
+      <Edra.Content class="min-w-full overflow-auto w-full cursor-auto px-8 py-4 text-base transition-all duration-300 *:outline-none" />
       {#if useGlobalSettings.useDragHandle}
-        <EdraDragHandleExtended {editor} />
+        <Edra.DragHandle type="extended" class="transition-all! duration-300!" />
       {/if}
-      <AI {editor} parentElement={element} />
-    {/if}
-    <EdraEditor
-      bind:editor
-      bind:element
-      {content}
-      class="flex-1 grow flex-col overflow-auto p-8! min-h-0"
-      {onUpdate}
-      {onFileSelect}
-      {onDropOrPaste}
-      {getAssets}
-      {getLocalFile}
-    />
+    </Edra>
   </div>
 {:else}
   <div class="flex size-full flex-col items-center justify-center gap-4">
     <h4>Something went wrong.</h4>
-    <a href={resolve("/")}>Got to Home</a>
+    <a href={resolve("/")}>Go to Home</a>
   </div>
 {/if}

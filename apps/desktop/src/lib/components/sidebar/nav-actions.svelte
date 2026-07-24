@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getNotesContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
-import type { Editor } from '@nota/ui/edra/types.js';
+import type { Editor } from '@nota/ui/edra/tiptap/index.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
@@ -10,12 +10,13 @@ import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { exportContent, importNotes } from '$lib/utils';
 import { getGlobalSettings } from '../settings';
+import { useEditorState } from '@lib/components/edra/tiptap';
 
 interface Props {
   starred?: boolean;
   toggleStar?: () => void;
   note: LocalNote | Note;
-  editor?: Editor;
+  editor: Editor;
 }
 
 let { starred, toggleStar, note, editor }: Props = $props();
@@ -29,10 +30,18 @@ const workspace = $derived(
     .find((w) => w.id === note.workspace_id)
 );
 
+const editorState = useEditorState({
+  editor,
+  selector: ({ editor }) => ({
+    words: editor?.storage.characterCount.words() ?? 0,
+  }),
+});
+
 let open = $state(false);
 </script>
 
 <div class="flex items-center gap-2 text-sm">
+  <small class="text-muted-foreground">{$editorState.words} words</small>
   <SimpleToolTip content="Toggle Pin">
     <Button variant="ghost" size="icon" onclick={toggleStar}>
       <icons.Pin class={cn(starred && "fill-yellow-500 text-yellow-500")} />
@@ -140,7 +149,7 @@ let open = $state(false);
       </Dropdown.Group>
       <Dropdown.Separator />
       <Dropdown.Label class="font-normal text-sm text-muted-foreground">
-        Word count: {editor?.storage.characterCount.words()}
+        Word count: {$editorState.words}
       </Dropdown.Label>
       <Dropdown.Label class="font-normal text-sm text-muted-foreground">
         Last Edited: {timeAgo(note.updated_at)}

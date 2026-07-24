@@ -24,7 +24,7 @@ fn get_or_create_stronghold_password(app: tauri::AppHandle) -> Result<String, St
         Ok(password)
     } else {
         let mut key = [0u8; 32];
-        rand::thread_rng().fill_bytes(&mut key);
+        rand::rng().fill_bytes(&mut key);
         let password: String = key.iter().map(|b| format!("{:02x}", b)).collect();
         fs::write(&key_path, &password).map_err(|e| e.to_string())?;
         Ok(password)

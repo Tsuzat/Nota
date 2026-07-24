@@ -146,26 +146,33 @@ html {
   }
 
   --font-sans: "Inter Variable", sans-serif;
-
   --radius-2xl: calc(var(--radius) * 1.8);
-
   --radius-3xl: calc(var(--radius) * 2.2);
-
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+    scrollbar-width: thin;
+    scrollbar-color: hsla(var(--muted-foreground) / 0.25) transparent;
   }
   body {
     @apply bg-background text-foreground;
   }
+  html {
+    @apply font-sans;
+  }
+
   h1 {
-    @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
+    @apply scroll-m-20 text-4xl font-extrabold tracking-tight text-balance lg:text-5xl;
   }
   h2 {
-    @apply scroll-m-20 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0;
+    @apply mt-4 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors;
+  }
+  h2:first-child {
+    @apply mt-0;
   }
   h3 {
     @apply scroll-m-20 text-2xl font-semibold tracking-tight;
@@ -173,11 +180,26 @@ html {
   h4 {
     @apply scroll-m-20 text-xl font-semibold tracking-tight;
   }
+  p {
+    @apply leading-7;
+  }
+  p:not(:first-child) {
+    @apply mt-6;
+  }
   small {
     @apply text-sm leading-none font-medium;
   }
-  html {
-    @apply font-sans;
+  a {
+    @apply font-medium text-primary;
+  }
+  .lead {
+    @apply text-xl text-muted-foreground;
+  }
+  .large {
+    @apply text-lg font-semibold;
+  }
+  .muted {
+    @apply text-sm text-muted-foreground;
   }
 }
 

@@ -1,178 +1,28 @@
 <script lang="ts">
-import { cn } from '@lib/utils';
-import { onDestroy, onMount } from 'svelte';
-import initEditor from '../editor';
-import type { EdraEditorProps } from '../types';
-import '@fontsource-variable/fira-code';
-import '../editor.css';
-import './style.css';
-import '../onedark.css';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import Mathematics from '@tiptap/extension-mathematics';
-import TableOfContents, { getHierarchicalIndexes, type TableOfContentData } from '@tiptap/extension-table-of-contents';
-import { common, createLowlight } from 'lowlight';
-import { toast } from 'svelte-sonner';
-import { SvelteNodeViewRenderer } from 'svelte-tiptap';
-import ToC from '../components/ToC.svelte';
-import { AudioExtended } from '../extensions/audio/AudiExtended';
-import { AudioPlaceholder } from '../extensions/audio/AudioPlaceholder';
-import { FileDrop } from '../extensions/HandleFileDrop';
-import { IFrameExtended } from '../extensions/iframe/IFrameExtended';
-import { IFramePlaceholder } from '../extensions/iframe/IFramePlaceholder';
-import { ImageExtended } from '../extensions/image/ImageExtended';
-import { ImagePlaceholder } from '../extensions/image/ImagePlaceholder';
-import slashcommand from '../extensions/slash-command/slashcommand';
-import { VideoExtended } from '../extensions/video/VideoExtended';
-import { VideoPlaceholder } from '../extensions/video/VideoPlaceholder';
-import { getHandleDropImage, getHandlePasteImage } from '../utils';
-import AudioExtendedComp from './components/AudioExtended.svelte';
-import AudioPlaceHolderComp from './components/AudioPlaceHolder.svelte';
-import CodeBlock from './components/CodeBlock.svelte';
-import IFrameExtendedComp from './components/IFrameExtended.svelte';
-import IFramePlaceHolderComp from './components/IFramePlaceHolder.svelte';
-import ImageExtendedComp from './components/ImageExtended.svelte';
-import ImagePlaceholderComp from './components/ImagePlaceholder.svelte';
-import SlashCommandList from './components/SlashCommandList.svelte';
-import VideoExtendedComp from './components/VideoExtended.svelte';
-import VideoPlaceHolderComp from './components/VideoPlaceholder.svelte';
-import Link from './menus/Link.svelte';
-import Math from './menus/Math.svelte';
-import MathInline from './menus/MathInline.svelte';
-import TableCol from './menus/TableCol.svelte';
-import TableRow from './menus/TableRow.svelte';
-import { Callout } from '../extensions/callout';
-import { Mermaid } from '../extensions/mermaid';
+import TiptapContent from '../tiptap/components/TiptapContent.svelte';
+import './editor.css';
 import mermaid from 'mermaid';
-  import { mode } from 'mode-watcher';
+import { MathBlock, Link, MathInline, TableColMenu, TableRowMenu } from './components/menu/index.js';
+import { mode } from 'mode-watcher';
+import { cn } from '@lib/utils.js';
 
-const lowlight = createLowlight(common);
-
-let tocItems = $state<TableOfContentData>();
-// Initialize mermaid with theme-aware config
+interface Props {
+  class?: string;
+}
+const { class: className = '' }: Props = $props();
 
 mermaid.initialize({
   startOnLoad: false,
-  theme: mode.current === "dark" ? 'dark' : 'default',
+  theme: mode.current === 'dark' ? 'dark' : 'default',
   securityLevel: 'loose',
   fontFamily: 'inherit',
 });
 
-let {
-  editor = $bindable(),
-  editable = true,
-  content,
-  element = $bindable<HTMLElement>(),
-  onUpdate,
-  autofocus = false,
-  class: className,
-  spellcheck = true,
-  onFileSelect,
-  onDropOrPaste,
-  getAssets,
-  getLocalFile,
-}: EdraEditorProps = $props();
-
-let _rafId: number | undefined;
-
-onMount(() => {
-  editor = initEditor(
-    element,
-    content,
-    [
-      CodeBlockLowlight.configure({
-        lowlight,
-      }).extend({
-        addNodeView() {
-          return SvelteNodeViewRenderer(CodeBlock);
-        },
-      }),
-      Callout,
-      ImagePlaceholder(ImagePlaceholderComp),
-      ImageExtended(ImageExtendedComp),
-      VideoPlaceholder(VideoPlaceHolderComp),
-      VideoExtended(VideoExtendedComp, onDropOrPaste),
-      AudioPlaceholder(AudioPlaceHolderComp),
-      AudioExtended(AudioExtendedComp, onDropOrPaste),
-      IFramePlaceholder(IFramePlaceHolderComp),
-      IFrameExtended(IFrameExtendedComp),
-      slashcommand(SlashCommandList),
-      FileDrop.configure({
-        handler: onFileSelect,
-        assetsGetter: getAssets,
-        localFileGetter: getLocalFile,
-      }),
-      Mathematics.configure({
-        // Options for the KaTeX renderer. See here: https://katex.org/docs/options.html
-        katexOptions: {
-          throwOnError: true, // don't throw an error if the LaTeX code is invalid
-          macros: {
-            '\\R': '\\mathbb{R}', // add a macro for the real numbers
-            '\\N': '\\mathbb{N}', // add a macro for the natural numbers
-          },
-        },
-      }),
-      Mermaid,
-      TableOfContents.configure({
-        getIndex: getHierarchicalIndexes,
-        onUpdate: (indexes) => {
-          tocItems = indexes;
-        },
-        scrollParent: () => element || window,
-      }),
-    ],
-    {
-      onUpdate,
-      onTransaction(props) {
-        // Batch rapid transactions (typing, initial load) into one Svelte reactive
-        // update per animation frame instead of one per transaction
-        cancelAnimationFrame(_rafId!);
-        _rafId = requestAnimationFrame(() => {
-          editor = undefined;
-          editor = props.editor;
-        });
-      },
-      onContentError: (error) => {
-        toast.error('Unable to load the content', {
-          description: 'The content of this page might be corrupted.',
-        });
-        console.error(error);
-      },
-      editable,
-      autofocus,
-    }
-  );
-  editor.setOptions({
-    editorProps: {
-      handlePaste: getHandlePasteImage(onDropOrPaste),
-      handleDrop: getHandleDropImage(onDropOrPaste),
-    },
-  });
-});
-
-onDestroy(() => {
-  cancelAnimationFrame(_rafId!);
-  if (editor) editor.destroy();
-});
 </script>
 
-{#if editor && !editor.isDestroyed}
-  <Link {editor} parentElement={element} />
-  <TableCol {editor} parentElement={element} />
-  <TableRow {editor} parentElement={element} />
-  <Math
-    {editor}
-    parentElement={element}
-  />
-  <MathInline
-    {editor}
-    parentElement={element}
-  />
-  <ToC {editor} items={tocItems} />
-{/if}
-
-<div
-  bind:this={element}
-  id="nota-editor"
-  class={cn("edra-editor h-full w-full cursor-auto *:outline-none", className)}
-  {spellcheck}
-></div>
+<Link />
+<MathBlock />
+<MathInline />
+<TableColMenu />
+<TableRowMenu />
+<TiptapContent class={cn('relative', className)} />
