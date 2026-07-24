@@ -17,7 +17,6 @@ mermaid.initialize({
   securityLevel: 'loose',
   fontFamily: 'inherit',
 });
-
 </script>
 
 <Link />

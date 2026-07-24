@@ -161,10 +161,11 @@ const insertNode = () => {
 };
 </script>
 
-<div bind:this={element} class={cn('z-0!', className)} style="visibility: hidden;">
+<div bind:this={element} class={cn('z-0!', className)} style="visibility: hidden;">	
 	<Button
 		variant="ghost"
-		class="z-0! size-7! rounded-sm opacity-60 hover:opacity-100 focus-visible:opacity-100 active:opacity-100"
+		size="icon-sm"
+		class="text-muted-foreground"
 		onclick={() => (open = !open)}
 	>
 		<GripVertical />
@@ -180,7 +181,7 @@ const insertNode = () => {
 						{currentNode?.type.name}
 					</DropdownMenu.GroupHeading>
 					{#if useAI()}
-						<DropdownMenu.Item onmousedown={(e) => e.preventDefault()} onclick={handleAIHighlight}>
+						<DropdownMenu.Item onmousedown={(e: Event) => e.preventDefault()} onclick={handleAIHighlight}>
 							<Sparkles />
 							<span
 								class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-bold text-transparent"
@@ -343,9 +344,9 @@ const insertNode = () => {
 					</DropdownMenu.Content>
 				</DropdownMenu.Sub>
 				<DropdownMenu.Separator />
-				<DropdownMenu.Item onclick={handleDelete}>
-					<Delete class="text-destructive" />
-					Delete
+				<DropdownMenu.Item variant="destructive" onclick={handleDelete}>
+					<Delete />
+					Delete This Node
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>

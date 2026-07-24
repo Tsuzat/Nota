@@ -8,7 +8,6 @@ import EmojiPicker from '@lib/icons/emoji-picker.svelte';
 const { node, updateAttributes }: NodeViewProps = $props();
 
 let emoji = $derived(node.attrs.emoji ?? '💡');
-
 </script>
 
 <NodeViewWrapper

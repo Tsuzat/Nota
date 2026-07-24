@@ -1,9 +1,8 @@
 <script lang="ts" module>
-
 let tocItems = $state<TableOfContentData>([]);
 export const setToC = (items: TableOfContentData) => {
-	tocItems = items;
-}
+  tocItems = items;
+};
 </script>
 
 <script lang="ts">

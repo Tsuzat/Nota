@@ -19,7 +19,6 @@
     "sql:default",
     "sql:allow-execute",
     "dialog:default",
-    "stronghold:default",
     "fs:allow-mkdir",
     "fs:allow-remove",
     "fs:allow-read",
@@ -35,6 +34,9 @@
     "dialog:allow-open",
     "dialog:allow-message",
     "dialog:allow-save",
+    "stronghold:default",
+    "stronghold:allow-remove-store-record",
+    "stronghold:allow-remove-secret",
     {
       "identifier": "http:default",
       "allow": [
