@@ -24,7 +24,7 @@ const { data } = $props();
 let note = $state<LocalNote>();
 let isLoading = $state(false);
 let isDirty = $state(false);
-let availableModels = $state<SelectableModel[]>([]);
+let availableModels = $state<Record<string, SelectableModel[]>>({});
 
 // --- Editor Setup ---
 const editor = createEditor({

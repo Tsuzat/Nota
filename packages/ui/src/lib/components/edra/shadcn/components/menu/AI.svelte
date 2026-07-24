@@ -42,14 +42,29 @@ export interface SelectableModel {
   provider: string;
   modelString: string;
   contextWindow: number;
+  maxOutputTokens?: number;
+  inputCostPerMillion?: number;
+  outputCostPerMillion?: number;
+  notes?: string;
   isCustom?: boolean;
 }
 
-interface Props {
-  availableModels?: SelectableModel[];
+function formatContextWindow(tokens: number): string {
+  if (!tokens) return '';
+  if (tokens >= 1_000_000) {
+    const formatted = (tokens / 1_000_000).toFixed(1).replace('.0', '');
+    return `${formatted}M ctx`;
+  }
+  return `${Math.round(tokens / 1000)}K ctx`;
 }
 
-let { availableModels = [] }: Props = $props();
+interface Props {
+  availableModels?: Record<string, SelectableModel[]>;
+}
+
+let { availableModels = {} }: Props = $props();
+
+const allModels = $derived(Object.values(availableModels).flat());
 
 let selectedModelId = $state(
   typeof localStorage !== 'undefined' ? localStorage.getItem('active_ai_model_id') || '' : ''
@@ -58,10 +73,10 @@ let includeDocContext = $state(false);
 let modelPopoverOpen = $state(false);
 
 $effect(() => {
-  if (availableModels && availableModels.length > 0) {
-    const exists = availableModels.some((m) => m.id === selectedModelId);
+  if (allModels.length > 0) {
+    const exists = allModels.some((m) => m.id === selectedModelId);
     if (!exists) {
-      selectedModelId = availableModels[0].id;
+      selectedModelId = allModels[0].id;
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('active_ai_model_id', selectedModelId);
       }
@@ -572,8 +587,8 @@ function handleInput(e: Event) {
 			<div
 				class="flex items-center justify-between border-t px-3 py-1.5 text-xs text-muted-foreground bg-muted/20 select-none"
 			>
-				{#if availableModels.length > 0}
-					{@const currentModel = availableModels.find((m) => m.id === selectedModelId) || availableModels[0]}
+				{#if allModels.length > 0}
+					{@const currentModel = allModels.find((m) => m.id === selectedModelId) || allModels[0]}
 					<Popover.Root bind:open={modelPopoverOpen}>
 						<Popover.Trigger
 							contenteditable="false"
@@ -592,28 +607,52 @@ function handleInput(e: Event) {
 								e.preventDefault();
 								e.stopPropagation();
 							}}
-							class="w-64 p-0! z-50 text-primary!"
+							class="w-84 p-0! z-50 text-primary!"
 							align="start"
 						>
 							<Command.Root class="p-0!">
 								<Command.Input placeholder="Search model..." />
-								<Command.List class="max-h-48 overflow-y-auto">
+								<Command.List class="max-h-64 overflow-y-auto p-1">
 									<Command.Empty>No model found.</Command.Empty>
-									<Command.Group>
-										{#each availableModels as model (model.id)}
-											<Command.Item
-												value={model.displayName}
-												onSelect={() => selectModel(model.id)}
-												onclick={() => selectModel(model.id)}
-												class="flex items-center justify-between text-xs cursor-pointer text-primary"
-											>
-												<span>{model.displayName}</span>
-												{#if model.id === selectedModelId}
-													<Check class="size-3.5" />
-												{/if}
-											</Command.Item>
-										{/each}
-									</Command.Group>
+									{#each Object.entries(availableModels) as [provider, models] (provider)}
+										<Command.Group heading={provider.toUpperCase()}>
+											{#each models as model (model.id)}
+												<Command.Item
+													value={`${model.displayName} ${model.notes || ''}`}
+													onSelect={() => selectModel(model.id)}
+													onclick={() => selectModel(model.id)}
+													class="flex flex-col gap-0.5 px-2 py-1.5 text-xs cursor-pointer text-primary rounded-md"
+												>
+													<div class="flex items-center justify-between w-full gap-2">
+														<div class="flex items-center gap-2 min-w-0">
+															<span class="font-medium truncate">{model.displayName}</span>
+															{#if model.inputCostPerMillion !== undefined && model.outputCostPerMillion !== undefined}
+																<span class="text-[10px] text-muted-foreground/60 font-mono shrink-0">
+																	${model.inputCostPerMillion}/${model.outputCostPerMillion}M
+																</span>
+															{/if}
+														</div>
+														<div class="flex items-center gap-1.5 shrink-0">
+															{#if model.contextWindow}
+																<span class="text-[10px] px-1 py-0.25 rounded bg-muted/80 text-muted-foreground font-mono">
+																	{formatContextWindow(model.contextWindow)}
+																</span>
+															{/if}
+															{#if model.id === selectedModelId}
+																<Check class="size-3.5 text-primary shrink-0" />
+															{/if}
+														</div>
+													</div>
+
+													{#if model.notes}
+														<span class="text-[10px] text-muted-foreground/70 truncate w-full">
+															{model.notes}
+														</span>
+													{/if}
+												</Command.Item>
+											{/each}
+										</Command.Group>
+									{/each}
 								</Command.List>
 							</Command.Root>
 						</Popover.Content>

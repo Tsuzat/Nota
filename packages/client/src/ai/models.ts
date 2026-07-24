@@ -24,6 +24,10 @@ export type SelectableModel = {
   provider: string;
   modelString: string;
   contextWindow: number;
+  maxOutputTokens?: number;
+  inputCostPerMillion?: number;
+  outputCostPerMillion?: number;
+  notes?: string;
   isCustom?: boolean;
 };
 

@@ -52,6 +52,12 @@ const PRESET_PROVIDERS: { id: AIProvider; label: string; docsUrl?: string; docNa
     docsUrl: 'https://platform.moonshot.cn/console/api-keys',
     docName: 'Moonshot Platform',
   },
+  {
+    id: 'grok',
+    label: 'xAI Grok',
+    docsUrl: 'https://console.x.ai/',
+    docName: 'xAI Console',
+  },
 ];
 
 // Preset provider key state
@@ -128,6 +134,10 @@ async function handleValidatePresetKey(providerId: AIProvider) {
     if (providerId === 'kimi') {
       defaultModel = 'kimi-k3';
       baseUrl = 'https://api.moonshot.cn/v1';
+    }
+    if (providerId === 'grok') {
+      defaultModel = 'grok-4.5';
+      baseUrl = 'https://api.x.ai/v1';
     }
 
     const ok = await testAIKey(providerId, providerKeyInput.trim(), defaultModel, baseUrl);

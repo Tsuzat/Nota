@@ -62,10 +62,14 @@ export async function getAllConfiguredModels(): Promise<Record<string, Selectabl
         for (const [mKey, mVal] of Object.entries(modelsMap)) {
           providerModels.push({
             id: `${p.id}:${mKey}`,
-            displayName: `${p.id.toUpperCase()} - ${mVal.displayName}`,
+            displayName: mVal.displayName,
             provider: p.id,
             modelString: mVal.modelString || mKey,
             contextWindow: mVal.contextWindow,
+            maxOutputTokens: mVal.maxOutputTokens,
+            inputCostPerMillion: mVal.inputCostPerMillion,
+            outputCostPerMillion: mVal.outputCostPerMillion,
+            notes: mVal.notes,
             isCustom: false,
           });
         }
@@ -145,6 +149,7 @@ export const getAIConfig = async (): Promise<{
       let baseUrl: string | undefined = undefined;
       if (provider === "deepseek") baseUrl = "https://api.deepseek.com/v1";
       if (provider === "kimi") baseUrl = "https://api.moonshot.cn/v1";
+      if (provider === "grok") baseUrl = "https://api.x.ai/v1";
 
       const modelsMap = LATEST_MODELS[provider as keyof typeof LATEST_MODELS];
       const modelObj = modelsMap ? modelsMap[mKey] : null;
@@ -170,6 +175,10 @@ export const getAIConfig = async (): Promise<{
   if (provider === "kimi" && !model) {
     model = "kimi-k3";
     baseUrl = "https://api.moonshot.cn/v1";
+  }
+  if (provider === "grok" && !model) {
+    model = "grok-4.5";
+    baseUrl = "https://api.x.ai/v1";
   }
 
   return { provider, model, apiKey, baseUrl };
@@ -237,6 +246,7 @@ export async function callAI(
       case "openai":
       case "deepseek":
       case "kimi":
+      case "grok":
       case "custom": {
         const openai = createOpenAI({
           apiKey: config.apiKey,
@@ -290,9 +300,10 @@ export async function testAIKey(
       case "openai":
       case "deepseek":
       case "kimi":
+      case "grok":
       case "custom": {
         const openai = createOpenAI({ apiKey, baseURL: baseUrl });
-        languageModel = openai(model || "gpt-4o-mini");
+        languageModel = openai(model || (provider === "grok" ? "grok-4.5" : "gpt-4o-mini"));
         break;
       }
       default:
