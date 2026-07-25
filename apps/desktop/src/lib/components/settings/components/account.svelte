@@ -5,6 +5,7 @@ import { getAuthContext } from '@nota/client';
 import { icons } from '@nota/ui/icons/index.js';
 import * as Avatar from '@nota/ui/shadcn/avatar';
 import { Button } from '@nota/ui/shadcn/button';
+import { Badge } from '@nota/ui/shadcn/badge';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
 import OAuth from '$lib/components/global-signin/oauth.svelte';
@@ -49,9 +50,14 @@ async function handleDeleteUser() {
 						<span class="text-base font-semibold text-foreground">
 							{user.name ?? 'User Profile'}
 						</span>
-						<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary border border-primary/20">
-							{user.subscription_type ?? user.subscription_plan ?? "Pro Tier"}
-						</span>
+						
+						{#if user.subscription_plan === "pro"}
+							<ProBadge />
+							{:else}
+						<Badge variant="outline">
+							Free
+						</Badge>
+						{/if}
 					</div>
 					<p class="text-xs text-muted-foreground font-mono leading-snug">{user.email}</p>
 					{#if user.ai_credits !== undefined}

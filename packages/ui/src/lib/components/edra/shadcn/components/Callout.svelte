@@ -20,7 +20,7 @@ let emoji = $derived(node.attrs.emoji ?? '💡');
 			>
 				{emoji}
 			</Popover.Trigger>
-			<Popover.Content strategy="absolute" class="size-fit p-0!">
+			<Popover.Content class="size-fit p-0!">
 				<EmojiPicker onSelect={(emoji: string) => updateAttributes({emoji: emoji.split(":")[1]})} />
 			</Popover.Content>
 		</Popover.Root>

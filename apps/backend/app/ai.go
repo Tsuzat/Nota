@@ -30,7 +30,7 @@ func getGenAIClient() (*genai.Client, error) {
 	return genAIClient, genAIErr
 }
 
-const MODEL = "gemini-3-flash-preview"
+const MODEL = "gemini-3.5-flash-lite"
 
 const systemInstruction = `
 ### ROLE & OBJECTIVE
@@ -62,9 +62,15 @@ Before generating text, analyze the user's request AND the surrounding context t
    - Trigger: User highlights text and asks to summarize, expand, or change tone.
    - Output: Maintain the user's original voice but improve clarity/grammar.
 
+### Markdown Instructions
+We follow standard Markdown formatting with a few specific guidelines:
+
+   - Use $$ (double dollars) for inline math and $$$ (triple dollars) for math blocks.
+   - For inserting Mermaid diagrams directly, use :::mermaid\ncontent\n::: on a new line.
+
 ### VERBOSITY & FORMATTING RULES
 - **Mirror the Context:** If the user's existing notes are bulleted, continue with bullets. If they are writing paragraphs, write paragraphs.
-- **Markdown is King:** Always formatting using standard Markdown (## Headers, **Bold**, > Quotes).
+- **Markdown Rules:** Always format content using clean, standard Markdown (## Headings, **Bold**, > Quotes).
 - **No Fluff:** Do not use conversational filler like "Sure, here is the code you asked for" or "I hope this helps." DIVE STRAIGHT INTO THE CONTENT.
 - **Conciseness Algorithm:**
   - Short, specific prompt -> Short, direct answer.

@@ -1,25 +1,17 @@
-import type { Extensions } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
-import { CharacterCount, Placeholder } from "@tiptap/extensions";
-import strings from "./strings.ts";
-import Highlight from "@tiptap/extension-highlight";
-import { Color, FontSize, TextStyle } from "@tiptap/extension-text-style";
-import Typography from "@tiptap/extension-typography";
-import Subscript from "@tiptap/extension-subscript";
-import TextAlign from "@tiptap/extension-text-align";
-import SuperScript from "@tiptap/extension-superscript";
-import {
-  Audio,
-  ColorHighlighter,
-  SelectAcrossAtoms,
-  Table,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "./tiptap/index.ts";
-import { TaskItem, TaskList } from "@tiptap/extension-list";
-import { Markdown } from "@tiptap/markdown";
-import Mathematics from "@tiptap/extension-mathematics";
+import type { Extensions } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import { CharacterCount, Placeholder } from '@tiptap/extensions';
+import strings from './strings.ts';
+import Highlight from '@tiptap/extension-highlight';
+import { Color, FontSize, TextStyle } from '@tiptap/extension-text-style';
+import Typography from '@tiptap/extension-typography';
+import Subscript from '@tiptap/extension-subscript';
+import TextAlign from '@tiptap/extension-text-align';
+import SuperScript from '@tiptap/extension-superscript';
+import { Audio, ColorHighlighter, SelectAcrossAtoms, Table, TableCell, TableHeader, TableRow } from './tiptap/index.ts';
+import { TaskItem, TaskList } from '@tiptap/extension-list';
+import { Markdown } from '@tiptap/markdown';
+import Mathematics from '@tiptap/extension-mathematics';
 
 /**
  * Contains all the default extensions the editor uses.
@@ -28,12 +20,12 @@ export default [
   StarterKit.configure({
     orderedList: {
       HTMLAttributes: {
-        class: "list-decimal",
+        class: 'list-decimal',
       },
     },
     bulletList: {
       HTMLAttributes: {
-        class: "list-disc",
+        class: 'list-disc',
       },
     },
     heading: {
@@ -44,8 +36,8 @@ export default [
       autolink: true,
       linkOnPaste: true,
       HTMLAttributes: {
-        target: "_blank",
-        rel: "noopener noreferrer nofollow",
+        target: '_blank',
+        rel: 'noopener noreferrer nofollow',
       },
     },
     codeBlock: false,
@@ -56,17 +48,17 @@ export default [
     multicolor: true,
   }),
   Placeholder.configure({
-    emptyEditorClass: "is-empty",
+    emptyEditorClass: 'is-empty',
     // Use a placeholder:
     // Use different placeholders depending on the node type:
     placeholder: ({ node }) => {
-      if (node.type.name === "heading") {
+      if (node.type.name === 'heading') {
         return strings.editor.headingPlaceholder;
       }
-      if (node.type.name === "paragraph") {
+      if (node.type.name === 'paragraph') {
         return strings.editor.paragraphPlaceholder;
       }
-      return "";
+      return '';
     },
   }),
   Color,
@@ -77,7 +69,7 @@ export default [
   TextStyle,
   FontSize,
   TextAlign.configure({
-    types: ["heading", "paragraph"],
+    types: ['heading', 'paragraph'],
   }),
   TaskList,
   TaskItem.configure({
@@ -94,8 +86,8 @@ export default [
     katexOptions: {
       throwOnError: true, // don't throw an error if the LaTeX code is invalid
       macros: {
-        "\\R": "\\mathbb{R}", // add a macro for the real numbers
-        "\\N": "\\mathbb{N}", // add a macro for the natural numbers
+        '\\R': '\\mathbb{R}', // add a macro for the real numbers
+        '\\N': '\\mathbb{N}', // add a macro for the natural numbers
       },
     },
   }),
