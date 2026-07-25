@@ -1,9 +1,9 @@
-import { getContext, setContext } from "svelte";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import request from "./request";
-import { type User, UserSchema, type Session, SessionSchema } from "./types";
-import { secureStorage } from "./secureStorage";
-import { isTauri } from "@tauri-apps/api/core";
+import { getContext, setContext } from 'svelte';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import request from './request';
+import { type User, UserSchema, type Session, SessionSchema } from './types';
+import { secureStorage } from './secureStorage';
+import { isTauri } from '@tauri-apps/api/core';
 
 class Auth {
   #user = $state<User>();
@@ -20,17 +20,17 @@ class Auth {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     const verifier = btoa(String.fromCharCode(...array))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
 
     const encoder = new TextEncoder();
     const data = encoder.encode(verifier);
-    const hash = await crypto.subtle.digest("SHA-256", data);
+    const hash = await crypto.subtle.digest('SHA-256', data);
     const challenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
 
     return { verifier, challenge };
   }
@@ -51,11 +51,11 @@ class Auth {
         this.#user = parsedUser;
       } catch (error) {
         console.log(error);
-        throw new Error("Please signin again");
+        throw new Error('Please signin again');
       }
     } else {
       console.log(await res.text());
-      throw new Error("Please signin again");
+      throw new Error('Please signin again');
     }
   }
 
@@ -71,7 +71,7 @@ class Auth {
   async signup(email: string, password: string, name?: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signup-email`;
     const res = await request(url, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({ email, password, name }),
     });
     if (res.ok) {
@@ -88,12 +88,12 @@ class Auth {
    * @returns A promise that resolves when the sign-in request is successful
    * @throws {Error} If the request fails with a non-200 status code
    */
-  async signInWithOAuth(provider: "github" | "google", isDesktop = false) {
+  async signInWithOAuth(provider: 'github' | 'google', isDesktop = false) {
     let url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signin/${provider}`;
 
     if (isDesktop) {
       const { verifier, challenge } = await this.generatePKCE();
-      localStorage.setItem("pkce_verifier", verifier);
+      localStorage.setItem('pkce_verifier', verifier);
       url += `?isdesktop=true&code_challenge=${challenge}`;
       return url;
     }
@@ -106,22 +106,22 @@ class Auth {
    * @param code - The auth code received from deep link
    */
   async exchangeCode(code: string) {
-    const verifier = localStorage.getItem("pkce_verifier");
-    if (!verifier) throw new Error("No PKCE verifier found");
+    const verifier = localStorage.getItem('pkce_verifier');
+    if (!verifier) throw new Error('No PKCE verifier found');
 
     const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/exchange`;
     const res = await request(url, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({
         code,
         code_verifier: verifier,
       }),
     });
     if (res.ok) {
-      localStorage.removeItem("pkce_verifier");
+      localStorage.removeItem('pkce_verifier');
       const { access_token, refresh_token } = await res.json();
-      await secureStorage.setItem("access_token", access_token);
-      await secureStorage.setItem("refresh_token", refresh_token);
+      await secureStorage.setItem('access_token', access_token);
+      await secureStorage.setItem('refresh_token', refresh_token);
       await this.init();
     } else {
       throw new Error(await res.text());
@@ -138,15 +138,15 @@ class Auth {
   async signInWithEmailAndPassword(email: string, password: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signin-email`;
     const res = await request(url, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({ email, password }),
     });
     if (res.ok && isTauri()) {
       const {
         data: { access_token, refresh_token },
       } = await res.json();
-      await secureStorage.setItem("access_token", access_token);
-      await secureStorage.setItem("refresh_token", refresh_token);
+      await secureStorage.setItem('access_token', access_token);
+      await secureStorage.setItem('refresh_token', refresh_token);
       await this.init();
     } else {
       throw new Error(await res.text());
@@ -162,8 +162,8 @@ class Auth {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signout`;
     this.#user = undefined;
     if (isTauri()) {
-      await secureStorage.removeItem("access_token");
-      await secureStorage.removeItem("refresh_token");
+      await secureStorage.removeItem('access_token');
+      await secureStorage.removeItem('refresh_token');
     }
     await request(url);
   }
@@ -185,7 +185,7 @@ class Auth {
    */
   async revokeSession(id: string): Promise<void> {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/session/revoke/${id}`;
-    const res = await request(url, { method: "POST" });
+    const res = await request(url, { method: 'POST' });
     if (!res.ok) throw new Error(await res.text());
   }
 
@@ -194,7 +194,7 @@ class Auth {
    */
   async revokeAllSessions(): Promise<void> {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/session/revoke/all`;
-    const res = await request(url, { method: "POST" });
+    const res = await request(url, { method: 'POST' });
     if (!res.ok) throw new Error(await res.text());
   }
 
@@ -203,12 +203,12 @@ class Auth {
    */
   async deleteAllOtherSessions(keepSessionId: string): Promise<void> {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/session/others/${keepSessionId}`;
-    const res = await request(url, { method: "DELETE" });
+    const res = await request(url, { method: 'DELETE' });
     if (!res.ok) throw new Error(await res.text());
   }
 }
 
-const NOTAAUTHKEY = Symbol("NOTAAUTHKEY");
+const NOTAAUTHKEY = Symbol('NOTAAUTHKEY');
 
 /**
  * Set the auth context.

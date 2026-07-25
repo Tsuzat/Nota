@@ -1,23 +1,16 @@
-import { streamText, generateText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
-import { createAnthropic } from "@ai-sdk/anthropic";
-import {
-  createGoogleGenerativeAI,
-  type GoogleLanguageModelOptions,
-} from "@ai-sdk/google";
-import { secureStorage } from "../secureStorage";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import request from "../request";
-import { systemInstruction } from "./prompts";
-import {
-  LATEST_MODELS,
-  type CustomModelConfig,
-  type SelectableModel,
-} from "./models";
+import { streamText, generateText } from 'ai';
+import { createOpenAI } from '@ai-sdk/openai';
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI, type GoogleLanguageModelOptions } from '@ai-sdk/google';
+import { secureStorage } from '../secureStorage';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import request from '../request';
+import { systemInstruction } from './prompts';
+import { LATEST_MODELS, type CustomModelConfig, type SelectableModel } from './models';
 
-export * from "./prompts";
-export * from "./commands";
-export * from "./models";
+export * from './prompts';
+export * from './commands';
+export * from './models';
 
 /**
  * Fallback to server-side AI generation.
@@ -25,50 +18,44 @@ export * from "./models";
 export const aiGenerate = async (prompt: string) => {
   const url = `${PUBLIC_BACKEND_URL}/api/v1/ai/generate`;
   const res = await request(url, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({ prompt }),
   });
   return res;
 };
 
-export type AIProvider =
-  | "server"
-  | "gemini"
-  | "openai"
-  | "claude"
-  | "deepseek"
-  | "kimi"
-  | "grok"
-  | "custom";
+export type AIProvider = 'server' | 'gemini' | 'openai' | 'claude' | 'deepseek' | 'kimi' | 'grok' | 'custom';
 
 export async function getAllConfiguredModels(): Promise<Record<string, SelectableModel[]>> {
   const result: Record<string, SelectableModel[]> = {};
 
   const providers: { id: keyof typeof LATEST_MODELS; key: string }[] = [
-    { id: "gemini", key: "gemini_api_key" },
-    { id: "openai", key: "openai_api_key" },
-    { id: "claude", key: "claude_api_key" },
-    { id: "deepseek", key: "deepseek_api_key" },
-    { id: "kimi", key: "kimi_api_key" },
-    { id: "grok", key: "grok_api_key" },
+    { id: 'gemini', key: 'gemini_api_key' },
+    { id: 'openai', key: 'openai_api_key' },
+    { id: 'claude', key: 'claude_api_key' },
+    { id: 'deepseek', key: 'deepseek_api_key' },
+    { id: 'kimi', key: 'kimi_api_key' },
+    { id: 'grok', key: 'grok_api_key' },
   ];
 
   for (const p of providers) {
     const key = await secureStorage.getItem(p.key);
     if (key && key.trim().length > 0) {
-      const modelsMap = LATEST_MODELS[p.id as keyof typeof LATEST_MODELS];
-      if (modelsMap) {
+      const providerConfig = LATEST_MODELS[p.id as keyof typeof LATEST_MODELS];
+      if (providerConfig && providerConfig.models) {
         const providerModels: SelectableModel[] = [];
-        for (const [mKey, mVal] of Object.entries(modelsMap)) {
+        for (const [mKey, mVal] of Object.entries(providerConfig.models)) {
           providerModels.push({
             id: `${p.id}:${mKey}`,
             displayName: mVal.displayName,
             provider: p.id,
+            providerIcon: providerConfig.icon,
             modelString: mVal.modelString || mKey,
             contextWindow: mVal.contextWindow,
             maxOutputTokens: mVal.maxOutputTokens,
             inputCostPerMillion: mVal.inputCostPerMillion,
             outputCostPerMillion: mVal.outputCostPerMillion,
+            cachedInputCostPerMillion: mVal.cachedInputCostPerMillion,
             notes: mVal.notes,
             isCustom: false,
           });
@@ -81,7 +68,7 @@ export async function getAllConfiguredModels(): Promise<Record<string, Selectabl
   }
 
   try {
-    const rawCustom = localStorage.getItem("custom_ai_models");
+    const rawCustom = localStorage.getItem('custom_ai_models');
     if (rawCustom) {
       const customList: CustomModelConfig[] = JSON.parse(rawCustom);
       const customModels: SelectableModel[] = [];
@@ -91,7 +78,7 @@ export async function getAllConfiguredModels(): Promise<Record<string, Selectabl
           customModels.push({
             id: item.id,
             displayName: item.displayName,
-            provider: "custom",
+            provider: 'custom',
             modelString: item.modelString,
             contextWindow: item.contextWindow || 128_000,
             isCustom: true,
@@ -99,11 +86,11 @@ export async function getAllConfiguredModels(): Promise<Record<string, Selectabl
         }
       }
       if (customModels.length > 0) {
-        result["custom"] = customModels;
+        result['custom'] = customModels;
       }
     }
   } catch (e) {
-    console.error("Failed to parse custom models from localStorage", e);
+    console.error('Failed to parse custom models from localStorage', e);
   }
 
   return result;
@@ -115,25 +102,23 @@ export const getAIConfig = async (): Promise<{
   apiKey: string;
   baseUrl?: string;
 }> => {
-  const useOwnKeys = localStorage.getItem("useOwnKeys") === "true";
+  const useOwnKeys = localStorage.getItem('useOwnKeys') === 'true';
   if (!useOwnKeys) {
-    return { provider: "server", model: "", apiKey: "" };
+    return { provider: 'server', model: '', apiKey: '' };
   }
 
-  const activeModelId = localStorage.getItem("active_ai_model_id");
+  const activeModelId = localStorage.getItem('active_ai_model_id');
 
   if (activeModelId) {
     try {
-      const rawCustom = localStorage.getItem("custom_ai_models");
+      const rawCustom = localStorage.getItem('custom_ai_models');
       if (rawCustom) {
-        const customList: import("./models").CustomModelConfig[] =
-          JSON.parse(rawCustom);
+        const customList: import('./models').CustomModelConfig[] = JSON.parse(rawCustom);
         const found = customList.find((c) => c.id === activeModelId);
         if (found) {
-          const apiKey =
-            (await secureStorage.getItem(`custom_${found.id}_api_key`)) || "";
+          const apiKey = (await secureStorage.getItem(`custom_${found.id}_api_key`)) || '';
           return {
-            provider: "custom",
+            provider: 'custom',
             model: found.modelString,
             apiKey,
             baseUrl: found.baseUrl,
@@ -142,43 +127,42 @@ export const getAIConfig = async (): Promise<{
       }
     } catch {}
 
-    if (activeModelId.includes(":")) {
-      const [p, mKey] = activeModelId.split(":");
+    if (activeModelId.includes(':')) {
+      const [p, mKey] = activeModelId.split(':');
       const provider = p as AIProvider;
-      const apiKey = (await secureStorage.getItem(`${provider}_api_key`)) || "";
+      const apiKey = (await secureStorage.getItem(`${provider}_api_key`)) || '';
       let baseUrl: string | undefined = undefined;
-      if (provider === "deepseek") baseUrl = "https://api.deepseek.com/v1";
-      if (provider === "kimi") baseUrl = "https://api.moonshot.cn/v1";
-      if (provider === "grok") baseUrl = "https://api.x.ai/v1";
+      if (provider === 'deepseek') baseUrl = 'https://api.deepseek.com/v1';
+      if (provider === 'kimi') baseUrl = 'https://api.moonshot.cn/v1';
+      if (provider === 'grok') baseUrl = 'https://api.x.ai/v1';
 
-      const modelsMap = LATEST_MODELS[provider as keyof typeof LATEST_MODELS];
-      const modelObj = modelsMap ? modelsMap[mKey] : null;
+      const providerConfig = LATEST_MODELS[provider as keyof typeof LATEST_MODELS];
+      const modelObj = providerConfig?.models ? providerConfig.models[mKey] : null;
       const model = modelObj ? modelObj.modelString : mKey;
 
       return { provider, model, apiKey, baseUrl };
     }
   }
 
-  const provider =
-    (localStorage.getItem("ai_provider") as AIProvider) || "gemini";
-  const apiKey = (await secureStorage.getItem(`${provider}_api_key`)) || "";
-  let model = localStorage.getItem(`${provider}_model`) || "";
+  const provider = (localStorage.getItem('ai_provider') as AIProvider) || 'gemini';
+  const apiKey = (await secureStorage.getItem(`${provider}_api_key`)) || '';
+  let model = localStorage.getItem(`${provider}_model`) || '';
   let baseUrl = localStorage.getItem(`${provider}_base_url`) || undefined;
 
-  if (provider === "gemini" && !model) model = "gemini-3.6-flash";
-  if (provider === "openai" && !model) model = "gpt-5.5";
-  if (provider === "claude" && !model) model = "claude-sonnet-5";
-  if (provider === "deepseek" && !model) {
-    model = "deepseek-v4-pro";
-    baseUrl = "https://api.deepseek.com/v1";
+  if (provider === 'gemini' && !model) model = 'gemini-3.6-flash';
+  if (provider === 'openai' && !model) model = 'gpt-5.5';
+  if (provider === 'claude' && !model) model = 'claude-sonnet-5';
+  if (provider === 'deepseek' && !model) {
+    model = 'deepseek-v4-pro';
+    baseUrl = 'https://api.deepseek.com/v1';
   }
-  if (provider === "kimi" && !model) {
-    model = "kimi-k3";
-    baseUrl = "https://api.moonshot.cn/v1";
+  if (provider === 'kimi' && !model) {
+    model = 'kimi-k3';
+    baseUrl = 'https://api.moonshot.cn/v1';
   }
-  if (provider === "grok" && !model) {
-    model = "grok-4.5";
-    baseUrl = "https://api.x.ai/v1";
+  if (provider === 'grok' && !model) {
+    model = 'grok-4.5';
+    baseUrl = 'https://api.x.ai/v1';
   }
 
   return { provider, model, apiKey, baseUrl };
@@ -191,18 +175,14 @@ export const getAIConfig = async (): Promise<{
  * @param onChunk - Callback invoked with each text chunk as it arrives.
  * @param onError - Optional callback invoked if an error occurs during generation.
  */
-export async function callAI(
-  prompt: string,
-  onChunk: (chunk: string) => void,
-  onError?: (error: Error) => void,
-) {
+export async function callAI(prompt: string, onChunk: (chunk: string) => void, onError?: (error: Error) => void) {
   try {
     const config = await getAIConfig();
 
-    if (config.provider === "server") {
+    if (config.provider === 'server') {
       const res = await aiGenerate(prompt);
       if (!res.ok) {
-        let message = "Failed to call AI";
+        let message = 'Failed to call AI';
         try {
           const data = await res.json();
           message = data?.error ?? message;
@@ -210,7 +190,7 @@ export async function callAI(
         throw new Error(message);
       }
       const reader = res.body?.getReader();
-      if (!reader) throw new Error("Streaming not supported");
+      if (!reader) throw new Error('Streaming not supported');
 
       const decoder = new TextDecoder();
       while (true) {
@@ -224,30 +204,30 @@ export async function callAI(
       return;
     }
 
-    if (!config.apiKey || config.apiKey.trim() === "") {
+    if (!config.apiKey || config.apiKey.trim() === '') {
       throw new Error(`Please set API key for ${config.provider} in settings.`);
     }
 
     let languageModel;
 
     switch (config.provider) {
-      case "gemini": {
+      case 'gemini': {
         const google = createGoogleGenerativeAI({
           apiKey: config.apiKey,
         });
         languageModel = google(config.model);
         break;
       }
-      case "claude": {
+      case 'claude': {
         const anthropic = createAnthropic({ apiKey: config.apiKey });
         languageModel = anthropic(config.model);
         break;
       }
-      case "openai":
-      case "deepseek":
-      case "kimi":
-      case "grok":
-      case "custom": {
+      case 'openai':
+      case 'deepseek':
+      case 'kimi':
+      case 'grok':
+      case 'custom': {
         const openai = createOpenAI({
           apiKey: config.apiKey,
           baseURL: config.baseUrl,
@@ -270,7 +250,7 @@ export async function callAI(
     }
   } catch (error) {
     console.error(error);
-    const err = error instanceof Error ? error : new Error("Unknown error");
+    const err = error instanceof Error ? error : new Error('Unknown error');
     onError?.(err);
   }
 }
@@ -282,28 +262,28 @@ export async function testAIKey(
   provider: AIProvider,
   apiKey: string,
   model: string,
-  baseUrl?: string,
+  baseUrl?: string
 ): Promise<boolean> {
   try {
     let languageModel;
     switch (provider) {
-      case "gemini": {
+      case 'gemini': {
         const google = createGoogleGenerativeAI({ apiKey });
-        languageModel = google(model || "gemini-2.5-flash");
+        languageModel = google(model || 'gemini-2.5-flash');
         break;
       }
-      case "claude": {
+      case 'claude': {
         const anthropic = createAnthropic({ apiKey });
-        languageModel = anthropic(model || "claude-3-5-sonnet-latest");
+        languageModel = anthropic(model || 'claude-3-5-sonnet-latest');
         break;
       }
-      case "openai":
-      case "deepseek":
-      case "kimi":
-      case "grok":
-      case "custom": {
+      case 'openai':
+      case 'deepseek':
+      case 'kimi':
+      case 'grok':
+      case 'custom': {
         const openai = createOpenAI({ apiKey, baseURL: baseUrl });
-        languageModel = openai(model || (provider === "grok" ? "grok-4.5" : "gpt-4o-mini"));
+        languageModel = openai(model || (provider === 'grok' ? 'grok-4.5' : 'gpt-4o-mini'));
         break;
       }
       default:
@@ -312,12 +292,12 @@ export async function testAIKey(
 
     await generateText({
       model: languageModel,
-      prompt: "Say hi",
+      prompt: 'Say hi',
     });
 
     return true;
   } catch (e) {
-    console.error("API Key verification failed:", e);
+    console.error('API Key verification failed:', e);
     return false;
   }
 }

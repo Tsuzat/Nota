@@ -35,16 +35,19 @@ import {
 import { Button, buttonVariants } from '@lib/components/ui/button/index.js';
 import * as Popover from '@lib/components/ui/popover/index.js';
 import * as Command from '@lib/components/ui/command/index.js';
+import { cn } from '@lib/utils.js';
 
 export interface SelectableModel {
   id: string;
   displayName: string;
   provider: string;
+  providerIcon?: string | { dark: string; light: string };
   modelString: string;
   contextWindow: number;
   maxOutputTokens?: number;
   inputCostPerMillion?: number;
   outputCostPerMillion?: number;
+  cachedInputCostPerMillion?: number;
   notes?: string;
   isCustom?: boolean;
 }
@@ -70,7 +73,7 @@ let selectedModelId = $state(
   typeof localStorage !== 'undefined' ? localStorage.getItem('active_ai_model_id') || '' : ''
 );
 let includeDocContext = $state(false);
-let modelPopoverOpen = $state(false);
+let modelDialogOpen = $state(false);
 
 $effect(() => {
   if (allModels.length > 0) {
@@ -89,7 +92,7 @@ function selectModel(id: string) {
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('active_ai_model_id', id);
   }
-  modelPopoverOpen = false;
+  modelDialogOpen = false;
 }
 
 let inputTag = $state<HTMLTextAreaElement | null>(null);
@@ -553,7 +556,7 @@ function handleInput(e: Event) {
 		aiResponse = '';
 		return false;
 	}}
-	class="absolute z-100 flex max-h-120 max-w-3xl flex-col rounded-lg bg-popover/75 p-0 backdrop-blur-2xl transition-[height] duration-500"
+	class="absolute z-10 flex max-h-120 max-w-3xl flex-col rounded-lg bg-popover/75 p-0 backdrop-blur-2xl transition-[height] duration-500"
 	options={{
 		strategy: 'absolute',
 		autoPlacement: {
@@ -589,74 +592,100 @@ function handleInput(e: Event) {
 			>
 				{#if allModels.length > 0}
 					{@const currentModel = allModels.find((m) => m.id === selectedModelId) || allModels[0]}
-					<Popover.Root bind:open={modelPopoverOpen}>
-						<Popover.Trigger
-							contenteditable="false"
-							class={buttonVariants({ variant: "ghost", size: "sm", class: "z-10!"})}
-						>
-							<span>{currentModel ? currentModel.displayName : 'Select Model'}</span>
-							<ChevronDown class="size-3 opacity-70" />
-						</Popover.Trigger>
-						<Popover.Content
-							portalProps={{ disabled: true, to: undefined }}
-							onCloseAutoFocus={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-							}}
-							onEscapeKeydown={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-							}}
-							class="w-84 p-0! z-50 text-primary!"
-							align="start"
-						>
-							<Command.Root class="p-0!">
-								<Command.Input placeholder="Search model..." />
-								<Command.List class="max-h-64 overflow-y-auto p-1">
-									<Command.Empty>No model found.</Command.Empty>
-									{#each Object.entries(availableModels) as [provider, models] (provider)}
-										<Command.Group heading={provider.toUpperCase()}>
-											{#each models as model (model.id)}
-												<Command.Item
-													value={`${model.displayName} ${model.notes || ''}`}
-													onSelect={() => selectModel(model.id)}
-													onclick={() => selectModel(model.id)}
-													class="flex flex-col gap-0.5 px-2 py-1.5 text-xs cursor-pointer text-primary rounded-md"
-												>
-													<div class="flex items-center justify-between w-full gap-2">
-														<div class="flex items-center gap-2 min-w-0">
-															<span class="font-medium truncate">{model.displayName}</span>
-															{#if model.inputCostPerMillion !== undefined && model.outputCostPerMillion !== undefined}
-																<span class="text-[10px] text-muted-foreground/60 font-mono shrink-0">
-																	${model.inputCostPerMillion}/${model.outputCostPerMillion}M
-																</span>
-															{/if}
-														</div>
-														<div class="flex items-center gap-1.5 shrink-0">
-															{#if model.contextWindow}
-																<span class="text-[10px] px-1 py-0.25 rounded bg-muted/80 text-muted-foreground font-mono">
-																	{formatContextWindow(model.contextWindow)}
-																</span>
-															{/if}
-															{#if model.id === selectedModelId}
-																<Check class="size-3.5 text-primary shrink-0" />
-															{/if}
-														</div>
-													</div>
+					<Button
+						type="button"
+						variant="ghost"
+						size="sm"
+						onclick={() => (modelDialogOpen = true)}
+						class="h-7 gap-1 px-2 text-xs font-normal cursor-pointer"
+					>
+						<Brain class="size-3.5 opacity-70" />
+						<span>{currentModel ? currentModel.displayName : 'Select Model'}</span>
+						<ChevronDown class="size-3 opacity-70" />
+					</Button>
 
-													{#if model.notes}
-														<span class="text-[10px] text-muted-foreground/70 truncate w-full">
-															{model.notes}
+					<Command.Dialog
+						bind:open={modelDialogOpen}
+						title="Select AI Model"
+						description="Search and select an AI provider and model"
+					>
+						<Command.Input
+							class="h-10 p-2 transition-colors"
+							placeholder="Search AI models..."
+						/>
+						<Command.List>
+							<Command.Empty>
+								<div class="flex flex-col items-center gap-2 py-6">
+									<Sparkles class="text-muted-foreground size-8 opacity-50" />
+									<span class="text-muted-foreground text-sm">No matching models found</span>
+								</div>
+							</Command.Empty>
+
+							{#each Object.entries(availableModels) as [provider, models], index (provider)}
+								{#if index > 0}
+									<Command.Separator />
+								{/if}
+								<Command.Group
+									value={provider}
+									heading={`${provider.toUpperCase()} · ${models.length}`}
+								>
+									{#each models as model (model.id)}
+										{@const isActive = model.id === selectedModelId}
+										<Command.Item
+											value={`${model.displayName} ${model.notes || ''} ${provider}`}
+											onselect={() => selectModel(model.id)}
+											onclick={() => selectModel(model.id)}
+											class={cn(isActive && "bg-primary/10 text-primary border border-primary", "flex flex-col items-start gap-0.5 px-2.5 py-1.5 text-xs cursor-pointer rounded-md hover:bg-accent/50 transition-colors my-0.5")}
+										>
+											<div class="flex items-center justify-between w-full gap-2">
+												<div class="flex items-center gap-2 min-w-0">
+													{#if typeof model.providerIcon === 'string'}
+														<img src={model.providerIcon} class="size-4 shrink-0" alt="" />
+													{:else if model.providerIcon && typeof model.providerIcon === 'object'}
+														<img src={model.providerIcon.dark} class="size-4 shrink-0 hidden dark:block" alt="" />
+														<img src={model.providerIcon.light} class="size-4 shrink-0 block dark:hidden" alt="" />
+													{:else}
+														<Brain class="size-4 shrink-0 opacity-70" />
+													{/if}
+													<span class="font-semibold text-xs truncate">{model.displayName}</span>
+												</div>
+												<div class="flex items-center gap-1.5 shrink-0">
+													{#if model.contextWindow}
+														<span class="text-[10px] px-1.5 py-0.5 rounded bg-muted/80 text-muted-foreground font-mono">
+															{formatContextWindow(model.contextWindow)}
 														</span>
 													{/if}
-												</Command.Item>
-											{/each}
-										</Command.Group>
+													{#if isActive}
+														<span class="bg-primary/10 text-primary rounded px-1.5 py-0.5 text-[9px] font-semibold">
+															Active
+														</span>
+													{/if}
+												</div>
+											</div>
+
+											{#if model.notes}
+												<span class="text-xs text-muted-foreground text-start">
+													{model.notes}
+												</span>
+											{/if}
+
+											{#if model.inputCostPerMillion !== undefined && model.outputCostPerMillion !== undefined}
+												<div class="flex items-center justify-start gap-1.5 text-xs text-muted-foreground/75 font-mono">
+													<span>In: ${model.inputCostPerMillion}/M</span>
+													<span>•</span>
+													<span>Out: ${model.outputCostPerMillion}/M</span>
+													{#if model.cachedInputCostPerMillion !== undefined}
+														<span>•</span>
+														<span>Cached: ${model.cachedInputCostPerMillion}/M</span>
+													{/if}
+												</div>
+											{/if}
+										</Command.Item>
 									{/each}
-								</Command.List>
-							</Command.Root>
-						</Popover.Content>
-					</Popover.Root>
+								</Command.Group>
+							{/each}
+						</Command.List>
+					</Command.Dialog>
 				{:else}
 					<span class="px-2 py-1 text-xs opacity-70">Nota Server AI</span>
 				{/if}

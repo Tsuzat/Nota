@@ -584,7 +584,7 @@ async function handleDeleteCustomModel(id: string, name: string) {
 									<div class="flex items-center gap-3 text-[11px] font-mono text-muted-foreground">
 										<span>Model: {m.modelString}</span>
 										<span>•</span>
-										<span class="truncate max-w-[200px]">{m.baseUrl}</span>
+										<span class="truncate max-w-50">{m.baseUrl}</span>
 									</div>
 								</div>
 
