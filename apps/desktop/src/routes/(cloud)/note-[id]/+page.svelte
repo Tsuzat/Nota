@@ -1,9 +1,16 @@
 <script lang="ts">
 import { type FileType, getFileTypeExtensions, getFileTypeFromExtension } from '@lib/components/edra/utils.js';
 import { Skeleton } from '@lib/components/ui/skeleton/index.js';
-import { getNotesContext, getStorageContext, type Note } from '@nota/client';
+import {
+  callAI,
+  getAllConfiguredModels,
+  getNotesContext,
+  getStorageContext,
+  type Note,
+  type SelectableModel,
+} from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
-import { type Content, Edra, createEditor } from '@nota/ui/edra/index.js';
+import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
 import { BarSpinner, IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { toast } from '@nota/ui/shadcn/sonner';
@@ -17,7 +24,6 @@ import { resolve } from '$app/paths';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import Topbar from '$lib/components/topbar.svelte';
-import { callAI } from '@nota/client';
 
 // --- Services & Context ---
 const cloudNotes = getNotesContext();
@@ -33,6 +39,7 @@ let isLoading = $state(false);
 let note = $state<Note>();
 let syncing = $state(false);
 let syncingText = $state('');
+let availableModels = $state<Record<string, SelectableModel[]>>({});
 
 // --- File Handling Utilities ---
 const onFileSelect = async (path: string) => {
@@ -85,12 +92,15 @@ const editor = createEditor({
   onFileUpload: async (file) => await cloudStorage.upload(file),
   selectFile: getLocalFile,
   getAssets,
-  callAI: useGlobalSettings.useAI ? callAI : undefined,
+  callAI,
 });
 
 // --- Hooks ---
 afterNavigate(() => {
   if (data.id) loadData();
+  getAllConfiguredModels().then((models) => {
+    availableModels = models;
+  });
 });
 
 onMount(() => {
@@ -287,7 +297,7 @@ function handleKeydown(e: KeyboardEvent) {
         <Edra.BubbleMenu />
       {/if}
       {#if useGlobalSettings.useAI}
-        <Edra.UseAI />
+        <Edra.UseAI {availableModels} />
       {/if}
       <Edra.Content class="min-w-full overflow-auto w-full cursor-auto px-8 py-4 text-base transition-all duration-300 *:outline-none" />
       {#if useGlobalSettings.useDragHandle}

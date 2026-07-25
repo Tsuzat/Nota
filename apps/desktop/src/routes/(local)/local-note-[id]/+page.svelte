@@ -1,8 +1,10 @@
 <script lang="ts">
-import { toast } from '@nota/ui/shadcn/sonner';
+import { callAI, getAllConfiguredModels, type SelectableModel } from '@nota/client';
+import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
 import { IconPicker, IconRenderer } from '@nota/ui/icons/index.js';
 import { buttonVariants } from '@nota/ui/shadcn/button';
 import { Skeleton } from '@nota/ui/shadcn/skeleton';
+import { toast } from '@nota/ui/shadcn/sonner';
 import { onDestroy, onMount } from 'svelte';
 import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 import { resolve } from '$app/paths';
@@ -12,8 +14,6 @@ import Topbar from '$lib/components/topbar.svelte';
 import { DB } from '$lib/local/db.js';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { createFile, getAssetsByFileType, selectLocalFile } from '$lib/local/util.js';
-import { type Content, Edra, createEditor } from '@nota/ui/edra/index.js';
-import { callAI, getAllConfiguredModels, type SelectableModel } from '@nota/client';
 
 // --- Services & Context ---
 const globalSettings = getGlobalSettings();
@@ -34,7 +34,7 @@ const editor = createEditor({
   onFileUpload: createFile,
   selectFile: selectLocalFile,
   getAssets: getAssetsByFileType,
-  callAI: globalSettings.useAI ? callAI : undefined,
+  callAI,
 });
 
 afterNavigate(() => {

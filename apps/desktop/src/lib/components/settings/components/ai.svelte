@@ -3,16 +3,16 @@ import { Button } from '@lib/components/ui/button';
 import { Input } from '@lib/components/ui/input';
 import { BarSpinner } from '@lib/icons';
 import { cn } from '@lib/utils';
-import { getAuthContext, secureStorage, testAIKey, type AIProvider, type CustomModelConfig } from '@nota/client';
+import { type AIProvider, type CustomModelConfig, getAuthContext, secureStorage, testAIKey } from '@nota/client';
 import { icons } from '@nota/ui/icons/index.js';
 import * as Label from '@nota/ui/shadcn/label';
-import * as Switch from '@nota/ui/shadcn/switch';
 import { toast } from '@nota/ui/shadcn/sonner';
+import * as Switch from '@nota/ui/shadcn/switch';
 import { openUrl } from '@tauri-apps/plugin-opener';
-import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
-import { getGlobalSettings } from '../constants.svelte';
 import { onMount } from 'svelte';
 import { fade, slide } from 'svelte/transition';
+import { PUBLIC_NOTA_FRONTEND_URL } from '$env/static/public';
+import { getGlobalSettings } from '../constants.svelte';
 
 const useSettings = getGlobalSettings();
 const user = $derived(getAuthContext().user);
@@ -123,7 +123,7 @@ async function handleValidatePresetKey(providerId: AIProvider) {
   isValidatedProviderKey = false;
   try {
     let defaultModel = '';
-    let baseUrl: string | undefined = undefined;
+    let baseUrl: string | undefined;
     if (providerId === 'gemini') defaultModel = 'gemini-3.6-flash';
     if (providerId === 'openai') defaultModel = 'gpt-5.5';
     if (providerId === 'claude') defaultModel = 'claude-sonnet-5';

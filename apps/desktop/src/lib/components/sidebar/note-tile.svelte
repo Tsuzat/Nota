@@ -33,7 +33,7 @@ const href = $derived(
 const isActive = $derived(page.url.pathname.endsWith(href));
 
 const openPreviewLink = async () => {
-  const url = PUBLIC_NOTA_FRONTEND_URL + `/p/${note.id}`;
+  const url = `${PUBLIC_NOTA_FRONTEND_URL}/p/${note.id}`;
   await invoke('plugin:shell|open', { path: url });
 };
 

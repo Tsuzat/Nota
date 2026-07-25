@@ -1,4 +1,5 @@
 <script lang="ts">
+import { useEditorState } from '@lib/components/edra/tiptap';
 import { getNotesContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import type { Editor } from '@nota/ui/edra/tiptap/index.js';
@@ -10,7 +11,6 @@ import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { getLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { exportContent, importNotes } from '$lib/utils';
 import { getGlobalSettings } from '../settings';
-import { useEditorState } from '@lib/components/edra/tiptap';
 
 interface Props {
   starred?: boolean;
