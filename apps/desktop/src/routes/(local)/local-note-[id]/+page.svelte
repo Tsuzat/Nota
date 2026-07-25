@@ -1,8 +1,8 @@
 <script lang="ts">
 import { callAI, getAllConfiguredModels, type SelectableModel } from '@nota/client';
 import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
-import { IconPicker, IconRenderer } from '@nota/ui/icons/index.js';
-import { buttonVariants } from '@nota/ui/shadcn/button';
+import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import { Skeleton } from '@nota/ui/shadcn/skeleton';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { onDestroy, onMount } from 'svelte';
@@ -22,7 +22,7 @@ const localNotes = getLocalNotes();
 // --- State ---
 const { data } = $props();
 let note = $state<LocalNote>();
-let isLoading = $state(false);
+let isLoading = $state(true);
 let isDirty = $state(false);
 let availableModels = $state<Record<string, SelectableModel[]>>({});
 
@@ -64,6 +64,23 @@ async function loadData() {
   isLoading = true;
   const id = data.id;
   note = localNotes.getNotes().find((n) => n.id === id);
+  if (!note) {
+    try {
+      const rows = await DB.select<LocalNote[]>(
+        'SELECT id, workspace_id, parent_note_id, name, icon, pinned, deleted_at, created_at, updated_at FROM notes WHERE id = $1',
+        [id]
+      );
+      if (rows.length > 0) {
+        const r = rows[0];
+        note = {
+          ...r,
+          pinned: r.pinned === 'true' || (r.pinned as any) === 1 || r.pinned === true,
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
   if (!note) {
     toast.error(`Note with id ${id} not found`);
     return goto(resolve('/'));
@@ -216,8 +233,18 @@ function handleKeydown(event: KeyboardEvent) {
     
   </div>
 {:else}
-  <div class="flex size-full flex-col items-center justify-center gap-4">
-    <h4>Something went wrong.</h4>
-    <a href={resolve("/")}>Go to Home</a>
+  <div class="flex flex-1 grow size-full min-h-0 flex-col items-center justify-center gap-4 p-8 animate-in fade-in">
+    <div class="flex size-16 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-2">
+      <icons.TriangleAlert class="size-8" />
+    </div>
+    <h4 class="text-xl font-semibold text-center">
+      Something went wrong loading this note.
+    </h4>
+    <p class="text-muted-foreground text-sm max-w-md text-center">
+      It may have been deleted or you don't have access.
+    </p>
+    <Button href={resolve("/")} variant="outline" class="mt-4 rounded-full px-6">
+      Go to Home
+    </Button>
   </div>
 {/if}

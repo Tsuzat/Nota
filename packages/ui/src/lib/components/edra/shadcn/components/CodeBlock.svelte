@@ -53,7 +53,7 @@ function convertToMermaid() {
 }
 </script>
 
-<NodeViewWrapper class="my-4 rounded-lg bg-muted pb-4 dark:bg-muted/20">
+<NodeViewWrapper class="my-4 rounded-lg bg-muted pb-4 px-4 dark:bg-muted/20">
 	<div class="mx-2 flex items-center justify-end gap-2 print:justify-start" contenteditable="false">
 		{#if defaultLanguage.toLowerCase() === 'mermaid'}
 			<Tooltip tooltip="Convert to Mermaid Diagram">

@@ -120,6 +120,26 @@ class Notes {
   }
 
   /**
+   * Fetch note metadata by ID
+   * @param noteId Note ID
+   * @returns Note metadata object
+   * @throws {Error} If the request fails with a non-200 status code
+   */
+  async fetchMeta(noteId: string) {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/meta`;
+    const res = await request(url);
+    if (res.ok) {
+      const json = await res.json();
+      const parsedNote = NoteSchema.parse(json.data);
+      if (!this.#notes.some((n) => n.id === parsedNote.id)) {
+        this.#notes = [...this.#notes, parsedNote];
+      }
+      return parsedNote;
+    }
+    throw new Error(await res.text());
+  }
+
+  /**
    * Fetch note content by ID
    * @param noteId Note ID
    * @returns Note content as a string

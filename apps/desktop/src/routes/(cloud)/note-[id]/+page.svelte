@@ -35,7 +35,7 @@ const { data } = $props();
 let syncedContent = $state<Content>();
 let isDirty = $state(false);
 
-let isLoading = $state(false);
+let isLoading = $state(true);
 let note = $state<Note>();
 let syncing = $state(false);
 let syncingText = $state('');
@@ -154,6 +154,13 @@ async function loadData() {
   const id = data.id;
   isLoading = true;
   note = cloudNotes.notes.find((n) => n.id === id);
+  if (!note) {
+    try {
+      note = await cloudNotes.fetchMeta(id);
+    } catch (error) {
+      console.error(error);
+    }
+  }
   if (!note) {
     toast.error(`Note with id ${id} not found`);
     return goto(resolve('/'));
@@ -306,8 +313,18 @@ function handleKeydown(e: KeyboardEvent) {
     </Edra>
   </div>
 {:else}
-  <div class="flex size-full flex-col items-center justify-center gap-4">
-    <h4>Something went wrong.</h4>
-    <a href={resolve("/")}>Go to Home</a>
+  <div class="flex flex-1 grow size-full min-h-0 flex-col items-center justify-center gap-4 p-8 animate-in fade-in">
+    <div class="flex size-16 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-2">
+      <icons.TriangleAlert class="size-8" />
+    </div>
+    <h4 class="text-xl font-semibold text-center">
+      Something went wrong loading this note.
+    </h4>
+    <p class="text-muted-foreground text-sm max-w-md text-center">
+      It may have been deleted or you don't have access.
+    </p>
+    <Button href={resolve("/")} variant="outline" class="mt-4 rounded-full px-6">
+      Go to Home
+    </Button>
   </div>
 {/if}

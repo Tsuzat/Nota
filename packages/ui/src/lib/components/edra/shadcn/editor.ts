@@ -25,6 +25,7 @@ import CalloutComp from './components/Callout.svelte';
 import TableOfContents, { getHierarchicalIndexes } from '@tiptap/extension-table-of-contents';
 import { setToC } from './toc.svelte';
 import { FileType } from '../utils.ts';
+import { toast } from 'svelte-sonner';
 
 const lowlight = createLowlight(all);
 
@@ -88,7 +89,6 @@ export const createEditor = (props?: EdraEditorProps) =>
         } as any,
       }),
       FileHandler.configure({
-        allowedMimeTypes: [FileType.AUDIO, FileType.DOCS, FileType.IMAGE, FileType.VIDEO],
         onDrop: (currentEditor, files, pos) => {
           if (!props?.onFileUpload) return;
           files.forEach((file) => {
@@ -101,6 +101,8 @@ export const createEditor = (props?: EdraEditorProps) =>
                   currentEditor.chain().insertContentAt(pos, { type: 'video', attrs: { src } }).focus().run();
                 } else if (file.type.startsWith('audio/')) {
                   currentEditor.chain().insertContentAt(pos, { type: 'audio', attrs: { src } }).focus().run();
+                } else {
+                  toast.error('This file type is not supported yet.');
                 }
               })
               .catch((err) => {
@@ -120,6 +122,8 @@ export const createEditor = (props?: EdraEditorProps) =>
                   currentEditor.chain().setVideo({ src }).focus().run();
                 } else if (file.type.startsWith('audio/')) {
                   currentEditor.chain().setAudio({ src }).focus().run();
+                } else {
+                  toast.error('This file type is not supported yet.');
                 }
               })
               .catch((err) => {

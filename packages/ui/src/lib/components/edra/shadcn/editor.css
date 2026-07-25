@@ -100,7 +100,7 @@
   left: 0;
   width: 0.3rem;
   content: " ";
-  background-color: var(--color-border);
+  background-color: var(--border);
   border-radius: 0.5rem;
 }
 
@@ -112,15 +112,15 @@
 .tiptap hr {
   margin: 1.5rem 0;
   border: none;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
 }
 
 .tiptap code:not(pre code) {
   font-family: "Fira Code Variable", monospace;
   font-size: 0.875em;
-  background-color: var(--color-muted);
-  color: var(--color-primary);
-  border: 0.5px solid var(--color-border);
+  background-color: var(--muted);
+  color: var(--primary);
+  border: 0.5px solid var(--border);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
 }
@@ -276,7 +276,7 @@
   width: 0.65rem;
   height: 0.65rem;
   content: "";
-  background-color: var(--color-primary);
+  background-color: var(--primary);
   clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
   transform: scale(0);
   transform-origin: center;
@@ -284,13 +284,13 @@
 }
 
 .tiptap input[type="checkbox"]:checked {
-  background-color: var(--color-background);
-  border-color: var(--color-border);
+  background-color: var(--background);
+  border-color: var(--border);
 }
 
 .tiptap input[type="checkbox"]:checked:hover {
-  background-color: var(--color-muted);
-  border-color: var(--color-border);
+  background-color: var(--muted);
+  border-color: var(--border);
 }
 
 .tiptap input[type="checkbox"]:checked::before {
@@ -311,13 +311,13 @@
   vertical-align: middle;
   content: " ";
   background-color: var(--color);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: 0.25rem;
 }
 
 /* Math Equations (KaTeX) */
 .tiptap-mathematics-render:hover {
-  background-color: var(--color-muted);
+  background-color: var(--muted);
 }
 
 /* Table Styling */
@@ -343,7 +343,7 @@
   margin-top: 1rem;
   margin-bottom: 1rem;
   border-collapse: collapse;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: 0.25rem;
 }
 
@@ -354,7 +354,7 @@
   padding: 0.5rem;
   vertical-align: top;
   text-align: left;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
 }
 
 .tiptap table td:first-of-type:not(a),
@@ -374,7 +374,7 @@
 
 .tiptap table th {
   font-weight: bold;
-  background-color: var(--color-muted);
+  background-color: var(--muted);
 }
 
 .tiptap table .column-resize-handle {
@@ -415,7 +415,7 @@
   width: 100%;
   height: 0.8rem;
   margin-left: -1px;
-  border: 0.25px solid var(--color-border);
+  border: 0.25px solid var(--border);
   border-radius: 1rem;
 }
 
@@ -436,7 +436,7 @@
 
 .tiptap table .grip-column.selected {
   background-color: var(--muted);
-  border-color: var(--color-border);
+  border-color: var(--border);
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
@@ -446,7 +446,7 @@
   width: 0.8rem;
   height: calc(100%);
   margin-top: -1px;
-  border: 0.5px solid var(--color-border);
+  border: 0.5px solid var(--border);
   border-radius: 1rem;
 }
 
@@ -463,7 +463,7 @@
 
 .tiptap table .grip-row.selected {
   background-color: var(--muted);
-  border-color: var(--color-border);
+  border-color: var(--border);
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
@@ -475,7 +475,7 @@
 	width: 0.5rem;
 	height: 1rem;
 	border-radius: 2px;
-	background-color: var(--color-primary);
+	background-color: var(--primary);
 	opacity: 0;
 	transition: all 200ms ease-in-out;
 } */
@@ -504,7 +504,7 @@
   color: var(--foreground);
   cursor: pointer;
   background-color: var(--muted);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   opacity: 0;
@@ -575,7 +575,7 @@
 }
 
 .tiptap .tiptap-mathematics-render--editable:hover {
-  background: var(--color-muted);
+  background: var(--muted);
 }
 
 /* Inline math */
@@ -596,7 +596,7 @@
 .tiptap .tiptap-mathematics-render.inline-math-error,
 .tiptap .tiptap-mathematics-render.block-math-error {
   color: var(--destructive);
-  background: var(--color-muted);
+  background: var(--muted);
   border: 1px solid darkred;
 }
 
@@ -637,7 +637,7 @@
   content: "";
   position: absolute;
   inset: -3px;
-  border: 2px solid var(--color-primary, #3b82f6);
+  border: 2px solid var(--primary, #3b82f6);
   border-radius: 0.5rem;
   pointer-events: none;
   z-index: 6;

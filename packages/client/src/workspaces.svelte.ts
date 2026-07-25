@@ -30,7 +30,6 @@ class Workspaces {
       const json = await res.json();
       const workspaces = json.data as Workspace[];
       const parsedWorkspaces = workspaces.map((workspace) => WorkspaceSchema.parse(workspace));
-      console.log(parsedWorkspaces);
       this.workspaces = parsedWorkspaces;
     } else {
       throw new Error(await res.text());

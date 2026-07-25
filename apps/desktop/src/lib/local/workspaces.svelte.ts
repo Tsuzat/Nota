@@ -41,7 +41,6 @@ class WorkSpaces {
     try {
       // insert into database
       const id = getNewUUID(this.#workspaces.map((t) => t.id));
-      console.log({ id, name, icon });
       const res = await DB.execute('INSERT INTO workspaces (id, name, icon) VALUES ($1, $2, $3)', [id, name, icon]);
       if (res.rowsAffected === 1) {
         const newWorkspace = await DB.select<LocalWorkSpace[]>(
