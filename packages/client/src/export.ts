@@ -280,16 +280,45 @@ export function generatePdfHtml(title: string, bodyHtml: string): string {
 
       // 3. Render KaTeX Math
       try {
-        if (window.renderMathInElement) {
-          renderMathInElement(document.body, {
-            delimiters: [
-              { left: '$$$', right: '$$$', display: true },
-              { left: '$$', right: '$$', display: false },
-              { left: '\\[', right: '\\]', display: true },
-              { left: '\\(', right: '\\)', display: false }
-            ],
-            throwOnError: false
+        if (window.katex) {
+          // A. Render Tiptap mathematics extension nodes ([data-latex], [data-type="inline-math"], etc.)
+          document.querySelectorAll('[data-latex], [data-type="inline-math"], [data-type="block-math"], .tiptap-mathematics-render').forEach(function(el) {
+            const latex = el.getAttribute('data-latex') || el.textContent || '';
+            if (latex.trim()) {
+              const isBlock = el.getAttribute('data-type') === 'block-math' || el.tagName.toLowerCase() === 'div';
+              try {
+                katex.render(latex, el, {
+                  displayMode: isBlock,
+                  throwOnError: false,
+                  macros: {
+                    '\\R': '\\mathbb{R}',
+                    '\\N': '\\mathbb{N}'
+                  }
+                });
+              } catch (e) {
+                console.error('KaTeX error on element:', e);
+                el.textContent = latex;
+              }
+            }
           });
+
+          // B. Also run auto-render on text nodes if present
+          if (window.renderMathInElement) {
+            renderMathInElement(document.body, {
+              delimiters: [
+                { left: '$$$', right: '$$$', display: true },
+                { left: '$$', right: '$$', display: false },
+                { left: '\\[', right: '\\]', display: true },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '$', right: '$', display: false }
+              ],
+              throwOnError: false,
+              macros: {
+                '\\R': '\\mathbb{R}',
+                '\\N': '\\mathbb{N}'
+              }
+            });
+          }
         }
       } catch (err) {
         console.error('KaTeX render error:', err);
