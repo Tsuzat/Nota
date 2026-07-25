@@ -1,12 +1,12 @@
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import request from "./request";
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import request from './request';
 
 /**
  * PDF Export Utility using Gotenberg v8 (https://render.nota.ink)
  */
 
 export function generatePdfHtml(title: string, bodyHtml: string): string {
-  const safeTitle = title.trim() || "Untitled Note";
+  const safeTitle = title.trim() || 'Untitled Note';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -291,8 +291,8 @@ export function generatePdfHtml(title: string, bodyHtml: string): string {
                   displayMode: isBlock,
                   throwOnError: false,
                   macros: {
-                    '\\R': '\\mathbb{R}',
-                    '\\N': '\\mathbb{N}'
+                    '\\\\R': '\\\\mathbb{R}',
+                    '\\\\N': '\\\\mathbb{N}'
                   }
                 });
               } catch (e) {
@@ -308,14 +308,14 @@ export function generatePdfHtml(title: string, bodyHtml: string): string {
               delimiters: [
                 { left: '$$$', right: '$$$', display: true },
                 { left: '$$', right: '$$', display: false },
-                { left: '\\[', right: '\\]', display: true },
-                { left: '\\(', right: '\\)', display: false },
+                { left: '\\\\[', right: '\\\\]', display: true },
+                { left: '\\\\(', right: '\\\\)', display: false },
                 { left: '$', right: '$', display: false }
               ],
               throwOnError: false,
               macros: {
-                '\\R': '\\mathbb{R}',
-                '\\N': '\\mathbb{N}'
+                '\\\\R': '\\\\mathbb{R}',
+                '\\\\N': '\\\\mathbb{N}'
               }
             });
           }
@@ -334,19 +334,13 @@ export function generatePdfHtml(title: string, bodyHtml: string): string {
 </html>`;
 }
 
-export async function convertHtmlToPdf(
-  title: string,
-  htmlContent: string,
-): Promise<ArrayBuffer> {
+export async function convertHtmlToPdf(title: string, htmlContent: string): Promise<ArrayBuffer> {
   const fullHtml = generatePdfHtml(title, htmlContent);
 
-  const response = await request(
-    `${PUBLIC_BACKEND_URL}/api/v1/db/note/export/pdf`,
-    {
-      method: "POST",
-      body: JSON.stringify({ html: fullHtml }),
-    },
-  );
+  const response = await request(`${PUBLIC_BACKEND_URL}/api/v1/db/note/export/pdf`, {
+    method: 'POST',
+    body: JSON.stringify({ html: fullHtml }),
+  });
 
   if (!response.ok) {
     let errText = response.statusText;
@@ -356,9 +350,7 @@ export async function convertHtmlToPdf(
     } catch {
       errText = await response.text().catch(() => response.statusText);
     }
-    throw new Error(
-      `PDF generation failed (${response.status}): ${errText}`,
-    );
+    throw new Error(`PDF generation failed (${response.status}): ${errText}`);
   }
 
   return await response.arrayBuffer();

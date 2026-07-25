@@ -18,11 +18,16 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 incremental = true # Compile your binary in smaller steps.
 
 [profile.release]
-codegen-units = 1 # Allows LLVM to perform better optimization.
+codegen-units = 16 # Allows LLVM to perform better optimization.
 lto = true        # Enables link-time-optimizations.
 opt-level = "s"   # Prioritizes small binary size. Use `3` if you prefer speed.
 panic = "abort"   # Higher performance by disabling panic handlers.
 strip = true      # Ensures debug symbols are removed.
+
+[profile.release.build-override]
+codegen-units = 16
+opt-level = 3
+strip = false      # Prevents macOS strip from corrupting proc-macro dylibs (mis-aligned LINKEDIT string pool)
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
