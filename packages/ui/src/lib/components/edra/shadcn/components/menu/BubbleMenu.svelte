@@ -4,7 +4,7 @@ import { Separator } from '@lib/components/ui/separator/index.js';
 import { commands } from '../../../commands/index.js';
 import { addAIHighlight, BubbleMenu, getEditor, isTextSelection, useEditorTransaction } from '../../../tiptap/index.js';
 import { cn } from '@lib/utils.js';
-import { WandSparkles } from '@lucide/svelte';
+import WandSparkles from '@lucide/svelte/icons/wand-sparkles';
 import Colors from '../tools/Colors.svelte';
 import Tooltip from '../Tooltip.svelte';
 import Link from '../tools/Link.svelte';
@@ -107,15 +107,23 @@ const shouldShow = (props: {
 	pluginKey="edra-bubble-menu"
 	{editor}
 	{shouldShow}
+	appendTo={() => document.body}
 	options={{
-		shift: true,
-		autoPlacement: {
-			allowedPlacements: ['top', 'top-end', 'top-start']
+		strategy: 'fixed',
+		placement: 'top',
+		autoPlacement: false,
+		flip: {
+			fallbackPlacements: ['bottom'],
+			padding: 12,
+			boundary: editor.view.dom
 		},
-		strategy: 'absolute',
+		shift: {
+			padding: 12,
+			boundary: editor.view.dom
+		},
 		scrollTarget: editor.view.dom.parentElement ?? window
 	}}
-	class={cn('flex w-fit items-center rounded-lg border bg-popover', className)}
+	class={cn('flex w-fit max-w-[min(48rem,calc(100vw-2rem))] overflow-x-auto items-center rounded-lg border bg-popover', className)}
 >
 	{#if useAI()}
 		<Tooltip tooltip="Use AI">

@@ -8,23 +8,25 @@ import {
   SvelteNodeViewRenderer,
   useEditor,
   VideoExtended,
-} from '../tiptap/index.ts';
-import { all, createLowlight } from 'lowlight';
-import extensions from '../extensions.ts';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import CodeBlock from './components/CodeBlock.svelte';
-import { MediaPlaceholder } from '../tiptap/extensions/MediaPlaceHolder.ts';
-import MediaPlaceholderComp from './components/MediaPlaceHolder.svelte';
-import ImageExtendedComp from './components/ImageExtended.svelte';
-import VideoExtendedComp from './components/VideoExtended.svelte';
-import IFrameComp from './components/IFrame.svelte';
-import MermaidComp from './components/Mermaid.svelte';
-import SlashCommandComp from './components/SlashCommand.svelte';
-import FileHandler from '@tiptap/extension-file-handler';
-import CalloutComp from './components/Callout.svelte';
-import TableOfContents, { getHierarchicalIndexes } from '@tiptap/extension-table-of-contents';
-import { setToC } from './toc.svelte';
-import { FileType } from '../utils.ts';
+} from "../tiptap/index.ts";
+import { all, createLowlight } from "lowlight";
+import extensions from "../extensions.ts";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import CodeBlock from "./components/CodeBlock.svelte";
+import { MediaPlaceholder } from "../tiptap/extensions/MediaPlaceHolder.ts";
+import MediaPlaceholderComp from "./components/MediaPlaceHolder.svelte";
+import ImageExtendedComp from "./components/ImageExtended.svelte";
+import VideoExtendedComp from "./components/VideoExtended.svelte";
+import IFrameComp from "./components/IFrame.svelte";
+import MermaidComp from "./components/Mermaid.svelte";
+import SlashCommandComp from "./components/SlashCommand.svelte";
+import FileHandler from "@tiptap/extension-file-handler";
+import CalloutComp from "./components/Callout.svelte";
+import TableOfContents, {
+  getHierarchicalIndexes,
+} from "@tiptap/extension-table-of-contents";
+import { setToC } from "./toc.svelte";
+import { FileType } from "../utils.ts";
 
 const lowlight = createLowlight(all);
 
@@ -42,7 +44,11 @@ export interface EdraEditorProps {
   onFileUpload?: (file: File) => Promise<string>;
   selectFile?: (fileType: FileType) => Promise<string | null>;
   getAssets?: (fileType: FileType) => Promise<string[]>;
-  callAI?: (prompt: string, onChunk: (chunk: string) => void, onError: (error: Error) => void) => Promise<void>;
+  callAI?: (
+    prompt: string,
+    onChunk: (chunk: string) => void,
+    onError: (error: Error) => void,
+  ) => Promise<void>;
 }
 
 export const createEditor = (props?: EdraEditorProps) =>
@@ -83,28 +89,47 @@ export const createEditor = (props?: EdraEditorProps) =>
             window.removeEventListener(event, handler, { capture: true });
           },
           get scrollY() {
-            return document.querySelector('.tiptap')?.parentElement?.scrollTop ?? 0;
+            return (
+              document.querySelector(".tiptap")?.parentElement?.scrollTop ?? 0
+            );
           },
         } as any,
       }),
       FileHandler.configure({
-        allowedMimeTypes: [FileType.AUDIO, FileType.DOCS, FileType.IMAGE, FileType.VIDEO],
+        allowedMimeTypes: [
+          FileType.AUDIO,
+          FileType.DOCS,
+          FileType.IMAGE,
+          FileType.VIDEO,
+        ],
         onDrop: (currentEditor, files, pos) => {
           if (!props?.onFileUpload) return;
           files.forEach((file) => {
             props.onFileUpload!(file)
               .then((src) => {
                 if (!src) return;
-                if (file.type.startsWith('image/')) {
-                  currentEditor.chain().insertContentAt(pos, { type: 'image', attrs: { src } }).focus().run();
-                } else if (file.type.startsWith('video/')) {
-                  currentEditor.chain().insertContentAt(pos, { type: 'video', attrs: { src } }).focus().run();
-                } else if (file.type.startsWith('audio/')) {
-                  currentEditor.chain().insertContentAt(pos, { type: 'audio', attrs: { src } }).focus().run();
+                if (file.type.startsWith("image/")) {
+                  currentEditor
+                    .chain()
+                    .insertContentAt(pos, { type: "image", attrs: { src } })
+                    .focus()
+                    .run();
+                } else if (file.type.startsWith("video/")) {
+                  currentEditor
+                    .chain()
+                    .insertContentAt(pos, { type: "video", attrs: { src } })
+                    .focus()
+                    .run();
+                } else if (file.type.startsWith("audio/")) {
+                  currentEditor
+                    .chain()
+                    .insertContentAt(pos, { type: "audio", attrs: { src } })
+                    .focus()
+                    .run();
                 }
               })
               .catch((err) => {
-                console.error('Failed to upload dropped file:', err);
+                console.error("Failed to upload dropped file:", err);
               });
           });
         },
@@ -114,16 +139,16 @@ export const createEditor = (props?: EdraEditorProps) =>
             props.onFileUpload!(file)
               .then((src) => {
                 if (!src) return;
-                if (file.type.startsWith('image/')) {
+                if (file.type.startsWith("image/")) {
                   currentEditor.chain().setImage({ src }).focus().run();
-                } else if (file.type.startsWith('video/')) {
+                } else if (file.type.startsWith("video/")) {
                   currentEditor.chain().setVideo({ src }).focus().run();
-                } else if (file.type.startsWith('audio/')) {
+                } else if (file.type.startsWith("audio/")) {
                   currentEditor.chain().setAudio({ src }).focus().run();
                 }
               })
               .catch((err) => {
-                console.error('Failed to upload pasted file:', err);
+                console.error("Failed to upload pasted file:", err);
               });
           });
         },

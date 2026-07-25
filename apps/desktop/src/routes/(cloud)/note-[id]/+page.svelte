@@ -258,12 +258,12 @@ function handleKeydown(e: KeyboardEvent) {
       {#snippet right()}
         {#if note?.is_public}
           <SimpleToolTip>
-            <Button variant="ghost" size="icon-sm">
+            <Button variant="ghost" size="icon">
               <icons.Globe />
             </Button>
             {#snippet child()}
               <div class="flex flex-col items-center">
-                <span class="font-semibold"> This is a public note </span>
+                <p class="font-semibold"> This is a public note </p>
                 <span>Anyone with the link can view this note</span>
               </div>
             {/snippet}

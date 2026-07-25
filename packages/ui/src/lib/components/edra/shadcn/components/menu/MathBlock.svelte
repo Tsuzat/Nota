@@ -20,6 +20,7 @@ function updateLatex() {
 <BubbleMenu
 	{editor}
 	pluginKey="math-block-bubble-menu"
+	appendTo={() => document.body}
 	shouldShow={(props) => {
 		const { editor: propsEditor, state } = props;
 		if (!propsEditor || !propsEditor.isEditable) return false;
@@ -27,14 +28,21 @@ function updateLatex() {
 		return propsEditor.isActive('blockMath');
 	}}
 	options={{
-		shift: true,
-		autoPlacement: {
-			allowedPlacements: ['top', 'bottom']
+		strategy: 'fixed',
+		placement: 'top',
+		autoPlacement: false,
+		flip: {
+			fallbackPlacements: ['bottom'],
+			padding: 12,
+			boundary: editor.view.dom
 		},
-		strategy: 'absolute',
+		shift: {
+			padding: 12,
+			boundary: editor.view.dom
+		},
 		scrollTarget: editor.view.dom.parentElement ?? window
 	}}
-	class="h-fit w-fit flex-col items-center gap-1 rounded-lg border bg-popover shadow-lg"
+	class="z-50 h-fit w-fit max-w-[calc(100vw-2rem)] flex-col items-center gap-1 rounded-lg border bg-popover shadow-lg"
 >
 	<Textarea
 		bind:value={latex}

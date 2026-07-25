@@ -22,6 +22,7 @@ function updateLatex() {
 <BubbleMenu
 	{editor}
 	pluginKey="math-inline-bubble-menu"
+	appendTo={() => document.body}
 	shouldShow={(props) => {
 		const { editor: propsEditor, state } = props;
 		if (!propsEditor || !propsEditor.isEditable) return false;
@@ -29,14 +30,21 @@ function updateLatex() {
 		return propsEditor.isActive('inlineMath');
 	}}
 	options={{
-		shift: true,
-		autoPlacement: {
-			allowedPlacements: ['top', 'bottom']
+		strategy: 'fixed',
+		placement: 'top',
+		autoPlacement: false,
+		flip: {
+			fallbackPlacements: ['bottom'],
+			padding: 12,
+			boundary: editor.view.dom
 		},
-		strategy: 'absolute',
+		shift: {
+			padding: 12,
+			boundary: editor.view.dom
+		},
 		scrollTarget: editor.view.dom.parentElement ?? window
 	}}
-	class="flex h-fit w-fit items-center gap-1 rounded-lg border bg-popover shadow-lg"
+	class="z-50 flex h-fit w-fit max-w-[calc(100vw-2rem)] items-center gap-1 rounded-lg border bg-popover shadow-lg"
 >
 	<Input
 		bind:value={latex}

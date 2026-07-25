@@ -15,6 +15,7 @@ const editor = getEditor();
 <BubbleMenu
 	{editor}
 	pluginKey="table-col-menu"
+	appendTo={() => document.body}
 	shouldShow={(props) => {
 		const { editor: propsEditor, state, view, from } = props;
 		if (!propsEditor || !propsEditor.isEditable) return false;
@@ -22,14 +23,21 @@ const editor = getEditor();
 		return isColumnGripSelected({ editor: propsEditor, view, state, from });
 	}}
 	options={{
-		shift: true,
-		autoPlacement: {
-			allowedPlacements: ['top', 'bottom']
+		strategy: 'fixed',
+		placement: 'top',
+		autoPlacement: false,
+		flip: {
+			fallbackPlacements: ['bottom'],
+			padding: 12,
+			boundary: editor.view.dom
 		},
-		strategy: 'absolute',
+		shift: {
+			padding: 12,
+			boundary: editor.view.dom
+		},
 		scrollTarget: editor.view.dom.parentElement ?? window
 	}}
-	class="z-50 flex h-fit w-fit flex-col gap-1 rounded-lg border bg-popover! p-2"
+	class="z-50 flex h-fit w-fit max-w-[calc(100vw-2rem)] flex-col gap-1 rounded-lg border bg-popover! p-2"
 >
 	<button
 		class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground data-inset:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 data-[variant=destructive]:hover:text-destructive dark:data-[variant=destructive]:hover:bg-destructive/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground data-[variant=destructive]:*:[svg]:text-destructive!"

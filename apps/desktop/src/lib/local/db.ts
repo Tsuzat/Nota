@@ -10,12 +10,12 @@ export async function initializeLocalDB() {
   try {
     DB = await Database.load('sqlite:nota.db');
 
-    // Check if migration is needed (if userworkspaces table exists)
+    // Check if migration is needed (if notes table has old workspace column)
     //!!!! REMOVE THIS IN UPCOMING VERSIONS
-    const res = await DB.select<{ name: string }[]>(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='userworkspaces'"
+    const oldNotesCheck = await DB.select<{ name: string }[]>(
+      "SELECT name FROM pragma_table_info('notes') WHERE name='workspace'"
     );
-    if (res.length > 0) {
+    if (oldNotesCheck.length > 0) {
       console.log('Running database migration from old schema...');
       const migrationScript = `
         PRAGMA foreign_keys = OFF;
@@ -61,6 +61,8 @@ export async function initializeLocalDB() {
       `;
       await DB.execute(migrationScript);
       console.log('Migration completed successfully.');
+    } else {
+      await DB.execute('PRAGMA foreign_keys = OFF; DROP TABLE IF EXISTS userworkspaces; PRAGMA foreign_keys = ON;');
     }
 
     await DB.execute(schema);

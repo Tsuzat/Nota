@@ -42,7 +42,7 @@ export const LATEST_MODELS: Record<'openai' | 'claude' | 'gemini' | 'deepseek' |
   openai: {
     icon: {
       dark: 'https://svgl.app/library/openai_dark.svg',
-      light: 'https://svgl.app/library/openai_light.svg',
+      light: 'https://svgl.app/library/openai.svg',
     },
     models: {
       'gpt-5.6': {

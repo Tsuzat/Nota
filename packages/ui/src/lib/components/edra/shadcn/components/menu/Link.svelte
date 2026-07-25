@@ -34,6 +34,7 @@ function handleSubmit(e: Event) {
 
 <BubbleMenu
 	{editor}
+	appendTo={() => document.body}
 	shouldShow={(props) => {
 		if (props.editor.isActive('link')) {
 			return true;
@@ -44,14 +45,21 @@ function handleSubmit(e: Event) {
 		}
 	}}
 	options={{
-		shift: true,
-		autoPlacement: {
-			allowedPlacements: ['top', 'bottom']
+		strategy: 'fixed',
+		placement: 'top',
+		autoPlacement: false,
+		flip: {
+			fallbackPlacements: ['bottom'],
+			padding: 12,
+			boundary: editor.view.dom
 		},
-		strategy: 'absolute',
+		shift: {
+			padding: 12,
+			boundary: editor.view.dom
+		},
 		scrollTarget: editor.view.dom.parentElement ?? window
 	}}
-	class="flex h-fit w-fit items-center gap-1 rounded-lg border bg-popover p-0!"
+	class="z-50 flex h-fit w-fit max-w-[calc(100vw-2rem)] overflow-x-auto items-center gap-1 rounded-lg border bg-popover p-0!"
 >
 	{#if !isEditing}
 		<Tooltip tooltip={strings.menu.link.open}>

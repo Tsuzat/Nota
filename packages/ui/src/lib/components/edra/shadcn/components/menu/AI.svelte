@@ -13,27 +13,24 @@ import {
   SUMMARIZE_PROMPT,
 } from '../../../commands/index.js';
 import { fade, slide } from 'svelte/transition';
-import {
-  Sparkle,
-  Check,
-  CornerDownLeft,
-  Copy,
-  RotateCcw,
-  Trash2,
-  Brain,
-  ArrowDownWideNarrow,
-  CheckCheck,
-  Feather,
-  PenLine,
-  RefreshCcwDot,
-  Sparkles,
-  TextWrap,
-  Send,
-  ChevronDown,
-  FileText,
-} from '@lucide/svelte';
-import { Button, buttonVariants } from '@lib/components/ui/button/index.js';
-import * as Popover from '@lib/components/ui/popover/index.js';
+import Sparkle from '@lucide/svelte/icons/sparkle';
+import Check from '@lucide/svelte/icons/check';
+import CornerDownLeft from '@lucide/svelte/icons/corner-down-left';
+import Copy from '@lucide/svelte/icons/copy';
+import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
+import Trash2 from '@lucide/svelte/icons/trash-2';
+import Brain from '@lucide/svelte/icons/brain';
+import ArrowDownWideNarrow from '@lucide/svelte/icons/arrow-down-wide-narrow';
+import CheckCheck from '@lucide/svelte/icons/check-check';
+import Feather from '@lucide/svelte/icons/feather';
+import PenLine from '@lucide/svelte/icons/pen-line';
+import RefreshCcwDot from '@lucide/svelte/icons/refresh-ccw-dot';
+import Sparkles from '@lucide/svelte/icons/sparkles';
+import TextWrap from '@lucide/svelte/icons/text-wrap';
+import Send from '@lucide/svelte/icons/send';
+import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import FileText from '@lucide/svelte/icons/file-text';
+import { Button } from '@lib/components/ui/button/index.js';
 import * as Command from '@lib/components/ui/command/index.js';
 import { cn } from '@lib/utils.js';
 
@@ -541,6 +538,7 @@ function handleInput(e: Event) {
 <BubbleMenu
 	{editor}
 	pluginKey="ai-bubble-menu"
+	appendTo={() => document.body}
 	shouldShow={(props) => {
 		const { editor: propsEditor, view } = props;
 		if (!propsEditor || !propsEditor.isEditable || propsEditor.isDestroyed) return false;
@@ -556,11 +554,19 @@ function handleInput(e: Event) {
 		aiResponse = '';
 		return false;
 	}}
-	class="absolute z-10 flex max-h-120 max-w-3xl flex-col rounded-lg bg-popover/75 p-0 backdrop-blur-2xl transition-[height] duration-500"
+	class="z-10 flex max-h-120 max-w-[min(48rem,calc(100vw-2rem))] flex-col rounded-lg bg-popover/75 p-0 backdrop-blur-2xl transition-[height] duration-500"
 	options={{
-		strategy: 'absolute',
-		autoPlacement: {
-			allowedPlacements: ['bottom-start', 'top-start']
+		strategy: 'fixed',
+		placement: 'top-start',
+		autoPlacement: false,
+		flip: {
+			fallbackPlacements: ['bottom-start', 'top', 'bottom'],
+			padding: 12,
+			boundary: editor.view.dom
+		},
+		shift: {
+			padding: 12,
+			boundary: editor.view.dom
 		},
 		scrollTarget: editor.view.dom.parentElement ?? window,
 		onShow() {
