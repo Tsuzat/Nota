@@ -90,7 +90,7 @@ func ConstsInit() {
 	ACCESS_TOKEN_EXPIRY, _ = strconv.ParseInt(os.Getenv("ACCESS_TOKEN_EXPIRY"), 10, 64)
 	REFRESH_TOKEN_SECRET = os.Getenv("REFRESH_TOKEN_SECRET")
 	REFRESH_TOKEN_EXPIRY, _ = strconv.ParseInt(os.Getenv("REFRESH_TOKEN_EXPIRY"), 10, 64)
-	
+
 	AccessTokenDuration = time.Minute * time.Duration(ACCESS_TOKEN_EXPIRY)
 	RefreshTokenDuration = time.Hour * 24 * time.Duration(REFRESH_TOKEN_EXPIRY)
 
@@ -126,7 +126,4 @@ func ConstsInit() {
 
 	// Gotenberg URL
 	GOTENBERG_URL = os.Getenv("GOTENBERG_URL")
-	if GOTENBERG_URL == "" {
-		GOTENBERG_URL = "http://render.railway.internal/forms/chromium/convert/html"
-	}
 }
