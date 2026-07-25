@@ -139,7 +139,7 @@ $effect(() => {
 >
   <AppSideBar />
   <Sidebar.Inset
-    class="flex max-h-screen! min-h-screen! w-full! flex-col! overflow-hidden!"
+    class="flex size-full min-h-0 w-full! flex-col! overflow-hidden!"
   >
     {@render children()}
   </Sidebar.Inset>

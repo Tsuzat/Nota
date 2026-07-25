@@ -1,4 +1,5 @@
-import { fetchFn } from "./request";
+import { PUBLIC_BACKEND_URL } from "$env/static/public";
+import request from "./request";
 
 /**
  * PDF Export Utility using Gotenberg v8 (https://render.nota.ink)
@@ -309,35 +310,25 @@ export async function convertHtmlToPdf(
   htmlContent: string,
 ): Promise<ArrayBuffer> {
   const fullHtml = generatePdfHtml(title, htmlContent);
-  const formData = new FormData();
 
-  const htmlBlob = new Blob([fullHtml], { type: "text/html" });
-  formData.append("files", htmlBlob, "index.html");
-  formData.append("paperWidth", "8.5in");
-  formData.append("paperHeight", "11in");
-  formData.append("marginTop", "0.6in");
-  formData.append("marginBottom", "0.6in");
-  formData.append("marginLeft", "0.6in");
-  formData.append("marginRight", "0.6in");
-  formData.append("printBackground", "true");
-  formData.append("waitDelay", "2s");
-  formData.append(
-    "waitForExpression",
-    "document.getElementById('ready-for-print') !== null",
-  );
-
-  const response = await fetchFn(
-    "https://render.nota.ink/forms/chromium/convert/html",
+  const response = await request(
+    `${PUBLIC_BACKEND_URL}/api/v1/db/note/export/pdf`,
     {
       method: "POST",
-      body: formData,
+      body: JSON.stringify({ html: fullHtml }),
     },
   );
 
   if (!response.ok) {
-    const errText = await response.text().catch(() => response.statusText);
+    let errText = response.statusText;
+    try {
+      const json = await response.json();
+      if (json && json.error) errText = json.error;
+    } catch {
+      errText = await response.text().catch(() => response.statusText);
+    }
     throw new Error(
-      `Gotenberg PDF generation failed (${response.status}): ${errText}`,
+      `PDF generation failed (${response.status}): ${errText}`,
     );
   }
 

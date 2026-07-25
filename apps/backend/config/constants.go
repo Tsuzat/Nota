@@ -56,6 +56,9 @@ var GEMINI_API_KEY string
 // Desktop Identifier
 var DESKTOP_APP_IDENTIFIER string
 
+// Gotenberg URL
+var GOTENBERG_URL string
+
 // Polar Related
 var POLAR_API_KEY string
 var POLAR_WEBHOOK_SECRET string
@@ -120,4 +123,10 @@ func ConstsInit() {
 
 	// Redis Related
 	VALKEY_URL = os.Getenv("VALKEY_URL")
+
+	// Gotenberg URL
+	GOTENBERG_URL = os.Getenv("GOTENBERG_URL")
+	if GOTENBERG_URL == "" {
+		GOTENBERG_URL = "http://render.railway.internal/forms/chromium/convert/html"
+	}
 }

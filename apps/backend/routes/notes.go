@@ -24,5 +24,7 @@ func InitNotesRouter() {
 	group.Post("/:id<guid>/duplicate", app.DuplicateNote)
 	// Import a note
 	group.Post("/import", app.ImportNote)
+	// Export a note to PDF
+	group.Post("/export/pdf", app.ExportNoteToPDF)
 
 }

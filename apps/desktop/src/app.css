@@ -2,6 +2,15 @@
 @import "@nota/ui/shadcn/css";
 @source "../../../packages/ui/src/**/*.{html,js,svelte,ts}";
 
+html,
+body {
+  overflow: hidden !important;
+  height: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 *[data-tauri-drag-region] {
   app-region: drag;
   -webkit-app-region: drag;
