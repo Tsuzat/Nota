@@ -1,13 +1,14 @@
-import type { Content, Editor } from '@nota/ui/edra/index.js';
-import { toast } from '@nota/ui/shadcn/sonner';
-import { downloadDir, resolve } from '@tauri-apps/api/path';
-import { open } from '@tauri-apps/plugin-dialog';
-import { readFile, writeFile } from '@tauri-apps/plugin-fs';
-import { openPath } from '@tauri-apps/plugin-opener';
-import { type } from '@tauri-apps/plugin-os';
+import { convertHtmlToPdf } from "@nota/client";
+import type { Content, Editor } from "@nota/ui/edra/index.js";
+import { toast } from "@nota/ui/shadcn/sonner";
+import { downloadDir, resolve } from "@tauri-apps/api/path";
+import { open } from "@tauri-apps/plugin-dialog";
+import { readFile, writeFile } from "@tauri-apps/plugin-fs";
+import { openPath } from "@tauri-apps/plugin-opener";
+import { type } from "@tauri-apps/plugin-os";
 
-export const ISMACOS = type() === 'macos';
-export const ISWINDOWS = type() === 'windows';
+export const ISMACOS = type() === "macos";
+export const ISWINDOWS = type() === "windows";
 
 /**
  * Generates a new UUID that is not in the given array of UUIDs
@@ -24,30 +25,35 @@ export const getNewUUID = (uuids: string[]) => {
       return uuid;
     }
   }
-  throw new Error('Could not generate a new UUID');
+  throw new Error("Could not generate a new UUID");
 };
 
-export const getKeyboardShortcut = (key: string, ctrl = false, shift = false, alt = false) => {
+export const getKeyboardShortcut = (
+  key: string,
+  ctrl = false,
+  shift = false,
+  alt = false,
+) => {
   const modifiers: string[] = [];
   if (ISMACOS) {
-    if (ctrl) modifiers.push('⌘');
-    if (shift) modifiers.push('⇧');
-    if (alt) modifiers.push('⌥');
+    if (ctrl) modifiers.push("⌘");
+    if (shift) modifiers.push("⇧");
+    if (alt) modifiers.push("⌥");
   } else {
-    if (ctrl) modifiers.push('Ctrl');
-    if (shift) modifiers.push('Shift');
-    if (alt) modifiers.push('Alt');
+    if (ctrl) modifiers.push("Ctrl");
+    if (shift) modifiers.push("Shift");
+    if (alt) modifiers.push("Alt");
   }
 
-  return [...modifiers, key].join(' ');
+  return [...modifiers, key].join(" ");
 };
 
 export function handleKeydown(e: KeyboardEvent) {
   if (e.metaKey || e.ctrlKey) {
-    if (e.key === 'ArrowLeft') {
+    if (e.key === "ArrowLeft") {
       e.preventDefault();
       history.back();
-    } else if (e.key === 'ArrowRight') {
+    } else if (e.key === "ArrowRight") {
       e.preventDefault();
       history.forward();
     }
@@ -66,64 +72,103 @@ export async function writeStringToFile(data: string, name: string) {
   const fileData = encoder.encode(data);
   const resolvedPath = await resolve(path, name);
   toast.promise(writeFile(resolvedPath, fileData), {
-    loading: 'Exporting data...',
-    success: 'Exported Successfully',
+    loading: "Exporting data...",
+    success: "Exported Successfully",
     error: (err) => {
       console.error(err);
-      return 'Something went wrong when exporting';
+      return "Something went wrong when exporting";
     },
     action: {
-      label: 'Open',
+      label: "Open",
       onClick: () => openPath(path),
     },
   });
 }
 
-export async function exportContent(editor: Editor, name: string, type: 'JSON' | 'HTML' | 'TEXT' | 'MD') {
+export async function writeBinaryToFile(data: Uint8Array, name: string) {
+  const path = await open({
+    directory: true,
+    multiple: false,
+    canCreateDirectories: true,
+    defaultPath: await downloadDir(),
+  });
+  if (path === null) return;
+  const resolvedPath = await resolve(path, name);
+  toast.promise(writeFile(resolvedPath, data), {
+    loading: "Exporting data...",
+    success: "Exported Successfully",
+    error: (err) => {
+      console.error(err);
+      return "Something went wrong when exporting";
+    },
+    action: {
+      label: "Open",
+      onClick: () => openPath(path),
+    },
+  });
+}
+
+export async function exportContent(
+  editor: Editor,
+  name: string,
+  type: "JSON" | "HTML" | "TEXT" | "MD" | "PDF",
+) {
   let content: string;
   switch (type) {
-    case 'JSON':
+    case "PDF": {
+      const toastId = toast.loading("Generating PDF...", { duration: 10000 });
+      try {
+        const pdfBuffer = await convertHtmlToPdf(name, editor.getHTML());
+        toast.success("Exporting PDF...", { id: toastId });
+        await writeBinaryToFile(new Uint8Array(pdfBuffer), `${name}.pdf`);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to generate PDF", { id: toastId });
+      }
+      break;
+    }
+    case "JSON":
       content = JSON.stringify(editor.getJSON(), undefined, 2);
       await writeStringToFile(content, `${name}.json`);
       break;
-    case 'HTML':
+    case "HTML":
       content = editor.getHTML();
       await writeStringToFile(content, `${name}.html`);
       break;
-    case 'TEXT':
+    case "TEXT":
       content = editor.getText();
       await writeStringToFile(content, `${name}.text`);
       break;
-    case 'MD':
+    case "MD":
       content = editor.getMarkdown();
       await writeStringToFile(content, `${name}.md`);
       break;
     default:
-      toast.error('Invalid export type');
+      toast.error("Invalid export type");
       return;
   }
 }
 
 export async function importNotes(editor?: Editor, returnData?: boolean) {
   if ((!editor || editor.isDestroyed || !editor.markdown) && !returnData) {
-    console.error('Editor is not initialized or destroyed\n Editor = ', editor);
-    toast.error('Can not intialize import. Try to restart.');
+    console.error("Editor is not initialized or destroyed\n Editor = ", editor);
+    toast.error("Can not intialize import. Try to restart.");
     return;
   }
 
-  const extensions = ['json', 'md', 'markdown', 'html'];
+  const extensions = ["json", "md", "markdown", "html"];
   const path = await open({
     multiple: false,
-    filters: [{ name: 'Nota Notes', extensions }],
+    filters: [{ name: "Nota Notes", extensions }],
     defaultPath: await downloadDir(),
   });
 
   if (!path) return;
 
   try {
-    const extension = path.split('.').pop()?.toLowerCase();
+    const extension = path.split(".").pop()?.toLowerCase();
     if (!extension || !extensions.includes(extension)) {
-      toast.error(`Only ${extensions.join(', ')} files are supported.`);
+      toast.error(`Only ${extensions.join(", ")} files are supported.`);
       return;
     }
 
@@ -132,14 +177,14 @@ export async function importNotes(editor?: Editor, returnData?: boolean) {
     // Parse content based on file type
     let content: Content | undefined;
     switch (extension) {
-      case 'json':
+      case "json":
         content = JSON.parse(fileData) as Content;
         break;
-      case 'md':
-      case 'markdown':
+      case "md":
+      case "markdown":
         content = editor?.markdown?.parse(fileData) as Content | undefined;
         break;
-      case 'html':
+      case "html":
         // HTML is handled as a raw string by the editor
         content = fileData as unknown as Content;
         break;
@@ -149,21 +194,21 @@ export async function importNotes(editor?: Editor, returnData?: boolean) {
 
     if (returnData) {
       const fileName = path
-        .split(ISMACOS ? '/' : '\\')
+        .split(ISMACOS ? "/" : "\\")
         .pop()
-        ?.split('.')[0];
+        ?.split(".")[0];
       if (fileName) return { name: fileName, content };
       return;
     }
 
     // Insert content into the editor
-    if (extension === 'html') {
+    if (extension === "html") {
       editor?.commands.setContent(fileData);
     } else {
       editor?.commands.setContent(content);
     }
   } catch (error) {
     console.error(error);
-    toast.error('Something went wrong when importing the file.');
+    toast.error("Something went wrong when importing the file.");
   }
 }

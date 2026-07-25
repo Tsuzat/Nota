@@ -114,6 +114,11 @@ let open = $state(false);
           <Dropdown.SubContent>
             <Dropdown.Item
               onclick={() => {
+                if (editor) exportContent(editor, note.name, "PDF");
+              }}>PDF</Dropdown.Item
+            >
+            <Dropdown.Item
+              onclick={() => {
                 if (editor) exportContent(editor, note.name, "JSON");
               }}>JSON</Dropdown.Item
             >

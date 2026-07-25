@@ -1,7 +1,7 @@
 <script lang="ts">
-import { getNotesContext, type Note } from '@nota/client';
+import { convertHtmlToPdf, getNotesContext, type Note } from '@nota/client';
+import type { Editor } from '@nota/ui/edra/index.js';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
-import type { Editor } from '@nota/ui/edra/types.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
@@ -40,10 +40,25 @@ function downloadData(dataStr: string, fileName: string) {
   downloadAnchor.remove();
 }
 
-async function exportAs(type: 'JSON' | 'HTML' | 'TEXT' | 'MD') {
+async function exportAs(type: 'JSON' | 'HTML' | 'TEXT' | 'MD' | 'PDF') {
   if (!editor) return;
   const id = toast.loading(`Exporting as ${type}...`);
   try {
+    if (type === 'PDF') {
+      const pdfBuffer = await convertHtmlToPdf(note.name, editor.getHTML());
+      const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', url);
+      downloadAnchor.setAttribute('download', `${note.name}.pdf`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+      toast.success('Exported successfully', { id });
+      return;
+    }
+
     let dataStr = '';
     let ext = '';
     if (type === 'JSON') {
@@ -149,6 +164,7 @@ async function trashNote() {
             Export As
           </Dropdown.SubTrigger>
           <Dropdown.SubContent>
+            <Dropdown.Item onclick={() => exportAs('PDF')}>PDF</Dropdown.Item>
             <Dropdown.Item onclick={() => exportAs('JSON')}>JSON</Dropdown.Item>
             <Dropdown.Item onclick={() => exportAs('HTML')}>HTML</Dropdown.Item>
             <Dropdown.Item onclick={() => exportAs('TEXT')}>Text</Dropdown.Item>
