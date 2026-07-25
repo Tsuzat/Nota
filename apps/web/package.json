@@ -1,39 +1,42 @@
 {
-  "name": "@nota/web",
+  "name": "web",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
     "build": "wrangler types && vite build",
-    "start": "vite preview",
     "preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
-    "format": "biome format . --write",
-    "lint": "biome check .",
-    "ci": "biome ci .",
     "prepare": "svelte-kit sync || echo ''",
-    "check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check": "wrangler types --check && biome check . && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "gen": "wrangler types"
+    "test:unit": "vitest",
+    "test": "npm run test:unit -- --run",
+    "gen": "wrangler types",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "ci": "biome ci"
   },
   "dependencies": {
-    "@lucide/svelte": "^0.561.0",
+    "@lucide/svelte": "^1.26.0",
     "@nota/client": "workspace:*",
-    "@nota/ui": "workspace:*",
-    "fast-json-patch": "^3.1.1"
+    "@nota/ui": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^7.2.8",
-    "@sveltejs/enhanced-img": "^0.9.3",
-    "@sveltejs/kit": "^2.61.1",
-    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@sveltejs/kit": "^2.63.0",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tailwindcss/vite": "^4.3.0",
-    "@types/node": "^25.9.1",
-    "svelte": "^5.55.9",
-    "svelte-check": "^4.4.8",
+    "@types/node": "^26.1.1",
+    "@vitest/browser-playwright": "^4.1.8",
+    "playwright": "^1.60.0",
+    "svelte": "^5.56.1",
+    "svelte-check": "^4.6.0",
     "tailwindcss": "^4.3.0",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8",
+    "vitest-browser-svelte": "^2.1.1",
     "wrangler": "^4.97.0"
   }
 }

@@ -1,22 +1,48 @@
-import { enhancedImages } from '@sveltejs/enhanced-img';
+import adapter from '@sveltejs/adapter-cloudflare';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { playwright } from '@vitest/browser-playwright';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [tailwindcss(), enhancedImages(), sveltekit()],
-  ssr: {
-    noExternal: ['@nota/ui', 'svelte-sonner', 'bits-ui', 'svelte-toolbelt', 'mode-watcher', 'runed'],
-  },
-  server: {
-    host: '127.0.0.1',
-    allowedHosts: ['local.nota.ink'],
-  },
-  build: {
-    sourcemap: false,
-    rollupOptions: {
-      maxParallelFileOps: 2,
-      cache: false,
-    },
+  plugins: [
+    tailwindcss(),
+    sveltekit({
+      compilerOptions: {
+        // Force runes mode for the project, except for libraries. Can be removed in svelte 6.
+        runes: ({ filename }) => (filename.split(/[/\\]/).includes('node_modules') ? undefined : true),
+        experimental: { async: true },
+      },
+      adapter: adapter(),
+      experimental: { remoteFunctions: true },
+    }),
+  ],
+  test: {
+    expect: { requireAssertions: true },
+    projects: [
+      {
+        extends: './vite.config.ts',
+        test: {
+          name: 'client',
+          browser: {
+            enabled: true,
+            provider: playwright(),
+            instances: [{ browser: 'chromium', headless: true }],
+          },
+          include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
+          exclude: ['src/lib/server/**'],
+        },
+      },
+
+      {
+        extends: './vite.config.ts',
+        test: {
+          name: 'server',
+          environment: 'node',
+          include: ['src/**/*.{test,spec}.{js,ts}'],
+          exclude: ['src/**/*.svelte.{test,spec}.{js,ts}'],
+        },
+      },
+    ],
   },
 });
