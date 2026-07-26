@@ -1,702 +1,612 @@
 <script lang="ts">
-import { BorderBeam, SimpleToolTip, ToggleMode } from '@lib/components/custom';
-import { toast } from '@lib/components/ui/sonner/index.js';
-import { cn } from '@lib/utils.js';
-import { request } from '@nota/client';
-import { BarSpinner, Github, icons } from '@nota/ui/icons/index.js';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
-import * as Avatar from '@nota/ui/shadcn/avatar';
-import { Button, buttonVariants } from '@nota/ui/shadcn/button';
-import * as Card from '@nota/ui/shadcn/card';
-import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
-import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
-import { goto } from '$app/navigation';
-import { resolve } from '$app/paths';
-import { PUBLIC_BACKEND_URL } from '$env/static/public';
-import ArtifactDownloader from '$lib/artifact/artifact-downloader.svelte';
-import MockAiDialog from '$lib/components/custom/landing/mock-ai-dialog.svelte';
-import MockBubbleMenu from '$lib/components/custom/landing/mock-bubble-menu.svelte';
-import MockDragHandle from '$lib/components/custom/landing/mock-drag-handle.svelte';
-import Particles from '$lib/components/custom/utils/particles.svelte';
-import Reveal from '$lib/components/custom/utils/reveal.svelte';
-import { sendToPaymentPortal } from '$lib/utils.js';
-import { getArtefacts } from './data.remote.js';
+  import Spotlight from "$lib/components/custom/landing/spotlight.svelte";
+  import ToggleMode from "@nota/ui/custom/ToggleMode.svelte";
+  import { onMount } from "svelte";
+  import AppLogo from "$lib/components/custom/applogo.svelte";
+  import { cn } from "@nota/ui/utils";
+  import { fade } from "svelte/transition";
+  import { icons, Github, BarSpinner } from "@nota/ui/icons";
+  import { buttonVariants, Button } from "@nota/ui/shadcn/button";
+  import * as Dropdown from "@nota/ui/shadcn/dropdown-menu";
+  import UserAvatar from "$lib/components/custom/user-avatar.svelte";
+  import { goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
+  import BorderBeam from "$lib/components/custom/landing/border-beam.svelte";
+  import Particles from "$lib/components/custom/landing/particles.svelte";
+  import Multistream from "$lib/components/custom/landing/multistream.svelte";
+  import Tiltcard from "$lib/components/custom/landing/utils/tiltcard.svelte";
+  import { Pricing } from "$lib/components/custom/landing/pricing";
+  import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+  } from "@nota/ui/shadcn/accordion";
+  import { getArtefacts } from "./data.remote";
+  import ArtifactDownloader from "$lib/artefact/artifact-downloader.svelte";
+  const { data } = $props();
+  const user = $derived(data.user);
 
-const { data } = $props();
-const user = $derived(data.user);
-let tabPro = $state<'monthly' | 'yearly'>('monthly');
-let isScrolled = $state(false);
+  let y = $state(0);
+  let isScrolled = $derived(y > 20);
+  const tabItems = [
+    {
+      url: "#features",
+      title: "Features",
+    },
+    {
+      url: "#solutions",
+      title: "Solution",
+    },
+    {
+      url: "#pricing",
+      title: "Pricing",
+    },
+    {
+      url: "#faqs",
+      title: "FAQs",
+    },
+  ];
 
-function onscroll() {
-  if (window.scrollY > 10) {
-    isScrolled = true;
-  } else {
-    isScrolled = false;
+  const features = [
+    {
+      name: "Rich Text Editor",
+      description:
+        "Powered by a custom editor with support for slash commands, markdown shortcuts, media embeds, and mathematical equations.",
+      icon: icons.Pencil,
+    },
+    {
+      name: "AI Integration",
+      description:
+        "Built-in AI assistant for text generation and summarization with a Bring Your Own Key (BYOK) model to keep costs down.",
+      icon: icons.Bot,
+    },
+    {
+      name: "Cross-Platform & Fast",
+      description:
+        "Available as a lightweight Desktop app built with Rust (Tauri) and on the Web for blazing fast performance.",
+      icon: icons.Zap,
+    },
+    {
+      name: "Secure & Organized",
+      description:
+        "Manage your notes with hierarchical workspaces. Protected by custom authentication flow and session management.",
+      icon: icons.FolderLock,
+    },
+  ];
+
+  const faqItems = [
+    {
+      id: "item-1",
+      question: "What is Nota?",
+      answer:
+        "Nota is a fast, lightweight, and feature-rich note-taking app designed to give you a powerful rich text editing experience without the bloat of typical Electron applications. It is available on Desktop (macOS, Windows, Linux) and the Web.",
+    },
+    {
+      id: "item-2",
+      question: "Is Nota free to use?",
+      answer:
+        "Yes! Our Free tier is perfect for local-first users, offering unlimited local notes and workspaces. You also get 1 cloud workspace and up to 5 cloud notes for free.",
+    },
+    {
+      id: "item-3",
+      question: "How does the AI integration work?",
+      answer:
+        "Nota uses a Bring Your Own Key (BYOK) model. You can plug in your own API keys to generate text and summarize notes without paying a high recurring subscription fee. Pro users can also use our bundled AI credits.",
+    },
+    {
+      id: "item-4",
+      question: "What is the difference between the Free and Pro plans?",
+      answer:
+        "The Free plan offers unlimited local notes, local media storage, and limited cloud syncing (1 workspace, 5 notes). The Pro plan unlocks unlimited cloud notes and workspaces, 5 GB of cloud storage, collaborative notes, web access, and bundled AI credits.",
+    },
+    {
+      id: "item-5",
+      question: "Can I use Nota offline?",
+      answer:
+        "Absolutely! Nota's Desktop app is built with Tauri and supports a local-first approach. Your notes are saved locally and are fully accessible even when you are not connected to the internet.",
+    },
+    {
+      id: "item-6",
+      question: "What features does the editor support?",
+      answer:
+        "Our custom rich text editor supports slash commands, markdown shortcuts, media embeds (images, video, audio), mathematical equations (KaTeX), tables, and task lists.",
+    },
+    {
+      id: "item-7",
+      question: "Can I collaborate on notes with others?",
+      answer:
+        "Yes, realtime collaboration is available on our Pro plan. You can invite others to collaborate on your cloud notes and work together seamlessly.",
+    },
+    {
+      id: "item-8",
+      question: "How do you handle my data and security?",
+      answer:
+        "We prioritize your privacy. Your cloud data is encrypted, and your local notes stay strictly on your device. We use a secure authentication flow and reliable session management to keep your information safe.",
+    },
+    {
+      id: "item-9",
+      question: "Can I upgrade, downgrade, or cancel anytime?",
+      answer:
+        "Yes, you have full control over your subscription. You can upgrade, downgrade, or cancel your Pro plan at any time from your settings.",
+    },
+  ];
+  let copied = $state(false);
+  function copyBrewCommand() {
+    navigator.clipboard.writeText("brew install --cask Tsuzat/tap/nota");
+    copied = true;
+    setTimeout(() => {
+      copied = false;
+    }, 2000);
   }
-}
 
-const pricingList = {
-  free: [
-    'All the data is in your local machine',
-    'Unlimited Local Notes, Workspaces and UserWorkspaces',
-    'Local Media Storage',
-    "AI Features with AI Credits (You'd need to logged in and buy AI Credits to use)",
-    'Regular Updates and Bug Fixes',
-    'Bring your own AI API Key',
-    '1 Cloud Workspaces',
-    '3 Cloud Notes',
-  ],
-  monthly: [
-    'All the features of Free Tier',
-    'Unlimited Cloud Notes, Workspaces',
-    'Notes collaborate with anyone [Comming Soon]',
-    'Notes Previews on Browser',
-    '50K AI Credits per month',
-    '1 GB Storage for Media Files',
-    'All data is encrypted',
-    'Priority support and 24/7 help',
-  ],
-  yearly: [
-    'All the features of Free Tier',
-    'Unlimited Cloud Notes, Workspaces',
-    'Notes collaborate with anyone [Comming Soon]',
-    'Notes Previews on Browser',
-    '700K AI Credits at once',
-    '1.5 GB Storage for Media Files',
-    'All data is encrypted',
-    'Priority support and 24/7 help',
-  ],
-  ai_credits: [
-    'Can be used without any subscription',
-    'Even Works for Free Tier Users',
-    'Never Expires',
-    'Pay as you go',
-    'Access to AI Features',
-  ],
-};
+  let showFirstSection = $state(false);
+  let activeSection = $state("hero");
+  onMount(() => {
+    setTimeout(() => {
+      showFirstSection = true;
+    }, 500);
 
-const faqItems = [
-  {
-    id: 'item-1',
-    question: 'Is Nota free to use?',
-    answer:
-      'Nota is free for local usages. You can simply download the application and use it for free forever for local usage. All your data is stored in your local machine.',
-  },
-  {
-    id: 'item-2',
-    question: 'What is bring your own AI API Key?',
-    answer:
-      'Bring your own AI API Key allows you to use Gemini API Keys with Nota. We do not process your data and store the API key securely.',
-  },
-  {
-    id: 'item-3',
-    question: 'What features are included in the Pro plan?',
-    answer:
-      "Pro plan, comes in monthly or yearly based subscription, allows you to use AI features with AI credits, Cloud Storage to store your notes, workspaces, and userworkspaces. You'll get 1 GB of storage to manage your media on cloud.",
-  },
-  {
-    id: 'item-4',
-    question: 'What are AI credits?',
-    answer:
-      'AI credits are the currency used to access AI features in Nota. You can purchase AI credits to use AI features in Nota. AI credits are used to generate AI content, such as summaries, translations, and more. Usually, these credits are equivalent to tokens.',
-  },
-  {
-    id: 'item-5',
-    question: 'Can I use AI without a pro subscription?',
-    answer:
-      'Yes, You can. Using AI features has nothing to do with having pro plan. You can simply sign in and buy AI Credits and then you can simply use the AI features.',
-  },
-];
+    // Intersection observer for section visibility (animations)
+    const sections = document.querySelectorAll("section:not(#landing)");
+    const animationObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+        }
+      });
+    });
+    sections.forEach((section) => {
+      section.classList.add("hide");
+      animationObserver.observe(section);
+    });
 
-async function copyToClipboard() {
-  toast.promise(navigator.clipboard.writeText('brew install --cask Tsuzat/tap/nota'), {
-    loading: 'Copying...',
-    success: 'Copied on Clipboard!',
-    error: 'Failed to copy',
+    // Intersection observer for active nav item
+    const navObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            activeSection = entry.target.id;
+          }
+        });
+      },
+      { rootMargin: "-20% 0px -60% 0px" },
+    );
+    const allSections = document.querySelectorAll("section");
+    allSections.forEach((section) => navObserver.observe(section));
+
+    // Radiant card mouse effect
+    const radiantCards = document.querySelectorAll(".radiant-card");
+    radiantCards.forEach((card) => {
+      card.addEventListener("mousemove", (ev) => {
+        const e = ev as MouseEvent;
+        const rect = (card as HTMLElement).getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (card as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
+        (card as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+      });
+    });
   });
-}
 </script>
 
-<Particles class="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
+<svelte:window bind:scrollY={y} />
+<svelte:head>
+  <title>Nota | Fast, Lightweight, Feature-Rich Note-Taking App</title>
+  <meta
+    name="description"
+    content="Nota is a fast, lightweight, and feature-rich note-taking app. Experience a rich text editor with markdown shortcuts, AI powers (BYOK), and cross-platform desktop & web support."
+  />
+  <link rel="canonical" href="https://nota.ink" />
 
-<svelte:document {onscroll} />
+  <!-- Open Graph overrides -->
+  <meta
+    property="og:title"
+    content="Nota — Fast, Lightweight, Feature-Rich Note-Taking App"
+  />
+  <meta
+    property="og:description"
+    content="A nimble, high-performance note-taking app with rich text editing, AI powers, and cross-platform support without the Electron bloat."
+  />
+  <meta property="og:url" content="https://nota.ink" />
+
+  <!-- X/Twitter overrides -->
+  <meta
+    name="twitter:title"
+    content="Nota — Fast, Lightweight, Feature-Rich Note-Taking App"
+  />
+  <meta
+    name="twitter:description"
+    content="A nimble, high-performance note-taking app with rich text editing, AI powers, and cross-platform support without the Electron bloat."
+  />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Nota",
+      "operatingSystem": "All",
+      "applicationCategory": "ProductivityApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0.00",
+        "priceCurrency": "USD"
+      },
+      "description": "Nota is a fast, lightweight, and feature-rich note-taking app built with Svelte 5 and Rust. Featuring a powerful rich text editor, AI integration (BYOK), and cross-platform desktop & web support."
+    }
+  </script>
+</svelte:head>
+
+<Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />
+<Spotlight />
 
 <header
   class={cn(
-    'mx-auto sticky top-0 transition-all rounded-xl duration-500 p-2 z-10 flex max-w-5xl items-center justify-between gap-4',
-    isScrolled && "max-w-4xl top-2 bg-background/75 backdrop-blur-lg border"
+    "sticky z-50 mx-auto flex items-center justify-between gap-8 rounded-xl px-2 backdrop-blur-sm transition-all duration-500",
+    isScrolled
+      ? "max-w-4xl border bg-background/60 p-4 shadow-lg sm:top-2"
+      : "top-0 max-w-full bg-background/20 px-4 py-2 sm:px-12",
   )}
 >
-  <a class="flex items-center gap-4" href={resolve("/")}>
-    <enhanced:img src="../../static/favicon.webp" alt="Nota" class="size-10" />
-    <h3 class="font-bold">Nota</h3>
-  </a>
-  <div class="items-center gap-8 hidden sm:inline-flex">
-    <a
-      class="hover:text-muted-foreground transition-all duration-500"
-      href="#features">Features</a
-    >
-    <a
-      class="hover:text-muted-foreground transition-all duration-500"
-      href="#solutions">Solutions</a
-    >
-    <a
-      class="hover:text-muted-foreground transition-all duration-500"
-      href="#pricing">Pricing</a
-    >
-    <a
-      class="hover:text-muted-foreground transition-all duration-500"
-      href="#faqs">FAQs</a
-    >
-  </div>
-  <div class="flex items-center gap-4">
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger
-        class={buttonVariants({
-          variant: "ghost",
-          size: "icon-sm",
-          class: "sm:hidden",
-        })}
+  <AppLogo showLogo={!isScrolled} />
+  <!-- Desktop Navigation -->
+  <div class="hidden items-center gap-8 md:flex">
+    {#each tabItems as item, idx (idx)}
+      <a
+        href={item.url}
+        title="Open Nav"
+        class="nodefault relative py-1 text-muted-foreground capitalize transition-all duration-500 hover:text-primary {activeSection ===
+        item.url.substring(1)
+          ? 'font-medium text-primary'
+          : ''}"
       >
-        <icons.Menu />
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Content class="w-fit">
-        <a href="#features">
-          <DropdownMenu.Item>Features</DropdownMenu.Item>
-        </a>
-        <a href="#solutions">
-          <DropdownMenu.Item>Solutions</DropdownMenu.Item>
-        </a>
-        <a href="#pricing">
-          <DropdownMenu.Item>Pricing</DropdownMenu.Item>
-        </a>
-        <a href="#faqs">
-          <DropdownMenu.Item>FAQs</DropdownMenu.Item>
-        </a>
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
-    <ToggleMode />
-    {#if user === null}
-      <Button href={resolve("/signin")}>Sign In</Button>
-    {:else}
+        {item.title}
+        {#if activeSection === item.url.substring(1)}
+          <div
+            transition:fade={{ duration: 300 }}
+            class="absolute -bottom-1 left-0 h-0.5 w-full bg-primary"
+          ></div>
+        {/if}
+      </a>
+    {/each}
+  </div>
+
+  <div class="flex items-center gap-2">
+    <!-- Mobile Navigation -->
+    <div class="md:hidden">
       <Dropdown.Root>
-        <Dropdown.Trigger>
-          <SimpleToolTip content={user.email}>
-            <Avatar.Root
-              class={buttonVariants({
-                variant: "ghost",
-                size: "icon-sm",
-                class: "rounded-full",
-              })}
-            >
-              <Avatar.Image src={user.avatar_url} />
-              <Avatar.Fallback>
-                <icons.User />
-              </Avatar.Fallback>
-            </Avatar.Root>
-          </SimpleToolTip>
+        <Dropdown.Trigger
+          class={buttonVariants({ variant: "ghost", size: "icon" })}
+        >
+          <icons.Menu />
+          <span class="sr-only">Links</span>
         </Dropdown.Trigger>
-        <Dropdown.Content class="w-fit">
-          <Dropdown.Label class="text-xs">
-            {user.email}
-          </Dropdown.Label>
-          <Dropdown.Item onclick={() => goto(resolve("/home"))}>
-            <icons.House />
-            <span>Home</span>
-          </Dropdown.Item>
-          <Dropdown.Item onclick={() => goto(resolve("/profile"))}>
-            <icons.UserRound />
-            <span>Profile</span>
-          </Dropdown.Item>
-          <Dropdown.Item
-            onclick={() => {
-              goto(resolve("/signout"));
-            }}
-          >
-            <icons.LogOut />
-            Sign Out
-          </Dropdown.Item>
+        <Dropdown.Content class="w-fit md:hidden">
+          {#each tabItems as item, idx (idx)}
+            <Dropdown.Item>
+              <a
+                href={item.url}
+                title="Open Nav"
+                class="nodefault block w-full capitalize"
+              >
+                {item.title}
+              </a>
+            </Dropdown.Item>
+          {/each}
         </Dropdown.Content>
       </Dropdown.Root>
+    </div>
+    <ToggleMode />
+    {#if user}
+      <Dropdown.Root>
+        <Dropdown.Trigger>
+          <UserAvatar
+            image={user.avatar_url ?? ""}
+            name={user.name ?? "Unknown"}
+          />
+        </Dropdown.Trigger>
+        <Dropdown.Content class="w-fit">
+          <Dropdown.Group>
+            <Dropdown.Label>{user.name}</Dropdown.Label>
+            <a href={resolve("/profile")}>
+              <Dropdown.Item>
+                <icons.User />
+                Profile
+              </Dropdown.Item>
+            </a>
+            <Dropdown.Item
+              variant="destructive"
+              onclick={() => goto(resolve("/signout"))}
+            >
+              <icons.LogOut />
+              Sign Out
+            </Dropdown.Item>
+          </Dropdown.Group>
+        </Dropdown.Content>
+      </Dropdown.Root>
+    {:else}
+      <Button href={resolve("/signin")}>Sign In</Button>
     {/if}
   </div>
 </header>
 
-<main
-  class="mx-auto flex size-full max-w-4xl flex-col items-center justify-between gap-8 overflow-auto px-4 pt-8"
->
-  <span
-    class="inline animate-pulse text-2xl font-bold bg-linear-to-r from-[#ff8c00] via-[#7c01ff] to-[#ff7b00] bg-size-[var(--bg-size)_100%] bg-clip-text text-transparent"
+<main class="mx-auto max-w-4xl px-2 text-center sm:px-0">
+  <section
+    id="landing"
+    class="transition-all duration-1000 *:my-8 {showFirstSection
+      ? 'translate-y-0 opacity-100'
+      : 'translate-y-10 opacity-0'}"
   >
-    Free. Privacy Focused. Local First
-  </span>
-
-  <p class="animate-bounce text-lg">
-    A fast, modern note taking app with native AI features
-  </p>
-  <div class="flex flex-col items-center gap-4 sm:flex-row">
-    <Button variant="outline" href={resolve("/playground")}>
-      <icons.Pen />
-      Playground
-    </Button>
-    <Button
-      variant="outline"
-      href="https://github.com/Tsuzat/Nota"
-      target="_blank"
+    <a
+      class="group nodefault relative z-10 mx-auto flex w-fit items-center gap-4 rounded-2xl border bg-primary/30 p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 hover:bg-background dark:border-t-white/5 dark:shadow-zinc-950 dark:hover:border-t-border"
+      href="#pricing"
+      title="Open Pricing"
     >
-      <Github />
-      Star us on Github
-    </Button>
-    {#await getArtefacts()}
-      <Button variant="outline">
-        <BarSpinner />
-        Loading
-      </Button>
-    {:then artefacts}
-      {#if artefacts}
-        {console.log(artefacts.platforms)}
-        <ArtifactDownloader platforms={artefacts.platforms} />
-      {:else}
-        <Button variant="outline">
-          <icons.X />
-          No Downloadables
-        </Button>
-      {/if}
-    {:catch error}
-      {console.error(error)}
-    {/await}
-  </div>
-  <Button
-    variant="outline"
-    class="mx-auto relative text-muted-foreground"
-    onclick={copyToClipboard}
-    title="Click to copy the installation command"
-  >
-    <BorderBeam />
-    $ brew install --cask Tsuzat/tap/nota
-  </Button>
-  <div class="hidden dark:block">
-    <enhanced:img
-      class="aspect-auto h-auto w-full"
-      src="../../static/previews/dark.webp"
-      alt="nota"
-    />
-  </div>
-  <div class="block dark:hidden">
-    <enhanced:img
-      class="z-10 block aspect-auto h-auto w-full"
-      src="../../static/previews/light.webp"
-      alt="nota"
-    />
-  </div>
-
-  <Reveal>
-    <section class="flex w-full flex-col gap-8 py-12">
-      <h2 class="text-center text-3xl font-bold">Features for Everyone</h2>
-      <div class="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-        <Card.Root class="bg-background/60 backdrop-blur-sm">
-          <Card.Header>
-            <Card.Title class="flex items-center gap-2">
-              <icons.Zap class="size-5 text-orange-500" />
-              Local First & Private
-            </Card.Title>
-            <Card.Description>Your data, your control</Card.Description>
-          </Card.Header>
-          <Card.Content>
-            All your data is stored locally on your machine. We never see your
-            notes. Truly private by default.
-          </Card.Content>
-        </Card.Root>
-        <Card.Root class="bg-background/60 backdrop-blur-sm">
-          <Card.Header>
-            <Card.Title class="flex items-center gap-2">
-              <icons.Code class="size-5 text-blue-500" />
-              Bring Your Own Keys
-            </Card.Title>
-            <Card.Description>Supports Gemini API</Card.Description>
-          </Card.Header>
-          <Card.Content>
-            Connect your own <strong>Gemini</strong> API key. No limits, no subscriptions
-            required for AI features.
-          </Card.Content>
-        </Card.Root>
-        <Card.Root class="bg-background/60 backdrop-blur-sm">
-          <Card.Header>
-            <Card.Title class="flex items-center gap-2">
-              <icons.Sparkles class="size-5 text-yellow-500" />
-              Native AI Features
-            </Card.Title>
-            <Card.Description>Fast and amazing experience</Card.Description>
-          </Card.Header>
-          <Card.Content>
-            Integrated AI for effortless writing. Summarize, translate, and edit
-            with AI directly in your workflow.
-          </Card.Content>
-        </Card.Root>
-        <Card.Root class="bg-background/60 backdrop-blur-sm">
-          <Card.Header>
-            <Card.Title class="flex items-center gap-2">
-              <icons.PenTool class="size-5 text-purple-500" />
-              Free Forever
-            </Card.Title>
-            <Card.Description>For local usage</Card.Description>
-          </Card.Header>
-          <Card.Content>
-            Nota is free for all local usage. Open source and community driven.
-            No hidden costs for your local data.
-          </Card.Content>
-        </Card.Root>
-      </div>
-    </section>
-  </Reveal>
-
-  <Reveal delay={200}>
-    <section id="solutions" class="flex w-full flex-col gap-8 py-12">
-      <h2 class="text-center text-3xl font-bold">Solutions for Everyone</h2>
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div class="flex flex-col items-center gap-4 text-center">
-          <div class="rounded-full bg-blue-500/10 p-4 text-blue-500">
-            <icons.Terminal class="size-8" />
-          </div>
-          <h3 class="text-xl font-semibold">For Developers</h3>
-          <p class="text-muted-foreground">
-            Manage snippets, document APIs, and keep your technical notes
-            organized with syntax highlighting.
-          </p>
-        </div>
-        <div class="flex flex-col items-center gap-4 text-center">
-          <div class="rounded-full bg-green-500/10 p-4 text-green-500">
-            <icons.BookOpen class="size-8" />
-          </div>
-          <h3 class="text-xl font-semibold">For Writers</h3>
-          <p class="text-muted-foreground">
-            Distraction-free writing environment with AI assistance to help you
-            overcome writer's block.
-          </p>
-        </div>
-        <div class="flex flex-col items-center gap-4 text-center">
-          <div class="rounded-full bg-pink-500/10 p-4 text-pink-500">
-            <icons.GraduationCap class="size-8" />
-          </div>
-          <h3 class="text-xl font-semibold">For Students</h3>
-          <p class="text-muted-foreground">
-            Take organized lecture notes, summarize complex topics with AI, and
-            study more effectively.
-          </p>
-        </div>
-      </div>
-    </section>
-  </Reveal>
-
-  <Reveal delay={200}>
-    <section
-      id="features"
-      class="flex w-full flex-col gap-12 py-12 md:gap-24 md:py-24"
-    >
-      <h2 class="text-center text-3xl font-bold tracking-tight md:text-4xl">
-        Powerful Editor Features
-      </h2>
-
-      <!-- Feature 1: Drag Handle -->
-      <div class="flex flex-col items-center gap-12 md:flex-row">
-        <div class="flex flex-1 flex-col gap-4">
-          <div
-            class="flex size-12 items-center justify-center rounded-lg bg-purple-500/10"
-          >
-            <icons.GripVertical class="size-6 text-purple-500" />
-          </div>
-          <h3 class="text-2xl font-bold">Smart Drag Handle</h3>
-          <p class="text-muted-foreground text-lg">
-            Organize your thoughts effortlessly. Drag and drop blocks to
-            rearrange content, or click to access quick actions like "Edit with
-            AI" and "Turn Into".
-          </p>
-        </div>
-        <div
-          class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-linear-to-br p-8 backdrop-blur-sm"
-        >
-          <MockDragHandle />
-        </div>
-      </div>
-
-      <!-- Feature 2: Bubble Menu -->
-      <div class="flex flex-col items-center gap-12 md:flex-row-reverse">
-        <div class="flex flex-1 flex-col gap-4">
-          <div
-            class="flex size-12 items-center justify-center rounded-lg bg-blue-500/10"
-          >
-            <icons.MousePointerClick class="size-6 text-blue-500" />
-          </div>
-          <h3 class="text-2xl font-bold">Contextual Menu</h3>
-          <p class="text-muted-foreground text-lg">
-            Everything you need, right where you need it. Highlight text to
-            format, add links, or ask AI to improve your writing without losing
-            flow.
-          </p>
-        </div>
-        <div
-          class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-linear-to-br p-8 backdrop-blur-sm"
-        >
-          <MockBubbleMenu />
-        </div>
-      </div>
-
-      <!-- Feature 3: AI Dialog -->
-      <div class="flex flex-col items-center gap-12 md:flex-row">
-        <div class="flex flex-1 flex-col gap-4">
-          <div
-            class="flex size-12 items-center justify-center rounded-lg bg-orange-500/10"
-          >
-            <icons.Sparkles class="size-6 text-orange-500" />
-          </div>
-          <h3 class="text-2xl font-bold">Native AI Integration</h3>
-          <p class="text-muted-foreground text-lg">
-            Bring your own API key for secure, unlimited AI assistance.
-            Summarize notes, fix grammar, or generate new content directly in
-            your editor.
-          </p>
-        </div>
-        <div
-          class="from-background/50 to-muted/50 flex flex-1 items-center justify-center rounded-2xl border bg-linear-to-br p-8 backdrop-blur-sm"
-        >
-          <MockAiDialog />
-        </div>
-      </div>
-    </section>
-  </Reveal>
-
-  <Reveal delay={200}>
-    <section id="pricing" class="flex w-full flex-col gap-8 py-12">
-      <h2 class="text-center text-3xl font-bold">Simple Pricing</h2>
-      <p class="text-center text-muted-foreground">
-        Choose the plan that fits your workflow.
-      </p>
-      <strong class="animate-bounce text-center"
-        >Get 10% off on all purchases.</strong
+      <span class="text-sm text-foreground"
+        >✨ Completely <span class="font-bold">Free</span> For Local Usages ✨</span
       >
-
-      <div class="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
-        <!-- Free -->
-        <Card.Root>
-          <Card.Header>
-            <Card.Title class="font-medium">Free</Card.Title>
-            <span class="my-3 block text-2xl font-semibold">$0 / mo</span>
-          </Card.Header>
-          <Card.Content class="space-y-4">
-            <hr class="border-dashed" />
-            <ul class="list-outside space-y-3 text-sm">
-              {#each pricingList.free as item, idx (idx)}
-                <li class="flex items-center gap-2">
-                  <icons.Check class="size-3!" />
-                  {item}
-                </li>
-              {/each}
-            </ul>
-          </Card.Content>
-          <Card.Footer class="my-auto">
-            <Button class="w-full" variant="outline" onclick={copyToClipboard}
-              >Install With Homebrew</Button
-            >
-          </Card.Footer>
-        </Card.Root>
-        <!-- Monthly -->
-
-        <Card.Root class="relative">
-          <BorderBeam />
-          <Card.Header>
-            <Card.Title class="font-medium flex items-center justify-center">
-              <span>Pro</span>
-              <div
-                class="ml-3 inline-flex items-center rounded-full bg-background"
-              >
-                <Button
-                  class="rounded-full"
-                  size="sm"
-                  variant={tabPro === "monthly" ? "default" : "ghost"}
-                  onclick={() => (tabPro = "monthly")}>Monthly</Button
-                >
-                <Button
-                  class="rounded-full"
-                  size="sm"
-                  variant={tabPro === "yearly" ? "default" : "ghost"}
-                  onclick={() => (tabPro = "yearly")}>Yearly</Button
-                >
-              </div>
-            </Card.Title>
-            {#if tabPro === "monthly"}
-              <span class="my-3 block text-2xl font-semibold">$5 / mo</span>
-            {:else}
-              <span class="my-3 block text-2xl font-semibold">
-                $4.5 / mo
-                <span class="text-lg font-normal text-muted-foreground"
-                  >billed $55/y</span
-                >
-              </span>
-            {/if}
-          </Card.Header>
-          <Card.Content class="space-y-4">
-            {@const list =
-              tabPro === "monthly" ? pricingList.monthly : pricingList.yearly}
-            <hr class="border-dashed" />
-            <ul class="list-outside space-y-3 text-sm">
-              {#each list as item, idx (idx)}
-                <li class="flex items-center gap-2">
-                  <icons.Check class="size-3!" />
-                  {item}
-                </li>
-              {/each}
-            </ul>
-          </Card.Content>
-          <Card.Footer>
-            <Button
-              class="w-full"
-              variant="outline"
-              onclick={() => {
-                if (!user) {
-                  return toast.warning("Please signin to continue", {
-                    action: {
-                      label: "Sign In",
-                      onClick: () => {
-                        goto(resolve("/signin"));
-                      },
-                    },
-                  });
-                }
-                sendToPaymentPortal(tabPro, user);
-              }}
-              >Start With {tabPro === "monthly" ? "Monthly" : "Yearly"} Plan</Button
-            >
-          </Card.Footer>
-        </Card.Root>
-
-        <!-- AI Credits -->
-        <Card.Root>
-          <Card.Header>
-            <Card.Title class="font-medium">AI Credits</Card.Title>
-            <span class="my-3 block text-2xl font-semibold">$5 / 1M tokens</span
-            >
-          </Card.Header>
-          <Card.Content class="space-y-4">
-            <hr class="border-dashed" />
-            <ul class="list-outside space-y-3 text-sm">
-              {#each pricingList.ai_credits as item, idx (idx)}
-                <li class="flex items-center gap-2">
-                  <icons.Check class="size-3" />
-                  {item}
-                </li>
-              {/each}
-            </ul>
-          </Card.Content>
-          <Card.Footer class="mt-auto flex flex-col gap-1">
-            {#if (user?.ai_credits || 0) <= 0}
-              <Button
-                class="w-full"
-                onclick={() => {
-                  if (!user) {
-                    return goto(resolve("/signin"));
-                  }
-                  toast.promise(
-                    request(`${PUBLIC_BACKEND_URL}/api/v1/redeem/ai-credits`),
-                    {
-                      loading: "Redeeming AI Credits...",
-                      success: () => {
-                        window.location.reload();
-                        return "AI Credits redeemed successfully";
-                      },
-                      error: "Failed to redeem AI Credits",
-                    },
-                  );
-                }}
-              >
-                {#if !user}
-                  Sign In to claim free AI Credits
-                {:else}
-                  Claim 10K Free AI Credits
-                {/if}
-              </Button>
-            {/if}
-            <Button
-              class="w-full"
-              variant="outline"
-              onclick={() => {
-                if (!user) {
-                  return toast.warning("Please Sign In to continue");
-                }
-                sendToPaymentPortal("ai_credits", user);
-              }}>Buy AI Credits</Button
-            >
-          </Card.Footer>
-        </Card.Root>
-      </div>
-    </section>
-  </Reveal>
-
-  <Reveal delay={200}>
-    <section id="faqs">
-      <div class="mx-auto px-4 md:px-6">
-        <div class="mx-auto max-w-xl text-center">
-          <h2 class="text-center text-3xl font-bold">
-            Frequently Asked Questions
-          </h2>
-          <p class="mt-4 text-balance text-muted-foreground">
-            Discover quick and comprehensive answers to common questions about
-            our platform, services, and features.
-          </p>
-        </div>
-
-        <div class="mx-auto mt-12 max-w-2xl">
-          <Accordion
-            type="single"
-            class="w-full rounded-2xl border bg-background px-8 py-3 shadow-sm ring-4 ring-muted dark:ring-0"
-          >
-            {#each faqItems as item, index (index)}
-              <AccordionItem
-                value={item.id}
-                class={[
-                  faqItems.length - 1 !== index
-                    ? "border-dashed"
-                    : "border-none",
-                ]}
-              >
-                <AccordionTrigger
-                  class="cursor-pointer text-base font-semibold hover:no-underline"
-                  >{item.question}</AccordionTrigger
-                >
-                <AccordionContent>
-                  <p class="text-base">{item.answer}</p>
-                </AccordionContent>
-              </AccordionItem>
-            {/each}
-          </Accordion>
-
-          <p class="mt-6 px-4 text-muted-foreground text-center">
-            Can't find what you're looking for?
-            <a
-              href="mailto:contact@nota.ink"
-              class="font-medium text-primary hover:underline"
-            >
-              Contact Us
-            </a>
-          </p>
-        </div>
-      </div>
-    </section>
-  </Reveal>
-
-  <footer
-    class="text-muted-foreground flex w-full flex-col items-center justify-between gap-4 border-t py-8 text-sm md:flex-row"
-  >
-    <p>&copy; {new Date().getFullYear()} Nota. All rights reserved.</p>
-    <div class="flex gap-4">
-      <a href="/privacy" class="hover:text-foreground transition-colors"
-        >Privacy</a
+      <span
+        class="block h-4 w-0.5 border-l bg-muted-foreground dark:border-background"
+      ></span>
+      <div
+        class="size-6 overflow-hidden rounded-full bg-background duration-500 group-hover:bg-primary"
       >
-      <a href="/terms" class="hover:text-foreground transition-colors">Terms</a>
-      <a
+        <div
+          class="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0"
+        >
+          <span class="flex size-6">
+            <icons.ArrowRight class="m-auto size-4 text-background!" />
+          </span>
+          <span class="flex size-6">
+            <icons.ArrowRight class="m-auto size-4 text-foreground!" />
+          </span>
+        </div>
+      </div>
+    </a>
+    <h1 class="text-balance">Fast, Lightweight & Feature-Rich Note-Taking</h1>
+    <p class="text-balance text-muted-foreground">
+      Nota is designed to be the nimble sports car of note-taking—stripping away
+      the bloat while keeping the power where it matters. Enjoy a rich text
+      editor with markdown shortcuts, AI powers, and cross-platform speed.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-2 my-4">
+      <!-- 1. GitHub Repo -->
+      <Button
+        variant="default"
         href="https://github.com/Tsuzat/Nota"
         target="_blank"
-        class="hover:text-foreground transition-colors">GitHub</a
+        rel="noopener noreferrer"
+        class="z-100"
       >
+        <Github />
+        <span>GitHub Repo</span>
+      </Button>
+
+      <!-- 2. Playground -->
+      <Button
+        variant="secondary"
+        href="https://edra.tsuzat.com/templates/notion"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <icons.Sparkles />
+        <span>Playground</span>
+      </Button>
+
+      {#await getArtefacts()}
+        <Button>
+          <BarSpinner />
+          Loading
+        </Button>
+      {:then artefacts}
+        {#if artefacts}
+          <ArtifactDownloader platforms={artefacts.platforms} />
+        {/if}
+      {:catch error}
+        {console.error(error)}
+      {/await}
     </div>
+
+    <div class="relative my-4 flex items-center justify-center">
+      <button
+        onclick={copyBrewCommand}
+        class="group relative flex items-center gap-3 rounded-lg border bg-muted/40 px-3.5 py-1.5 font-mono text-xs transition-colors hover:border-primary/50 hover:bg-muted/80 cursor-pointer"
+        title="Copy Homebrew install command"
+      >
+        <span class="font-semibold text-primary">$</span>
+        <span>brew install --cask Tsuzat/tap/nota</span>
+        {#if copied}
+          <icons.Check class="size-3.5 text-emerald-500" />
+        {:else}
+          <icons.Copy
+            class="size-3.5 opacity-60 transition-opacity group-hover:opacity-100"
+          />
+        {/if}
+      </button>
+    </div>
+
+    <Tiltcard
+      tiltLimit={10}
+      scale={1.025}
+      spotlight={false}
+      perspective={1200}
+      class="relative overflow-hidden! h-full w-full rounded-xl shadow-lg inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20"
+    >
+      <BorderBeam
+        duration={6}
+        size={400}
+        class="from-transparent via-orange-500 to-transparent"
+      />
+      <BorderBeam
+        duration={6}
+        delay={3}
+        size={400}
+        borderWidth={2}
+        class="from-transparent via-purple-500 to-transparent"
+      />
+      <img
+        src="/preview/light.png"
+        alt="Nota Light Preview"
+        class="block h-full w-full rounded-xl border object-cover dark:hidden"
+      />
+      <img
+        src="/preview/dark.png"
+        alt="Nota Dark Preview"
+        class="hidden h-full w-full rounded-xl border object-cover dark:block"
+      />
+    </Tiltcard>
+  </section>
+  <section id="features">
+    <div class="flex flex-col items-center gap-4">
+      <h1 class="text-4xl font-bold">Everything you need to write</h1>
+      <p class="text-lg text-balance text-muted-foreground">
+        Fast, precise, and enjoyable to drive—stripping away the bloat while
+        keeping the power.
+      </p>
+    </div>
+    <dl class="my-20 grid grid-cols-2 gap-10">
+      {#each features as item, idx (idx)}
+        {@const Icon = item.icon}
+        <div class="col-span-full sm:col-span-2 lg:col-span-1">
+          <div
+            class="mx-auto flex w-fit rounded-lg p-2 shadow-md ring-1 shadow-primary/50 ring-black/5 dark:ring-white/5"
+          >
+            <Icon aria-hidden="true" class="size-6 text-muted-foreground" />
+          </div>
+          <dt
+            class="mt-6 text-center font-semibold text-gray-900 dark:text-gray-50"
+          >
+            {item.name}
+          </dt>
+          <dd
+            class="mt-2 text-center leading-7 text-gray-600 dark:text-gray-400"
+          >
+            {item.description}
+          </dd>
+        </div>
+      {/each}
+    </dl>
+    <div class="flex flex-col items-center gap-4 text-center">
+      <h1 class="text-4xl font-bold">Powerfully Versatile</h1>
+      <span class="text-lg text-balance text-muted-foreground"
+        >Create rich and beautiful notes for anything, we support it all.
+      </span>
+    </div>
+    <div class="relative mx-auto mt-4 w-full overflow-hidden! rounded-2xl">
+      <BorderBeam
+        duration={6}
+        size={400}
+        class="from-transparent via-pink-500 to-transparent"
+      />
+      <BorderBeam
+        duration={6}
+        delay={3}
+        size={400}
+        borderWidth={2}
+        class="from-transparent via-emerald-500 to-transparent"
+      />
+      <Multistream class="mx-auto rounded-2xl" />
+    </div>
+  </section>
+
+  <section id="pricing" class="text-start!">
+    <Pricing />
+  </section>
+
+  <section id="faqs" class="my-4">
+    <div class="mx-auto px-4 md:px-6">
+      <div class="mx-auto max-w-2xl text-center text-balance">
+        <h1>Frequently Asked Questions</h1>
+        <p class="mt-4 text-balance text-muted-foreground">
+          Discover quick and comprehensive answers to common questions about our
+          platform, services, and features.
+        </p>
+      </div>
+
+      <div class="mx-auto mt-12 max-w-2xl">
+        <Accordion
+          type="single"
+          class="w-full rounded-xl border bg-background px-8 py-3 shadow-sm ring-4 ring-muted dark:ring-0"
+        >
+          {#each faqItems as item, index (index)}
+            <AccordionItem
+              value={item.id}
+              class={[
+                faqItems.length - 1 !== index ? "border-dashed" : "border-none",
+              ]}
+            >
+              <AccordionTrigger
+                class="cursor-pointer text-base font-semibold hover:no-underline"
+                >{item.question}</AccordionTrigger
+              >
+              <AccordionContent>
+                <p class="text-base">{item.answer}</p>
+              </AccordionContent>
+            </AccordionItem>
+          {/each}
+        </Accordion>
+
+        <p class="mt-6 px-4 text-muted-foreground">
+          Can't find what you're looking for?
+          <a
+            href="mailto:contact@nota.ink"
+            title="Contact Us"
+            class="font-medium text-primary hover:underline"
+          >
+            Contact Us
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+  <footer class="flex items-center justify-center gap-2 border-t py-4 text-sm">
+    © 2026 Nota. All rights reserved •
+    <a href={resolve("/terms")} title="Open Terms of Use" class="text-primary"
+      >Terms of Use</a
+    >
+    •
+    <a
+      href={resolve("/privacy")}
+      title="Open Privacy Policy"
+      class="text-primary">Privacy Policy</a
+    >
+    •
+    <a href="mailto:contact@nota.ink" title="Contact Us" class="text-primary"
+      >Contact Us</a
+    >
   </footer>
 </main>
+
+<style>
+  section {
+    padding-top: 5rem;
+  }
+
+  .highlight {
+    background-color: var(--color-primary);
+    padding: 0 4px;
+    border-radius: 4px;
+    color: var(--color-foreground);
+  }
+
+  :global(section.hide) {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(4rem);
+    transition: all 500ms ease-in-out;
+    transition-delay: 300ms;
+  }
+
+  :global(section.show) {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(section.hide) {
+      transition: none;
+    }
+  }
+</style>

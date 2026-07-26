@@ -1,20 +1,23 @@
 <script lang="ts">
-import '../app.css';
-import { setAuthContext } from '@nota/client';
-import { ModeWatcher } from '@nota/ui';
-import { Toaster } from '@nota/ui/shadcn/sonner';
-import Metadata from '$lib/components/seo/Metadata.svelte';
+  import { Toaster } from "@nota/ui/shadcn/sonner";
+  import "../app.css";
+  import { ModeWatcher } from "@nota/ui";
+  import { setAuthContext, setStorageContext } from "@nota/client";
+  import { onMount } from "svelte";
+  let { children, data } = $props();
 
-let { children, data } = $props();
-const authContext = setAuthContext();
+  const authClient = setAuthContext();
+  setStorageContext();
 
-$effect(() => {
-  if (data.user) authContext.user = data.user;
-});
+  onMount(() => {
+    if (data.user && data.session) {
+      authClient.user = data.user;
+      authClient.session = data.session;
+    }
+  });
 </script>
 
-<Metadata />
 <ModeWatcher />
-<Toaster richColors />
+<Toaster closeButton richColors />
 
 {@render children()}

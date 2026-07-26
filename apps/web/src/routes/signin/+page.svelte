@@ -1,113 +1,58 @@
 <script lang="ts">
-import Github from '@nota/ui/icons/customs/github.svelte';
-import Google from '@nota/ui/icons/customs/google.svelte';
-import { Button } from '@nota/ui/shadcn/button';
-import * as Card from '@nota/ui/shadcn/card';
-import { onMount } from 'svelte';
-import { PUBLIC_BACKEND_URL } from '$env/static/public';
-import Particles from '$lib/components/custom/utils/particles.svelte';
-
-let ref = $state<HTMLDivElement>();
-
-const signInWithOAuth = async (provider: string) => {
-  const url = `${PUBLIC_BACKEND_URL}/api/v1/auth/signin/${provider}`;
-  window.location.href = url;
-};
-
-// variables for animation
-let mouseX = $state(0);
-let mouseY = $state(0);
-let rotateX = $derived.by(() => {
-  // Convert mouse Y position to rotation around X axis (tilt up/down)
-  // Normalize to a small angle range for subtle effect
-  return (mouseY / 360) * -10; // Max 10 degrees rotation
-});
-let rotateY = $derived.by(() => {
-  // Convert mouse X position to rotation around Y axis (tilt left/right)
-  // Normalize to a small angle range for subtle effect
-  return (mouseX / 360) * 10; // Max 10 degrees rotation
-});
-
-function handleMouseMove(e: MouseEvent) {
-  if (!ref) return;
-  e.preventDefault();
-  // mouse x and y position
-  const x = e.clientX;
-  const y = e.clientY;
-  // get the element that was clicked
-  const rect = ref.getBoundingClientRect();
-  // Center the coordinates and normalize to card dimensions
-  mouseX = x - rect.left - rect.width / 2;
-  mouseY = y - rect.top - rect.height / 2;
-}
-
-function handleMouseLeave(e: MouseEvent) {
-  e.preventDefault();
-  // Reset mouse position to center when mouse leaves
-  mouseX = 0;
-  mouseY = 0;
-}
-
-onMount(() => {
-  ref = document.getElementById('sign-in-card') as HTMLDivElement;
-  ref.addEventListener('mousemove', handleMouseMove);
-  ref.addEventListener('mouseleave', handleMouseLeave);
-  return () => {
-    ref?.removeEventListener('mousemove', handleMouseMove);
-    ref?.removeEventListener('mouseleave', handleMouseLeave);
-  };
-});
+  import { resolve } from "$app/paths";
+  import { env } from "$env/dynamic/public";
+  import Applogo from "$lib/components/custom/applogo.svelte";
+  import Particles from "$lib/components/custom/landing/particles.svelte";
+  import { Button } from "@lib/components/ui/button";
+  import { Github, Google, icons } from "@lib/icons";
+  import { cn } from "@lib/utils";
+  import { getAuthContext } from "@nota/client";
+  const authClient = getAuthContext();
 </script>
 
-<Particles class="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
-
-<div
-	class="inset-0 flex h-screen w-screen flex-col items-center justify-center gap-8"
->
-    <a href="/">
-        <img src="/favicon.webp" alt="applogo" class="mx-auto size-20 aspect-square" />
-    </a>
-	<Card.Root
-	 id="sign-in-card"
-		class="w-120 max-w-full border bg-transparent p-4 backdrop-blur-2xl transition-transform duration-500 ease-out"
-		style="transform: perspective(1000px) rotateX({rotateX}deg) rotateY({rotateY}deg); transform-style: preserve-3d;"
-	>
-		<Card.Header class="text-center">
-			<Card.Title class="text-xl">Sign In to Nota</Card.Title>
-		</Card.Header>
-		<Card.Content>
-				<div class="grid gap-6">
-					<div class="flex flex-col gap-4">
-						<Button
-							variant="outline"
-							size="lg"
-							class="w-full"
-							onclick={() => signInWithOAuth('google')}
-						>
-							<Google class="size-4" />
-							Sign In with Google
-						</Button>
-						<Button
-							variant="outline"
-							size="lg"
-							class="w-full"
-							onclick={() => signInWithOAuth('github')}
-						>
-							<Github class="size-4" />
-							Sign In with Github
-						</Button>
-					</div>
-                </div>
-
-		</Card.Content>
-        <Card.Footer>
-
-	<div
-		class="text-center text-xs text-balance text-muted-foreground *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-primary"
-	>
-		By clicking continue, you agree to our <a href="/terms">Terms of Service</a>
-		and <a href="/privacy">Privacy Policy</a>.
-	</div>
-        </Card.Footer>
-	</Card.Root>	
+<div class={cn("relative w-full md:h-screen md:overflow-hidden")}>
+  <Particles class="absolute inset-0" ease={20} quantity={120} />
+  <div
+    class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-8"
+  >
+    <Button class="absolute top-4 left-4" href={resolve("/")} variant="ghost">
+      <icons.ChevronLeft data-icon="inline-start" />
+      Home
+    </Button>
+    <div class="mx-auto w-full max-w-sm space-y-4">
+      <Applogo />
+      <div class="flex flex-col space-y-1">
+        <h1 class="text-2xl font-bold tracking-wide">Sign In or Join Now!</h1>
+        <p class="text-base text-muted-foreground">
+          login or create your nota account.
+        </p>
+      </div>
+      <div class="space-y-2">
+        <Button
+          class="w-full"
+          onclick={() => authClient.signInWithOAuth("google")}
+        >
+          <Google />
+          Continue with Google
+        </Button>
+        <Button
+          class="w-full"
+          onclick={() => authClient.signInWithOAuth("github")}
+        >
+          <Github />
+          Continue with GitHub
+        </Button>
+      </div>
+      <span class="mt-8 text-sm text-muted-foreground">
+        By clicking continue, you agree to our
+        <Button class="underline" variant="link" href={resolve("/terms")}
+          >Terms of Service</Button
+        >
+        and
+        <Button class="underline" variant="link" href={resolve("/privacy")}
+          >Privacy Policy</Button
+        >.
+      </span>
+    </div>
+  </div>
 </div>

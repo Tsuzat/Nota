@@ -3,6 +3,7 @@ export { default as SimpleToolTip } from './SimpleToolTip.svelte';
 export { default as ToggleMode } from './ToggleMode.svelte';
 export { default as BorderBeam } from './BorderBeam.svelte';
 export { default as ProBadge } from './ProBadge.svelte';
+export { default as StorageViewer } from './StorageViewer.svelte';
 export {
   default as DeleteWorkspaceDialog,
   openDeleteWorkspaceDialog,

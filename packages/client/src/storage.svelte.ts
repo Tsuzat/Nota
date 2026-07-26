@@ -2,95 +2,159 @@ import { getContext, setContext } from 'svelte';
 import z from 'zod';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import request, { fetchFn } from './request';
-import { type NotaFile, NotaFileSchema } from './types';
+import { type Asset, AssetSchema } from './types';
 
 const SignedUrlResponseSchema = z.object({
-  uploadUrl: z.string().nonempty(),
-  publicUrl: z.string().nonempty(),
-  key: z.string().nonempty(),
+  uploadUrl: z.string().min(1),
+  publicUrl: z.string().min(1),
+  key: z.string().min(1),
 });
 
+export interface FetchStorageOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  workspaceId?: string;
+}
+
+export interface UploadStorageOptions {
+  workspaceId?: string;
+  noteId?: string;
+}
+
 class Storage {
-  #files = $state<NotaFile[]>([]);
-  get files() {
-    return this.#files;
+  #assets = $state<Asset[]>([]);
+  #total = $state<number>(0);
+  #page = $state<number>(1);
+  #limit = $state<number>(20);
+
+  get assets() {
+    return this.#assets;
+  }
+
+  get total() {
+    return this.#total;
+  }
+
+  get page() {
+    return this.#page;
+  }
+
+  get limit() {
+    return this.#limit;
   }
 
   /**
-   * Fetches the list of files from the server
-   * @throws {Error} If the request fails with a non-200 status code
+   * Backwards compatibility helper returning legacy file objects
    */
-  async fetch() {
-    const url = `${PUBLIC_BACKEND_URL}/api/v1/storage/list`;
+  get files() {
+    return this.#assets.map((asset) => ({
+      key: asset.path,
+      size: asset.size,
+      lastModified: asset.updated_at,
+      url: asset.path,
+    }));
+  }
+
+  /**
+   * Fetches the list of assets from the database with optional pagination and search
+   */
+  async fetch(options?: FetchStorageOptions) {
+    const params = new URLSearchParams();
+    if (options?.page) params.set('page', options.page.toString());
+    if (options?.limit) params.set('limit', options.limit.toString());
+    if (options?.search) params.set('search', options.search);
+    if (options?.workspaceId) params.set('workspaceId', options.workspaceId);
+
+    const queryString = params.toString();
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/storage/list${queryString ? `?${queryString}` : ''}`;
     const res = await request(url);
     if (res.ok) {
       const json = await res.json();
-      const files = json.data as NotaFile[];
-      if (files.length === 0) return;
-      const parsedFiles = files.map((file: NotaFile) => NotaFileSchema.parse(file));
-      this.#files = parsedFiles;
+      const data = json.data;
+      if (data && Array.isArray(data.files)) {
+        const parsedAssets = data.files.map((file: unknown) => AssetSchema.parse(file));
+        this.#assets = parsedAssets;
+        this.#total = data.total ?? parsedAssets.length;
+        this.#page = data.page ?? 1;
+        this.#limit = data.limit ?? 20;
+      }
     } else {
       throw new Error(await res.text());
     }
   }
 
-  async upload(file: File) {
+  /**
+   * Uploads a file to storage and creates an asset record in DB
+   */
+  async upload(file: File, options?: UploadStorageOptions) {
     const getSignedUrl = `${PUBLIC_BACKEND_URL}/api/v1/storage/presigned-url`;
+    const workspaceId = options?.workspaceId || '';
+    const noteId = options?.noteId;
+
     const signedUrlRes = await request(getSignedUrl, {
       method: 'POST',
       body: JSON.stringify({
         filename: file.name,
-        contentType: file.type,
+        contentType: file.type || 'application/octet-stream',
         size: file.size,
+        workspaceId,
+        noteId,
       }),
     });
     if (!signedUrlRes.ok) {
-      console.log('Status of Presigned: ', signedUrlRes.ok);
       throw new Error(await signedUrlRes.text());
     }
     const json = await signedUrlRes.json();
     const signedUrl = SignedUrlResponseSchema.parse(json.data);
-    console.log(signedUrl);
+
     const res = await fetchFn(signedUrl.uploadUrl, {
       method: 'PUT',
       headers: {
-        'Content-Type': file.type,
+        'Content-Type': file.type || 'application/octet-stream',
       },
       body: file,
     });
     if (!res.ok) {
       throw new Error((await res.text()) || 'Failed to upload file');
     }
+
     const confirmUrl = `${PUBLIC_BACKEND_URL}/api/v1/storage/confirm`;
     const confirmRes = await request(confirmUrl, {
       method: 'POST',
-      body: JSON.stringify({ key: signedUrl.key }),
+      body: JSON.stringify({
+        key: signedUrl.key,
+        filename: file.name,
+        contentType: file.type || 'application/octet-stream',
+        workspaceId,
+        noteId,
+      }),
     });
     if (!confirmRes.ok) {
       throw new Error((await confirmRes.text()) || 'Failed to confirm upload');
     }
-    this.#files.push({
-      key: signedUrl.key,
-      size: file.size,
-      lastModified: new Date(file.lastModified),
-      url: signedUrl.publicUrl,
-    });
-    return signedUrl.publicUrl;
+
+    const confirmJson = await confirmRes.json();
+    const asset = AssetSchema.parse(confirmJson.data);
+
+    this.#assets.push(asset);
+    return asset.path;
   }
 
   /**
-   * Deletes a file from the server
-   * @param key - The key of the file to delete
-   * @throws {Error} If the request fails with a non-200 status code
+   * Deletes an asset by ID or Key
    */
-  async delete(key: string) {
+  async delete(idOrKey: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/storage`;
+    const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(idOrKey);
+    const body = isUuid ? { id: idOrKey } : { key: idOrKey };
+
     const res = await request(url, {
       method: 'DELETE',
-      body: JSON.stringify({ key }),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
-      this.#files = this.#files.filter((file) => file.key !== key);
+      this.#assets = this.#assets.filter((asset) => asset.id !== idOrKey && asset.path !== idOrKey);
     } else {
       throw new Error(await res.text());
     }

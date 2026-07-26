@@ -1,12 +1,22 @@
 import { getContext, setContext } from 'svelte';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import request from './request';
-import { type User, UserSchema, type Session, SessionSchema } from './types';
+import {
+  type User,
+  UserSchema,
+  type Session,
+  SessionSchema,
+  type SubscriptionDetails,
+  SubscriptionDetailsSchema,
+  type CheckoutDetails,
+  CheckoutDetailsSchema,
+} from './types';
 import { secureStorage } from './secureStorage';
 import { isTauri } from '@tauri-apps/api/core';
 
 class Auth {
   #user = $state<User>();
+  #session = $state<Session>();
 
   get user() {
     return this.#user;
@@ -14,6 +24,14 @@ class Auth {
 
   set user(user: User | undefined) {
     this.#user = user;
+  }
+
+  get session() {
+    return this.#session;
+  }
+
+  set session(session: Session | undefined) {
+    this.#session = session;
   }
 
   private async generatePKCE() {
@@ -46,9 +64,15 @@ class Auth {
     if (res.ok) {
       try {
         const json = await res.json();
-        const user = json.data;
-        const parsedUser = UserSchema.parse(user);
-        this.#user = parsedUser;
+        const data = json.data;
+        if (data && typeof data === 'object' && 'user' in data) {
+          this.#user = UserSchema.parse(data.user);
+          if (data.session) {
+            this.#session = SessionSchema.parse(data.session);
+          }
+        } else {
+          this.#user = UserSchema.parse(data);
+        }
       } catch (error) {
         console.log(error);
         throw new Error('Please signin again');
@@ -196,6 +220,28 @@ class Auth {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/session/revoke/all`;
     const res = await request(url, { method: 'POST' });
     if (!res.ok) throw new Error(await res.text());
+  }
+
+  /**
+   * Fetch detailed subscription information
+   */
+  async getSubscriptionDetails(): Promise<SubscriptionDetails> {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/payments/subscription`;
+    const res = await request(url);
+    if (!res.ok) throw new Error(await res.text());
+    const json = await res.json();
+    return SubscriptionDetailsSchema.parse(json);
+  }
+
+  /**
+   * Fetch checkout session details by ID
+   */
+  async getCheckoutDetails(id: string): Promise<CheckoutDetails> {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/payments/checkout-details/${id}`;
+    const res = await request(url);
+    if (!res.ok) throw new Error(await res.text());
+    const json = await res.json();
+    return CheckoutDetailsSchema.parse(json);
   }
 
   /**

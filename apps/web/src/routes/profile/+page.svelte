@@ -1,389 +1,478 @@
 <script lang="ts">
-import ProBadge from '@lib/components/custom/ProBadge.svelte';
-import ToggleMode from '@lib/components/custom/ToggleMode.svelte';
-import Globe from '@lucide/svelte/icons/globe';
-import LogOut from '@lucide/svelte/icons/log-out';
-import MapPin from '@lucide/svelte/icons/map-pin';
-import Monitor from '@lucide/svelte/icons/monitor';
-import MonitorSmartphone from '@lucide/svelte/icons/monitor-smartphone';
-import Trash2 from '@lucide/svelte/icons/trash-2';
-import {
-  BarSpinner,
-  BraveBrowser,
-  ChromeBrowser,
-  EdgeBrowser,
-  FirefoxBrowser,
-  icons,
-  SafariBrowser,
-  ZenBrowser,
-} from '@nota/ui/icons/index.js';
-import * as Avatar from '@nota/ui/shadcn/avatar';
-import { Button } from '@nota/ui/shadcn/button';
-import * as Card from '@nota/ui/shadcn/card';
-import { toast } from '@nota/ui/shadcn/sonner';
-import * as Tabs from '@nota/ui/shadcn/tabs';
-import { resolve } from '$app/paths';
-import Topbar from '$lib/components/topbar.svelte';
+  import { getAuthContext, getStorageContext } from "@nota/client";
+  import { onMount } from "svelte";
+  import UserAvatar from "$lib/components/custom/user-avatar.svelte";
+  import { Button } from "@nota/ui/shadcn/button";
+  import { Badge } from "@nota/ui/shadcn/badge";
+  import * as Tabs from "@nota/ui/shadcn/tabs";
+  import * as Card from "@nota/ui/shadcn/card";
+  import { icons } from "@nota/ui/icons";
+  import type { Session } from "@nota/client";
+  import Particles from "$lib/components/custom/landing/particles.svelte";
+  import { toast } from "@lib/components/ui/sonner";
+  import { ProBadge, StorageViewer } from "@nota/ui/custom/index.js";
+  import { PUBLIC_BACKEND_URL } from "$env/static/public";
 
-const { data } = $props();
+  const { data } = $props();
+  const authClient = getAuthContext();
+  const storage = getStorageContext();
+  const user = $derived(data.user);
+  const session = $derived(data.session);
 
-const user = $derived(data.user);
+  let sessions = $state<Session[]>([]);
 
-const isPro = $derived((user?.subscription_plan || 'free') === 'pro');
-const ai_credits = $derived(user?.ai_credits || 0);
-const external_customer_id = $derived(user?.external_customer_id);
-const sub_type = $derived(user?.subscription_plan || undefined);
+  let search = $state("");
+  let page = $state(1);
+  let limit = $state(10);
+  let isLoading = $state(false);
 
-function handleDeleteAccount() {
-  toast.warning('Account Deletion is coming soon.');
-}
-
-import { getAuthContext, type ParsedSession, parseSession, type Session } from '@nota/client';
-import { onMount } from 'svelte';
-import Particles from '$lib/components/custom/utils/particles.svelte';
-
-const auth = getAuthContext();
-let sessions: (Session & ParsedSession)[] = $state([]);
-let isLoadingSessions = $state(true);
-
-onMount(async () => {
-  try {
-    const rawSessions = await auth.getSessions();
-    // Assuming the one with the latest refreshed_at or created_at might be current if we don't know the ID
-    // For now we'll just parse them
-    sessions = rawSessions
-      .map((s) => ({
-        ...s,
-        ...parseSession(s.user_agent ?? '', s),
-      }))
-      .sort(
-        (a, b) =>
-          new Date(b.refreshed_at || b.created_at).getTime() - new Date(a.refreshed_at || a.created_at).getTime()
-      );
-
-    // Naively mark the most recently active one as current if we don't have currentSessionId
-    if (sessions.length > 0 && !sessions.some((s) => s.isCurrent)) {
-      sessions[0].isCurrent = true;
+  async function loadStorageFiles() {
+    if (!storage) return;
+    isLoading = true;
+    try {
+      await storage.fetch({ page, limit, search });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      isLoading = false;
     }
-  } catch (err) {
-    toast.error('Failed to load sessions');
-  } finally {
-    isLoadingSessions = false;
   }
-});
 
-async function revokeSession(id: string) {
-  try {
-    await auth.revokeSession(id);
-    sessions = sessions.filter((s) => s.id !== id);
-    toast.success('Session revoked successfully.');
-  } catch (err) {
-    toast.error('Failed to revoke session.');
-  }
-}
+  onMount(async () => {
+    try {
+      sessions = await authClient.getSessions();
+    } catch (e) {
+      console.error(e);
+    }
+    loadStorageFiles();
+  });
 
-async function revokeAllOtherSessions() {
-  try {
-    // Current is either the one marked isCurrent or the first one
-    const currentSession = sessions.find((s) => s.isCurrent) || sessions[0];
-    if (!currentSession) return;
-    await auth.deleteAllOtherSessions(currentSession.id);
-    sessions = sessions.filter((s) => s.id === currentSession.id);
-    toast.success('All other sessions revoked successfully.');
-  } catch (err) {
-    toast.error('Failed to revoke other sessions.');
+  function timeAgo(date: Date | string | null | undefined) {
+    if (!date) return "";
+    const seconds = Math.floor(
+      (new Date().getTime() - new Date(date).getTime()) / 1000,
+    );
+    if (seconds < 60) return "just now";
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return interval + "y ago";
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return interval + "mo ago";
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return interval + "d ago";
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return interval + "h ago";
+    interval = Math.floor(seconds / 60);
+    return interval + "m ago";
   }
-}
+
+  function getDeviceIcon(
+    device: string | null | undefined,
+    browser: string | null | undefined,
+  ) {
+    if (device === "desktop") return "/favicon.svg";
+    if (!browser) return "https://svgl.app/library/chrome.svg";
+
+    const b = browser.toLowerCase();
+    if (b.includes("safari")) return "https://svgl.app/library/safari.svg";
+    if (b.includes("chrome")) return "https://svgl.app/library/chrome.svg";
+    if (b.includes("edge")) return "https://svgl.app/library/edge.svg";
+    if (b.includes("zen"))
+      return "https://svgl.app/library/zen-browser-dark.svg";
+    if (b.includes("firefox")) return "https://svgl.app/library/firefox.svg";
+    if (b.includes("brave")) return "https://svgl.app/library/brave.svg";
+
+    return "https://svgl.app/library/chrome.svg";
+  }
+
+  async function handleSignOut() {
+    await authClient.logout();
+    window.location.href = "/signin";
+  }
+
+  async function handleRevokeSession(id: string) {
+    try {
+      await authClient.revokeSession(id);
+      sessions = sessions.filter((s) => s.id !== id);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function handleRevokeOtherSessions() {
+    if (session) {
+      try {
+        await authClient.deleteAllOtherSessions(session.id);
+        sessions = await authClient.getSessions();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  async function handleDeleteAsset(id: string, name: string) {
+    if (!storage) return;
+    try {
+      await storage.delete(id);
+      toast.success(`Deleted file "${name}"`);
+      await loadStorageFiles();
+    } catch (e: any) {
+      toast.error(`Failed to delete file: ${e?.message || e}`);
+    }
+  }
+
+  function handleSearchChange(newSearch: string) {
+    search = newSearch;
+    page = 1;
+    loadStorageFiles();
+  }
+
+  function handlePageChange(newPage: number) {
+    page = newPage;
+    loadStorageFiles();
+  }
 </script>
 
-<Particles class="fixed top-0 -z-10 h-screen w-screen overflow-hidden" />
+<Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />
 
-{#if !user}
-  <main class="container mx-auto max-w-4xl p-4 md:p-8">
-    <h2>Please sign in to view your profile.</h2>
-  </main>
-{:else}
-<div class="flex h-screen w-full flex-col text-foreground">
-  <Topbar>
-    {#snippet left()}
-      <div class="flex items-center gap-2">
-      <Button href={resolve("/")} variant="outline" size="icon">
-        <icons.ChevronLeft />
-      </Button>
-        <icons.User class="size-4" />
-        <span class="font-medium text-sm">Profile</span>
-      </div>
-    {/snippet}
-  </Topbar>
+<div class="mx-auto max-w-4xl p-6 md:p-10 pt-16 space-y-8">
+  <div class="space-y-1">
+    <h1 class="text-3xl font-bold tracking-tight">Your Profile</h1>
+    <span class="text-muted-foreground"
+      >Manage your account, settings, and cloud storage.</span
+    >
+  </div>
 
-  <div class="flex-1 overflow-auto p-6 md:p-10">
-    <div class="mx-auto max-w-4xl space-y-8 animate-in fade-in">
-      <div class="space-y-1">
-        <h1 class="text-3xl font-bold tracking-tight">Your Profile</h1>
-        <p class="text-muted-foreground">Manage your account and settings.</p>
-      </div>
+  {#if user}
+    <Tabs.Root value="general" class="w-full">
+      <Tabs.List class="w-full">
+        <Tabs.Trigger value="general">
+          <icons.User />
+          General
+        </Tabs.Trigger>
+        <Tabs.Trigger value="billing">
+          <icons.CreditCard />
+          Billing
+        </Tabs.Trigger>
+        <Tabs.Trigger value="storage">
+          <icons.Database />
+          Storage
+        </Tabs.Trigger>
+        <Tabs.Trigger value="sessions">
+          <icons.Monitor />
+          Sessions
+        </Tabs.Trigger>
+      </Tabs.List>
 
-      <Tabs.Root value="general" class="w-full">
-        <Tabs.List class="grid w-full grid-cols-4 lg:w-[400px]">
-          <Tabs.Trigger value="general">General</Tabs.Trigger>
-          <Tabs.Trigger value="billing">Billing</Tabs.Trigger>
-          <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
-          <Tabs.Trigger value="sessions">Sessions</Tabs.Trigger>
-        </Tabs.List>
-
-        <!-- General Tab -->
-        <Tabs.Content value="general" class="space-y-8 mt-6">
-          <Card.Root class="border-border/50 bg-card/50 backdrop-blur-xs">
-            <Card.Header>
-              <Card.Title>User Information</Card.Title>
-              <Card.Description>Your personal details.</Card.Description>
-            </Card.Header>
-            <Card.Content class="grid gap-6">
-              <div class="flex items-center gap-4">
-                <Avatar.Root class="h-16 w-16">
-                  {#if user.avatar_url}
-                    <Avatar.Image src={user.avatar_url} alt={user.name} />
+      <!-- General Tab -->
+      <Tabs.Content value="general" class="space-y-6 outline-none">
+        <Card.Root class="overflow-hidden">
+          <Card.Header>
+            <Card.Title>User Information</Card.Title>
+            <Card.Description
+              >Your personal details and credit status.</Card.Description
+            >
+          </Card.Header>
+          <Card.Content class="space-y-6">
+            <div class="flex items-center gap-4 mt-2">
+              <UserAvatar
+                image={user.avatar_url ?? ""}
+                name={user.name ?? "User"}
+                class="size-16 text-xl"
+              />
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl font-semibold"
+                    >{user.name ?? "User"}</span
+                  >
+                  {#if user.subscription_plan === "pro"}
+                    <ProBadge />
+                  {:else}
+                    <Badge variant="outline">Free</Badge>
                   {/if}
-                  <Avatar.Fallback>
-                    {user.name?.charAt(0) ?? user.email.charAt(0)?.toUpperCase()}
-                  </Avatar.Fallback>
-                </Avatar.Root>
-                <div class="grid gap-1">
-                  <div class="text-xl font-semibold flex items-center gap-2">
-                    <span>
-                      {user.name ?? "No Name"}
+                </div>
+                <span class="text-sm text-muted-foreground">{user.email}</span>
+              </div>
+            </div>
+
+            <!-- AI Credits Card inside General section -->
+            <div class="rounded-xl border bg-muted/40 p-4 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold flex items-center gap-2">
+                  <icons.Sparkles class="size-4 text-orange-500" />
+                  Available AI Credits
+                </span>
+                <Badge variant="secondary" class="font-mono text-xs">
+                  {user.ai_credits.toLocaleString()} Credits
+                </Badge>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                AI credits are used for smart completions, document analysis,
+                and generative note actions.
+              </p>
+            </div>
+
+            <div class="mt-4">
+              <span class="text-sm font-semibold mb-1 block"
+                >Account Created</span
+              >
+              <span class="text-sm text-muted-foreground">
+                {new Date(user.created_at).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+          </Card.Content>
+          <Card.Footer class="justify-end">
+            <Button variant="outline" onclick={handleSignOut} class="gap-2">
+              <icons.LogOut class="size-4" />
+              Sign Out
+            </Button>
+          </Card.Footer>
+        </Card.Root>
+
+        <Card.Root class="border-red-900/50 bg-red-950/10">
+          <Card.Header>
+            <Card.Title class="text-red-500">Danger Zone</Card.Title>
+            <Card.Description class="text-muted-foreground">
+              These actions are permanent and cannot be undone.
+            </Card.Description>
+          </Card.Header>
+          <Card.Content class="flex items-center justify-between mt-2">
+            <div class="space-y-1">
+              <span class="font-medium text-foreground block"
+                >Delete Account</span
+              >
+              <span class="text-sm text-muted-foreground block">
+                Permanently delete your account and all associated data.
+              </span>
+            </div>
+            <Button
+              variant="destructive"
+              class="bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 gap-2"
+              onclick={() => {
+                toast.warning("User deletion is not available yet");
+              }}
+            >
+              <icons.Trash2 class="size-4" />
+              Delete Account
+            </Button>
+          </Card.Content>
+        </Card.Root>
+      </Tabs.Content>
+
+      <!-- Billing Tab -->
+      <Tabs.Content value="billing" class="space-y-6 outline-none">
+        <Card.Root>
+          <Card.Header>
+            <Card.Title>Subscription Status</Card.Title>
+            <Card.Description>
+              Manage your current subscription and billing cycle.
+            </Card.Description>
+          </Card.Header>
+          <Card.Content class="space-y-6 mt-2">
+            {#await authClient.getSubscriptionDetails()}
+              <div class="flex items-center justify-center p-8">
+                <icons.Loader
+                  class="size-6 animate-spin text-muted-foreground"
+                />
+              </div>
+            {:then details}
+              <div class="grid gap-6 md:grid-cols-2">
+                <div class="space-y-1">
+                  <span class="text-sm font-medium block">Current Plan</span>
+                  {#if details.subscription_plan === "pro"}
+                    <div class="flex items-center gap-2">
+                      <ProBadge class="w-fit mx-0" />
+                      {#if details.status === "canceled"}
+                        <Badge
+                          variant="destructive"
+                          class="text-[10px] uppercase">Canceled</Badge
+                        >
+                      {:else if details.status === "active"}
+                        <Badge
+                          variant="outline"
+                          class="border-green-500/30 text-green-500 bg-green-500/10 font-medium uppercase text-[10px]"
+                          >Active</Badge
+                        >
+                      {/if}
+                    </div>
+                  {:else}
+                    <Badge variant="outline">Free</Badge>
+                  {/if}
+                </div>
+
+                {#if details.subscription_plan === "pro"}
+                  <div class="space-y-1">
+                    <span class="text-sm font-medium block">Billing Cycle</span>
+                    <span
+                      class="text-sm text-muted-foreground block capitalize"
+                    >
+                      {details.subscription_type || "N/A"}
                     </span>
-                    {#if isPro}
-                      <ProBadge text={sub_type} />
-                    {/if}
                   </div>
-                  <div class="text-muted-foreground text-sm">{user?.email}</div>
-                </div>
+
+                  {#if details.amount && details.currency}
+                    <div class="space-y-1">
+                      <span class="text-sm font-medium block">Amount</span>
+                      <span
+                        class="text-sm text-muted-foreground block uppercase"
+                      >
+                        {(details.amount / 100).toFixed(2)}
+                        {details.currency}
+                      </span>
+                    </div>
+                  {/if}
+
+                  <div class="space-y-1">
+                    <span class="text-sm font-medium block">
+                      {details.cancel_at_period_end
+                        ? "Ends On"
+                        : "Next Billing Date"}
+                    </span>
+                    <span class="text-sm text-muted-foreground block">
+                      {#if details.current_period_end}
+                        {new Date(
+                          details.current_period_end,
+                        ).toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      {:else}
+                        N/A
+                      {/if}
+                    </span>
+                  </div>
+                {/if}
               </div>
-              <div class="grid gap-2">
-                <div class="text-sm font-medium">Account created</div>
-                <div class="text-muted-foreground text-sm">
-                  {new Date(user.created_at ?? "").toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </div>
+            {:catch error}
+              <div class="text-sm text-red-500">
+                Failed to load subscription details. {error.message}
               </div>
-            </Card.Content>
-            <Card.Footer class="flex justify-end gap-2 border-t pt-6 bg-muted/10">
-              <Button href={resolve('/signout')} variant="outline">
-                <LogOut class="mr-2 h-4 w-4" />
-                Sign Out
+            {/await}
+          </Card.Content>
+          {#if user.subscription_plan === "pro"}
+            <Card.Footer class="px-6 py-4">
+              <Button
+                variant="outline"
+                href="{PUBLIC_BACKEND_URL}/api/v1/payments/portal"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="gap-2 w-full sm:w-auto"
+              >
+                <icons.ExternalLink class="size-4" />
+                Manage Subscription on Polar
               </Button>
             </Card.Footer>
-          </Card.Root>
+          {/if}
+        </Card.Root>
+      </Tabs.Content>
 
-          <Card.Root class="border-destructive/30 bg-destructive/5">
-            <Card.Header>
-              <Card.Title class="text-destructive">Danger Zone</Card.Title>
-              <Card.Description>These actions are permanent and cannot be undone.</Card.Description>
-            </Card.Header>
-            <Card.Content>
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="font-semibold text-foreground">Delete Account</div>
-                  <div class="text-muted-foreground text-sm">
-                    Permanently delete your account and all associated data.
+      <!-- Storage Tab -->
+      <Tabs.Content value="storage" class="space-y-6 outline-none">
+        <StorageViewer
+          usedStorage={user.used_storage}
+          assignedStorage={user.assigned_storage}
+          assets={storage?.assets || []}
+          total={storage?.total || 0}
+          {page}
+          {limit}
+          {isLoading}
+          bind:search
+          onSearchChange={handleSearchChange}
+          onPageChange={handlePageChange}
+          onRefresh={loadStorageFiles}
+          onDelete={handleDeleteAsset}
+        />
+      </Tabs.Content>
+
+      <!-- Sessions Tab -->
+      <Tabs.Content value="sessions" class="outline-none">
+        <Card.Root>
+          <Card.Header
+            class="flex flex-row items-center justify-between space-y-0 pb-6"
+          >
+            <div class="space-y-1.5">
+              <Card.Title>Active Sessions</Card.Title>
+              <Card.Description>
+                Manage the devices where you are currently logged in.
+              </Card.Description>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onclick={handleRevokeOtherSessions}
+            >
+              Revoke All Other Sessions
+            </Button>
+          </Card.Header>
+          <Card.Content class="grid gap-3">
+            {#each sessions as s}
+              <div
+                class="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 p-2"
+                  >
+                    <img
+                      src={getDeviceIcon(s.device, s.browser)}
+                      alt={s.browser || "Browser"}
+                      class="size-full object-contain"
+                    />
                   </div>
-                </div>
-                <Button onclick={handleDeleteAccount} variant="destructive">
-                  <Trash2 class="mr-2 h-4 w-4" />
-                  Delete Account
-                </Button>
-              </div>
-            </Card.Content>
-          </Card.Root>
-        </Tabs.Content>
-
-        <!-- Billing Tab -->
-        <Tabs.Content value="billing" class="space-y-8 mt-6">
-          <Card.Root class="border-border/50 bg-card/50 backdrop-blur-xs">
-            <Card.Header>
-              <Card.Title>Storage & Usage</Card.Title>
-              <Card.Description>Manage your storage limits and AI credits.</Card.Description>
-            </Card.Header>
-            <Card.Content class="grid gap-6">
-              <div class="grid gap-2">
-                <div class="text-sm font-medium flex justify-between">
-                  <span>Storage Usage</span>
-                  <span class="text-muted-foreground">
-                    {(user.used_storage / 1024 / 1024).toFixed(2)} MB / {(user.assigned_storage / 1024 / 1024).toFixed(2)} MB
-                  </span>
-                </div>
-                <div class="w-full bg-secondary rounded-full h-2.5 dark:bg-gray-700">
-                  <div class="bg-primary h-2.5 rounded-full" style="width: {Math.min(100, ((user.used_storage || 0) / (user.assigned_storage || 1)) * 100)}%"></div>
-                </div>
-              </div>
-              
-              <div class="grid gap-2">
-                <div class="text-sm font-medium">Available AI Credits</div>
-                <div class="text-muted-foreground text-sm flex items-center gap-2">
-                  <icons.Sparkles class="size-4 text-orange-500" />
-                  {ai_credits} Tokens remaining
-                </div>
-              </div>
-            </Card.Content>
-          </Card.Root>
-
-          <Card.Root class="border-border/50 bg-card/50 backdrop-blur-xs">
-            <Card.Header>
-              <Card.Title>Subscription Status</Card.Title>
-              <Card.Description>Manage your current subscription and billing cycle.</Card.Description>
-            </Card.Header>
-            <Card.Content class="grid gap-6">
-              <div class="flex items-center justify-between">
-                <div class="space-y-1">
-                  <p class="text-sm font-medium leading-none">Current Plan</p>
-                  <p class="text-sm text-muted-foreground capitalize flex items-center gap-2 mt-1">
-                    {sub_type || 'Free Tier'}
-                    {#if isPro}
-                      <ProBadge />
-                    {/if}
-                  </p>
-                </div>
-              </div>
-              <div class="grid gap-2">
-                <div class="text-sm font-medium">Subscription Cycle</div>
-                <div class="text-muted-foreground text-sm">
-                  {#if user.next_billing_at}
-                    Next billing date: {new Date(user.next_billing_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  {:else}
-                    No active billing cycle
-                  {/if}
-                </div>
-              </div>
-            </Card.Content>
-            <Card.Footer class="flex justify-end gap-2 border-t pt-6 bg-muted/10">
-              {#if !isPro}
-                <Button variant="default" href="/#pricing">
-                  Upgrade to <ProBadge />
-                </Button>
-              {:else if external_customer_id}
-                <Button variant="outline" href="https://api.nota.ink/api/v1/payments/portal">
-                  Manage Subscription
-                </Button>
-              {/if}
-            </Card.Footer>
-          </Card.Root>
-        </Tabs.Content>
-
-        <!-- Settings Tab -->
-        <Tabs.Content value="settings" class="space-y-8 mt-6">
-          <Card.Root class="border-border/50 bg-card/50 backdrop-blur-xs">
-            <Card.Header>
-              <Card.Title>Appearance</Card.Title>
-              <Card.Description>Customize the look and feel of the application.</Card.Description>
-            </Card.Header>
-            <Card.Content>
-              <div class="flex items-center justify-between">
-                <div class="space-y-1">
-                  <div class="font-medium">Theme Mode</div>
-                  <div class="text-sm text-muted-foreground">Switch between light and dark themes.</div>
-                </div>
-                <ToggleMode />
-              </div>
-            </Card.Content>
-          </Card.Root>
-        </Tabs.Content>
-
-        <!-- Sessions Tab -->
-        <Tabs.Content value="sessions" class="space-y-8 mt-6">
-          <Card.Root class="border-border/50 bg-card/50 backdrop-blur-xs">
-            <Card.Header class="flex flex-row items-center justify-between">
-              <div>
-                <Card.Title>Active Sessions</Card.Title>
-                <Card.Description>Manage the devices where you are currently logged in.</Card.Description>
-              </div>
-              {#if sessions.length > 1}
-                <Button variant="outline" size="sm" onclick={revokeAllOtherSessions}>
-                  Revoke All Other Sessions
-                </Button>
-              {/if}
-            </Card.Header>
-            <Card.Content class="grid gap-4">
-              {#if isLoadingSessions}
-                <div class="flex items-center justify-center py-8">
-                  <BarSpinner class="size-6 text-muted-foreground" />
-                </div>
-              {:else if sessions.length === 0}
-                <div class="text-center text-sm text-muted-foreground py-8">No active sessions found.</div>
-              {:else}
-                {#each sessions as session (session.id)}
-                  <div class="flex flex-col sm:flex-row sm:items-center justify-between border rounded-lg p-4 bg-background/50 gap-4">
-                    <div class="flex items-center gap-4">
-                      <div class="bg-muted p-2 rounded-full flex items-center justify-center size-10">
-                        {#if session.browserName === 'Chrome'}
-                          <ChromeBrowser class="size-6" />
-                        {:else if session.browserName === 'Safari'}
-                          <SafariBrowser class="size-6" />
-                        {:else if session.browserName === 'Edge'}
-                          <EdgeBrowser class="size-6" />
-                        {:else if session.browserName === 'Firefox'}
-                          <FirefoxBrowser class="size-6" />
-                        {:else if session.browserName === 'Brave'}
-                          <BraveBrowser class="size-6" />
-                        {:else if session.browserName === 'Zen'}
-                          <ZenBrowser class="size-6" />
-                        {:else}
-                          <MonitorSmartphone class="size-5 text-muted-foreground" />
-                        {/if}
-                      </div>
-                      <div>
-                        <div class="font-medium flex items-center gap-2 flex-wrap">
-                          <span>{session.osName} &bull; {session.browserName}</span>
-                          {#if session.platform === 'desktop'}
-                            <span class="inline-flex items-center gap-1 bg-blue-500/10 text-blue-500 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border border-blue-500/20">
-                              <Monitor class="size-4" /> Desktop
-                            </span>
-                          {:else}
-                            <span class="inline-flex items-center gap-1 bg-green-500/10 text-green-500 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border border-green-500/20">
-                              <Globe class="size-4" /> Web
-                            </span>
-                          {/if}
-                          {#if session.isCurrent}
-                            <span class="bg-primary/10 text-primary text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Current Device</span>
-                          {/if}
-                        </div>
-                        <div class="text-sm text-muted-foreground flex items-center gap-3 mt-1">
-                          {#if session.location}
-                            <span class="flex items-center gap-1" title="IP: {session.ip}">
-                              <MapPin class="size-4 text-red-500" /> {session.location}
-                            </span>
-                            <span class="text-muted-foreground/60">&bull;</span>
-                          {:else if session.ip}
-                            <span class="flex items-center gap-1">
-                              <MapPin class="size-4" /> {session.ip}
-                            </span>
-                            <span class="text-muted-foreground/60">&bull;</span>
-                          {/if}
-                          <span>Active {session.createdAgo}</span>
-                        </div>
-                      </div>
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-medium leading-none">
+                        {s.os || "Unknown OS"} • {s.browser ||
+                          "Unknown Browser"}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        class="border-green-500/30 text-green-500 bg-green-500/10 font-medium uppercase text-[10px]"
+                      >
+                        {s.device === "desktop" ? "APP" : "WEB"}
+                      </Badge>
+                      {#if data.session?.id === s.id}
+                        <Badge
+                          variant="secondary"
+                          class="bg-muted font-medium uppercase text-[10px]"
+                        >
+                          CURRENT DEVICE
+                        </Badge>
+                      {/if}
                     </div>
-                    {#if !session.isCurrent}
-                      <Button variant="ghost" size="sm" class="text-destructive hover:bg-destructive/10 hover:text-destructive w-full sm:w-auto" onclick={() => revokeSession(session.id)}>
-                        Revoke
-                      </Button>
-                    {/if}
+                    <div
+                      class="flex items-center gap-2 text-xs text-muted-foreground"
+                    >
+                      <div class="flex items-center gap-1 text-red-400">
+                        <icons.MapPin class="size-3" />
+                        <span>{s.country || "Unknown"}</span>
+                      </div>
+                      <span>•</span>
+                      <span
+                        >Active {timeAgo(s.refreshed_at || s.created_at)}</span
+                      >
+                    </div>
                   </div>
-                {/each}
-              {/if}
-            </Card.Content>
-          </Card.Root>
-        </Tabs.Content>
-
-      </Tabs.Root>
-    </div>
-  </div>
+                </div>
+                {#if data.session?.id !== s.id}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    class="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                    onclick={() => handleRevokeSession(s.id)}
+                  >
+                    Revoke
+                  </Button>
+                {/if}
+              </div>
+            {/each}
+          </Card.Content>
+        </Card.Root>
+      </Tabs.Content>
+    </Tabs.Root>
+  {/if}
 </div>
-{/if}

@@ -7,8 +7,10 @@ const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in 
 
 export const fetchFn = isTauri() ? tauriFetch : fetch;
 
+type FetchLike = (input: RequestInfo | URL | string, init?: RequestInit) => Promise<Response>;
+
 interface CustomRequestInit extends RequestInit {
-  fetch?: typeof fetch;
+  fetch?: FetchLike;
 }
 
 // ---------------------------------------------------------------------------
@@ -85,7 +87,7 @@ async function tryRefresh(
   originalUrl: string,
   fetchOptions: RequestInit,
   headers: Headers,
-  doFetch: typeof fetch,
+  doFetch: FetchLike,
   options: CustomRequestInit
 ): Promise<Response> {
   try {

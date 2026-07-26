@@ -17,14 +17,6 @@ func GetUserByEmail(email string) (*models.User, error) {
 	return user, nil
 }
 
-func InsertOrUpdateUser(user *models.User) error {
-	ctx := context.Background()
-	if _, err := config.DB.NewInsert().Model(user).On("CONFLICT (email) DO UPDATE").Set("name = ?, avatar_url = ?, provider = ?, provider_id = ?", user.Name, user.AvatarUrl, user.Provider, user.ProviderId).Exec(ctx); err != nil {
-		return err
-	}
-	return nil
-}
-
 func GetUserById(id string) (*models.User, error) {
 	ctx := context.Background()
 	user := &models.User{Id: id}
@@ -36,10 +28,8 @@ func GetUserById(id string) (*models.User, error) {
 
 func InsertUser(user *models.User) error {
 	ctx := context.Background()
-	if _, err := config.DB.NewInsert().Model(user).Exec(ctx); err != nil {
-		return err
-	}
-	return nil
+	_, err := config.DB.NewInsert().Model(user).Exec(ctx)
+	return err
 }
 
 func UpdateUser(user *models.User) error {
@@ -51,4 +41,26 @@ func UpdateUser(user *models.User) error {
 	}
 	log.Info("Updated User with id: ", user.Id)
 	return nil
+}
+
+func CreateDefaultWorkspace(userId string, name string) error {
+	if userId == "" {
+		return nil
+	}
+	ctx := context.Background()
+	exists, err := config.DB.NewSelect().Model((*models.Workspace)(nil)).Where("owner = ?", userId).Exists(ctx)
+	if err == nil && !exists {
+		if name == "" {
+			name = "Cloud Workspace"
+		}
+		workspace := &models.Workspace{
+			Name:        name,
+			Icon:        "📁",
+			Description: "Your default workspace",
+			Owner:       userId,
+		}
+		_, err = config.DB.NewInsert().Model(workspace).Exec(ctx)
+		return err
+	}
+	return err
 }

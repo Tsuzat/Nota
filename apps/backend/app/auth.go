@@ -7,7 +7,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"os"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -29,6 +29,7 @@ import (
 )
 
 var AvailableOAuthProviders = []string{"google", "github"}
+var base64UrlRegex = regexp.MustCompile(`^[a-zA-Z0-9\-\_]{43,128}$`)
 
 func getGoogleAuthConfig() *oauth2.Config {
 	return &oauth2.Config{
@@ -58,7 +59,7 @@ func SignUpWithEmailAndPassword(c fiber.Ctx) error {
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
-			Error:  err.Error(),
+			Error:  "Invalid request body",
 		})
 	}
 	if _, err := db.GetUserByEmail(req.Email); err == nil {
@@ -77,19 +78,21 @@ func SignUpWithEmailAndPassword(c fiber.Ctx) error {
 		})
 	}
 	req.Password = string(hashedPassword)
-	// insert the user in DB
-	if err := db.InsertUser(&models.User{
+	newUser := &models.User{
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: req.Password,
 		Provider: "email",
-	}); err != nil {
+	}
+	if err := db.InsertUser(newUser); err != nil {
 		log.Error("User creation error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Failed to create your account. Please try again.",
 		})
 	}
+	OnUserCreate(c.Context(), newUser)
+
 	return c.Status(fiber.StatusCreated).JSON(models.APIResponse{
 		Status:  fiber.StatusCreated,
 		Message: "User created successfully.",
@@ -101,7 +104,7 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
-			Error:  err.Error(),
+			Error:  "Invalid request body",
 		})
 	}
 	// Check if the user exists
@@ -111,27 +114,21 @@ func SignInWithEmailAndPassword(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
 			Error:  "Something went wrong when retrieving user. Please try again.",
-			Data:   err.Error(),
 		})
-	} else if user == nil {
-		log.Error("User not found with email:", req.Email)
+	} else if user == nil || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)) != nil {
+		log.Error("Invalid authentication attempt for email:", req.Email)
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusNotFound,
-			Error:  "User not found with email",
+			Status: fiber.StatusUnauthorized,
+			Error:  "Invalid email or password",
 		})
-	} else if user.IsVerified == false {
+	} else if !user.IsVerified {
 		log.Error("User not verified with email:", req.Email)
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "User not verified with email. Please verify your email or register again.",
 		})
-	} else if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)) != nil {
-		log.Error("Password comparison error for user:", req.Email)
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "Password is incorrect",
-		})
 	}
+
 	isDesktop := c.Locals("isDesktop").(bool)
 	sessionId, err := db.CreateSession(user.Id, c, isDesktop)
 	if err != nil {
@@ -182,7 +179,25 @@ func SignInOAuth(c fiber.Ctx) error {
 	provider := c.Req().Params("provider")
 	codeChallenge := c.Req().Query("code_challenge")
 	isDesktop := c.Locals("isDesktop").(bool) || c.Req().Query("isdesktop") == "true"
-	isProd := os.Getenv("ENV") == "production"
+	isProd := config.IsProduction()
+
+	if codeChallenge != "" {
+		if !base64UrlRegex.MatchString(codeChallenge) {
+			return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+				Status: fiber.StatusBadRequest,
+				Error:  "Invalid code_challenge format",
+			})
+		}
+		c.Cookie(&fiber.Cookie{
+			Name:     "code_challenge",
+			Value:    codeChallenge,
+			MaxAge:   60 * 5,
+			HTTPOnly: true,
+			Secure:   isProd,
+			SameSite: "Lax",
+		})
+	}
+
 	if isDesktop {
 		c.Cookie(&fiber.Cookie{
 			Name:     "auth_platform",
@@ -197,16 +212,7 @@ func SignInOAuth(c fiber.Ctx) error {
 		c.Cookie(&fiber.Cookie{Name: "auth_platform", Value: "", MaxAge: -1, HTTPOnly: true, Secure: isProd, SameSite: "Lax"})
 		c.Cookie(&fiber.Cookie{Name: "code_challenge", Value: "", MaxAge: -1, HTTPOnly: true, Secure: isProd, SameSite: "Lax"})
 	}
-	if codeChallenge != "" {
-		c.Cookie(&fiber.Cookie{
-			Name:     "code_challenge",
-			Value:    codeChallenge,
-			MaxAge:   60 * 5,
-			HTTPOnly: true,
-			Secure:   isProd,
-			SameSite: "Lax",
-		})
-	}
+
 	if provider == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
@@ -229,6 +235,79 @@ func SignInWithGoogle(c fiber.Ctx) error {
 	utils.SetCache("oauth_state:"+state, true, time.Minute*5)
 	url := getGoogleAuthConfig().AuthCodeURL(state)
 	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(url)
+}
+
+func completeOAuthLogin(c fiber.Ctx, user *models.User) error {
+	existingUser, _ := db.GetUserByEmail(user.Email)
+	isNewUser := existingUser == nil
+
+	// UPSERT user into DB
+	_, err := config.DB.NewInsert().
+		Model(user).
+		On("CONFLICT (email) DO UPDATE").
+		Set("name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, provider = EXCLUDED.provider, provider_id = EXCLUDED.provider_id").
+		Returning("id").
+		Exec(c.Context())
+	if err != nil {
+		log.Error("Error while updating user: ", err)
+		return c.Status(fiber.ErrInternalServerError.Code).JSON(models.APIError{
+			Status: fiber.ErrInternalServerError.Code,
+			Error:  "Something went wrong when updating user",
+		})
+	}
+
+	if isNewUser {
+		OnUserCreate(c.Context(), user)
+	}
+
+	platform := string(c.Request().Header.Cookie("auth_platform"))
+	codeChallenge := string(c.Request().Header.Cookie("code_challenge"))
+	isDesktop := platform == "desktop"
+
+	// Clear one-time-use cookies immediately after reading
+	secureCookie := config.IsProduction()
+	c.Cookie(&fiber.Cookie{Name: "auth_platform", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
+	c.Cookie(&fiber.Cookie{Name: "code_challenge", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
+
+	if isDesktop {
+		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c, true)
+		if err != nil {
+			log.Error("Unable to create desktop session: ", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+				Status: fiber.StatusInternalServerError,
+				Error:  "Unable to create session",
+			})
+		}
+		return c.Redirect().Status(fiber.StatusPermanentRedirect).To(fmt.Sprintf("nota://auth/callback?code=%s", sessionId))
+	}
+
+	sessionId, err := db.CreateSession(user.Id, c, false)
+	if err != nil {
+		log.Error("Error while creating session: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Unable to create session",
+		})
+	}
+	accessToken, err := user.GenerateAccessToken(sessionId)
+	if err != nil {
+		log.Error("Error while generating access token: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Unable to generate access token",
+		})
+	}
+	refreshToken, err := user.GenerateRefreshToken(sessionId)
+	if err != nil {
+		log.Error("Error while generating refresh token: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Unable to generate refresh token",
+		})
+	}
+	c.Cookie(config.GetCookieOptions("access_token", accessToken, time.Now().Add(config.AccessTokenDuration)))
+	c.Cookie(config.GetCookieOptions("refresh_token", refreshToken, time.Now().Add(config.RefreshTokenDuration)))
+	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(config.FRONTEND_URL)
 }
 
 func SingInWithGoogleCallBack(c fiber.Ctx) error {
@@ -255,7 +334,7 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 		log.Error("Error while fetch google user: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
-			Error:  fmt.Sprintf("Failed to get google user info: %s", err.Error()),
+			Error:  "Failed to get google user info",
 		})
 	}
 
@@ -269,67 +348,7 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 		EmailVerified:   true,
 		EmailVerifiedAt: time.Now(),
 	}
-	// check if the user if present in DB
-	_, err = config.DB.NewInsert().
-		Model(user).
-		On("CONFLICT (email) DO UPDATE").
-		Set(
-			"name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, provider = EXCLUDED.provider, provider_id = EXCLUDED.provider_id",
-		).
-		Exec(c.Context())
-	if err != nil {
-		log.Error("Error while updating user: ", err)
-		return c.Status(fiber.ErrInternalServerError.Code).JSON(models.APIError{
-			Status: fiber.ErrInternalServerError.Code,
-			Error:  "Something went wrong when updating user",
-			Data:   err.Error(),
-		})
-	}
-
-	platform := string(c.Request().Header.Cookie("auth_platform"))
-	codeChallenge := string(c.Request().Header.Cookie("code_challenge"))
-	isDesktop := platform == "desktop"
-	// Clear one-time-use cookies immediately after reading
-	secureCookie := os.Getenv("ENV") == "production"
-	c.Cookie(&fiber.Cookie{Name: "auth_platform", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
-	c.Cookie(&fiber.Cookie{Name: "code_challenge", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
-	if isDesktop {
-		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c, true)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-				Status: fiber.StatusInternalServerError,
-				Error:  "Unable to create session",
-				Data:   err.Error(),
-			})
-		}
-		return c.Redirect().Status(fiber.StatusPermanentRedirect).To(fmt.Sprintf("nota://auth/callback?code=%s", sessionId))
-	}
-	sessionId, err := db.CreateSession(user.Id, c, false)
-	if err != nil {
-		log.Error("Error while creating session: ", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-			Status: fiber.StatusInternalServerError,
-			Error:  "Unable to create session",
-		})
-	}
-	access_token, err := user.GenerateAccessToken(sessionId)
-	if err != nil {
-		log.Error("Error while generating access token: ", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-			Status: fiber.StatusInternalServerError,
-			Error:  "Unable to generate access token",
-		})
-	}
-	refresh_token, err := user.GenerateRefreshToken(sessionId)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-			Status: fiber.StatusInternalServerError,
-			Error:  "Unable to generate refresh token",
-		})
-	}
-	c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(config.AccessTokenDuration)))
-	c.Cookie(config.GetCookieOptions("refresh_token", refresh_token, time.Now().Add(config.RefreshTokenDuration)))
-	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(config.FRONTEND_URL)
+	return completeOAuthLogin(c, user)
 }
 
 func SignOut(c fiber.Ctx) error {
@@ -351,10 +370,13 @@ func SignOut(c fiber.Ctx) error {
 			}
 			return []byte(config.ACCESS_TOKEN_SECRET), nil
 		})
-		if err == nil {
-			if claims, ok := token.Claims.(jwt.MapClaims); ok {
-				if sid, ok := claims["session_id"].(string); ok && sid != "" {
-					sessionId = &sid
+		// Extract claims even if the token has expired
+		if err == nil || errors.Is(err, jwt.ErrTokenExpired) {
+			if token != nil {
+				if claims, ok := token.Claims.(jwt.MapClaims); ok {
+					if sid, ok := claims["session_id"].(string); ok && sid != "" {
+						sessionId = &sid
+					}
 				}
 			}
 		}
@@ -365,10 +387,14 @@ func SignOut(c fiber.Ctx) error {
 
 	if sessionId != nil {
 		utils.DeleteCache("session:" + *sessionId)
-		go config.DB.NewDelete().
-			Model(&models.Session{}).
-			Where("id = ?", *sessionId).
-			Exec(context.Background())
+		go func(sid string) {
+			if _, err := config.DB.NewDelete().
+				Model(&models.Session{}).
+				Where("id = ?", sid).
+				Exec(context.Background()); err != nil {
+				log.Error("Failed to delete session in SignOut:", err)
+			}
+		}(*sessionId)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(models.APIResponse{
@@ -409,11 +435,9 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 		log.Error("Error while fetch github user: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,
-			Error:  fmt.Sprintf("Failed to get github user info: %s", err.Error()),
+			Error:  "Failed to get github user info",
 		})
 	}
-
-	// If email is empty, fetch it separately
 	if gitUser.Email == "" {
 		email, err := utils.GetGithubUserEmail(token.AccessToken)
 		if err != nil {
@@ -425,6 +449,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 		}
 		gitUser.Email = email
 	}
+
 	user := &models.User{
 		Name:            gitUser.Name,
 		Email:           gitUser.Email,
@@ -435,100 +460,37 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 		EmailVerified:   true,
 		EmailVerifiedAt: time.Now(),
 	}
-	// check if the user if present in DB
-	_, err = config.DB.NewInsert().
-		Model(user).
-		On("CONFLICT (email) DO UPDATE").
-		Set(
-			"name = ?, avatar_url = ?, provider = ?, provider_id = ?", gitUser.Name, gitUser.AvatarUrl, "github", strconv.Itoa(gitUser.ID),
-		).
-		Exec(c.Context())
-	if err != nil {
-		return c.Status(fiber.ErrInternalServerError.Code).JSON(models.APIError{
-			Status: fiber.ErrInternalServerError.Code,
-			Error:  "Something went wrong when updating user",
-			Data:   err.Error(),
-		})
-	}
-
-	platform := string(c.Request().Header.Cookie("auth_platform"))
-	codeChallenge := string(c.Request().Header.Cookie("code_challenge"))
-	isDesktop := platform == "desktop"
-	// Clear one-time-use cookies immediately after reading
-	secureCookie := os.Getenv("ENV") == "production"
-	c.Cookie(&fiber.Cookie{Name: "auth_platform", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
-	c.Cookie(&fiber.Cookie{Name: "code_challenge", Value: "", MaxAge: -1, HTTPOnly: true, Secure: secureCookie, SameSite: "Lax"})
-	if isDesktop {
-		sessionId, err := db.GetPKCESessionToken(user.Id, codeChallenge, c, true)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-				Status: fiber.StatusInternalServerError,
-				Error:  "Unable to create session",
-				Data:   err.Error(),
-			})
-		}
-		return c.Redirect().Status(fiber.StatusPermanentRedirect).To(fmt.Sprintf("nota://auth/callback?code=%s", sessionId))
-	}
-	sessionId, err := db.CreateSession(user.Id, c, false)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-			Status: fiber.StatusInternalServerError,
-			Error:  "Unable to create session",
-		})
-	}
-	access_token, err := user.GenerateAccessToken(sessionId)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-			Status: fiber.StatusInternalServerError,
-			Error:  "Unable to generate access token",
-		})
-	}
-	refresh_token, err := user.GenerateRefreshToken(sessionId)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-			Status: fiber.StatusInternalServerError,
-			Error:  "Unable to generate refresh token",
-		})
-	}
-	c.Cookie(config.GetCookieOptions("access_token", access_token, time.Now().Add(time.Minute*time.Duration(config.ACCESS_TOKEN_EXPIRY))))
-	c.Cookie(config.GetCookieOptions("refresh_token", refresh_token, time.Now().Add(config.RefreshTokenDuration)))
-	return c.Status(fiber.StatusPermanentRedirect).Redirect().To(config.FRONTEND_URL)
+	return completeOAuthLogin(c, user)
 }
 
 func RefreshAccessToken(c fiber.Ctx) error {
 	var refresh_token string
-	// Find the token in cookies
 	refresh_token = c.Cookies("refresh_token")
-	// if Cookies is not found, find the token in headers
 	if refresh_token == "" {
 		authHeader := strings.Split(string(c.Request().Header.Peek("Authorization")), "Bearer ")
 		if len(authHeader) == 2 {
 			refresh_token = authHeader[1]
 		}
 	}
-	// if token is not found, return 403
 	if refresh_token == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "No Refresh Token Provided in Request",
 		})
 	}
-	// decode the token
 	token, err := jwt.Parse(refresh_token, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(config.REFRESH_TOKEN_SECRET), nil
 	})
-	// If there is an error, return 401
-	if err != nil && err != jwt.ErrTokenExpired {
+	if err != nil && !errors.Is(err, jwt.ErrTokenExpired) {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "Error while parsing the access token. Please relogin or refresh your access token",
-			Data:   err.Error(),
 		})
 	}
-	if err == jwt.ErrTokenExpired {
+	if errors.Is(err, jwt.ErrTokenExpired) {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "Access token has expired. Please refresh your access token",
@@ -541,8 +503,16 @@ func RefreshAccessToken(c fiber.Ctx) error {
 			Error:  "Error while parsing the access token",
 		})
 	}
-	// Get the user from the database and attach it to the context so that we can use it in the route
-	id, sessionId := claims["id"].(string), claims["session_id"].(string)
+
+	id, ok1 := claims["id"].(string)
+	sessionId, ok2 := claims["session_id"].(string)
+	if !ok1 || !ok2 {
+		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+			Status: fiber.StatusUnauthorized,
+			Error:  "Invalid token claims",
+		})
+	}
+
 	if !db.IsValidSession(sessionId) {
 		c.Cookie(config.GetCookieOptions("access_token", "", time.Now().Add(-time.Hour)))
 		c.Cookie(config.GetCookieOptions("refresh_token", "", time.Now().Add(-time.Hour)))
@@ -556,7 +526,6 @@ func RefreshAccessToken(c fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "Invalid token, User not found",
-			Data:   err.Error(),
 		})
 	} else if !user.IsVerified {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
@@ -569,7 +538,6 @@ func RefreshAccessToken(c fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
 			Status: fiber.StatusUnauthorized,
 			Error:  "Error while generating access token",
-			Data:   err.Error(),
 		})
 	}
 	isDesktop := c.Locals("isDesktop").(bool)
@@ -598,7 +566,6 @@ func ExchangeCodeForTokens(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
 			Error:  "Invalid request body",
-			Data:   err.Error(),
 		})
 	}
 
@@ -629,12 +596,19 @@ func ExchangeCodeForTokens(c fiber.Ctx) error {
 	sha256Hash := sha256.Sum256([]byte(req.CodeVerifier))
 	challenge := base64.RawURLEncoding.EncodeToString(sha256Hash[:])
 
-	if session.PkceChallenge != challenge {
+	if session.PkceChallenge == "" || session.PkceChallenge != challenge {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
 			Error:  "Invalid code verifier",
 		})
 	}
+
+	// Invalidate PKCE challenge immediately after verification to prevent code reuse
+	_, _ = config.DB.NewUpdate().
+		Model((*models.Session)(nil)).
+		Set("pkce_challenge = NULL").
+		Where("id = ?", session.Id).
+		Exec(c.Context())
 
 	user, err := db.GetUserById(session.UserId)
 	if err != nil {

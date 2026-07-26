@@ -23,25 +23,35 @@ func GetClientInfo(c fiber.Ctx, isDesktop bool) ClientInfo {
 	}
 
 	lowerUA := strings.ToLower(ua)
-	
+	secChUa := strings.ToLower(c.Get("Sec-Ch-Ua"))
+
 	browser := "Unknown Browser"
 	switch {
-	case strings.Contains(lowerUA, "zen"):
+	case strings.Contains(secChUa, "zen") || strings.Contains(lowerUA, "zen"):
 		browser = "Zen"
-	case strings.Contains(lowerUA, "brave"):
+	case strings.Contains(secChUa, "brave") || strings.Contains(lowerUA, "brave"):
 		browser = "Brave"
-	case strings.Contains(lowerUA, "edg"):
+	case strings.Contains(secChUa, "edg") || strings.Contains(lowerUA, "edg"):
 		browser = "Edge"
-	case strings.Contains(lowerUA, "chrome") || strings.Contains(lowerUA, "crios"):
+	case strings.Contains(secChUa, "chrome") || strings.Contains(lowerUA, "chrome") || strings.Contains(lowerUA, "crios"):
 		browser = "Chrome"
-	case strings.Contains(lowerUA, "firefox") || strings.Contains(lowerUA, "fxios"):
+	case strings.Contains(secChUa, "firefox") || strings.Contains(lowerUA, "firefox") || strings.Contains(lowerUA, "fxios"):
 		browser = "Firefox"
-	case strings.Contains(lowerUA, "safari"):
+	case strings.Contains(secChUa, "safari") || strings.Contains(lowerUA, "safari"):
 		browser = "Safari"
 	}
 
 	osName := "Unknown OS"
 	device := "web"
+
+	cfDevice := c.Get("CF-Device-Type")
+	switch cfDevice {
+	case "desktop":
+		device = "desktop"
+	case "mobile", "tablet":
+		device = "mobile"
+	}
+
 	if isDesktop {
 		device = "desktop"
 	}

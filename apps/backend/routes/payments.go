@@ -12,6 +12,8 @@ func InitPaymentRouter() {
 	// Protected routes
 	group.Get("/checkout", middleware.Authenticate, app.Checkout)
 	group.Get("/portal", middleware.Authenticate, app.Portal)
+	group.Get("/subscription", middleware.Authenticate, app.SubscriptionDetails)
+	group.Get("/checkout-details/:id", middleware.Authenticate, app.GetCheckoutDetails)
 
 	// Webhook route (not protected)
 	group.Post("/hooks", app.PolarWebhook)

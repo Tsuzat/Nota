@@ -75,6 +75,7 @@ export type Note = z.infer<typeof NoteSchema>;
 
 export const AssetSchema = z.object({
   id: z.uuid(),
+  user_id: z.uuid(),
   workspace_id: z.uuid(),
   note_id: z.uuid().nullable().optional(),
   name: z.string(),
@@ -94,3 +95,27 @@ export const NotaFileSchema = z.object({
   url: z.url(),
 });
 export type NotaFile = z.infer<typeof NotaFileSchema>;
+
+export const SubscriptionDetailsSchema = z.object({
+  subscription_plan: SubscriptionPlanSchema,
+  subscription_type: SubscriptionTypeSchema.nullable().optional(),
+  status: z.string().nullable().optional(),
+  current_period_start: z.coerce.date().nullable().optional(),
+  current_period_end: z.coerce.date().nullable().optional(),
+  cancel_at_period_end: z.boolean().nullable().optional(),
+  canceled_at: z.coerce.date().nullable().optional(),
+  amount: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+});
+export type SubscriptionDetails = z.infer<typeof SubscriptionDetailsSchema>;
+
+export const CheckoutDetailsSchema = z.object({
+  id: z.string(),
+  status: z.string().nullable().optional(),
+  amount: z.number().nullable().optional(),
+  total_amount: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  created_at: z.coerce.date().nullable().optional(),
+  payment_method: z.string().nullable().optional(),
+});
+export type CheckoutDetails = z.infer<typeof CheckoutDetailsSchema>;
