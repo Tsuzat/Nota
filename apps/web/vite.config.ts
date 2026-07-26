@@ -29,6 +29,7 @@ export default defineConfig({
       "bits-ui",
       "mode-watcher",
       "@lucide/svelte",
+      "runed",
     ],
   },
   server: {

@@ -2,9 +2,8 @@
   import AppLogo from "$lib/components/custom/applogo.svelte";
   import ToggleMode from "@nota/ui/custom/ToggleMode.svelte";
   import Particles from "$lib/components/custom/landing/particles.svelte";
-  import Spotlight from "$lib/components/custom/landing/spotlight.svelte";
   import { Button } from "@nota/ui/shadcn/button";
-  import { icons } from "@nota/ui/icons/index.ts";
+  import { icons } from "@nota/ui/icons";
   import { resolve } from "$app/paths";
 
   const lastUpdated = "July 26, 2026";

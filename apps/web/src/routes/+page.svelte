@@ -309,9 +309,6 @@
         <Dropdown.Content class="w-fit">
           <Dropdown.Group>
             <Dropdown.Label>{user.name}</Dropdown.Label>
-            <Dropdown.Label class="text-xs text-muted-foreground">
-              {user.email}
-            </Dropdown.Label>
             <a href={resolve("/profile")}>
               <Dropdown.Item>
                 <icons.User />

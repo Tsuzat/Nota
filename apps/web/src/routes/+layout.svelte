@@ -2,11 +2,12 @@
   import { Toaster } from "@nota/ui/shadcn/sonner";
   import "../app.css";
   import { ModeWatcher } from "@nota/ui";
-  import { setAuthContext } from "@nota/client";
+  import { setAuthContext, setStorageContext } from "@nota/client";
   import { onMount } from "svelte";
   let { children, data } = $props();
 
   const authClient = setAuthContext();
+  setStorageContext();
 
   onMount(() => {
     if (data.user && data.session) {

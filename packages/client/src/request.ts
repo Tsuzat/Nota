@@ -1,17 +1,13 @@
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-import { env } from "$env/dynamic/public";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import { secureStorage } from "./secureStorage";
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
+import { env } from '$env/dynamic/public';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { secureStorage } from './secureStorage';
 
-const isTauri = () =>
-  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 export const fetchFn = isTauri() ? tauriFetch : fetch;
 
-type FetchLike = (
-  input: RequestInfo | URL | string,
-  init?: RequestInit,
-) => Promise<Response>;
+type FetchLike = (input: RequestInfo | URL | string, init?: RequestInit) => Promise<Response>;
 
 interface CustomRequestInit extends RequestInit {
   fetch?: FetchLike;
@@ -32,8 +28,8 @@ function upsertCookie(existing: string, name: string, value: string): string {
 
 /** Clear Tauri secure storage tokens on auth failure. */
 async function clearTauriTokens() {
-  await secureStorage.removeItem("access_token");
-  await secureStorage.removeItem("refresh_token");
+  await secureStorage.removeItem('access_token');
+  await secureStorage.removeItem('refresh_token');
 }
 
 // ---------------------------------------------------------------------------
@@ -50,45 +46,33 @@ async function clearTauriTokens() {
  *
  * Automatically attempts a single token refresh on 401 / 403.
  */
-export default async function request(
-  url: string,
-  options: CustomRequestInit = {},
-): Promise<Response> {
+export default async function request(url: string, options: CustomRequestInit = {}): Promise<Response> {
   const { fetch: callerFetch, ...restOptions } = options;
   const doFetch = callerFetch || fetchFn;
 
   // --- Build headers ---
   const headers = new Headers(options.headers || {});
 
-  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
-    headers.set("Content-Type", "application/json");
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
   }
 
   if (isTauri()) {
-    headers.set(
-      "Authorization",
-      `Bearer ${await secureStorage.getItem("access_token")}`,
-    );
-    headers.set(
-      "X-Nota-Desktop-Identifier",
-      env.PUBLIC_DESKTOP_APP_IDENTIFIER ?? "",
-    );
+    headers.set('Authorization', `Bearer ${await secureStorage.getItem('access_token')}`);
+    headers.set('X-Nota-Desktop-Identifier', env.PUBLIC_DESKTOP_APP_IDENTIFIER ?? '');
   }
 
   const fetchOptions: RequestInit = {
     ...restOptions,
     headers,
-    credentials: "include",
+    credentials: 'include',
   };
 
   // --- Initial request ---
   let response = await doFetch(url, fetchOptions);
 
   // --- Auto-refresh on 401 / 403 ---
-  if (
-    (response.status === 401 || response.status === 403) &&
-    !url.includes("/auth/refreshtoken")
-  ) {
+  if ((response.status === 401 || response.status === 403) && !url.includes('/auth/refreshtoken')) {
     response = await tryRefresh(url, fetchOptions, headers, doFetch, options);
   }
 
@@ -104,34 +88,25 @@ async function tryRefresh(
   fetchOptions: RequestInit,
   headers: Headers,
   doFetch: FetchLike,
-  options: CustomRequestInit,
+  options: CustomRequestInit
 ): Promise<Response> {
   try {
     // Build refresh-specific headers
     const refreshHeaders = new Headers(options.headers || {});
     if (isTauri()) {
-      refreshHeaders.set("Content-Type", "application/json");
-      refreshHeaders.set(
-        "Authorization",
-        `Bearer ${await secureStorage.getItem("refresh_token")}`,
-      );
-      refreshHeaders.set(
-        "X-Nota-Desktop-Identifier",
-        env.PUBLIC_DESKTOP_APP_IDENTIFIER ?? "",
-      );
+      refreshHeaders.set('Content-Type', 'application/json');
+      refreshHeaders.set('Authorization', `Bearer ${await secureStorage.getItem('refresh_token')}`);
+      refreshHeaders.set('X-Nota-Desktop-Identifier', env.PUBLIC_DESKTOP_APP_IDENTIFIER ?? '');
     }
 
-    const refreshRes = await doFetch(
-      `${PUBLIC_BACKEND_URL}/api/v1/auth/refreshtoken`,
-      {
-        method: "POST",
-        headers: refreshHeaders,
-        credentials: "include",
-      },
-    );
+    const refreshRes = await doFetch(`${PUBLIC_BACKEND_URL}/api/v1/auth/refreshtoken`, {
+      method: 'POST',
+      headers: refreshHeaders,
+      credentials: 'include',
+    });
 
     if (!refreshRes.ok) {
-      console.error("Token refresh failed:", await refreshRes.json());
+      console.error('Token refresh failed:', await refreshRes.json());
       if (isTauri()) await clearTauriTokens();
       // Return a failed response so the caller can handle it
       return refreshRes;
@@ -142,20 +117,17 @@ async function tryRefresh(
 
     if (isTauri()) {
       const { data } = await refreshRes.json();
-      await secureStorage.setItem("access_token", data);
-      headers.set("Authorization", `Bearer ${data}`);
+      await secureStorage.setItem('access_token', data);
+      headers.set('Authorization', `Bearer ${data}`);
     } else {
       // Web (SSR): pull the new access_token from Set-Cookie and patch
       // the forwarded Cookie header so the retry carries the fresh token.
-      setCookieHeader = refreshRes.headers.get("Set-Cookie");
+      setCookieHeader = refreshRes.headers.get('Set-Cookie');
       if (setCookieHeader) {
         const match = setCookieHeader.match(/access_token=([^;]+)/);
         if (match) {
-          const current = headers.get("Cookie") || "";
-          headers.set(
-            "Cookie",
-            upsertCookie(current, "access_token", match[1]),
-          );
+          const current = headers.get('Cookie') || '';
+          headers.set('Cookie', upsertCookie(current, 'access_token', match[1]));
         }
       }
     }
@@ -168,13 +140,13 @@ async function tryRefresh(
     // Attach Set-Cookie so SvelteKit hooks can forward it to the browser
     if (!isTauri() && setCookieHeader) {
       const patched = new Response(response.body, response);
-      patched.headers.append("Set-Cookie", setCookieHeader);
+      patched.headers.append('Set-Cookie', setCookieHeader);
       response = patched;
     }
 
     return response;
   } catch (e) {
-    console.error("Auto-refresh failed:", e);
+    console.error('Auto-refresh failed:', e);
     if (isTauri()) await clearTauriTokens();
     // Re-fetch so we at least return *something* (will be the 401/403)
     return doFetch(originalUrl, fetchOptions);

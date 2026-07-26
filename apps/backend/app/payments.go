@@ -3,8 +3,9 @@ package app
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"net/http"
-
+	"strings"
 	"sync"
 
 	"github.com/Tsuzat/Nota/config"
@@ -21,11 +22,11 @@ import (
 func getCreditsToAdd(productId string) int {
 	switch productId {
 	case config.POLAR_MONTLY_SUB:
-		return 50_000
+		return 500_000
 	case config.POLAR_YEARLY_SUB:
-		return 700_000
+		return 6_000_000
 	case config.POLAR_AI_CREDITS:
-		return 1000_000
+		return 1_000_000
 	default:
 		return 0
 	}
@@ -33,10 +34,8 @@ func getCreditsToAdd(productId string) int {
 
 func getStorageToAdd(productId string) int64 {
 	switch productId {
-	case config.POLAR_MONTLY_SUB:
-		return 1_000_000_000
-	case config.POLAR_YEARLY_SUB:
-		return 1_500_000_000
+	case config.POLAR_MONTLY_SUB, config.POLAR_YEARLY_SUB:
+		return 5_000_000_000
 	default:
 		return 0
 	}
@@ -87,9 +86,18 @@ func Checkout(c fiber.Ctx) error {
 
 	client := getPolarClient()
 
+	successURL := config.POLAR_SUCCESS_URL
+	if successURL == "" {
+		frontend := strings.TrimSuffix(config.FRONTEND_URL, "/")
+		if frontend == "" {
+			frontend = "https://nota.ink"
+		}
+		successURL = fmt.Sprintf("%s/payment-success", frontend)
+	}
+
 	checkoutSession, err := client.Checkouts.Create(c.Context(), components.CheckoutCreate{
 		Products:      []string{productId},
-		SuccessURL:    polar.String(config.POLAR_SUCCESS_URL),
+		SuccessURL:    polar.String(successURL),
 		CustomerEmail: polar.String(user.Email),
 	})
 
@@ -165,6 +173,56 @@ func Portal(c fiber.Ctx) error {
 	return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 		Status: fiber.StatusInternalServerError,
 		Error:  "Customer portal URL not available",
+	})
+}
+
+// SubscriptionDetails fetches active subscription data from Polar API
+func SubscriptionDetails(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+	client := getPolarClient()
+
+	var polarCustomerId string
+
+	// 1. Get Customer ID
+	if user.ExternalCustomerId != "" {
+		polarCustomerId = user.ExternalCustomerId
+	} else {
+		customers, err := client.Customers.List(c.Context(), operations.CustomersListRequest{
+			Email: polar.String(user.Email),
+		})
+		if err != nil || customers.ListResourceCustomer == nil || len(customers.ListResourceCustomer.Items) == 0 {
+			return c.Status(fiber.StatusOK).JSON(fiber.Map{
+				"subscription_plan": "free",
+			})
+		}
+		polarCustomerId = customers.ListResourceCustomer.Items[0].ID
+	}
+
+	// 2. Query Subscriptions
+	customerIdFilter := operations.CreateCustomerIDFilterStr(polarCustomerId)
+	subs, err := client.Subscriptions.List(c.Context(), operations.SubscriptionsListRequest{
+		CustomerID: &customerIdFilter,
+		Active:     polar.Bool(true),
+	})
+
+	if err != nil || subs.ListResourceSubscription == nil || len(subs.ListResourceSubscription.Items) == 0 {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"subscription_plan": "free",
+		})
+	}
+
+	sub := subs.ListResourceSubscription.Items[0]
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"subscription_plan":    getSubscriptionTier(sub.ProductID),
+		"subscription_type":    getSubscriptionTime(sub.ProductID),
+		"status":               sub.Status,
+		"current_period_start": sub.CurrentPeriodStart,
+		"current_period_end":   sub.CurrentPeriodEnd,
+		"cancel_at_period_end": sub.CancelAtPeriodEnd,
+		"canceled_at":          sub.CanceledAt,
+		"amount":               sub.Amount,
+		"currency":             sub.Currency,
 	})
 }
 
