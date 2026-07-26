@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
 
 	"github.com/Tsuzat/Nota/config"
@@ -86,14 +85,7 @@ func Checkout(c fiber.Ctx) error {
 
 	client := getPolarClient()
 
-	successURL := config.POLAR_SUCCESS_URL
-	if successURL == "" {
-		frontend := strings.TrimSuffix(config.FRONTEND_URL, "/")
-		if frontend == "" {
-			frontend = "https://nota.ink"
-		}
-		successURL = fmt.Sprintf("%s/payment-success", frontend)
-	}
+	successURL := fmt.Sprintf("%s/payment-success?checkout_id={CHECKOUT_ID}", config.FRONTEND_URL)
 
 	checkoutSession, err := client.Checkouts.Create(c.Context(), components.CheckoutCreate{
 		Products:      []string{productId},
