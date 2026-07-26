@@ -6,6 +6,8 @@
 
   import { onMount } from "svelte";
   import { icons } from "@lib/icons";
+  import { goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
 
   let NumberFlow: typeof import("@number-flow/svelte").default | undefined =
     $state(undefined);
@@ -15,10 +17,6 @@
     NumberFlow = mod.default;
   });
 
-  interface Props {
-    onClick?: (plan: "pro-monthly" | "pro-yearly") => void;
-  }
-  const { onClick }: Props = $props();
   let frequency = $state<FREQUENCY>("monthly");
 
   type Plan = {
@@ -91,7 +89,7 @@
       btn: {
         text: "Get started",
         onclick: async () => {
-          onClick?.(`pro-${frequency}`);
+          goto(resolve(`/payment?type=${frequency}`));
         },
       },
     },

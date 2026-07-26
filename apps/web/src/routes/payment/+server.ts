@@ -14,5 +14,5 @@ export const GET = ({ url, locals: { user } }) => {
     productId = env.POLAR_YEARLY_SUB;
   }
   const sendTo = `${PUBLIC_BACKEND_URL}/api/v1/payments/checkout?productId=${productId}&customerExternalId=${user.id}&customerEmail=${user.email}&customerName=${user.name}`;
-  return redirect(304, sendTo);
+  return redirect(303, sendTo);
 };

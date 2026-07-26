@@ -1,9 +1,9 @@
 import { request as apiRequest } from "@nota/client";
 import type { Handle } from "@sveltejs/kit";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const url = `${PUBLIC_BACKEND_URL}/api/v1/user/me`;
+  const url = `${env.PUBLIC_BACKEND_URL}/api/v1/user/me`;
   const res = await apiRequest(url, {
     headers: event.request.headers,
     fetch: event.fetch,

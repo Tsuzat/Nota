@@ -5,10 +5,9 @@
   import AppLogo from "$lib/components/custom/applogo.svelte";
   import { cn } from "@nota/ui/utils";
   import { fade } from "svelte/transition";
-  import { icons, Github, BarSpinner } from "@nota/ui/icons/index.ts";
+  import { icons, Github, BarSpinner } from "@nota/ui/icons";
   import { buttonVariants, Button } from "@nota/ui/shadcn/button";
   import * as Dropdown from "@nota/ui/shadcn/dropdown-menu";
-  import type { User } from "@nota/client";
   import UserAvatar from "$lib/components/custom/user-avatar.svelte";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
@@ -25,8 +24,9 @@
   } from "@nota/ui/shadcn/accordion";
   import { getArtefacts } from "./data.remote";
   import ArtifactDownloader from "$lib/artefact/artifact-downloader.svelte";
+  const { data } = $props();
+  const user = $derived(data.user);
 
-  let user = $state<User | null>(null);
   let y = $state(0);
   let isScrolled = $derived(y > 20);
   const tabItems = [
@@ -236,8 +236,8 @@
   class={cn(
     "sticky z-50 mx-auto flex items-center justify-between gap-8 rounded-xl px-2 backdrop-blur-sm transition-all duration-500",
     isScrolled
-      ? "max-w-4xl border bg-background/60 p-2 shadow-lg sm:top-2"
-      : "top-0 max-w-full bg-background/20 px-2 py-2 sm:px-12",
+      ? "max-w-4xl border bg-background/60 p-4 shadow-lg sm:top-2"
+      : "top-0 max-w-full bg-background/20 px-4 py-2 sm:px-12",
   )}
 >
   <AppLogo showLogo={!isScrolled} />
@@ -256,7 +256,6 @@
         {#if activeSection === item.url.substring(1)}
           <div
             transition:fade={{ duration: 300 }}
-            // layoutId="nav-underline"
             class="absolute -bottom-1 left-0 h-0.5 w-full bg-primary"
           ></div>
         {/if}
@@ -304,6 +303,12 @@
             <Dropdown.Label class="text-xs text-muted-foreground">
               {user.email}
             </Dropdown.Label>
+            <a href={resolve("/profile")}>
+              <Dropdown.Item>
+                <icons.User />
+                Profile
+              </Dropdown.Item>
+            </a>
             <Dropdown.Item
               variant="destructive"
               onclick={() => goto(resolve("/signout"))}
