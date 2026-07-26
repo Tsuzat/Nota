@@ -13,6 +13,6 @@ export const GET = ({ url, locals: { user } }) => {
   } else {
     productId = env.POLAR_YEARLY_SUB;
   }
-  const sendTo = `${envPublic.PUBLIC_BACKEND_URL}/api/v1/payments/checkout?productId=${productId}&customerExternalId=${user.id}&customerEmail=${user.email}&customerName=${user.name}`;
+  const sendTo = `${envPublic.PUBLIC_BACKEND_URL}/api/v1/payments/checkout?productId=${productId}`;
   return redirect(303, sendTo);
 };

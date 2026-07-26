@@ -30,6 +30,7 @@ export default defineConfig({
       "mode-watcher",
       "@lucide/svelte",
       "runed",
+      "svelte-toolbelt",
     ],
   },
   server: {

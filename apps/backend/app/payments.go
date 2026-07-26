@@ -9,6 +9,7 @@ import (
 
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/models"
+	"github.com/Tsuzat/Nota/utils"
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
@@ -91,6 +92,8 @@ func Checkout(c fiber.Ctx) error {
 		Products:      []string{productId},
 		SuccessURL:    polar.String(successURL),
 		CustomerEmail: polar.String(user.Email),
+		CustomerName:  polar.String(user.Name),
+		CustomerID:    polar.String(user.Id),
 	})
 
 	if err != nil {
@@ -313,7 +316,8 @@ func handleSubscriptionChange(ctx context.Context, data map[string]interface{}) 
 	creditsToAdd := getCreditsToAdd(productId)
 	storageToAdd := getStorageToAdd(productId)
 
-	_, err := config.DB.NewUpdate().
+	var userId string
+	err := config.DB.NewUpdate().
 		Model((*models.User)(nil)).
 		Set("ai_credits = ai_credits + ?", creditsToAdd).
 		Set("assigned_storage = ?", storageToAdd).
@@ -321,10 +325,14 @@ func handleSubscriptionChange(ctx context.Context, data map[string]interface{}) 
 		Set("subscription_type = ?", getSubscriptionTime(productId)).
 		Set("external_customer_id = ?", customerId).
 		Where("email = ?", email).
-		Exec(ctx)
+		Returning("id").
+		Scan(ctx, &userId)
 
 	if err != nil {
 		log.Error("Webhook Update User Error:", err)
+	} else {
+		utils.DeleteCache("user:" + userId)
+		log.Infof("Successfully updated subscription for user email: %s, id: %s", email, userId)
 	}
 }
 
@@ -347,15 +355,20 @@ func handleOrderPaid(ctx context.Context, data map[string]interface{}) {
 
 	customerId, _ := data["customer_id"].(string)
 
-	_, err := config.DB.NewUpdate().
+	var userId string
+	err := config.DB.NewUpdate().
 		Model((*models.User)(nil)).
 		Set("ai_credits = ai_credits + ?", creditsToAdd).
 		Set("external_customer_id = ?", customerId).
 		Where("email = ?", email).
-		Exec(ctx)
+		Returning("id").
+		Scan(ctx, &userId)
 
 	if err != nil {
 		log.Error("Webhook Order Paid Update User Error:", err)
+	} else {
+		utils.DeleteCache("user:" + userId)
+		log.Infof("Successfully processed order paid for user email: %s, id: %s", email, userId)
 	}
 }
 
@@ -363,15 +376,20 @@ func handleSubscriptionCanceled(ctx context.Context, data map[string]interface{}
 	customer, _ := data["customer"].(map[string]interface{})
 	email, _ := customer["email"].(string)
 
-	_, err := config.DB.NewUpdate().
+	var userId string
+	err := config.DB.NewUpdate().
 		Model((*models.User)(nil)).
 		Set("assigned_storage = 0").
 		Set("subscription_plan = 'free'").
 		Set("subscription_type = NULL").
 		Where("email = ?", email).
-		Exec(ctx)
+		Returning("id").
+		Scan(ctx, &userId)
 
 	if err != nil {
 		log.Error("Webhook Canceled User Error:", err)
+	} else {
+		utils.DeleteCache("user:" + userId)
+		log.Infof("Successfully canceled subscription for user email: %s, id: %s", email, userId)
 	}
 }
