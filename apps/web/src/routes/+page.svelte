@@ -5,7 +5,7 @@
   import AppLogo from "$lib/components/custom/applogo.svelte";
   import { cn } from "@nota/ui/utils";
   import { fade } from "svelte/transition";
-  import { icons } from "@nota/ui/icons/index.ts";
+  import { icons, Github, BarSpinner } from "@nota/ui/icons/index.ts";
   import { buttonVariants, Button } from "@nota/ui/shadcn/button";
   import * as Dropdown from "@nota/ui/shadcn/dropdown-menu";
   import type { User } from "@nota/client";
@@ -13,6 +13,18 @@
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import BorderBeam from "$lib/components/custom/landing/border-beam.svelte";
+  import Particles from "$lib/components/custom/landing/particles.svelte";
+  import Multistream from "$lib/components/custom/landing/multistream.svelte";
+  import Tiltcard from "$lib/components/custom/landing/utils/tiltcard.svelte";
+  import { Pricing } from "$lib/components/custom/landing/pricing";
+  import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+  } from "@nota/ui/shadcn/accordion";
+  import { getArtefacts } from "./data.remote";
+  import ArtifactDownloader from "$lib/artefact/artifact-downloader.svelte";
 
   let user = $state<User | null>(null);
   let y = $state(0);
@@ -33,6 +45,90 @@
     {
       url: "#faqs",
       title: "FAQs",
+    },
+  ];
+
+  const features = [
+    {
+      name: "Rich Text Editor",
+      description:
+        "Powered by a custom editor with support for slash commands, markdown shortcuts, media embeds, and mathematical equations.",
+      icon: icons.Pencil,
+    },
+    {
+      name: "AI Integration",
+      description:
+        "Built-in AI assistant for text generation and summarization with a Bring Your Own Key (BYOK) model to keep costs down.",
+      icon: icons.Bot,
+    },
+    {
+      name: "Cross-Platform & Fast",
+      description:
+        "Available as a lightweight Desktop app built with Rust (Tauri) and on the Web for blazing fast performance.",
+      icon: icons.Zap,
+    },
+    {
+      name: "Secure & Organized",
+      description:
+        "Manage your notes with hierarchical workspaces. Protected by custom authentication flow and session management.",
+      icon: icons.FolderLock,
+    },
+  ];
+
+  const faqItems = [
+    {
+      id: "item-1",
+      question: "What is Nota?",
+      answer:
+        "Nota is a fast, lightweight, and feature-rich note-taking app designed to give you a powerful rich text editing experience without the bloat of typical Electron applications. It is available on Desktop (macOS, Windows, Linux) and the Web.",
+    },
+    {
+      id: "item-2",
+      question: "Is Nota free to use?",
+      answer:
+        "Yes! Our Free tier is perfect for local-first users, offering unlimited local notes and workspaces. You also get 1 cloud workspace and up to 5 cloud notes for free.",
+    },
+    {
+      id: "item-3",
+      question: "How does the AI integration work?",
+      answer:
+        "Nota uses a Bring Your Own Key (BYOK) model. You can plug in your own API keys to generate text and summarize notes without paying a high recurring subscription fee. Pro users can also use our bundled AI credits.",
+    },
+    {
+      id: "item-4",
+      question: "What is the difference between the Free and Pro plans?",
+      answer:
+        "The Free plan offers unlimited local notes, local media storage, and limited cloud syncing (1 workspace, 5 notes). The Pro plan unlocks unlimited cloud notes and workspaces, 5 GB of cloud storage, collaborative notes, web access, and bundled AI credits.",
+    },
+    {
+      id: "item-5",
+      question: "Can I use Nota offline?",
+      answer:
+        "Absolutely! Nota's Desktop app is built with Tauri and supports a local-first approach. Your notes are saved locally and are fully accessible even when you are not connected to the internet.",
+    },
+    {
+      id: "item-6",
+      question: "What features does the editor support?",
+      answer:
+        "Our custom rich text editor supports slash commands, markdown shortcuts, media embeds (images, video, audio), mathematical equations (KaTeX), tables, and task lists.",
+    },
+    {
+      id: "item-7",
+      question: "Can I collaborate on notes with others?",
+      answer:
+        "Yes, realtime collaboration is available on our Pro plan. You can invite others to collaborate on your cloud notes and work together seamlessly.",
+    },
+    {
+      id: "item-8",
+      question: "How do you handle my data and security?",
+      answer:
+        "We prioritize your privacy. Your cloud data is encrypted, and your local notes stay strictly on your device. We use a secure authentication flow and reliable session management to keep your information safe.",
+    },
+    {
+      id: "item-9",
+      question: "Can I upgrade, downgrade, or cancel anytime?",
+      answer:
+        "Yes, you have full control over your subscription. You can upgrade, downgrade, or cancel your Pro plan at any time from your settings.",
     },
   ];
   let showFirstSection = $state(false);
@@ -133,6 +229,7 @@
   </script>
 </svelte:head>
 
+<Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />
 <Spotlight />
 
 <header
@@ -236,7 +333,7 @@
       title="Open Pricing"
     >
       <span class="text-sm text-foreground"
-        >✨ Use code <span class="font-bold">EARLY10</span> for 10% off ✨</span
+        >✨ Completely <span class="font-bold">Free</span> For Local Usages ✨</span
       >
       <span
         class="block h-4 w-0.5 border-l bg-muted-foreground dark:border-background"
@@ -248,7 +345,7 @@
           class="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0"
         >
           <span class="flex size-6">
-            <icons.ArrowRight class="m-auto size-4 text-foreground!" />
+            <icons.ArrowRight class="m-auto size-4 text-background!" />
           </span>
           <span class="flex size-6">
             <icons.ArrowRight class="m-auto size-4 text-foreground!" />
@@ -262,36 +359,229 @@
       the bloat while keeping the power where it matters. Enjoy a rich text
       editor with markdown shortcuts, AI powers, and cross-platform speed.
     </p>
-    <div class="flex items-center justify-center gap-4">
-      <Button>Get Started</Button>
-      <Button variant="outline" href="#pricing">See Pricing</Button>
-    </div>
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <!-- 1. GitHub Repo -->
+      <Button
+        variant="outline"
+        href="https://github.com/Tsuzat/Nota"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Github />
+        <span>GitHub Repo</span>
+      </Button>
 
-    <div
-      class="relative h-full w-full rounded-xl shadow-lg inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20"
-    >
+      <!-- 2. Playground -->
+      <Button
+        variant="secondary"
+        href="https://edra.tsuzat.com/templates/notion"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <icons.Sparkles />
+        <span>Playground</span>
+      </Button>
+
+      {#await getArtefacts()}
+        <Button variant="outline">
+          <BarSpinner />
+          Loading
+        </Button>
+      {:then artefacts}
+        {#if artefacts}
+          <ArtifactDownloader platforms={artefacts.platforms} />
+        {:else}
+          <Button variant="outline">
+            <icons.X />
+            No Downloadables
+          </Button>
+        {/if}
+      {:catch error}
+        {console.error(error)}
+      {/await}
+
+      <Tiltcard
+        tiltLimit={10}
+        scale={1.025}
+        spotlight={false}
+        perspective={1200}
+        class="relative overflow-hidden! h-full w-full rounded-xl shadow-lg inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20"
+      >
+        <BorderBeam
+          duration={6}
+          size={400}
+          class="from-transparent via-orange-500 to-transparent"
+        />
+        <BorderBeam
+          duration={6}
+          delay={3}
+          size={400}
+          borderWidth={2}
+          class="from-transparent via-purple-500 to-transparent"
+        />
+        <img
+          src="/preview/light.png"
+          alt="Nota Light Preview"
+          class="block h-full w-full rounded-xl border object-cover dark:hidden"
+        />
+        <img
+          src="/preview/dark.png"
+          alt="Nota Dark Preview"
+          class="hidden h-full w-full rounded-xl border object-cover dark:block"
+        />
+      </Tiltcard>
+    </div>
+  </section>
+  <section id="features">
+    <div class="flex flex-col items-center gap-4">
+      <h1 class="text-4xl font-bold">Everything you need to write</h1>
+      <p class="text-lg text-balance text-muted-foreground">
+        Fast, precise, and enjoyable to drive—stripping away the bloat while
+        keeping the power.
+      </p>
+    </div>
+    <dl class="my-20 grid grid-cols-2 gap-10">
+      {#each features as item, idx (idx)}
+        {@const Icon = item.icon}
+        <div class="col-span-full sm:col-span-2 lg:col-span-1">
+          <div
+            class="mx-auto flex w-fit rounded-lg p-2 shadow-md ring-1 shadow-primary/50 ring-black/5 dark:ring-white/5"
+          >
+            <Icon aria-hidden="true" class="size-6 text-muted-foreground" />
+          </div>
+          <dt
+            class="mt-6 text-center font-semibold text-gray-900 dark:text-gray-50"
+          >
+            {item.name}
+          </dt>
+          <dd
+            class="mt-2 text-center leading-7 text-gray-600 dark:text-gray-400"
+          >
+            {item.description}
+          </dd>
+        </div>
+      {/each}
+    </dl>
+    <div class="flex flex-col items-center gap-4 text-center">
+      <h1 class="text-4xl font-bold">Powerfully Versatile</h1>
+      <span class="text-lg text-balance text-muted-foreground"
+        >Create rich and beautiful notes for anything, we support it all.
+      </span>
+    </div>
+    <div class="relative mx-auto mt-4 w-full overflow-hidden! rounded-2xl">
       <BorderBeam
         duration={6}
-        size={150}
-        class="from-transparent via-primary to-transparent"
+        size={400}
+        class="from-transparent via-pink-500 to-transparent"
       />
       <BorderBeam
         duration={6}
         delay={3}
-        size={150}
+        size={400}
         borderWidth={2}
-        class="from-transparent via-muted to-transparent"
+        class="from-transparent via-emerald-500 to-transparent"
       />
-      <img
-        src="/preview/light.png"
-        alt="Nota Light Preview"
-        class="block h-full w-full rounded-xl border object-cover dark:hidden"
-      />
-      <img
-        src="/preview/dark.png"
-        alt="Nota Dark Preview"
-        class="hidden h-full w-full rounded-xl border object-cover dark:block"
-      />
+      <Multistream class="mx-auto rounded-2xl" />
     </div>
   </section>
+
+  <section id="pricing" class="text-start!">
+    <Pricing />
+  </section>
+
+  <section id="faqs" class="my-4">
+    <div class="mx-auto px-4 md:px-6">
+      <div class="mx-auto max-w-2xl text-center text-balance">
+        <h1>Frequently Asked Questions</h1>
+        <p class="mt-4 text-balance text-muted-foreground">
+          Discover quick and comprehensive answers to common questions about our
+          platform, services, and features.
+        </p>
+      </div>
+
+      <div class="mx-auto mt-12 max-w-2xl">
+        <Accordion
+          type="single"
+          class="w-full rounded-xl border bg-background px-8 py-3 shadow-sm ring-4 ring-muted dark:ring-0"
+        >
+          {#each faqItems as item, index (index)}
+            <AccordionItem
+              value={item.id}
+              class={[
+                faqItems.length - 1 !== index ? "border-dashed" : "border-none",
+              ]}
+            >
+              <AccordionTrigger
+                class="cursor-pointer text-base font-semibold hover:no-underline"
+                >{item.question}</AccordionTrigger
+              >
+              <AccordionContent>
+                <p class="text-base">{item.answer}</p>
+              </AccordionContent>
+            </AccordionItem>
+          {/each}
+        </Accordion>
+
+        <p class="mt-6 px-4 text-muted-foreground">
+          Can't find what you're looking for?
+          <a
+            href="mailto:contact@nota.ink"
+            title="Contact Us"
+            class="font-medium text-primary hover:underline"
+          >
+            Contact Us
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+  <footer class="flex items-center justify-center gap-2 border-t py-4 text-sm">
+    © 2026 Nota. All rights reserved •
+    <a href={resolve("/terms")} title="Open Terms of Use" class="text-primary"
+      >Terms of Use</a
+    >
+    •
+    <a
+      href={resolve("/privacy")}
+      title="Open Privacy Policy"
+      class="text-primary">Privacy Policy</a
+    >
+    •
+    <a href="mailto:contact@nota.ink" title="Contact Us" class="text-primary"
+      >Contact Us</a
+    >
+  </footer>
 </main>
+
+<style>
+  section {
+    padding-top: 5rem;
+  }
+
+  .highlight {
+    background-color: var(--color-primary);
+    padding: 0 4px;
+    border-radius: 4px;
+    color: var(--color-foreground);
+  }
+
+  :global(section.hide) {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(4rem);
+    transition: all 500ms ease-in-out;
+    transition-delay: 300ms;
+  }
+
+  :global(section.show) {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(section.hide) {
+      transition: none;
+    }
+  }
+</style>

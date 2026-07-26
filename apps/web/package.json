@@ -20,7 +20,8 @@
   "dependencies": {
     "@lucide/svelte": "^1.26.0",
     "@nota/client": "workspace:*",
-    "@nota/ui": "workspace:*"
+    "@nota/ui": "workspace:*",
+    "@number-flow/svelte": "^0.4.2"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^7.2.8",

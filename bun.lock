@@ -61,6 +61,7 @@
         "@lucide/svelte": "^1.26.0",
         "@nota/client": "workspace:*",
         "@nota/ui": "workspace:*",
+        "@number-flow/svelte": "^0.4.2",
       },
       "devDependencies": {
         "@sveltejs/adapter-cloudflare": "^7.2.8",
@@ -384,6 +385,8 @@
     "@nota/ui": ["@nota/ui@workspace:packages/ui"],
 
     "@nota/web": ["@nota/web@workspace:apps/web"],
+
+    "@number-flow/svelte": ["@number-flow/svelte@0.4.2", "", { "dependencies": { "esm-env": "^1.1.4", "number-flow": "0.6.2" }, "peerDependencies": { "svelte": "^4 || ^5" } }, "sha512-svlhRTdBXl1MKfRcrCllqvSZkb2qt0Ep+qEh3TUAcv8E4pnf9wJfhKzx5ISKZcFbpS117i+257U4LHyuTYdTuA=="],
 
     "@oxc-project/types": ["@oxc-project/types@0.139.0", "", {}, "sha512-r9gHphtCs+1M7J0pw6Sn/hh/Wpa/iQrOOkrNAlVLF/gHq+/CJmHIWKKUUhdWjcD6CIa8idarspCsASiXCXvFUw=="],
 
@@ -1090,6 +1093,8 @@
     "node-fetch": ["node-fetch@3.3.2", "", { "dependencies": { "data-uri-to-buffer": "^4.0.0", "fetch-blob": "^3.1.4", "formdata-polyfill": "^4.0.10" } }, "sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA=="],
 
     "node-fetch-native": ["node-fetch-native@1.6.7", "", {}, "sha512-g9yhqoedzIUm0nTnTqAQvueMPVOuIY16bqgAJJC8XOOubYFNwz6IER9qs0Gq2Xd0+CecCKFjtdDTMA4u4xG06Q=="],
+
+    "number-flow": ["number-flow@0.6.2", "", { "dependencies": { "esm-env": "^1.1.4" } }, "sha512-MCnImG4Q5vPwhSXnov56nOuyyKn6LC+Qd7II1UiKc+ACRtug5iAtn0+CwXNxM38AC5lSowEY+oYEtZX2qMnUyw=="],
 
     "obug": ["obug@2.1.4", "", {}, "sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA=="],
 
