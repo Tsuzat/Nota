@@ -1,9 +1,12 @@
 <script lang="ts">
+import { Toaster } from '@nota/ui/shadcn/sonner';
 import './layout.css';
-import favicon from '$lib/assets/favicon.svg';
-
+import { ModeWatcher } from '@nota/ui';
 let { children } = $props();
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+
+<ModeWatcher />
+<Toaster richColors />
+
 {@render children()}

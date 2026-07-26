@@ -14,9 +14,16 @@ export default defineConfig({
         experimental: { async: true },
       },
       adapter: adapter(),
+      alias: {
+        '@lib': '../../packages/ui/src/lib',
+        '@lib/*': '../../packages/ui/src/lib/*',
+      },
       experimental: { remoteFunctions: true },
     }),
   ],
+  ssr: {
+    noExternal: ['@nota/ui', 'svelte-sonner', 'bits-ui', 'mode-watcher'],
+  },
   test: {
     expect: { requireAssertions: true },
     projects: [
