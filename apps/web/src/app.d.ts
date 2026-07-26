@@ -1,11 +1,12 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
-import type { User } from '@nota/client';
+import type { User, Session } from "@nota/client";
 
 declare global {
   namespace App {
     interface Locals {
       user: User | null;
+      session?: Session | null;
     }
 
     interface Error {

@@ -1,11 +1,8 @@
 <script lang="ts">
   import { AnimatedBeam, Circle } from "./animated-beam";
-  import User from "@lucide/svelte/icons/user";
-  import Users from "@lucide/svelte/icons/users";
-  import UsersLock from "@lucide/svelte/icons/user-lock";
-  import Business from "@lucide/svelte/icons/briefcase";
   import { cn } from "@lib/utils";
   import AppLogo from "$lib/components/custom/applogo.svelte";
+  import { icons } from "@lib/icons";
   const { class: className }: { class: string } = $props();
 
   let containerRef: HTMLDivElement | null = $state(null);
@@ -59,13 +56,13 @@
         >
       </Circle>
       <Circle bind:ref={div3Ref} content="Teams">
-        <Users />
+        <icons.Users />
       </Circle>
       <Circle bind:ref={div4Ref} content="Personal">
-        <UsersLock />
+        <icons.UserLock />
       </Circle>
       <Circle bind:ref={div5Ref} content="Business">
-        <Business />
+        <icons.Briefcase />
       </Circle>
     </div>
     <div class="flex flex-col justify-center">
@@ -75,7 +72,7 @@
     </div>
     <div class="flex flex-col justify-center">
       <Circle bind:ref={div7Ref} content="You">
-        <User />
+        <icons.User />
       </Circle>
     </div>
   </div>

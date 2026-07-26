@@ -315,7 +315,7 @@
         </Dropdown.Content>
       </Dropdown.Root>
     {:else}
-      <Button class="nodefault" href={resolve("/signin")}>Sign In</Button>
+      <Button href={resolve("/signin")}>Sign In</Button>
     {/if}
   </div>
 </header>
@@ -359,13 +359,14 @@
       the bloat while keeping the power where it matters. Enjoy a rich text
       editor with markdown shortcuts, AI powers, and cross-platform speed.
     </p>
-    <div class="flex flex-wrap items-center justify-center gap-3">
+    <div class="flex flex-wrap items-center justify-center gap-2 my-4">
       <!-- 1. GitHub Repo -->
       <Button
-        variant="outline"
+        variant="default"
         href="https://github.com/Tsuzat/Nota"
         target="_blank"
         rel="noopener noreferrer"
+        class="z-100"
       >
         <Github />
         <span>GitHub Repo</span>
@@ -383,54 +384,48 @@
       </Button>
 
       {#await getArtefacts()}
-        <Button variant="outline">
+        <Button>
           <BarSpinner />
           Loading
         </Button>
       {:then artefacts}
         {#if artefacts}
           <ArtifactDownloader platforms={artefacts.platforms} />
-        {:else}
-          <Button variant="outline">
-            <icons.X />
-            No Downloadables
-          </Button>
         {/if}
       {:catch error}
         {console.error(error)}
       {/await}
-
-      <Tiltcard
-        tiltLimit={10}
-        scale={1.025}
-        spotlight={false}
-        perspective={1200}
-        class="relative overflow-hidden! h-full w-full rounded-xl shadow-lg inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20"
-      >
-        <BorderBeam
-          duration={6}
-          size={400}
-          class="from-transparent via-orange-500 to-transparent"
-        />
-        <BorderBeam
-          duration={6}
-          delay={3}
-          size={400}
-          borderWidth={2}
-          class="from-transparent via-purple-500 to-transparent"
-        />
-        <img
-          src="/preview/light.png"
-          alt="Nota Light Preview"
-          class="block h-full w-full rounded-xl border object-cover dark:hidden"
-        />
-        <img
-          src="/preview/dark.png"
-          alt="Nota Dark Preview"
-          class="hidden h-full w-full rounded-xl border object-cover dark:block"
-        />
-      </Tiltcard>
     </div>
+    <Tiltcard
+      tiltLimit={10}
+      scale={1.025}
+      spotlight={false}
+      perspective={1200}
+      class="relative overflow-hidden! h-full w-full rounded-xl shadow-lg inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20"
+    >
+      <BorderBeam
+        duration={6}
+        size={400}
+        class="from-transparent via-orange-500 to-transparent"
+      />
+      <BorderBeam
+        duration={6}
+        delay={3}
+        size={400}
+        borderWidth={2}
+        class="from-transparent via-purple-500 to-transparent"
+      />
+      <img
+        src="/preview/light.png"
+        alt="Nota Light Preview"
+        class="block h-full w-full rounded-xl border object-cover dark:hidden"
+      />
+      <img
+        src="/preview/dark.png"
+        alt="Nota Dark Preview"
+        class="hidden h-full w-full rounded-xl border object-cover dark:block"
+      />
+    </Tiltcard>
   </section>
   <section id="features">
     <div class="flex flex-col items-center gap-4">

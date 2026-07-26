@@ -58,7 +58,6 @@
       "name": "@nota/web",
       "version": "0.0.5",
       "dependencies": {
-        "@lucide/svelte": "^1.26.0",
         "@nota/client": "workspace:*",
         "@nota/ui": "workspace:*",
         "@number-flow/svelte": "^0.4.2",
@@ -372,7 +371,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@lucide/svelte": ["@lucide/svelte@1.26.0", "", { "peerDependencies": { "svelte": "^5" } }, "sha512-KUfLTlNRVrHZ460Um7jdrvh46hI/8Sw4+1k/Ttj4g6JI9bCrjD7HZVG4cqhh7LasjfDz5b+CuKrjd/k/3obYcA=="],
+    "@lucide/svelte": ["@lucide/svelte@1.27.0", "", { "peerDependencies": { "svelte": "^5" } }, "sha512-qzNBHdqy/MKp2qxuy/DcYELuep6h19fjo+4ech8fZsS4GtZeBtg5jgCTRQvLvwhppt0mhRN6qt8Nt8rPb/J4Ag=="],
 
     "@mermaid-js/parser": ["@mermaid-js/parser@1.2.0", "", { "dependencies": { "@chevrotain/types": "~11.1.2" } }, "sha512-oYPyv8A4As1yH5Bx+04iQEQxXuIQDe0GKCNSRgao6z8AM9jixXIfP0vsppRLvGf+nKIOb9/LdpWA4YuJiVvESA=="],
 

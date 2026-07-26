@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { CircleCheck, Star } from "@lucide/svelte";
   import { AnimatePresence, createLayoutMotion } from "motion-sv";
   import FrequencyToggle, { type FREQUENCY } from "./frequency-toggle.svelte";
   import { Button } from "@lib/components/ui/button";
   import { cn } from "@lib/utils";
 
   import { onMount } from "svelte";
+  import { icons } from "@lib/icons";
 
   let NumberFlow: typeof import("@number-flow/svelte").default | undefined =
     $state(undefined);
@@ -199,7 +199,7 @@
                   transition={{ duration: badge.id === "popular" ? 0.1 : 0.15 }}
                 >
                   {#if badge.id === "popular"}
-                    <Star class="size-3 fill-current" />
+                    <icons.Star class="size-3 fill-current" />
                   {/if}
                   {badge.label}
                 </layout.div>
@@ -247,7 +247,7 @@
         >
           {#each plan.features as feature, idx (idx)}
             <div class="flex items-center gap-2">
-              <CircleCheck class="size-3.5 text-foreground" />
+              <icons.CircleCheck class="size-3.5 text-foreground" />
               <span>{feature}</span>
             </div>
           {/each}

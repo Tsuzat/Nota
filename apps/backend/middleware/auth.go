@@ -84,6 +84,7 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 	if !user.IsVerified {
 		return nil, fiber.ErrUnauthorized
 	}
+	c.Locals("session", &session)
 	return user, nil
 }
 
