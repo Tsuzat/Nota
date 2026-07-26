@@ -12,8 +12,8 @@ export const handle: Handle = async ({ event, resolve }) => {
   if (res.ok) {
     try {
       const data: any = await res.json();
-      event.locals.user = data.data?.user ? data.data.user : data.data;
-      event.locals.session = data.data?.session ?? null;
+      event.locals.user = data.data.user;
+      event.locals.session = data.data.session;
     } catch (error) {
       console.error("Error fetching user data:", error);
       event.locals.user = null;

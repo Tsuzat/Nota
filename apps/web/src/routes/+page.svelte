@@ -131,6 +131,15 @@
         "Yes, you have full control over your subscription. You can upgrade, downgrade, or cancel your Pro plan at any time from your settings.",
     },
   ];
+  let copied = $state(false);
+  function copyBrewCommand() {
+    navigator.clipboard.writeText("brew install --cask Tsuzat/tap/nota");
+    copied = true;
+    setTimeout(() => {
+      copied = false;
+    }, 2000);
+  }
+
   let showFirstSection = $state(false);
   let activeSection = $state("hero");
   onMount(() => {
@@ -401,6 +410,25 @@
         {console.error(error)}
       {/await}
     </div>
+
+    <div class="relative my-4 flex items-center justify-center">
+      <button
+        onclick={copyBrewCommand}
+        class="group relative flex items-center gap-3 rounded-lg border bg-muted/40 px-3.5 py-1.5 font-mono text-xs transition-colors hover:border-primary/50 hover:bg-muted/80 cursor-pointer"
+        title="Copy Homebrew install command"
+      >
+        <span class="font-semibold text-primary">$</span>
+        <span>brew install --cask Tsuzat/tap/nota</span>
+        {#if copied}
+          <icons.Check class="size-3.5 text-emerald-500" />
+        {:else}
+          <icons.Copy
+            class="size-3.5 opacity-60 transition-opacity group-hover:opacity-100"
+          />
+        {/if}
+      </button>
+    </div>
+
     <Tiltcard
       tiltLimit={10}
       scale={1.025}

@@ -3,10 +3,8 @@
   import FrequencyToggle, { type FREQUENCY } from "./frequency-toggle.svelte";
   import { Button } from "@lib/components/ui/button";
   import { cn } from "@lib/utils";
-
   import { onMount } from "svelte";
   import { icons } from "@lib/icons";
-  import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
 
   let NumberFlow: typeof import("@number-flow/svelte").default | undefined =
@@ -65,8 +63,12 @@
         "Local Notes Backup",
       ],
       btn: {
-        text: "Get Started",
-        onclick: () => {},
+        text: "Copy Brew Command",
+        onclick: () => {
+          window.navigator.clipboard.writeText(
+            "brew install --cask Tsuzat/tap/nota",
+          );
+        },
       },
     },
     {
@@ -89,7 +91,7 @@
       btn: {
         text: "Get started",
         onclick: async () => {
-          goto(resolve(`/payment?type=${frequency}`));
+          window.location.href = resolve(`/payment?type=${frequency}`);
         },
       },
     },
