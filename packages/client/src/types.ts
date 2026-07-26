@@ -108,3 +108,14 @@ export const SubscriptionDetailsSchema = z.object({
   currency: z.string().nullable().optional(),
 });
 export type SubscriptionDetails = z.infer<typeof SubscriptionDetailsSchema>;
+
+export const CheckoutDetailsSchema = z.object({
+  id: z.string(),
+  status: z.string().nullable().optional(),
+  amount: z.number().nullable().optional(),
+  total_amount: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  created_at: z.coerce.date().nullable().optional(),
+  payment_method: z.string().nullable().optional(),
+});
+export type CheckoutDetails = z.infer<typeof CheckoutDetailsSchema>;

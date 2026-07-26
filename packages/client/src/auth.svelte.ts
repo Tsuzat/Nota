@@ -8,6 +8,8 @@ import {
   SessionSchema,
   type SubscriptionDetails,
   SubscriptionDetailsSchema,
+  type CheckoutDetails,
+  CheckoutDetailsSchema,
 } from './types';
 import { secureStorage } from './secureStorage';
 import { isTauri } from '@tauri-apps/api/core';
@@ -229,6 +231,17 @@ class Auth {
     if (!res.ok) throw new Error(await res.text());
     const json = await res.json();
     return SubscriptionDetailsSchema.parse(json);
+  }
+
+  /**
+   * Fetch checkout session details by ID
+   */
+  async getCheckoutDetails(id: string): Promise<CheckoutDetails> {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/payments/checkout-details/${id}`;
+    const res = await request(url);
+    if (!res.ok) throw new Error(await res.text());
+    const json = await res.json();
+    return CheckoutDetailsSchema.parse(json);
   }
 
   /**

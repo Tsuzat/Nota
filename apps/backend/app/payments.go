@@ -218,6 +218,43 @@ func SubscriptionDetails(c fiber.Ctx) error {
 	})
 }
 
+// GetCheckoutDetails fetches details for a given checkout session ID
+func GetCheckoutDetails(c fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Checkout ID is required",
+		})
+	}
+
+	client := getPolarClient()
+	res, err := client.Checkouts.Get(c.Context(), id)
+	if err != nil || res == nil || res.Checkout == nil {
+		return c.Status(fiber.StatusNotFound).JSON(models.APIError{
+			Status: fiber.StatusNotFound,
+			Error:  "Checkout session not found",
+		})
+	}
+
+	checkout := res.Checkout
+
+	paymentMethod := "Card / Digital Wallet"
+	if checkout.PaymentProcessor != "" {
+		paymentMethod = string(checkout.PaymentProcessor)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"id":             checkout.ID,
+		"status":         checkout.Status,
+		"amount":         checkout.Amount,
+		"total_amount":   checkout.TotalAmount,
+		"currency":       checkout.Currency,
+		"created_at":     checkout.CreatedAt,
+		"payment_method": paymentMethod,
+	})
+}
+
 // PolarWebhook handles incoming webhooks from Polar
 func PolarWebhook(c fiber.Ctx) error {
 	payload := c.Body()
