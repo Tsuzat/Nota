@@ -9,10 +9,13 @@
   import { icons } from "@nota/ui/icons";
   import type { Session } from "@nota/client";
   import Particles from "$lib/components/custom/landing/particles.svelte";
+  import { toast } from "@lib/components/ui/sonner";
+  import ProBadge from "@nota/ui/custom/ProBadge.svelte";
 
   const { data } = $props();
   const authClient = getAuthContext();
   const user = $derived(data.user);
+  const session = $derived(data.session);
 
   let sessions = $state<Session[]>([]);
 
@@ -51,6 +54,25 @@
     return interval + "m ago";
   }
 
+  function getDeviceIcon(
+    device: string | null | undefined,
+    browser: string | null | undefined,
+  ) {
+    if (device === "desktop") return "./favicon.svg";
+    if (!browser) return "https://svgl.app/library/chrome.svg";
+
+    const b = browser.toLowerCase();
+    if (b.includes("safari")) return "https://svgl.app/library/safari.svg";
+    if (b.includes("chrome")) return "https://svgl.app/library/chrome.svg";
+    if (b.includes("edge")) return "https://svgl.app/library/edge.svg";
+    if (b.includes("zen"))
+      return "https://svgl.app/library/zen-browser-dark.svg";
+    if (b.includes("firefox")) return "https://svgl.app/library/firefox.svg";
+    if (b.includes("brave")) return "https://svgl.app/library/brave.svg";
+
+    return "https://svgl.app/library/chrome.svg";
+  }
+
   const storagePercentage = $derived(
     user.assigned_storage > 0
       ? (user.used_storage / user.assigned_storage) * 100
@@ -72,9 +94,9 @@
   }
 
   async function handleRevokeOtherSessions() {
-    if (data.session) {
+    if (session) {
       try {
-        await authClient.deleteAllOtherSessions(data.session.id);
+        await authClient.deleteAllOtherSessions(session.id);
         sessions = await authClient.getSessions();
       } catch (e) {
         console.error(e);
@@ -88,15 +110,27 @@
 <div class="mx-auto max-w-4xl p-6 md:p-10 pt-16 space-y-8">
   <div class="space-y-1">
     <h1 class="text-3xl font-bold tracking-tight">Your Profile</h1>
-    <p class="text-muted-foreground">Manage your account and settings.</p>
+    <span class="text-muted-foreground">Manage your account and settings.</span>
   </div>
 
   <Tabs.Root value="general" class="w-full">
-    <Tabs.List class="mb-6 bg-muted/50 border">
-      <Tabs.Trigger value="general" class="rounded-sm">General</Tabs.Trigger>
-      <Tabs.Trigger value="billing" class="rounded-sm">Billing</Tabs.Trigger>
-      <Tabs.Trigger value="settings" class="rounded-sm">Settings</Tabs.Trigger>
-      <Tabs.Trigger value="sessions" class="rounded-sm">Sessions</Tabs.Trigger>
+    <Tabs.List>
+      <Tabs.Trigger value="general">
+        <icons.User />
+        General</Tabs.Trigger
+      >
+      <Tabs.Trigger value="billing">
+        <icons.CreditCard />
+        Billing</Tabs.Trigger
+      >
+      <Tabs.Trigger value="storage">
+        <icons.Database />
+        Storage</Tabs.Trigger
+      >
+      <Tabs.Trigger value="sessions">
+        <icons.Monitor />
+        Sessions</Tabs.Trigger
+      >
     </Tabs.List>
 
     <!-- General Tab -->
@@ -117,11 +151,9 @@
               <div class="flex items-center gap-2">
                 <span class="text-xl font-semibold">{user.name ?? "User"}</span>
                 {#if user.subscription_plan === "pro"}
-                  <Badge
-                    variant="outline"
-                    class="text-purple-500 border-purple-500/30 bg-purple-500/10 font-normal uppercase text-[10px]"
-                    >pro</Badge
-                  >
+                  <ProBadge />
+                {:else}
+                  <Badge variant="outline">Free</Badge>
                 {/if}
               </div>
               <span class="text-sm text-muted-foreground">{user.email}</span>
@@ -129,17 +161,17 @@
           </div>
 
           <div class="mt-8">
-            <p class="text-sm font-semibold mb-1">Account created</p>
-            <p class="text-sm text-muted-foreground">
+            <span class="text-sm font-semibold mb-1">Account created</span>
+            <span class="text-sm text-muted-foreground">
               {new Date(user.created_at).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
                 year: "numeric",
               })}
-            </p>
+            </span>
           </div>
         </Card.Content>
-        <Card.Footer class="border-t bg-muted/20 px-6 py-4 flex justify-end">
+        <Card.Footer class="justify-end">
           <Button variant="outline" onclick={handleSignOut} class="gap-2">
             <icons.LogOut class="size-4" />
             Sign Out
@@ -156,14 +188,17 @@
         </Card.Header>
         <Card.Content class="flex items-center justify-between mt-2">
           <div class="space-y-1">
-            <p class="font-medium text-foreground">Delete Account</p>
-            <p class="text-sm text-muted-foreground">
+            <span class="font-medium text-foreground">Delete Account</span>
+            <span class="text-sm text-muted-foreground">
               Permanently delete your account and all associated data.
-            </p>
+            </span>
           </div>
           <Button
             variant="destructive"
             class="bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 gap-2"
+            onclick={() => {
+              toast.warning("User deletion is not available yet");
+            }}
           >
             <icons.Trash2 class="size-4" />
             Delete Account
@@ -176,40 +211,6 @@
     <Tabs.Content value="billing" class="space-y-6 outline-none">
       <Card.Root>
         <Card.Header>
-          <Card.Title>Storage & Usage</Card.Title>
-          <Card.Description
-            >Manage your storage limits and AI credits.</Card.Description
-          >
-        </Card.Header>
-        <Card.Content class="space-y-8 mt-2">
-          <div class="space-y-2">
-            <div class="flex justify-between items-end mb-2">
-              <p class="text-sm font-medium">Storage Usage</p>
-              <p class="text-xs text-muted-foreground">
-                {formatBytes(user.used_storage)} / {formatBytes(
-                  user.assigned_storage,
-                )}
-              </p>
-            </div>
-            <div class="h-2 w-full overflow-hidden rounded-full bg-secondary">
-              <div
-                class="h-full rounded-full bg-primary/80 transition-all duration-500"
-                style="width: {storagePercentage}%"
-              ></div>
-            </div>
-          </div>
-          <div class="space-y-2">
-            <p class="text-sm font-medium">Available AI Credits</p>
-            <div class="flex items-center gap-2 text-sm text-muted-foreground">
-              <icons.Sparkles class="size-4 text-orange-500" />
-              <span>{user.ai_credits} Tokens remaining</span>
-            </div>
-          </div>
-        </Card.Content>
-      </Card.Root>
-
-      <Card.Root>
-        <Card.Header>
           <Card.Title>Subscription Status</Card.Title>
           <Card.Description
             >Manage your current subscription and billing cycle.</Card.Description
@@ -217,23 +218,16 @@
         </Card.Header>
         <Card.Content class="space-y-6 mt-2">
           <div class="space-y-1">
-            <p class="text-sm font-medium">Current Plan</p>
-            <div class="flex items-center gap-2">
-              <span class="capitalize text-muted-foreground"
-                >{user.subscription_plan}</span
-              >
-              {#if user.subscription_plan === "pro"}
-                <Badge
-                  variant="outline"
-                  class="text-purple-500 border-purple-500/30 bg-purple-500/10 font-normal uppercase text-[10px]"
-                  >pro</Badge
-                >
-              {/if}
-            </div>
+            <span class="text-sm font-medium">Current Plan</span>
+            {#if user.subscription_plan === "pro"}
+              <ProBadge class="w-fit mx-0" />
+            {:else}
+              <Badge variant="outline">Free</Badge>
+            {/if}
           </div>
           <div class="space-y-1">
-            <p class="text-sm font-medium">Subscription Cycle</p>
-            <p class="text-sm text-muted-foreground">
+            <span class="text-sm font-medium">Subscription Cycle</span>
+            <span class="text-sm text-muted-foreground">
               {#if user.next_billing_at}
                 Next billing date: {new Date(
                   user.next_billing_at,
@@ -245,23 +239,45 @@
               {:else}
                 N/A
               {/if}
-            </p>
+            </span>
           </div>
         </Card.Content>
       </Card.Root>
     </Tabs.Content>
 
-    <!-- Settings Tab -->
-    <Tabs.Content value="settings" class="outline-none">
+    <!-- Storage Tab -->
+    <Tabs.Content value="storage" class="space-y-6 outline-none">
       <Card.Root>
         <Card.Header>
-          <Card.Title>Settings</Card.Title>
-          <Card.Description>Manage your preferences.</Card.Description>
+          <Card.Title>Storage & Usage</Card.Title>
+          <Card.Description
+            >Manage your storage limits and AI credits.</Card.Description
+          >
         </Card.Header>
-        <Card.Content>
-          <p class="text-sm text-muted-foreground mt-2">
-            No settings available at the moment.
-          </p>
+        <Card.Content class="space-y-8 mt-2">
+          <div class="space-y-2">
+            <div class="flex justify-between items-end mb-2">
+              <span class="text-sm font-medium">Storage Usage</span>
+              <span class="text-xs text-muted-foreground">
+                {formatBytes(user.used_storage)} / {formatBytes(
+                  user.assigned_storage,
+                )}
+              </span>
+            </div>
+            <div class="h-2 w-full overflow-hidden rounded-full bg-secondary">
+              <div
+                class="h-full rounded-full bg-primary/80 transition-all duration-500"
+                style="width: {storagePercentage}%"
+              ></div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <span class="text-sm font-medium">Available AI Credits</span>
+            <div class="flex items-center gap-2 text-sm text-muted-foreground">
+              <icons.Sparkles class="size-4 text-orange-500" />
+              <span>{user.ai_credits} Tokens remaining</span>
+            </div>
+          </div>
         </Card.Content>
       </Card.Root>
     </Tabs.Content>
@@ -293,21 +309,19 @@
             >
               <div class="flex items-center gap-4">
                 <div
-                  class="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 text-muted-foreground"
+                  class="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 p-2"
                 >
-                  {#if s.browser?.toLowerCase().includes("safari")}
-                    <icons.Compass class="size-5" />
-                  {:else if s.browser?.toLowerCase().includes("firefox")}
-                    <icons.Flame class="size-5 text-orange-500" />
-                  {:else}
-                    <icons.Globe class="size-5" />
-                  {/if}
+                  <img
+                    src={getDeviceIcon(s.device, s.browser)}
+                    alt={s.browser || "Browser"}
+                    class="size-full object-contain"
+                  />
                 </div>
                 <div class="space-y-1">
                   <div class="flex items-center gap-2">
-                    <p class="text-sm font-medium leading-none">
+                    <span class="text-sm font-medium leading-none">
                       {s.os || "Unknown OS"} • {s.browser || "Unknown Browser"}
-                    </p>
+                    </span>
                     <Badge
                       variant="outline"
                       class="border-green-500/30 text-green-500 bg-green-500/10 font-medium uppercase text-[10px]"
