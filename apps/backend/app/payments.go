@@ -128,6 +128,62 @@ func OnUserCreate(ctx context.Context, user *models.User) {
 	}(user)
 }
 
+// getOrCreatePolarCustomer guarantees a valid Polar Customer ID for all payment handlers
+func getOrCreatePolarCustomer(ctx context.Context, user *models.User) (string, error) {
+	if user == nil || user.Id == "" {
+		return "", fmt.Errorf("invalid user object")
+	}
+
+	if user.ExternalCustomerId != "" {
+		return user.ExternalCustomerId, nil
+	}
+
+	client := getPolarClient()
+
+	// 1. Try to find customer by email
+	customers, err := client.Customers.List(ctx, operations.CustomersListRequest{
+		Email: polar.String(user.Email),
+	})
+	if err == nil && customers != nil && customers.ListResourceCustomer != nil && len(customers.ListResourceCustomer.Items) > 0 {
+		polarCustomerId := customers.ListResourceCustomer.Items[0].ID
+		go func(uID, pID string) {
+			if _, err := config.DB.NewUpdate().
+				Model((*models.User)(nil)).
+				Set("external_customer_id = ?", pID).
+				Where("id = ?", uID).
+				Exec(context.Background()); err == nil {
+				utils.DeleteCache("user:" + uID)
+			}
+		}(user.Id, polarCustomerId)
+		user.ExternalCustomerId = polarCustomerId
+		return polarCustomerId, nil
+	}
+
+	// 2. Fallback: Create Customer on Polar
+	res, err := client.Customers.Create(ctx, components.CustomerCreate{
+		ExternalID: polar.Pointer(user.Id),
+		Email:      user.Email,
+		Name:       polar.Pointer(user.Name),
+	})
+	if err != nil || res == nil || res.Customer == nil {
+		return "", fmt.Errorf("failed to create Polar customer: %v", err)
+	}
+
+	polarCustomerId := res.Customer.ID
+	go func(uID, pID string) {
+		if _, err := config.DB.NewUpdate().
+			Model((*models.User)(nil)).
+			Set("external_customer_id = ?", pID).
+			Where("id = ?", uID).
+			Exec(context.Background()); err == nil {
+			utils.DeleteCache("user:" + uID)
+		}
+	}(user.Id, polarCustomerId)
+
+	user.ExternalCustomerId = polarCustomerId
+	return polarCustomerId, nil
+}
+
 // Checkout generates a Polar checkout URL and redirects the user
 func Checkout(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
@@ -136,6 +192,15 @@ func Checkout(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
 			Error:  "productId is required",
+		})
+	}
+
+	polarCustomerId, err := getOrCreatePolarCustomer(c.Context(), user)
+	if err != nil {
+		log.Error("Polar Customer Resolution Error:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to resolve customer for checkout",
 		})
 	}
 
@@ -148,7 +213,7 @@ func Checkout(c fiber.Ctx) error {
 		SuccessURL:    polar.String(successURL),
 		CustomerEmail: polar.String(user.Email),
 		CustomerName:  polar.String(user.Name),
-		CustomerID:    polar.String(user.Id),
+		CustomerID:    polar.String(polarCustomerId),
 	})
 
 	if err != nil {
@@ -172,36 +237,19 @@ func Checkout(c fiber.Ctx) error {
 // Portal generates a Polar customer portal URL and redirects the user
 func Portal(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	client := getPolarClient()
 
-	var polarCustomerId string
-
-	// 1. If we have the external ID, use it
-	if user.ExternalCustomerId != "" {
-		polarCustomerId = user.ExternalCustomerId
-	} else {
-		// 2. Try to find customer by email if ID is missing
-		customers, err := client.Customers.List(c.Context(), operations.CustomersListRequest{
-			Email: polar.String(user.Email),
+	polarCustomerId, err := getOrCreatePolarCustomer(c.Context(), user)
+	if err != nil {
+		log.Error("Polar Customer Lookup Error:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to lookup customer information",
 		})
-		if err != nil {
-			log.Error("Polar Customer Lookup Error:", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-				Status: fiber.StatusInternalServerError,
-				Error:  "Failed to lookup customer information",
-			})
-		}
-
-		if customers.ListResourceCustomer == nil || len(customers.ListResourceCustomer.Items) == 0 {
-			return c.Status(fiber.StatusNotFound).JSON(models.APIError{
-				Status: fiber.StatusNotFound,
-				Error:  "No subscription or customer found. Please subscribe first.",
-			})
-		}
-		polarCustomerId = customers.ListResourceCustomer.Items[0].ID
 	}
 
-	// 3. Create a Customer Session (Portal Session)
+	client := getPolarClient()
+
+	// Create a Customer Session (Portal Session)
 	session, err := client.CustomerSessions.Create(c.Context(), operations.CreateCustomerSessionsCreateCustomerSessionCreateCustomerSessionCustomerIDCreate(
 		components.CustomerSessionCustomerIDCreate{
 			CustomerID: polarCustomerId,
@@ -229,26 +277,17 @@ func Portal(c fiber.Ctx) error {
 // SubscriptionDetails fetches active subscription data from Polar API
 func SubscriptionDetails(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	client := getPolarClient()
 
-	var polarCustomerId string
-
-	// 1. Get Customer ID
-	if user.ExternalCustomerId != "" {
-		polarCustomerId = user.ExternalCustomerId
-	} else {
-		customers, err := client.Customers.List(c.Context(), operations.CustomersListRequest{
-			Email: polar.String(user.Email),
+	polarCustomerId, err := getOrCreatePolarCustomer(c.Context(), user)
+	if err != nil {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"subscription_plan": "free",
 		})
-		if err != nil || customers.ListResourceCustomer == nil || len(customers.ListResourceCustomer.Items) == 0 {
-			return c.Status(fiber.StatusOK).JSON(fiber.Map{
-				"subscription_plan": "free",
-			})
-		}
-		polarCustomerId = customers.ListResourceCustomer.Items[0].ID
 	}
 
-	// 2. Query Subscriptions
+	client := getPolarClient()
+
+	// Query Subscriptions
 	customerIdFilter := operations.CreateCustomerIDFilterStr(polarCustomerId)
 	subs, err := client.Subscriptions.List(c.Context(), operations.SubscriptionsListRequest{
 		CustomerID: &customerIdFilter,

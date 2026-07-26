@@ -37,8 +37,10 @@ var (
 	BUCKET_NAME           string
 )
 
+var IS_PRODUCTION bool
+
 func IsProduction() bool {
-	return os.Getenv("ENV") == "production"
+	return IS_PRODUCTION
 }
 
 func GetCookieOptions(name string, value string, expires time.Time) *fiber.Cookie {
@@ -88,6 +90,7 @@ var (
 Init function initializes the environment variables
 */
 func ConstsInit() {
+	IS_PRODUCTION = os.Getenv("ENV") == "production"
 	DB_URL = os.Getenv("DB_URL")
 	ACCESS_TOKEN_SECRET = os.Getenv("ACCESS_TOKEN_SECRET")
 	ACCESS_TOKEN_EXPIRY, _ = strconv.ParseInt(os.Getenv("ACCESS_TOKEN_EXPIRY"), 10, 64)
