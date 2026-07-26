@@ -8,8 +8,10 @@ import (
 	"sync"
 
 	"github.com/Tsuzat/Nota/config"
+	"github.com/Tsuzat/Nota/db"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/Tsuzat/Nota/utils"
+	"strings"
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
@@ -71,6 +73,59 @@ func getPolarClient() *polar.Polar {
 		polarClient = polar.New(opts...)
 	})
 	return polarClient
+}
+
+// OnUserCreate handles initial setup for newly created users synchronously for DB items and async for Polar
+func OnUserCreate(ctx context.Context, user *models.User) {
+	if user == nil || user.Id == "" {
+		return
+	}
+
+	// Extract first name or fall back to "Cloud"
+	firstName := "Cloud"
+	trimmed := strings.TrimSpace(user.Name)
+	if trimmed != "" {
+		parts := strings.Fields(trimmed)
+		if len(parts) > 0 {
+			firstName = parts[0]
+		}
+	}
+	workspaceName := fmt.Sprintf("%s's Workspace", firstName)
+
+	// 1. Synchronously create default workspace before returning so frontend can access it immediately
+	if err := db.CreateDefaultWorkspace(user.Id, workspaceName); err != nil {
+		log.Error("Failed to create default workspace for user: ", user.Id, err)
+	}
+
+	// 2. Asynchronously create Polar Customer and store the external_customer_id
+	go func(u *models.User) {
+		client := getPolarClient()
+		res, err := client.Customers.Create(context.Background(), components.CustomerCreate{
+			ExternalID: polar.Pointer(u.Id),
+			Email:      u.Email,
+			Name:       polar.Pointer(u.Name),
+		})
+		if err != nil {
+			log.Error("Failed to create Polar customer: ", err)
+			return
+		}
+
+		if res != nil && res.Customer != nil {
+			polarCustomerId := res.Customer.ID
+			_, err = config.DB.NewUpdate().
+				Model((*models.User)(nil)).
+				Set("external_customer_id = ?", polarCustomerId).
+				Where("id = ?", u.Id).
+				Exec(context.Background())
+
+			if err != nil {
+				log.Error("Failed to update user external_customer_id: ", err)
+			} else {
+				utils.DeleteCache("user:" + u.Id)
+				log.Infof("Successfully associated Polar customer ID (%s) with user %s", polarCustomerId, u.Id)
+			}
+		}
+	}(user)
 }
 
 // Checkout generates a Polar checkout URL and redirects the user

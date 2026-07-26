@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -15,7 +16,6 @@ import (
 )
 
 func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
-
 	var access_token string
 	// Find the token in cookies
 	access_token = c.Cookies("access_token")
@@ -26,10 +26,11 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 			access_token = authHeader[1]
 		}
 	}
-	// if token is not found, return 403
+	// if token is not found, return 401
 	if access_token == "" {
 		return nil, fiber.ErrUnauthorized
 	}
+
 	// decode the token
 	token, err := jwt.Parse(access_token, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -50,7 +51,12 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 	if !ok {
 		return nil, fiber.ErrUnauthorized
 	}
-	id, sessionId := claims["id"].(string), claims["session_id"].(string)
+
+	id, ok1 := claims["id"].(string)
+	sessionId, ok2 := claims["session_id"].(string)
+	if !ok1 || !ok2 || id == "" || sessionId == "" {
+		return nil, fiber.ErrUnauthorized
+	}
 
 	var session models.Session
 	var validSession bool
@@ -61,14 +67,28 @@ func AuthenticatedUser(c fiber.Ctx) (*models.User, error) {
 		if err == nil && dbSession != nil {
 			validSession = !dbSession.Revoked && dbSession.ExpiresAt.After(time.Now())
 			if validSession {
+				session = *dbSession
 				go utils.SetCache("session:"+sessionId, dbSession, 5*time.Minute)
 			}
 		}
 	}
 
 	if !validSession {
+		// Clear cookies
 		c.Cookie(config.GetCookieOptions("access_token", "", time.Now().Add(-time.Hour)))
 		c.Cookie(config.GetCookieOptions("refresh_token", "", time.Now().Add(-time.Hour)))
+
+		// Clean up invalid/expired session from cache & DB
+		utils.DeleteCache("session:" + sessionId)
+		go func(sid string) {
+			if _, err := config.DB.NewDelete().
+				Model((*models.Session)(nil)).
+				Where("id = ?", sid).
+				Exec(context.Background()); err != nil {
+				log.Error("Failed to delete invalid session in middleware:", err)
+			}
+		}(sessionId)
+
 		return nil, fiber.ErrUnauthorized
 	}
 
@@ -101,7 +121,6 @@ func Authenticate(c fiber.Ctx) error {
 		return c.Status(statusCode).JSON(models.APIError{
 			Status: statusCode,
 			Error:  errorMessage,
-			Data:   err.Error(),
 		})
 	}
 	// Attach the user to the context
