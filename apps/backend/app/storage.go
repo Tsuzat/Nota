@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -77,7 +78,7 @@ func GeneratePresignedURL(c fiber.Ctx) error {
 	})
 }
 
-// ConfirmUpload verifies the upload and updates user storage usage
+// ConfirmUpload verifies the upload, records the asset in DB, and updates user storage usage
 func ConfirmUpload(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	userId := user.Id
@@ -105,6 +106,26 @@ func ConfirmUpload(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(models.APIError{Status: fiber.StatusNotFound, Error: "File empty or not found"})
 	}
 
+	endpoint := strings.TrimSuffix(config.R2_PUBLIC_ENDPOINT, "/")
+	publicUrl := fmt.Sprintf("%s/%s", endpoint, req.Key)
+
+	// Insert Asset in Database
+	asset := &models.Asset{
+		UserId:      userId,
+		WorkspaceId: req.WorkspaceId,
+		NoteId:      req.NoteId,
+		Name:        req.Filename,
+		Path:        publicUrl,
+		MimeType:    req.ContentType,
+		Size:        realSize,
+	}
+
+	_, err = config.DB.NewInsert().Model(asset).Exec(c.Context())
+	if err != nil {
+		log.Error("Error inserting asset record:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to record asset in database"})
+	}
+
 	// Update user storage in DB
 	_, err = config.DB.NewUpdate().
 		Model((*models.User)(nil)).
@@ -122,16 +143,25 @@ func ConfirmUpload(c fiber.Ctx) error {
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Upload confirmed successfully",
-		Data: fiber.Map{
-			"size": realSize,
-		},
+		Data:    asset,
 	})
 }
 
-// ListFiles lists files for the user with caching
+// ListFiles lists files for the user from DB with pagination, search, and caching
 func ListFiles(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	userId := user.Id
+
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit, err := strconv.Atoi(c.Query("limit"))
+	if err != nil || limit < 1 || limit > 100 {
+		limit = 20
+	}
+	search := strings.TrimSpace(c.Query("search"))
+	workspaceId := strings.TrimSpace(c.Query("workspaceId"))
 
 	// Cache Check
 	versionKey := fmt.Sprintf("storage:version:%s", userId)
@@ -141,102 +171,103 @@ func ListFiles(c fiber.Ctx) error {
 		version = string(versionBytes)
 	}
 
-	cacheKey := fmt.Sprintf("storage:list:%s:%s", userId, version)
+	cacheKey := fmt.Sprintf("storage:list:%s:%s:p%d:l%d:q%s:w%s", userId, version, page, limit, search, workspaceId)
 
-	files := make([]map[string]any, 0)
-	if err := utils.GetCache(cacheKey, &files); err == nil {
+	var cachedResult map[string]any
+	if err := utils.GetCache(cacheKey, &cachedResult); err == nil {
 		return c.JSON(models.APIResponse{
 			Status:  fiber.StatusOK,
 			Message: "Fetched Files Successfully",
-			Data:    files,
+			Data:    cachedResult,
 		})
 	}
 
-	searchPrefix := userId + "/"
-
-	endpoint := strings.TrimSuffix(config.R2_PUBLIC_ENDPOINT, "/")
-
-	var continuationToken *string
-	for {
-		listOutput, err := utils.S3CLIENT.ListObjectsV2(c.Context(), &s3.ListObjectsV2Input{
-			Bucket:            aws.String(config.BUCKET_NAME),
-			Prefix:            aws.String(searchPrefix),
-			ContinuationToken: continuationToken,
-		})
-
-		if err != nil {
-			log.Error("List files error:", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to list files"})
-		}
-
-		for _, item := range listOutput.Contents {
-			files = append(files, map[string]any{
-				"key":          *item.Key,
-				"size":         item.Size,
-				"lastModified": item.LastModified,
-				"url":          fmt.Sprintf("%s/%s", endpoint, *item.Key),
-			})
-		}
-
-		if listOutput.IsTruncated != nil && *listOutput.IsTruncated {
-			continuationToken = listOutput.NextContinuationToken
-		} else {
-			break
-		}
+	query := config.DB.NewSelect().Model((*models.Asset)(nil)).Where("user_id = ?", userId)
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if workspaceId != "" {
+		query = query.Where("workspace_id = ?", workspaceId)
 	}
 
-	jsonBytes, _ := config.APP.Config().JSONEncoder(files)
+	count, err := query.Count(c.Context())
+	if err != nil {
+		log.Error("Count assets error:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to list files"})
+	}
+
+	var assets []models.Asset
+	err = query.Order("created_at DESC").Limit(limit).Offset((page - 1) * limit).Scan(c.Context())
+	if err != nil {
+		log.Error("List assets error:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to list files"})
+	}
+
+	result := fiber.Map{
+		"files": assets,
+		"total": count,
+		"page":  page,
+		"limit": limit,
+	}
+
+	jsonBytes, _ := config.APP.Config().JSONEncoder(result)
 	config.VALKEY.Set(cacheKey, jsonBytes, 10*time.Minute)
 
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Fetched Files Successfully",
-		Data:    files,
+		Data:    result,
 	})
 }
 
-// DeleteFile deletes a file and refunds quota
+// DeleteFile deletes a file from DB and S3 and refunds quota
 func DeleteFile(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	userId := user.Id
-	req := new(utils.ConfirmUploadRequest)
+	req := new(utils.DeleteFileRequest)
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: err.Error()})
 	}
-	key := req.Key
 
-	if !strings.HasPrefix(key, userId+"/") {
-		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: fiber.StatusForbidden, Error: "Permission denied"})
+	var asset models.Asset
+	query := config.DB.NewSelect().Model(&asset).Where("user_id = ?", userId)
+	if req.Id != "" {
+		query = query.Where("id = ?", req.Id)
+	} else if req.Key != "" {
+		query = query.Where("path LIKE ?", "%"+req.Key)
+	} else {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: "Either id or key is required"})
 	}
 
-	headOutput, err := utils.S3CLIENT.HeadObject(c.Context(), &s3.HeadObjectInput{
-		Bucket: aws.String(config.BUCKET_NAME),
-		Key:    aws.String(key),
-	})
-
-	if err != nil {
-		// Check for 404
-		// In aws-sdk-go-v2 checking error types is a bit verbose
+	if err := query.Scan(c.Context()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(models.APIError{Status: fiber.StatusNotFound, Error: "File not found"})
 	}
 
-	size := *headOutput.ContentLength
+	s3Key := asset.Path
+	endpoint := strings.TrimSuffix(config.R2_PUBLIC_ENDPOINT, "/")
+	if strings.HasPrefix(s3Key, endpoint) {
+		s3Key = strings.TrimPrefix(s3Key, endpoint+"/")
+	}
 
-	_, err = utils.S3CLIENT.DeleteObject(c.Context(), &s3.DeleteObjectInput{
+	_, err := utils.S3CLIENT.DeleteObject(c.Context(), &s3.DeleteObjectInput{
 		Bucket: aws.String(config.BUCKET_NAME),
-		Key:    aws.String(key),
+		Key:    aws.String(s3Key),
 	})
 
 	if err != nil {
-		log.Error("Delete error:", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to delete file"})
+		log.Error("Delete S3 error:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to delete file from S3"})
 	}
 
-	if size > 0 {
-		// Refund storage
+	_, err = config.DB.NewDelete().Model(&asset).Where("id = ?", asset.Id).Exec(c.Context())
+	if err != nil {
+		log.Error("Delete asset DB error:", err)
+	}
+
+	if asset.Size > 0 {
 		_, err = config.DB.NewUpdate().
 			Model((*models.User)(nil)).
-			Set("used_storage = GREATEST(0, used_storage - ?)", size).
+			Set("used_storage = GREATEST(0, used_storage - ?)", asset.Size).
 			Where("id = ?", userId).
 			Exec(c.Context())
 
@@ -251,7 +282,8 @@ func DeleteFile(c fiber.Ctx) error {
 		Status:  fiber.StatusOK,
 		Message: "File deleted successfully",
 		Data: fiber.Map{
-			"refunded": size,
+			"refunded": asset.Size,
+			"id":       asset.Id,
 		},
 	})
 }

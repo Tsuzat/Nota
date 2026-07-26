@@ -15,13 +15,24 @@ import (
 )
 
 type PresignedURLRequest struct {
-	Filename    string `json:"filename" validate:"required"`
-	ContentType string `json:"contentType" validate:"required"`
-	Size        int64  `json:"size" validate:"required,min=1"`
+	Filename    string  `json:"filename" validate:"required"`
+	ContentType string  `json:"contentType" validate:"required"`
+	Size        int64   `json:"size" validate:"required,min=1"`
+	WorkspaceId string  `json:"workspaceId" validate:"required"`
+	NoteId      *string `json:"noteId,omitempty"`
 }
 
 type ConfirmUploadRequest struct {
-	Key string `json:"key" validate:"required"`
+	Key         string  `json:"key" validate:"required"`
+	Filename    string  `json:"filename" validate:"required"`
+	ContentType string  `json:"contentType" validate:"required"`
+	WorkspaceId string  `json:"workspaceId" validate:"required"`
+	NoteId      *string `json:"noteId,omitempty"`
+}
+
+type DeleteFileRequest struct {
+	Id  string `json:"id,omitempty"`
+	Key string `json:"key,omitempty"`
 }
 
 var (
