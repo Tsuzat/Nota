@@ -1,21 +1,16 @@
 <script lang="ts">
-  import { cn } from "@lib/utils";
-  import type { Snippet } from "svelte";
-  import * as Tooltip from "@lib/components/ui/tooltip";
+import * as Tooltip from '@lib/components/ui/tooltip';
+import { cn } from '@lib/utils';
+import type { Snippet } from 'svelte';
 
-  interface Props {
-    class?: string;
-    ref: HTMLDivElement | null;
-    content: string;
-    children?: Snippet<[]>;
-  }
+interface Props {
+  class?: string;
+  ref: HTMLDivElement | null;
+  content: string;
+  children?: Snippet<[]>;
+}
 
-  let {
-    class: className = "",
-    ref = $bindable(),
-    children,
-    content,
-  }: Props = $props();
+let { class: className = '', ref = $bindable(), children, content }: Props = $props();
 </script>
 
 <Tooltip.Provider>

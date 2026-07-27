@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Avatar, AvatarImage, AvatarFallback } from '@nota/ui/shadcn/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@nota/ui/shadcn/avatar';
 
 interface Props {
   image: string | null;

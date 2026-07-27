@@ -1,27 +1,27 @@
 <script lang="ts">
-  import AppLogo from "$lib/components/custom/applogo.svelte";
-  import ToggleMode from "@nota/ui/custom/ToggleMode.svelte";
-  import Particles from "$lib/components/custom/landing/particles.svelte";
-  import Spotlight from "$lib/components/custom/landing/spotlight.svelte";
-  import { Button } from "@nota/ui/shadcn/button";
-  import { icons } from "@nota/ui/icons/index.ts";
-  import { resolve } from "$app/paths";
+import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
+import { icons } from '@nota/ui/icons/index.ts';
+import { Button } from '@nota/ui/shadcn/button';
+import { resolve } from '$app/paths';
+import AppLogo from '$lib/components/custom/applogo.svelte';
+import Particles from '$lib/components/custom/landing/particles.svelte';
+import Spotlight from '$lib/components/custom/landing/spotlight.svelte';
 
-  const lastUpdated = "July 26, 2026";
+const lastUpdated = 'July 26, 2026';
 
-  const sections = [
-    { id: "acceptance", title: "1. Acceptance of Terms" },
-    { id: "description", title: "2. Description of Service & Pricing Plans" },
-    { id: "account", title: "3. Account Registration & Security" },
-    { id: "user-content", title: "4. User Content & Ownership" },
-    { id: "ai-byok", title: "5. AI Integration & BYOK (Bring Your Own Key)" },
-    { id: "local-first", title: "6. Local-First Storage & Offline Use" },
-    { id: "billing", title: "7. Subscriptions, Payments & Cancellations" },
-    { id: "prohibited", title: "8. Acceptable Use & Prohibited Conduct" },
-    { id: "disclaimers", title: "9. Disclaimers & Limitation of Liability" },
-    { id: "termination", title: "10. Termination & Changes to Terms" },
-    { id: "contact", title: "11. Contact Information" },
-  ];
+const sections = [
+  { id: 'acceptance', title: '1. Acceptance of Terms' },
+  { id: 'description', title: '2. Description of Service & Pricing Plans' },
+  { id: 'account', title: '3. Account Registration & Security' },
+  { id: 'user-content', title: '4. User Content & Ownership' },
+  { id: 'ai-byok', title: '5. AI Integration & BYOK (Bring Your Own Key)' },
+  { id: 'local-first', title: '6. Local-First Storage & Offline Use' },
+  { id: 'billing', title: '7. Subscriptions, Payments & Cancellations' },
+  { id: 'prohibited', title: '8. Acceptable Use & Prohibited Conduct' },
+  { id: 'disclaimers', title: '9. Disclaimers & Limitation of Liability' },
+  { id: 'termination', title: '10. Termination & Changes to Terms' },
+  { id: 'contact', title: '11. Contact Information' },
+];
 </script>
 
 <svelte:head>

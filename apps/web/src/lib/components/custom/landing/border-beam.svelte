@@ -1,6 +1,6 @@
 <script lang="ts">
-import { motion, type Transition } from 'motion-sv';
 import { cn } from '@nota/ui/utils';
+import { motion, type Transition } from 'motion-sv';
 
 interface BorderBeamProps {
   size?: number;
@@ -45,7 +45,7 @@ const animateConfig = $derived({
 });
 
 const transitionConfig = $derived({
-  repeat: Infinity,
+  repeat: Number.POSITIVE_INFINITY,
   ease: 'linear' as const,
   duration,
   delay: -delay,

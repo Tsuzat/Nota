@@ -1,7 +1,7 @@
 <script lang="ts">
-import { resolve } from '$app/paths';
 import { cn } from '@nota/ui/utils';
 import { slide } from 'svelte/transition';
+import { resolve } from '$app/paths';
 
 interface Props {
   size?: number;

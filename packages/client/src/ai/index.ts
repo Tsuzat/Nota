@@ -1,7 +1,7 @@
 import { streamText, generateText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
-import { createGoogleGenerativeAI, type GoogleLanguageModelOptions } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { secureStorage } from '../secureStorage';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import request from '../request';
@@ -26,7 +26,13 @@ export const aiGenerate = async (prompt: string) => {
 
 export type AIProvider = 'server' | 'gemini' | 'openai' | 'claude' | 'deepseek' | 'kimi' | 'grok' | 'custom';
 
+const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
 export async function getAllConfiguredModels(): Promise<Record<string, SelectableModel[]>> {
+  if (!isTauri()) {
+    return {};
+  }
+
   const result: Record<string, SelectableModel[]> = {};
 
   const providers: { id: keyof typeof LATEST_MODELS; key: string }[] = [
@@ -102,6 +108,10 @@ export const getAIConfig = async (): Promise<{
   apiKey: string;
   baseUrl?: string;
 }> => {
+  if (!isTauri()) {
+    return { provider: 'server', model: '', apiKey: '' };
+  }
+
   const useOwnKeys = localStorage.getItem('useOwnKeys') === 'true';
   if (!useOwnKeys) {
     return { provider: 'server', model: '', apiKey: '' };

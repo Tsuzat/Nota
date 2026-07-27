@@ -1,5 +1,5 @@
 <script lang="ts" module>
-  export type FREQUENCY = "monthly" | "yearly";
+export type FREQUENCY = 'monthly' | 'yearly';
 </script>
 
 <script lang="ts">

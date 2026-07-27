@@ -1,7 +1,7 @@
-import type { PathDimensions } from "./types";
+import type { PathDimensions } from './types';
 
 export function usePathCalculator() {
-  let pathD = $state("");
+  let pathD = $state('');
   let svgDimensions = $state<PathDimensions>({ width: 0, height: 0 });
 
   function calculatePath(
@@ -12,7 +12,7 @@ export function usePathCalculator() {
     startXOffset: number,
     startYOffset: number,
     endXOffset: number,
-    endYOffset: number,
+    endYOffset: number
   ) {
     if (!containerRef || !fromRef || !toRef) return;
 
@@ -24,10 +24,8 @@ export function usePathCalculator() {
     const svgHeight = containerRect.height;
     svgDimensions = { width: svgWidth, height: svgHeight };
 
-    const startX =
-      rectA.left - containerRect.left + rectA.width / 2 + startXOffset;
-    const startY =
-      rectA.top - containerRect.top + rectA.height / 2 + startYOffset;
+    const startX = rectA.left - containerRect.left + rectA.width / 2 + startXOffset;
+    const startY = rectA.top - containerRect.top + rectA.height / 2 + startYOffset;
     const endX = rectB.left - containerRect.left + rectB.width / 2 + endXOffset;
     const endY = rectB.top - containerRect.top + rectB.height / 2 + endYOffset;
 

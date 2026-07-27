@@ -1,13 +1,13 @@
-import { POLAR_MONTLY_SUB, POLAR_YEARLY_SUB } from "$env/static/private";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import { redirect } from "@sveltejs/kit";
+import { redirect } from '@sveltejs/kit';
+import { POLAR_MONTLY_SUB, POLAR_YEARLY_SUB } from '$env/static/private';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
 export const GET = ({ url, locals: { user } }) => {
   if (user === null) {
-    throw redirect(303, "/signin");
+    throw redirect(303, '/signin');
   }
-  const monthly = url.searchParams.get("type") === "monthly";
-  let productId = "";
+  const monthly = url.searchParams.get('type') === 'monthly';
+  let productId = '';
   if (monthly) {
     productId = POLAR_MONTLY_SUB;
   } else {

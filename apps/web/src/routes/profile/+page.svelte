@@ -1,135 +1,88 @@
 <script lang="ts">
-  import { getAuthContext, getStorageContext } from "@nota/client";
-  import { onMount, untrack } from "svelte";
-  import UserAvatar from "$lib/components/custom/user-avatar.svelte";
-  import { Button } from "@nota/ui/shadcn/button";
-  import { Badge } from "@nota/ui/shadcn/badge";
-  import * as Tabs from "@nota/ui/shadcn/tabs";
-  import * as Card from "@nota/ui/shadcn/card";
-  import { icons } from "@nota/ui/icons";
-  import type { Session } from "@nota/client";
-  import Particles from "$lib/components/custom/landing/particles.svelte";
-  import { toast } from "@lib/components/ui/sonner";
-  import { ProBadge, StorageViewer } from "@nota/ui/custom/index.js";
-  import { PUBLIC_BACKEND_URL } from "$env/static/public";
+import { toast } from '@lib/components/ui/sonner';
+import type { Session } from '@nota/client';
+import { getAuthContext } from '@nota/client';
+import { ProBadge } from '@nota/ui/custom/index.js';
+import { icons } from '@nota/ui/icons';
+import { Badge } from '@nota/ui/shadcn/badge';
+import { Button } from '@nota/ui/shadcn/button';
+import * as Card from '@nota/ui/shadcn/card';
+import * as Tabs from '@nota/ui/shadcn/tabs';
+import { onMount } from 'svelte';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import Particles from '$lib/components/custom/landing/particles.svelte';
+import UserAvatar from '$lib/components/custom/user-avatar.svelte';
 
-  const { data } = $props();
-  const authClient = getAuthContext();
-  const storage = getStorageContext();
-  const user = $derived(data.user);
-  const session = $derived(data.session);
+const { data } = $props();
+const authClient = getAuthContext();
+const user = $derived(data.user);
+const session = $derived(data.session);
 
-  let sessions = $state<Session[]>([]);
+let sessions = $state<Session[]>([]);
 
-  let search = $state("");
-  let page = $state(1);
-  let limit = $state(10);
-  let isLoading = $state(false);
-
-  async function loadStorageFiles() {
-    if (!storage) return;
-    isLoading = true;
-    try {
-      await storage.fetch({ page, limit, search });
-    } catch (e) {
-      console.error(e);
-    } finally {
-      isLoading = false;
-    }
+onMount(async () => {
+  try {
+    sessions = await authClient.getSessions();
+  } catch (e) {
+    console.error(e);
   }
+});
 
-  onMount(async () => {
+function timeAgo(date: Date | string | null | undefined) {
+  if (!date) return '';
+  const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+  let interval = Math.floor(seconds / 31536000);
+  if (interval >= 1) return interval + 'y ago';
+  interval = Math.floor(seconds / 2592000);
+  if (interval >= 1) return interval + 'mo ago';
+  interval = Math.floor(seconds / 86400);
+  if (interval >= 1) return interval + 'd ago';
+  interval = Math.floor(seconds / 3600);
+  if (interval >= 1) return interval + 'h ago';
+  interval = Math.floor(seconds / 60);
+  return interval + 'm ago';
+}
+
+function getDeviceIcon(device: string | null | undefined, browser: string | null | undefined) {
+  if (device === 'desktop') return '/favicon.svg';
+  if (!browser) return 'https://svgl.app/library/chrome.svg';
+
+  const b = browser.toLowerCase();
+  if (b.includes('safari')) return 'https://svgl.app/library/safari.svg';
+  if (b.includes('chrome')) return 'https://svgl.app/library/chrome.svg';
+  if (b.includes('edge')) return 'https://svgl.app/library/edge.svg';
+  if (b.includes('zen')) return 'https://svgl.app/library/zen-browser-dark.svg';
+  if (b.includes('firefox')) return 'https://svgl.app/library/firefox.svg';
+  if (b.includes('brave')) return 'https://svgl.app/library/brave.svg';
+
+  return 'https://svgl.app/library/chrome.svg';
+}
+
+async function handleSignOut() {
+  await authClient.logout();
+  window.location.href = '/signin';
+}
+
+async function handleRevokeSession(id: string) {
+  try {
+    await authClient.revokeSession(id);
+    sessions = sessions.filter((s) => s.id !== id);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function handleRevokeOtherSessions() {
+  if (session) {
     try {
+      await authClient.deleteAllOtherSessions(session.id);
       sessions = await authClient.getSessions();
     } catch (e) {
       console.error(e);
     }
-    loadStorageFiles();
-  });
-
-  function timeAgo(date: Date | string | null | undefined) {
-    if (!date) return "";
-    const seconds = Math.floor(
-      (new Date().getTime() - new Date(date).getTime()) / 1000,
-    );
-    if (seconds < 60) return "just now";
-    let interval = Math.floor(seconds / 31536000);
-    if (interval >= 1) return interval + "y ago";
-    interval = Math.floor(seconds / 2592000);
-    if (interval >= 1) return interval + "mo ago";
-    interval = Math.floor(seconds / 86400);
-    if (interval >= 1) return interval + "d ago";
-    interval = Math.floor(seconds / 3600);
-    if (interval >= 1) return interval + "h ago";
-    interval = Math.floor(seconds / 60);
-    return interval + "m ago";
   }
-
-  function getDeviceIcon(
-    device: string | null | undefined,
-    browser: string | null | undefined,
-  ) {
-    if (device === "desktop") return "/favicon.svg";
-    if (!browser) return "https://svgl.app/library/chrome.svg";
-
-    const b = browser.toLowerCase();
-    if (b.includes("safari")) return "https://svgl.app/library/safari.svg";
-    if (b.includes("chrome")) return "https://svgl.app/library/chrome.svg";
-    if (b.includes("edge")) return "https://svgl.app/library/edge.svg";
-    if (b.includes("zen"))
-      return "https://svgl.app/library/zen-browser-dark.svg";
-    if (b.includes("firefox")) return "https://svgl.app/library/firefox.svg";
-    if (b.includes("brave")) return "https://svgl.app/library/brave.svg";
-
-    return "https://svgl.app/library/chrome.svg";
-  }
-
-  async function handleSignOut() {
-    await authClient.logout();
-    window.location.href = "/signin";
-  }
-
-  async function handleRevokeSession(id: string) {
-    try {
-      await authClient.revokeSession(id);
-      sessions = sessions.filter((s) => s.id !== id);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  async function handleRevokeOtherSessions() {
-    if (session) {
-      try {
-        await authClient.deleteAllOtherSessions(session.id);
-        sessions = await authClient.getSessions();
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }
-
-  async function handleDeleteAsset(id: string, name: string) {
-    if (!storage) return;
-    try {
-      await storage.delete(id);
-      toast.success(`Deleted file "${name}"`);
-      await loadStorageFiles();
-    } catch (e: any) {
-      toast.error(`Failed to delete file: ${e?.message || e}`);
-    }
-  }
-
-  $effect(() => {
-    // Re-fetch storage files when search or page changes
-    search;
-    page;
-
-    // Check if component is mounted and we have storage
-    if (storage && !isLoading) {
-      untrack(() => loadStorageFiles());
-    }
-  });
+}
 </script>
 
 <Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />
@@ -152,10 +105,6 @@
         <Tabs.Trigger value="billing">
           <icons.CreditCard />
           Billing
-        </Tabs.Trigger>
-        <Tabs.Trigger value="storage">
-          <icons.Database />
-          Storage
         </Tabs.Trigger>
         <Tabs.Trigger value="sessions">
           <icons.Monitor />
@@ -368,22 +317,6 @@
             </Card.Footer>
           {/if}
         </Card.Root>
-      </Tabs.Content>
-
-      <!-- Storage Tab -->
-      <Tabs.Content value="storage" class="space-y-6 outline-none">
-        <StorageViewer
-          usedStorage={user.used_storage}
-          assignedStorage={user.assigned_storage}
-          assets={storage?.assets || []}
-          total={storage?.total || 0}
-          bind:page
-          {limit}
-          {isLoading}
-          bind:search
-          onRefresh={loadStorageFiles}
-          onDelete={handleDeleteAsset}
-        />
       </Tabs.Content>
 
       <!-- Sessions Tab -->

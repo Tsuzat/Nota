@@ -1,1 +1,1 @@
-export { default as Pricing } from "./pricing.svelte";
+export { default as Pricing } from './pricing.svelte';

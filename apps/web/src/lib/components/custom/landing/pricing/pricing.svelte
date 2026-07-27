@@ -1,151 +1,146 @@
 <script lang="ts">
-  import { AnimatePresence, createLayoutMotion } from "motion-sv";
-  import FrequencyToggle, { type FREQUENCY } from "./frequency-toggle.svelte";
-  import { Button } from "@lib/components/ui/button";
-  import { cn } from "@lib/utils";
-  import { onMount } from "svelte";
-  import { icons } from "@lib/icons";
-  import { resolve } from "$app/paths";
+import { Button } from '@lib/components/ui/button';
+import { icons } from '@lib/icons';
+import { cn } from '@lib/utils';
+import { AnimatePresence, createLayoutMotion } from 'motion-sv';
+import { onMount } from 'svelte';
+import { resolve } from '$app/paths';
+import FrequencyToggle, { type FREQUENCY } from './frequency-toggle.svelte';
 
-  let NumberFlow: typeof import("@number-flow/svelte").default | undefined =
-    $state(undefined);
+let NumberFlow: typeof import('@number-flow/svelte').default | undefined = $state(undefined);
 
-  onMount(async () => {
-    const mod = await import("@number-flow/svelte");
-    NumberFlow = mod.default;
-  });
+onMount(async () => {
+  const mod = await import('@number-flow/svelte');
+  NumberFlow = mod.default;
+});
 
-  let frequency = $state<FREQUENCY>("monthly");
+let frequency = $state<FREQUENCY>('monthly');
 
-  type Plan = {
-    name: string;
-    info: string;
-    price: {
-      monthly: number;
-      yearly: number;
-    };
-    features: string[];
-    btn: {
-      text: string;
-      onclick?: () => void;
-    };
-    highlighted?: boolean;
+type Plan = {
+  name: string;
+  info: string;
+  price: {
+    monthly: number;
+    yearly: number;
   };
+  features: string[];
+  btn: {
+    text: string;
+    onclick?: () => void;
+  };
+  highlighted?: boolean;
+};
 
-  type PlanBadge =
-    | {
-        id: "popular";
-        label: string;
-        variant: "neutral";
-      }
-    | {
-        id: "discount";
-        label: string;
-        variant: "primary";
-      };
-
-  const plans = $derived<Plan[]>([
-    {
-      name: "Free",
-      info: "Local-first purists & BYOK users",
-      price: {
-        monthly: 0,
-        yearly: 0,
-      },
-      features: [
-        "Unlimited Local Notes & Workspaces",
-        "1 Cloud Workspace, 5 Cloud Notes",
-        "Local Media Storage Only",
-        "BYOK or Buy AI Credits",
-        "Local only Collaboration",
-        "Local app access",
-        "Regular Updates & Bug Fixes",
-        "Local Notes Backup",
-      ],
-      btn: {
-        text: "Copy Brew Command",
-        onclick: () => {
-          window.navigator.clipboard.writeText(
-            "brew install --cask Tsuzat/tap/nota",
-          );
-        },
-      },
-    },
-    {
-      highlighted: true,
-      name: "Pro",
-      info: "Cloud-sync power users",
-      price: {
-        monthly: 5,
-        yearly: 50,
-      },
-      features: [
-        "Unlimited Cloud Notes & Workspaces",
-        "5 GB Cloud Storage",
-        frequency === "monthly" ? "500K AI Credits / mo" : "6M AI Credits",
-        "Collaborative Notes",
-        "Browser Previews & Web Access",
-        "Encrypted Data",
-        "Notes Backup",
-      ],
-      btn: {
-        text: "Get started",
-        onclick: async () => {
-          window.location.href = resolve(`/payment?type=${frequency}`);
-        },
-      },
-    },
-  ]);
-
-  const layout = createLayoutMotion();
-
-  const setFrequency = layout.update.with((nextFrequency: FREQUENCY) => {
-    frequency = nextFrequency;
-  });
-
-  function formatPrice(value: number): string {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      notation: "compact",
-    }).format(value);
-  }
-
-  function getDiscount(plan: Plan) {
-    if (plan.price.monthly == 0 || plan.price.yearly == 0) {
-      return 0;
+type PlanBadge =
+  | {
+      id: 'popular';
+      label: string;
+      variant: 'neutral';
     }
-    const defaultYearly = plan.price.monthly * 12;
-    return Math.round(
-      ((defaultYearly - plan.price.yearly) / defaultYearly) * 100,
-    );
+  | {
+      id: 'discount';
+      label: string;
+      variant: 'primary';
+    };
+
+const plans = $derived<Plan[]>([
+  {
+    name: 'Free',
+    info: 'Local-first purists & BYOK users',
+    price: {
+      monthly: 0,
+      yearly: 0,
+    },
+    features: [
+      'Unlimited Local Notes & Workspaces',
+      '1 Cloud Workspace, 5 Cloud Notes',
+      'Local Media Storage Only',
+      'BYOK or Buy AI Credits',
+      'Local only Collaboration',
+      'Local app access',
+      'Regular Updates & Bug Fixes',
+      'Local Notes Backup',
+    ],
+    btn: {
+      text: 'Copy Brew Command',
+      onclick: () => {
+        window.navigator.clipboard.writeText('brew install --cask Tsuzat/tap/nota');
+      },
+    },
+  },
+  {
+    highlighted: true,
+    name: 'Pro',
+    info: 'Cloud-sync power users',
+    price: {
+      monthly: 5,
+      yearly: 50,
+    },
+    features: [
+      'Unlimited Cloud Notes & Workspaces',
+      '5 GB Cloud Storage',
+      frequency === 'monthly' ? '500K AI Credits / mo' : '6M AI Credits',
+      'Collaborative Notes',
+      'Browser Previews & Web Access',
+      'Encrypted Data',
+      'Notes Backup',
+    ],
+    btn: {
+      text: 'Get started',
+      onclick: async () => {
+        window.location.href = resolve(`/payment?type=${frequency}`);
+      },
+    },
+  },
+]);
+
+const layout = createLayoutMotion();
+
+const setFrequency = layout.update.with((nextFrequency: FREQUENCY) => {
+  frequency = nextFrequency;
+});
+
+function formatPrice(value: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    notation: 'compact',
+  }).format(value);
+}
+
+function getDiscount(plan: Plan) {
+  if (plan.price.monthly == 0 || plan.price.yearly == 0) {
+    return 0;
+  }
+  const defaultYearly = plan.price.monthly * 12;
+  return Math.round(((defaultYearly - plan.price.yearly) / defaultYearly) * 100);
+}
+
+function getBadges(plan: Plan, activeFrequency: FREQUENCY): PlanBadge[] {
+  const badges: PlanBadge[] = [];
+
+  if (plan.highlighted) {
+    badges.push({
+      id: 'popular',
+      label: 'Popular',
+      variant: 'neutral',
+    });
   }
 
-  function getBadges(plan: Plan, activeFrequency: FREQUENCY): PlanBadge[] {
-    const badges: PlanBadge[] = [];
+  if (activeFrequency === 'yearly') {
+    const discount = getDiscount(plan);
 
-    if (plan.highlighted) {
+    if (discount >= 0) {
       badges.push({
-        id: "popular",
-        label: "Popular",
-        variant: "neutral",
+        id: 'discount',
+        label: `${discount}% off`,
+        variant: 'primary',
       });
     }
-
-    if (activeFrequency === "yearly") {
-      const discount = getDiscount(plan);
-
-      if (discount >= 0) {
-        badges.push({
-          id: "discount",
-          label: `${discount}% off`,
-          variant: "primary",
-        });
-      }
-    }
-
-    return badges;
   }
+
+  return badges;
+}
 </script>
 
 <section class="flex w-full flex-col items-center justify-center space-y-7 p-4">

@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { Button, buttonVariants } from "@nota/ui/shadcn/button";
-  import * as Select from "@nota/ui/shadcn/select";
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import * as Select from '@nota/ui/shadcn/select';
 
-  import { getArtifacts, type ReleaseAssetsResponse } from "./artifacts";
-  import Mac from "./icons/mac.svelte";
+import { getArtifacts, type ReleaseAssetsResponse } from './artifacts';
+import Mac from './icons/mac.svelte';
 
-  interface Props {
-    platforms: ReleaseAssetsResponse["platforms"];
-  }
+interface Props {
+  platforms: ReleaseAssetsResponse['platforms'];
+}
 
-  const { platforms }: Props = $props();
+const { platforms }: Props = $props();
 
-  let artifacts = $derived.by(() => {
-    return getArtifacts(platforms);
-  });
+let artifacts = $derived.by(() => {
+  return getArtifacts(platforms);
+});
 
-  let current = $derived.by(() => {
-    return artifacts.find((artifact) => artifact.isCurrent);
-  });
+let current = $derived.by(() => {
+  return artifacts.find((artifact) => artifact.isCurrent);
+});
 </script>
 
 <div class="z-50 inline-flex rtl:space-x-reverse">

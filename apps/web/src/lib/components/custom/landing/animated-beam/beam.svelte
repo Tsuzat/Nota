@@ -1,62 +1,62 @@
 <script lang="ts">
-  import { motion } from "motion-sv";
-  import { cn } from "@lib/utils";
-  import type { AnimatedBeamProps } from "./types";
-  import { usePathCalculator } from "./use-path-calculator.svelte";
-  import { useGradientCoordinates } from "./use-gradient-coordinates.svelte";
-  import { useResizeObserver } from "./use-resize-observer.svelte";
+import { cn } from '@lib/utils';
+import { motion } from 'motion-sv';
+import type { AnimatedBeamProps } from './types';
+import { useGradientCoordinates } from './use-gradient-coordinates.svelte';
+import { usePathCalculator } from './use-path-calculator.svelte';
+import { useResizeObserver } from './use-resize-observer.svelte';
 
-  let {
-    class: className,
+let {
+  class: className,
+  containerRef,
+  fromRef,
+  toRef,
+  curvature = 0,
+  reverse = false,
+  duration = Math.random() * 3 + 4,
+  delay = 0,
+  pathColor = 'gray',
+  pathWidth = 2,
+  pathOpacity = 0.2,
+  gradientStartColor = '#ffaa40',
+  gradientStopColor = '#9c40ff',
+  startXOffset = 0,
+  startYOffset = 0,
+  endXOffset = 0,
+  endYOffset = 0,
+}: AnimatedBeamProps = $props();
+
+// Generate unique ID for gradient
+// let id = $state(`gradient-${Math.random().toString(36).substring(2, 11)}`);
+let id = $props.id();
+
+// Use path calculator
+const pathCalculator = usePathCalculator();
+
+// Calculate gradient coordinates based on reverse prop
+const gradientCoordinates = $derived(useGradientCoordinates(reverse));
+
+// Update path function
+const updatePath = () => {
+  pathCalculator.calculatePath(
     containerRef,
     fromRef,
     toRef,
-    curvature = 0,
-    reverse = false,
-    duration = Math.random() * 3 + 4,
-    delay = 0,
-    pathColor = "gray",
-    pathWidth = 2,
-    pathOpacity = 0.2,
-    gradientStartColor = "#ffaa40",
-    gradientStopColor = "#9c40ff",
-    startXOffset = 0,
-    startYOffset = 0,
-    endXOffset = 0,
-    endYOffset = 0,
-  }: AnimatedBeamProps = $props();
+    curvature,
+    startXOffset,
+    startYOffset,
+    endXOffset,
+    endYOffset
+  );
+};
 
-  // Generate unique ID for gradient
-  // let id = $state(`gradient-${Math.random().toString(36).substring(2, 11)}`);
-  let id = $props.id();
+// Setup resize observer
+useResizeObserver(() => containerRef, updatePath);
 
-  // Use path calculator
-  const pathCalculator = usePathCalculator();
-
-  // Calculate gradient coordinates based on reverse prop
-  const gradientCoordinates = $derived(useGradientCoordinates(reverse));
-
-  // Update path function
-  const updatePath = () => {
-    pathCalculator.calculatePath(
-      containerRef,
-      fromRef,
-      toRef,
-      curvature,
-      startXOffset,
-      startYOffset,
-      endXOffset,
-      endYOffset,
-    );
-  };
-
-  // Setup resize observer
-  useResizeObserver(() => containerRef, updatePath);
-
-  // Watch for changes in refs and offsets
-  $effect(() => {
-    updatePath();
-  });
+// Watch for changes in refs and offsets
+$effect(() => {
+  updatePath();
+});
 </script>
 
 <svg

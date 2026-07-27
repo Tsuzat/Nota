@@ -1,18 +1,19 @@
 <script lang="ts">
-  import { AnimatedBeam, Circle } from "./animated-beam";
-  import { cn } from "@lib/utils";
-  import AppLogo from "$lib/components/custom/applogo.svelte";
-  import { icons } from "@lib/icons";
-  const { class: className }: { class: string } = $props();
+import { icons } from '@lib/icons';
+import { cn } from '@lib/utils';
+import AppLogo from '$lib/components/custom/applogo.svelte';
+import { AnimatedBeam, Circle } from './animated-beam';
 
-  let containerRef: HTMLDivElement | null = $state(null);
-  let div1Ref: HTMLDivElement | null = $state(null);
-  let div2Ref: HTMLDivElement | null = $state(null);
-  let div3Ref: HTMLDivElement | null = $state(null);
-  let div4Ref: HTMLDivElement | null = $state(null);
-  let div5Ref: HTMLDivElement | null = $state(null);
-  let div6Ref: HTMLDivElement | null = $state(null);
-  let div7Ref: HTMLDivElement | null = $state(null);
+const { class: className }: { class: string } = $props();
+
+let containerRef: HTMLDivElement | null = $state(null);
+let div1Ref: HTMLDivElement | null = $state(null);
+let div2Ref: HTMLDivElement | null = $state(null);
+let div3Ref: HTMLDivElement | null = $state(null);
+let div4Ref: HTMLDivElement | null = $state(null);
+let div5Ref: HTMLDivElement | null = $state(null);
+let div6Ref: HTMLDivElement | null = $state(null);
+let div7Ref: HTMLDivElement | null = $state(null);
 </script>
 
 <div

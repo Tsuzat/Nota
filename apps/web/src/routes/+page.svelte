@@ -1,193 +1,189 @@
 <script lang="ts">
-  import Spotlight from "$lib/components/custom/landing/spotlight.svelte";
-  import ToggleMode from "@nota/ui/custom/ToggleMode.svelte";
-  import { onMount } from "svelte";
-  import AppLogo from "$lib/components/custom/applogo.svelte";
-  import { cn } from "@nota/ui/utils";
-  import { fade } from "svelte/transition";
-  import { icons, Github, BarSpinner } from "@nota/ui/icons";
-  import { buttonVariants, Button } from "@nota/ui/shadcn/button";
-  import * as Dropdown from "@nota/ui/shadcn/dropdown-menu";
-  import UserAvatar from "$lib/components/custom/user-avatar.svelte";
-  import { goto } from "$app/navigation";
-  import { resolve } from "$app/paths";
-  import BorderBeam from "$lib/components/custom/landing/border-beam.svelte";
-  import Particles from "$lib/components/custom/landing/particles.svelte";
-  import Multistream from "$lib/components/custom/landing/multistream.svelte";
-  import Tiltcard from "$lib/components/custom/landing/utils/tiltcard.svelte";
-  import { Pricing } from "$lib/components/custom/landing/pricing";
-  import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-  } from "@nota/ui/shadcn/accordion";
-  import { getArtefacts } from "./data.remote";
-  import ArtifactDownloader from "$lib/artefact/artifact-downloader.svelte";
-  const { data } = $props();
-  const user = $derived(data.user);
+import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
+import { BarSpinner, Github, icons } from '@nota/ui/icons';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
+import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
+import { cn } from '@nota/ui/utils';
+import { onMount } from 'svelte';
+import { fade } from 'svelte/transition';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import ArtifactDownloader from '$lib/artefact/artifact-downloader.svelte';
+import AppLogo from '$lib/components/custom/applogo.svelte';
+import BorderBeam from '$lib/components/custom/landing/border-beam.svelte';
+import Multistream from '$lib/components/custom/landing/multistream.svelte';
+import Particles from '$lib/components/custom/landing/particles.svelte';
+import { Pricing } from '$lib/components/custom/landing/pricing';
+import Spotlight from '$lib/components/custom/landing/spotlight.svelte';
+import Tiltcard from '$lib/components/custom/landing/utils/tiltcard.svelte';
+import UserAvatar from '$lib/components/custom/user-avatar.svelte';
+import { getArtefacts } from './data.remote';
 
-  let y = $state(0);
-  let isScrolled = $derived(y > 20);
-  const tabItems = [
-    {
-      url: "#features",
-      title: "Features",
-    },
-    {
-      url: "#solutions",
-      title: "Solution",
-    },
-    {
-      url: "#pricing",
-      title: "Pricing",
-    },
-    {
-      url: "#faqs",
-      title: "FAQs",
-    },
-  ];
+const { data } = $props();
+const user = $derived(data.user);
 
-  const features = [
-    {
-      name: "Rich Text Editor",
-      description:
-        "Powered by a custom editor with support for slash commands, markdown shortcuts, media embeds, and mathematical equations.",
-      icon: icons.Pencil,
-    },
-    {
-      name: "AI Integration",
-      description:
-        "Built-in AI assistant for text generation and summarization with a Bring Your Own Key (BYOK) model to keep costs down.",
-      icon: icons.Bot,
-    },
-    {
-      name: "Cross-Platform & Fast",
-      description:
-        "Available as a lightweight Desktop app built with Rust (Tauri) and on the Web for blazing fast performance.",
-      icon: icons.Zap,
-    },
-    {
-      name: "Secure & Organized",
-      description:
-        "Manage your notes with hierarchical workspaces. Protected by custom authentication flow and session management.",
-      icon: icons.FolderLock,
-    },
-  ];
+let y = $state(0);
+let isScrolled = $derived(y > 20);
+const tabItems = [
+  {
+    url: '#features',
+    title: 'Features',
+  },
+  {
+    url: '#solutions',
+    title: 'Solution',
+  },
+  {
+    url: '#pricing',
+    title: 'Pricing',
+  },
+  {
+    url: '#faqs',
+    title: 'FAQs',
+  },
+];
 
-  const faqItems = [
-    {
-      id: "item-1",
-      question: "What is Nota?",
-      answer:
-        "Nota is a fast, lightweight, and feature-rich note-taking app designed to give you a powerful rich text editing experience without the bloat of typical Electron applications. It is available on Desktop (macOS, Windows, Linux) and the Web.",
-    },
-    {
-      id: "item-2",
-      question: "Is Nota free to use?",
-      answer:
-        "Yes! Our Free tier is perfect for local-first users, offering unlimited local notes and workspaces. You also get 1 cloud workspace and up to 5 cloud notes for free.",
-    },
-    {
-      id: "item-3",
-      question: "How does the AI integration work?",
-      answer:
-        "Nota uses a Bring Your Own Key (BYOK) model. You can plug in your own API keys to generate text and summarize notes without paying a high recurring subscription fee. Pro users can also use our bundled AI credits.",
-    },
-    {
-      id: "item-4",
-      question: "What is the difference between the Free and Pro plans?",
-      answer:
-        "The Free plan offers unlimited local notes, local media storage, and limited cloud syncing (1 workspace, 5 notes). The Pro plan unlocks unlimited cloud notes and workspaces, 5 GB of cloud storage, collaborative notes, web access, and bundled AI credits.",
-    },
-    {
-      id: "item-5",
-      question: "Can I use Nota offline?",
-      answer:
-        "Absolutely! Nota's Desktop app is built with Tauri and supports a local-first approach. Your notes are saved locally and are fully accessible even when you are not connected to the internet.",
-    },
-    {
-      id: "item-6",
-      question: "What features does the editor support?",
-      answer:
-        "Our custom rich text editor supports slash commands, markdown shortcuts, media embeds (images, video, audio), mathematical equations (KaTeX), tables, and task lists.",
-    },
-    {
-      id: "item-7",
-      question: "Can I collaborate on notes with others?",
-      answer:
-        "Yes, realtime collaboration is available on our Pro plan. You can invite others to collaborate on your cloud notes and work together seamlessly.",
-    },
-    {
-      id: "item-8",
-      question: "How do you handle my data and security?",
-      answer:
-        "We prioritize your privacy. Your cloud data is encrypted, and your local notes stay strictly on your device. We use a secure authentication flow and reliable session management to keep your information safe.",
-    },
-    {
-      id: "item-9",
-      question: "Can I upgrade, downgrade, or cancel anytime?",
-      answer:
-        "Yes, you have full control over your subscription. You can upgrade, downgrade, or cancel your Pro plan at any time from your settings.",
-    },
-  ];
-  let copied = $state(false);
-  function copyBrewCommand() {
-    navigator.clipboard.writeText("brew install --cask Tsuzat/tap/nota");
-    copied = true;
-    setTimeout(() => {
-      copied = false;
-    }, 2000);
-  }
+const features = [
+  {
+    name: 'Rich Text Editor',
+    description:
+      'Powered by a custom editor with support for slash commands, markdown shortcuts, media embeds, and mathematical equations.',
+    icon: icons.Pencil,
+  },
+  {
+    name: 'AI Integration',
+    description:
+      'Built-in AI assistant for text generation and summarization with a Bring Your Own Key (BYOK) model to keep costs down.',
+    icon: icons.Bot,
+  },
+  {
+    name: 'Cross-Platform & Fast',
+    description:
+      'Available as a lightweight Desktop app built with Rust (Tauri) and on the Web for blazing fast performance.',
+    icon: icons.Zap,
+  },
+  {
+    name: 'Secure & Organized',
+    description:
+      'Manage your notes with hierarchical workspaces. Protected by custom authentication flow and session management.',
+    icon: icons.FolderLock,
+  },
+];
 
-  let showFirstSection = $state(false);
-  let activeSection = $state("hero");
-  onMount(() => {
-    setTimeout(() => {
-      showFirstSection = true;
-    }, 500);
+const faqItems = [
+  {
+    id: 'item-1',
+    question: 'What is Nota?',
+    answer:
+      'Nota is a fast, lightweight, and feature-rich note-taking app designed to give you a powerful rich text editing experience without the bloat of typical Electron applications. It is available on Desktop (macOS, Windows, Linux) and the Web.',
+  },
+  {
+    id: 'item-2',
+    question: 'Is Nota free to use?',
+    answer:
+      'Yes! Our Free tier is perfect for local-first users, offering unlimited local notes and workspaces. You also get 1 cloud workspace and up to 5 cloud notes for free.',
+  },
+  {
+    id: 'item-3',
+    question: 'How does the AI integration work?',
+    answer:
+      'Nota uses a Bring Your Own Key (BYOK) model. You can plug in your own API keys to generate text and summarize notes without paying a high recurring subscription fee. Pro users can also use our bundled AI credits.',
+  },
+  {
+    id: 'item-4',
+    question: 'What is the difference between the Free and Pro plans?',
+    answer:
+      'The Free plan offers unlimited local notes, local media storage, and limited cloud syncing (1 workspace, 5 notes). The Pro plan unlocks unlimited cloud notes and workspaces, 5 GB of cloud storage, collaborative notes, web access, and bundled AI credits.',
+  },
+  {
+    id: 'item-5',
+    question: 'Can I use Nota offline?',
+    answer:
+      "Absolutely! Nota's Desktop app is built with Tauri and supports a local-first approach. Your notes are saved locally and are fully accessible even when you are not connected to the internet.",
+  },
+  {
+    id: 'item-6',
+    question: 'What features does the editor support?',
+    answer:
+      'Our custom rich text editor supports slash commands, markdown shortcuts, media embeds (images, video, audio), mathematical equations (KaTeX), tables, and task lists.',
+  },
+  {
+    id: 'item-7',
+    question: 'Can I collaborate on notes with others?',
+    answer:
+      'Yes, realtime collaboration is available on our Pro plan. You can invite others to collaborate on your cloud notes and work together seamlessly.',
+  },
+  {
+    id: 'item-8',
+    question: 'How do you handle my data and security?',
+    answer:
+      'We prioritize your privacy. Your cloud data is encrypted, and your local notes stay strictly on your device. We use a secure authentication flow and reliable session management to keep your information safe.',
+  },
+  {
+    id: 'item-9',
+    question: 'Can I upgrade, downgrade, or cancel anytime?',
+    answer:
+      'Yes, you have full control over your subscription. You can upgrade, downgrade, or cancel your Pro plan at any time from your settings.',
+  },
+];
+let copied = $state(false);
+function copyBrewCommand() {
+  navigator.clipboard.writeText('brew install --cask Tsuzat/tap/nota');
+  copied = true;
+  setTimeout(() => {
+    copied = false;
+  }, 2000);
+}
 
-    // Intersection observer for section visibility (animations)
-    const sections = document.querySelectorAll("section:not(#landing)");
-    const animationObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("show");
-        }
-      });
-    });
-    sections.forEach((section) => {
-      section.classList.add("hide");
-      animationObserver.observe(section);
-    });
+let showFirstSection = $state(false);
+let activeSection = $state('hero');
+onMount(() => {
+  setTimeout(() => {
+    showFirstSection = true;
+  }, 500);
 
-    // Intersection observer for active nav item
-    const navObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            activeSection = entry.target.id;
-          }
-        });
-      },
-      { rootMargin: "-20% 0px -60% 0px" },
-    );
-    const allSections = document.querySelectorAll("section");
-    allSections.forEach((section) => navObserver.observe(section));
-
-    // Radiant card mouse effect
-    const radiantCards = document.querySelectorAll(".radiant-card");
-    radiantCards.forEach((card) => {
-      card.addEventListener("mousemove", (ev) => {
-        const e = ev as MouseEvent;
-        const rect = (card as HTMLElement).getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        (card as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
-        (card as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
-      });
+  // Intersection observer for section visibility (animations)
+  const sections = document.querySelectorAll('section:not(#landing)');
+  const animationObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('show');
+      }
     });
   });
+  sections.forEach((section) => {
+    section.classList.add('hide');
+    animationObserver.observe(section);
+  });
+
+  // Intersection observer for active nav item
+  const navObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          activeSection = entry.target.id;
+        }
+      });
+    },
+    { rootMargin: '-20% 0px -60% 0px' }
+  );
+  const allSections = document.querySelectorAll('section');
+  allSections.forEach((section) => navObserver.observe(section));
+
+  // Radiant card mouse effect
+  const radiantCards = document.querySelectorAll('.radiant-card');
+  radiantCards.forEach((card) => {
+    card.addEventListener('mousemove', (ev) => {
+      const e = ev as MouseEvent;
+      const rect = (card as HTMLElement).getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      (card as HTMLElement).style.setProperty('--mouse-x', `${x}px`);
+      (card as HTMLElement).style.setProperty('--mouse-y', `${y}px`);
+    });
+  });
+});
 </script>
 
 <svelte:window bind:scrollY={y} />
@@ -313,6 +309,12 @@
               <Dropdown.Item>
                 <icons.User />
                 Profile
+              </Dropdown.Item>
+            </a>
+            <a href={resolve("/(app)/home")}>
+              <Dropdown.Item>
+                <icons.House />
+                Home
               </Dropdown.Item>
             </a>
             <Dropdown.Item

@@ -1,26 +1,26 @@
 <script lang="ts">
-  import AppLogo from "$lib/components/custom/applogo.svelte";
-  import ToggleMode from "@nota/ui/custom/ToggleMode.svelte";
-  import Particles from "$lib/components/custom/landing/particles.svelte";
-  import { Button } from "@nota/ui/shadcn/button";
-  import { icons } from "@nota/ui/icons";
-  import { resolve } from "$app/paths";
+import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
+import { icons } from '@nota/ui/icons';
+import { Button } from '@nota/ui/shadcn/button';
+import { resolve } from '$app/paths';
+import AppLogo from '$lib/components/custom/applogo.svelte';
+import Particles from '$lib/components/custom/landing/particles.svelte';
 
-  const lastUpdated = "July 26, 2026";
+const lastUpdated = 'July 26, 2026';
 
-  const sections = [
-    { id: "philosophy", title: "1. Our Privacy Philosophy" },
-    { id: "information-collected", title: "2. Information We Collect" },
-    { id: "how-we-use", title: "3. How We Use Information" },
-    { id: "ai-privacy", title: "4. AI Processing & Third-Party Providers" },
-    { id: "local-first-data", title: "5. Local Notes & Offline Isolation" },
-    { id: "security", title: "6. Data Security & Encryption" },
-    { id: "retention", title: "7. Data Retention & Account Deletion" },
-    { id: "cookies", title: "8. Cookies & Local Storage" },
-    { id: "your-rights", title: "9. Your Privacy Rights (GDPR & CCPA)" },
-    { id: "children", title: "10. Children's Privacy" },
-    { id: "contact", title: "11. Contact Us" },
-  ];
+const sections = [
+  { id: 'philosophy', title: '1. Our Privacy Philosophy' },
+  { id: 'information-collected', title: '2. Information We Collect' },
+  { id: 'how-we-use', title: '3. How We Use Information' },
+  { id: 'ai-privacy', title: '4. AI Processing & Third-Party Providers' },
+  { id: 'local-first-data', title: '5. Local Notes & Offline Isolation' },
+  { id: 'security', title: '6. Data Security & Encryption' },
+  { id: 'retention', title: '7. Data Retention & Account Deletion' },
+  { id: 'cookies', title: '8. Cookies & Local Storage' },
+  { id: 'your-rights', title: '9. Your Privacy Rights (GDPR & CCPA)' },
+  { id: 'children', title: "10. Children's Privacy" },
+  { id: 'contact', title: '11. Contact Us' },
+];
 </script>
 
 <svelte:head>

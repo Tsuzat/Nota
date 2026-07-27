@@ -1,8 +1,8 @@
 <script>
-  import { page } from "$app/state";
-  import Particles from "$lib/components/custom/landing/particles.svelte";
-  import { Button } from "@lib/components/ui/button";
-  import { icons } from "@lib/icons";
+import { Button } from '@lib/components/ui/button';
+import { icons } from '@lib/icons';
+import { page } from '$app/state';
+import Particles from '$lib/components/custom/landing/particles.svelte';
 </script>
 
 <Particles class="fixed -z-10 h-screen w-screen" />

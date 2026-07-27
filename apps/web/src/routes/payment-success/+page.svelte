@@ -1,27 +1,27 @@
 <script lang="ts">
-  import { resolve } from "$app/paths";
-  import Applogo from "$lib/components/custom/applogo.svelte";
-  import { Button } from "@lib/components/ui/button";
-  import * as Card from "@lib/components/ui/card";
-  import { onMount } from "svelte";
-  import { draw, fade, slide } from "svelte/transition";
-  import { cubicOut, linear } from "svelte/easing";
-  import Particles from "$lib/components/custom/landing/particles.svelte";
+import { Button } from '@lib/components/ui/button';
+import * as Card from '@lib/components/ui/card';
+import { onMount } from 'svelte';
+import { cubicOut, linear } from 'svelte/easing';
+import { draw, fade, slide } from 'svelte/transition';
+import { resolve } from '$app/paths';
+import Applogo from '$lib/components/custom/applogo.svelte';
+import Particles from '$lib/components/custom/landing/particles.svelte';
 
-  let isLoading = $state(true);
-  let showSuccessAnimation = $state(false);
-  let showDetails = $state(false);
+let isLoading = $state(true);
+let showSuccessAnimation = $state(false);
+let showDetails = $state(false);
 
-  onMount(async () => {
-    // Just a nice loading effect before showing success
-    await new Promise((r) => setTimeout(r, 800));
-    isLoading = false;
-    showSuccessAnimation = true;
-    // Trigger details fade in after checkmark draws
-    setTimeout(() => {
-      showDetails = true;
-    }, 500);
-  });
+onMount(async () => {
+  // Just a nice loading effect before showing success
+  await new Promise((r) => setTimeout(r, 800));
+  isLoading = false;
+  showSuccessAnimation = true;
+  // Trigger details fade in after checkmark draws
+  setTimeout(() => {
+    showDetails = true;
+  }, 500);
+});
 </script>
 
 <Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />

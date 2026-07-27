@@ -1,6 +1,6 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
-import type { User, Session } from "@nota/client";
+import type { User, Session } from '@nota/client';
 
 declare global {
   namespace App {

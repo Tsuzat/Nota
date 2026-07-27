@@ -1,13 +1,16 @@
 <script lang="ts">
-  import { resolve } from "$app/paths";
-  import { env } from "$env/dynamic/public";
-  import Applogo from "$lib/components/custom/applogo.svelte";
-  import Particles from "$lib/components/custom/landing/particles.svelte";
-  import { Button } from "@lib/components/ui/button";
-  import { Github, Google, icons } from "@lib/icons";
-  import { cn } from "@lib/utils";
-  import { getAuthContext } from "@nota/client";
-  const authClient = getAuthContext();
+import { BorderBeam } from '@lib/components/custom';
+import { Button } from '@lib/components/ui/button';
+import { Github, Google, icons } from '@lib/icons';
+import { cn } from '@lib/utils';
+import { getAuthContext } from '@nota/client';
+import { resolve } from '$app/paths';
+import { env } from '$env/dynamic/public';
+import Applogo from '$lib/components/custom/applogo.svelte';
+import Particles from '$lib/components/custom/landing/particles.svelte';
+import Tiltcard from '$lib/components/custom/landing/utils/tiltcard.svelte';
+
+const authClient = getAuthContext();
 </script>
 
 <div class={cn("relative w-full md:h-screen md:overflow-hidden")}>
@@ -19,7 +22,11 @@
       <icons.ChevronLeft data-icon="inline-start" />
       Home
     </Button>
-    <div class="mx-auto w-full max-w-sm space-y-4">
+    <Tiltcard
+      scale={1.0125}
+      tiltLimit={10}
+      class="dark:bg-card/75 bg-card mx-auto w-full max-w-sm space-y-4 rounded-xl p-4"
+    >
       <Applogo />
       <div class="flex flex-col space-y-1">
         <h1 class="text-2xl font-bold tracking-wide">Sign In or Join Now!</h1>
@@ -53,6 +60,6 @@
           >Privacy Policy</Button
         >.
       </span>
-    </div>
+    </Tiltcard>
   </div>
 </div>
