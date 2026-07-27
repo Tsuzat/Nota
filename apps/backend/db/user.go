@@ -55,7 +55,7 @@ func CreateDefaultWorkspace(userId string, name string) error {
 		}
 		workspace := &models.Workspace{
 			Name:        name,
-			Icon:        "📁",
+			Icon:        "emoji:📁",
 			Description: "Your default workspace",
 			Owner:       userId,
 		}

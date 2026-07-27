@@ -23,7 +23,7 @@ type Workspace struct {
 
 	Id          string    `json:"id" bun:"id,pk,type:uuid,default:gen_random_uuid()"`
 	Name        string    `json:"name" bun:"name"`
-	Icon        string    `json:"icon" bun:"icon,default:'📁'"`
+	Icon        string    `json:"icon" bun:"icon,default:'emoji:📁'"`
 	Description string    `json:"description" bun:"description"`
 	CreatedAt   time.Time `json:"created_at" bun:"created_at,nullzero,notnull,default:current_timestamp"`
 	UpdatedAt   time.Time `json:"updated_at" bun:"updated_at,nullzero,notnull,default:current_timestamp"`
