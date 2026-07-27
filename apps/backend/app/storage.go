@@ -197,7 +197,7 @@ func ListFiles(c fiber.Ctx) error {
 	}
 
 	var assets []models.Asset
-	err = query.Order("created_at DESC").Limit(limit).Offset((page - 1) * limit).Scan(c.Context(), &assets)
+	err = query.Order("created_at DESC").Limit(limit).Offset((page-1)*limit).Scan(c.Context(), &assets)
 	if err != nil {
 		log.Error("List assets error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to list files"})
@@ -227,6 +227,12 @@ func DeleteFile(c fiber.Ctx) error {
 	req := new(utils.DeleteFileRequest)
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: err.Error()})
+	}
+
+	if req.Key != "" {
+		if !strings.HasPrefix(req.Key, userId+"/") {
+			return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: fiber.StatusForbidden, Error: "Permission denied"})
+		}
 	}
 
 	var asset models.Asset
