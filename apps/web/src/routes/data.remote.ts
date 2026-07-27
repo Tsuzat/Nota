@@ -1,5 +1,5 @@
 import { query } from "$app/server";
-import { env } from "$env/dynamic/private";
+import { GITHUB_API_TOKEN } from "$env/static/private";
 import type { ReleaseAssetsResponse } from "$lib/artefact/artifacts";
 
 interface ReleaseAsset {
@@ -16,7 +16,7 @@ export const getArtefacts = query(async () => {
       "https://api.github.com/repos/Tsuzat/Nota/releases/latest",
       {
         headers: {
-          Authorization: `Bearer ${env.GITHUB_API_TOKEN}`,
+          Authorization: `Bearer ${GITHUB_API_TOKEN}`,
           "User-Agent": "Nota-Release-Fetcher",
           Accept: "application/vnd.github+json",
         },

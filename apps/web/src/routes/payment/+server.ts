@@ -1,6 +1,6 @@
-import { env } from "$env/dynamic/private";
+import { POLAR_MONTLY_SUB, POLAR_YEARLY_SUB } from "$env/static/private";
+import { PUBLIC_BACKEND_URL } from "$env/static/public";
 import { redirect } from "@sveltejs/kit";
-import { env as envPublic } from "$env/dynamic/public";
 
 export const GET = ({ url, locals: { user } }) => {
   if (user === null) {
@@ -9,10 +9,10 @@ export const GET = ({ url, locals: { user } }) => {
   const monthly = url.searchParams.get("type") === "monthly";
   let productId = "";
   if (monthly) {
-    productId = env.POLAR_MONTLY_SUB;
+    productId = POLAR_MONTLY_SUB;
   } else {
-    productId = env.POLAR_YEARLY_SUB;
+    productId = POLAR_YEARLY_SUB;
   }
-  const sendTo = `${envPublic.PUBLIC_BACKEND_URL}/api/v1/payments/checkout?productId=${productId}`;
+  const sendTo = `${PUBLIC_BACKEND_URL}/api/v1/payments/checkout?productId=${productId}`;
   return redirect(303, sendTo);
 };
