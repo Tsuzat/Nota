@@ -1,42 +1,38 @@
-# Building the binary of the App
+# ---- Build stage ----
 FROM golang:1.25-alpine AS build
 
-# Set working directory
+# Needed for go mod download over HTTPS + some go tooling
+RUN apk add --no-cache git ca-certificates
+
 WORKDIR /app
 
-# Copy go mod and sum files for better layer caching
+# Copy go mod files first for better layer caching
 COPY go.mod go.sum ./
-
-# Download all dependencies
 RUN go mod download
 
-# Copy the rest of the source code
+# Copy the rest of the source
 COPY . .
 
-# Build the application as a statically linked binary
-# -ldflags="-s -w" removes debug information to reduce binary size
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-s -w" -o main .
+# Build a static binary
+# CGO_ENABLED=0 -> no libc dependency, works on scratch/distroless
+# -trimpath removes local file paths from the binary (reproducibility + smaller)
+# -ldflags="-s -w" strips debug info
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -trimpath -ldflags="-s -w" -o /app/main .
 
-
-# Moving the binary to the 'final Image' to make it smaller
+# ---- Final stage ----
 FROM alpine:latest AS release
 
-# Set working directory
+RUN apk add --no-cache dumb-init ca-certificates && \
+    addgroup -S app && adduser -S app -G app
+
 WORKDIR /app
 
-# Add packages:
-# - dumb-init: for proper signal handling (PID 1)
-# - ca-certificates: required for making HTTPS requests (OAuth, R2, etc.)
-RUN apk add --no-cache dumb-init ca-certificates
-
-# Copy the binary from the build stage
 COPY --from=build /app/main .
 
-# Expose the port the app listens on
+USER app
+
 EXPOSE 3000
 
-# Use dumb-init to ensure signals are handled correctly
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-
-# Run the application
 CMD ["./main"]
