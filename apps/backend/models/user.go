@@ -30,8 +30,8 @@ type User struct {
 	EmailVerifiedAt                 time.Time `json:"email_verified_at" bun:"email_verified_at"`
 	EmailVerificationToken          string    `json:"email_verification_token" bun:"email_verification_token"`
 	EmailVerificationTokenExpiresAt time.Time `json:"email_verification_token_expires_at" bun:"email_verification_token_expires_at"`
-	AssignedStorage                 int64     `json:"assigned_storage" bun:"assigned_storage,notnull,default:0"`
-	UsedStorage                     int64     `json:"used_storage" bun:"used_storage,notnull,default:0"`
+	AssignedStorage                 int64     `json:"assigned_storage" bun:"assigned_storage,type:bigint,notnull,default:0"`
+	UsedStorage                     int64     `json:"used_storage" bun:"used_storage,type:bigint,notnull,default:0"`
 	NextBillingAt                   time.Time `json:"next_billing_at" bun:"next_billing_at"`
 }
 
