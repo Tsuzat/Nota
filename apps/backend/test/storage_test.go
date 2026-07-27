@@ -186,6 +186,46 @@ func TestDeleteFile_PermissionDenied(t *testing.T) {
 	assert.Contains(t, string(respBody), "Permission denied")
 }
 
+func TestListFiles_Success(t *testing.T) {
+	fiberApp := testutils.CreateTestApp()
+	mockUser := testutils.MockUser()
+
+	fiberApp.Get("/storage/list", func(c fiber.Ctx) error {
+		c.Locals("user", mockUser)
+		return app.ListFiles(c)
+	})
+
+	req := httptest.NewRequest("GET", "/storage/list", nil)
+	resp, err := fiberApp.Test(req)
+
+	require.NoError(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	respBody, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Contains(t, string(respBody), "Fetched Files Successfully")
+}
+
+func TestListFiles_WithFiltersAndSorting(t *testing.T) {
+	fiberApp := testutils.CreateTestApp()
+	mockUser := testutils.MockUser()
+
+	fiberApp.Get("/storage/list", func(c fiber.Ctx) error {
+		c.Locals("user", mockUser)
+		return app.ListFiles(c)
+	})
+
+	req := httptest.NewRequest("GET", "/storage/list?page=1&limit=10&search=test&type=image&sortBy=size&sortOrder=asc", nil)
+	resp, err := fiberApp.Test(req)
+
+	require.NoError(t, err)
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	respBody, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Contains(t, string(respBody), "Fetched Files Successfully")
+}
+
 // Test utils.GetFolder function
 func TestGetFolder(t *testing.T) {
 	tests := []struct {

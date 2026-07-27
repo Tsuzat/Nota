@@ -1,111 +1,111 @@
 <script lang="ts">
-  import { Button } from "@lib/components/ui/button/index.js";
-  import { NodeViewWrapper } from "../../tiptap/index.js";
-  import { AudioLines, Video, Image, CodeXml } from "@lucide/svelte";
-  import { type NodeViewProps } from "@tiptap/core";
-  import * as Popover from "@lib/components/ui/popover/index.js";
-  import * as Tabs from "@lib/components/ui/tabs/index.js";
-  import { Input } from "@lib/components/ui/input/index.js";
-  import { FileType } from "../../utils.ts";
-  import { BarSpinner } from "@lib/icons";
-  import { toast } from "svelte-sonner";
-  import { cn } from "@lib/utils.js";
-  import { page } from "$app/state";
+import { Button } from '@lib/components/ui/button/index.js';
+import { NodeViewWrapper } from '../../tiptap/index.js';
+import { AudioLines, Video, Image, CodeXml } from '@lucide/svelte';
+import { type NodeViewProps } from '@tiptap/core';
+import * as Popover from '@lib/components/ui/popover/index.js';
+import * as Tabs from '@lib/components/ui/tabs/index.js';
+import { Input } from '@lib/components/ui/input/index.js';
+import { FileType } from '../../utils.ts';
+import { BarSpinner } from '@lib/icons';
+import { toast } from 'svelte-sonner';
+import { cn } from '@lib/utils.js';
+import { page } from '$app/state';
 
-  const { editor, node }: NodeViewProps = $props();
-  let open = $state(false);
-  let isUploading = $state(false);
-  const mediaType = $derived(node.attrs.mediaType);
-  let url = $state("");
-  let files = $state<FileList | undefined>();
+const { editor, node }: NodeViewProps = $props();
+let open = $state(false);
+let isUploading = $state(false);
+const mediaType = $derived(node.attrs.mediaType);
+let url = $state('');
+let files = $state<FileList | undefined>();
 
-  const fileTypeEnum = $derived.by(() => {
-    switch (mediaType) {
-      case "audio":
-        return FileType.AUDIO;
-      case "video":
-        return FileType.VIDEO;
-      case "image":
-        return FileType.IMAGE;
-      default:
-        return FileType.UNKNOWN;
+const fileTypeEnum = $derived.by(() => {
+  switch (mediaType) {
+    case 'audio':
+      return FileType.AUDIO;
+    case 'video':
+      return FileType.VIDEO;
+    case 'image':
+      return FileType.IMAGE;
+    default:
+      return FileType.UNKNOWN;
+  }
+});
+
+const selectFileFn = $derived(editor.storage.mediaPlaceholder?.selectFile);
+const getAssetsFn = $derived(editor.storage.mediaPlaceholder?.getAssets);
+
+let assets = $state<string[]>([]);
+let loadingAssets = $state(false);
+
+async function loadAssets() {
+  if (getAssetsFn && fileTypeEnum !== FileType.UNKNOWN) {
+    loadingAssets = true;
+    try {
+      assets = await getAssetsFn(fileTypeEnum);
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Failed to load assets');
+    } finally {
+      loadingAssets = false;
     }
-  });
+  }
+}
 
-  const selectFileFn = $derived(editor.storage.mediaPlaceholder?.selectFile);
-  const getAssetsFn = $derived(editor.storage.mediaPlaceholder?.getAssets);
-
-  let assets = $state<string[]>([]);
-  let loadingAssets = $state(false);
-
-  async function loadAssets() {
-    if (getAssetsFn && fileTypeEnum !== FileType.UNKNOWN) {
-      loadingAssets = true;
-      try {
-        assets = await getAssetsFn(fileTypeEnum);
-      } catch (e) {
-        console.error(e);
-        toast.error(e instanceof Error ? e.message : "Failed to load assets");
-      } finally {
-        loadingAssets = false;
+async function handleSelectFile() {
+  if (selectFileFn && fileTypeEnum !== FileType.UNKNOWN) {
+    isUploading = true;
+    open = false;
+    try {
+      const src = await selectFileFn(fileTypeEnum);
+      if (src) {
+        setMediaFn(src);
       }
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : 'Upload failed');
+    } finally {
+      isUploading = false;
     }
   }
+}
 
-  async function handleSelectFile() {
-    if (selectFileFn && fileTypeEnum !== FileType.UNKNOWN) {
-      isUploading = true;
-      open = false;
-      try {
-        const src = await selectFileFn(fileTypeEnum);
-        if (src) {
-          setMediaFn(src);
-        }
-      } catch (e) {
-        console.error(e);
-        toast.error(e instanceof Error ? e.message : "Upload failed");
-      } finally {
-        isUploading = false;
-      }
-    }
+const mediaTypeData = $derived.by(() => {
+  switch (mediaType) {
+    case 'audio':
+      return {
+        icon: AudioLines,
+        text: 'Insert An Audio File',
+      };
+    case 'video':
+      return {
+        icon: Video,
+        text: 'Insert An Video File',
+      };
+    case 'image':
+      return {
+        icon: Image,
+        text: 'Insert An Image File',
+      };
+    case 'iframe':
+      return {
+        icon: CodeXml,
+        text: 'Insert An IFrame',
+      };
   }
+});
 
-  const mediaTypeData = $derived.by(() => {
-    switch (mediaType) {
-      case "audio":
-        return {
-          icon: AudioLines,
-          text: "Insert An Audio File",
-        };
-      case "video":
-        return {
-          icon: Video,
-          text: "Insert An Video File",
-        };
-      case "image":
-        return {
-          icon: Image,
-          text: "Insert An Image File",
-        };
-      case "iframe":
-        return {
-          icon: CodeXml,
-          text: "Insert An IFrame",
-        };
-    }
-  });
-
-  function setMediaFn(src: string) {
-    if (mediaType === "audio") {
-      editor.chain().focus().setAudio({ src }).run();
-    } else if (mediaType === "video") {
-      editor.chain().focus().setVideo({ src }).run();
-    } else if (mediaType === "image") {
-      editor.chain().focus().setImage({ src }).run();
-    } else if (mediaType === "iframe") {
-      editor.chain().focus().setIframe({ src }).run();
-    }
+function setMediaFn(src: string) {
+  if (mediaType === 'audio') {
+    editor.chain().focus().setAudio({ src }).run();
+  } else if (mediaType === 'video') {
+    editor.chain().focus().setVideo({ src }).run();
+  } else if (mediaType === 'image') {
+    editor.chain().focus().setImage({ src }).run();
+  } else if (mediaType === 'iframe') {
+    editor.chain().focus().setIframe({ src }).run();
   }
+}
 </script>
 
 <NodeViewWrapper class="my-2 w-full!">

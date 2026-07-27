@@ -162,16 +162,25 @@ func ListFiles(c fiber.Ctx) error {
 	}
 	search := strings.TrimSpace(c.Query("search"))
 	workspaceId := strings.TrimSpace(c.Query("workspaceId"))
+	mediaType := strings.TrimSpace(c.Query("type"))
+	sortBy := strings.TrimSpace(c.Query("sortBy"))
+	sortOrder := strings.ToLower(strings.TrimSpace(c.Query("sortOrder")))
+
+	if sortOrder != "asc" && sortOrder != "desc" {
+		sortOrder = "desc"
+	}
 
 	// Cache Check
 	versionKey := fmt.Sprintf("storage:version:%s", userId)
-	versionBytes, _ := config.VALKEY.Get(versionKey)
 	version := "0"
-	if len(versionBytes) > 0 {
-		version = string(versionBytes)
+	if config.VALKEY != nil {
+		versionBytes, _ := config.VALKEY.Get(versionKey)
+		if len(versionBytes) > 0 {
+			version = string(versionBytes)
+		}
 	}
 
-	cacheKey := fmt.Sprintf("storage:list:%s:%s:p%d:l%d:q%s:w%s", userId, version, page, limit, search, workspaceId)
+	cacheKey := fmt.Sprintf("storage:list:%s:%s:p%d:l%d:q%s:w%s:t%s:sb%s:so%s", userId, version, page, limit, search, workspaceId, mediaType, sortBy, sortOrder)
 
 	var cachedResult map[string]any
 	if err := utils.GetCache(cacheKey, &cachedResult); err == nil {
@@ -182,12 +191,51 @@ func ListFiles(c fiber.Ctx) error {
 		})
 	}
 
+	if config.DB == nil {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Fetched Files Successfully",
+			Data: fiber.Map{
+				"files": []models.Asset{},
+				"total": 0,
+				"page":  page,
+				"limit": limit,
+			},
+		})
+	}
+
 	query := config.DB.NewSelect().Model((*models.Asset)(nil)).Where("user_id = ?", userId)
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
 	if workspaceId != "" {
 		query = query.Where("workspace_id = ?", workspaceId)
+	}
+	if mediaType != "" {
+		switch mediaType {
+		case "image":
+			query = query.Where("mime_type LIKE ?", "image/%")
+		case "video":
+			query = query.Where("mime_type LIKE ?", "video/%")
+		case "audio":
+			query = query.Where("mime_type LIKE ?", "audio/%")
+		case "document":
+			query = query.Where("mime_type LIKE ? OR mime_type LIKE ? OR mime_type LIKE ?", "%pdf%", "%document%", "text/%")
+		case "other":
+			query = query.Where("mime_type NOT LIKE ? AND mime_type NOT LIKE ? AND mime_type NOT LIKE ? AND mime_type NOT LIKE ? AND mime_type NOT LIKE ?", "image/%", "video/%", "audio/%", "%pdf%", "text/%")
+		}
+	}
+
+	orderClause := "created_at DESC"
+	switch sortBy {
+	case "name":
+		orderClause = fmt.Sprintf("name %s", strings.ToUpper(sortOrder))
+	case "size":
+		orderClause = fmt.Sprintf("size %s", strings.ToUpper(sortOrder))
+	case "created_at", "date":
+		orderClause = fmt.Sprintf("created_at %s", strings.ToUpper(sortOrder))
+	default:
+		orderClause = fmt.Sprintf("created_at %s", strings.ToUpper(sortOrder))
 	}
 
 	count, err := query.Count(c.Context())
@@ -197,7 +245,7 @@ func ListFiles(c fiber.Ctx) error {
 	}
 
 	var assets []models.Asset
-	err = query.Order("created_at DESC").Limit(limit).Offset((page-1)*limit).Scan(c.Context(), &assets)
+	err = query.Order(orderClause).Limit(limit).Offset((page-1)*limit).Scan(c.Context(), &assets)
 	if err != nil {
 		log.Error("List assets error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to list files"})
@@ -210,8 +258,10 @@ func ListFiles(c fiber.Ctx) error {
 		"limit": limit,
 	}
 
-	jsonBytes, _ := config.APP.Config().JSONEncoder(result)
-	config.VALKEY.Set(cacheKey, jsonBytes, 10*time.Minute)
+	if config.VALKEY != nil {
+		jsonBytes, _ := config.APP.Config().JSONEncoder(result)
+		config.VALKEY.Set(cacheKey, jsonBytes, 5*time.Minute)
+	}
 
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,

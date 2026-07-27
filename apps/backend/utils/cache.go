@@ -10,6 +10,9 @@ import (
 )
 
 func SetCache(key string, data any, ttl time.Duration) {
+	if config.VALKEY == nil {
+		return
+	}
 	// convert data to []byte
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
@@ -24,6 +27,9 @@ func SetCache(key string, data any, ttl time.Duration) {
 }
 
 func GetCache(key string, dest any) error {
+	if config.VALKEY == nil {
+		return errors.New("Valkey disabled")
+	}
 	cacheData, err := config.VALKEY.Get(key)
 	if err != nil {
 		log.Info("Cache miss: ", key)
@@ -42,6 +48,9 @@ func GetCache(key string, dest any) error {
 }
 
 func DeleteCache(key string) {
+	if config.VALKEY == nil {
+		return
+	}
 	if err := config.VALKEY.Delete(key); err != nil {
 		log.Error("Error when deleting cache: ", err)
 	} else {

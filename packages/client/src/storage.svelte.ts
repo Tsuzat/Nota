@@ -15,6 +15,9 @@ export interface FetchStorageOptions {
   limit?: number;
   search?: string;
   workspaceId?: string;
+  type?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }
 
 export interface UploadStorageOptions {
@@ -73,6 +76,9 @@ class Storage {
     if (options?.limit) params.set('limit', options.limit.toString());
     if (options?.search) params.set('search', options.search);
     if (options?.workspaceId) params.set('workspaceId', options.workspaceId);
+    if (options?.type) params.set('type', options.type);
+    if (options?.sortBy) params.set('sortBy', options.sortBy);
+    if (options?.sortOrder) params.set('sortOrder', options.sortOrder);
 
     const queryString = params.toString();
     const url = `${PUBLIC_BACKEND_URL}/api/v1/storage/list${queryString ? `?${queryString}` : ''}`;
