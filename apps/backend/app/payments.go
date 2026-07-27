@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"sync"
 
+	"strings"
+	"time"
+
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/db"
 	"github.com/Tsuzat/Nota/models"
 	"github.com/Tsuzat/Nota/utils"
-	"strings"
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
@@ -376,6 +378,15 @@ func PolarWebhook(c fiber.Ctx) error {
 		})
 	}
 
+	webhookId := c.Get("webhook-id")
+	if config.VALKEY != nil && webhookId != "" {
+		val, err := config.VALKEY.GetWithContext(c.Context(), "webhook:"+webhookId)
+		if err == nil && len(val) > 0 {
+			log.Info("Webhook already processed:", webhookId)
+			return c.Status(fiber.StatusOK).SendString("OK")
+		}
+	}
+
 	var event map[string]any
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
@@ -398,6 +409,10 @@ func PolarWebhook(c fiber.Ctx) error {
 		handleOrderPaid(c.Context(), data)
 	}
 
+	if config.VALKEY != nil && webhookId != "" {
+		_ = config.VALKEY.SetWithContext(c.Context(), "webhook:"+webhookId, []byte("processed"), 24*time.Hour)
+	}
+
 	return c.Status(fiber.StatusOK).SendString("OK")
 }
 
@@ -407,13 +422,11 @@ func handleSubscriptionChange(ctx context.Context, data map[string]interface{}) 
 	productId, _ := data["product_id"].(string)
 	customerId, _ := data["customer_id"].(string)
 
-	creditsToAdd := getCreditsToAdd(productId)
 	storageToAdd := getStorageToAdd(productId)
 
 	var userId string
 	err := config.DB.NewUpdate().
 		Model((*models.User)(nil)).
-		Set("ai_credits = ai_credits + ?", creditsToAdd).
 		Set("assigned_storage = ?", storageToAdd).
 		Set("subscription_plan = ?", getSubscriptionTier(productId)).
 		Set("subscription_type = ?", getSubscriptionTime(productId)).
@@ -450,9 +463,15 @@ func handleOrderPaid(ctx context.Context, data map[string]interface{}) {
 	customerId, _ := data["customer_id"].(string)
 
 	var userId string
-	err := config.DB.NewUpdate().
-		Model((*models.User)(nil)).
-		Set("ai_credits = ai_credits + ?", creditsToAdd).
+	query := config.DB.NewUpdate().Model((*models.User)(nil))
+
+	if productId == config.POLAR_AI_CREDITS {
+		query = query.Set("ai_credits = ai_credits + ?", creditsToAdd)
+	} else {
+		query = query.Set("ai_credits = ?", creditsToAdd)
+	}
+
+	err := query.
 		Set("external_customer_id = ?", customerId).
 		Where("email = ?", email).
 		Returning("id").
