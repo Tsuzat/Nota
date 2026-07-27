@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getAuthContext, getStorageContext } from "@nota/client";
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import UserAvatar from "$lib/components/custom/user-avatar.svelte";
   import { Button } from "@nota/ui/shadcn/button";
   import { Badge } from "@nota/ui/shadcn/badge";
@@ -120,16 +120,16 @@
     }
   }
 
-  function handleSearchChange(newSearch: string) {
-    search = newSearch;
-    page = 1;
-    loadStorageFiles();
-  }
+  $effect(() => {
+    // Re-fetch storage files when search or page changes
+    search;
+    page;
 
-  function handlePageChange(newPage: number) {
-    page = newPage;
-    loadStorageFiles();
-  }
+    // Check if component is mounted and we have storage
+    if (storage && !isLoading) {
+      untrack(() => loadStorageFiles());
+    }
+  });
 </script>
 
 <Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />
@@ -377,12 +377,10 @@
           assignedStorage={user.assigned_storage}
           assets={storage?.assets || []}
           total={storage?.total || 0}
-          {page}
+          bind:page
           {limit}
           {isLoading}
           bind:search
-          onSearchChange={handleSearchChange}
-          onPageChange={handlePageChange}
           onRefresh={loadStorageFiles}
           onDelete={handleDeleteAsset}
         />

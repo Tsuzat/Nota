@@ -82,14 +82,20 @@ class Storage {
 
     const queryString = params.toString();
     const url = `${PUBLIC_BACKEND_URL}/api/v1/storage/list${queryString ? `?${queryString}` : ''}`;
+    
     const res = await request(url);
     if (res.ok) {
       const json = await res.json();
       const data = json.data;
-      if (data && Array.isArray(data.files)) {
-        const parsedAssets = data.files.map((file: unknown) => AssetSchema.parse(file));
-        this.#assets = parsedAssets;
-        this.#total = data.total ?? parsedAssets.length;
+      if (data) {
+        if (Array.isArray(data.files)) {
+          const parsedAssets = data.files.map((file: unknown) => AssetSchema.parse(file));
+          this.#assets = parsedAssets;
+          this.#total = data.total ?? parsedAssets.length;
+        } else {
+          this.#assets = [];
+          this.#total = 0;
+        }
         this.#page = data.page ?? 1;
         this.#limit = data.limit ?? 20;
       }

@@ -140,11 +140,27 @@
 
           // Media type filter
           if (mediaTypeFilter !== "all") {
-            if (mediaTypeFilter === "image" && !mime_type.startsWith("image/")) continue;
-            if (mediaTypeFilter === "video" && !mime_type.startsWith("video/")) continue;
-            if (mediaTypeFilter === "audio" && !mime_type.startsWith("audio/")) continue;
-            if (mediaTypeFilter === "document" && !mime_type.includes("pdf") && !mime_type.startsWith("text/")) continue;
-            if (mediaTypeFilter === "other" && (mime_type.startsWith("image/") || mime_type.startsWith("video/") || mime_type.startsWith("audio/") || mime_type.includes("pdf") || mime_type.startsWith("text/"))) continue;
+            if (mediaTypeFilter === "image" && !mime_type.startsWith("image/"))
+              continue;
+            if (mediaTypeFilter === "video" && !mime_type.startsWith("video/"))
+              continue;
+            if (mediaTypeFilter === "audio" && !mime_type.startsWith("audio/"))
+              continue;
+            if (
+              mediaTypeFilter === "document" &&
+              !mime_type.includes("pdf") &&
+              !mime_type.startsWith("text/")
+            )
+              continue;
+            if (
+              mediaTypeFilter === "other" &&
+              (mime_type.startsWith("image/") ||
+                mime_type.startsWith("video/") ||
+                mime_type.startsWith("audio/") ||
+                mime_type.includes("pdf") ||
+                mime_type.startsWith("text/"))
+            )
+              continue;
           }
 
           items.push({
@@ -201,26 +217,6 @@
       loadStorageData();
     }
   });
-
-  function handleSearchChange(newSearch: string) {
-    searchQuery = newSearch;
-    page = 1;
-  }
-
-  function handleMediaTypeChange(newType: string) {
-    mediaTypeFilter = newType;
-    page = 1;
-  }
-
-  function handleSortChange(newSortBy: string, newSortOrder: string) {
-    sortByFilter = newSortBy;
-    sortOrderFilter = newSortOrder;
-    page = 1;
-  }
-
-  function handlePageChange(newPage: number) {
-    page = newPage;
-  }
 
   function handleRefresh() {
     loadStorageData();
@@ -305,7 +301,7 @@
   );
 </script>
 
-<div class="flex flex-col flex-1 h-full min-h-0 overflow-hidden">
+<div class="flex size-full min-h-0 overflow-hidden flex-col">
   <Topbar>
     {#snippet left()}
       <h1 class="text-lg font-semibold tracking-tight ml-2">Storage</h1>
@@ -366,25 +362,22 @@
   </Topbar>
 
   <!-- Storage View Body -->
-  <main class="flex-1 min-h-0 overflow-auto">
-    <div class="mx-auto w-full max-w-3xl p-4 sm:p-6">
+  <main class="flex-1 max-h-[calc(100vh-3rem)] overflow-auto!">
+    <div class="mx-auto w-full max-w-6xl p-4 sm:p-6">
       <StorageViewer
+        title={selectedLabel}
         usedStorage={currentUsedStorage}
         assignedStorage={currentAssignedStorage}
         isLocal={selectedType === "local"}
         assets={currentAssets}
         total={currentTotal}
-        {page}
+        bind:page
         {limit}
         bind:search={searchQuery}
         bind:mediaType={mediaTypeFilter}
         bind:sortBy={sortByFilter}
         bind:sortOrder={sortOrderFilter}
         {isLoading}
-        onSearchChange={handleSearchChange}
-        onMediaTypeChange={handleMediaTypeChange}
-        onSortChange={handleSortChange}
-        onPageChange={handlePageChange}
         onRefresh={handleRefresh}
         onDelete={handleDeleteClick}
         onOpen={handleOpenFile}

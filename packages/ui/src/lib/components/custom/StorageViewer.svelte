@@ -2,6 +2,7 @@
   import * as Card from "../ui/card";
   import * as Table from "../ui/table";
   import * as Select from "../ui/select";
+  import * as DropdownMenu from "../ui/dropdown-menu";
   import { Button } from "../ui/button";
   import { Input } from "../ui/input";
   import { Badge } from "../ui/badge";
@@ -24,17 +25,14 @@
     isLocal = false,
     assets = [],
     total = 0,
-    page = 1,
+    page = $bindable(1),
     limit = 10,
     search = $bindable(""),
     mediaType = $bindable("all"),
     sortBy = $bindable("created_at"),
     sortOrder = $bindable("desc"),
     isLoading = false,
-    onSearchChange,
-    onMediaTypeChange,
-    onSortChange,
-    onPageChange,
+    title,
     onRefresh,
     onDelete,
     onOpen,
@@ -51,10 +49,7 @@
     sortBy?: string;
     sortOrder?: string;
     isLoading?: boolean;
-    onSearchChange?: (search: string) => void;
-    onMediaTypeChange?: (mediaType: string) => void;
-    onSortChange?: (sortBy: string, sortOrder: string) => void;
-    onPageChange?: (page: number) => void;
+    title?: string;
     onRefresh?: () => void;
     onDelete?: (id: string, name: string) => void;
     onOpen?: (asset: StorageAssetItem) => void;
@@ -100,13 +95,13 @@
   function handleInput(e: Event) {
     const target = e.target as HTMLInputElement;
     search = target.value;
-    onSearchChange?.(target.value);
+    page = 1;
   }
 
   function handleTypeSelect(val: string | undefined) {
     if (!val) return;
     mediaType = val;
-    onMediaTypeChange?.(val);
+    page = 1;
   }
 
   function handleSortSelect(val: string | undefined) {
@@ -114,7 +109,7 @@
     const [sb, so] = val.split(":");
     sortBy = sb;
     sortOrder = so;
-    onSortChange?.(sb, so);
+    page = 1;
   }
 
   function handleOpenFile(asset: StorageAssetItem) {
@@ -185,17 +180,14 @@
   <!-- Storage Files List Card -->
   <Card.Root class="overflow-hidden">
     <Card.Header
-      class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b bg-muted/20 pb-4"
+      class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b py-4"
     >
-      <div>
-        <Card.Title class="flex items-center gap-2">
-          <icons.Folder class="size-5 text-primary" />
-          {isLocal ? "Local Assets" : "Cloud Assets"}
-        </Card.Title>
-        <Card.Description>
-          Search, filter, view, and manage your stored media files.
-        </Card.Description>
-      </div>
+      <Card.Title class="flex items-center gap-2 shrink-0">
+        <icons.Folder class="size-5 text-primary" />
+        <div class="flex flex-col">
+          {title || (isLocal ? "Local Assets" : "Cloud Assets")}
+        </div>
+      </Card.Title>
 
       <!-- Filters & Controls Bar -->
       <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
@@ -231,15 +223,18 @@
             </div>
           </Select.Trigger>
           <Select.Content>
-            {#each mediaTypeOptions as option}
-              <Select.Item
-                value={option.value}
-                label={option.label}
-                class="text-xs"
-              >
-                {option.label}
-              </Select.Item>
-            {/each}
+            <Select.Group>
+              <Select.GroupHeading>Filter by Type</Select.GroupHeading>
+              {#each mediaTypeOptions as option}
+                <Select.Item
+                  value={option.value}
+                  label={option.label}
+                  class="text-xs"
+                >
+                  {option.label}
+                </Select.Item>
+              {/each}
+            </Select.Group>
           </Select.Content>
         </Select.Root>
 
@@ -261,15 +256,18 @@
             </div>
           </Select.Trigger>
           <Select.Content>
-            {#each sortOptions as option}
-              <Select.Item
-                value={option.value}
-                label={option.label}
-                class="text-xs"
-              >
-                {option.label}
-              </Select.Item>
-            {/each}
+            <Select.Group>
+              <Select.GroupHeading>Sort Order</Select.GroupHeading>
+              {#each sortOptions as option}
+                <Select.Item
+                  value={option.value}
+                  label={option.label}
+                  class="text-xs"
+                >
+                  {option.label}
+                </Select.Item>
+              {/each}
+            </Select.Group>
           </Select.Content>
         </Select.Root>
 
@@ -383,30 +381,37 @@
 
                   <!-- Actions -->
                   <Table.Cell class="py-3 text-right pr-6">
-                    <div class="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        class="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-                        onclick={() => handleOpenFile(asset)}
-                        title="View file"
-                      >
-                        <icons.ExternalLink class="size-3.5" />
-                        <span class="hidden sm:inline">View</span>
-                      </Button>
-
-                      {#if onDelete}
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger>
                         <Button
                           variant="ghost"
                           size="icon"
-                          class="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-500/10"
-                          onclick={() => onDelete(asset.id, asset.name)}
-                          title="Delete file"
+                          class="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          title="Actions"
                         >
-                          <icons.Trash2 class="size-4" />
+                          <icons.EllipsisVertical class="size-4" />
                         </Button>
-                      {/if}
-                    </div>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content align="end" class="w-36">
+                        <DropdownMenu.Item
+                          onclick={() => handleOpenFile(asset)}
+                          class="cursor-pointer"
+                        >
+                          <icons.ExternalLink class="size-4 mr-2" />
+                          <span>Open File</span>
+                        </DropdownMenu.Item>
+                        {#if onDelete}
+                          <DropdownMenu.Separator />
+                          <DropdownMenu.Item
+                            class="text-red-500 focus:text-red-500 focus:bg-red-500/10 cursor-pointer"
+                            onclick={() => onDelete(asset.id, asset.name)}
+                          >
+                            <icons.Trash2 class="size-4 mr-2 text-red-500" />
+                            <span>Delete File</span>
+                          </DropdownMenu.Item>
+                        {/if}
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
                   </Table.Cell>
                 </Table.Row>
               {/each}
@@ -432,7 +437,7 @@
             size="sm"
             class="h-8 text-xs"
             disabled={page <= 1 || isLoading}
-            onclick={() => onPageChange?.(page - 1)}
+            onclick={() => (page -= 1)}
           >
             <icons.ChevronLeft class="size-3.5" />
             Previous
@@ -442,7 +447,7 @@
             size="sm"
             class="h-8 text-xs"
             disabled={page >= totalPages || isLoading}
-            onclick={() => onPageChange?.(page + 1)}
+            onclick={() => (page += 1)}
           >
             Next
             <icons.ChevronRight class="size-3.5" />
