@@ -40,16 +40,15 @@ let isStorageHovered = $state(false);
     </Sidebar.MenuButton>
   </Sidebar.MenuItem>
   <Sidebar.MenuItem>
-    <a href={resolve("/(app)/storage")}>
-      <Sidebar.MenuButton
-        class="mt-1"
-        isActive={page.url.pathname.startsWith("/(app)/storage")}
-        onmouseenter={() => (isStorageHovered = true)}
-        onmouseleave={() => (isStorageHovered = false)}
-      >
-        <MovingStorage size={18} animate={isStorageHovered} />
-        <span>Storage</span>
-      </Sidebar.MenuButton>
-    </a>
+    <Sidebar.MenuButton
+      class="mt-1"
+      isActive={page.url.pathname.startsWith("/(app)/storage")}
+      onclick={() => goto(resolve("/(app)/storage"))}
+      onmouseenter={() => (isStorageHovered = true)}
+      onmouseleave={() => (isStorageHovered = false)}
+    >
+      <MovingStorage size={18} animate={isStorageHovered} />
+      <span>Storage</span>
+    </Sidebar.MenuButton>
   </Sidebar.MenuItem>
 </Sidebar.Menu>

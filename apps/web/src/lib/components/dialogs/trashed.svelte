@@ -6,6 +6,8 @@ import { Button } from '@nota/ui/shadcn/button';
 import * as Popover from '@nota/ui/shadcn/popover';
 import { toast } from '@nota/ui/shadcn/sonner';
 
+import * as Dialog from '@nota/ui/shadcn/dialog';
+
 interface Props {
   open?: boolean;
 }
@@ -18,18 +20,27 @@ const trashedNotes = $derived.by<Note[]>(() => {
   return cloudNotes.notes.filter((n) => n.deleted_at);
 });
 
-async function deleteNote(note: Note) {
+let noteToDelete = $state<Note | null>(null);
+let isDeleting = $state(false);
+
+function deleteNote(note: Note) {
+  noteToDelete = note;
+}
+
+async function confirmDelete() {
+  if (!noteToDelete) return;
+  isDeleting = true;
   try {
-    const confirm = window.confirm(
-      `Are you sure you want to delete ${note.name} permanently? This action cannot be undone.`
-    );
-    if (!confirm) return;
-    await cloudNotes.delete(note.id);
+    await cloudNotes.delete(noteToDelete.id);
+    noteToDelete = null;
   } catch (error) {
     console.error(error);
-    toast.error(`Something went wrong while deleting ${note.name}`);
+    toast.error(`Something went wrong while deleting ${noteToDelete?.name}`);
+  } finally {
+    isDeleting = false;
   }
 }
+
 async function restoreNote(note: Note) {
   try {
     await cloudNotes.update(note.id, { deleted_at: null });
@@ -82,3 +93,32 @@ async function restoreNote(note: Note) {
     {/if}
   </Popover.Content>
 </Popover.Root>
+
+<Dialog.Root
+  open={!!noteToDelete}
+  onOpenChange={(v) => !v && (noteToDelete = null)}
+>
+  <Dialog.Content class="sm:max-w-100">
+    <Dialog.Header>
+      <Dialog.Title>Delete Note</Dialog.Title>
+      <Dialog.Description>
+        Are you sure you want to delete <strong>{noteToDelete?.name}</strong> permanently?
+        This action cannot be undone.
+      </Dialog.Description>
+    </Dialog.Header>
+    <Dialog.Footer class="mt-4 gap-2 sm:gap-0">
+      <Button
+        variant="outline"
+        onclick={() => (noteToDelete = null)}
+        disabled={isDeleting}>Cancel</Button
+      >
+      <Button
+        variant="destructive"
+        onclick={confirmDelete}
+        disabled={isDeleting}
+      >
+        {isDeleting ? "Deleting..." : "Delete Permanently"}
+      </Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>

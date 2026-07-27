@@ -47,16 +47,8 @@ async function exportContent(editor: Editor, name: string, type: 'PDF' | 'JSON' 
   } else if (type === 'MD') {
     content = editor.getMarkdown();
   } else if (type === 'PDF') {
-    const toastId = toast.loading('Generating PDF...', { duration: 10000 });
-    try {
-      content = await convertHtmlToPdf(name, editor.getHTML());
-      toast.success('PDF generated', { id: toastId });
-      mime = 'application/pdf';
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to generate PDF', { id: toastId });
-      return;
-    }
+    content = await convertHtmlToPdf(name, editor.getHTML());
+    mime = 'application/pdf';
   }
 
   const blob = new Blob([content], { type: mime });
@@ -66,6 +58,15 @@ async function exportContent(editor: Editor, name: string, type: 'PDF' | 'JSON' 
   a.download = `${name || 'Untitled'}.${ext}`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
+  if (!editor) return;
+  toast.promise(exportContent(editor, note.name, type), {
+    loading: `Exporting as ${type}...`,
+    success: `${type} exported successfully`,
+    error: `Failed to export ${type}`,
+  });
 }
 </script>
 
@@ -135,30 +136,20 @@ async function exportContent(editor: Editor, name: string, type: 'PDF' | 'JSON' 
           </Dropdown.SubTrigger>
           <Dropdown.SubContent>
             <Dropdown.Item
-              onclick={() => {
-                if (editor) exportContent(editor, note.name, "PDF");
-              }}>PDF</Dropdown.Item
-            >
+              onclick={() => handleExport("PDF")}
+            >PDF</Dropdown.Item>
             <Dropdown.Item
-              onclick={() => {
-                if (editor) exportContent(editor, note.name, "JSON");
-              }}>JSON</Dropdown.Item
-            >
+              onclick={() => handleExport("JSON")}
+            >JSON</Dropdown.Item>
             <Dropdown.Item
-              onclick={() => {
-                if (editor) exportContent(editor, note.name, "HTML");
-              }}>HTML</Dropdown.Item
-            >
+              onclick={() => handleExport("HTML")}
+            >HTML</Dropdown.Item>
             <Dropdown.Item
-              onclick={() => {
-                if (editor) exportContent(editor, note.name, "TEXT");
-              }}>Text</Dropdown.Item
-            >
+              onclick={() => handleExport("TEXT")}
+            >Text</Dropdown.Item>
             <Dropdown.Item
-              onclick={() => {
-                if (editor) exportContent(editor, note.name, "MD");
-              }}>Markdown</Dropdown.Item
-            >
+              onclick={() => handleExport("MD")}
+            >Markdown</Dropdown.Item>
           </Dropdown.SubContent>
         </Dropdown.Sub>
       </Dropdown.Group>
