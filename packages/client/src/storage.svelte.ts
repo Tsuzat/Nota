@@ -82,7 +82,7 @@ class Storage {
 
     const queryString = params.toString();
     const url = `${PUBLIC_BACKEND_URL}/api/v1/storage/list${queryString ? `?${queryString}` : ''}`;
-    
+
     const res = await request(url);
     if (res.ok) {
       const json = await res.json();

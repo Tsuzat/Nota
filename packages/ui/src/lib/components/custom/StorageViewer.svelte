@@ -1,142 +1,132 @@
 <script lang="ts">
-  import * as Card from "../ui/card";
-  import * as Table from "../ui/table";
-  import * as Select from "../ui/select";
-  import * as DropdownMenu from "../ui/dropdown-menu";
-  import { Button } from "../ui/button";
-  import { Input } from "../ui/input";
-  import { Badge } from "../ui/badge";
-  import { BarSpinner, icons } from "../../icons";
-  import { cn, timeAgo } from "../../utils";
+import * as Card from '../ui/card';
+import * as Table from '../ui/table';
+import * as Select from '../ui/select';
+import * as DropdownMenu from '../ui/dropdown-menu';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
+import { BarSpinner, icons } from '../../icons';
+import { cn, timeAgo } from '../../utils';
 
-  export interface StorageAssetItem {
-    id: string;
-    name: string;
-    path: string;
-    mime_type: string;
-    size: number;
-    created_at: Date | string;
-    updated_at?: Date | string;
+export interface StorageAssetItem {
+  id: string;
+  name: string;
+  path: string;
+  mime_type: string;
+  size: number;
+  created_at: Date | string;
+  updated_at?: Date | string;
+}
+
+let {
+  usedStorage = 0,
+  assignedStorage = 0,
+  isLocal = false,
+  assets = [],
+  total = 0,
+  page = $bindable(1),
+  limit = 10,
+  search = $bindable(''),
+  mediaType = $bindable('all'),
+  sortBy = $bindable('created_at'),
+  sortOrder = $bindable('desc'),
+  isLoading = false,
+  title,
+  onRefresh,
+  onDelete,
+  onOpen,
+}: {
+  usedStorage?: number;
+  assignedStorage?: number;
+  isLocal?: boolean;
+  assets?: StorageAssetItem[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  search?: string;
+  mediaType?: string;
+  sortBy?: string;
+  sortOrder?: string;
+  isLoading?: boolean;
+  title?: string;
+  onRefresh?: () => void;
+  onDelete?: (id: string, name: string) => void;
+  onOpen?: (asset: StorageAssetItem) => void;
+} = $props();
+
+const storagePercentage = $derived(assignedStorage > 0 ? (usedStorage / assignedStorage) * 100 : 0);
+
+function formatBytes(bytes: number, decimals = 2) {
+  if (!+bytes) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
+
+function getFileIcon(mimeType: string) {
+  if (mimeType.startsWith('image/')) return icons.Image;
+  if (mimeType.startsWith('video/')) return icons.Video;
+  if (mimeType.startsWith('audio/')) return icons.Music;
+  if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.startsWith('text/')) return icons.FileText;
+  return icons.File;
+}
+
+function getCleanMimeLabel(mimeType: string) {
+  if (mimeType.startsWith('image/')) return mimeType.replace('image/', '').toUpperCase();
+  if (mimeType.startsWith('video/')) return mimeType.replace('video/', '').toUpperCase();
+  if (mimeType.startsWith('audio/')) return mimeType.replace('audio/', '').toUpperCase();
+  if (mimeType.includes('pdf')) return 'PDF';
+  return mimeType.split('/')[1]?.toUpperCase() || 'FILE';
+}
+
+function handleInput(e: Event) {
+  const target = e.target as HTMLInputElement;
+  search = target.value;
+  page = 1;
+}
+
+function handleTypeSelect(val: string | undefined) {
+  if (!val) return;
+  mediaType = val;
+  page = 1;
+}
+
+function handleSortSelect(val: string | undefined) {
+  if (!val) return;
+  const [sb, so] = val.split(':');
+  sortBy = sb;
+  sortOrder = so;
+  page = 1;
+}
+
+function handleOpenFile(asset: StorageAssetItem) {
+  if (onOpen) {
+    onOpen(asset);
+  } else {
+    window.open(asset.path, '_blank');
   }
+}
 
-  let {
-    usedStorage = 0,
-    assignedStorage = 0,
-    isLocal = false,
-    assets = [],
-    total = 0,
-    page = $bindable(1),
-    limit = 10,
-    search = $bindable(""),
-    mediaType = $bindable("all"),
-    sortBy = $bindable("created_at"),
-    sortOrder = $bindable("desc"),
-    isLoading = false,
-    title,
-    onRefresh,
-    onDelete,
-    onOpen,
-  }: {
-    usedStorage?: number;
-    assignedStorage?: number;
-    isLocal?: boolean;
-    assets?: StorageAssetItem[];
-    total?: number;
-    page?: number;
-    limit?: number;
-    search?: string;
-    mediaType?: string;
-    sortBy?: string;
-    sortOrder?: string;
-    isLoading?: boolean;
-    title?: string;
-    onRefresh?: () => void;
-    onDelete?: (id: string, name: string) => void;
-    onOpen?: (asset: StorageAssetItem) => void;
-  } = $props();
+const mediaTypeOptions = [
+  { value: 'all', label: 'All Types' },
+  { value: 'image', label: 'Images' },
+  { value: 'video', label: 'Videos' },
+  { value: 'audio', label: 'Audio' },
+  { value: 'document', label: 'Documents' },
+  { value: 'other', label: 'Other' },
+];
 
-  const storagePercentage = $derived(
-    assignedStorage > 0 ? (usedStorage / assignedStorage) * 100 : 0,
-  );
-
-  function formatBytes(bytes: number, decimals = 2) {
-    if (!+bytes) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-  }
-
-  function getFileIcon(mimeType: string) {
-    if (mimeType.startsWith("image/")) return icons.Image;
-    if (mimeType.startsWith("video/")) return icons.Video;
-    if (mimeType.startsWith("audio/")) return icons.Music;
-    if (
-      mimeType.includes("pdf") ||
-      mimeType.includes("document") ||
-      mimeType.startsWith("text/")
-    )
-      return icons.FileText;
-    return icons.File;
-  }
-
-  function getCleanMimeLabel(mimeType: string) {
-    if (mimeType.startsWith("image/"))
-      return mimeType.replace("image/", "").toUpperCase();
-    if (mimeType.startsWith("video/"))
-      return mimeType.replace("video/", "").toUpperCase();
-    if (mimeType.startsWith("audio/"))
-      return mimeType.replace("audio/", "").toUpperCase();
-    if (mimeType.includes("pdf")) return "PDF";
-    return mimeType.split("/")[1]?.toUpperCase() || "FILE";
-  }
-
-  function handleInput(e: Event) {
-    const target = e.target as HTMLInputElement;
-    search = target.value;
-    page = 1;
-  }
-
-  function handleTypeSelect(val: string | undefined) {
-    if (!val) return;
-    mediaType = val;
-    page = 1;
-  }
-
-  function handleSortSelect(val: string | undefined) {
-    if (!val) return;
-    const [sb, so] = val.split(":");
-    sortBy = sb;
-    sortOrder = so;
-    page = 1;
-  }
-
-  function handleOpenFile(asset: StorageAssetItem) {
-    if (onOpen) {
-      onOpen(asset);
-    } else {
-      window.open(asset.path, "_blank");
-    }
-  }
-
-  const mediaTypeOptions = [
-    { value: "all", label: "All Types" },
-    { value: "image", label: "Images" },
-    { value: "video", label: "Videos" },
-    { value: "audio", label: "Audio" },
-    { value: "document", label: "Documents" },
-    { value: "other", label: "Other" },
-  ];
-
-  const sortOptions = [
-    { value: "created_at:desc", label: "Newest First" },
-    { value: "created_at:asc", label: "Oldest First" },
-    { value: "size:desc", label: "Largest Size" },
-    { value: "size:asc", label: "Smallest Size" },
-    { value: "name:asc", label: "Name (A-Z)" },
-    { value: "name:desc", label: "Name (Z-A)" },
-  ];
+const sortOptions = [
+  { value: 'created_at:desc', label: 'Newest First' },
+  { value: 'created_at:asc', label: 'Oldest First' },
+  { value: 'size:desc', label: 'Largest Size' },
+  { value: 'size:asc', label: 'Smallest Size' },
+  { value: 'name:asc', label: 'Name (A-Z)' },
+  { value: 'name:desc', label: 'Name (Z-A)' },
+];
 </script>
 
 <div class="space-y-6">
@@ -211,26 +201,18 @@
           value={mediaType}
           onValueChange={handleTypeSelect}
         >
-          <Select.Trigger class="h-9 w-32.5 text-xs">
-            <div class="flex items-center gap-1.5 truncate">
-              <icons.SlidersHorizontal
-                class="size-3.5 text-muted-foreground shrink-0"
-              />
-              <span class="truncate">
-                {mediaTypeOptions.find((o) => o.value === mediaType)?.label ||
-                  "Type"}
-              </span>
-            </div>
+          <Select.Trigger>
+            <icons.SlidersHorizontal />
+            <span class="truncate">
+              {mediaTypeOptions.find((o) => o.value === mediaType)?.label ||
+                "Type"}
+            </span>
           </Select.Trigger>
           <Select.Content>
             <Select.Group>
               <Select.GroupHeading>Filter by Type</Select.GroupHeading>
               {#each mediaTypeOptions as option}
-                <Select.Item
-                  value={option.value}
-                  label={option.label}
-                  class="text-xs"
-                >
+                <Select.Item value={option.value} label={option.label}>
                   {option.label}
                 </Select.Item>
               {/each}
@@ -244,26 +226,18 @@
           value={`${sortBy}:${sortOrder}`}
           onValueChange={handleSortSelect}
         >
-          <Select.Trigger class="h-9 w-35 text-xs">
-            <div class="flex items-center gap-1.5 truncate">
-              <icons.SlidersHorizontal
-                class="size-3.5 text-muted-foreground shrink-0"
-              />
-              <span class="truncate">
-                {sortOptions.find((o) => o.value === `${sortBy}:${sortOrder}`)
-                  ?.label || "Sort"}
-              </span>
-            </div>
+          <Select.Trigger>
+            <icons.SlidersHorizontal />
+            <span class="truncate">
+              {sortOptions.find((o) => o.value === `${sortBy}:${sortOrder}`)
+                ?.label || "Sort"}
+            </span>
           </Select.Trigger>
           <Select.Content>
             <Select.Group>
               <Select.GroupHeading>Sort Order</Select.GroupHeading>
               {#each sortOptions as option}
-                <Select.Item
-                  value={option.value}
-                  label={option.label}
-                  class="text-xs"
-                >
+                <Select.Item value={option.value} label={option.label}>
                   {option.label}
                 </Select.Item>
               {/each}
