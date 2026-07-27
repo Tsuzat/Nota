@@ -14,7 +14,7 @@
     },
     "apps/desktop": {
       "name": "@nota/desktop",
-      "version": "0.9.81-beta",
+      "version": "0.9.82-beta",
       "dependencies": {
         "@google/genai": "^1.52.0",
         "@nota/client": "workspace:*",
