@@ -1,72 +1,77 @@
 <script lang="ts">
-import * as Card from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { BarSpinner, icons } from '../../icons';
-import { cn, timeAgo } from '../../utils';
+  import * as Card from "../ui/card";
+  import { Button } from "../ui/button";
+  import { Input } from "../ui/input";
+  import { BarSpinner, icons } from "../../icons";
+  import { cn, timeAgo } from "../../utils";
 
-export interface StorageAssetItem {
-  id: string;
-  name: string;
-  path: string;
-  mime_type: string;
-  size: number;
-  created_at: Date | string;
-  updated_at?: Date | string;
-}
+  export interface StorageAssetItem {
+    id: string;
+    name: string;
+    path: string;
+    mime_type: string;
+    size: number;
+    created_at: Date | string;
+    updated_at?: Date | string;
+  }
 
-let {
-  usedStorage = 0,
-  assignedStorage = 0,
-  assets = [],
-  total = 0,
-  page = 1,
-  limit = 10,
-  search = $bindable(''),
-  isLoading = false,
-  onSearchChange,
-  onPageChange,
-  onRefresh,
-  onDelete,
-}: {
-  usedStorage?: number;
-  assignedStorage?: number;
-  assets?: StorageAssetItem[];
-  total?: number;
-  page?: number;
-  limit?: number;
-  search?: string;
-  isLoading?: boolean;
-  onSearchChange?: (search: string) => void;
-  onPageChange?: (page: number) => void;
-  onRefresh?: () => void;
-  onDelete?: (id: string, name: string) => void;
-} = $props();
+  let {
+    usedStorage = 0,
+    assignedStorage = 0,
+    isLocal = false,
+    assets = [],
+    total = 0,
+    page = 1,
+    limit = 10,
+    search = $bindable(""),
+    isLoading = false,
+    onSearchChange,
+    onPageChange,
+    onRefresh,
+    onDelete,
+  }: {
+    usedStorage?: number;
+    assignedStorage?: number;
+    isLocal?: boolean;
+    assets?: StorageAssetItem[];
+    total?: number;
+    page?: number;
+    limit?: number;
+    search?: string;
+    isLoading?: boolean;
+    onSearchChange?: (search: string) => void;
+    onPageChange?: (page: number) => void;
+    onRefresh?: () => void;
+    onDelete?: (id: string, name: string) => void;
+  } = $props();
 
-const storagePercentage = $derived(assignedStorage > 0 ? (usedStorage / assignedStorage) * 100 : 0);
+  const storagePercentage = $derived(
+    assignedStorage > 0 ? (usedStorage / assignedStorage) * 100 : 0,
+  );
 
-function formatBytes(bytes: number, decimals = 2) {
-  if (!+bytes) return '0 Bytes';
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-}
+  function formatBytes(bytes: number, decimals = 2) {
+    if (!+bytes) return "0 Bytes";
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  }
 
-function getFileIcon(mimeType: string) {
-  if (mimeType.startsWith('image/')) return icons.Image;
-  if (mimeType.startsWith('video/')) return icons.Video;
-  if (mimeType.startsWith('audio/')) return icons.Music;
-  if (mimeType.includes('pdf') || mimeType.includes('document')) return icons.FileText;
-  return icons.File;
-}
+  function getFileIcon(mimeType: string) {
+    if (mimeType.startsWith("image/")) return icons.Image;
+    if (mimeType.startsWith("video/")) return icons.Video;
+    if (mimeType.startsWith("audio/")) return icons.Music;
+    if (mimeType.includes("pdf") || mimeType.includes("document"))
+      return icons.FileText;
+    return icons.File;
+  }
 
-function handleInput(e: Event) {
-  const target = e.target as HTMLInputElement;
-  search = target.value;
-  onSearchChange?.(target.value);
-}
+  function handleInput(e: Event) {
+    const target = e.target as HTMLInputElement;
+    search = target.value;
+    onSearchChange?.(target.value);
+  }
 </script>
 
 <div class="space-y-6">
@@ -78,7 +83,9 @@ function handleInput(e: Event) {
         Storage & Usage
       </Card.Title>
       <Card.Description>
-        Overview of your assigned cloud storage usage.
+        {isLocal || assignedStorage <= 0
+          ? "Overview of your local assets directory storage."
+          : "Overview of your assigned cloud storage usage."}
       </Card.Description>
     </Card.Header>
     <Card.Content class="space-y-4">
@@ -86,15 +93,21 @@ function handleInput(e: Event) {
         <div class="flex justify-between items-end">
           <span class="text-sm font-medium">Used Space</span>
           <span class="text-xs text-muted-foreground font-mono">
-            {formatBytes(usedStorage)} / {formatBytes(assignedStorage)}
+            {#if isLocal || assignedStorage <= 0}
+              {formatBytes(usedStorage)}
+            {:else}
+              {formatBytes(usedStorage)} / {formatBytes(assignedStorage)}
+            {/if}
           </span>
         </div>
-        <div class="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
-          <div
-            class="h-full rounded-full bg-primary transition-all duration-500"
-            style="width: {storagePercentage}%"
-          ></div>
-        </div>
+        {#if !isLocal && assignedStorage > 0}
+          <div class="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
+            <div
+              class="h-full rounded-full bg-primary transition-all duration-500"
+              style="width: {storagePercentage}%"
+            ></div>
+          </div>
+        {/if}
       </div>
     </Card.Content>
   </Card.Root>
@@ -107,7 +120,7 @@ function handleInput(e: Event) {
       <div>
         <Card.Title class="flex items-center gap-2">
           <icons.Folder class="size-5 text-primary" />
-          Cloud Assets
+          {isLocal ? "Local Assets" : "Cloud Assets"}
         </Card.Title>
         <Card.Description>
           Search, view, and manage your stored media files.

@@ -47,9 +47,13 @@ $effect(() => {
   if (!user) {
     cloudWorkspaces.workspaces = [];
     cloudNotes.notes = [];
+    cloudStorage.usedBytes = 0;
   } else {
     cloudWorkspaces.fetch();
-    cloudStorage.fetch();
+    cloudStorage.fetch({ workspaceId: currentWorkspace.get()?.id });
+    if (user.used_storage !== undefined) {
+      cloudStorage.usedBytes = user.used_storage;
+    }
   }
 });
 

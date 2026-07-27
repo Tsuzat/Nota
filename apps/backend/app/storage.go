@@ -197,7 +197,7 @@ func ListFiles(c fiber.Ctx) error {
 	}
 
 	var assets []models.Asset
-	err = query.Order("created_at DESC").Limit(limit).Offset((page - 1) * limit).Scan(c.Context())
+	err = query.Order("created_at DESC").Limit(limit).Offset((page - 1) * limit).Scan(c.Context(), &assets)
 	if err != nil {
 		log.Error("List assets error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: fiber.StatusInternalServerError, Error: "Failed to list files"})

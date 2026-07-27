@@ -24,6 +24,7 @@ export interface UploadStorageOptions {
 
 class Storage {
   #assets = $state<Asset[]>([]);
+  #usedBytes = $state<number>(0);
   #total = $state<number>(0);
   #page = $state<number>(1);
   #limit = $state<number>(20);
@@ -42,6 +43,13 @@ class Storage {
 
   get limit() {
     return this.#limit;
+  }
+
+  get usedBytes() {
+    return this.#usedBytes;
+  }
+  set usedBytes(value) {
+    this.#usedBytes = value;
   }
 
   /**
@@ -138,6 +146,7 @@ class Storage {
     const asset = AssetSchema.parse(confirmJson.data);
 
     this.#assets.push(asset);
+    this.#usedBytes += asset.size;
     return asset.path;
   }
 
@@ -154,6 +163,10 @@ class Storage {
       body: JSON.stringify(body),
     });
     if (res.ok) {
+      const targetAsset = this.#assets.find((asset) => asset.id === idOrKey || asset.path === idOrKey);
+      if (targetAsset) {
+        this.#usedBytes = Math.max(0, this.#usedBytes - targetAsset.size);
+      }
       this.#assets = this.#assets.filter((asset) => asset.id !== idOrKey && asset.path !== idOrKey);
     } else {
       throw new Error(await res.text());

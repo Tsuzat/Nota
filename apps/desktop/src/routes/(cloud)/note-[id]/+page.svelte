@@ -24,12 +24,13 @@ import { resolve } from '$app/paths';
 import { getGlobalSettings } from '$lib/components/settings/index.js';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import Topbar from '$lib/components/topbar.svelte';
+import { getCurrentWorkspace } from '$lib/currentworkspace.svelte.js';
 
 // --- Services & Context ---
 const cloudNotes = getNotesContext();
 const cloudStorage = getStorageContext();
 const useGlobalSettings = getGlobalSettings();
-
+const useCurrentWorkspace = getCurrentWorkspace();
 // --- State ---
 const { data } = $props();
 let syncedContent = $state<Content>();
@@ -50,7 +51,10 @@ const onFileSelect = async (path: string) => {
     throw new Error('Unsupported file is being uploaded. Rejected the Upload.');
   }
   const file = new File([bytes], name, { type: extension });
-  return await cloudStorage.upload(file);
+  return await cloudStorage.upload(file, {
+    workspaceId: useCurrentWorkspace.get()?.id,
+    noteId: note?.id,
+  });
 };
 
 const getAssets = async (fileType: FileType) => {
@@ -240,7 +244,9 @@ function handleKeydown(e: KeyboardEvent) {
     </div>
   </div>
 {:else if note && editor}
-  <div class="relative flex max-h-screen! min-h-screen! w-full! flex-col overflow-hidden!">
+  <div
+    class="relative flex max-h-screen! min-h-screen! w-full! flex-col overflow-hidden!"
+  >
     <Topbar showSeparator={true}>
       {#snippet left()}
         <IconPicker
@@ -251,7 +257,13 @@ function handleKeydown(e: KeyboardEvent) {
             if (note) updateNote(note.name, note.icon, note.pinned);
           }}
         >
-          <div class={buttonVariants({ variant: "ghost", size: "icon", class: "mr-2" })}>
+          <div
+            class={buttonVariants({
+              variant: "ghost",
+              size: "icon",
+              class: "mr-2",
+            })}
+          >
             <IconRenderer icon={note!.icon} />
           </div>
         </IconPicker>
@@ -270,7 +282,7 @@ function handleKeydown(e: KeyboardEvent) {
             </Button>
             {#snippet child()}
               <div class="flex flex-col items-center">
-                <p class="font-semibold"> This is a public note </p>
+                <p class="font-semibold">This is a public note</p>
                 <span>Anyone with the link can view this note</span>
               </div>
             {/snippet}
@@ -306,15 +318,24 @@ function handleKeydown(e: KeyboardEvent) {
       {#if useGlobalSettings.useAI}
         <Edra.UseAI {availableModels} />
       {/if}
-      <Edra.Content class="min-w-full overflow-auto w-full cursor-auto px-8 py-4 text-base transition-all duration-300 *:outline-none" />
+      <Edra.Content
+        class="min-w-full overflow-auto w-full cursor-auto px-8 py-4 text-base transition-all duration-300 *:outline-none"
+      />
       {#if useGlobalSettings.useDragHandle}
-        <Edra.DragHandle type="extended" class="transition-all! duration-300!" />
+        <Edra.DragHandle
+          type="extended"
+          class="transition-all! duration-300!"
+        />
       {/if}
     </Edra>
   </div>
 {:else}
-  <div class="flex flex-1 grow size-full min-h-0 flex-col items-center justify-center gap-4 p-8 animate-in fade-in">
-    <div class="flex size-16 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-2">
+  <div
+    class="flex flex-1 grow size-full min-h-0 flex-col items-center justify-center gap-4 p-8 animate-in fade-in"
+  >
+    <div
+      class="flex size-16 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-2"
+    >
       <icons.TriangleAlert class="size-8" />
     </div>
     <h4 class="text-xl font-semibold text-center">
@@ -323,7 +344,11 @@ function handleKeydown(e: KeyboardEvent) {
     <p class="text-muted-foreground text-sm max-w-md text-center">
       It may have been deleted or you don't have access.
     </p>
-    <Button href={resolve("/")} variant="outline" class="mt-4 rounded-full px-6">
+    <Button
+      href={resolve("/")}
+      variant="outline"
+      class="mt-4 rounded-full px-6"
+    >
       Go to Home
     </Button>
   </div>

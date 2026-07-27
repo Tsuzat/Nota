@@ -1,5 +1,5 @@
 <script lang="ts">
-import { MovingHome, MovingSearch } from '@nota/ui/icons/index.js';
+import { MovingHome, MovingSearch, MovingStorage } from '@nota/ui/icons/index.js';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
@@ -9,6 +9,7 @@ import { openGlobalSearch } from '../global-search';
 
 let isHomeHovered = $state(false);
 let isSearchHovered = $state(false);
+let isStorageHovered = $state(false);
 </script>
 
 <Sidebar.Menu>
@@ -28,7 +29,7 @@ let isSearchHovered = $state(false);
 	</Sidebar.MenuItem>
 	<Sidebar.MenuItem>
 		<Sidebar.MenuButton
-		class="mt-1"
+			class="mt-1"
 			isActive={page.url.pathname.endsWith('/')}
 			onclick={() => goto(resolve('/'))}
 			onmouseenter={() => (isHomeHovered = true)}
@@ -36,6 +37,18 @@ let isSearchHovered = $state(false);
 		>
 			<MovingHome size={18} isHovered={isHomeHovered} />
 			<span>Home</span>
+		</Sidebar.MenuButton>
+	</Sidebar.MenuItem>
+	<Sidebar.MenuItem>
+		<Sidebar.MenuButton
+			class="mt-1"
+			isActive={page.url.pathname.startsWith('/storage')}
+			onclick={() => goto(resolve('/storage'))}
+			onmouseenter={() => (isStorageHovered = true)}
+			onmouseleave={() => (isStorageHovered = false)}
+		>
+			<MovingStorage size={18} animate={isStorageHovered} />
+			<span>Storage</span>
 		</Sidebar.MenuButton>
 	</Sidebar.MenuItem>
 </Sidebar.Menu>
