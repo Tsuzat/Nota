@@ -28,7 +28,13 @@ onMount(async () => {
     await workspaces.fetch();
     // Auto-select first workspace if none is selected
     if (!currentWorkspace.get() && workspaces.workspaces.length > 0) {
-      currentWorkspace.set(workspaces.workspaces[0]);
+      const lastWorkspaceId = localStorage.getItem('lastWorkspaceId');
+      const lastWorkspace = workspaces.workspaces.find((w) => w.id === lastWorkspaceId);
+      if (lastWorkspace) {
+        currentWorkspace.set(lastWorkspace);
+      } else {
+        currentWorkspace.set(workspaces.workspaces[0]);
+      }
     }
   }
 });
@@ -36,6 +42,7 @@ onMount(async () => {
 $effect(() => {
   const active = currentWorkspace.get();
   if (active) {
+    localStorage.setItem('lastWorkspaceId', active.id);
     toast.promise(Promise.all([notes.fetchByWorkspace(active.id), storage.fetch({ workspaceId: active.id })]), {
       loading: 'Loading workspace...',
       success: 'Workspace loaded',

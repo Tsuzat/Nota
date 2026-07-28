@@ -1,7 +1,14 @@
 <script lang="ts">
 import { ALLOWED_MAX_FILE_SIZE, FileType, getFileTypeExtensions } from '@lib/components/edra/utils.js';
 import { Skeleton } from '@lib/components/ui/skeleton/index.js';
-import { callAI, getNotesContext, getStorageContext, type Note, type SelectableModel } from '@nota/client';
+import {
+  callAI,
+  getNotesContext,
+  getStorageContext,
+  getWorkspacesContext,
+  type Note,
+  type SelectableModel,
+} from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
 import { BarSpinner, IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
@@ -17,10 +24,12 @@ import Topbar from '$lib/components/topbar.svelte';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 
 // --- Services & Context ---
+const cloudWorkspaces = getWorkspacesContext();
 const cloudNotes = getNotesContext();
 const cloudStorage = getStorageContext();
 const useGlobalSettings = getGlobalSettings();
-const currentWorkspace = $derived(getCurrentWorkspace().get());
+const currentWorkspaceCtx = getCurrentWorkspace();
+const currentWorkspace = $derived(currentWorkspaceCtx.get());
 
 // --- State ---
 const { data } = $props();
@@ -107,6 +116,15 @@ const editor = createEditor({
 // --- Hooks ---
 afterNavigate(() => {
   if (data.id) loadData();
+});
+
+$effect(() => {
+  if (note?.workspace_id && cloudWorkspaces.workspaces.length > 0) {
+    const workspace = cloudWorkspaces.workspaces.find((w) => w.id === note?.workspace_id);
+    if (workspace && currentWorkspaceCtx.get()?.id !== workspace.id) {
+      currentWorkspaceCtx.set(workspace);
+    }
+  }
 });
 
 onMount(() => {
