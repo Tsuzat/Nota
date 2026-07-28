@@ -19,7 +19,7 @@
         "url": "index.html",
         "minHeight": 400,
         "minWidth": 500,
-        "visible": false,
+        "visible": true,
         "dragDropEnabled": false,
         "hiddenTitle": true,
         "titleBarStyle": "Overlay",

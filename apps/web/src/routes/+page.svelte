@@ -370,9 +370,7 @@ onMount(() => {
     </a>
     <h1 class="text-balance">Fast, Lightweight & Feature-Rich Note-Taking</h1>
     <p class="text-balance text-muted-foreground">
-      Nota is designed to be the nimble sports car of note-taking—stripping away
-      the bloat while keeping the power where it matters. Enjoy a rich text
-      editor with markdown shortcuts, AI powers, and cross-platform speed.
+      Nota is a powerful, local-first note-taking application. Its core purpose is to provide users with a fast and efficient platform to organize personal and professional notes, featuring rich text editing, AI integration, and secure, cross-platform synchronization without the bloat.
     </p>
     <div class="flex flex-wrap items-center justify-center gap-2 my-4">
       <!-- 1. GitHub Repo -->
@@ -566,15 +564,9 @@ onMount(() => {
   </section>
   <footer class="flex items-center justify-center gap-2 border-t py-4 text-sm">
     © 2026 Nota. All rights reserved •
-    <a href={resolve("/terms")} title="Open Terms of Use" class="text-primary"
-      >Terms of Use</a
-    >
+    <a href="/terms" title="Open Terms of Use" class="text-primary">Terms of Use</a>
     •
-    <a
-      href={resolve("/privacy")}
-      title="Open Privacy Policy"
-      class="text-primary">Privacy Policy</a
-    >
+    <a href="/privacy" title="Open Privacy Policy" class="text-primary">Privacy Policy</a>
     •
     <a href="mailto:contact@nota.ink" title="Contact Us" class="text-primary"
       >Contact Us</a
