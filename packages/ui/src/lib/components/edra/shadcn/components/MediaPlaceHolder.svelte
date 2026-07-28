@@ -17,7 +17,6 @@ let open = $state(false);
 let isUploading = $state(false);
 const mediaType = $derived(node.attrs.mediaType);
 let url = $state('');
-let files = $state<FileList | undefined>();
 
 const fileTypeEnum = $derived.by(() => {
   switch (mediaType) {

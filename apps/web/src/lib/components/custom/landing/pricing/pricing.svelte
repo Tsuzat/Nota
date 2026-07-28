@@ -109,7 +109,7 @@ function formatPrice(value: number): string {
 }
 
 function getDiscount(plan: Plan) {
-  if (plan.price.monthly == 0 || plan.price.yearly == 0) {
+  if (plan.price.monthly === 0 || plan.price.yearly === 0) {
     return 0;
   }
   const defaultYearly = plan.price.monthly * 12;

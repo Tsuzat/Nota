@@ -1,6 +1,3 @@
-@import "katex/dist/katex.min.css";
-@import "../onedark.css";
-
 .tiptap {
   margin-inline: auto;
   max-width: 48rem;

@@ -169,7 +169,9 @@ onMount(() => {
     { rootMargin: '-20% 0px -60% 0px' }
   );
   const allSections = document.querySelectorAll('section');
-  allSections.forEach((section) => navObserver.observe(section));
+  allSections.forEach((section) => {
+    navObserver.observe(section);
+  });
 
   // Radiant card mouse effect
   const radiantCards = document.querySelectorAll('.radiant-card');

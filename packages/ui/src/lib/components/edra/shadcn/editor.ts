@@ -24,7 +24,7 @@ import FileHandler from '@tiptap/extension-file-handler';
 import CalloutComp from './components/Callout.svelte';
 import TableOfContents, { getHierarchicalIndexes } from '@tiptap/extension-table-of-contents';
 import { setToC } from './toc.svelte';
-import { FileType } from '../utils.ts';
+import { ALLOWED_MAX_FILE_SIZE, FileType } from '../utils.ts';
 import { toast } from 'svelte-sonner';
 
 const lowlight = createLowlight(all);
@@ -91,10 +91,21 @@ export const createEditor = (props?: EdraEditorProps) =>
       FileHandler.configure({
         onDrop: (currentEditor, files, pos) => {
           if (!props?.onFileUpload) return;
-          files.forEach((file) => {
-            props.onFileUpload!(file)
-              .then((src) => {
-                if (!src) return;
+          (async () => {
+            for (const file of files) {
+              if (file.size > ALLOWED_MAX_FILE_SIZE) {
+                toast.error(`File ${file.name} is too large (max 50MB).`);
+                continue;
+              }
+              try {
+                const uploadPromise = props.onFileUpload!(file);
+                toast.promise(uploadPromise, {
+                  loading: `Uploading ${file.name}...`,
+                  success: `${file.name} uploaded successfully`,
+                  error: `Failed to upload ${file.name}`,
+                });
+                const src = await uploadPromise;
+                if (!src) continue;
                 if (file.type.startsWith('image/')) {
                   currentEditor.chain().insertContentAt(pos, { type: 'image', attrs: { src } }).focus().run();
                 } else if (file.type.startsWith('video/')) {
@@ -104,18 +115,29 @@ export const createEditor = (props?: EdraEditorProps) =>
                 } else {
                   toast.error('This file type is not supported yet.');
                 }
-              })
-              .catch((err) => {
+              } catch (err) {
                 console.error('Failed to upload dropped file:', err);
-              });
-          });
+              }
+            }
+          })();
         },
         onPaste: (currentEditor, files) => {
           if (!props?.onFileUpload) return;
-          files.forEach((file) => {
-            props.onFileUpload!(file)
-              .then((src) => {
-                if (!src) return;
+          (async () => {
+            for (const file of files) {
+              if (file.size > ALLOWED_MAX_FILE_SIZE) {
+                toast.error(`File ${file.name} is too large (max 50MB).`);
+                continue;
+              }
+              try {
+                const uploadPromise = props.onFileUpload!(file);
+                toast.promise(uploadPromise, {
+                  loading: `Uploading ${file.name}...`,
+                  success: `${file.name} uploaded successfully`,
+                  error: `Failed to upload ${file.name}`,
+                });
+                const src = await uploadPromise;
+                if (!src) continue;
                 if (file.type.startsWith('image/')) {
                   currentEditor.chain().setImage({ src }).focus().run();
                 } else if (file.type.startsWith('video/')) {
@@ -125,11 +147,11 @@ export const createEditor = (props?: EdraEditorProps) =>
                 } else {
                   toast.error('This file type is not supported yet.');
                 }
-              })
-              .catch((err) => {
+              } catch (err) {
                 console.error('Failed to upload pasted file:', err);
-              });
-          });
+              }
+            }
+          })();
         },
       }),
     ],

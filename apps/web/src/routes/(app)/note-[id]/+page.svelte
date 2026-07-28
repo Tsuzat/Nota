@@ -1,5 +1,5 @@
 <script lang="ts">
-import { FileType, getFileTypeExtensions } from '@lib/components/edra/utils.js';
+import { ALLOWED_MAX_FILE_SIZE, FileType, getFileTypeExtensions } from '@lib/components/edra/utils.js';
 import { Skeleton } from '@lib/components/ui/skeleton/index.js';
 import { callAI, getNotesContext, getStorageContext, type Note, type SelectableModel } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
@@ -62,11 +62,23 @@ const getLocalFile = async (fileType: FileType) => {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return resolve(null);
+
+      if (file.size > ALLOWED_MAX_FILE_SIZE) {
+        toast.error(`File ${file.name} is too large (max 50MB).`);
+        return resolve(null);
+      }
+
       try {
-        const url = await cloudStorage.upload(file, {
+        const uploadPromise = cloudStorage.upload(file, {
           workspaceId: currentWorkspace?.id,
           noteId: note?.id,
         });
+        toast.promise(uploadPromise, {
+          loading: `Uploading ${file.name}...`,
+          success: `${file.name} uploaded successfully`,
+          error: `Failed to upload ${file.name}`,
+        });
+        const url = await uploadPromise;
         resolve(url);
       } catch (err) {
         console.error(err);
@@ -82,7 +94,11 @@ const editor = createEditor({
   onUpdate: () => {
     isDirty = true;
   },
-  onFileUpload: (file) => cloudStorage.upload(file),
+  onFileUpload: (file) =>
+    cloudStorage.upload(file, {
+      workspaceId: currentWorkspace?.id,
+      noteId: note?.id,
+    }),
   selectFile: getLocalFile,
   getAssets,
   callAI,

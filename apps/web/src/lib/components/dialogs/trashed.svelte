@@ -3,10 +3,9 @@ import { getNotesContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
+import * as Dialog from '@nota/ui/shadcn/dialog';
 import * as Popover from '@nota/ui/shadcn/popover';
 import { toast } from '@nota/ui/shadcn/sonner';
-
-import * as Dialog from '@nota/ui/shadcn/dialog';
 
 interface Props {
   open?: boolean;

@@ -30,8 +30,8 @@ let containerEl = $state<HTMLDivElement | null>(null);
 // Derived RGB kept reactive so prop changes re-draw
 const rgb = $derived(hexToRgb(color));
 
-function hexToRgb(hex: string): [number, number, number] {
-  hex = hex.replace('#', '');
+function hexToRgb(hexString: string): [number, number, number] {
+  let hex = hexString.replace('#', '');
   if (hex.length === 3)
     hex = hex
       .split('')
@@ -55,15 +55,17 @@ type Circle = {
 };
 
 onMount(() => {
-  const canvas = canvasEl!;
-  const container = containerEl!;
-  const ctx = canvas.getContext('2d')!;
+  if (!canvasEl || !containerEl) return;
+  const canvas = canvasEl;
+  const container = containerEl;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
   const dpr = window.devicePixelRatio || 1;
 
-  let w = 0,
-    h = 0;
-  let mx = 0,
-    my = 0;
+  let w = 0;
+  let h = 0;
+  let mx = 0;
+  let my = 0;
   let rafId = 0;
   // Pre-allocate fixed-size pool to avoid GC pressure
   const pool: Circle[] = new Array(quantity);
@@ -76,7 +78,7 @@ onMount(() => {
     canvas.height = h * dpr;
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
     count = 0;
     for (let i = 0; i < quantity; i++) pool[i] = makeCircle();
     count = quantity;
@@ -98,7 +100,7 @@ onMount(() => {
   }
 
   function frame() {
-    ctx.clearRect(0, 0, w, h);
+    ctx?.clearRect(0, 0, w, h);
 
     const [r, g, b] = rgb; // captured from outer reactive scope each frame
 
@@ -120,6 +122,7 @@ onMount(() => {
       c.ty += (my * inv - c.ty) / ease;
 
       // Draw — setTransform once per circle avoids translate/restore overhead
+      if (ctx === null) return;
       ctx.beginPath();
       ctx.arc(c.x + c.tx, c.y + c.ty, c.r, 0, 6.2831853);
       ctx.fillStyle = `rgba(${r},${g},${b},${c.alpha})`;
@@ -159,5 +162,5 @@ onMount(() => {
 </script>
 
 <div class={className} bind:this={containerEl} aria-hidden="true">
-	<canvas bind:this={canvasEl} style="width:100%;height:100%;"></canvas>
+  <canvas bind:this={canvasEl} style="width:100%;height:100%;"></canvas>
 </div>

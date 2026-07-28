@@ -1,4 +1,6 @@
 <script lang="ts">
+import 'katex/dist/katex.min.css';
+import '../onedark.css';
 import TiptapContent from '../tiptap/components/TiptapContent.svelte';
 import './editor.css';
 import mermaid from 'mermaid';
@@ -24,4 +26,4 @@ mermaid.initialize({
 <MathInline />
 <TableColMenu />
 <TableRowMenu />
-<TiptapContent class={cn('relative', className)} />
+<TiptapContent class={cn("relative", className)} />

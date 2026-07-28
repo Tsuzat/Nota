@@ -30,18 +30,18 @@ onMount(async () => {
 
 function timeAgo(date: Date | string | null | undefined) {
   if (!date) return '';
-  const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+  const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
   if (seconds < 60) return 'just now';
   let interval = Math.floor(seconds / 31536000);
-  if (interval >= 1) return interval + 'y ago';
+  if (interval >= 1) return `${interval}y ago`;
   interval = Math.floor(seconds / 2592000);
-  if (interval >= 1) return interval + 'mo ago';
+  if (interval >= 1) return `${interval}mo ago`;
   interval = Math.floor(seconds / 86400);
-  if (interval >= 1) return interval + 'd ago';
+  if (interval >= 1) return `${interval}d ago`;
   interval = Math.floor(seconds / 3600);
-  if (interval >= 1) return interval + 'h ago';
+  if (interval >= 1) return `${interval}h ago`;
   interval = Math.floor(seconds / 60);
-  return interval + 'm ago';
+  return `${interval}m ago`;
 }
 
 function getDeviceIcon(device: string | null | undefined, browser: string | null | undefined) {
@@ -231,7 +231,7 @@ async function handleRevokeOtherSessions() {
               <div class="grid gap-6 md:grid-cols-2">
                 <div class="space-y-1">
                   <span class="text-sm font-medium block">Current Plan</span>
-                  {#if details.subscription_plan === "pro"}
+                  {#if user.subscription_plan === "pro"}
                     <div class="flex items-center gap-2">
                       <ProBadge class="w-fit mx-0" />
                       {#if details.status === "canceled"}
@@ -252,7 +252,7 @@ async function handleRevokeOtherSessions() {
                   {/if}
                 </div>
 
-                {#if details.subscription_plan === "pro"}
+                {#if user.subscription_plan === "pro"}
                   <div class="space-y-1">
                     <span class="text-sm font-medium block">Billing Cycle</span>
                     <span
