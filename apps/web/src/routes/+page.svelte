@@ -190,7 +190,7 @@ onMount(() => {
 
 <svelte:window bind:scrollY={y} />
 <svelte:head>
-  <title>Nota | Fast, Lightweight, Feature-Rich Note-Taking App</title>
+  <title>Nota</title>
   <meta
     name="description"
     content="Nota is a fast, lightweight, and feature-rich note-taking app. Experience a rich text editor with markdown shortcuts, AI powers (BYOK), and cross-platform desktop & web support."
@@ -198,10 +198,7 @@ onMount(() => {
   <link rel="canonical" href="https://nota.ink" />
 
   <!-- Open Graph overrides -->
-  <meta
-    property="og:title"
-    content="Nota — Fast, Lightweight, Feature-Rich Note-Taking App"
-  />
+  <meta property="og:title" content="Nota" />
   <meta
     property="og:description"
     content="A nimble, high-performance note-taking app with rich text editing, AI powers, and cross-platform support without the Electron bloat."
@@ -209,10 +206,7 @@ onMount(() => {
   <meta property="og:url" content="https://nota.ink" />
 
   <!-- X/Twitter overrides -->
-  <meta
-    name="twitter:title"
-    content="Nota — Fast, Lightweight, Feature-Rich Note-Taking App"
-  />
+  <meta name="twitter:title" content="Nota" />
   <meta
     name="twitter:description"
     content="A nimble, high-performance note-taking app with rich text editing, AI powers, and cross-platform support without the Electron bloat."
@@ -244,7 +238,7 @@ onMount(() => {
     "sticky z-50 mx-auto flex items-center justify-between gap-8 rounded-xl px-2 backdrop-blur-sm transition-all duration-500",
     isScrolled
       ? "max-w-4xl border bg-background/60 p-4 shadow-lg sm:top-2"
-      : "top-0 max-w-full bg-background/20 px-4 py-2 sm:px-12",
+      : "top-0 max-w-full bg-background/20 p-4 sm:px-12",
   )}
 >
   <AppLogo showLogo={!isScrolled} />
@@ -370,7 +364,10 @@ onMount(() => {
     </a>
     <h1 class="text-balance">Fast, Lightweight & Feature-Rich Note-Taking</h1>
     <p class="text-balance text-muted-foreground">
-      Nota is a powerful, local-first note-taking application. Its core purpose is to provide users with a fast and efficient platform to organize personal and professional notes, featuring rich text editing, AI integration, and secure, cross-platform synchronization without the bloat.
+      Nota is a powerful, local-first note-taking application. Its core purpose
+      is to provide users with a fast and efficient platform to organize
+      personal and professional notes, featuring rich text editing, AI
+      integration, and secure, cross-platform synchronization without the bloat.
     </p>
     <div class="flex flex-wrap items-center justify-center gap-2 my-4">
       <!-- 1. GitHub Repo -->
@@ -417,7 +414,14 @@ onMount(() => {
         title="Copy Homebrew install command"
       >
         <span class="font-semibold text-primary">$</span>
-        <span>brew install --cask Tsuzat/tap/nota</span>
+        <pre class="font-mono text-sm bg-transparent whitespace-pre-wrap"><code
+            ><span class="text-purple-700 dark:text-[#d2a8ff]">brew</span> <span
+              class="text-[#24292f] dark:text-[#c9d1d9]">install</span
+            > <span class="text-[#0550ae] dark:text-[#79c0ff]">--cask</span
+            > <span class="text-[#0a3069] dark:text-[#a5d6ff]"
+              >Tsuzat/tap/nota</span
+            ></code
+          ></pre>
         {#if copied}
           <icons.Check class="size-3.5 text-emerald-500" />
         {:else}
@@ -459,6 +463,39 @@ onMount(() => {
       />
     </Tiltcard>
   </section>
+
+  <section id="performance" class="my-20">
+    <div class="flex flex-col items-center gap-4 text-center">
+      <h1 class="text-4xl font-bold">Instantly Ready When You Are</h1>
+      <p class="text-lg text-balance text-muted-foreground">
+        Powered by Rust (Tauri), Nota launches blazingly fast. No loading
+        screens, no Electron overhead—just instant access to your thoughts. See
+        it launch via Raycast below.
+      </p>
+    </div>
+    <Tiltcard
+      tiltLimit={5}
+      scale={1.01}
+      spotlight={false}
+      perspective={1200}
+      class="relative mx-auto mt-8 overflow-hidden! h-full w-full rounded-xl shadow-lg inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20"
+    >
+      <BorderBeam
+        duration={4}
+        size={300}
+        class="from-transparent via-cyan-500 to-transparent"
+      />
+      <video
+        src="https://storage.nota.ink/internal/demo-launch.mov"
+        autoplay
+        loop
+        muted
+        playsinline
+        class="block h-full w-full rounded-xl border object-cover"
+      ></video>
+    </Tiltcard>
+  </section>
+
   <section id="features">
     <div class="flex flex-col items-center gap-4">
       <h1 class="text-4xl font-bold">Everything you need to write</h1>
@@ -564,9 +601,13 @@ onMount(() => {
   </section>
   <footer class="flex items-center justify-center gap-2 border-t py-4 text-sm">
     © 2026 Nota. All rights reserved •
-    <a href="/terms" title="Open Terms of Use" class="text-primary">Terms of Use</a>
+    <a href="/terms" title="Open Terms of Use" class="text-primary"
+      >Terms of Use</a
+    >
     •
-    <a href="/privacy" title="Open Privacy Policy" class="text-primary">Privacy Policy</a>
+    <a href="/privacy" title="Open Privacy Policy" class="text-primary"
+      >Privacy Policy</a
+    >
     •
     <a href="mailto:contact@nota.ink" title="Contact Us" class="text-primary"
       >Contact Us</a
