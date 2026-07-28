@@ -155,17 +155,19 @@ function formatDate(val: number | Date | null | undefined) {
         </a>
       {/snippet}
     </Sidebar.MenuButton>
-    <Collapsible.Trigger>
-      {#snippet child({ props })}
-        <Sidebar.MenuAction
-          {...props}
-          class="bg-sidebar-accent size-6 top-1! text-sidebar-accent-foreground inset-s-1 data-[state=open]:rotate-90"
-          showOnHover
-        >
-          <icons.ChevronRight />
-        </Sidebar.MenuAction>
-      {/snippet}
-    </Collapsible.Trigger>
+    {#if childNotes.length > 0}
+      <Collapsible.Trigger>
+        {#snippet child({ props })}
+          <Sidebar.MenuAction
+            {...props}
+            class="bg-sidebar-accent size-6 top-1! text-sidebar-accent-foreground inset-s-1 data-[state=open]:rotate-90"
+            showOnHover
+          >
+            <icons.ChevronRight />
+          </Sidebar.MenuAction>
+        {/snippet}
+      </Collapsible.Trigger>
+    {/if}
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         {#snippet child({ props })}
@@ -250,19 +252,14 @@ function formatDate(val: number | Date | null | undefined) {
         </div>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
-    <Collapsible.Content>
-      <Sidebar.MenuItem>
-        {#if childNotes.length > 0}
+    {#if childNotes.length > 0}
+      <Collapsible.Content>
+        <Sidebar.MenuItem>
           {#each childNotes as note (note.id)}
             <NoteTile {note} depth={depth + 1} />
           {/each}
-        {:else}
-          <div class="ml-6 flex my-px items-center gap-1 text-muted-foreground">
-            <icons.FileXCorner class="size-4" />
-            <small>No Sub Notes...</small>
-          </div>
-        {/if}
-      </Sidebar.MenuItem>
-    </Collapsible.Content>
+        </Sidebar.MenuItem>
+      </Collapsible.Content>
+    {/if}
   </Sidebar.MenuItem>
 </Collapsible.Root>
