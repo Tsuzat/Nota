@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getKeyboardShortcut } from '@lib/components/edra';
-import { MovingHome, MovingSearch, MovingStorage } from '@nota/ui/icons/index.js';
+import { cn } from '@lib/utils';
+import { MovingHome, MovingSearch, MovingStorage, MovingVersion } from '@nota/ui/icons/index.js';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
@@ -10,6 +11,7 @@ import { openGlobalSearch } from './global-search';
 let isHomeHovered = $state(false);
 let isSearchHovered = $state(false);
 let isStorageHovered = $state(false);
+let isVersionHovered = $state(false);
 </script>
 
 <Sidebar.Menu>
@@ -29,8 +31,7 @@ let isStorageHovered = $state(false);
   </Sidebar.MenuItem>
   <Sidebar.MenuItem>
     <Sidebar.MenuButton
-      class="mt-1"
-      isActive={page.url.pathname.endsWith("/home")}
+      class={cn("mt-1", page.url.pathname.includes("/home") && "bg-muted")}
       onclick={() => goto(resolve("/(app)/home"))}
       onmouseenter={() => (isHomeHovered = true)}
       onmouseleave={() => (isHomeHovered = false)}
@@ -41,14 +42,24 @@ let isStorageHovered = $state(false);
   </Sidebar.MenuItem>
   <Sidebar.MenuItem>
     <Sidebar.MenuButton
-      class="mt-1"
-      isActive={page.url.pathname.startsWith("/(app)/storage")}
+      class={cn("mt-1", page.url.pathname.includes("/storage") && "bg-muted")}
       onclick={() => goto(resolve("/(app)/storage"))}
       onmouseenter={() => (isStorageHovered = true)}
       onmouseleave={() => (isStorageHovered = false)}
     >
       <MovingStorage size={18} animate={isStorageHovered} />
       <span>Storage</span>
+    </Sidebar.MenuButton>
+  </Sidebar.MenuItem>
+  <Sidebar.MenuItem>
+    <Sidebar.MenuButton
+      class={cn("mt-1", page.url.pathname.includes("/versions") && "bg-muted")}
+      onclick={() => goto(resolve("/(app)/versions"))}
+      onmouseenter={() => (isVersionHovered = true)}
+      onmouseleave={() => (isVersionHovered = false)}
+    >
+      <MovingVersion size={18} animate={isVersionHovered} />
+      <span>Versions</span>
     </Sidebar.MenuButton>
   </Sidebar.MenuItem>
 </Sidebar.Menu>

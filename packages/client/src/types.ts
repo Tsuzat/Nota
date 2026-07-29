@@ -73,6 +73,20 @@ export const NoteSchema = z.object({
 });
 export type Note = z.infer<typeof NoteSchema>;
 
+export const NoteVersionSchema = z.object({
+  id: z.uuid(),
+  note_id: z.uuid(),
+  workspace_id: z.uuid(),
+  content_hash: z.string(),
+  size_bytes: z.number().int(),
+  compressed_size_bytes: z.number().int(),
+  version_type: z.enum(['auto', 'manual', 'restore']).default('auto'),
+  label: z.string().nullable().optional(),
+  created_by: z.uuid().nullable().optional(),
+  created_at: z.coerce.date(),
+});
+export type NoteVersion = z.infer<typeof NoteVersionSchema>;
+
 export const AssetSchema = z.object({
   id: z.uuid(),
   user_id: z.uuid(),

@@ -1,5 +1,11 @@
 <script lang="ts">
-import { getAuthContext, setNotesContext, setStorageContext, setWorkspacesContext } from '@nota/client';
+import {
+  getAuthContext,
+  setNotesContext,
+  setStorageContext,
+  setVersionsContext,
+  setWorkspacesContext,
+} from '@nota/client';
 import DeleteWorkspaceDialog from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
@@ -17,6 +23,7 @@ const authContext = getAuthContext();
 const workspaces = setWorkspacesContext();
 const notes = setNotesContext();
 const storage = setStorageContext();
+setVersionsContext();
 
 const currentWorkspace = setCurrentWorkspace();
 const user = $derived(authContext.user);

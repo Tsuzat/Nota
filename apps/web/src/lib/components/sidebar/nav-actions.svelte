@@ -1,11 +1,13 @@
 <script lang="ts">
 import { useEditorState } from '@lib/components/edra/tiptap';
-import { convertHtmlToPdf, getNotesContext, type Note } from '@nota/client';
+import { convertHtmlToPdf, getNotesContext, getVersionsContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import type { Editor } from '@nota/ui/edra/tiptap/index.js';
 import { icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@nota/ui/shadcn/dialog';
 import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
+import { Input } from '@nota/ui/shadcn/input';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { cn, timeAgo } from '@nota/ui/utils';
 import { getGlobalSettings } from '../settings/index.svelte';
@@ -20,7 +22,17 @@ interface Props {
 let { starred, toggleStar, note, editor }: Props = $props();
 
 const cloudNotes = getNotesContext();
+const versionsClient = getVersionsContext();
 const globalSettings = getGlobalSettings();
+
+let versionCount = $state(0);
+$effect(() => {
+  if (note.id) {
+    versionsClient.getVersionCount(note.id).then((count) => {
+      versionCount = count;
+    });
+  }
+});
 
 const editorState = useEditorState({
   editor,
@@ -30,6 +42,26 @@ const editorState = useEditorState({
 });
 
 let open = $state(false);
+
+let snapshotDialogOpen = $state(false);
+let snapshotLabel = $state('');
+let isCreatingSnapshot = $state(false);
+
+async function handleCreateSnapshot() {
+  if (!note.id) return;
+  isCreatingSnapshot = true;
+  try {
+    await versionsClient.createManualSnapshot(note.id, snapshotLabel || undefined);
+    toast.success('Snapshot created');
+    versionCount++;
+    snapshotDialogOpen = false;
+    snapshotLabel = '';
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to create snapshot');
+  } finally {
+    isCreatingSnapshot = false;
+  }
+}
 
 async function exportContent(editor: Editor, name: string, type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
   let content: string | ArrayBuffer = '';
@@ -71,6 +103,15 @@ async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
 </script>
 
 <div class="flex items-center gap-2 text-sm">
+  {#if versionCount > 0}
+    <a
+      href={`/versions?note_ids=${note.id}`}
+      class="text-muted-foreground hover:text-foreground hover:underline mr-2"
+    >
+      {versionCount}
+      {versionCount > 1 ? "Versions" : "Version"}
+    </a>
+  {/if}
   <small class="text-muted-foreground">{$editorState.words} words</small>
   <SimpleToolTip content="Toggle Pin">
     <Button variant="ghost" size="icon" onclick={toggleStar}>
@@ -114,6 +155,19 @@ async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
       </Dropdown.Group>
       <Dropdown.Separator />
       <Dropdown.Group>
+        <Dropdown.Item onclick={() => (snapshotDialogOpen = true)}>
+          <icons.Save />
+          Save Snapshot
+        </Dropdown.Item>
+        <a href={`/versions?note_ids=${note.id}`}>
+          <Dropdown.Item>
+            <icons.Clock />
+            Version History
+          </Dropdown.Item>
+        </a>
+      </Dropdown.Group>
+      <Dropdown.Separator />
+      <Dropdown.Group>
         <Dropdown.Item
           onclick={() =>
             cloudNotes.update(note.id, { is_public: !note.is_public })}
@@ -135,21 +189,21 @@ async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
             Export As
           </Dropdown.SubTrigger>
           <Dropdown.SubContent>
-            <Dropdown.Item
-              onclick={() => handleExport("PDF")}
-            >PDF</Dropdown.Item>
-            <Dropdown.Item
-              onclick={() => handleExport("JSON")}
-            >JSON</Dropdown.Item>
-            <Dropdown.Item
-              onclick={() => handleExport("HTML")}
-            >HTML</Dropdown.Item>
-            <Dropdown.Item
-              onclick={() => handleExport("TEXT")}
-            >Text</Dropdown.Item>
-            <Dropdown.Item
-              onclick={() => handleExport("MD")}
-            >Markdown</Dropdown.Item>
+            <Dropdown.Item onclick={() => handleExport("PDF")}
+              >PDF</Dropdown.Item
+            >
+            <Dropdown.Item onclick={() => handleExport("JSON")}
+              >JSON</Dropdown.Item
+            >
+            <Dropdown.Item onclick={() => handleExport("HTML")}
+              >HTML</Dropdown.Item
+            >
+            <Dropdown.Item onclick={() => handleExport("TEXT")}
+              >Text</Dropdown.Item
+            >
+            <Dropdown.Item onclick={() => handleExport("MD")}
+              >Markdown</Dropdown.Item
+            >
           </Dropdown.SubContent>
         </Dropdown.Sub>
       </Dropdown.Group>
@@ -175,3 +229,36 @@ async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
     </Dropdown.Content>
   </Dropdown.Root>
 </div>
+
+<Dialog bind:open={snapshotDialogOpen}>
+  <DialogContent class="sm:max-w-105">
+    <DialogHeader>
+      <DialogTitle>Save Snapshot</DialogTitle>
+    </DialogHeader>
+    <div class="grid gap-4 py-4">
+      <Input
+        bind:value={snapshotLabel}
+        placeholder="Snapshot label (optional)"
+        onkeydown={(e) => {
+          if (e.key === "Enter") handleCreateSnapshot();
+        }}
+      />
+      <p class="text-sm text-muted-foreground">
+        Saved snapshots are permanently pinned in your version history and will
+        not be overwritten by auto-saves.
+      </p>
+    </div>
+    <DialogFooter>
+      <Button
+        variant="outline"
+        onclick={() => (snapshotDialogOpen = false)}
+        disabled={isCreatingSnapshot}
+      >
+        Cancel
+      </Button>
+      <Button onclick={handleCreateSnapshot} disabled={isCreatingSnapshot}>
+        {isCreatingSnapshot ? "Saving..." : "Save"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>

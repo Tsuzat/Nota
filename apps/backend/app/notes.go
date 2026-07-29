@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -312,6 +313,9 @@ func ApplyNoteContentPatch(c fiber.Ctx) error {
 	// invalidate the cache for note content
 	cacheKey = fmt.Sprintf("note:%s:content", noteId)
 	go utils.DeleteCache(cacheKey)
+	
+	// Create auto snapshot
+	go maybeAutoSnapshot(context.Background(), noteId, user.Id)
 
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,

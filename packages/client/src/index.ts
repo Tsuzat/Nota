@@ -25,3 +25,13 @@ export {
   getWorkspacesContext,
   setWorkspacesContext,
 } from './workspaces.svelte';
+export {
+  getVersionsContext,
+  setVersionsContext,
+} from './versions.svelte';
+export type {
+  NoteVersion,
+} from './types';
+export {
+  NoteVersionSchema,
+} from './types';
