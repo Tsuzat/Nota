@@ -77,6 +77,7 @@ const plans = $derived<Plan[]>([
       yearly: 50,
     },
     features: [
+      '14-day Free Trial',
       'Unlimited Cloud Notes & Workspaces',
       '5 GB Cloud Storage',
       frequency === 'monthly' ? '500K AI Credits / mo' : '6M AI Credits',
@@ -86,7 +87,7 @@ const plans = $derived<Plan[]>([
       'Notes Backup',
     ],
     btn: {
-      text: 'Get started',
+      text: 'Start 14-day Free Trial',
       onclick: async () => {
         window.location.href = resolve(`/payment?type=${frequency}`);
       },

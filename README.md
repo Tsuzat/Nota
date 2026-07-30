@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://nota.ink/favicon.png" width="120" height="120" />
+  <img src="https://nota.ink/favicon.svg" width="120" height="120" />
   <h1>Nota</h1>
   <p><strong>Fast, Lightweight, Feature-Rich Note-Taking App</strong></p>
   
@@ -19,7 +19,7 @@
 
 <br />
 
-![Nota Preview](https://www.nota.ink/previews/dark.webp)
+![Nota Preview](https://www.nota.ink/previews/dark.png)
 
 ## ✨ Features
 

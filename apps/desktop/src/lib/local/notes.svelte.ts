@@ -1,4 +1,4 @@
-import type { Content } from '@nota/ui/edra/types.js';
+import type { Content } from '@nota/ui/edra/index.js';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { getContext, setContext } from 'svelte';
 import { goto } from '$app/navigation';
@@ -189,6 +189,7 @@ class Notes {
 
   async delete(noteId: string) {
     try {
+      await DB.execute('DELETE FROM note_versions WHERE note_id = $1', [noteId]);
       const res = await DB.execute('DELETE FROM notes WHERE id = $1', [noteId]);
       if (res.rowsAffected === 1) {
         this.setNotes(this.getNotes().filter((n) => n.id !== noteId));

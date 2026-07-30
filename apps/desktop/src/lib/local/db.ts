@@ -65,6 +65,40 @@ export async function initializeLocalDB() {
       await DB.execute('PRAGMA foreign_keys = OFF; DROP TABLE IF EXISTS userworkspaces; PRAGMA foreign_keys = ON;');
     }
 
+    const noteVersionsFkCheck = await DB.select<any[]>("PRAGMA foreign_key_list('note_versions')");
+    if (noteVersionsFkCheck.length > 0) {
+      console.log('Migrating note_versions to remove foreign keys...');
+      const migrationScript = `
+        PRAGMA foreign_keys = OFF;
+        
+        CREATE TABLE IF NOT EXISTS new_note_versions (
+            id UUID PRIMARY KEY NOT NULL,
+            note_id UUID NOT NULL,
+            workspace_id UUID NOT NULL,
+            content_compressed BLOB NOT NULL,
+            content_hash TEXT NOT NULL,
+            size_bytes INTEGER NOT NULL,
+            version_type TEXT NOT NULL DEFAULT 'auto',
+            label TEXT,
+            source TEXT NOT NULL DEFAULT 'local',
+            created_at INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'now'))
+        );
+
+        INSERT OR IGNORE INTO new_note_versions (id, note_id, workspace_id, content_compressed, content_hash, size_bytes, version_type, label, source, created_at)
+        SELECT id, note_id, workspace_id, content_compressed, content_hash, size_bytes, version_type, label, source, created_at FROM note_versions;
+
+        DROP TABLE IF EXISTS note_versions;
+        ALTER TABLE new_note_versions RENAME TO note_versions;
+
+        CREATE INDEX IF NOT EXISTS idx_note_versions_note_id ON note_versions (note_id);
+        CREATE INDEX IF NOT EXISTS idx_note_versions_workspace_id ON note_versions (workspace_id);
+
+        PRAGMA foreign_keys = ON;
+      `;
+      await DB.execute(migrationScript);
+      console.log('note_versions migration completed.');
+    }
+
     await DB.execute(schema);
     await checkAndCreateAssetsDir();
     console.log('Sqlite database loaded successfully');

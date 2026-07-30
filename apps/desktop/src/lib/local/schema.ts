@@ -25,6 +25,19 @@ CREATE TABLE IF NOT EXISTS notes (
     FOREIGN KEY (parent_note_id) REFERENCES notes (id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS note_versions (
+    id UUID PRIMARY KEY NOT NULL,
+    note_id UUID NOT NULL,
+    workspace_id UUID NOT NULL,
+    content_compressed BLOB NOT NULL,
+    content_hash TEXT NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    version_type TEXT NOT NULL DEFAULT 'auto',
+    label TEXT,
+    source TEXT NOT NULL DEFAULT 'local',
+    created_at INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'now'))
+);
+
 CREATE TABLE IF NOT EXISTS assets (
     id UUID PRIMARY KEY NOT NULL,
     workspace_id UUID NOT NULL,
@@ -47,6 +60,9 @@ CREATE INDEX IF NOT EXISTS idx_notes_deleted_at ON notes (deleted_at);
 CREATE INDEX IF NOT EXISTS idx_assets_workspace_id ON assets (workspace_id);
 CREATE INDEX IF NOT EXISTS idx_assets_note_id ON assets (note_id);
 CREATE INDEX IF NOT EXISTS idx_assets_deleted_at ON assets (deleted_at);
+
+CREATE INDEX IF NOT EXISTS idx_note_versions_note_id ON note_versions (note_id);
+CREATE INDEX IF NOT EXISTS idx_note_versions_workspace_id ON note_versions (workspace_id);
 
 CREATE TRIGGER IF NOT EXISTS trigger_update_workspaces_updated_at
   AFTER UPDATE ON workspaces

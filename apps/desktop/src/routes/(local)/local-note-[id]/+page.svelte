@@ -14,10 +14,12 @@ import Topbar from '$lib/components/topbar.svelte';
 import { DB } from '$lib/local/db.js';
 import { getLocalNotes, type LocalNote } from '$lib/local/notes.svelte';
 import { createFile, getAssetsByFileType, selectLocalFile } from '$lib/local/util.js';
+import { getLocalVersions } from '$lib/local/versions.svelte';
 
 // --- Services & Context ---
 const globalSettings = getGlobalSettings();
 const localNotes = getLocalNotes();
+const localVersions = getLocalVersions();
 
 // --- State ---
 const { data } = $props();
@@ -108,6 +110,11 @@ async function saveContent() {
     const contentJSON = editor.getJSON();
     await DB.execute('UPDATE notes SET content = $1 WHERE id = $2', [JSON.stringify(contentJSON), note.id]);
     isDirty = false;
+
+    // Attempt auto-snapshot
+    if (note.workspace_id) {
+      await localVersions.maybeAutoSnapshot(note.id, note.workspace_id, contentJSON, 'local');
+    }
   } catch (err) {
     console.error('Failed to save note content:', err);
   }

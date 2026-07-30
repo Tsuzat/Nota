@@ -31,6 +31,17 @@ fn get_or_create_stronghold_password(app: tauri::AppHandle) -> Result<String, St
     }
 }
 
+#[tauri::command]
+fn compress_data(data: String) -> Result<Vec<u8>, String> {
+    zstd::encode_all(data.as_bytes(), 0).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn decompress_data(data: Vec<u8>) -> Result<String, String> {
+    let decompressed = zstd::decode_all(data.as_slice()).map_err(|e| e.to_string())?;
+    String::from_utf8(decompressed).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -53,7 +64,12 @@ pub fn run() {
             })
             .build(),
         )
-        .invoke_handler(tauri::generate_handler![greet, get_or_create_stronghold_password])
+        .invoke_handler(tauri::generate_handler![
+            greet, 
+            get_or_create_stronghold_password,
+            compress_data,
+            decompress_data
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

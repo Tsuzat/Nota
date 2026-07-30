@@ -60,7 +60,7 @@ const features = [
   {
     name: 'Cross-Platform & Fast',
     description:
-      'Available as a lightweight Desktop app built with Rust (Tauri) and on the Web for blazing fast performance.',
+      'Available as a lightweight Desktop app built with Rust (Tauri) and on the Web with the same blazingly fast, responsive performance.',
     icon: icons.Zap,
   },
   {
@@ -468,8 +468,8 @@ onMount(() => {
     <div class="flex flex-col items-center gap-4 text-center">
       <h1 class="text-4xl font-bold">Instantly Ready When You Are</h1>
       <p class="text-lg text-balance text-muted-foreground">
-        Powered by Rust (Tauri), Nota launches blazingly fast. No loading
-        screens, no Electron overhead—just instant access to your thoughts. See
+        Powered by Rust (Tauri) on desktop and Svelte on the web, Nota delivers the same blazingly fast experience on every platform. No loading
+        screens, no Electron overhead—just instant access to your thoughts everywhere. See
         it launch via Raycast below.
       </p>
     </div>
@@ -494,6 +494,106 @@ onMount(() => {
         class="block h-full w-full rounded-xl border object-cover"
       ></video>
     </Tiltcard>
+  </section>
+
+  <section id="demos" class="my-20">
+    <div class="flex flex-col items-center gap-4 text-center">
+      <h1 class="text-4xl font-bold">Built for Speed & Flow</h1>
+      <p class="text-lg text-balance text-muted-foreground">
+        Explore how Nota streamlines workspace management, note organization, and icon customization.
+      </p>
+    </div>
+
+    <div class="mt-12 grid grid-cols-1 items-start gap-8 md:grid-cols-3">
+      <!-- Card 1: Custom Icons -->
+      <div class="flex flex-col items-center text-center">
+        <Tiltcard
+          tiltLimit={5}
+          scale={1.01}
+          spotlight={false}
+          perspective={1200}
+          class="relative w-full overflow-hidden! rounded-xl shadow-lg inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20"
+        >
+          <BorderBeam
+            duration={6}
+            size={300}
+            class="from-transparent via-amber-500 to-transparent"
+          />
+          <video
+            src="https://storage.nota.ink/internal/icons.mov"
+            autoplay
+            loop
+            muted
+            playsinline
+            class="block h-auto w-full rounded-xl border object-cover"
+          ></video>
+        </Tiltcard>
+        <h3 class="mt-4 text-xl font-semibold">Custom Icons & Emojis</h3>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Personalize workspaces and notes with custom emojis, icons, or custom image URLs.
+        </p>
+      </div>
+
+      <!-- Card 2: Nested Note Hierarchy -->
+      <div class="flex flex-col items-center text-center">
+        <Tiltcard
+          tiltLimit={5}
+          scale={1.01}
+          spotlight={false}
+          perspective={1200}
+          class="relative w-full overflow-hidden! rounded-xl shadow-lg inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20"
+        >
+          <BorderBeam
+            duration={6}
+            delay={2}
+            size={300}
+            class="from-transparent via-indigo-500 to-transparent"
+          />
+          <video
+            src="https://storage.nota.ink/internal/note-tile.mov"
+            autoplay
+            loop
+            muted
+            playsinline
+            class="block h-auto w-full rounded-xl border object-cover"
+          ></video>
+        </Tiltcard>
+        <h3 class="mt-4 text-xl font-semibold">Nested Note Tree</h3>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Organize your notes with an intuitive tree structure and expandable child notes.
+        </p>
+      </div>
+
+      <!-- Card 3: Workspace Switcher -->
+      <div class="flex flex-col items-center text-center">
+        <Tiltcard
+          tiltLimit={5}
+          scale={1.01}
+          spotlight={false}
+          perspective={1200}
+          class="relative w-full overflow-hidden! rounded-xl shadow-lg inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20"
+        >
+          <BorderBeam
+            duration={6}
+            delay={4}
+            size={300}
+            class="from-transparent via-emerald-500 to-transparent"
+          />
+          <video
+            src="https://storage.nota.ink/internal/workspaces.mov"
+            autoplay
+            loop
+            muted
+            playsinline
+            class="block h-auto w-full rounded-xl border object-cover"
+          ></video>
+        </Tiltcard>
+        <h3 class="mt-4 text-xl font-semibold">Workspace Switching</h3>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Seamlessly toggle between local and cloud workspaces to organize different projects.
+        </p>
+      </div>
+    </div>
   </section>
 
   <section id="features">

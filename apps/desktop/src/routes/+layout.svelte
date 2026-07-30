@@ -4,7 +4,14 @@ import '../app.css';
 
 let { children, data } = $props();
 
-import { secureStorage, setAuthContext, setNotesContext, setStorageContext, setWorkspacesContext } from '@nota/client';
+import {
+  secureStorage,
+  setAuthContext,
+  setNotesContext,
+  setStorageContext,
+  setVersionsContext,
+  setWorkspacesContext,
+} from '@nota/client';
 import { ModeWatcher } from '@nota/ui';
 import DeleteWorkspaceDialog from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
 import { Toaster, toast } from '@nota/ui/shadcn/sonner';
@@ -23,6 +30,7 @@ import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
 import { setCurrentWorkspace } from '$lib/currentworkspace.svelte';
 import { useDeepLinkAuth } from '$lib/handleOAuth';
 import { setLocalNotes } from '$lib/local/notes.svelte';
+import { setLocalVersions } from '$lib/local/versions.svelte';
 import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
 import { setupAppMenu } from '$lib/menu';
 import { setTheme } from '$lib/theme';
@@ -31,12 +39,14 @@ import { downloadAndInstall } from '$lib/updater';
 // Local Workspaces and Notes
 const localWorkspaces = setLocalWorkspaces();
 const localNotes = setLocalNotes();
+const localVersions = setLocalVersions();
 const currentWorkspace = setCurrentWorkspace();
 
 // Cloud Workspaces and Notes
 const cloudWorkspaces = setWorkspacesContext();
 const cloudNotes = setNotesContext();
 const cloudStorage = setStorageContext();
+const cloudVersions = setVersionsContext();
 
 const authContext = setAuthContext();
 const user = $derived(authContext.user);

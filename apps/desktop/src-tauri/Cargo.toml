@@ -50,6 +50,7 @@ rand = "0.9.3"
 sha2 = "0.10"
 tar = "0.4.46"
 rustls-webpki = "0.103.13"
+zstd = "0.13"
 
 [profile.dev.package.scrypt]
 opt-level = 3
