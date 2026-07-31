@@ -1,4 +1,5 @@
 <script lang="ts">
+import ProBadge from '@lib/components/custom/ProBadge.svelte';
 import { getKeyboardShortcut } from '@lib/components/edra';
 import { cn } from '@lib/utils';
 import { MovingHome, MovingSearch, MovingStorage, MovingVersion } from '@nota/ui/icons/index.js';

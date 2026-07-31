@@ -80,6 +80,28 @@ func CreateNote(c fiber.Ctx) error {
 			Data:   err.Error(),
 		})
 	}
+	if user.SubscriptionPlan != "pro" {
+		count, err := config.DB.NewSelect().Model((*models.Note)(nil)).Where("owner = ?", user.Id).Count(c.Context())
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+				Status: fiber.StatusInternalServerError,
+				Error:  "Failed to verify note quota",
+			})
+		}
+		if count >= 5 {
+			return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+				Status: fiber.StatusForbidden,
+				Error:  "Free users are limited to 5 cloud notes. Please upgrade to Pro for unlimited notes.",
+			})
+		}
+		if user.UsedStorage >= config.FREE_STORAGE_LIMIT {
+			return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+				Status: fiber.StatusForbidden,
+				Error:  "Storage quota exceeded. Please upgrade to Pro or free up space.",
+			})
+		}
+	}
+
 	note := models.Note{
 		Name:         req.Name,
 		Icon:         req.Icon,
@@ -117,6 +139,17 @@ func UpdateNote(c fiber.Ctx) error {
 			Error:  "Invalid request body",
 			Data:   err.Error(),
 		})
+	}
+
+	if user.SubscriptionPlan != "pro" && req.DeletedAt == nil {
+		// Allow deletes, but block updates if over limit
+		count, err := config.DB.NewSelect().Model((*models.Note)(nil)).Where("owner = ?", user.Id).Count(c.Context())
+		if err == nil && (count > 5 || user.UsedStorage > config.FREE_STORAGE_LIMIT) {
+			return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+				Status: fiber.StatusForbidden,
+				Error:  "Read-only mode: You have exceeded the Free tier quota. Please delete some notes or upgrade to Pro to resume editing.",
+			})
+		}
 	}
 
 	query := config.DB.NewUpdate().Model((*models.Note)(nil))
@@ -284,6 +317,16 @@ func ApplyNoteContentPatch(c fiber.Ctx) error {
 		})
 	}
 
+	if user.SubscriptionPlan != "pro" {
+		count, err := config.DB.NewSelect().Model((*models.Note)(nil)).Where("owner = ?", user.Id).Count(c.Context())
+		if err == nil && (count > 5 || user.UsedStorage > config.FREE_STORAGE_LIMIT) {
+			return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+				Status: fiber.StatusForbidden,
+				Error:  "Read-only mode: You have exceeded the Free tier quota. Please delete some notes or upgrade to Pro to resume editing.",
+			})
+		}
+	}
+
 	if _, err := config.DB.NewRaw("SELECT apply_note_patch(?, (?::jsonb)->'p', ?)", noteId, string(wrapperJSON), user.Id).Exec(c.Context()); err != nil {
 		log.Error("Error patching note: ", err)
 		errMsg := err.Error()
@@ -313,9 +356,11 @@ func ApplyNoteContentPatch(c fiber.Ctx) error {
 	// invalidate the cache for note content
 	cacheKey = fmt.Sprintf("note:%s:content", noteId)
 	go utils.DeleteCache(cacheKey)
-	
+
 	// Create auto snapshot
-	go maybeAutoSnapshot(context.Background(), noteId, user.Id)
+	if user.SubscriptionPlan == config.PRO_PLAN {
+		go maybeAutoSnapshot(context.Background(), noteId, user.Id)
+	}
 
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,

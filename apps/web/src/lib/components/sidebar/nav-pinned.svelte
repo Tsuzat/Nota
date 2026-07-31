@@ -23,15 +23,17 @@ const notes = $derived.by(() => {
       {#each notes.slice(0, showMore ? notes.length : 3) as note (note.id)}
         <NoteTile {note} />
       {/each}
-      <Sidebar.MenuItem>
-        <Sidebar.MenuButton
-          class="text-sidebar-foreground/70"
-          onclick={() => (showMore = !showMore)}
-        >
-          <icons.Ellipsis />
-          <span>{showMore ? "Less" : "More"}</span>
-        </Sidebar.MenuButton>
-      </Sidebar.MenuItem>
+      {#if notes.length > 3}
+        <Sidebar.MenuItem>
+          <Sidebar.MenuButton
+            class="text-sidebar-foreground/70"
+            onclick={() => (showMore = !showMore)}
+          >
+            <icons.Ellipsis />
+            <span>{showMore ? "Less" : "More"}</span>
+          </Sidebar.MenuButton>
+        </Sidebar.MenuItem>
+      {/if}
     </Sidebar.Menu>
   </Sidebar.Group>
 {/if}

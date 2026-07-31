@@ -9,7 +9,12 @@ export const openNewWorkspace = () => {
 <script lang="ts">
   import { toast } from "@nota/ui/shadcn/sonner";
   import { getAuthContext, getWorkspacesContext } from "@nota/client";
-  import { BarSpinner, IconPicker, IconRenderer, icons } from "@nota/ui/icons/index.js";
+  import {
+    BarSpinner,
+    IconPicker,
+    IconRenderer,
+    icons,
+  } from "@nota/ui/icons/index.js";
   import { Button, buttonVariants } from "@nota/ui/shadcn/button";
   import * as Dialog from "@nota/ui/shadcn/dialog";
   import { Input } from "@nota/ui/shadcn/input";
@@ -27,8 +32,18 @@ export const openNewWorkspace = () => {
   const user = $derived(getAuthContext().user);
   let isLocal = $state(true);
 
+  const isOverLimit = $derived(
+    !isLocal &&
+      user?.subscription_plan === "free" &&
+      cloudWorkspaces.workspaces.length >= 1,
+  );
+
   const canSubmit = $derived(
-    name !== undefined && name.trim() !== "" && icon.trim() !== "" && !loading
+    name !== undefined &&
+      name.trim() !== "" &&
+      icon.trim() !== "" &&
+      !loading &&
+      !isOverLimit,
   );
 
   async function createLocalWorkspace() {
@@ -53,8 +68,17 @@ export const openNewWorkspace = () => {
   }
 
   async function createCloudWorkspace() {
-    if (user === null) {
+    if (!user) {
       toast.error("No user found. Please login again.");
+      return;
+    }
+    if (
+      user.subscription_plan === "free" &&
+      cloudWorkspaces.workspaces.length >= 1
+    ) {
+      toast.error(
+        "Free users are limited to 1 cloud workspace. Please upgrade to Pro.",
+      );
       return;
     }
     if (!icon || !name || name.trim() === "") {
@@ -104,7 +128,9 @@ export const openNewWorkspace = () => {
   <Dialog.Content class="max-w-md gap-5" showCloseButton={true}>
     <Dialog.Header>
       <div class="flex items-center gap-3">
-        <div class="bg-primary/10 flex size-9 shrink-0 items-center justify-center rounded-lg">
+        <div
+          class="bg-primary/10 flex size-9 shrink-0 items-center justify-center rounded-lg"
+        >
           <icons.FolderPlus class="text-primary size-4" />
         </div>
         <div>
@@ -120,54 +146,70 @@ export const openNewWorkspace = () => {
       </div>
     </Dialog.Header>
 
-    <form onsubmit={handleSubmit} class="flex flex-col gap-4">
-      <!-- Icon + Name row -->
-      <div class="flex w-full items-center gap-2">
-        <IconPicker {icon} side="right" onSelect={(ic) => (icon = ic)}>
-          <div class={buttonVariants({ variant: "outline", size: "icon" })}>
-            <IconRenderer {icon} />
-          </div>
-        </IconPicker>
-        <Input
-          bind:value={name}
-          placeholder="Workspace Name"
-          type="text"
-          required
-          autofocus
-        />
+    {#if isOverLimit}
+      <div
+        class="bg-destructive/15 text-destructive border-destructive/30 rounded-md border p-3 text-sm"
+      >
+        Free users are limited to 1 cloud workspace. Please upgrade to Pro for
+        unlimited workspaces.
       </div>
-
-      <!-- Storage type toggle -->
-      {#if user}
-        <div class="bg-muted/40 flex items-center justify-between rounded-lg p-3">
-          <div class="flex items-center gap-2">
-            {#if isLocal}
-              <icons.HardDrive class="text-muted-foreground size-4" />
-            {:else}
-              <icons.Cloud class="text-muted-foreground size-4" />
-            {/if}
-            <Label for="storage-toggle" class="text-sm font-medium">
-              {isLocal ? "Local" : "Cloud"} Workspace
-            </Label>
-          </div>
-          <Switch id="storage-toggle" bind:checked={isLocal} />
+    {:else}
+      <form onsubmit={handleSubmit} class="flex flex-col gap-4">
+        <!-- Icon + Name row -->
+        <div class="flex w-full items-center gap-2">
+          <IconPicker {icon} side="right" onSelect={(ic) => (icon = ic)}>
+            <div class={buttonVariants({ variant: "outline", size: "icon" })}>
+              <IconRenderer {icon} />
+            </div>
+          </IconPicker>
+          <Input
+            bind:value={name}
+            placeholder="Workspace Name"
+            type="text"
+            required
+            autofocus
+          />
         </div>
-      {/if}
 
-      <!-- Footer -->
-      <Dialog.Footer>
-        <Dialog.Close>
-          {#snippet child({ props })}
-            <Button variant="outline" {...props}>Cancel</Button>
-          {/snippet}
-        </Dialog.Close>
-        <Button type="submit" disabled={!canSubmit}>
-          {#if loading}
-            <BarSpinner />
-          {/if}
-          Create Workspace
-        </Button>
-      </Dialog.Footer>
-    </form>
+        <!-- Storage type toggle -->
+        {#if user}
+          <div
+            class="bg-muted/40 flex items-center justify-between rounded-lg p-3"
+          >
+            <div class="flex items-center gap-2">
+              {#if isLocal}
+                <icons.HardDrive class="text-muted-foreground size-4" />
+              {:else}
+                <icons.Cloud class="text-muted-foreground size-4" />
+              {/if}
+              <Label for="storage-toggle" class="text-sm font-medium">
+                {isLocal ? "Local" : "Cloud"} Workspace
+              </Label>
+            </div>
+            <Switch
+              id="storage-toggle"
+              disabled={user.subscription_plan === "free" &&
+                cloudWorkspaces.workspaces.length >= 1}
+              bind:checked={isLocal}
+            />
+          </div>
+        {/if}
+
+        <!-- Footer -->
+        <Dialog.Footer>
+          <Dialog.Close>
+            {#snippet child({ props })}
+              <Button variant="outline" {...props}>Cancel</Button>
+            {/snippet}
+          </Dialog.Close>
+          <Button type="submit" disabled={!canSubmit}>
+            {#if loading}
+              <BarSpinner />
+            {/if}
+            Create Workspace
+          </Button>
+        </Dialog.Footer>
+      </form>
+    {/if}
   </Dialog.Content>
 </Dialog.Root>

@@ -133,3 +133,11 @@ func ConstsInit() {
 	// Gotenberg URL
 	GOTENBERG_URL = os.Getenv("GOTENBERG_URL")
 }
+
+// For Storage Limit & Subscription Plans
+const PRO_PLAN = "pro"
+
+var (
+	PRO_STORAGE_LIMIT  = int64(5 * 1024 * 1024 * 1024)
+	FREE_STORAGE_LIMIT = int64(100 * 1024 * 1024)
+)

@@ -58,6 +58,10 @@ class WorkSpaces {
   }
 
   async deleteWorkspace(workspace: LocalWorkSpace) {
+    if (this.#workspaces.length <= 1) {
+      toast.error('You must have at least one local workspace.');
+      return;
+    }
     try {
       await DB.execute('DELETE FROM note_versions WHERE workspace_id = $1', [workspace.id]);
       const res = await DB.execute('DELETE FROM workspaces WHERE id = $1', [workspace.id]);

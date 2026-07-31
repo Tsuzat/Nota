@@ -7,7 +7,7 @@ import (
 )
 
 func InitWorkspaceRoutes() {
-	group := config.APP.Group("/api/v1/db/workspace", middleware.Authenticate, middleware.CheckPro)
+	group := config.APP.Group("/api/v1/db/workspace", middleware.Authenticate)
 
 	group.Get("/", app.GetWorkspaces)
 	group.Post("/", app.CreateWorkspace)

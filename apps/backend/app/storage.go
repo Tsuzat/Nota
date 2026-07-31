@@ -33,11 +33,13 @@ func GeneratePresignedURL(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: "File size exceeds the 500MB limit"})
 	}
 
-	if user.UsedStorage+req.Size > user.AssignedStorage {
+	maxStorage := user.AssignedStorage
+
+	if user.UsedStorage+req.Size > maxStorage {
 		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
 			Status: fiber.StatusForbidden,
 			Error:  "Storage quota exceeded",
-			Data:   fiber.Map{"used": user.UsedStorage, "assigned": user.AssignedStorage, "required": req.Size},
+			Data:   fiber.Map{"used": user.UsedStorage, "assigned": maxStorage, "required": req.Size},
 		})
 	}
 

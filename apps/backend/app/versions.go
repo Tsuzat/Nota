@@ -166,14 +166,11 @@ func CreateManualSnapshot(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(models.APIError{Status: 404, Error: "Note not found"})
 	}
 
-	if user.SubscriptionPlan != "pro" {
-		count, _ := config.DB.NewSelect().Model((*models.NoteVersion)(nil)).Where("created_by = ? AND version_type = 'manual'", user.Id).Count(c.Context())
-		if count >= 5 {
-			return c.Status(fiber.StatusPaymentRequired).JSON(models.APIError{
-				Status: fiber.StatusPaymentRequired,
-				Error:  "Free tier limit reached (5 manual snapshots). Please upgrade to Pro.",
-			})
-		}
+	if user.SubscriptionPlan != config.PRO_PLAN {
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+			Status: fiber.StatusForbidden,
+			Error:  "Cloud snapshots are only available on the Pro plan.",
+		})
 	}
 
 	// Compute snapshot content

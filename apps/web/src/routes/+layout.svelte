@@ -19,6 +19,6 @@ onMount(() => {
 </script>
 
 <ModeWatcher />
-<Toaster closeButton richColors />
+<Toaster closeButton richColors class="z-10000!" />
 
 {@render children()}

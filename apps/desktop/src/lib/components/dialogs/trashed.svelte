@@ -34,7 +34,7 @@ async function deleteNote(note: LocalNote | Note) {
       );
       if (!confirm) return;
       await cloudNotes.delete(note.id);
-    } else await localNotes.deleteNote(note);
+    } else await localNotes.delete(note.id);
   } catch (error) {
     console.error(error);
     toast.error(`Something went wrong while deleting ${note.name}`);

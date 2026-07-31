@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useEditorState } from '@lib/components/edra/tiptap';
-import { getNotesContext, getVersionsContext, type Note } from '@nota/client';
+import { getAuthContext, getNotesContext, getVersionsContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import type { Editor } from '@nota/ui/edra/tiptap/index.js';
 import { BarSpinner, icons } from '@nota/ui/icons/index.js';
@@ -34,6 +34,8 @@ const workspace = $derived(
     .getWorkspaces()
     .find((w) => w.id === note.workspace_id)
 );
+const authContext = getAuthContext();
+const isPro = $derived(authContext.user?.subscription_plan === 'pro');
 
 const editorState = useEditorState({
   editor,
@@ -50,7 +52,7 @@ const localVersions = getLocalVersions();
 let versionCount = $state(0);
 $effect(() => {
   if (note.id) {
-    if ('owner' in note) {
+    if ('owner' in note && isPro) {
       versionsClient.getVersionCount(note.id).then((count) => {
         versionCount = count;
       });
@@ -66,9 +68,11 @@ let snapshotDialogOpen = $state(false);
 let snapshotLabel = $state('');
 let isCreatingSnapshot = $state(false);
 let storeLocally = $state(false);
-
 async function handleCreateSnapshot() {
   if (!note.id) return;
+  if ('owner' in note && !isPro) {
+    storeLocally = true;
+  }
   isCreatingSnapshot = true;
   try {
     if ('owner' in note) {
@@ -207,7 +211,14 @@ async function handleCreateSnapshot() {
       </Dropdown.Group>
       <Dropdown.Separator />
       <Dropdown.Group>
-        <Dropdown.Item onclick={() => (snapshotDialogOpen = true)}>
+        <Dropdown.Item
+          onclick={() => {
+            if ("owner" in note && !isPro) {
+              storeLocally = true;
+            }
+            snapshotDialogOpen = true;
+          }}
+        >
           <icons.Camera />
           Save Snapshot
         </Dropdown.Item>
@@ -265,11 +276,15 @@ async function handleCreateSnapshot() {
         <div class="flex items-center space-x-2">
           <Switch
             bind:checked={storeLocally}
-            disabled={isCreatingSnapshot}
+            disabled={isCreatingSnapshot || !isPro}
             id="store-locally"
           />
-          <label for="store-locally" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <label
+            for="store-locally"
+            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
             {storeLocally ? "Store Locally" : "Store In Cloud"}
+            {!isPro ? " (Cloud Snapshot Requires Pro)" : ""}
           </label>
         </div>
       {/if}

@@ -6,14 +6,21 @@ export const openGlobalSearch = () => {
 </script>
 
 <script lang="ts">
-  import { getNotesContext, getWorkspacesContext, type Workspace } from "@nota/client";
+  import {
+    getNotesContext,
+    getWorkspacesContext,
+    type Workspace,
+  } from "@nota/client";
   import { SimpleToolTip } from "@nota/ui/custom/index.js";
   import { IconRenderer, icons } from "@nota/ui/icons/index.js";
   import * as Command from "@nota/ui/shadcn/command";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { getLocalNotes } from "$lib/local/notes.svelte";
-  import { getLocalWorkspaces, type LocalWorkSpace } from "$lib/local/workspaces.svelte";
+  import {
+    getLocalWorkspaces,
+    type LocalWorkSpace,
+  } from "$lib/local/workspaces.svelte";
   import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
   import { openNewNote } from "$lib/components/dialogs";
   import { openNewWorkspace } from "$lib/components/dialogs/new-workspace.svelte";
@@ -53,16 +60,16 @@ export const openGlobalSearch = () => {
 
   function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
     if (currentWorkspace.get()?.id === workspace.id) {
-      return toast.info("Already in this workspace.")
+      return toast.info("Already in this workspace.");
     }
-    currentWorkspace.set(workspace)
+    currentWorkspace.set(workspace);
   }
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
 
 <Command.Dialog
-  bind:open={open}
+  bind:open
   class="border"
   title="Search"
   description="Search notes, workspaces, and actions"

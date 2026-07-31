@@ -79,10 +79,11 @@ func SignUpWithEmailAndPassword(c fiber.Ctx) error {
 	}
 	req.Password = string(hashedPassword)
 	newUser := &models.User{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: req.Password,
-		Provider: "email",
+		Name:            req.Name,
+		Email:           req.Email,
+		Password:        req.Password,
+		Provider:        "email",
+		AssignedStorage: config.FREE_STORAGE_LIMIT,
 	}
 	if err := db.InsertUser(newUser); err != nil {
 		log.Error("User creation error:", err)
@@ -347,6 +348,7 @@ func SingInWithGoogleCallBack(c fiber.Ctx) error {
 		IsVerified:      true,
 		EmailVerified:   true,
 		EmailVerifiedAt: time.Now(),
+		AssignedStorage: config.FREE_STORAGE_LIMIT,
 	}
 	return completeOAuthLogin(c, user)
 }
@@ -459,6 +461,7 @@ func SignInWithGithubCallBack(c fiber.Ctx) error {
 		IsVerified:      true,
 		EmailVerified:   true,
 		EmailVerifiedAt: time.Now(),
+		AssignedStorage: config.FREE_STORAGE_LIMIT,
 	}
 	return completeOAuthLogin(c, user)
 }

@@ -8,7 +8,7 @@ import {
 } from '@nota/client';
 import DeleteWorkspaceDialog from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
-import { toast } from '@nota/ui/shadcn/sonner';
+import { Toaster, toast } from '@nota/ui/shadcn/sonner';
 import { onMount } from 'svelte';
 import { MoveNote, NewNotes, NewWorkspace, RenameNote } from '$lib/components/dialogs';
 import { setGlobalSettings } from '$lib/components/settings/index.svelte';

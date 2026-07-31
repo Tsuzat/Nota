@@ -1,7 +1,7 @@
 <script lang="ts">
-import type { Content } from '@lib/components/edra/types.js';
 import { getNotesContext, getWorkspacesContext, type Note, type Workspace } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
+import type { Content } from '@nota/ui/edra/index.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
@@ -161,7 +161,9 @@ async function importNote() {
             >
               <icons.Plus class="text-primary size-5" />
             </div>
-            <span class="text-muted-foreground font-medium">Create New Note</span>
+            <span class="text-muted-foreground font-medium"
+              >Create New Note</span
+            >
           </Button>
 
           {#each notes as note (note.id)}
@@ -249,13 +251,26 @@ async function importNote() {
     </main>
   </div>
 {:else}
-  <div class="flex h-full items-center justify-center">
-    <div class="text-center">
-      <h2 class="text-xl font-semibold">Workspace not found</h2>
-      <p class="text-muted-foreground">
-        The requested workspace could not be found.
-      </p>
-      <Button variant="link" href="/">Go Home</Button>
+  <div
+    class="flex flex-1 grow size-full min-h-0 flex-col items-center justify-center gap-4 p-8 animate-in fade-in"
+  >
+    <div
+      class="flex size-16 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-2"
+    >
+      <icons.TriangleAlert class="size-8" />
     </div>
+    <h4 class="text-xl font-semibold text-center">
+      Something went wrong loading this workspace.
+    </h4>
+    <p class="text-muted-foreground text-sm max-w-md text-center">
+      It may have been deleted or you don't have access.
+    </p>
+    <Button
+      href={resolve("/")}
+      variant="outline"
+      class="mt-4 rounded-full px-6"
+    >
+      Go to Home
+    </Button>
   </div>
 {/if}

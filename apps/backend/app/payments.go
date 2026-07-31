@@ -39,7 +39,7 @@ func getCreditsToAdd(productId string) int {
 func getStorageToAdd(productId string) int64 {
 	switch productId {
 	case config.POLAR_MONTLY_SUB, config.POLAR_YEARLY_SUB:
-		return 5_000_000_000
+		return config.PRO_STORAGE_LIMIT
 	default:
 		return 0
 	}

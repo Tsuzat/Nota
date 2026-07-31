@@ -3,6 +3,7 @@ import { ALLOWED_MAX_FILE_SIZE, FileType, getFileTypeExtensions } from '@lib/com
 import { Skeleton } from '@lib/components/ui/skeleton/index.js';
 import {
   callAI,
+  getAuthContext,
   getNotesContext,
   getStorageContext,
   getWorkspacesContext,
@@ -30,6 +31,7 @@ const cloudStorage = getStorageContext();
 const useGlobalSettings = getGlobalSettings();
 const currentWorkspaceCtx = getCurrentWorkspace();
 const currentWorkspace = $derived(currentWorkspaceCtx.get());
+const authContext = getAuthContext();
 
 // --- State ---
 const { data } = $props();
@@ -77,6 +79,12 @@ const getLocalFile = async (fileType: FileType) => {
         return resolve(null);
       }
 
+      const user = authContext.user;
+      if (user && user.used_storage + file.size > user.assigned_storage) {
+        toast.error(`Not enough storage to upload ${file.name}.`);
+        return resolve(null);
+      }
+
       try {
         const uploadPromise = cloudStorage.upload(file, {
           workspaceId: currentWorkspace?.id,
@@ -103,11 +111,17 @@ const editor = createEditor({
   onUpdate: () => {
     isDirty = true;
   },
-  onFileUpload: (file) =>
-    cloudStorage.upload(file, {
+  onFileUpload: (file) => {
+    const user = authContext.user;
+    if (user && user.used_storage + file.size > user.assigned_storage) {
+      toast.error(`Not enough storage to upload ${file.name}.`);
+      return Promise.reject(new Error('Storage quota exceeded'));
+    }
+    return cloudStorage.upload(file, {
       workspaceId: currentWorkspace?.id,
       noteId: note?.id,
-    }),
+    });
+  },
   selectFile: getLocalFile,
   getAssets,
   callAI,

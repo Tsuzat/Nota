@@ -115,7 +115,14 @@ class Notes {
       const parsedNote = NoteSchema.parse(updatedNote);
       this.notes = this.notes.map((note) => (note.id === noteId ? parsedNote : note));
     } else {
-      throw new Error(await res.text());
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        if (json && json.error) throw new Error(json.error);
+      } catch (e) {
+        // Not a JSON or no error field
+      }
+      throw new Error(text);
     }
   }
 
@@ -194,7 +201,16 @@ class Notes {
       body: JSON.stringify(patch),
     });
     if (!res.ok) {
-      throw new Error(await res.text());
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        if (json && json.error) {
+          throw new Error(json.error);
+        }
+      } catch (e) {
+        // Not a JSON or no error field
+      }
+      throw new Error(text);
     }
   }
 

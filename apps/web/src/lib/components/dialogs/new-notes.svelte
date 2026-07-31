@@ -34,8 +34,16 @@ export const openNewNote = (pNoteId: string | null = null) => {
   const workspace = $derived(currentWorkspaceCtx.get());
   const user = $derived(getAuthContext().user);
 
+  const isOverLimit = $derived(
+    user?.subscription_plan === "free" && cloudNotes.notes.length >= 5,
+  );
+
   const canSubmit = $derived(
-    name !== undefined && name.trim() !== "" && icon.trim() !== "" && !loading,
+    name !== undefined &&
+      name.trim() !== "" &&
+      icon.trim() !== "" &&
+      !loading &&
+      !isOverLimit,
   );
 
   async function handleSubmit(e: Event) {
@@ -53,6 +61,12 @@ export const openNewNote = (pNoteId: string | null = null) => {
       if (!user) {
         toast.error(
           "User is not logged in. Please login to create cloud notes",
+        );
+        return;
+      }
+      if (user.subscription_plan === "free" && cloudNotes.notes.length >= 5) {
+        toast.error(
+          "Free users are limited to 5 cloud notes. Please upgrade to Pro.",
         );
         return;
       }
@@ -113,51 +127,60 @@ export const openNewNote = (pNoteId: string | null = null) => {
       </div>
     </Dialog.Header>
 
-    <form onsubmit={handleSubmit} class="flex flex-col gap-4">
-      <!-- Icon + Name row -->
-      <div class="flex w-full items-center gap-2">
-        <IconPicker {icon} side="right" onSelect={(ic) => (icon = ic)}>
-          <div class={buttonVariants({ variant: "outline", size: "icon" })}>
-            <IconRenderer {icon} />
-          </div>
-        </IconPicker>
-        <Input
-          bind:value={name}
-          placeholder="Note Name"
-          type="text"
-          required
-          autofocus
-        />
+    {#if isOverLimit}
+      <div
+        class="bg-destructive/15 text-destructive border-destructive/30 rounded-md border p-3 text-sm"
+      >
+        Free users are limited to 5 cloud notes. Please upgrade to Pro for
+        unlimited notes.
       </div>
-
-      <!-- Options -->
-      <div class="flex items-center ml-2 justify-between">
-        <div class="flex items-center gap-2">
-          <Checkbox id="pin-toggle" bind:checked={isPinned} />
-          <Label
-            for="pin-toggle"
-            class="text-muted-foreground flex items-center gap-1.5 text-xs"
-          >
-            <icons.Pin class="size-3" />
-            Pin to top
-          </Label>
+    {:else}
+      <form onsubmit={handleSubmit} class="flex flex-col gap-4">
+        <!-- Icon + Name row -->
+        <div class="flex w-full items-center gap-2">
+          <IconPicker {icon} side="right" onSelect={(ic) => (icon = ic)}>
+            <div class={buttonVariants({ variant: "outline", size: "icon" })}>
+              <IconRenderer {icon} />
+            </div>
+          </IconPicker>
+          <Input
+            bind:value={name}
+            placeholder="Note Name"
+            type="text"
+            required
+            autofocus
+          />
         </div>
-      </div>
 
-      <!-- Footer -->
-      <Dialog.Footer>
-        <Dialog.Close>
-          {#snippet child({ props })}
-            <Button variant="outline" {...props}>Cancel</Button>
-          {/snippet}
-        </Dialog.Close>
-        <Button type="submit" disabled={!canSubmit}>
-          {#if loading}
-            <BarSpinner />
-          {/if}
-          Create Note
-        </Button>
-      </Dialog.Footer>
-    </form>
+        <!-- Options -->
+        <div class="flex items-center ml-2 justify-between">
+          <div class="flex items-center gap-2">
+            <Checkbox id="pin-toggle" bind:checked={isPinned} />
+            <Label
+              for="pin-toggle"
+              class="text-muted-foreground flex items-center gap-1.5 text-xs"
+            >
+              <icons.Pin class="size-3" />
+              Pin to top
+            </Label>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <Dialog.Footer>
+          <Dialog.Close>
+            {#snippet child({ props })}
+              <Button variant="outline" {...props}>Cancel</Button>
+            {/snippet}
+          </Dialog.Close>
+          <Button type="submit" disabled={!canSubmit}>
+            {#if loading}
+              <BarSpinner />
+            {/if}
+            Create Note
+          </Button>
+        </Dialog.Footer>
+      </form>
+    {/if}
   </Dialog.Content>
 </Dialog.Root>

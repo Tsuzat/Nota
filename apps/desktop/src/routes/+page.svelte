@@ -102,11 +102,19 @@ function tryDeleteLocalWorkspace(ws: { id: string; name: string }) {
 function tryDeleteCloudWorkspace(ws: { id: string; name: string }) {
   const isCurrent = isActiveWorkspace(ws.id);
 
+  const isLastCloud = allCloudWorkspaces.length <= 1;
+
+  let blockedReason: string | undefined;
+  if (isCurrent) {
+    blockedReason = 'This is your currently active workspace. Switch to another workspace before deleting it.';
+  } else if (isLastCloud) {
+    blockedReason =
+      'You must have at least one cloud workspace. Create another cloud workspace before deleting this one.';
+  }
+
   openDeleteWorkspaceDialog({
     workspaceName: ws.name,
-    blockedReason: isCurrent
-      ? 'This is your currently active workspace. Switch to another workspace before deleting it.'
-      : undefined,
+    blockedReason,
     onConfirm: async () => {
       try {
         await cloudWorkspaces.delete(ws.id);

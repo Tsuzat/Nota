@@ -57,6 +57,22 @@ func CreateWorkspace(c fiber.Ctx) error {
 				Data:   err.Error(),
 			})
 	}
+	if user.SubscriptionPlan != "pro" {
+		count, err := config.DB.NewSelect().Model((*models.Workspace)(nil)).Where("owner = ?", user.Id).Count(c.Context())
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+				Status: fiber.StatusInternalServerError,
+				Error:  "Failed to verify workspace quota",
+			})
+		}
+		if count >= 1 {
+			return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+				Status: fiber.StatusForbidden,
+				Error:  "Free users are limited to 1 cloud workspace. Please upgrade to Pro for unlimited workspaces.",
+			})
+		}
+	}
+
 	workspace := &models.Workspace{
 		Icon:        req.Icon,
 		Name:        req.Name,
@@ -137,7 +153,22 @@ func UpdateWorkspace(c fiber.Ctx) error {
 func DeleteWorkspace(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	id := c.Params("id")
-	_, err := config.DB.NewDelete().
+	
+	count, err := config.DB.NewSelect().Model((*models.Workspace)(nil)).Where("owner = ?", user.Id).Count(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to verify workspace count",
+		})
+	}
+	if count <= 1 {
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+			Status: fiber.StatusForbidden,
+			Error:  "You must have at least one cloud workspace. Deletion is not allowed.",
+		})
+	}
+
+	_, err = config.DB.NewDelete().
 		Model(&models.Workspace{}).
 		Where("id = ? and owner = ?", id, user.Id).
 		Exec(c.Context())

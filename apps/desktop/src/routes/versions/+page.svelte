@@ -1,7 +1,7 @@
 <script lang="ts">
 import { IconRenderer, icons } from '@lib/icons';
 import BarSpinner from '@lib/icons/moving-icons/bar-spinner.svelte';
-import { getNotesContext, getVersionsContext, type Note, type NoteVersion } from '@nota/client';
+import { getAuthContext, getNotesContext, getVersionsContext, type Note, type NoteVersion } from '@nota/client';
 import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
 import { Badge } from '@nota/ui/shadcn/badge';
 import { Button } from '@nota/ui/shadcn/button';
@@ -10,10 +10,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@nota/ui/shadc
 import { Input } from '@nota/ui/shadcn/input';
 import * as Select from '@nota/ui/shadcn/select';
 import { toast } from '@nota/ui/shadcn/sonner';
+import { onDestroy } from 'svelte';
 import { page as appPage } from '$app/state';
+import Topbar from '$lib/components/topbar.svelte';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 import { getLocalNotes } from '$lib/local/notes.svelte';
 import { getLocalVersions } from '$lib/local/versions.svelte';
+
+const authContext = getAuthContext();
+const isPro = $derived(authContext.user?.subscription_plan === 'pro');
 
 const versionsCtx = getVersionsContext();
 const localVersionsCtx = getLocalVersions();
@@ -67,7 +72,7 @@ async function loadVersions() {
       note_ids: selectedNoteId,
     };
 
-    if (isLocal) {
+    if (isLocal || !isPro) {
       const res = await localVersionsCtx.listWorkspaceVersions(ws.id, filters);
       versions = res.versions;
       total = res.total;
@@ -91,6 +96,7 @@ $effect(() => {
 });
 
 let debounceTimer: ReturnType<typeof setTimeout>;
+onDestroy(() => clearTimeout(debounceTimer));
 function handleSearch(e: Event) {
   const val = (e.target as HTMLInputElement).value;
   search = val;
@@ -105,8 +111,7 @@ async function openPreview(v: NoteVersion) {
   try {
     previewOpen = true;
     previewLoading = true;
-    if (isLocal || v.id.length < 36) {
-      // wait, if it's a local snapshot of cloud note, we need a way to distinguish. `source` param handles it mostly.
+    if (isLocal || !isPro) {
       previewContent = await localVersionsCtx.getVersionContent(v.note_id, v.id);
     } else {
       previewContent = await versionsCtx.getVersionContent(v.note_id, v.id);
@@ -123,15 +128,7 @@ async function restoreVersion(v: NoteVersion) {
   if (!confirm('Are you sure you want to restore this version? The current state will be saved as a restore point.'))
     return;
   try {
-    if (isLocal) {
-      // Local note restore logic.
-      // We need to fetch the current note first
-      const currentContentRes = await localVersionsCtx.getVersionContent(v.note_id, v.id); // Wait, this just gets the version content.
-      // For local restore, the actual note update needs to happen
-      // Actually we just call restoreVersion which returns the content and saves the current as backup
-      // But we need the current content to pass to it!
-      // This is slightly tricky, we can just grab it from localNotes...
-      // Or we can just let localVersions handle it later. Let's just do a basic restore for now.
+    if (isLocal || !isPro) {
       toast.error('Local restore is unimplemented in this view currently');
     } else {
       await versionsCtx.restoreVersion(v.note_id, v.id);
@@ -146,7 +143,7 @@ async function restoreVersion(v: NoteVersion) {
 async function deleteVersion(v: NoteVersion) {
   if (!confirm('Are you sure you want to delete this snapshot?')) return;
   try {
-    if (isLocal) {
+    if (isLocal || !isPro) {
       await localVersionsCtx.deleteVersion(v.note_id, v.id);
     } else {
       await versionsCtx.deleteVersion(v.note_id, v.id);
@@ -176,211 +173,222 @@ function formatSize(bytes: number) {
   <title>Version History - Nota</title>
 </svelte:head>
 
-<div class="h-full w-full p-6 overflow-y-auto">
-  <div class="max-w-5xl mx-auto space-y-6">
-    <div class="flex items-center gap-4">
-      <Button variant="outline" onclick={() => history.back()}>
-        <icons.ArrowLeft class="w-4 h-4 mr-2" /> Back
-      </Button>
+<div class="flex size-full min-h-0 flex-col overflow-hidden">
+  <Topbar showSeparator={true}>
+    {#snippet left()}
+      <span class="font-semibold"> Version History </span>
+    {/snippet}
+  </Topbar>
+
+  <div class="min-h-0 flex-1 grow overflow-y-auto p-6 md:p-8">
+    <div class="max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">
-          {isLocal ? "Local " : ""}Version History
-        </h1>
-        <p class="text-muted-foreground mt-1">
+        <p class="text-muted-foreground">
           View and restore previous states of your notes.
         </p>
       </div>
-    </div>
 
-    <div class="flex flex-col sm:flex-row gap-4">
-      <div class="flex-1">
-        <Input
-          placeholder="Search by label..."
-          value={search}
-          oninput={handleSearch}
-        />
-      </div>
-      <Select.Root
-        type="single"
-        bind:value={selectedNoteId}
-        onValueChange={() => {
-          page = 1;
-          loadVersions();
-        }}
-      >
-        <Select.Trigger class="w-50">
-          {#if selectedNoteId}
-            {workspaceNotes.find((n) => n.id === selectedNoteId)?.name ||
-              "All Notes"}
-          {:else}
-            All Notes
-          {/if}
-        </Select.Trigger>
-        <Select.Content>
-          <Select.Group>
-            <Select.GroupHeading>Select Notes</Select.GroupHeading>
-            <Select.Item value="">All Notes</Select.Item>
-            {#each workspaceNotes as note}
-              <Select.Item value={note.id}>
-                <span class="flex items-center gap-2">
-                  <IconRenderer icon={note.icon} />
-                  <span class="truncate">{note.name}</span>
-                </span>
-              </Select.Item>
-            {/each}
-          </Select.Group>
-        </Select.Content>
-      </Select.Root>
-      <Select.Root
-        type="single"
-        bind:value={typeFilter}
-        onValueChange={() => {
-          page = 1;
-          loadVersions();
-        }}
-      >
-        <Select.Trigger class="w-38">
-          {#if typeFilter === "auto"}
-            Auto
-          {:else if typeFilter === "manual"}
-            Manual
-          {:else if typeFilter === "restore"}
-            Restore Point
-          {:else}
-            All Types
-          {/if}
-        </Select.Trigger>
-        <Select.Content>
-          <Select.Item value="">All Types</Select.Item>
-          <Select.Item value="auto">Auto</Select.Item>
-          <Select.Item value="manual">Pinned</Select.Item>
-          <Select.Item value="restore">Restore Point</Select.Item>
-        </Select.Content>
-      </Select.Root>
-    </div>
+      {#if !isLocal && !isPro}
+        <div class="bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-md p-4 mb-6 flex items-start gap-3">
+          <icons.Info class="w-5 h-5 mt-0.5 shrink-0" />
+          <div class="text-sm">
+            <p class="font-medium">Showing Local Snapshots</p>
+            <p class="mt-1 opacity-90">As a free user, cloud snapshots are disabled. You are viewing local snapshots for this cloud workspace.</p>
+          </div>
+        </div>
+      {/if}
 
-    {#if loading}
-      <div class="flex justify-center p-12">
-        <BarSpinner size={20} />
-      </div>
-    {:else if versions.length === 0}
-      <Card class="border-dashed">
-        <CardContent
-          class="flex flex-col items-center justify-center p-12 text-center"
-        >
-          <icons.Clock />
-          <h3 class="text-lg font-medium">No versions found</h3>
-          <p class="text-muted-foreground mt-2 max-w-sm">
-            Versions are created automatically as you type, or you can pin them
-            manually from the note menu.
-          </p>
-        </CardContent>
-      </Card>
-    {:else}
-      <div class="grid gap-4">
-        {#each versions as v (v.id)}
-          <Card>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <Input
+            placeholder="Search by label..."
+            value={search}
+            oninput={handleSearch}
+          />
+        </div>
+          <Select.Root
+            type="single"
+            bind:value={selectedNoteId}
+            onValueChange={() => {
+              page = 1;
+              loadVersions();
+            }}
+          >
+            <Select.Trigger class="w-50">
+              {#if selectedNoteId}
+                {workspaceNotes.find((n) => n.id === selectedNoteId)?.name ||
+                  "All Notes"}
+              {:else}
+                All Notes
+              {/if}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Group>
+                <Select.GroupHeading>Select Notes</Select.GroupHeading>
+                <Select.Item value="">All Notes</Select.Item>
+                {#each workspaceNotes as note}
+                  <Select.Item value={note.id}>
+                    <span class="flex items-center gap-2">
+                      <IconRenderer icon={note.icon} />
+                      <span class="truncate">{note.name}</span>
+                    </span>
+                  </Select.Item>
+                {/each}
+              </Select.Group>
+            </Select.Content>
+          </Select.Root>
+          <Select.Root
+            type="single"
+            bind:value={typeFilter}
+            onValueChange={() => {
+              page = 1;
+              loadVersions();
+            }}
+          >
+            <Select.Trigger class="w-38">
+              {#if typeFilter === "auto"}
+                Auto
+              {:else if typeFilter === "manual"}
+                Manual
+              {:else if typeFilter === "restore"}
+                Restore Point
+              {:else}
+                All Types
+              {/if}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="">All Types</Select.Item>
+              <Select.Item value="auto">Auto</Select.Item>
+              <Select.Item value="manual">Pinned</Select.Item>
+              <Select.Item value="restore">Restore Point</Select.Item>
+            </Select.Content>
+          </Select.Root>
+        </div>
+
+        {#if loading}
+          <div class="flex justify-center p-12">
+            <BarSpinner size={20} />
+          </div>
+        {:else if versions.length === 0}
+          <Card class="border-dashed">
             <CardContent
-              class="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              class="flex flex-col items-center justify-center p-12 text-center"
             >
-              <div class="flex items-start gap-3">
-                <div class="mt-1">
-                  {#if v.version_type === "auto"}
-                    <icons.Clock class="w-5 h-5 text-muted-foreground" />
-                  {:else if v.version_type === "restore"}
-                    <icons.Undo2 class="w-5 h-5 text-blue-500" />
-                  {:else}
-                    <icons.Pin class="w-5 h-5 text-orange-500" />
-                  {/if}
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-medium"
-                      >{getNote(v.note_id)?.name || "Unknown Note"}</span
-                    >
-                    <Badge
-                      variant={v.version_type === "auto"
-                        ? "secondary"
-                        : "default"}
-                    >
-                      {v.version_type}
-                    </Badge>
-                  </div>
-                  <div
-                    class="text-sm text-muted-foreground mt-1 flex flex-col sm:flex-row sm:items-center gap-2"
-                  >
-                    <span>{new Date(v.created_at).toLocaleString()}</span>
-                    <span class="hidden sm:inline">•</span>
-                    <span>{formatSize(v.size_bytes)}</span>
-                    {#if v.label}
-                      <span class="hidden sm:inline">•</span>
-                      <span class="italic text-foreground">"{v.label}"</span>
-                    {/if}
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  class="flex-1 sm:flex-none"
-                  onclick={() => openPreview(v)}
-                >
-                  Preview
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  class="flex-1 sm:flex-none"
-                  onclick={() => restoreVersion(v)}
-                >
-                  Restore
-                </Button>
-                {#if v.version_type === "manual"}
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onclick={() => deleteVersion(v)}
-                  >
-                    <icons.Trash2 class="w-4 h-4" />
-                  </Button>
-                {/if}
-              </div>
+              <icons.Clock />
+              <h3 class="text-lg font-medium">No versions found</h3>
+              <p class="text-muted-foreground mt-2 max-w-sm">
+                Versions are created automatically as you type, or you can pin
+                them manually from the note menu.
+              </p>
             </CardContent>
           </Card>
-        {/each}
-      </div>
+        {:else}
+          <div class="grid gap-4">
+            {#each versions as v (v.id)}
+              <Card>
+                <CardContent
+                  class="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                >
+                  <div class="flex items-start gap-3">
+                    <div class="mt-1">
+                      {#if v.version_type === "auto"}
+                        <icons.Clock class="w-5 h-5 text-muted-foreground" />
+                      {:else if v.version_type === "restore"}
+                        <icons.Undo2 class="w-5 h-5 text-blue-500" />
+                      {:else}
+                        <icons.Pin class="w-5 h-5 text-orange-500" />
+                      {/if}
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="font-medium"
+                          >{getNote(v.note_id)?.name || "Unknown Note"}</span
+                        >
+                        <Badge
+                          variant={v.version_type === "auto"
+                            ? "secondary"
+                            : "default"}
+                        >
+                          {v.version_type}
+                        </Badge>
+                      </div>
+                      <div
+                        class="text-sm text-muted-foreground mt-1 flex flex-col sm:flex-row sm:items-center gap-2"
+                      >
+                        <span>{new Date(v.created_at).toLocaleString()}</span>
+                        <span class="hidden sm:inline">•</span>
+                        <span>{formatSize(v.size_bytes)}</span>
+                        {#if v.label}
+                          <span class="hidden sm:inline">•</span>
+                          <span class="italic text-foreground">"{v.label}"</span
+                          >
+                        {/if}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      class="flex-1 sm:flex-none"
+                      onclick={() => openPreview(v)}
+                    >
+                      Preview
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      class="flex-1 sm:flex-none"
+                      onclick={() => restoreVersion(v)}
+                    >
+                      Restore
+                    </Button>
+                    {#if v.version_type === "manual"}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onclick={() => deleteVersion(v)}
+                      >
+                        <icons.Trash2 class="w-4 h-4" />
+                      </Button>
+                    {/if}
+                  </div>
+                </CardContent>
+              </Card>
+            {/each}
+          </div>
 
-      <div class="flex justify-between items-center pt-4">
-        <p class="text-sm text-muted-foreground">
-          Showing {versions.length} of {total}
-        </p>
-        <div class="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page === 1}
-            onclick={() => {
-              page--;
-              loadVersions();
-            }}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={versions.length < 20}
-            onclick={() => {
-              page++;
-              loadVersions();
-            }}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
-    {/if}
+          <div class="flex justify-between items-center pt-4">
+            <p class="text-sm text-muted-foreground">
+              Showing {versions.length} of {total}
+            </p>
+            <div class="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onclick={() => {
+                  page--;
+                  loadVersions();
+                }}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={versions.length < 20}
+                onclick={() => {
+                  page++;
+                  loadVersions();
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        {/if}
+    </div>
   </div>
 </div>
 

@@ -9,6 +9,7 @@ import { Skeleton } from '@lib/components/ui/skeleton/index.js';
 import {
   callAI,
   getAllConfiguredModels,
+  getAuthContext,
   getNotesContext,
   getStorageContext,
   type Note,
@@ -36,6 +37,7 @@ const cloudNotes = getNotesContext();
 const cloudStorage = getStorageContext();
 const useGlobalSettings = getGlobalSettings();
 const useCurrentWorkspace = getCurrentWorkspace();
+const authContext = getAuthContext();
 // --- State ---
 const { data } = $props();
 let syncedContent = $state<Content>();
@@ -60,6 +62,12 @@ const onFileSelect = async (path: string) => {
 
   if (file.size > ALLOWED_MAX_FILE_SIZE) {
     toast.error(`File ${file.name} is too large (max 50MB).`);
+    return null;
+  }
+
+  const user = authContext.user;
+  if (user && user.used_storage + file.size > user.assigned_storage) {
+    toast.error(`Not enough storage to upload ${file.name}.`);
     return null;
   }
 
@@ -113,11 +121,17 @@ const editor = createEditor({
   onUpdate: () => {
     isDirty = true;
   },
-  onFileUpload: (file) =>
-    cloudStorage.upload(file, {
+  onFileUpload: (file) => {
+    const user = authContext.user;
+    if (user && user.used_storage + file.size > user.assigned_storage) {
+      toast.error(`Not enough storage to upload ${file.name}.`);
+      return Promise.reject(new Error('Storage quota exceeded'));
+    }
+    return cloudStorage.upload(file, {
       workspaceId: useCurrentWorkspace.get()?.id,
       noteId: note?.id,
-    }),
+    });
+  },
   selectFile: getLocalFile,
   getAssets,
   callAI,

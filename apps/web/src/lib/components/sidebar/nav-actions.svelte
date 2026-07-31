@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useEditorState } from '@lib/components/edra/tiptap';
-import { convertHtmlToPdf, getNotesContext, getVersionsContext, type Note } from '@nota/client';
+import { convertHtmlToPdf, getAuthContext, getNotesContext, getVersionsContext, type Note } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import type { Editor } from '@nota/ui/edra/tiptap/index.js';
 import { icons } from '@nota/ui/icons/index.js';
@@ -24,13 +24,17 @@ let { starred, toggleStar, note, editor }: Props = $props();
 const cloudNotes = getNotesContext();
 const versionsClient = getVersionsContext();
 const globalSettings = getGlobalSettings();
+const authContext = getAuthContext();
+const isPro = $derived(authContext.user?.subscription_plan === 'pro');
 
 let versionCount = $state(0);
 $effect(() => {
-  if (note.id) {
+  if (note.id && isPro) {
     versionsClient.getVersionCount(note.id).then((count) => {
       versionCount = count;
     });
+  } else {
+    versionCount = 0;
   }
 });
 
@@ -48,7 +52,7 @@ let snapshotLabel = $state('');
 let isCreatingSnapshot = $state(false);
 
 async function handleCreateSnapshot() {
-  if (!note.id) return;
+  if (!note.id || !isPro) return;
   isCreatingSnapshot = true;
   try {
     await versionsClient.createManualSnapshot(note.id, snapshotLabel || undefined);
@@ -155,9 +159,12 @@ async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
       </Dropdown.Group>
       <Dropdown.Separator />
       <Dropdown.Group>
-        <Dropdown.Item onclick={() => (snapshotDialogOpen = true)}>
+        <Dropdown.Item onclick={() => {
+            if (isPro) snapshotDialogOpen = true;
+            else toast.error('Cloud snapshots are only available on the Pro plan.');
+          }}>
           <icons.Save />
-          Save Snapshot
+          Save Snapshot {!isPro ? '(Pro)' : ''}
         </Dropdown.Item>
         <a href={`/versions?note_ids=${note.id}`}>
           <Dropdown.Item>
