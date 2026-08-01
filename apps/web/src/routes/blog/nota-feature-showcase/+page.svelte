@@ -102,23 +102,21 @@ const featureTabs = [
   </script>
 </svelte:head>
 
-<BlogArticleShell
-  headerSubtitle="Feature Showcase"
-  showHeaderCta={true}
-  mainMaxWidth="max-w-4xl"
->
+<BlogArticleShell headerSubtitle="Feature Showcase">
   <!-- Article Header -->
   <header class="mb-10 text-left">
-    <div class="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold">
+    <div class="mb-4 flex flex-wrap items-center gap-2.5 text-xs font-semibold">
       <span
-        class="rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-primary"
+        class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-bold text-primary shadow-xs"
       >
+        <icons.Sparkles class="size-3.5 text-primary" />
         Features & Workflow
       </span>
-      <span class="rounded-full bg-muted px-3 py-1 text-muted-foreground">
+      <span class="inline-flex items-center whitespace-nowrap rounded-full border border-border/50 bg-muted/80 px-3 py-1 font-medium text-muted-foreground">
         10 min read
       </span>
-      <span class="text-muted-foreground">• August 2, 2026</span>
+      <span class="text-muted-foreground/40">•</span>
+      <time class="whitespace-nowrap font-medium text-muted-foreground">August 2, 2026</time>
     </div>
 
     <h1

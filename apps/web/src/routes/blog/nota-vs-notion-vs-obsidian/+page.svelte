@@ -222,19 +222,21 @@ const filteredRows = $derived(
   </script>
 </svelte:head>
 
-<BlogArticleShell headerSubtitle="Showdown Guide" showHeaderCta={true} mainMaxWidth="max-w-4xl">
+<BlogArticleShell headerSubtitle="Comparative Guide">
   <!-- Article Header -->
   <header class="mb-10 text-left">
-    <div class="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold">
+    <div class="mb-4 flex flex-wrap items-center gap-2.5 text-xs font-semibold">
       <span
-        class="rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-primary"
+        class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-bold text-primary shadow-xs"
       >
-        Comparative Guide
+        <icons.Sparkles class="size-3.5 text-primary" />
+        Showdown & Comparison
       </span>
-      <span class="rounded-full bg-muted px-3 py-1 text-muted-foreground">
+      <span class="inline-flex items-center whitespace-nowrap rounded-full border border-border/50 bg-muted/80 px-3 py-1 font-medium text-muted-foreground">
         12 min read
       </span>
-      <span class="text-muted-foreground">• August 1, 2026</span>
+      <span class="text-muted-foreground/40">•</span>
+      <time class="whitespace-nowrap font-medium text-muted-foreground">August 1, 2026</time>
     </div>
 
     <h1

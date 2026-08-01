@@ -76,16 +76,22 @@ import { copyArticleLink } from '$lib/utils/blog';
 	</script>
 </svelte:head>
 
-<BlogArticleShell headerSubtitle="Philosophy">
+<BlogArticleShell headerSubtitle="Philosophy & Engineering">
 	<header class="mb-10 text-left">
-		<div class="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold">
+		<div class="mb-4 flex flex-wrap items-center gap-2.5 text-xs font-semibold">
 			<span
-				class="rounded-full bg-purple-500/10 border border-purple-500/20 px-3 py-1 text-purple-500"
+				class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-bold text-primary shadow-xs"
 			>
+				<icons.Sparkles class="size-3.5 text-primary" />
 				Philosophy & Engineering
 			</span>
-			<span class="rounded-full bg-muted px-3 py-1 text-muted-foreground">8 min read</span>
-			<span class="text-muted-foreground">• July 2, 2026</span>
+			<span
+				class="inline-flex items-center whitespace-nowrap rounded-full border border-border/50 bg-muted/80 px-3 py-1 font-medium text-muted-foreground"
+			>
+				8 min read
+			</span>
+			<span class="text-muted-foreground/40">•</span>
+			<time class="whitespace-nowrap font-medium text-muted-foreground">July 2, 2026</time>
 		</div>
 		<h1
 			class="text-3xl font-extrabold tracking-tight sm:text-5xl text-foreground text-balance leading-tight"
@@ -96,21 +102,60 @@ import { copyArticleLink } from '$lib/utils/blog';
 			You should never have to write custom Bash sync scripts or lose access to your thoughts when
 			cloud infrastructure stutters. Here is how we engineered seamless local-first resilience.
 		</p>
-		<div class="mt-6 flex items-center justify-between border-y py-4 text-sm text-muted-foreground">
-			<span class="font-semibold text-foreground">By The Nota Engineering Team</span>
-			<Button
-				variant="outline"
-				size="sm"
-				onclick={copyArticleLink}
-				class="h-8 rounded-full text-xs gap-1.5"
-			>
-				<icons.Link class="size-3" />
-				Copy Link
-			</Button>
+		<div
+			class="mt-8 flex flex-wrap items-center justify-between gap-4 border-y py-4 text-sm text-muted-foreground"
+		>
+			<div class="flex items-center gap-3">
+				<div class="flex -space-x-2 overflow-hidden">
+					<div
+						class="size-9 rounded-full bg-linear-to-tr from-primary to-blue-500 flex items-center justify-center font-bold text-white text-xs shadow-sm ring-2 ring-background"
+					>
+						N
+					</div>
+					<div
+						class="size-9 rounded-full bg-linear-to-br from-purple-500 to-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-sm ring-2 ring-background"
+					>
+						T
+					</div>
+				</div>
+				<div>
+					<div class="font-semibold text-foreground">
+						Tsuzat & The Nota Engineering Team
+					</div>
+					<div class="text-xs text-muted-foreground">
+						Core Storage & Sync Architecture
+					</div>
+				</div>
+			</div>
+
+			<div class="flex items-center gap-2">
+				<span class="mr-1 text-xs font-semibold text-muted-foreground">Share:</span>
+				<Button
+					variant="outline"
+					size="icon"
+					class="size-8 rounded-full"
+					href="https://twitter.com/intent/tweet?text={encodeURIComponent(
+						'Local-First Without the Complexity: Inside Nota’s Hybrid Engine'
+					)}&url={encodeURIComponent('https://nota.ink/blog/local-first-hybrid-engine')}"
+					target="_blank"
+					title="Share on Twitter / X"
+				>
+					<icons.Share2 class="size-3.5 text-foreground" />
+				</Button>
+				<Button
+					variant="outline"
+					size="icon"
+					class="size-8 rounded-full"
+					onclick={copyArticleLink}
+					title="Copy Article Link"
+				>
+					<icons.Link class="size-3.5 text-foreground" />
+				</Button>
+			</div>
 		</div>
 	</header>
 
-	<article class="space-y-6 text-base sm:text-lg leading-relaxed text-foreground/90">
+	<article class="prose prose-neutral dark:prose-invert max-w-none space-y-8 text-base sm:text-lg leading-relaxed text-foreground/90">
 		<p>
 			The term "local-first" has rightly gained intense traction across the software industry. It
 			reflects a fundamental principle: users should own their personal writing, data should reside

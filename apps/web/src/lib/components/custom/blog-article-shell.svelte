@@ -12,13 +12,13 @@ interface Props {
   headerSubtitle?: string;
   /** Whether to show the "Try Nota Free" CTA button in the header */
   showHeaderCta?: boolean;
-  /** Max-width class for the `<main>` container (default: "max-w-3xl") */
+  /** Max-width class for the `<main>` container (default: "max-w-4xl") */
   mainMaxWidth?: string;
   /** The article body content */
   children: Snippet;
 }
 
-let { headerSubtitle = 'Blog', showHeaderCta = false, mainMaxWidth = 'max-w-3xl', children }: Props = $props();
+let { headerSubtitle = 'Blog', showHeaderCta = true, mainMaxWidth = 'max-w-4xl', children }: Props = $props();
 </script>
 
 <Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />

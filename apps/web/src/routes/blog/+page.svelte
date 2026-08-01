@@ -266,20 +266,22 @@ const displayedArticles = $derived(
         >
           <div class="md:col-span-7 flex flex-col justify-between space-y-4">
             <div
-              class="flex flex-wrap items-center gap-2 text-xs font-semibold"
+              class="flex flex-wrap items-center gap-2.5 text-xs font-semibold"
             >
               <span
-                class="rounded-full bg-primary px-3 py-1 text-primary-foreground shadow-xs"
+                class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-primary px-3 py-1 text-primary-foreground shadow-xs"
               >
+                <icons.Sparkles class="size-3.5 text-primary-foreground" />
                 {featuredArticle.badge}
               </span>
               <span
-                class="rounded-full bg-muted px-3 py-1 text-muted-foreground"
+                class="inline-flex items-center whitespace-nowrap rounded-full border border-border/50 bg-muted/80 px-3 py-1 text-muted-foreground"
               >
                 {featuredArticle.category}
               </span>
-              <span class="text-muted-foreground"
-                >• {featuredArticle.readTime}</span
+              <span class="text-muted-foreground/40">•</span>
+              <span class="whitespace-nowrap text-muted-foreground font-medium"
+                >{featuredArticle.readTime}</span
               >
             </div>
 
@@ -365,24 +367,20 @@ const displayedArticles = $derived(
         class="group flex flex-col justify-between rounded-xl border bg-card/60 p-6 backdrop-blur-xs transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:bg-card hover:shadow-lg"
       >
         <div>
-          <div
-            class="mb-3 flex items-center justify-between text-xs text-muted-foreground"
-          >
-            <div class="flex items-center gap-2">
-              {#if article.badge}
-                <span
-                  class="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 font-bold text-primary text-[10px]"
-                >
-                  {article.badge}
-                </span>
-              {/if}
+          <div class="mb-3.5 flex flex-wrap items-center gap-2">
+            {#if article.badge}
               <span
-                class="rounded-full bg-muted px-2.5 py-0.5 font-medium text-foreground/80"
+                class="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold tracking-wide text-primary shadow-xs"
               >
-                {article.category}
+                <icons.Sparkles class="size-3 text-primary" />
+                {article.badge}
               </span>
-            </div>
-            <span>{article.readTime}</span>
+            {/if}
+            <span
+              class="inline-flex items-center whitespace-nowrap rounded-full border border-border/50 bg-muted/80 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground transition-colors group-hover:border-border group-hover:text-foreground"
+            >
+              {article.category}
+            </span>
           </div>
 
           <h3
@@ -399,14 +397,18 @@ const displayedArticles = $derived(
         </div>
 
         <div
-          class="mt-6 flex items-center justify-between border-t pt-4 text-xs text-muted-foreground font-medium"
+          class="mt-6 flex items-center justify-between border-t border-border/40 pt-4 text-xs font-medium text-muted-foreground"
         >
-          <time>{article.date}</time>
+          <div class="flex items-center gap-2">
+            <time>{article.date}</time>
+            <span class="text-muted-foreground/40">•</span>
+            <span class="whitespace-nowrap">{article.readTime}</span>
+          </div>
           <span
-            class="inline-flex items-center gap-1 font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+            class="inline-flex items-center gap-1 font-semibold text-primary opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100"
           >
-            Read Article
-            <icons.ArrowRight class="size-3.5" />
+            <span class="hidden xl:inline">Read</span>
+            <icons.ArrowRight class="size-4" />
           </span>
         </div>
       </a>
