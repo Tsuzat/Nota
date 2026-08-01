@@ -1,16 +1,16 @@
-import { streamText, generateText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { secureStorage } from '../secureStorage';
+import { createOpenAI } from '@ai-sdk/openai';
+import { generateText, streamText } from 'ai';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import request from '../request';
+import { secureStorage } from '../secureStorage';
+import { type CustomModelConfig, LATEST_MODELS, type SelectableModel } from './models';
 import { systemInstruction } from './prompts';
-import { LATEST_MODELS, type CustomModelConfig, type SelectableModel } from './models';
 
-export * from './prompts';
 export * from './commands';
 export * from './models';
+export * from './prompts';
 
 /**
  * Fallback to server-side AI generation.
@@ -141,7 +141,7 @@ export const getAIConfig = async (): Promise<{
       const [p, mKey] = activeModelId.split(':');
       const provider = p as AIProvider;
       const apiKey = (await secureStorage.getItem(`${provider}_api_key`)) || '';
-      let baseUrl: string | undefined = undefined;
+      let baseUrl: string | undefined;
       if (provider === 'deepseek') baseUrl = 'https://api.deepseek.com/v1';
       if (provider === 'kimi') baseUrl = 'https://api.moonshot.cn/v1';
       if (provider === 'grok') baseUrl = 'https://api.x.ai/v1';

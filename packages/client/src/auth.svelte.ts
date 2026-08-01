@@ -1,18 +1,18 @@
+import { isTauri } from '@tauri-apps/api/core';
 import { getContext, setContext } from 'svelte';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import request from './request';
+import { secureStorage } from './secureStorage';
 import {
-  type User,
-  UserSchema,
+  type CheckoutDetails,
+  CheckoutDetailsSchema,
   type Session,
   SessionSchema,
   type SubscriptionDetails,
   SubscriptionDetailsSchema,
-  type CheckoutDetails,
-  CheckoutDetailsSchema,
+  type User,
+  UserSchema,
 } from './types';
-import { secureStorage } from './secureStorage';
-import { isTauri } from '@tauri-apps/api/core';
 
 class Auth {
   #user = $state<User>();

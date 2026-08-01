@@ -5,9 +5,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
-	"sync"
-
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Tsuzat/Nota/config"
@@ -77,6 +76,19 @@ func getPolarClient() *polar.Polar {
 	return polarClient
 }
 
+// updateExternalCustomerID persists the Polar customer ID in the database and invalidates user cache
+func updateExternalCustomerID(ctx context.Context, userID, polarCustomerID string) {
+	if _, err := config.DB.NewUpdate().
+		Model((*models.User)(nil)).
+		Set("external_customer_id = ?", polarCustomerID).
+		Where("id = ?", userID).
+		Exec(ctx); err != nil {
+		log.Error("Failed to update external_customer_id: ", err)
+	} else {
+		utils.DeleteCache("user:" + userID)
+	}
+}
+
 // OnUserCreate handles initial setup for newly created users synchronously for DB items and async for Polar
 func OnUserCreate(ctx context.Context, user *models.User) {
 	if user == nil || user.Id == "" {
@@ -99,33 +111,10 @@ func OnUserCreate(ctx context.Context, user *models.User) {
 		log.Error("Failed to create default workspace for user: ", user.Id, err)
 	}
 
-	// 2. Asynchronously create Polar Customer and store the external_customer_id
+	// 2. Asynchronously ensure Polar customer exists
 	go func(u *models.User) {
-		client := getPolarClient()
-		res, err := client.Customers.Create(context.Background(), components.CustomerCreate{
-			ExternalID: polar.Pointer(u.Id),
-			Email:      u.Email,
-			Name:       polar.Pointer(u.Name),
-		})
-		if err != nil {
-			log.Error("Failed to create Polar customer: ", err)
-			return
-		}
-
-		if res != nil && res.Customer != nil {
-			polarCustomerId := res.Customer.ID
-			_, err = config.DB.NewUpdate().
-				Model((*models.User)(nil)).
-				Set("external_customer_id = ?", polarCustomerId).
-				Where("id = ?", u.Id).
-				Exec(context.Background())
-
-			if err != nil {
-				log.Error("Failed to update user external_customer_id: ", err)
-			} else {
-				utils.DeleteCache("user:" + u.Id)
-				log.Infof("Successfully associated Polar customer ID (%s) with user %s", polarCustomerId, u.Id)
-			}
+		if _, err := getOrCreatePolarCustomer(context.Background(), u); err != nil {
+			log.Error("Failed to create Polar customer for user: ", u.Id, err)
 		}
 	}(user)
 }
@@ -148,15 +137,7 @@ func getOrCreatePolarCustomer(ctx context.Context, user *models.User) (string, e
 	})
 	if err == nil && customers != nil && customers.ListResourceCustomer != nil && len(customers.ListResourceCustomer.Items) > 0 {
 		polarCustomerId := customers.ListResourceCustomer.Items[0].ID
-		go func(uID, pID string) {
-			if _, err := config.DB.NewUpdate().
-				Model((*models.User)(nil)).
-				Set("external_customer_id = ?", pID).
-				Where("id = ?", uID).
-				Exec(context.Background()); err == nil {
-				utils.DeleteCache("user:" + uID)
-			}
-		}(user.Id, polarCustomerId)
+		go updateExternalCustomerID(context.Background(), user.Id, polarCustomerId)
 		user.ExternalCustomerId = polarCustomerId
 		return polarCustomerId, nil
 	}
@@ -172,15 +153,7 @@ func getOrCreatePolarCustomer(ctx context.Context, user *models.User) (string, e
 	}
 
 	polarCustomerId := res.Customer.ID
-	go func(uID, pID string) {
-		if _, err := config.DB.NewUpdate().
-			Model((*models.User)(nil)).
-			Set("external_customer_id = ?", pID).
-			Where("id = ?", uID).
-			Exec(context.Background()); err == nil {
-			utils.DeleteCache("user:" + uID)
-		}
-	}(user.Id, polarCustomerId)
+	go updateExternalCustomerID(context.Background(), user.Id, polarCustomerId)
 
 	user.ExternalCustomerId = polarCustomerId
 	return polarCustomerId, nil
@@ -208,7 +181,10 @@ func Checkout(c fiber.Ctx) error {
 
 	client := getPolarClient()
 
-	successURL := fmt.Sprintf("%s/payment-success?checkout_id={CHECKOUT_ID}", config.FRONTEND_URL)
+	successURL := config.POLAR_SUCCESS_URL
+	if successURL == "" {
+		successURL = fmt.Sprintf("%s/payment-success?checkout_id={CHECKOUT_ID}", config.FRONTEND_URL)
+	}
 
 	checkoutSession, err := client.Checkouts.Create(c.Context(), components.CheckoutCreate{
 		Products:      []string{productId},
@@ -357,8 +333,10 @@ func GetCheckoutDetails(c fiber.Ctx) error {
 // PolarWebhook handles incoming webhooks from Polar
 func PolarWebhook(c fiber.Ctx) error {
 	payload := c.Body()
+	webhookId := c.Get("webhook-id")
+
 	headers := http.Header{}
-	headers.Set("webhook-id", c.Get("webhook-id"))
+	headers.Set("webhook-id", webhookId)
 	headers.Set("webhook-timestamp", c.Get("webhook-timestamp"))
 	headers.Set("webhook-signature", c.Get("webhook-signature"))
 	base64Secret := base64.StdEncoding.EncodeToString([]byte(config.POLAR_WEBHOOK_SECRET))
@@ -378,7 +356,6 @@ func PolarWebhook(c fiber.Ctx) error {
 		})
 	}
 
-	webhookId := c.Get("webhook-id")
 	if config.VALKEY != nil && webhookId != "" {
 		val, err := config.VALKEY.GetWithContext(c.Context(), "webhook:"+webhookId)
 		if err == nil && len(val) > 0 {
@@ -419,6 +396,10 @@ func PolarWebhook(c fiber.Ctx) error {
 func handleSubscriptionChange(ctx context.Context, data map[string]interface{}) {
 	customer, _ := data["customer"].(map[string]interface{})
 	email, _ := customer["email"].(string)
+	if email == "" {
+		return
+	}
+
 	productId, _ := data["product_id"].(string)
 	customerId, _ := data["customer_id"].(string)
 
@@ -463,15 +444,9 @@ func handleOrderPaid(ctx context.Context, data map[string]interface{}) {
 	customerId, _ := data["customer_id"].(string)
 
 	var userId string
-	query := config.DB.NewUpdate().Model((*models.User)(nil))
-
-	if productId == config.POLAR_AI_CREDITS {
-		query = query.Set("ai_credits = ai_credits + ?", creditsToAdd)
-	} else {
-		query = query.Set("ai_credits = ?", creditsToAdd)
-	}
-
-	err := query.
+	err := config.DB.NewUpdate().
+		Model((*models.User)(nil)).
+		Set("ai_credits = ai_credits + ?", creditsToAdd).
 		Set("external_customer_id = ?", customerId).
 		Where("email = ?", email).
 		Returning("id").
@@ -488,6 +463,9 @@ func handleOrderPaid(ctx context.Context, data map[string]interface{}) {
 func handleSubscriptionCanceled(ctx context.Context, data map[string]interface{}) {
 	customer, _ := data["customer"].(map[string]interface{})
 	email, _ := customer["email"].(string)
+	if email == "" {
+		return
+	}
 
 	var userId string
 	err := config.DB.NewUpdate().

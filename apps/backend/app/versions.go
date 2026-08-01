@@ -283,7 +283,11 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 	}
 
 	// Create restore point of current content
-	contentJson, _ := json.Marshal(note.Content)
+	contentJson, err := json.Marshal(note.Content)
+	if err != nil {
+		log.Error("Failed to marshal existing note content during restore: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Failed to backup current state"})
+	}
 	hashBytes := sha256.Sum256(contentJson)
 	hashStr := hex.EncodeToString(hashBytes[:])
 	compressed := zstdEncoder.EncodeAll(contentJson, make([]byte, 0, len(contentJson)))
@@ -324,6 +328,77 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 	go utils.DeleteCache(fmt.Sprintf("note:%s:content", noteId))
 
 	return c.JSON(models.APIResponse{Status: 200, Message: "Restored successfully", Data: data})
+}
+
+// RestoreNoteFromContent restores a cloud note using content supplied by the client (e.g. from a local snapshot)
+func RestoreNoteFromContent(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+	noteId := c.Params("id")
+
+	req := new(models.RestoreFromContentRequest)
+	if err := c.Bind().Body(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "Invalid request body"})
+	}
+
+	if req.Content == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "Content is required"})
+	}
+
+	// Fetch note and verify ownership
+	var note models.Note
+	if err := config.DB.NewSelect().Model(&note).Where("id = ? AND owner = ?", noteId, user.Id).Scan(c.Context()); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(models.APIError{Status: 404, Error: "Note not found"})
+	}
+
+	// Create restore point of current content
+	currentJson, err := json.Marshal(note.Content)
+	if err != nil {
+		log.Error("Failed to marshal existing note content during restore-from-content: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Failed to backup current state"})
+	}
+	currentHash := sha256.Sum256(currentJson)
+	currentHashStr := hex.EncodeToString(currentHash[:])
+	currentCompressed := zstdEncoder.EncodeAll(currentJson, make([]byte, 0, len(currentJson)))
+
+	restoreLabel := "Restore point"
+	if req.Label != nil {
+		restoreLabel = *req.Label
+	}
+	restorePoint := models.NoteVersion{
+		NoteId:              note.Id,
+		WorkspaceId:         note.WorkspaceId,
+		ContentCompressed:   currentCompressed,
+		ContentHash:         currentHashStr,
+		SizeBytes:           len(currentJson),
+		CompressedSizeBytes: len(currentCompressed),
+		VersionType:         "restore",
+		Label:               &restoreLabel,
+		CreatedBy:           &user.Id,
+	}
+
+	// Transaction: save restore point + update note content
+	err = config.DB.RunInTx(c.Context(), nil, func(ctx context.Context, tx bun.Tx) error {
+		if _, err := tx.NewInsert().Model(&restorePoint).Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewUpdate().Model(&note).Set("content = ?", req.Content).Set("updated_at = ?", time.Now()).WherePK().Exec(ctx); err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Error("RestoreFromContent failed: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed"})
+	}
+
+	// Invalidate caches
+	go utils.DeleteCache(fmt.Sprintf("note_versions_latest:%s", noteId))
+	go utils.DeleteCache(fmt.Sprintf("note_versions_count:%s", noteId))
+	go utils.DeleteCache(fmt.Sprintf("note:%s:preview", noteId))
+	go utils.DeleteCache(fmt.Sprintf("note:%s:content", noteId))
+
+	return c.JSON(models.APIResponse{Status: 200, Message: "Restored from content successfully", Data: req.Content})
 }
 
 // maybeAutoSnapshot is called as a goroutine after a successful patch operation

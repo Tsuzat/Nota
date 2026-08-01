@@ -1,37 +1,33 @@
 export * from './ai';
 export { getAuthContext, setAuthContext } from './auth.svelte';
-export { getNotesContext, setNotesContext } from './notes.svelte';
 export * from './export';
+export { getNotesContext, setNotesContext } from './notes.svelte';
 export { default as request } from './request';
 export { secureStorage } from './secureStorage';
-export { getStorageContext, setStorageContext } from './storage.svelte';
 export * from './session-parser';
+export { getStorageContext, setStorageContext } from './storage.svelte';
 export type {
+  CheckoutDetails,
   NotaFile,
   Note,
+  NoteVersion,
   Session,
   User,
   Workspace,
-  CheckoutDetails,
 } from './types';
 export {
   NotaFileSchema,
   NoteSchema,
+  NoteVersionSchema,
   SessionSchema,
   UserSchema,
   WorkspaceSchema,
 } from './types';
 export {
-  getWorkspacesContext,
-  setWorkspacesContext,
-} from './workspaces.svelte';
-export {
   getVersionsContext,
   setVersionsContext,
 } from './versions.svelte';
-export type {
-  NoteVersion,
-} from './types';
 export {
-  NoteVersionSchema,
-} from './types';
+  getWorkspacesContext,
+  setWorkspacesContext,
+} from './workspaces.svelte';

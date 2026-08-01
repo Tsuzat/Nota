@@ -331,7 +331,7 @@ const currentAssignedStorage = $derived(
 
   <!-- Storage View Body -->
   <main class="flex-1 max-h-[calc(100vh-3rem)] overflow-auto!">
-    <div class="mx-auto w-full max-w-6xl p-4 sm:p-6">
+    <div class="mx-auto w-full max-w-4xl p-4 sm:p-6">
       <StorageViewer
         title={selectedLabel}
         usedStorage={currentUsedStorage}

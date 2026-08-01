@@ -136,7 +136,7 @@ function switchWorkspace(workspace: LocalWorkSpace | Workspace) {
 
 <Topbar showSeparator={true}></Topbar>
 
-<div class="flex h-[calc(100vh-3rem)] w-full flex-1 grow overflow-auto">
+<div class="flex max-h-[calc(100vh-3rem)] w-full flex-1 grow overflow-scroll">
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-4">
     <section class="flex flex-col gap-1">
       <h2

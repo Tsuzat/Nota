@@ -1,7 +1,7 @@
-import { getContext, setContext } from "svelte";
-import { PUBLIC_BACKEND_URL } from "$env/static/public";
-import request from "./request";
-import { type Workspace, WorkspaceSchema } from "./types";
+import { getContext, setContext } from 'svelte';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import request from './request';
+import { type Workspace, WorkspaceSchema } from './types';
 
 class Workspaces {
   #workspaces = $state<Workspace[]>([]);
@@ -21,17 +21,15 @@ class Workspaces {
   async fetch() {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace`;
     const res = await request(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
     if (res.ok) {
       const json = await res.json();
       const workspaces = json.data as Workspace[];
-      const parsedWorkspaces = workspaces.map((workspace) =>
-        WorkspaceSchema.parse(workspace),
-      );
+      const parsedWorkspaces = workspaces.map((workspace) => WorkspaceSchema.parse(workspace));
       this.workspaces = parsedWorkspaces;
     } else {
       throw new Error(await res.text());
@@ -47,9 +45,9 @@ class Workspaces {
   async create(name: string, icon: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace`;
     const res = await request(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name,
@@ -76,9 +74,9 @@ class Workspaces {
   async update(workspaceId: string, name: string, icon: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace/${workspaceId}`;
     const res = await request(url, {
-      method: "PATCH",
+      method: 'PATCH',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name,
@@ -90,7 +88,7 @@ class Workspaces {
       const updatedWorkspace = json.data as Workspace;
       const parsedWorkspace = WorkspaceSchema.parse(updatedWorkspace);
       this.workspaces = this.workspaces.map((workspace) =>
-        workspace.id === workspaceId ? parsedWorkspace : workspace,
+        workspace.id === workspaceId ? parsedWorkspace : workspace
       );
     } else {
       throw new Error(await res.text());
@@ -104,28 +102,24 @@ class Workspaces {
    */
   async delete(workspaceId: string) {
     if (this.#workspaces.length === 1) {
-      throw new Error(
-        "You must have at least one cloud workspace. Deletion is not allowed.",
-      );
+      throw new Error('You must have at least one cloud workspace. Deletion is not allowed.');
     }
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/workspace/${workspaceId}`;
     const res = await request(url, {
-      method: "DELETE",
+      method: 'DELETE',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
     if (res.ok) {
-      this.workspaces = this.workspaces.filter(
-        (workspace) => workspace.id !== workspaceId,
-      );
+      this.workspaces = this.workspaces.filter((workspace) => workspace.id !== workspaceId);
     } else {
       throw new Error(await res.text());
     }
   }
 }
 
-const NOTAWORKSPACESKEY = Symbol("NOTAWORKSPACESKEY");
+const NOTAWORKSPACESKEY = Symbol('NOTAWORKSPACESKEY');
 
 /**
  * Set the workspaces context.

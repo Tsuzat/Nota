@@ -18,4 +18,5 @@ func InitVersionRoutes() {
 	group.Post("/:id<guid>/versions", app.CreateManualSnapshot)
 	group.Delete("/:id<guid>/versions/:versionId<guid>", app.DeleteNoteVersion)
 	group.Post("/:id<guid>/versions/:versionId<guid>/restore", app.RestoreNoteVersion)
+	group.Post("/:id<guid>/restore-from-content", app.RestoreNoteFromContent)
 }

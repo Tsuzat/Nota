@@ -1,20 +1,18 @@
 <script lang="ts" module>
-  type DeleteWorkspaceDialogOptions = {
-    workspaceName: string;
-    onConfirm: () => Promise<void> | void;
-    /** Reason why deletion is blocked (if any). Dialog shows this and disables confirm. */
-    blockedReason?: string;
-  };
+type DeleteWorkspaceDialogOptions = {
+  workspaceName: string;
+  onConfirm: () => Promise<void> | void;
+  /** Reason why deletion is blocked (if any). Dialog shows this and disables confirm. */
+  blockedReason?: string;
+};
 
-  let open = $state(false);
-  let options = $state<DeleteWorkspaceDialogOptions | null>(null);
+let open = $state(false);
+let options = $state<DeleteWorkspaceDialogOptions | null>(null);
 
-  export function openDeleteWorkspaceDialog(
-    opts: DeleteWorkspaceDialogOptions,
-  ) {
-    options = opts;
-    open = true;
-  }
+export function openDeleteWorkspaceDialog(opts: DeleteWorkspaceDialogOptions) {
+  options = opts;
+  open = true;
+}
 </script>
 
 <script lang="ts">

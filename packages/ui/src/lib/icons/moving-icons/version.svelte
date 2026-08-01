@@ -1,27 +1,27 @@
 <script lang="ts">
-  interface IconProps {
-    color?: string;
-    size?: number;
-    strokeWidth?: number;
-    animate?: boolean;
-    class?: string;
-  }
+interface IconProps {
+  color?: string;
+  size?: number;
+  strokeWidth?: number;
+  animate?: boolean;
+  class?: string;
+}
 
-  let {
-    color = "currentColor",
-    size = 24,
-    strokeWidth = 2,
-    animate = false,
-    class: className = "",
-  }: IconProps = $props();
+let {
+  color = 'currentColor',
+  size = 24,
+  strokeWidth = 2,
+  animate = false,
+  class: className = '',
+}: IconProps = $props();
 
-  function handleMouseEnter() {
-    animate = true;
-  }
+function handleMouseEnter() {
+  animate = true;
+}
 
-  function handleMouseLeave() {
-    animate = false;
-  }
+function handleMouseLeave() {
+  animate = false;
+}
 </script>
 
 <div

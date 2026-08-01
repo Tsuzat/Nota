@@ -57,6 +57,7 @@ func main() {
 	}
 
 	config.APP = fiber.New(fiber.Config{
+		BodyLimit:       20 * 1024 * 1024, // 20 MB — supports large note restore payloads
 		ReadBufferSize:  32768,
 		JSONEncoder:     json.Marshal,
 		JSONDecoder:     json.Unmarshal,
@@ -66,6 +67,8 @@ func main() {
 	config.APP.Use(middleware.RequestLogger)
 	// sanitization middleware
 	config.APP.Use(middleware.SanitizationMiddleware)
+	// payload size limit middleware
+	config.APP.Use(middleware.PayloadLimitMiddleware)
 	// ban middleware
 	config.APP.Use(middleware.BanMiddleware)
 
