@@ -42,6 +42,10 @@ const tabItems = [
     url: '#faqs',
     title: 'FAQs',
   },
+  {
+    url: '/blog',
+    title: 'Blog',
+  },
 ];
 
 const features = [
@@ -74,59 +78,95 @@ const features = [
 const faqItems = [
   {
     id: 'item-1',
-    question: 'What is Nota?',
+    question: 'What makes Nota different from typical Electron note apps?',
     answer:
-      'Nota is a fast, lightweight, and feature-rich note-taking app designed to give you a powerful rich text editing experience without the bloat of typical Electron applications. It is available on Desktop (macOS, Windows, Linux) and the Web.',
+      'Nota is built natively with Tauri and Rust, making it blindingly fast, lightweight, and memory-efficient. You enjoy an expressive rich text editing experience without the sluggish performance or system resource bloat of standard desktop applications on macOS, Windows, Linux, and Web.',
+    category: 'General',
   },
   {
     id: 'item-2',
-    question: 'Is Nota free to use?',
+    question: 'Is Nota free for local-first users?',
     answer:
-      'Yes! Our Free tier is perfect for local-first users, offering unlimited local notes and workspaces. You also get 1 cloud workspace and up to 5 cloud notes for free.',
+      'Yes! Our Free tier is tailored for local-first workflows, offering unlimited local notes and workspaces stored directly on your disk. You also receive 1 cloud workspace with up to 5 cloud notes completely free.',
+    category: 'Pricing',
   },
   {
     id: 'item-3',
-    question: 'How does the AI integration work?',
+    question: 'How does version history and snapshot restoration work?',
     answer:
-      'Nota uses a Bring Your Own Key (BYOK) model. You can plug in your own API keys to generate text and summarize notes without paying a high recurring subscription fee. Pro users can also use our bundled AI credits.',
+      'Nota automatically preserves checkpoints of your writing as you edit. Local notes save snapshots directly to your disk, while Pro users on cloud workspaces maintain both cloud and local backups—enabling seamless content restoration across devices even for massive 100,000+ word documents.',
+    category: 'Features',
   },
   {
     id: 'item-4',
-    question: 'What is the difference between the Free and Pro plans?',
+    question: 'How does the Bring Your Own Key (BYOK) AI model work?',
     answer:
-      'The Free plan offers unlimited local notes, local media storage, and limited cloud syncing (1 workspace, 5 notes). The Pro plan unlocks unlimited cloud notes and workspaces, 5 GB of cloud storage, collaborative notes, web access, and bundled AI credits.',
+      'Instead of paying expensive recurring AI subscription add-ons, Nota lets you connect your personal API keys (OpenAI, Anthropic, Google, etc.) to generate text, rephrase paragraphs, and summarize documents practically at cost. Pro subscribers also enjoy bundled AI credits ready out of the box.',
+    category: 'Features',
   },
   {
     id: 'item-5',
-    question: 'Can I use Nota offline?',
+    question: 'What is the difference between the Free and Pro plans?',
     answer:
-      "Absolutely! Nota's Desktop app is built with Tauri and supports a local-first approach. Your notes are saved locally and are fully accessible even when you are not connected to the internet.",
+      'The Free plan unlocks unlimited local note creation, device-local media storage, and limited cloud syncing (1 workspace, 5 notes). Pro upgrades you to unlimited cloud notes and workspaces, 5 GB of cloud media storage, realtime teamwork collaboration, browser web access, advanced versioning, and AI credits.',
+    category: 'Pricing',
   },
   {
     id: 'item-6',
-    question: 'What features does the editor support?',
+    question: 'Can I reliably work totally offline?',
     answer:
-      'Our custom rich text editor supports slash commands, markdown shortcuts, media embeds (images, video, audio), mathematical equations (KaTeX), tables, and task lists.',
+      'Absolutely! Because Nota relies on a robust local-first SQLite and filesystem architecture via Tauri, your notes remain instantaneous and fully accessible on your desktop regardless of your internet connection.',
+    category: 'General',
   },
   {
     id: 'item-7',
-    question: 'Can I collaborate on notes with others?',
+    question: 'What capabilities does the rich text editor offer?',
     answer:
-      'Yes, realtime collaboration is available on our Pro plan. You can invite others to collaborate on your cloud notes and work together seamlessly.',
+      'Our high-speed custom Tiptap editor seamlessly supports markdown shortcuts, rapid slash commands (/), drag-and-drop media embeds (images, video, audio), LaTeX mathematical formulas, interactive task checklists, code blocks, and dynamic tables.',
+    category: 'Features',
   },
   {
     id: 'item-8',
-    question: 'How do you handle my data and security?',
+    question: 'How secure is my personal writing and data?',
     answer:
-      'We prioritize your privacy. Your cloud data is encrypted, and your local notes stay strictly on your device. We use a secure authentication flow and reliable session management to keep your information safe.',
+      'We treat your privacy with rigorous respect. Your local workspaces never touch our servers. For cloud features, data is transferred with robust encryption, secured by modern authentication protocols, and tenant-isolated in state-of-the-art databases.',
+    category: 'Security',
   },
   {
     id: 'item-9',
-    question: 'Can I upgrade, downgrade, or cancel anytime?',
+    question: 'Can I export my notes to avoid lock-in?',
     answer:
-      'Yes, you have full control over your subscription. You can upgrade, downgrade, or cancel your Pro plan at any time from your settings.',
+      'Yes! We believe your writing belongs solely to you. Nota provides seamless export capabilities to standard markdown and JSON document formats at any time, guaranteeing zero vendor lock-in.',
+    category: 'General',
+  },
+  {
+    id: 'item-10',
+    question: 'Can I upgrade, downgrade, or cancel my subscription anytime?',
+    answer:
+      'Yes, you retain full control over your billing from your settings dashboard. You can upgrade, switch billing cycles, or cancel your Pro membership instantly without hassle.',
+    category: 'Pricing',
   },
 ];
+
+let faqCategory = $state('All');
+const faqCategories = ['All', 'General', 'Features', 'Pricing', 'Security'];
+const filteredFaqs = $derived(
+  faqCategory === 'All' ? faqItems : faqItems.filter((item) => item.category === faqCategory)
+);
+
+const faqJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+});
+
 let copied = $state(false);
 function copyBrewCommand() {
   navigator.clipboard.writeText('brew install --cask Tsuzat/tap/nota');
@@ -227,6 +267,10 @@ onMount(() => {
       },
       "description": "Nota is a fast, lightweight, and feature-rich note-taking app built with Svelte 5 and Rust. Featuring a powerful rich text editor, AI integration (BYOK), and cross-platform desktop & web support."
     }
+  </script>
+  <!-- Schema.org FAQPage JSON-LD -->
+  <script type="application/ld+json">
+    {@html faqJsonLd}
   </script>
 </svelte:head>
 
@@ -468,9 +512,10 @@ onMount(() => {
     <div class="flex flex-col items-center gap-4 text-center">
       <h1 class="text-4xl font-bold">Instantly Ready When You Are</h1>
       <p class="text-lg text-balance text-muted-foreground">
-        Powered by Rust (Tauri) on desktop and Svelte on the web, Nota delivers the same blazingly fast experience on every platform. No loading
-        screens, no Electron overhead—just instant access to your thoughts everywhere. See
-        it launch via Raycast below.
+        Powered by Rust (Tauri) on desktop and Svelte on the web, Nota delivers
+        the same blazingly fast experience on every platform. No loading
+        screens, no Electron overhead—just instant access to your thoughts
+        everywhere. See it launch via Raycast below.
       </p>
     </div>
     <Tiltcard
@@ -500,7 +545,8 @@ onMount(() => {
     <div class="flex flex-col items-center gap-4 text-center">
       <h1 class="text-4xl font-bold">Built for Speed & Flow</h1>
       <p class="text-lg text-balance text-muted-foreground">
-        Explore how Nota streamlines workspace management, note organization, and icon customization.
+        Explore how Nota streamlines workspace management, note organization,
+        and icon customization.
       </p>
     </div>
 
@@ -530,7 +576,8 @@ onMount(() => {
         </Tiltcard>
         <h3 class="mt-4 text-xl font-semibold">Custom Icons & Emojis</h3>
         <p class="mt-1 text-sm text-muted-foreground">
-          Personalize workspaces and notes with custom emojis, icons, or custom image URLs.
+          Personalize workspaces and notes with custom emojis, icons, or custom
+          image URLs.
         </p>
       </div>
 
@@ -560,7 +607,8 @@ onMount(() => {
         </Tiltcard>
         <h3 class="mt-4 text-xl font-semibold">Nested Note Tree</h3>
         <p class="mt-1 text-sm text-muted-foreground">
-          Organize your notes with an intuitive tree structure and expandable child notes.
+          Organize your notes with an intuitive tree structure and expandable
+          child notes.
         </p>
       </div>
 
@@ -590,7 +638,8 @@ onMount(() => {
         </Tiltcard>
         <h3 class="mt-4 text-xl font-semibold">Workspace Switching</h3>
         <p class="mt-1 text-sm text-muted-foreground">
-          Seamlessly toggle between local and cloud workspaces to organize different projects.
+          Seamlessly toggle between local and cloud workspaces to organize
+          different projects.
         </p>
       </div>
     </div>
@@ -656,31 +705,63 @@ onMount(() => {
   <section id="faqs" class="my-4">
     <div class="mx-auto px-4 md:px-6">
       <div class="mx-auto max-w-2xl text-center text-balance">
-        <h1>Frequently Asked Questions</h1>
+        <h2 class="text-3xl font-bold tracking-tight md:text-4xl">
+          Frequently Asked Questions
+        </h2>
         <p class="mt-4 text-balance text-muted-foreground">
-          Discover quick and comprehensive answers to common questions about our
-          platform, services, and features.
+          Discover comprehensive answers about our architecture, pricing models,
+          editor capabilities, and data privacy.
         </p>
       </div>
 
-      <div class="mx-auto mt-12 max-w-2xl">
+      <div class="mx-auto mt-8 max-w-3xl">
+        <!-- Category Filters -->
+        <div class="mb-6 flex flex-wrap items-center justify-center gap-2">
+          {#each faqCategories as cat (cat)}
+            <Button
+              variant={faqCategory === cat ? "default" : "outline"}
+              size="sm"
+              class="rounded-full px-4 text-xs font-semibold"
+              onclick={() => {
+                faqCategory = cat;
+              }}
+            >
+              {cat}
+            </Button>
+          {/each}
+        </div>
+
         <Accordion
           type="single"
-          class="w-full rounded-xl border bg-background px-8 py-3 shadow-sm ring-4 ring-muted dark:ring-0"
+          class="w-full rounded-xl border bg-background px-6 py-2 shadow-sm ring-4 ring-muted md:px-8 dark:ring-0"
         >
-          {#each faqItems as item, index (index)}
+          {#each filteredFaqs as item, index (item.id)}
             <AccordionItem
               value={item.id}
               class={[
-                faqItems.length - 1 !== index ? "border-dashed" : "border-none",
+                filteredFaqs.length - 1 !== index
+                  ? "border-dashed"
+                  : "border-none",
               ]}
             >
               <AccordionTrigger
-                class="cursor-pointer text-base font-semibold hover:no-underline"
-                >{item.question}</AccordionTrigger
+                class="cursor-pointer text-left text-base font-semibold hover:no-underline"
               >
+                <div
+                  class="flex flex-col gap-1 pr-2 text-left md:flex-row md:items-center md:gap-3"
+                >
+                  <span>{item.question}</span>
+                  <span
+                    class="w-fit rounded-full bg-muted/60 px-2.5 py-0.5 text-[11px] font-medium tracking-normal text-muted-foreground"
+                  >
+                    {item.category}
+                  </span>
+                </div>
+              </AccordionTrigger>
               <AccordionContent>
-                <p class="text-base">{item.answer}</p>
+                <p class="text-base text-muted-foreground leading-relaxed">
+                  {item.answer}
+                </p>
               </AccordionContent>
             </AccordionItem>
           {/each}
@@ -707,6 +788,10 @@ onMount(() => {
     •
     <a href="/privacy" title="Open Privacy Policy" class="text-primary"
       >Privacy Policy</a
+    >
+    •
+    <a href="/blog" title="Open Blog & Insights" class="text-primary"
+      >Blog</a
     >
     •
     <a href="mailto:contact@nota.ink" title="Contact Us" class="text-primary"
