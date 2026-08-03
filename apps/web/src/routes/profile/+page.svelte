@@ -45,7 +45,7 @@ function timeAgo(date: Date | string | null | undefined) {
 }
 
 function getDeviceIcon(device: string | null | undefined, browser: string | null | undefined) {
-  if (device === 'desktop') return '/favicon.svg';
+  if (device === 'desktop') return '/web-app-manifest-192x192.png';
   if (!browser) return 'https://svgl.app/library/chrome.svg';
 
   const b = browser.toLowerCase();

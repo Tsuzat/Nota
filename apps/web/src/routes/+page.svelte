@@ -73,6 +73,18 @@ const features = [
       'Manage your notes with hierarchical workspaces. Protected by custom authentication flow and session management.',
     icon: icons.FolderLock,
   },
+  {
+    name: 'Multi-Format Export',
+    description:
+      'Export your notes anytime to PDF, JSON, HTML, and Markdown to maintain complete ownership of your data with zero vendor lock-in.',
+    icon: icons.Download,
+  },
+  {
+    name: 'Local-First & Offline',
+    description:
+      'Built on a robust device-local SQLite and filesystem architecture. Your notes remain instantaneous and accessible offline without internet.',
+    icon: icons.Database,
+  },
 ];
 
 const faqItems = [
@@ -136,7 +148,7 @@ const faqItems = [
     id: 'item-9',
     question: 'Can I export my notes to avoid lock-in?',
     answer:
-      'Yes! We believe your writing belongs solely to you. Nota provides seamless export capabilities to standard markdown and JSON document formats at any time, guaranteeing zero vendor lock-in.',
+      'Yes! We believe your writing belongs solely to you. Nota provides seamless export capabilities to PDF, JSON, HTML, and Markdown document formats at any time, guaranteeing zero vendor lock-in.',
     category: 'General',
   },
   {
