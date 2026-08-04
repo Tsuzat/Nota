@@ -8,7 +8,7 @@ import (
 )
 
 // RecordAiUsage updates user balance, inserts log, and keeps latest 50 within a single transaction.
-func RecordAiUsage(ctx context.Context, user *models.User, noteId string, inputTokens, outputTokens, totalCostCents int, description string) error {
+func RecordAiUsage(ctx context.Context, user *models.User, noteId string, inputTokens, outputTokens int, totalCostCents float64, description string) error {
 	tx, err := config.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return err

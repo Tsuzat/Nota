@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"math"
+
 	"strconv"
 	"sync"
 
@@ -110,10 +110,10 @@ func GenerateContent(c fiber.Ctx) error {
 		// Output cost: $5.00 per 1M = 0.0005 cents per token
 		inputCost := float64(inputTokens) * 0.00006
 		outputCost := float64(outputTokens) * 0.0005
-		totalCostCents := int(math.Ceil(inputCost + outputCost))
+		totalCostCents := inputCost + outputCost
 
 		if totalCostCents > 0 {
-			description := fmt.Sprintf("Used $%g in input, $%g in output and $%.2f in total.", inputCost/100.0, outputCost/100.0, float64(totalCostCents)/100.0)
+			description := fmt.Sprintf("%d input tokens, %d output tokens, $%.3f total.", inputTokens, outputTokens, totalCostCents/100.0)
 			err = db.RecordAiUsage(context.Background(), user, req.NoteId, inputTokens, outputTokens, totalCostCents, description)
 			if err != nil {
 				log.Error("Failed to record AI usage:", err)

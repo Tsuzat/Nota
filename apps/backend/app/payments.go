@@ -22,12 +22,12 @@ import (
 	svix "github.com/svix/svix-webhooks/go"
 )
 
-func getCreditsToAdd(productId string) int {
+func getCreditsToAdd(productId string) float64 {
 	switch productId {
 	case config.POLAR_AI_CREDITS:
-		return 500
+		return 500.0
 	default:
-		return 0
+		return 0.0
 	}
 }
 

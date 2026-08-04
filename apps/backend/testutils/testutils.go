@@ -25,7 +25,7 @@ func MockUser() *models.User {
 		UpdatedAt:        time.Now(),
 		IsVerified:       true,
 		SubscriptionPlan: "free",
-		AiCredits:        1000,
+		AiCredits:        1000.0,
 		AssignedStorage:  0,
 		UsedStorage:      0,
 		EmailVerified:    true,
@@ -37,7 +37,7 @@ func MockProUser() *models.User {
 	user := MockUser()
 	user.SubscriptionPlan = "pro"
 	user.SubscriptionType = "monthly"
-	user.AiCredits = 2_000_000
+	user.AiCredits = 2_000_000.0
 	user.AssignedStorage = 1_000_000_000
 	return user
 }

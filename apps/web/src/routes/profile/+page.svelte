@@ -3,12 +3,13 @@ import { toast } from '@lib/components/ui/sonner';
 import type { Session } from '@nota/client';
 import { getAiUsageLogs, getAuthContext } from '@nota/client';
 import { ProBadge } from '@nota/ui/custom/index.js';
-import { icons } from '@nota/ui/icons';
+import { BarSpinner, icons } from '@nota/ui/icons';
 import { Badge } from '@nota/ui/shadcn/badge';
 import { Button } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
 import * as Tabs from '@nota/ui/shadcn/tabs';
 import { onMount } from 'svelte';
+import { resolve } from '$app/paths';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import Particles from '$lib/components/custom/landing/particles.svelte';
 import UserAvatar from '$lib/components/custom/user-avatar.svelte';
@@ -86,6 +87,13 @@ async function handleRevokeOtherSessions() {
 </script>
 
 <Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />
+
+<div class="fixed top-2 left-2">
+  <Button href={resolve("/")} variant="outline" class="gap-2">
+    <icons.MoveLeft />
+    Back
+  </Button>
+</div>
 
 <div class="mx-auto max-w-4xl p-6 md:p-10 pt-16 space-y-8">
   <div class="space-y-1">
@@ -210,9 +218,7 @@ async function handleRevokeOtherSessions() {
           <Card.Content class="space-y-6 mt-2">
             {#await authClient.getSubscriptionDetails()}
               <div class="flex items-center justify-center p-8">
-                <icons.Loader
-                  class="size-6 animate-spin text-muted-foreground"
-                />
+                <BarSpinner />
               </div>
             {:then details}
               <div class="grid gap-6 md:grid-cols-2">
@@ -321,11 +327,10 @@ async function handleRevokeOtherSessions() {
             <Button
               variant="outline"
               size="sm"
-              href="{PUBLIC_BACKEND_URL}/api/v1/payments/portal"
-              target="_blank"
+              href={resolve("/payment?type=credits")}
               class="gap-2"
             >
-              <icons.Plus class="size-4" />
+              <icons.Plus />
               Top Up
             </Button>
           </Card.Header>
@@ -333,11 +338,11 @@ async function handleRevokeOtherSessions() {
             <div class="rounded-xl border bg-muted/40 p-4 space-y-2 mb-6">
               <div class="flex items-center justify-between">
                 <span class="text-sm font-semibold flex items-center gap-2">
-                  <icons.Sparkles class="size-4 text-orange-500" />
+                  <icons.Sparkles class="text-orange-500" />
                   Available AI Balance
                 </span>
-                <Badge variant="secondary" class="font-mono text-lg">
-                  ${user?.ai_credits?.toFixed(2) ?? "0.00"}
+                <Badge variant="default" class="text-lg">
+                  ${user.ai_credits.toFixed(2)}
                 </Badge>
               </div>
               <p class="text-xs text-muted-foreground">
@@ -347,9 +352,7 @@ async function handleRevokeOtherSessions() {
 
             {#await getAiUsageLogs(50)}
               <div class="flex items-center justify-center p-8">
-                <icons.Loader
-                  class="size-6 animate-spin text-muted-foreground"
-                />
+                <BarSpinner />
               </div>
             {:then logs}
               {#if logs.length === 0}
@@ -384,10 +387,12 @@ async function handleRevokeOtherSessions() {
                     <tbody class="divide-y">
                       {#each logs as log}
                         <tr>
-                          <td class="p-4 text-muted-foreground">
-                            {new Date(log.on).toLocaleDateString()}
-                            {new Date(log.on).toLocaleTimeString([], {
-                              hour: "2-digit",
+                          <td class="p-4 text-muted-foreground whitespace-nowrap">
+                            {new Date(log.on).toLocaleString(undefined, {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "numeric",
                               minute: "2-digit",
                             })}
                           </td>
@@ -406,11 +411,11 @@ async function handleRevokeOtherSessions() {
                   </table>
                 </div>
               {/if}
-            {:catch error}
+            {:catch}
               <div
                 class="text-sm text-red-500 p-4 border border-red-500/20 bg-red-500/10 rounded-xl"
               >
-                Failed to load AI usage logs. {error.message}
+                Failed to load AI usage logs.
               </div>
             {/await}
           </Card.Content>

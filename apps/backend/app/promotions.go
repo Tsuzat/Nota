@@ -8,7 +8,7 @@ import (
 
 func RedeemAICredits(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
-	user.AiCredits += 10000
+	user.AiCredits += 10000.0
 	if err := db.UpdateUser(user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Status: fiber.StatusInternalServerError,

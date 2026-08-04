@@ -37,7 +37,7 @@ func createValidatedTestApp() *fiber.App {
 func TestGenerateContent_InsufficientCredits(t *testing.T) {
 	fiberApp := createValidatedTestApp()
 	mockUser := testutils.MockUser()
-	mockUser.AiCredits = 0
+	mockUser.AiCredits = 0.0
 
 	fiberApp.Post("/ai/generate", func(c fiber.Ctx) error {
 		c.Locals("user", mockUser)
@@ -61,7 +61,7 @@ func TestGenerateContent_InsufficientCredits(t *testing.T) {
 func TestGenerateContent_NegativeCredits(t *testing.T) {
 	fiberApp := createValidatedTestApp()
 	mockUser := testutils.MockUser()
-	mockUser.AiCredits = -5
+	mockUser.AiCredits = -5.0
 
 	fiberApp.Post("/ai/generate", func(c fiber.Ctx) error {
 		c.Locals("user", mockUser)
@@ -81,7 +81,7 @@ func TestGenerateContent_NegativeCredits(t *testing.T) {
 func TestGenerateContent_InvalidBody(t *testing.T) {
 	fiberApp := createValidatedTestApp()
 	mockUser := testutils.MockUser()
-	mockUser.AiCredits = 500
+	mockUser.AiCredits = 500.0
 
 	fiberApp.Post("/ai/generate", func(c fiber.Ctx) error {
 		c.Locals("user", mockUser)
@@ -100,7 +100,7 @@ func TestGenerateContent_InvalidBody(t *testing.T) {
 func TestGenerateContent_EmptyPrompt(t *testing.T) {
 	fiberApp := createValidatedTestApp()
 	mockUser := testutils.MockUser()
-	mockUser.AiCredits = 500
+	mockUser.AiCredits = 500.0
 
 	fiberApp.Post("/ai/generate", func(c fiber.Ctx) error {
 		c.Locals("user", mockUser)
@@ -120,7 +120,7 @@ func TestGenerateContent_EmptyPrompt(t *testing.T) {
 func TestGenerateContent_MissingNoteId(t *testing.T) {
 	fiberApp := createValidatedTestApp()
 	mockUser := testutils.MockUser()
-	mockUser.AiCredits = 500
+	mockUser.AiCredits = 500.0
 
 	fiberApp.Post("/ai/generate", func(c fiber.Ctx) error {
 		c.Locals("user", mockUser)
@@ -140,7 +140,7 @@ func TestGenerateContent_MissingNoteId(t *testing.T) {
 func TestGenerateContent_InvalidNoteId(t *testing.T) {
 	fiberApp := createValidatedTestApp()
 	mockUser := testutils.MockUser()
-	mockUser.AiCredits = 500
+	mockUser.AiCredits = 500.0
 
 	fiberApp.Post("/ai/generate", func(c fiber.Ctx) error {
 		c.Locals("user", mockUser)
@@ -239,7 +239,7 @@ func TestCostCalculation_SmallTokensCeilsUp(t *testing.T) {
 func TestGenerateRequest_ValidRequest(t *testing.T) {
 	fiberApp := createValidatedTestApp()
 	mockUser := testutils.MockUser()
-	mockUser.AiCredits = 500
+	mockUser.AiCredits = 500.0
 
 	// Set a dummy API key so the GenAI client initialization doesn't throw an error log
 	config.GEMINI_API_KEY = "dummy-api-key"

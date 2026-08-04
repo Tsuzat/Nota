@@ -22,7 +22,7 @@ type User struct {
 	UpdatedAt                       time.Time `json:"updated_at" bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 	IsVerified                      bool      `json:"is_verified" bun:"is_verified,notnull,default:false"`
 	SubscriptionPlan                string    `json:"subscription_plan" bun:"subscription_plan,notnull,default:'free'"`
-	AiCredits                       int       `json:"ai_credits" bun:"ai_credits,notnull,default:0"`
+	AiCredits                       float64   `json:"ai_credits" bun:"ai_credits,notnull,default:0"`
 	SubscriptionType                string    `json:"subscription_type" bun:"subscription_type,nullzero"`
 	ExternalCustomerId              string    `json:"external_customer_id" bun:"external_customer_id"`
 	Password                        string    `json:"-" bun:"encrypted_password"`
@@ -85,7 +85,7 @@ func (user *User) UserResponse() any {
 		"updated_at":           user.UpdatedAt,
 		"is_verified":          user.IsVerified,
 		"subscription_plan":    user.SubscriptionPlan,
-		"ai_credits":           float64(user.AiCredits) / 100.0,
+		"ai_credits":           user.AiCredits / 100.0,
 		"subscription_type":    user.SubscriptionType,
 		"external_customer_id": user.ExternalCustomerId,
 		"email_verified":       user.EmailVerified,

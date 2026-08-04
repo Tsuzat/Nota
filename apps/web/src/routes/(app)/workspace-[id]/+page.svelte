@@ -9,7 +9,7 @@ import { toast } from '@nota/ui/shadcn/sonner';
 import { timeAgo } from '@nota/ui/utils';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { openNewNote } from '$lib/components/dialogs/index.js';
+import { openMoveNote, openNewNote } from '$lib/components/dialogs/index.js';
 import Topbar from '$lib/components/topbar.svelte';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 
@@ -75,6 +75,24 @@ async function trashNote(note: Note) {
   if (!ok) return;
   note.deleted_at = new Date();
   await cloudNotes.update(note.id, { deleted_at: note.deleted_at });
+}
+
+async function togglePin(note: Note) {
+  note.pinned = !note.pinned;
+  await cloudNotes.update(note.id, { pinned: note.pinned });
+}
+
+async function deletePermanently(note: Note) {
+  const ok = window.confirm(
+    `Are you absolutely sure you want to permanently delete '${note.name}'? This action cannot be undone.`
+  );
+  if (!ok) return;
+  try {
+    await cloudNotes.delete(note.id);
+    toast.success(`Note '${note.name}' permanently deleted`);
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Unknown error');
+  }
 }
 </script>
 
@@ -151,60 +169,16 @@ async function trashNote(note: Note) {
               onclick={() => openNote(note)}
             >
               <Card.Header class="pb-2">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" class="bg-muted">
-                      <IconRenderer icon={note.icon} />
-                    </Button>
-                    <Card.Title class="line-clamp-1 text-base font-medium">
-                      {note.name}
-                    </Card.Title>
-                  </div>
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        class="size-8 opacity-0 transition-opacity group-hover:opacity-100"
-                      >
-                        <icons.EllipsisVertical class="size-4" />
-                      </Button>
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content>
-                      <DropdownMenu.Item onclick={() => exportNote(note)}>
-                        <icons.ArrowDownToLine />
-                        Export Notes
-                      </DropdownMenu.Item>
-                      <DropdownMenu.Sub>
-                        <DropdownMenu.SubTrigger
-                          disabled={cloudWorkspaces.workspaces.length === 1}
-                          >Move to...</DropdownMenu.SubTrigger
-                        >
-                        <DropdownMenu.SubContent>
-                          {#each cloudWorkspaces.workspaces as ws (ws.id)}
-                            {#if ws.id !== data.id}
-                              <DropdownMenu.Item
-                                onclick={() => moveToWorkspace(note, ws)}
-                              >
-                                {ws.name}
-                              </DropdownMenu.Item>
-                            {/if}
-                          {/each}
-                        </DropdownMenu.SubContent>
-                      </DropdownMenu.Sub>
-                      <DropdownMenu.Separator />
-                      <DropdownMenu.Item
-                        variant="destructive"
-                        onclick={() => trashNote(note)}
-                      >
-                        <icons.Trash2 class="mr-2 size-4" />
-                        Trash Note
-                      </DropdownMenu.Item>
-                    </DropdownMenu.Content>
-                  </DropdownMenu.Root>
-                </div>
+                <Button variant="ghost" size="icon">
+                  <IconRenderer icon={note.icon} />
+                </Button>
+                <Card.Title
+                  class="line-clamp-1 flex items-center gap-1.5 text-base font-medium"
+                >
+                  {note.name}
+                </Card.Title>
               </Card.Header>
-              <Card.Content>
+              <Card.Footer>
                 <div class="absolute right-4 bottom-4 left-4">
                   <div
                     class="text-muted-foreground flex items-center justify-between text-xs"
@@ -215,7 +189,7 @@ async function trashNote(note: Note) {
                     </div>
                   </div>
                 </div>
-              </Card.Content>
+              </Card.Footer>
             </Card.Root>
           {/each}
         </div>

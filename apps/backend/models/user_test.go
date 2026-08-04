@@ -105,7 +105,7 @@ func TestUserResponse(t *testing.T) {
 		UpdatedAt:          now,
 		IsVerified:         true,
 		SubscriptionPlan:   "pro",
-		AiCredits:          2_000_000,
+		AiCredits:          2000.0,
 		SubscriptionType:   "monthly",
 		ExternalCustomerId: "cust-123",
 		EmailVerified:      true,
@@ -127,7 +127,7 @@ func TestUserResponse(t *testing.T) {
 	assert.Equal(t, user.Provider, responseMap["provider"])
 	assert.Equal(t, user.IsVerified, responseMap["is_verified"])
 	assert.Equal(t, user.SubscriptionPlan, responseMap["subscription_plan"])
-	assert.Equal(t, user.AiCredits, responseMap["ai_credits"])
+	assert.Equal(t, user.AiCredits/100.0, responseMap["ai_credits"])
 	assert.Equal(t, user.SubscriptionType, responseMap["subscription_type"])
 	assert.Equal(t, user.ExternalCustomerId, responseMap["external_customer_id"])
 	assert.Equal(t, user.EmailVerified, responseMap["email_verified"])
