@@ -1,7 +1,7 @@
 <script lang="ts">
 import { toast } from '@lib/components/ui/sonner';
 import type { Session } from '@nota/client';
-import { getAuthContext } from '@nota/client';
+import { getAiUsageLogs, getAuthContext } from '@nota/client';
 import { ProBadge } from '@nota/ui/custom/index.js';
 import { icons } from '@nota/ui/icons';
 import { Badge } from '@nota/ui/shadcn/badge';
@@ -106,6 +106,10 @@ async function handleRevokeOtherSessions() {
           <icons.CreditCard />
           Billing
         </Tabs.Trigger>
+        <Tabs.Trigger value="ai-usage">
+          <icons.Sparkles class="text-orange-500" />
+          AI Usage
+        </Tabs.Trigger>
         <Tabs.Trigger value="sessions">
           <icons.Monitor />
           Sessions
@@ -141,23 +145,6 @@ async function handleRevokeOtherSessions() {
                 </div>
                 <span class="text-sm text-muted-foreground">{user.email}</span>
               </div>
-            </div>
-
-            <!-- AI Credits Card inside General section -->
-            <div class="rounded-xl border bg-muted/40 p-4 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold flex items-center gap-2">
-                  <icons.Sparkles class="size-4 text-orange-500" />
-                  Available AI Credits
-                </span>
-                <Badge variant="secondary" class="font-mono text-xs">
-                  {user.ai_credits.toLocaleString()} Credits
-                </Badge>
-              </div>
-              <p class="text-xs text-muted-foreground">
-                AI credits are used for smart completions, document analysis,
-                and generative note actions.
-              </p>
             </div>
 
             <div class="mt-4">
@@ -316,6 +303,117 @@ async function handleRevokeOtherSessions() {
               </Button>
             </Card.Footer>
           {/if}
+        </Card.Root>
+      </Tabs.Content>
+
+      <!-- AI Usage Tab -->
+      <Tabs.Content value="ai-usage" class="outline-none">
+        <Card.Root>
+          <Card.Header
+            class="flex flex-row items-center justify-between space-y-0 pb-6"
+          >
+            <div class="space-y-1.5">
+              <Card.Title>AI Usage Logs</Card.Title>
+              <Card.Description>
+                View your recent AI usage and costs.
+              </Card.Description>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              href="{PUBLIC_BACKEND_URL}/api/v1/payments/portal"
+              target="_blank"
+              class="gap-2"
+            >
+              <icons.Plus class="size-4" />
+              Top Up
+            </Button>
+          </Card.Header>
+          <Card.Content class="space-y-4">
+            <div class="rounded-xl border bg-muted/40 p-4 space-y-2 mb-6">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold flex items-center gap-2">
+                  <icons.Sparkles class="size-4 text-orange-500" />
+                  Available AI Balance
+                </span>
+                <Badge variant="secondary" class="font-mono text-lg">
+                  ${user?.ai_credits?.toFixed(2) ?? "0.00"}
+                </Badge>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                Your AI balance is used to pay for generative AI features.
+              </p>
+            </div>
+
+            {#await getAiUsageLogs(50)}
+              <div class="flex items-center justify-center p-8">
+                <icons.Loader
+                  class="size-6 animate-spin text-muted-foreground"
+                />
+              </div>
+            {:then logs}
+              {#if logs.length === 0}
+                <div
+                  class="text-center p-8 text-sm text-muted-foreground border border-dashed rounded-xl"
+                >
+                  No AI usage logs found.
+                </div>
+              {:else}
+                <div class="rounded-md border overflow-hidden">
+                  <table class="w-full text-sm">
+                    <thead class="border-b bg-muted/50">
+                      <tr>
+                        <th
+                          class="h-10 px-4 text-left font-medium text-muted-foreground"
+                          >Date</th
+                        >
+                        <th
+                          class="h-10 px-4 text-left font-medium text-muted-foreground"
+                          >Note</th
+                        >
+                        <th
+                          class="h-10 px-4 text-left font-medium text-muted-foreground"
+                          >Description</th
+                        >
+                        <th
+                          class="h-10 px-4 text-right font-medium text-muted-foreground"
+                          >Cost</th
+                        >
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                      {#each logs as log}
+                        <tr>
+                          <td class="p-4 text-muted-foreground">
+                            {new Date(log.on).toLocaleDateString()}
+                            {new Date(log.on).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </td>
+                          <td class="p-4 font-medium"
+                            >{log.note_name || "Deleted Note"}</td
+                          >
+                          <td class="p-4 text-muted-foreground"
+                            >{log.description || "General generation"}</td
+                          >
+                          <td class="p-4 text-right font-mono"
+                            >${(log.usages / 100).toFixed(2)}</td
+                          >
+                        </tr>
+                      {/each}
+                    </tbody>
+                  </table>
+                </div>
+              {/if}
+            {:catch error}
+              <div
+                class="text-sm text-red-500 p-4 border border-red-500/20 bg-red-500/10 rounded-xl"
+              >
+                Failed to load AI usage logs. {error.message}
+              </div>
+            {/await}
+          </Card.Content>
         </Card.Root>
       </Tabs.Content>
 

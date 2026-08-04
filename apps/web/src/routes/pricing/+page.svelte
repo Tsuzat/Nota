@@ -1,68 +1,68 @@
 <script lang="ts">
-  import Pricing from "$lib/components/custom/landing/pricing/pricing.svelte";
-  import { icons } from "@nota/ui/icons";
-  import { Button } from "@nota/ui/shadcn/button";
-  import Particles from "$lib/components/custom/landing/particles.svelte";
-  import Spotlight from "$lib/components/custom/landing/spotlight.svelte";
-  import { resolve } from "$app/paths";
+import { icons } from '@nota/ui/icons';
+import { Button } from '@nota/ui/shadcn/button';
+import { resolve } from '$app/paths';
+import Particles from '$lib/components/custom/landing/particles.svelte';
+import Pricing from '$lib/components/custom/landing/pricing/pricing.svelte';
+import Spotlight from '$lib/components/custom/landing/spotlight.svelte';
 
-  const features = [
-    {
-      name: "Local notes & workspaces",
-      free: "Unlimited",
-      pro: "Unlimited",
-      credits: "—",
-    },
-    { name: "Cloud workspaces", free: "1", pro: "Unlimited", credits: "—" },
-    { name: "Cloud notes", free: "5", pro: "Unlimited", credits: "—" },
-    { name: "Cloud storage", free: "100MB", pro: "5GB", credits: "—" },
-    {
-      name: "Media storage",
-      free: "Local only",
-      pro: "Cloud + local",
-      credits: "—",
-    },
-    {
-      name: "Collaboration",
-      free: "Local only",
-      pro: "Full (cloud collaborative notes)",
-      credits: "—",
-    },
-    { name: "PDF export", free: "no", pro: "yes", credits: "—" },
-    {
-      name: "Cloud snapshots (auto + manual)",
-      free: "no",
-      pro: "yes",
-      credits: "—",
-    },
-    {
-      name: "Browser previews / web access",
-      free: "no",
-      pro: "yes",
-      credits: "—",
-    },
-    { name: "Encrypted data", free: "Local only", pro: "yes", credits: "—" },
-    { name: "Notes backup", free: "Local only", pro: "Cloud", credits: "—" },
-    {
-      name: "AI usage",
-      free: "BYOK, or buy credits",
-      pro: "BYOK, or buy credits",
-      credits: "Deducted from credit balance",
-    },
-    {
-      name: "AI pricing (if not BYOK)",
-      free: "$0.6/M input tokens, $5/M output tokens",
-      pro: "Same",
-      credits: "Same rate both tiers",
-    },
-    {
-      name: "App access",
-      free: "Local app only",
-      pro: "Full (web + desktop)",
-      credits: "—",
-    },
-    { name: "Updates & bug fixes", free: "yes", pro: "yes", credits: "—" },
-  ];
+const features = [
+  {
+    name: 'Local notes & workspaces',
+    free: 'Unlimited',
+    pro: 'Unlimited',
+    credits: '—',
+  },
+  { name: 'Cloud workspaces', free: '1', pro: 'Unlimited', credits: '—' },
+  { name: 'Cloud notes', free: '5', pro: 'Unlimited', credits: '—' },
+  { name: 'Cloud storage', free: '100MB', pro: '5GB', credits: '—' },
+  {
+    name: 'Media storage',
+    free: 'Local only',
+    pro: 'Cloud + local',
+    credits: '—',
+  },
+  {
+    name: 'Collaboration',
+    free: 'Local only',
+    pro: 'Full (cloud collaborative notes)',
+    credits: '—',
+  },
+  { name: 'PDF export', free: 'no', pro: 'yes', credits: '—' },
+  {
+    name: 'Cloud snapshots (auto + manual)',
+    free: 'no',
+    pro: 'yes',
+    credits: '—',
+  },
+  {
+    name: 'Browser previews / web access',
+    free: 'no',
+    pro: 'yes',
+    credits: '—',
+  },
+  { name: 'Encrypted data', free: 'Local only', pro: 'yes', credits: '—' },
+  { name: 'Notes backup', free: 'Local only', pro: 'Cloud', credits: '—' },
+  {
+    name: 'AI usage',
+    free: 'BYOK, or buy credits',
+    pro: 'BYOK, or buy credits',
+    credits: 'Deducted from credit balance',
+  },
+  {
+    name: 'AI pricing (if not BYOK)',
+    free: '$0.6/M input tokens, $5/M output tokens',
+    pro: 'Same',
+    credits: 'Same rate both tiers',
+  },
+  {
+    name: 'App access',
+    free: 'Local app only',
+    pro: 'Full (web + desktop)',
+    credits: '—',
+  },
+  { name: 'Updates & bug fixes', free: 'yes', pro: 'yes', credits: '—' },
+];
 </script>
 
 <svelte:head>

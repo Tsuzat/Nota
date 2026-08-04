@@ -124,7 +124,9 @@ const editor = createEditor({
   },
   selectFile: getLocalFile,
   getAssets,
-  callAI,
+  callAI: (prompt: string, onChunk: (chunk: string) => void, onError?: (error: Error) => void) => {
+    return callAI(prompt, note?.id || '', onChunk, onError);
+  },
 });
 
 // --- Hooks ---
