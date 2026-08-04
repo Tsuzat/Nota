@@ -61,7 +61,7 @@ func RecordAiUsage(ctx context.Context, user *models.User, noteId string, inputT
 }
 
 func GetAiUsageLogs(ctx context.Context, userId string, limit int) ([]models.AiUsageLogResponse, error) {
-	var logs []models.AiUsageLogResponse
+	logs := make([]models.AiUsageLogResponse, 0)
 
 	err := config.DB.NewSelect().
 		Model((*models.AiUsageLog)(nil)).

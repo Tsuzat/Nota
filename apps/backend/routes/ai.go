@@ -9,4 +9,5 @@ import (
 func InitAIRouter() {
 	group := config.APP.Group("/api/v1/ai", middleware.Authenticate)
 	group.Post("/generate", app.GenerateContent)
+	group.Get("/usage", app.GetAiUsageLogs)
 }
