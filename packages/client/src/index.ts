@@ -7,6 +7,7 @@ export { secureStorage } from './secureStorage';
 export * from './session-parser';
 export { getStorageContext, setStorageContext } from './storage.svelte';
 export type {
+  AiUsageLog,
   CheckoutDetails,
   NotaFile,
   Note,
@@ -16,6 +17,7 @@ export type {
   Workspace,
 } from './types';
 export {
+  AiUsageLogSchema,
   NotaFileSchema,
   NoteSchema,
   NoteVersionSchema,

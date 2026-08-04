@@ -133,3 +133,13 @@ export const CheckoutDetailsSchema = z.object({
   payment_method: z.string().nullable().optional(),
 });
 export type CheckoutDetails = z.infer<typeof CheckoutDetailsSchema>;
+
+export const AiUsageLogSchema = z.object({
+  id: z.uuid(),
+  usages: z.number(),
+  note_id: z.uuid(),
+  note_name: z.string(),
+  description: z.string(),
+  on: z.coerce.date(),
+});
+export type AiUsageLog = z.infer<typeof AiUsageLogSchema>;

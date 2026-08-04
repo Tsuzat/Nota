@@ -7,6 +7,7 @@ import request from '../request';
 import { secureStorage } from '../secureStorage';
 import { type CustomModelConfig, LATEST_MODELS, type SelectableModel } from './models';
 import { systemInstruction } from './prompts';
+import { AiUsageLogSchema, type AiUsageLog } from '../types';
 
 export * from './commands';
 export * from './models';
@@ -15,13 +16,28 @@ export * from './prompts';
 /**
  * Fallback to server-side AI generation.
  */
-export const aiGenerate = async (prompt: string) => {
+export const aiGenerate = async (prompt: string, noteId: string) => {
   const url = `${PUBLIC_BACKEND_URL}/api/v1/ai/generate`;
   const res = await request(url, {
     method: 'POST',
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt, note_id: noteId }),
   });
   return res;
+};
+
+/**
+ * Fetch the last 10 AI usage logs for the current user by default
+ * @param limit Number of logs to fetch. Default is 10.
+ * @returns An array of AiUsageLogs
+ */
+export const getAiUsageLogs = async (limit = 10): Promise<AiUsageLog[]> => {
+  const url = `${PUBLIC_BACKEND_URL}/api/v1/ai/usage?limit=${limit}`;
+  const res = await request(url);
+  if (!res.ok) {
+    throw new Error('Failed to fetch AI usage logs');
+  }
+  const data = await res.json();
+  return AiUsageLogSchema.array().parse(data);
 };
 
 export type AIProvider = 'server' | 'gemini' | 'openai' | 'claude' | 'deepseek' | 'kimi' | 'grok' | 'custom';
@@ -185,12 +201,17 @@ export const getAIConfig = async (): Promise<{
  * @param onChunk - Callback invoked with each text chunk as it arrives.
  * @param onError - Optional callback invoked if an error occurs during generation.
  */
-export async function callAI(prompt: string, onChunk: (chunk: string) => void, onError?: (error: Error) => void) {
+export async function callAI(
+  prompt: string,
+  noteId: string,
+  onChunk: (chunk: string) => void,
+  onError?: (error: Error) => void
+) {
   try {
     const config = await getAIConfig();
 
     if (config.provider === 'server') {
-      const res = await aiGenerate(prompt);
+      const res = await aiGenerate(prompt, noteId);
       if (!res.ok) {
         let message = 'Failed to call AI';
         try {
