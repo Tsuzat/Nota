@@ -24,12 +24,8 @@ import (
 
 func getCreditsToAdd(productId string) int {
 	switch productId {
-	case config.POLAR_MONTLY_SUB:
-		return 500_000
-	case config.POLAR_YEARLY_SUB:
-		return 6_000_000
 	case config.POLAR_AI_CREDITS:
-		return 1_000_000
+		return 500
 	default:
 		return 0
 	}

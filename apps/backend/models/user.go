@@ -86,6 +86,7 @@ func (user *User) UserResponse() any {
 		"is_verified":          user.IsVerified,
 		"subscription_plan":    user.SubscriptionPlan,
 		"ai_credits":           user.AiCredits,
+		"ai_balance":           float64(user.AiCredits) / 100.0,
 		"subscription_type":    user.SubscriptionType,
 		"external_customer_id": user.ExternalCustomerId,
 		"email_verified":       user.EmailVerified,

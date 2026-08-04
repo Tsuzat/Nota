@@ -712,6 +712,11 @@ onMount(() => {
 
   <section id="pricing" class="text-start!">
     <Pricing />
+    <div class="mt-8 flex justify-center">
+      <Button variant="link" href="/pricing" class="text-primary hover:text-primary/80">
+        View full feature comparison &xrarr;
+      </Button>
+    </div>
   </section>
 
   <section id="faqs" class="my-4">

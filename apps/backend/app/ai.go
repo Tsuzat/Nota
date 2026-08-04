@@ -4,12 +4,14 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"strings"
-
+	"math"
+	"strconv"
 	"sync"
 
 	"github.com/Tsuzat/Nota/config"
+	"github.com/Tsuzat/Nota/db"
 	"github.com/Tsuzat/Nota/models"
+	"github.com/Tsuzat/Nota/utils"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 	"google.golang.org/genai"
@@ -30,65 +32,11 @@ func getGenAIClient() (*genai.Client, error) {
 	return genAIClient, genAIErr
 }
 
-const MODEL = "gemini-3.5-flash-lite"
-
-const systemInstruction = `
-### ROLE & OBJECTIVE
-You are an intelligent, context-aware AI writing assistant embedded within a collaborative note-taking application. Your goal is to seamlessly augment the user's thought process. You do not chat; you co-create.
-
-### CORE OPERATING PRINCIPLE: INTENT INFERENCE
-Before generating text, analyze the user's request AND the surrounding context to determine the appropriate "Mode."
-
-1. **The Architect Mode (Structure & Planning)**
-   - Trigger: User asks for outlines, plans, or brainstorming.
-   - Output: Use hierarchical Markdown (headers, bullet points). Be organized and comprehensive.
-
-2. **The Coder Mode (Development & Engineering)**
-   - Trigger: User asks for functions, classes, or bug fixes.
-   - SUB-LOGIC for Code:
-     - *Default:* Provide code + brief explanation of *why* it works.
-     - *Constraint "Just code":* Output ONLY the code block. No intro/outro.
-     - *Constraint "Explain this":* Output code with heavy inline comments and a breakdown text.
-     - *Constraint "Refactor/Fix":* Output the corrected code and a diff-style summary of changes.
-
-3. **The Scholar Mode (Learning & Math)**
-   - Trigger: User asks for solutions, definitions, or complex explanations.
-   - SUB-LOGIC for Depth:
-     - If the user asks "What is X?": Provide a concise definition.
-     - If the user asks "Explain X like I'm 5" or "Deep dive": Adjust complexity accordingly.
-     - *Math/Logic:* Use LaTeX format ($$) for equations.
-
-4. **The Editor Mode (Refining)**
-   - Trigger: User highlights text and asks to summarize, expand, or change tone.
-   - Output: Maintain the user's original voice but improve clarity/grammar.
-
-### Markdown Instructions
-We follow standard Markdown formatting with a few specific guidelines:
-
-   - Use $$ (double dollars) for inline math and $$$ (triple dollars) for math blocks.
-   - For inserting Mermaid diagrams directly, use :::mermaid\ncontent\n::: on a new line.
-
-### VERBOSITY & FORMATTING RULES
-- **Mirror the Context:** If the user's existing notes are bulleted, continue with bullets. If they are writing paragraphs, write paragraphs.
-- **Markdown Rules:** Always format content using clean, standard Markdown (## Headings, **Bold**, > Quotes).
-- **No Fluff:** Do not use conversational filler like "Sure, here is the code you asked for" or "I hope this helps." DIVE STRAIGHT INTO THE CONTENT.
-- **Conciseness Algorithm:**
-  - Short, specific prompt -> Short, direct answer.
-  - Open-ended, complex prompt -> Structured, detailed answer.
-
-### EXCEPTION HANDLING
-- If the user's intent is ambiguous, lean towards **brevity**. It is easier for a user to ask "expand on this" than to delete 3 paragraphs of text.
-- If the request is dangerous or unethical, refuse politely and briefly.
-
-### INPUT VARIABLES
-You will receive context in this format:
-[PRECEDING_TEXT]: The text immediately before the cursor (if any).
-[SELECTED_TEXT]: Text the user has highlighted (if any).
-[USER_PROMPT]: The specific instruction the user just typed.
-`
+const MODEL = "gemini-3.5-flash-lite" // Or whatever model is intended
 
 type GenerateRequest struct {
 	Prompt string `json:"prompt" validate:"required,min=1"`
+	NoteId string `json:"note_id" validate:"required,uuid"`
 }
 
 func GenerateContent(c fiber.Ctx) error {
@@ -118,34 +66,20 @@ func GenerateContent(c fiber.Ctx) error {
 		})
 	}
 
-	// 1. Count Input Tokens (Approximate)
-	// Currently the SDK or model might not support simple token counting without a request.
-	// We'll estimate or count after if possible.
-	// The Go SDK typically doesn't have a standalone CountTokens in the core package easily accessible
-	// without looking at specific model capabilities.
-	// For now, we will assume 0 and update with response usage metadata if available.
-
-	// Set headers for streaming
 	c.Set("Content-Type", "text/plain; charset=utf-8")
 	c.Set("Transfer-Encoding", "chunked")
 	c.Set("Connection", "keep-alive")
 	c.Set("X-Accel-Buffering", "no")
 
-	// Use ContextWriter to stream data
 	c.SendStreamWriter(func(w *bufio.Writer) {
-		var fullText strings.Builder
 		stream := client.Models.GenerateContentStream(
 			ctx,
 			MODEL,
 			genai.Text(req.Prompt),
-			&genai.GenerateContentConfig{
-				SystemInstruction: &genai.Content{
-					Parts: []*genai.Part{
-						{Text: systemInstruction},
-					},
-				},
-			},
+			&genai.GenerateContentConfig{},
 		)
+
+		var inputTokens, outputTokens int
 
 		for chunk, err := range stream {
 			if err != nil {
@@ -154,10 +88,15 @@ func GenerateContent(c fiber.Ctx) error {
 				w.Flush()
 				break
 			}
+
+			if chunk.UsageMetadata != nil {
+				inputTokens = int(chunk.UsageMetadata.PromptTokenCount)
+				outputTokens = int(chunk.UsageMetadata.CandidatesTokenCount)
+			}
+
 			if len(chunk.Candidates) > 0 && len(chunk.Candidates[0].Content.Parts) > 0 {
 				part := chunk.Candidates[0].Content.Parts[0]
 				text := part.Text
-				fullText.WriteString(text)
 				if _, err := w.WriteString(text); err != nil {
 					log.Error("Stream Write Error:", err)
 					break
@@ -166,33 +105,44 @@ func GenerateContent(c fiber.Ctx) error {
 			}
 		}
 
-		// 3. Calculate Cost & Update DB
-		// Simple estimation: 1 token ~= 4 chars (very rough)
-		// Or assume output tokens from fullText.
-		// Since we don't have CountTokens easily available in this snippet context without extra calls:
-		// We will approximate.
-		// Better: If the chunk or final response has UsageMetadata, use it.
-		// The Go SDK GenAI v0.2.0 might have UsageMetadata in the chunk or response.
-		// Let's assume we estimate for now based on length if metadata isn't easily grabbed from the stream loop.
+		// Calculate cost
+		// Input cost: $0.60 per 1M = 0.00006 cents per token
+		// Output cost: $5.00 per 1M = 0.0005 cents per token
+		inputCost := float64(inputTokens) * 0.00006
+		outputCost := float64(outputTokens) * 0.0005
+		totalCostCents := int(math.Ceil(inputCost + outputCost))
 
-		// TODO: Use actual CountTokens API when possible or check stream response for UsageMetadata
-		inputTokens := len(req.Prompt) / 4
-		outputTokens := len(fullText.String()) / 4
-		totalCost := inputTokens + outputTokens
-
-		if totalCost > 0 {
-			_, err := config.DB.NewUpdate().
-				Model((*models.User)(nil)).
-				Set("ai_credits = GREATEST(0, ai_credits - ?)", totalCost).
-				Where("id = ?", user.Id).
-				Exec(context.Background())
-
+		if totalCostCents > 0 {
+			description := fmt.Sprintf("Used $%g in input, $%g in output and $%.2f in total.", inputCost/100.0, outputCost/100.0, float64(totalCostCents)/100.0)
+			err = db.RecordAiUsage(context.Background(), user, req.NoteId, inputTokens, outputTokens, totalCostCents, description)
 			if err != nil {
-				log.Error("Failed to update AI credits:", err)
+				log.Error("Failed to record AI usage:", err)
 			} else {
-				log.Info(fmt.Sprintf("Updated credits for user %s: spent %d", user.Id, totalCost))
+				// Invalidate user cache to ensure latest credits are fetched
+				utils.DeleteCache("user:" + user.Id)
 			}
 		}
 	})
 	return nil
+}
+
+func GetAiUsageLogs(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+	limit := 50
+	if l := c.Query("limit"); l != "" {
+		if parsedLimit, err := strconv.Atoi(l); err == nil && parsedLimit > 0 && parsedLimit <= 100 {
+			limit = parsedLimit
+		}
+	}
+
+	logs, err := db.GetAiUsageLogs(c.Context(), user.Id, limit)
+	if err != nil {
+		log.Error("Failed to get AI usage logs:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to get AI usage logs",
+		})
+	}
+
+	return c.JSON(logs)
 }
