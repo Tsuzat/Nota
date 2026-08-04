@@ -383,7 +383,7 @@ func PolarWebhook(c fiber.Ctx) error {
 	}
 
 	if config.VALKEY != nil && webhookId != "" {
-		_ = config.VALKEY.SetWithContext(c.Context(), "webhook:"+webhookId, []byte("processed"), 24*time.Hour)
+		_ = config.VALKEY.SetWithContext(c.Context(), "webhook:"+webhookId, []byte("processed"), 30*time.Minute)
 	}
 
 	return c.Status(fiber.StatusOK).SendString("OK")
