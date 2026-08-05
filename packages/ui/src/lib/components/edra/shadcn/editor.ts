@@ -31,6 +31,7 @@ const lowlight = createLowlight(all);
 
 export interface EdraEditorProps {
   onUpdate?: () => void;
+  editable?: boolean;
   /**
    * Callback function to handle file uploads when a user drags/drops, pastes,
    * or selects a media file (image, video, audio) to insert.
@@ -48,6 +49,7 @@ export interface EdraEditorProps {
 
 export const createEditor = (props?: EdraEditorProps) =>
   useEditor({
+    editable: props?.editable,
     extensions: [
       ...extensions,
       CodeBlockLowlight.configure({

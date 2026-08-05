@@ -427,6 +427,15 @@ func GetNotePreview(c fiber.Ctx) error {
 			Error:  "User is not the owner of the note",
 		})
 	}
+
+	if user.SubscriptionPlan != config.PRO_PLAN {
+		log.Info("User is not the pro user")
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+			Status: fiber.StatusForbidden,
+			Error:  "Note preview is a Pro feature",
+		})
+	}
+
 	// cache the note preview
 	go utils.SetCache(cacheKey, note, time.Minute*30)
 	return c.JSON(models.APIResponse{
