@@ -19,7 +19,7 @@
 
 <br />
 
-![Nota Preview](https://www.nota.ink/previews/dark.png)
+![Nota Preview](https://www.nota.ink/preview/dark.png)
 
 ## ✨ Features
 
