@@ -642,43 +642,16 @@
 }
 
 /* 
- * Definitive fix for Tailwind v4 + KaTeX + Chromium rendering bugs.
- * Tailwind's `*` selector applies `border-style: solid` globally. When this hits KaTeX's 
- * internal `inline-table` (.vlist-t) elements, it triggers a catastrophic Chromium layout 
- * bug causing fraction lines to stretch to 100% and \boxed borders to collapse to 0px.
- * We nuke all borders inside KaTeX to stop this, then selectively restore the borders 
- * that KaTeX genuinely needs.
+ * Fix for Tailwind v4 Preflight + KaTeX + Chromium rendering bugs.
+ * By placing this reset in @layer base without !important, we cleanly override 
+ * Tailwind's global * { box-sizing: border-box; border: 0 solid; } inside KaTeX,
+ * while allowing KaTeX's unlayered stylesheets (katex.min.css) to apply normally.
  */
-.katex * {
-  box-sizing: content-box !important;
-  border: none !important;
+@layer base {
+  .katex,
+  .katex * {
+    box-sizing: content-box;
+    border-style: none;
+  }
 }
 
-/* 1. Restore fraction lines, hlines, overlines, and underlines */
-.katex .frac-line,
-.katex .katex-hline,
-.katex .katex-overline .overline-line,
-.katex .katex-underline .underline-line {
-  border-bottom-style: solid !important;
-  border-bottom-width: 0.04em !important;
-}
-
-/* 2. Restore strike-through */
-.katex .katex-sout {
-  border-bottom-style: solid !important;
-  border-bottom-width: 0.08em !important;
-}
-
-/* 3. Restore \boxed and \fcolorbox */
-.katex .fbox, 
-.katex .fcolorbox {
-  box-sizing: border-box !important;
-  border: 0.04em solid currentColor !important;
-}
-
-/* 4. Restore angles */
-.katex .angl {
-  box-sizing: border-box !important;
-  border-top: 0.049em solid currentColor !important;
-  border-right: 0.049em solid currentColor !important;
-}
