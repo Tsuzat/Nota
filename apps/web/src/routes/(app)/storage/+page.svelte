@@ -109,6 +109,10 @@ const currentUsedStorage = $derived(cloudStorage.usedBytes ?? 0);
 const currentAssignedStorage = $derived(authContext.user?.assigned_storage ?? 0);
 </script>
 
+<svelte:head>
+  <title>Storage | Nota</title>
+</svelte:head>
+
 <div class="flex size-full min-h-0 flex-col overflow-hidden">
   <Topbar>
     {#snippet left()}

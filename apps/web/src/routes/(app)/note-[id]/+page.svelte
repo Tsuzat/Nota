@@ -254,6 +254,10 @@ function handleKeydown(e: KeyboardEvent) {
 }
 </script>
 
+<svelte:head>
+  <title>{note?.name ? `${note.name} | Nota` : "Nota"}</title>
+</svelte:head>
+
 <svelte:document onkeydown={handleKeydown} />
 
 {#if isLoading}

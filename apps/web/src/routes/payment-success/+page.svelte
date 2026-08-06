@@ -24,6 +24,10 @@ onMount(async () => {
 });
 </script>
 
+<svelte:head>
+  <title>Payment Success | Nota</title>
+</svelte:head>
+
 <Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />
 <div
   class="relative w-full min-h-screen flex flex-col items-center justify-center p-4"

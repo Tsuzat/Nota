@@ -1,5 +1,4 @@
 <script lang="ts">
-import 'katex/dist/katex.min.css';
 import '../onedark.css';
 import TiptapContent from '../tiptap/components/TiptapContent.svelte';
 import './editor.css';

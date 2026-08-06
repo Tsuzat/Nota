@@ -86,6 +86,10 @@ async function handleRevokeOtherSessions() {
 }
 </script>
 
+<svelte:head>
+  <title>Profile | Nota</title>
+</svelte:head>
+
 <Particles class="fixed top-0 left-0 -z-10 h-screen w-screen bg-transparent!" />
 
 <div class="fixed top-2 left-2">

@@ -96,6 +96,10 @@ async function deletePermanently(note: Note) {
 }
 </script>
 
+<svelte:head>
+  <title>Workspace | Nota</title>
+</svelte:head>
+
 {#if workspace}
   <div class="flex size-full min-h-0 overflow-hidden flex-col">
     <Topbar showSeparator={false} />

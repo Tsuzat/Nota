@@ -90,6 +90,10 @@ function switchWorkspace(workspace: Workspace) {
 }
 </script>
 
+<svelte:head>
+  <title>Home | Nota</title>
+</svelte:head>
+
 <Topbar showSeparator={true}></Topbar>
 
 <div class="flex h-[calc(100vh-3rem)] w-full flex-1 grow overflow-auto">

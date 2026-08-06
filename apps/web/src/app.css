@@ -1,3 +1,4 @@
 @import "tailwindcss";
+@import "katex/dist/katex.min.css";
 @import "@nota/ui/shadcn/css";
 @source "../../../packages/ui/src/**/*.{html,js,svelte,ts}";

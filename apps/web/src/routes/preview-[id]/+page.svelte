@@ -1,30 +1,50 @@
 <script lang="ts">
-import { createEditor, type Editor, Edra } from '@nota/ui/edra/index.js';
-import { IconRenderer } from '@nota/ui/icons';
-import { Button } from '@nota/ui/shadcn/button';
-import { onMount } from 'svelte';
-import 'katex/dist/katex.min.css';
-import { ToggleMode } from '@lib/components/custom';
-import { Skeleton } from '@nota/ui/shadcn/skeleton';
-import Applogo from '$lib/components/custom/applogo.svelte';
+  import { createEditor, type Editor, Edra } from "@nota/ui/edra/index.js";
+  import { IconRenderer } from "@nota/ui/icons";
+  import { Button } from "@nota/ui/shadcn/button";
+  import { onMount } from "svelte";
+  import { ToggleMode } from "@lib/components/custom";
+  import { Skeleton } from "@nota/ui/shadcn/skeleton";
+  import Applogo from "$lib/components/custom/applogo.svelte";
 
-const { data } = $props();
+  const { data } = $props();
 
-let editor = $state<Editor>();
-let words = $state(0);
+  let editor = $state<Editor>();
+  let words = $state(0);
 
-onMount(() => {
-  editor = createEditor({
-    editable: false,
-  });
-  if (editor) {
-    editor.commands.setContent(data.note.content ?? null, {
-      contentType: 'json',
+  onMount(() => {
+    editor = createEditor({
+      editable: false,
     });
-    words = editor.storage.characterCount.words() ?? 0;
-  }
-});
+    if (editor) {
+      editor.commands.setContent(data.note.content ?? null, {
+        contentType: "json",
+      });
+      words = editor.storage.characterCount.words() ?? 0;
+    }
+  });
 </script>
+
+<svelte:head>
+  <title>{data.note.name || "Shared Note"} | Nota</title>
+  <meta
+    name="description"
+    content="Read '{data.note.name ||
+      'Untitled'}' on Nota, a fast, local-first note-taking and AI workspace."
+  />
+  <meta property="og:type" content="article" />
+  <meta
+    property="og:title"
+    content="{data.note.name || 'Shared Note'} | Nota"
+  />
+  <meta
+    property="og:description"
+    content="Read '{data.note.name ||
+      'Untitled'}' on Nota, a fast, local-first note-taking and AI workspace."
+  />
+  <meta property="og:site_name" content="Nota" />
+  <meta name="twitter:card" content="summary" />
+</svelte:head>
 
 <header class="flex items-center relative justify-between w-full p-4">
   <Applogo class="print:hidden" />

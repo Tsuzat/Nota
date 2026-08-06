@@ -71,6 +71,14 @@ const features = [
     name="description"
     content="Compare Nota's Free and Pro plans, and learn about our flexible pay-as-you-go AI Credits."
   />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Nota Pricing & Plans" />
+  <meta
+    property="og:description"
+    content="Compare Nota's Free and Pro plans, and learn about our flexible pay-as-you-go AI Credits."
+  />
+  <meta property="og:site_name" content="Nota" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="canonical" href="https://nota.ink/pricing" />
 </svelte:head>
 

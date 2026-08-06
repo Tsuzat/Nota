@@ -13,6 +13,11 @@ import Tiltcard from '$lib/components/custom/landing/utils/tiltcard.svelte';
 const authClient = getAuthContext();
 </script>
 
+<svelte:head>
+  <title>Sign In | Nota</title>
+  <meta name="description" content="Sign in or create your Nota account." />
+</svelte:head>
+
 <div class={cn("relative w-full md:h-screen md:overflow-hidden")}>
   <Particles class="absolute inset-0" ease={20} quantity={120} />
   <div
