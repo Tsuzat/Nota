@@ -640,3 +640,14 @@
   z-index: 6;
   box-sizing: border-box;
 }
+
+.katex * {
+  box-sizing: content-box !important;
+  border-style: initial;
+  border-width: initial;
+}
+
+.katex .fbox, 
+.katex .fcolorbox {
+  box-sizing: border-box !important;
+}

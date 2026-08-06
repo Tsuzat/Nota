@@ -49,7 +49,7 @@ export interface EdraEditorProps {
 
 export const createEditor = (props?: EdraEditorProps) =>
   useEditor({
-    editable: props?.editable,
+    editable: props?.editable ?? true,
     extensions: [
       ...extensions,
       CodeBlockLowlight.configure({
