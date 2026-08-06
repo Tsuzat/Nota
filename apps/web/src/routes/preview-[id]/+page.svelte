@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { createEditor, type Editor, Edra } from "@nota/ui/edra/index.js";
-  import { IconRenderer } from "@nota/ui/icons";
-  import { Button } from "@nota/ui/shadcn/button";
-  import { onMount } from "svelte";
-  import { ToggleMode } from "@lib/components/custom";
-  import { Skeleton } from "@nota/ui/shadcn/skeleton";
-  import Applogo from "$lib/components/custom/applogo.svelte";
+import { ToggleMode } from '@lib/components/custom';
+import { createEditor, type Editor, Edra } from '@nota/ui/edra/index.js';
+import { IconRenderer } from '@nota/ui/icons';
+import { Button } from '@nota/ui/shadcn/button';
+import { Skeleton } from '@nota/ui/shadcn/skeleton';
+import { onMount } from 'svelte';
+import Applogo from '$lib/components/custom/applogo.svelte';
 
-  const { data } = $props();
+const { data } = $props();
 
-  let editor = $state<Editor>();
-  let words = $state(0);
+let editor = $state<Editor>();
+let words = $state(0);
 
-  onMount(() => {
-    editor = createEditor({
-      editable: false,
-    });
-    if (editor) {
-      editor.commands.setContent(data.note.content ?? null, {
-        contentType: "json",
-      });
-      words = editor.storage.characterCount.words() ?? 0;
-    }
+onMount(() => {
+  editor = createEditor({
+    editable: false,
   });
+  if (editor) {
+    editor.commands.setContent(data.note.content ?? null, {
+      contentType: 'json',
+    });
+    words = editor.storage.characterCount.words() ?? 0;
+  }
+});
 </script>
 
 <svelte:head>

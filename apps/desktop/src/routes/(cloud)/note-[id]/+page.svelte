@@ -1,258 +1,275 @@
 <script lang="ts">
-import {
-  ALLOWED_MAX_FILE_SIZE,
-  type FileType,
-  getFileTypeExtensions,
-  getFileTypeFromExtension,
-} from '@lib/components/edra/utils.js';
-import { Skeleton } from '@lib/components/ui/skeleton/index.js';
-import {
-  callAI,
-  getAllConfiguredModels,
-  getAuthContext,
-  getNotesContext,
-  getStorageContext,
-  type Note,
-  type SelectableModel,
-} from '@nota/client';
-import { SimpleToolTip } from '@nota/ui/custom/index.js';
-import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
-import { BarSpinner, IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
-import { Button, buttonVariants } from '@nota/ui/shadcn/button';
-import { toast } from '@nota/ui/shadcn/sonner';
-import { basename } from '@tauri-apps/api/path';
-import { open } from '@tauri-apps/plugin-dialog';
-import { readFile } from '@tauri-apps/plugin-fs';
-import { compare } from 'fast-json-patch';
-import { onDestroy, onMount } from 'svelte';
-import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
-import { resolve } from '$app/paths';
-import { getGlobalSettings } from '$lib/components/settings/index.js';
-import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import Topbar from '$lib/components/topbar.svelte';
-import { getCurrentWorkspace } from '$lib/currentworkspace.svelte.js';
+  import {
+    ALLOWED_MAX_FILE_SIZE,
+    type FileType,
+    getFileTypeExtensions,
+    getFileTypeFromExtension,
+  } from "@lib/components/edra/utils.js";
+  import { Skeleton } from "@lib/components/ui/skeleton/index.js";
+  import {
+    callAI,
+    getAllConfiguredModels,
+    getAuthContext,
+    getNotesContext,
+    getStorageContext,
+    type Note,
+    type SelectableModel,
+  } from "@nota/client";
+  import { SimpleToolTip } from "@nota/ui/custom/index.js";
+  import { type Content, createEditor, Edra } from "@nota/ui/edra/index.js";
+  import {
+    BarSpinner,
+    IconPicker,
+    IconRenderer,
+    icons,
+  } from "@nota/ui/icons/index.js";
+  import { Button, buttonVariants } from "@nota/ui/shadcn/button";
+  import { toast } from "@nota/ui/shadcn/sonner";
+  import { basename } from "@tauri-apps/api/path";
+  import { open } from "@tauri-apps/plugin-dialog";
+  import { readFile } from "@tauri-apps/plugin-fs";
+  import { compare } from "fast-json-patch";
+  import { onDestroy, onMount } from "svelte";
+  import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
+  import { getGlobalSettings } from "$lib/components/settings/index.js";
+  import NavActions from "$lib/components/sidebar/nav-actions.svelte";
+  import Topbar from "$lib/components/topbar.svelte";
+  import { getCurrentWorkspace } from "$lib/currentworkspace.svelte.js";
 
-// --- Services & Context ---
-const cloudNotes = getNotesContext();
-const cloudStorage = getStorageContext();
-const useGlobalSettings = getGlobalSettings();
-const useCurrentWorkspace = getCurrentWorkspace();
-const authContext = getAuthContext();
-// --- State ---
-const { data } = $props();
-let syncedContent = $state<Content>();
-let isDirty = $state(false);
+  // --- Services & Context ---
+  const cloudNotes = getNotesContext();
+  const cloudStorage = getStorageContext();
+  const useGlobalSettings = getGlobalSettings();
+  const useCurrentWorkspace = getCurrentWorkspace();
+  const authContext = getAuthContext();
+  // --- State ---
+  const { data } = $props();
+  let syncedContent = $state<Content>();
+  let isDirty = $state(false);
 
-let isLoading = $state(true);
-let note = $state<Note>();
-let syncing = $state(false);
-let syncingText = $state('');
-let availableModels = $state<Record<string, SelectableModel[]>>({});
+  let isLoading = $state(true);
+  let note = $state<Note>();
+  let syncing = $state(false);
+  let syncingText = $state("");
+  let availableModels = $state<Record<string, SelectableModel[]>>({});
 
-// --- File Handling Utilities ---
-const onFileSelect = async (path: string) => {
-  const bytes = await readFile(path);
-  const name = await basename(path);
-  const extension = getFileTypeFromExtension(name);
-  if (extension === null) {
-    toast.error('Unsupported file is being uploaded. Rejected the Upload.');
-    throw new Error('Unsupported file is being uploaded. Rejected the Upload.');
-  }
-  const file = new File([bytes], name, { type: extension });
-
-  if (file.size > ALLOWED_MAX_FILE_SIZE) {
-    toast.error(`File ${file.name} is too large (max 50MB).`);
-    return null;
-  }
-
-  const user = authContext.user;
-  if (user && user.used_storage + file.size > user.assigned_storage) {
-    toast.error(`Not enough storage to upload ${file.name}.`);
-    return null;
-  }
-
-  const uploadPromise = cloudStorage.upload(file, {
-    workspaceId: useCurrentWorkspace.get()?.id,
-    noteId: note?.id,
-  });
-
-  toast.promise(uploadPromise, {
-    loading: `Uploading ${file.name}...`,
-    success: `${file.name} uploaded successfully`,
-    error: `Failed to upload ${file.name}`,
-  });
-
-  return await uploadPromise;
-};
-
-const getAssets = async (fileType: FileType) => {
-  const files = cloudStorage.files;
-  const extensions = new Set(getFileTypeExtensions(fileType));
-  const assets: string[] = [];
-  for (const file of files) {
-    const key = file.key;
-    const fileExtension = key.split('.').pop();
-    if (fileExtension !== undefined && extensions.has(fileExtension)) {
-      assets.push(file.url);
+  // --- File Handling Utilities ---
+  const onFileSelect = async (path: string) => {
+    const bytes = await readFile(path);
+    const name = await basename(path);
+    const extension = getFileTypeFromExtension(name);
+    if (extension === null) {
+      toast.error("Unsupported file is being uploaded. Rejected the Upload.");
+      throw new Error(
+        "Unsupported file is being uploaded. Rejected the Upload.",
+      );
     }
-  }
-  return assets;
-};
+    const file = new File([bytes], name, { type: extension });
 
-const getLocalFile = async (fileType: FileType) => {
-  const extensions = getFileTypeExtensions(fileType);
-  const file = await open({
-    title: 'Select File',
-    multiple: false,
-    directory: false,
-    filters: [
-      {
-        name: 'Select File',
-        extensions,
-      },
-    ],
-  });
-  if (!file) return null;
-  return await onFileSelect(file);
-};
+    if (file.size > ALLOWED_MAX_FILE_SIZE) {
+      toast.error(`File ${file.name} is too large (max 50MB).`);
+      return null;
+    }
 
-// --- Editor Setup ---
-const editor = createEditor({
-  onUpdate: () => {
-    isDirty = true;
-  },
-  onFileUpload: (file) => {
     const user = authContext.user;
     if (user && user.used_storage + file.size > user.assigned_storage) {
       toast.error(`Not enough storage to upload ${file.name}.`);
-      return Promise.reject(new Error('Storage quota exceeded'));
+      return null;
     }
-    return cloudStorage.upload(file, {
+
+    const uploadPromise = cloudStorage.upload(file, {
       workspaceId: useCurrentWorkspace.get()?.id,
       noteId: note?.id,
     });
-  },
-  selectFile: getLocalFile,
-  getAssets,
-  callAI,
-});
 
-// --- Hooks ---
-afterNavigate(() => {
-  if (data.id) loadData();
-  getAllConfiguredModels().then((models) => {
-    availableModels = models;
+    toast.promise(uploadPromise, {
+      loading: `Uploading ${file.name}...`,
+      success: `${file.name} uploaded successfully`,
+      error: `Failed to upload ${file.name}`,
+    });
+
+    return await uploadPromise;
+  };
+
+  const getAssets = async (fileType: FileType) => {
+    const files = cloudStorage.files;
+    const extensions = new Set(getFileTypeExtensions(fileType));
+    const assets: string[] = [];
+    for (const file of files) {
+      const key = file.key;
+      const fileExtension = key.split(".").pop();
+      if (fileExtension !== undefined && extensions.has(fileExtension)) {
+        assets.push(file.url);
+      }
+    }
+    return assets;
+  };
+
+  const getLocalFile = async (fileType: FileType) => {
+    const extensions = getFileTypeExtensions(fileType);
+    const file = await open({
+      title: "Select File",
+      multiple: false,
+      directory: false,
+      filters: [
+        {
+          name: "Select File",
+          extensions,
+        },
+      ],
+    });
+    if (!file) return null;
+    return await onFileSelect(file);
+  };
+
+  // --- Editor Setup ---
+  const editor = createEditor({
+    onUpdate: () => {
+      isDirty = true;
+    },
+    onFileUpload: (file) => {
+      const user = authContext.user;
+      if (user && user.used_storage + file.size > user.assigned_storage) {
+        toast.error(`Not enough storage to upload ${file.name}.`);
+        return Promise.reject(new Error("Storage quota exceeded"));
+      }
+      return cloudStorage.upload(file, {
+        workspaceId: useCurrentWorkspace.get()?.id,
+        noteId: note?.id,
+      });
+    },
+    selectFile: getLocalFile,
+    getAssets,
+    callAI: (
+      prompt: string,
+      onChunk: (chunk: string) => void,
+      onError?: (error: Error) => void,
+    ) => {
+      return callAI(prompt, note?.id || "", onChunk, onError);
+    },
   });
-});
 
-onMount(() => {
-  // auto save is called in every 2 mins
-  const saveInterval = setInterval(() => {
-    saveNoteContent();
-  }, 120000);
-  return () => clearInterval(saveInterval);
-});
+  // --- Hooks ---
+  afterNavigate(() => {
+    if (data.id) loadData();
+    getAllConfiguredModels().then((models) => {
+      availableModels = models;
+    });
+  });
 
-beforeNavigate(async () => {
-  if (isDirty) {
-    await saveNoteContent();
-  }
-});
+  onMount(() => {
+    // auto save is called in every 2 mins
+    const saveInterval = setInterval(() => {
+      saveNoteContent();
+    }, 120000);
+    return () => clearInterval(saveInterval);
+  });
 
-onDestroy(() => {
-  editor?.destroy();
-});
+  beforeNavigate(async () => {
+    if (isDirty) {
+      await saveNoteContent();
+    }
+  });
 
-// --- Data Operations ---
-async function saveNoteContent() {
-  if (!isDirty || !note || !editor) return;
+  onDestroy(() => {
+    editor?.destroy();
+  });
 
-  const currentContent = editor.getJSON();
-  if (syncedContent === undefined || syncedContent === null || typeof syncedContent === 'string') {
-    syncedContent = {};
-  }
-  const patch = compare(syncedContent as object, currentContent);
+  // --- Data Operations ---
+  async function saveNoteContent() {
+    if (!isDirty || !note || !editor) return;
 
-  if (patch.length === 0) {
-    isDirty = false;
-    return;
-  }
+    const currentContent = editor.getJSON();
+    if (
+      syncedContent === undefined ||
+      syncedContent === null ||
+      typeof syncedContent === "string"
+    ) {
+      syncedContent = {};
+    }
+    const patch = compare(syncedContent as object, currentContent);
 
-  syncing = true;
-  syncingText = `Syncing ${patch.length} changes`;
-  try {
-    await cloudNotes.patch(note.id, patch);
-    syncedContent = currentContent;
-    isDirty = false;
-  } catch (error) {
-    console.error(error);
-    toast.error('Something went wrong when saving content to cloud');
-  } finally {
-    syncing = false;
-  }
-}
+    if (patch.length === 0) {
+      isDirty = false;
+      return;
+    }
 
-async function loadData() {
-  const id = data.id;
-  isLoading = true;
-  note = cloudNotes.notes.find((n) => n.id === id);
-  if (!note) {
+    syncing = true;
+    syncingText = `Syncing ${patch.length} changes`;
     try {
-      note = await cloudNotes.fetchMeta(id);
+      await cloudNotes.patch(note.id, patch);
+      syncedContent = currentContent;
+      isDirty = false;
     } catch (error) {
       console.error(error);
+      toast.error("Something went wrong when saving content to cloud");
+    } finally {
+      syncing = false;
     }
   }
-  if (!note) {
-    toast.error(`Note with id ${id} not found`);
-    return goto(resolve('/'));
-  }
-  try {
-    const data = await cloudNotes.fetchContent(id);
-    if (data) {
-      const dbContent = data as Content;
-      editor?.commands.setContent(dbContent, { contentType: 'json' });
-      syncedContent = dbContent;
+
+  async function loadData() {
+    const id = data.id;
+    isLoading = true;
+    note = cloudNotes.notes.find((n) => n.id === id);
+    if (!note) {
+      try {
+        note = await cloudNotes.fetchMeta(id);
+      } catch (error) {
+        console.error(error);
+      }
     }
-  } catch (error) {
-    console.error(error);
-    toast.error('Something went wrong when loading note');
-    goto(resolve('/'));
-  } finally {
-    isLoading = false;
+    if (!note) {
+      toast.error(`Note with id ${id} not found`);
+      return goto(resolve("/"));
+    }
+    try {
+      const data = await cloudNotes.fetchContent(id);
+      if (data) {
+        const dbContent = data as Content;
+        editor?.commands.setContent(dbContent, { contentType: "json" });
+        syncedContent = dbContent;
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong when loading note");
+      goto(resolve("/"));
+    } finally {
+      isLoading = false;
+    }
   }
-}
 
-async function updateNote(name: string, icon: string, pinned: boolean) {
-  if (!note) return;
-  syncing = true;
-  try {
-    await cloudNotes.update(note.id, { name, icon, pinned });
-    note.name = name;
-    note.icon = icon;
-    note.pinned = pinned;
-  } catch (e) {
-    toast.error('Could not update note');
-    console.error(e);
-  } finally {
-    syncing = false;
+  async function updateNote(name: string, icon: string, pinned: boolean) {
+    if (!note) return;
+    syncing = true;
+    try {
+      await cloudNotes.update(note.id, { name, icon, pinned });
+      note.name = name;
+      note.icon = icon;
+      note.pinned = pinned;
+    } catch (e) {
+      toast.error("Could not update note");
+      console.error(e);
+    } finally {
+      syncing = false;
+    }
   }
-}
 
-async function handleNameChange(e: Event) {
-  if (!note) return;
-  const target = e.target as HTMLInputElement;
-  const value = target.value.trim();
-  if (!value) return;
-  await updateNote(value, note.icon, note.pinned);
-}
-
-function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    saveNoteContent();
+  async function handleNameChange(e: Event) {
+    if (!note) return;
+    const target = e.target as HTMLInputElement;
+    const value = target.value.trim();
+    if (!value) return;
+    await updateNote(value, note.icon, note.pinned);
   }
-}
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      saveNoteContent();
+    }
+  }
 </script>
 
 <svelte:document onkeydown={handleKeydown} />

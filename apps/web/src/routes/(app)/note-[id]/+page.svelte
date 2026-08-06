@@ -23,7 +23,6 @@ import { getGlobalSettings } from '$lib/components/settings/index.svelte';
 import NavActions from '$lib/components/sidebar/nav-actions.svelte';
 import Topbar from '$lib/components/topbar.svelte';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
-import 'katex/dist/katex.min.css';
 
 // --- Services & Context ---
 const cloudWorkspaces = getWorkspacesContext();
