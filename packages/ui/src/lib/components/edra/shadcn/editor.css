@@ -640,18 +640,3 @@
   z-index: 6;
   box-sizing: border-box;
 }
-
-/* 
- * Fix for Tailwind v4 Preflight + KaTeX + Chromium rendering bugs.
- * By placing this reset in @layer base without !important, we cleanly override 
- * Tailwind's global * { box-sizing: border-box; border: 0 solid; } inside KaTeX,
- * while allowing KaTeX's unlayered stylesheets (katex.min.css) to apply normally.
- */
-@layer base {
-  .katex,
-  .katex * {
-    box-sizing: content-box;
-    border-style: none;
-  }
-}
-

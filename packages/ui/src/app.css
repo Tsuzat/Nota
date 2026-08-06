@@ -158,11 +158,6 @@ html {
     scrollbar-width: thin;
     scrollbar-color: hsla(var(--muted-foreground) / 0.25) transparent;
   }
-  .katex,
-  .katex * {
-    box-sizing: content-box;
-    border-style: none;
-  }
   body {
     @apply bg-background text-foreground;
   }

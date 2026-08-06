@@ -1,6 +1,6 @@
 <script lang="ts">
 import { createEditor, type Editor, Edra } from '@nota/ui/edra/index.js';
-import { IconRenderer, icons } from '@nota/ui/icons';
+import { IconRenderer } from '@nota/ui/icons';
 import { Button } from '@nota/ui/shadcn/button';
 import { onMount } from 'svelte';
 import 'katex/dist/katex.min.css';

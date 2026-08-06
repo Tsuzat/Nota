@@ -159,12 +159,17 @@ async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
       </Dropdown.Group>
       <Dropdown.Separator />
       <Dropdown.Group>
-        <Dropdown.Item onclick={() => {
+        <Dropdown.Item
+          onclick={() => {
             if (isPro) snapshotDialogOpen = true;
-            else toast.error('Cloud snapshots are only available on the Pro plan.');
-          }}>
+            else
+              toast.error(
+                "Cloud snapshots are only available on the Pro plan.",
+              );
+          }}
+        >
           <icons.Save />
-          Save Snapshot {!isPro ? '(Pro)' : ''}
+          Save Snapshot {!isPro ? "(Pro)" : ""}
         </Dropdown.Item>
         <a href={`/versions?note_ids=${note.id}`}>
           <Dropdown.Item>
@@ -227,12 +232,14 @@ async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
         </Dropdown.Item>
       </Dropdown.Group>
       <Dropdown.Separator />
-      <Dropdown.Label class="font-normal text-sm text-muted-foreground">
-        Word count: {$editorState.words}
-      </Dropdown.Label>
-      <Dropdown.Label class="font-normal text-sm text-muted-foreground">
-        Last Edited: {timeAgo(note.updated_at)}
-      </Dropdown.Label>
+      <div
+        class="px-2 py-1.5 text-[10px] text-muted-foreground select-none leading-normal"
+      >
+        <div>
+          Word count: {$editorState.words}
+        </div>
+        <div>{timeAgo(note.updated_at)}</div>
+      </div>
     </Dropdown.Content>
   </Dropdown.Root>
 </div>
