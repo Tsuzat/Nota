@@ -76,8 +76,10 @@ async function handleDeleteUser() {
               <icons.Sparkles class="size-3.5 text-amber-500" />
               <span>${user.ai_credits} Available</span>
             </div>
-            <Button variant="link" href={`${PUBLIC_NOTA_FRONTEND_URL}/profile`}
-              >See Usages</Button
+            <Button
+              variant="link"
+              onclick={() => openUrl(`${PUBLIC_NOTA_FRONTEND_URL}/profile`)}
+              >See Usage</Button
             >
           {/if}
         </div>

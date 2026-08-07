@@ -49,6 +49,11 @@ export async function getAllConfiguredModels(): Promise<Record<string, Selectabl
     return {};
   }
 
+  const useOwnKeys = localStorage.getItem('useOwnKeys') === 'true';
+  if (!useOwnKeys) {
+    return {};
+  }
+
   const result: Record<string, SelectableModel[]> = {};
 
   const providers: { id: keyof typeof LATEST_MODELS; key: string }[] = [
