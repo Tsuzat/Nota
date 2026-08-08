@@ -89,6 +89,10 @@ func ConfirmUpload(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: err.Error()})
 	}
 
+	if (req.WorkspaceId == nil || *req.WorkspaceId == "") && (req.NoteId == nil || *req.NoteId == "") {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: "Either WorkspaceId or NoteId is required"})
+	}
+
 	if !strings.HasPrefix(req.Key, userId+"/") {
 		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: fiber.StatusForbidden, Error: "Invalid key ownership"})
 	}
@@ -111,10 +115,15 @@ func ConfirmUpload(c fiber.Ctx) error {
 	endpoint := strings.TrimSuffix(config.R2_PUBLIC_ENDPOINT, "/")
 	publicUrl := fmt.Sprintf("%s/%s", endpoint, req.Key)
 
+	var wId *string
+	if req.WorkspaceId != nil && *req.WorkspaceId != "" {
+		wId = req.WorkspaceId
+	}
+
 	// Insert Asset in Database
 	asset := &models.Asset{
 		UserId:      userId,
-		WorkspaceId: req.WorkspaceId,
+		WorkspaceId: wId,
 		NoteId:      req.NoteId,
 		Name:        req.Filename,
 		Path:        publicUrl,

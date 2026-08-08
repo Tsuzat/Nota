@@ -9,8 +9,14 @@ import (
 func InitNotesRouter() {
 	config.APP.Get("/api/v1/db/note/preview/:id<guid>", app.GetNotePreview)
 	group := config.APP.Group("/api/v1/db/note", middleware.Authenticate)
+	group.Get("/shared", app.GetSharedNotes)
 	group.Get("/:id<guid>", app.GetNotes)
 	group.Get("/:id<guid>/meta", app.GetNoteMeta)
+	group.Get("/:id<guid>/collaborators", app.HasCollaborators)
+	group.Get("/:id<guid>/collaborators/list", app.GetCollaborators)
+	group.Post("/:id<guid>/collaborators", app.AddCollaborator)
+	group.Patch("/:id<guid>/collaborators/:collabId<guid>", app.UpdateCollaboratorRole)
+	group.Delete("/:id<guid>/collaborators/:collabId<guid>", app.RemoveCollaborator)
 	group.Post("/", app.CreateNote)
 	// update note by it's id
 	group.Patch("/:id<guid>", app.UpdateNote)

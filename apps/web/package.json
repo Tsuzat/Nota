@@ -18,11 +18,13 @@
     "ci": "biome ci"
   },
   "dependencies": {
+    "@hocuspocus/provider": "^4.5.0",
     "@nota/client": "workspace:*",
     "@nota/ui": "workspace:*",
     "@number-flow/svelte": "^0.4.2",
     "fast-json-patch": "^3.1.1",
-    "katex": "^0.18.1"
+    "katex": "^0.18.1",
+    "yjs": "^13.6.32"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^7.2.8",

@@ -1,256 +1,402 @@
 <script lang="ts">
-import { ALLOWED_MAX_FILE_SIZE, FileType, getFileTypeExtensions } from '@lib/components/edra/utils.js';
-import { Skeleton } from '@lib/components/ui/skeleton/index.js';
-import {
-  callAI,
-  getAuthContext,
-  getNotesContext,
-  getStorageContext,
-  getWorkspacesContext,
-  type Note,
-  type SelectableModel,
-} from '@nota/client';
-import { SimpleToolTip } from '@nota/ui/custom/index.js';
-import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
-import { BarSpinner, IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
-import { Button, buttonVariants } from '@nota/ui/shadcn/button';
-import { toast } from '@nota/ui/shadcn/sonner';
-import { compare } from 'fast-json-patch';
-import { onDestroy, onMount } from 'svelte';
-import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
-import { resolve } from '$app/paths';
-import { getGlobalSettings } from '$lib/components/settings/index.svelte';
-import NavActions from '$lib/components/sidebar/nav-actions.svelte';
-import Topbar from '$lib/components/topbar.svelte';
-import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
+  import {
+    ALLOWED_MAX_FILE_SIZE,
+    FileType,
+    getFileTypeExtensions,
+  } from "@lib/components/edra/utils.js";
+  import { Skeleton } from "@lib/components/ui/skeleton/index.js";
+  import {
+    callAI,
+    getAuthContext,
+    getNotesContext,
+    getStorageContext,
+    getWorkspacesContext,
+    type Note,
+    type SelectableModel,
+  } from "@nota/client";
+  import { SimpleToolTip } from "@nota/ui/custom/index.js";
+  import { type Content, createEditor, Edra } from "@nota/ui/edra/index.js";
+  import CollaboratorsDialog from "$lib/components/dialogs/collaborators-dialog.svelte";
+  import { setCollaboratorsContext } from "@nota/client";
+  import {
+    BarSpinner,
+    IconPicker,
+    IconRenderer,
+    icons,
+  } from "@nota/ui/icons/index.js";
+  import { Button, buttonVariants } from "@nota/ui/shadcn/button";
+  import { toast } from "@nota/ui/shadcn/sonner";
+  import { compare } from "fast-json-patch";
+  import { onDestroy, onMount } from "svelte";
+  import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
+  import { getGlobalSettings } from "$lib/components/settings/index.svelte";
+  import NavActions from "$lib/components/sidebar/nav-actions.svelte";
+  import Topbar from "$lib/components/topbar.svelte";
+  import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
+  import { browser } from "$app/environment";
+  import * as Y from "yjs";
+  import { HocuspocusProvider } from "@hocuspocus/provider";
+  import { PUBLIC_COLLABORATION_URL } from "$env/static/public";
+  import UserAvatar from "$lib/components/custom/user-avatar.svelte";
+  import { getRandomUserColor } from "@lib/utils.js";
 
-// --- Services & Context ---
-const cloudWorkspaces = getWorkspacesContext();
-const cloudNotes = getNotesContext();
-const cloudStorage = getStorageContext();
-const useGlobalSettings = getGlobalSettings();
-const currentWorkspaceCtx = getCurrentWorkspace();
-const currentWorkspace = $derived(currentWorkspaceCtx.get());
-const authContext = getAuthContext();
+  // --- Services & Context ---
+  const cloudWorkspaces = getWorkspacesContext();
+  const cloudNotes = getNotesContext();
+  const cloudStorage = getStorageContext();
+  const useGlobalSettings = getGlobalSettings();
+  const authContext = getAuthContext();
+  const collaborators = setCollaboratorsContext();
+  const currentWorkspaceCtx = getCurrentWorkspace();
+  const currentWorkspace = $derived(currentWorkspaceCtx.get());
 
-// --- State ---
-const { data } = $props();
-let syncedContent = $state<Content>();
-let isDirty = $state(false);
+  // --- State ---
+  const { data } = $props();
+  let syncedContent = $state<Content>();
+  let isDirty = $state(false);
 
-// Note data derived from store
-let note = $state<Note>();
+  // Note data derived from store
+  let note = $state<Note>();
 
-let isLoading = $state(true);
-let syncing = $state(false);
-let syncingText = $state('');
-let availableModels = $state<Record<string, SelectableModel[]>>({});
+  let isLoading = $state(true);
+  let syncing = $state(false);
+  let syncingText = $state("");
+  let availableModels = $state<Record<string, SelectableModel[]>>({});
 
-// --- File Handling Utilities ---
-const getAssets = async (fileType: FileType) => {
-  const files = cloudStorage.files;
-  const extensions = new Set(getFileTypeExtensions(fileType));
-  const assets: string[] = [];
-  for (const file of files) {
-    const key = file.key;
-    const fileExtension = key.split('.').pop();
-    if (fileExtension !== undefined && extensions.has(fileExtension)) {
-      assets.push(file.url);
+  // --- File Handling Utilities ---
+  const getAssets = async (fileType: FileType) => {
+    const files = cloudStorage.files;
+    const extensions = new Set(getFileTypeExtensions(fileType));
+    const assets: string[] = [];
+    for (const file of files) {
+      const key = file.key;
+      const fileExtension = key.split(".").pop();
+      if (fileExtension !== undefined && extensions.has(fileExtension)) {
+        assets.push(file.url);
+      }
     }
-  }
-  return assets;
-};
+    return assets;
+  };
 
-const getLocalFile = async (fileType: FileType) => {
-  return new Promise<string | null>((resolve) => {
-    const input = document.createElement('input');
-    input.type = 'file';
+  const getLocalFile = async (fileType: FileType) => {
+    return new Promise<string | null>((resolve) => {
+      const input = document.createElement("input");
+      input.type = "file";
 
-    if (fileType === FileType.IMAGE) input.accept = 'image/*';
-    else if (fileType === FileType.VIDEO) input.accept = 'video/*';
-    else if (fileType === FileType.AUDIO) input.accept = 'audio/*';
+      if (fileType === FileType.IMAGE) input.accept = "image/*";
+      else if (fileType === FileType.VIDEO) input.accept = "video/*";
+      else if (fileType === FileType.AUDIO) input.accept = "audio/*";
 
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return resolve(null);
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return resolve(null);
 
-      if (file.size > ALLOWED_MAX_FILE_SIZE) {
-        toast.error(`File ${file.name} is too large (max 50MB).`);
-        return resolve(null);
-      }
+        if (file.size > ALLOWED_MAX_FILE_SIZE) {
+          toast.error(`File ${file.name} is too large (max 50MB).`);
+          return resolve(null);
+        }
 
-      const user = authContext.user;
-      if (user && user.used_storage + file.size > user.assigned_storage) {
-        toast.error(`Not enough storage to upload ${file.name}.`);
-        return resolve(null);
-      }
+        const user = authContext.user;
+        if (user && user.used_storage + file.size > user.assigned_storage) {
+          toast.error(`Not enough storage to upload ${file.name}.`);
+          return resolve(null);
+        }
 
-      try {
-        const uploadPromise = cloudStorage.upload(file, {
+        try {
+          const uploadPromise = cloudStorage.upload(file, {
+            workspaceId: currentWorkspace?.id,
+            noteId: note?.id,
+          });
+          toast.promise(uploadPromise, {
+            loading: `Uploading ${file.name}...`,
+            success: `${file.name} uploaded successfully`,
+            error: `Failed to upload ${file.name}`,
+          });
+          const url = await uploadPromise;
+          resolve(url);
+        } catch (err) {
+          console.error(err);
+          resolve(null);
+        }
+      };
+      input.click();
+    });
+  };
+
+  let ydoc = $state.raw<Y.Doc | undefined>(undefined);
+  let provider = $state.raw<HocuspocusProvider | undefined>(undefined);
+  let editor = $state.raw<ReturnType<typeof createEditor> | undefined>(
+    undefined,
+  );
+  let isCollaborative = $state(false);
+  let currentNoteId = $state<string | undefined>(undefined);
+  let loadInFlight = $state(false);
+  let loadSeq = 0;
+
+  async function setupEditor(nextId: string, shouldCollab: boolean) {
+    const providerName = `note:${nextId}`;
+    const currentName = (provider as any)?.configuration?.name as
+      | string
+      | undefined;
+    if (
+      currentNoteId === nextId &&
+      isCollaborative === shouldCollab &&
+      currentName === providerName &&
+      editor
+    ) {
+      return;
+    }
+
+    editor?.destroy();
+    try {
+      provider?.disconnect();
+    } catch {}
+    try {
+      (provider as any)?.destroy?.();
+    } catch {}
+    ydoc?.destroy();
+
+    currentNoteId = nextId;
+    isCollaborative = shouldCollab;
+
+    if (shouldCollab) {
+      ydoc = new Y.Doc();
+      provider = new HocuspocusProvider({
+        url: PUBLIC_COLLABORATION_URL,
+        name: providerName,
+        document: ydoc,
+        token: data.token,
+      });
+      provider.on("authenticationFailed", () => {
+        toast.error("Collaboration authentication failed");
+        isCollaborative = false;
+        setupEditor(nextId, false);
+      });
+      provider.on("close" as any, (event: any) => {
+        if (event?.event?.code === 1001 || event?.code === 1001) {
+          console.warn("[collab] ws closed with 1001 (unauth queue)", event);
+        }
+      });
+    } else {
+      ydoc = undefined;
+      provider = undefined;
+    }
+
+    editor = createEditor({
+      onUpdate: () => {
+        isDirty = true;
+      },
+      onFileUpload: (file) => {
+        const user = authContext.user;
+        if (user && user.used_storage + file.size > user.assigned_storage) {
+          toast.error(`Not enough storage to upload ${file.name}.`);
+          return Promise.reject(new Error("Storage quota exceeded"));
+        }
+        return cloudStorage.upload(file, {
           workspaceId: currentWorkspace?.id,
           noteId: note?.id,
         });
-        toast.promise(uploadPromise, {
-          loading: `Uploading ${file.name}...`,
-          success: `${file.name} uploaded successfully`,
-          error: `Failed to upload ${file.name}`,
-        });
-        const url = await uploadPromise;
-        resolve(url);
-      } catch (err) {
-        console.error(err);
-        resolve(null);
-      }
-    };
-    input.click();
-  });
-};
-
-// --- Editor Setup ---
-const editor = createEditor({
-  onUpdate: () => {
-    isDirty = true;
-  },
-  onFileUpload: (file) => {
-    const user = authContext.user;
-    if (user && user.used_storage + file.size > user.assigned_storage) {
-      toast.error(`Not enough storage to upload ${file.name}.`);
-      return Promise.reject(new Error('Storage quota exceeded'));
-    }
-    return cloudStorage.upload(file, {
-      workspaceId: currentWorkspace?.id,
-      noteId: note?.id,
+      },
+      selectFile: getLocalFile,
+      getAssets,
+      callAI: (
+        prompt: string,
+        onChunk: (chunk: string) => void,
+        onError?: (error: Error) => void,
+      ) => {
+        return callAI(prompt, note?.id || "", onChunk, onError);
+      },
+      openCollaboration: shouldCollab,
+      document: ydoc,
+      provider,
+      user: {
+        name: data.user.name || "User",
+        color: getRandomUserColor(),
+        avatar: data.user.avatar_url || "",
+      },
     });
-  },
-  selectFile: getLocalFile,
-  getAssets,
-  callAI: (prompt: string, onChunk: (chunk: string) => void, onError?: (error: Error) => void) => {
-    return callAI(prompt, note?.id || '', onChunk, onError);
-  },
-});
+  }
 
-// --- Hooks ---
-afterNavigate(() => {
-  if (data.id) loadData();
-});
+  // --- Hooks ---
+  // afterNavigate fires on every client navigation including the initial
+  // hydration; keep it but dedup via loadInFlight/seq so we don't spawn
+  // two concurrent providers.
+  afterNavigate(() => {
+    if (data.id) loadData();
+  });
 
-$effect(() => {
-  if (note?.workspace_id && cloudWorkspaces.workspaces.length > 0) {
-    const workspace = cloudWorkspaces.workspaces.find((w) => w.id === note?.workspace_id);
-    if (workspace && currentWorkspaceCtx.get()?.id !== workspace.id) {
-      currentWorkspaceCtx.set(workspace);
+  $effect(() => {
+    if (note?.workspace_id && cloudWorkspaces.workspaces.length > 0) {
+      const workspace = cloudWorkspaces.workspaces.find(
+        (w) => w.id === note?.workspace_id,
+      );
+      if (workspace && currentWorkspaceCtx.get()?.id !== workspace.id) {
+        currentWorkspaceCtx.set(workspace);
+      }
     }
-  }
-});
+  });
 
-onMount(() => {
-  // auto save is called in every 2 mins
-  const saveInterval = setInterval(() => {
-    saveNoteContent();
-  }, 120000);
-  return () => clearInterval(saveInterval);
-});
+  onMount(() => {
+    if (browser && data.id) loadData();
+    // auto save is called in every 2 mins
+    const saveInterval = setInterval(() => {
+      saveNoteContent();
+    }, 120000);
+    return () => clearInterval(saveInterval);
+  });
 
-beforeNavigate(async () => {
-  if (isDirty) {
-    await saveNoteContent();
-  }
-});
+  beforeNavigate(async () => {
+    if (isDirty && !isCollaborative) {
+      await saveNoteContent();
+    }
+  });
 
-onDestroy(() => {
-  editor?.destroy();
-});
-
-// --- Data Operations ---
-async function saveNoteContent() {
-  if (!isDirty || !note || !editor) return;
-
-  const currentContent = editor.getJSON();
-  if (syncedContent === undefined || syncedContent === null || typeof syncedContent === 'string') {
-    syncedContent = {};
-  }
-  const patch = compare(syncedContent as object, currentContent);
-
-  if (patch.length === 0) {
-    isDirty = false;
-    return;
-  }
-
-  syncing = true;
-  syncingText = `Syncing ${patch.length} changes`;
-  try {
-    await cloudNotes.patch(note.id, patch);
-    syncedContent = currentContent;
-    isDirty = false;
-  } catch (error) {
-    console.error(error);
-    toast.error('Something went wrong when saving content to cloud');
-  } finally {
-    syncing = false;
-  }
-}
-
-async function loadData() {
-  const id = data.id;
-  isLoading = true;
-  note = cloudNotes.notes.find((n) => n.id === id);
-  if (!note) {
+  onDestroy(() => {
+    editor?.destroy();
     try {
-      note = await cloudNotes.fetchMeta(id);
+      provider?.disconnect();
+    } catch {}
+    try {
+      (provider as any)?.destroy?.();
+    } catch {}
+    ydoc?.destroy();
+    currentNoteId = undefined;
+  });
+
+  // --- Data Operations ---
+  async function saveNoteContent() {
+    if (!isDirty || !note || !editor || isCollaborative) return;
+
+    const currentContent = editor.getJSON();
+    if (
+      syncedContent === undefined ||
+      syncedContent === null ||
+      typeof syncedContent === "string"
+    ) {
+      syncedContent = {};
+    }
+    const patch = compare(syncedContent as object, currentContent);
+
+    if (patch.length === 0) {
+      isDirty = false;
+      return;
+    }
+
+    syncing = true;
+    syncingText = `Syncing ${patch.length} changes`;
+    try {
+      await cloudNotes.patch(note.id, patch);
+      syncedContent = currentContent;
+      isDirty = false;
     } catch (error) {
       console.error(error);
+      toast.error("Something went wrong when saving content to cloud");
+    } finally {
+      syncing = false;
     }
   }
-  if (!note) {
-    toast.error(`Note with id ${id} not found`);
-    return goto(resolve('/(app)/home'));
-  }
-  try {
-    const data = await cloudNotes.fetchContent(id);
-    if (data) {
-      const dbContent = data as Content;
-      editor?.commands.setContent(dbContent, { contentType: 'json' });
-      syncedContent = dbContent;
+
+  const withTimeout = <T,>(p: Promise<T>, ms: number) =>
+    Promise.race([
+      p,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`timeout ${ms}ms`)), ms),
+      ),
+    ]);
+
+  async function loadData() {
+    if (loadInFlight) return;
+    loadInFlight = true;
+    const seq = ++loadSeq;
+    const id = data.id;
+    isLoading = true;
+    note = cloudNotes.notes.find((n) => n.id === id);
+    if (!note) {
+      try {
+        note = await cloudNotes.fetchMeta(id);
+      } catch (error) {
+        console.error(error);
+      }
     }
-  } catch (error) {
-    console.error(error);
-    toast.error('Something went wrong when loading note');
-    goto(resolve('/(app)/home'));
-  } finally {
-    isLoading = false;
-  }
-}
+    if (!note) {
+      toast.error(`Note with id ${id} not found`);
+      loadInFlight = false;
+      return goto(resolve("/(app)/home"));
+    }
 
-async function updateNote(name: string, icon: string, pinned: boolean) {
-  if (!note) return;
-  syncing = true;
-  try {
-    await cloudNotes.update(note.id, { name, icon, pinned });
-    note.name = name;
-    note.icon = icon;
-    note.pinned = pinned;
-  } catch (e) {
-    toast.error('Could not update note');
-    console.error(e);
-  } finally {
-    syncing = false;
-  }
-}
+    let shouldCollab = false;
+    try {
+      await withTimeout(collaborators.fetchMembers(id), 8000);
+      shouldCollab = collaborators.members.length > 0;
+    } catch (e) {
+      console.error(e);
+      shouldCollab = false;
+    }
+    if (seq !== loadSeq) {
+      loadInFlight = false;
+      return;
+    }
 
-async function handleNameChange(e: Event) {
-  if (!note) return;
-  const target = e.target as HTMLInputElement;
-  const value = target.value.trim();
-  if (!value) return;
-  await updateNote(value, note.icon, note.pinned);
-}
-
-function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    saveNoteContent();
+    await setupEditor(id, shouldCollab);
+    if (seq !== loadSeq) {
+      loadInFlight = false;
+      return;
+    }
+    try {
+      const fetched = await withTimeout(cloudNotes.fetchContent(id), 8000);
+      if (seq !== loadSeq) {
+        loadInFlight = false;
+        return;
+      }
+      if (fetched) {
+        const dbContent = fetched as Content;
+        if (!isCollaborative) {
+          editor?.commands.setContent(dbContent, { contentType: "json" });
+          syncedContent = dbContent;
+        }
+        // collaborative: Yjs hydrates content via provider — skip setContent
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong when loading note");
+      goto(resolve("/(app)/home"));
+    } finally {
+      if (seq === loadSeq) isLoading = false;
+      loadInFlight = false;
+    }
   }
-}
+
+  async function updateNote(name: string, icon: string, pinned: boolean) {
+    if (!note) return;
+    syncing = true;
+    try {
+      await cloudNotes.update(note.id, { name, icon, pinned });
+      note.name = name;
+      note.icon = icon;
+      note.pinned = pinned;
+    } catch (e) {
+      toast.error("Could not update note");
+      console.error(e);
+    } finally {
+      syncing = false;
+    }
+  }
+
+  async function handleNameChange(e: Event) {
+    if (!note) return;
+    const target = e.target as HTMLInputElement;
+    const value = target.value.trim();
+    if (!value) return;
+    await updateNote(value, note.icon, note.pinned);
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      saveNoteContent();
+    }
+  }
 </script>
 
 <svelte:head>
@@ -315,6 +461,23 @@ function handleKeydown(e: KeyboardEvent) {
       {/snippet}
 
       {#snippet right()}
+        {#if isCollaborative && collaborators.members.length > 0}
+          <div class="flex items-center -space-x-2 mr-2">
+            {#each collaborators.members.slice(0, 3) as member (member.id)}
+              <UserAvatar
+                image={member.avatar_url ?? ""}
+                name={member.name ?? "Unknown"}
+              />
+            {/each}
+            {#if collaborators.members.length > 3}
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium z-10"
+              >
+                +{collaborators.members.length - 3}
+              </div>
+            {/if}
+          </div>
+        {/if}
         {#if note?.is_public}
           <SimpleToolTip>
             <Button variant="ghost" size="icon">
@@ -337,37 +500,40 @@ function handleKeydown(e: KeyboardEvent) {
             {/if}
           </Button>
         </SimpleToolTip>
+        <CollaboratorsDialog noteId={data.id} />
         <NavActions
           starred={Boolean(note?.pinned)}
           toggleStar={() => {
             if (note) updateNote(note.name, note.icon, !note.pinned);
           }}
-          {editor}
+          editor={editor!}
           note={note!}
         />
       {/snippet}
     </Topbar>
-    <Edra {editor}>
-      <Edra.ToC />
-      {#if useGlobalSettings.useToolBar}
-        <Edra.Toolbar />
-      {/if}
-      {#if useGlobalSettings.useBubbleMenu}
-        <Edra.BubbleMenu />
-      {/if}
-      {#if useGlobalSettings.useAI}
-        <Edra.UseAI {availableModels} />
-      {/if}
-      <Edra.Content
-        class="min-w-full overflow-auto w-full cursor-auto px-8 py-4 text-base transition-all duration-300 *:outline-none"
-      />
-      {#if useGlobalSettings.useDragHandle}
-        <Edra.DragHandle
-          type="extended"
-          class="transition-all! duration-300!"
+    {#key editor}
+      <Edra editor={editor!}>
+        <Edra.ToC />
+        {#if useGlobalSettings.useToolBar}
+          <Edra.Toolbar />
+        {/if}
+        {#if useGlobalSettings.useBubbleMenu}
+          <Edra.BubbleMenu />
+        {/if}
+        {#if useGlobalSettings.useAI}
+          <Edra.UseAI {availableModels} />
+        {/if}
+        <Edra.Content
+          class="min-w-full overflow-auto w-full cursor-auto px-8 py-4 text-base transition-all duration-300 *:outline-none"
         />
-      {/if}
-    </Edra>
+        {#if useGlobalSettings.useDragHandle}
+          <Edra.DragHandle
+            type="extended"
+            class="transition-all! duration-300!"
+          />
+        {/if}
+      </Edra>
+    {/key}
   </div>
 {:else}
   <div

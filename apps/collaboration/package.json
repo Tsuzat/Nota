@@ -1,0 +1,24 @@
+{
+  "name": "@nota/collaboration",
+  "main": "src/main.ts",
+  "module": "src/main.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "dev": "bun --watch run src/main.ts",
+    "start": "bun run src/main.ts"
+  },
+  "dependencies": {
+    "@hocuspocus/extension-logger": "^4.5.0",
+    "@hocuspocus/server": "^4.5.0",
+    "cookie": "^2.0.1",
+    "yjs": "^13.6.32",
+    "zod": "^4.4.3"
+  }
+}

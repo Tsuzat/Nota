@@ -24,6 +24,36 @@ var (
 	zstdDecoder, _ = zstd.NewReader(nil)
 )
 
+func userHasNoteReadAccess(ctx context.Context, noteId string, userId string) bool {
+	cacheKey := fmt.Sprintf("note_access_read:%s:%s", noteId, userId)
+	var hasAccess bool
+	if utils.GetCache(cacheKey, &hasAccess) == nil {
+		return hasAccess
+	}
+	exists, _ := config.DB.NewSelect().
+		Model((*models.Note)(nil)).
+		Where("id = ? AND (owner = ? OR id IN (SELECT note_id FROM note_collaborators WHERE user_id = ?))", noteId, userId, userId).
+		Exists(ctx)
+	
+	go utils.SetCache(cacheKey, exists, 5*time.Minute)
+	return exists
+}
+
+func userHasNoteWriteAccess(ctx context.Context, noteId string, userId string) bool {
+	cacheKey := fmt.Sprintf("note_access_write:%s:%s", noteId, userId)
+	var hasAccess bool
+	if utils.GetCache(cacheKey, &hasAccess) == nil {
+		return hasAccess
+	}
+	exists, _ := config.DB.NewSelect().
+		Model((*models.Note)(nil)).
+		Where("id = ? AND (owner = ? OR id IN (SELECT note_id FROM note_collaborators WHERE user_id = ? AND role IN ('editor', 'admin')))", noteId, userId, userId).
+		Exists(ctx)
+	
+	go utils.SetCache(cacheKey, exists, 5*time.Minute)
+	return exists
+}
+
 func ListWorkspaceVersions(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	workspaceId := c.Params("workspaceId")
@@ -100,9 +130,7 @@ func GetNoteVersionCount(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	noteId := c.Params("id")
 
-	// Verify ownership
-	exists, _ := config.DB.NewSelect().Model((*models.Note)(nil)).Where("id = ? AND owner = ?", noteId, user.Id).Exists(c.Context())
-	if !exists {
+	if !userHasNoteReadAccess(c.Context(), noteId, user.Id) {
 		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Forbidden"})
 	}
 
@@ -127,9 +155,7 @@ func GetNoteVersion(c fiber.Ctx) error {
 	noteId := c.Params("id")
 	versionId := c.Params("versionId")
 
-	// Verify ownership
-	exists, _ := config.DB.NewSelect().Model((*models.Note)(nil)).Where("id = ? AND owner = ?", noteId, user.Id).Exists(c.Context())
-	if !exists {
+	if !userHasNoteReadAccess(c.Context(), noteId, user.Id) {
 		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Forbidden"})
 	}
 
@@ -161,8 +187,12 @@ func CreateManualSnapshot(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "Invalid request"})
 	}
 
+	if !userHasNoteWriteAccess(c.Context(), noteId, user.Id) {
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Forbidden"})
+	}
+
 	var note models.Note
-	if err := config.DB.NewSelect().Model(&note).Where("id = ? AND owner = ?", noteId, user.Id).Scan(c.Context()); err != nil {
+	if err := config.DB.NewSelect().Model(&note).Where("id = ?", noteId).Scan(c.Context()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(models.APIError{Status: 404, Error: "Note not found"})
 	}
 
@@ -233,9 +263,7 @@ func DeleteNoteVersion(c fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Only manual snapshots can be deleted"})
 	}
 
-	// Verify ownership
-	exists, _ := config.DB.NewSelect().Model((*models.Note)(nil)).Where("id = ? AND owner = ?", noteId, user.Id).Exists(c.Context())
-	if !exists {
+	if !userHasNoteWriteAccess(c.Context(), noteId, user.Id) {
 		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Forbidden"})
 	}
 
@@ -260,9 +288,13 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 	noteId := c.Params("id")
 	versionId := c.Params("versionId")
 
+	if !userHasNoteWriteAccess(c.Context(), noteId, user.Id) {
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Forbidden"})
+	}
+
 	// Fetch note
 	var note models.Note
-	if err := config.DB.NewSelect().Model(&note).Where("id = ? AND owner = ?", noteId, user.Id).Scan(c.Context()); err != nil {
+	if err := config.DB.NewSelect().Model(&note).Where("id = ?", noteId).Scan(c.Context()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(models.APIError{Status: 404, Error: "Note not found"})
 	}
 
@@ -345,8 +377,12 @@ func RestoreNoteFromContent(c fiber.Ctx) error {
 	}
 
 	// Fetch note and verify ownership
+	if !userHasNoteWriteAccess(c.Context(), noteId, user.Id) {
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Forbidden"})
+	}
+
 	var note models.Note
-	if err := config.DB.NewSelect().Model(&note).Where("id = ? AND owner = ?", noteId, user.Id).Scan(c.Context()); err != nil {
+	if err := config.DB.NewSelect().Model(&note).Where("id = ?", noteId).Scan(c.Context()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(models.APIError{Status: 404, Error: "Note not found"})
 	}
 

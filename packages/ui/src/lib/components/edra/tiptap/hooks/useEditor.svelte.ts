@@ -4,22 +4,10 @@ import { browser } from '$app/environment';
 import { Editor } from '../Editor.ts';
 
 export const useEditor = (options: Partial<EditorOptions> = {}) => {
-  let editor: Editor | undefined = undefined;
-
-  if (browser) {
-    editor = new Editor(options);
-  }
-
-  $effect(() => {
-    return () => {
-      if (editor) {
-        const nodes = editor.view.dom?.parentNode;
-        const newEl = nodes?.cloneNode(true) as HTMLElement;
-        nodes?.parentNode?.replaceChild(newEl, nodes);
-        editor.destroy();
-      }
-    };
-  });
-
-  return editor;
+  if (!browser) return undefined;
+  // NOTE: intentionally no `$effect` here. `$effect` inside a plain function
+  // triggers `effect_orphan` when `createEditor`/`useEditor` is called
+  // outside component init (e.g. from an async `loadData`/`setupEditor`).
+  // Caller is responsible for `editor.destroy()` via `onDestroy`.
+  return new Editor(options);
 };

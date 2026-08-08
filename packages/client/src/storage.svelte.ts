@@ -1,8 +1,8 @@
-import { getContext, setContext } from 'svelte';
-import z from 'zod';
-import { PUBLIC_BACKEND_URL } from '$env/static/public';
-import request, { fetchFn } from './request';
-import { type Asset, AssetSchema } from './types';
+import { getContext, setContext } from "svelte";
+import z from "zod";
+import { PUBLIC_BACKEND_URL } from "$env/static/public";
+import request, { fetchFn } from "./request";
+import { type Asset, AssetSchema } from "./types";
 
 const SignedUrlResponseSchema = z.object({
   uploadUrl: z.string().min(1),
@@ -72,16 +72,16 @@ class Storage {
    */
   async fetch(options?: FetchStorageOptions) {
     const params = new URLSearchParams();
-    if (options?.page) params.set('page', options.page.toString());
-    if (options?.limit) params.set('limit', options.limit.toString());
-    if (options?.search) params.set('search', options.search);
-    if (options?.workspaceId) params.set('workspaceId', options.workspaceId);
-    if (options?.type) params.set('type', options.type);
-    if (options?.sortBy) params.set('sortBy', options.sortBy);
-    if (options?.sortOrder) params.set('sortOrder', options.sortOrder);
+    if (options?.page) params.set("page", options.page.toString());
+    if (options?.limit) params.set("limit", options.limit.toString());
+    if (options?.search) params.set("search", options.search);
+    if (options?.workspaceId) params.set("workspaceId", options.workspaceId);
+    if (options?.type) params.set("type", options.type);
+    if (options?.sortBy) params.set("sortBy", options.sortBy);
+    if (options?.sortOrder) params.set("sortOrder", options.sortOrder);
 
     const queryString = params.toString();
-    const url = `${PUBLIC_BACKEND_URL}/api/v1/storage/list${queryString ? `?${queryString}` : ''}`;
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/storage/list${queryString ? `?${queryString}` : ""}`;
 
     const res = await request(url);
     if (res.ok) {
@@ -89,7 +89,9 @@ class Storage {
       const data = json.data;
       if (data) {
         if (Array.isArray(data.files)) {
-          const parsedAssets = data.files.map((file: unknown) => AssetSchema.parse(file));
+          const parsedAssets = data.files.map((file: unknown) =>
+            AssetSchema.parse(file),
+          );
           this.#assets = parsedAssets;
           this.#total = data.total ?? parsedAssets.length;
         } else {
@@ -109,17 +111,13 @@ class Storage {
    */
   async upload(file: File, options?: UploadStorageOptions) {
     const getSignedUrl = `${PUBLIC_BACKEND_URL}/api/v1/storage/presigned-url`;
-    const workspaceId = options?.workspaceId || '';
-    const noteId = options?.noteId;
 
     const signedUrlRes = await request(getSignedUrl, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({
         filename: file.name,
-        contentType: file.type || 'application/octet-stream',
+        contentType: file.type || "application/octet-stream",
         size: file.size,
-        workspaceId,
-        noteId,
       }),
     });
     if (!signedUrlRes.ok) {
@@ -129,29 +127,29 @@ class Storage {
     const signedUrl = SignedUrlResponseSchema.parse(json.data);
 
     const res = await fetchFn(signedUrl.uploadUrl, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': file.type || 'application/octet-stream',
+        "Content-Type": file.type || "application/octet-stream",
       },
       body: file,
     });
     if (!res.ok) {
-      throw new Error((await res.text()) || 'Failed to upload file');
+      throw new Error((await res.text()) || "Failed to upload file");
     }
 
     const confirmUrl = `${PUBLIC_BACKEND_URL}/api/v1/storage/confirm`;
     const confirmRes = await request(confirmUrl, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({
         key: signedUrl.key,
         filename: file.name,
-        contentType: file.type || 'application/octet-stream',
-        workspaceId,
-        noteId,
+        contentType: file.type || "application/octet-stream",
+        workspaceId: options?.workspaceId || "",
+        noteId: options?.noteId || "",
       }),
     });
     if (!confirmRes.ok) {
-      throw new Error((await confirmRes.text()) || 'Failed to confirm upload');
+      throw new Error((await confirmRes.text()) || "Failed to confirm upload");
     }
 
     const confirmJson = await confirmRes.json();
@@ -167,26 +165,33 @@ class Storage {
    */
   async delete(idOrKey: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/storage`;
-    const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(idOrKey);
+    const isUuid =
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+        idOrKey,
+      );
     const body = isUuid ? { id: idOrKey } : { key: idOrKey };
 
     const res = await request(url, {
-      method: 'DELETE',
+      method: "DELETE",
       body: JSON.stringify(body),
     });
     if (res.ok) {
-      const targetAsset = this.#assets.find((asset) => asset.id === idOrKey || asset.path === idOrKey);
+      const targetAsset = this.#assets.find(
+        (asset) => asset.id === idOrKey || asset.path === idOrKey,
+      );
       if (targetAsset) {
         this.#usedBytes = Math.max(0, this.#usedBytes - targetAsset.size);
       }
-      this.#assets = this.#assets.filter((asset) => asset.id !== idOrKey && asset.path !== idOrKey);
+      this.#assets = this.#assets.filter(
+        (asset) => asset.id !== idOrKey && asset.path !== idOrKey,
+      );
     } else {
       throw new Error(await res.text());
     }
   }
 }
 
-const NOTASTORAGEKEY = Symbol('NOTASTORAGEKEY');
+const NOTASTORAGEKEY = Symbol("NOTASTORAGEKEY");
 
 /**
  * Set the storage context.

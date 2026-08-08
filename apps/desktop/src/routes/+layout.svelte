@@ -1,135 +1,142 @@
 <script lang="ts">
-import * as Sidebar from '@nota/ui/shadcn/sidebar';
-import '../app.css';
+  import * as Sidebar from "@nota/ui/shadcn/sidebar";
+  import "../app.css";
 
-let { children, data } = $props();
+  let { children, data } = $props();
 
-import {
-  secureStorage,
-  setAuthContext,
-  setNotesContext,
-  setStorageContext,
-  setVersionsContext,
-  setWorkspacesContext,
-} from '@nota/client';
-import { ModeWatcher } from '@nota/ui';
-import DeleteWorkspaceDialog from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
-import { Toaster, toast } from '@nota/ui/shadcn/sonner';
-import { check } from '@tauri-apps/plugin-updater';
-import { onMount } from 'svelte';
-import AboutDialog from '$lib/components/dialogs/about.svelte';
-import MoveNote from '$lib/components/dialogs/move-note.svelte';
-import NewNotes from '$lib/components/dialogs/new-notes.svelte';
-import NewWorkspace from '$lib/components/dialogs/new-workspace.svelte';
-import RenameNote from '$lib/components/dialogs/rename-note.svelte';
-import GlobalSearch from '$lib/components/global-search/global-search.svelte';
-import { setGlobalSignInContext } from '$lib/components/global-signin';
-import GlobalSignin from '$lib/components/global-signin/global-signin.svelte';
-import { GlobalSettings, setGlobalSettings } from '$lib/components/settings';
-import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
-import { setCurrentWorkspace } from '$lib/currentworkspace.svelte';
-import { useDeepLinkAuth } from '$lib/handleOAuth';
-import { setLocalNotes } from '$lib/local/notes.svelte';
-import { setLocalVersions } from '$lib/local/versions.svelte';
-import { setLocalWorkspaces } from '$lib/local/workspaces.svelte';
-import { setupAppMenu } from '$lib/menu';
-import { setTheme } from '$lib/theme';
-import { downloadAndInstall } from '$lib/updater';
+  import {
+    secureStorage,
+    setAuthContext,
+    setNotesContext,
+    setStorageContext,
+    setVersionsContext,
+    setWorkspacesContext,
+    setCollaboratorsContext,
+  } from "@nota/client";
+  import { ModeWatcher } from "@nota/ui";
+  import DeleteWorkspaceDialog from "@nota/ui/custom/DeleteWorkspaceDialog.svelte";
+  import { Toaster, toast } from "@nota/ui/shadcn/sonner";
+  import { check } from "@tauri-apps/plugin-updater";
+  import { onMount } from "svelte";
+  import AboutDialog from "$lib/components/dialogs/about.svelte";
+  import MoveNote from "$lib/components/dialogs/move-note.svelte";
+  import NewNotes from "$lib/components/dialogs/new-notes.svelte";
+  import NewWorkspace from "$lib/components/dialogs/new-workspace.svelte";
+  import RenameNote from "$lib/components/dialogs/rename-note.svelte";
+  import GlobalSearch from "$lib/components/global-search/global-search.svelte";
+  import { setGlobalSignInContext } from "$lib/components/global-signin";
+  import GlobalSignin from "$lib/components/global-signin/global-signin.svelte";
+  import { GlobalSettings, setGlobalSettings } from "$lib/components/settings";
+  import AppSideBar from "$lib/components/sidebar/app-sidebar.svelte";
+  import { setCurrentWorkspace } from "$lib/currentworkspace.svelte";
+  import { useDeepLinkAuth } from "$lib/handleOAuth";
+  import { setLocalNotes } from "$lib/local/notes.svelte";
+  import { setLocalVersions } from "$lib/local/versions.svelte";
+  import { setLocalWorkspaces } from "$lib/local/workspaces.svelte";
+  import { setupAppMenu } from "$lib/menu";
+  import { setTheme } from "$lib/theme";
+  import { downloadAndInstall } from "$lib/updater";
 
-// Local Workspaces and Notes
-const localWorkspaces = setLocalWorkspaces();
-const localNotes = setLocalNotes();
-const localVersions = setLocalVersions();
-const currentWorkspace = setCurrentWorkspace();
+  // Local Workspaces and Notes
+  const localWorkspaces = setLocalWorkspaces();
+  const localNotes = setLocalNotes();
+  const localVersions = setLocalVersions();
+  const currentWorkspace = setCurrentWorkspace();
 
-// Cloud Workspaces and Notes
-const cloudWorkspaces = setWorkspacesContext();
-const cloudNotes = setNotesContext();
-const cloudStorage = setStorageContext();
-const cloudVersions = setVersionsContext();
+  // Cloud Workspaces and Notes
+  const cloudWorkspaces = setWorkspacesContext();
+  const cloudNotes = setNotesContext();
+  const cloudStorage = setStorageContext();
+  const cloudVersions = setVersionsContext();
+  const cloudCollaborators = setCollaboratorsContext();
 
-const authContext = setAuthContext();
-const user = $derived(authContext.user);
+  const authContext = setAuthContext();
+  const user = $derived(authContext.user);
 
-let open = $state(localStorage.getItem('sidebar-state') === 'open');
+  let open = $state(localStorage.getItem("sidebar-state") === "open");
 
-$effect(() => {
-  if (!user) {
-    cloudWorkspaces.workspaces = [];
-    cloudNotes.notes = [];
-    cloudStorage.usedBytes = 0;
-  } else {
-    cloudWorkspaces.fetch();
-    cloudStorage.fetch({ workspaceId: currentWorkspace.get()?.id });
-    if (user.used_storage !== undefined) {
-      cloudStorage.usedBytes = user.used_storage;
+  $effect(() => {
+    if (!user) {
+      cloudWorkspaces.workspaces = [];
+      cloudNotes.notes = [];
+      cloudNotes.sharedNotes = [];
+      cloudStorage.usedBytes = 0;
+    } else {
+      cloudWorkspaces.fetch();
+      cloudNotes.fetchShared().catch(console.error);
+      cloudStorage.fetch({ workspaceId: currentWorkspace.get()?.id });
+      if (user.used_storage !== undefined) {
+        cloudStorage.usedBytes = user.used_storage;
+      }
     }
-  }
-});
+  });
 
-useDeepLinkAuth({
-  onCode: (code) => authContext.exchangeCode(code),
-});
+  useDeepLinkAuth({
+    onCode: (code) => authContext.exchangeCode(code),
+  });
 
-setGlobalSignInContext();
-const useSettings = setGlobalSettings();
+  setGlobalSignInContext();
+  const useSettings = setGlobalSettings();
 
-onMount(async () => {
-  await secureStorage.init();
-  setTheme(useSettings.themeColor);
-  // Initialize native app menu
-  setupAppMenu();
-  const token = await secureStorage.getItem('access_token');
-  if (token) {
-    toast.promise(authContext.init(), {
-      loading: 'Signing you in...',
-      success: 'Successfully signed in',
-      error: 'Please signin again.',
-    });
-  }
-  check().then((update) => {
-    if (update) {
-      const id = Symbol('CheckForNotaUpdate').toString();
-      toast.info('New Version available', {
-        description: `Update to latest version ${update.version}, this will take less than a minute`,
-        id,
-        action: {
-          label: 'Install',
-          onClick: () => {
-            toast.dismiss(id);
-            downloadAndInstall(update);
+  onMount(async () => {
+    await secureStorage.init();
+    setTheme(useSettings.themeColor);
+    // Initialize native app menu
+    setupAppMenu();
+    const token = await secureStorage.getItem("access_token");
+    if (token) {
+      toast.promise(authContext.init(), {
+        loading: "Signing you in...",
+        success: "Successfully signed in",
+        error: "Please signin again.",
+      });
+    }
+    check().then((update) => {
+      if (update) {
+        const id = Symbol("CheckForNotaUpdate").toString();
+        toast.info("New Version available", {
+          description: `Update to latest version ${update.version}, this will take less than a minute`,
+          id,
+          action: {
+            label: "Install",
+            onClick: () => {
+              toast.dismiss(id);
+              downloadAndInstall(update);
+            },
           },
-        },
+        });
+      }
+    });
+  });
+
+  $effect(() => {
+    if (
+      data.localWorkspaces === undefined ||
+      data.currentWorkspace === undefined
+    ) {
+      toast.error("Something went wrong when loading the local data");
+    } else {
+      currentWorkspace.set(data.currentWorkspace);
+      localWorkspaces.setWorkspaces(data.localWorkspaces ?? []);
+    }
+  });
+
+  $effect(() => {
+    const currentWS = currentWorkspace.get();
+    if (currentWS !== undefined) {
+      localNotes.setNotes([]);
+      cloudNotes.notes = [];
+      const promise =
+        "owner" in currentWS
+          ? cloudNotes.fetchByWorkspace(currentWS.id)
+          : localNotes.fetchNotesForWorkspace(currentWS.id);
+      toast.promise(promise, {
+        loading: "Loading workspace data...",
+        success: "Workspace loaded.",
+        error: "Failed to load workspace data",
       });
     }
   });
-});
-
-$effect(() => {
-  if (data.localWorkspaces === undefined || data.currentWorkspace === undefined) {
-    toast.error('Something went wrong when loading the local data');
-  } else {
-    currentWorkspace.set(data.currentWorkspace);
-    localWorkspaces.setWorkspaces(data.localWorkspaces ?? []);
-  }
-});
-
-$effect(() => {
-  const currentWS = currentWorkspace.get();
-  if (currentWS !== undefined) {
-    localNotes.setNotes([]);
-    cloudNotes.notes = [];
-    const promise =
-      'owner' in currentWS
-        ? cloudNotes.fetchByWorkspace(currentWS.id)
-        : localNotes.fetchNotesForWorkspace(currentWS.id);
-    toast.promise(promise, {
-      loading: 'Loading workspace data...',
-      success: 'Workspace loaded.',
-      error: 'Failed to load workspace data',
-    });
-  }
-});
 </script>
 
 <ModeWatcher />

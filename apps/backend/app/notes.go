@@ -22,7 +22,7 @@ func GetNoteMeta(c fiber.Ctx) error {
 	if err := config.DB.NewSelect().
 		Model(&note).
 		Column("id", "name", "icon", "workspace_id", "parent_note_id", "owner", "pinned", "deleted_at", "created_at", "updated_at", "is_public").
-		Where("id = ? AND owner = ?", id, user.Id).
+		Where("id = ? AND (owner = ? OR id IN (SELECT note_id FROM note_collaborators WHERE user_id = ?))", id, user.Id, user.Id).
 		Scan(c.Context()); err != nil {
 		log.Error("Error when getting note: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -33,6 +33,62 @@ func GetNoteMeta(c fiber.Ctx) error {
 		Status:  fiber.StatusOK,
 		Message: "Note retrieved successfully",
 		Data:    note,
+	})
+}
+
+// HasCollaborators returns whether the note has any collaborators
+// and the count. Used by the frontend to decide whether to enable
+// real-time collaboration mode.
+func HasCollaborators(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+	noteId := c.Params("id")
+
+	// 1. Verify the user owns the note or is a collaborator
+	var collab models.NoteCollaborator
+	err := config.DB.NewSelect().
+		Model(&collab).
+		Where("note_id = ? AND user_id = ?", noteId, user.Id).
+		Scan(c.Context())
+
+	if err != nil {
+		// Not a collaborator, check if owner
+		var note models.Note
+		err = config.DB.NewSelect().
+			Model(&note).
+			Column("id", "owner").
+			Where("id = ? AND owner = ?", noteId, user.Id).
+			Scan(c.Context())
+
+		if err != nil {
+			log.Error("HasCollaborators - note not found or not owned: ", err)
+			return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+				Status: fiber.StatusForbidden,
+				Error:  "Not authorized for this note",
+			})
+		}
+	}
+
+	// 2. Count total collaborators for this note
+	count, err := config.DB.NewSelect().
+		Model((*models.NoteCollaborator)(nil)).
+		Where("note_id = ?", noteId).
+		Count(c.Context())
+
+	if err != nil {
+		log.Error("HasCollaborators - count failed: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Status: fiber.StatusInternalServerError,
+			Error:  "Failed to count collaborators",
+		})
+	}
+
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "Collaborator check successful",
+		Data: map[string]any{
+			"has_collaborators":  count > 0,
+			"collaborator_count": count,
+		},
 	})
 }
 
@@ -65,6 +121,42 @@ func GetNotes(c fiber.Ctx) error {
 	return c.JSON(models.APIResponse{
 		Status:  fiber.StatusOK,
 		Message: "Notes retrieved successfully",
+		Data:    notes,
+	})
+}
+
+func GetSharedNotes(c fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
+
+	notes := []models.Note{}
+	cacheKey := fmt.Sprintf("notes:shared:%s", user.Id)
+	if utils.GetCache(cacheKey, &notes) == nil {
+		return c.JSON(models.APIResponse{
+			Status:  fiber.StatusOK,
+			Message: "Shared notes retrieved successfully",
+			Data:    notes,
+		})
+	}
+
+	if err := config.DB.NewSelect().
+		Model(&notes).
+		ColumnExpr("note.id, note.name, note.icon, note.workspace_id, note.parent_note_id, note.owner, note.pinned, note.deleted_at, note.created_at, note.updated_at, note.is_public").
+		Join("JOIN note_collaborators AS nc ON nc.note_id = note.id").
+		Where("nc.user_id = ?", user.Id).
+		Where("note.owner != ?", user.Id).
+		Where("note.deleted_at IS NULL").
+		Scan(c.Context()); err != nil {
+		log.Error("Error when getting shared notes: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	go utils.SetCache(cacheKey, notes, time.Minute*15)
+
+	return c.JSON(models.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "Shared notes retrieved successfully",
 		Data:    notes,
 	})
 }
@@ -200,7 +292,7 @@ func UpdateNote(c fiber.Ctx) error {
 
 	var note models.Note
 	if _, err := query.
-		Where("id = ? AND owner = ?", id, user.Id).
+		Where("id = ? AND (owner = ? OR id IN (SELECT note_id FROM note_collaborators WHERE user_id = ? AND role IN ('editor', 'admin')))", id, user.Id, user.Id).
 		Returning("*").
 		Exec(c.Context(), &note); err != nil {
 		log.Error("Error when updating note: ", err)
@@ -260,7 +352,7 @@ func GetNoteContent(c fiber.Ctx) error {
 	if err := config.DB.NewSelect().
 		Model((*models.Note)(nil)).
 		Column("content").
-		Where("id = ? AND owner = ?", id, user.Id).
+		Where("id = ? AND (owner = ? OR id IN (SELECT note_id FROM note_collaborators WHERE user_id = ?))", id, user.Id, user.Id).
 		Scan(c.Context(), &content); err != nil {
 		log.Error("Error when getting note content: ", err)
 		if strings.Contains(err.Error(), "no rows in result set") {

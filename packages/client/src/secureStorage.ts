@@ -1,12 +1,12 @@
 import { invoke } from '@tauri-apps/api/core';
 import { appLocalDataDir, join } from '@tauri-apps/api/path';
-import { Stronghold } from '@tauri-apps/plugin-stronghold';
+import { Store, Stronghold } from '@tauri-apps/plugin-stronghold';
 
 const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 class SecureStorage {
   private stronghold: Stronghold | null = null;
-  private store: any = null;
+  private store: Store| null = null;
   private initPromise: Promise<void> | null = null;
 
   async init() {
@@ -53,17 +53,20 @@ class SecureStorage {
 
   async getItem(key: string): Promise<string | null> {
     if (!isTauri()) {
-      return localStorage.getItem(key);
+      const val = localStorage.getItem(key);
+      return val === "null" || val === "undefined" ? null : val;
     }
     const store = await this.getStore();
     if (!store) {
       console.warn(`Stronghold not available. Falling back to localStorage for getItem(${key})`);
-      return localStorage.getItem(key);
+      const val = localStorage.getItem(key);
+      return val === "null" || val === "undefined" ? null : val;
     }
     try {
       const valueBytes = await store.get(key);
       if (!valueBytes) return null;
-      return new TextDecoder().decode(new Uint8Array(valueBytes));
+      const str = new TextDecoder().decode(new Uint8Array(valueBytes));
+      return str === "null" || str === "undefined" ? null : str;
     } catch (e) {
       console.error(`Error reading key ${key} from Stronghold:`, e);
       return localStorage.getItem(key);
@@ -112,4 +115,10 @@ class SecureStorage {
   }
 }
 
-export const secureStorage = new SecureStorage();
+const instance = (typeof window !== 'undefined' && (window as any).__NOTA_SECURE_STORAGE__) || new SecureStorage();
+
+if (typeof window !== 'undefined') {
+  (window as any).__NOTA_SECURE_STORAGE__ = instance;
+}
+
+export const secureStorage = instance as SecureStorage;

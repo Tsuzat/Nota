@@ -15,18 +15,16 @@ import (
 )
 
 type PresignedURLRequest struct {
-	Filename    string  `json:"filename" validate:"required"`
-	ContentType string  `json:"contentType" validate:"required"`
-	Size        int64   `json:"size" validate:"required,min=1"`
-	WorkspaceId string  `json:"workspaceId" validate:"required"`
-	NoteId      *string `json:"noteId,omitempty"`
+	Filename    string `json:"filename" validate:"required"`
+	ContentType string `json:"contentType" validate:"required"`
+	Size        int64  `json:"size" validate:"required,min=1"`
 }
 
 type ConfirmUploadRequest struct {
 	Key         string  `json:"key" validate:"required"`
 	Filename    string  `json:"filename" validate:"required"`
 	ContentType string  `json:"contentType" validate:"required"`
-	WorkspaceId string  `json:"workspaceId" validate:"required"`
+	WorkspaceId *string `json:"workspaceId,omitempty"`
 	NoteId      *string `json:"noteId,omitempty"`
 }
 
@@ -107,5 +105,5 @@ func InvalidateListCache(userId string) {
 	}
 
 	newVersion := currentVersion + 1
-	config.VALKEY.Set(versionKey, []byte(fmt.Sprintf("%d", newVersion)), 0)
+	config.VALKEY.Set(versionKey, fmt.Appendf(nil, "%d", newVersion), 0)
 }

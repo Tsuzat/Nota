@@ -1,3 +1,79 @@
+/* Give a remote user a caret */
+.collaboration-carets__caret {
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+  z-index: 10000 !important;
+}
+
+/* Render the username above the caret */
+.collaboration-carets__label {
+  align-items: center;
+  border-radius: 9999px;
+  color: whitesmoke;
+  cursor: pointer;
+  display: flex;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  gap: 0;
+  left: -1px;
+  line-height: normal;
+  padding: 2px;
+  pointer-events: auto;
+  position: absolute;
+  top: 0;
+  transform: translateY(-100%);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  white-space: nowrap;
+  z-index: 10000 !important;
+}
+
+.collaboration-carets__label:hover {
+  gap: 6px;
+  padding-right: 8px;
+}
+
+.collaboration-carets__avatar {
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  display: flex;
+  flex-shrink: 0;
+  height: 20px;
+  justify-content: center;
+  overflow: hidden;
+  width: 20px;
+}
+
+.collaboration-carets__avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.collaboration-carets__avatar span {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.collaboration-carets__name {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collaboration-carets__label:hover .collaboration-carets__name {
+  max-width: 150px;
+  opacity: 1;
+}
+
 .tiptap {
   margin-inline: auto;
   max-width: 48rem;
@@ -640,3 +716,5 @@
   z-index: 6;
   box-sizing: border-box;
 }
+
+

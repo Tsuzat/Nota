@@ -15,6 +15,7 @@ export type {
   Session,
   User,
   Workspace,
+  NoteCollaborator,
 } from './types';
 export {
   AiUsageLogSchema,
@@ -24,11 +25,16 @@ export {
   SessionSchema,
   UserSchema,
   WorkspaceSchema,
+  NoteCollaboratorSchema,
 } from './types';
 export {
   getVersionsContext,
   setVersionsContext,
 } from './versions.svelte';
+export {
+  getCollaboratorsContext,
+  setCollaboratorsContext,
+} from './collaborators.svelte';
 export {
   getWorkspacesContext,
   setWorkspacesContext,

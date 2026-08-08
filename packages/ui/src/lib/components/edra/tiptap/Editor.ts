@@ -1,3 +1,4 @@
+import { untrack } from 'svelte';
 import type { EditorOptions, Storage } from '@tiptap/core';
 import { Editor as CoreEditor } from '@tiptap/core';
 import type { EditorState, Plugin, PluginKey } from '@tiptap/pm/state';
@@ -14,8 +15,10 @@ export class Editor extends CoreEditor {
     this.reactiveExtensionStorage = this.extensionStorage;
 
     this.on('beforeTransaction', ({ nextState }) => {
-      this.reactiveState = nextState;
-      this.reactiveExtensionStorage = this.extensionStorage;
+      untrack(() => {
+        this.reactiveState = nextState;
+        this.reactiveExtensionStorage = this.extensionStorage;
+      });
     });
   }
 
@@ -33,9 +36,11 @@ export class Editor extends CoreEditor {
   ): EditorState {
     const nextState = super.registerPlugin(plugin, handlePlugins);
 
-    if (this.reactiveState) {
-      this.reactiveState = nextState;
-    }
+    untrack(() => {
+      if (this.reactiveState) {
+        this.reactiveState = nextState;
+      }
+    });
 
     return nextState;
   }
@@ -43,9 +48,11 @@ export class Editor extends CoreEditor {
   public unregisterPlugin(nameOrPluginKey: string | PluginKey): EditorState | undefined {
     const nextState = super.unregisterPlugin(nameOrPluginKey);
 
-    if (this.reactiveState && nextState) {
-      this.reactiveState = nextState;
-    }
+    untrack(() => {
+      if (this.reactiveState && nextState) {
+        this.reactiveState = nextState;
+      }
+    });
 
     return nextState;
   }

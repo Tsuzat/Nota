@@ -21,6 +21,7 @@ type Note struct {
 	UpdatedAt    time.Time      `json:"updated_at" bun:"updated_at,nullzero,default:current_timestamp"`
 	IsPublic     bool           `json:"is_public" bun:"is_public,default:false"`
 	Content      map[string]any `json:"content" bun:"content,type:jsonb,default:'{}'"`
+	YDocState    []byte         `json:"-" bun:"ydoc_state,type:bytea"`
 }
 
 type CreateNoteRequest struct {

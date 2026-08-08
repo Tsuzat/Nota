@@ -64,6 +64,9 @@ var DESKTOP_APP_IDENTIFIER string
 // Gotenberg URL
 var GOTENBERG_URL string
 
+// Internal API Key (for service-to-service auth, e.g. collaboration server)
+var INTERNAL_API_KEY string
+
 // Polar Related
 var POLAR_API_KEY string
 var POLAR_WEBHOOK_SECRET string
@@ -132,6 +135,9 @@ func ConstsInit() {
 
 	// Gotenberg URL
 	GOTENBERG_URL = os.Getenv("GOTENBERG_URL")
+
+	// Internal API Key
+	INTERNAL_API_KEY = os.Getenv("INTERNAL_API_KEY")
 }
 
 // For Storage Limit & Subscription Plans

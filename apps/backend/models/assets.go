@@ -11,7 +11,7 @@ type Asset struct {
 
 	Id          string     `json:"id" bun:"id,pk,type:uuid,default:gen_random_uuid()"`
 	UserId      string     `json:"user_id" bun:"user_id,type:uuid,notnull"`
-	WorkspaceId string     `json:"workspace_id" bun:"workspace_id,type:uuid,notnull"`
+	WorkspaceId *string    `json:"workspace_id" bun:"workspace_id,type:uuid"`
 	NoteId      *string    `json:"note_id" bun:"note_id,type:uuid"`
 	Name        string     `json:"name" bun:"name,notnull"`
 	Path        string     `json:"path" bun:"path,notnull"`
