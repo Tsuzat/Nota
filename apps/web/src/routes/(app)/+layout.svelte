@@ -1,4 +1,5 @@
 <script lang="ts">
+import { DeleteWorkspaceDialog } from '@lib/components/custom';
 import {
   getAuthContext,
   setNotesContext,
@@ -6,7 +7,6 @@ import {
   setVersionsContext,
   setWorkspacesContext,
 } from '@nota/client';
-import DeleteWorkspaceDialog from '@nota/ui/custom/DeleteWorkspaceDialog.svelte';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { onMount } from 'svelte';
@@ -16,22 +16,20 @@ import AppSideBar from '$lib/components/sidebar/app-sidebar.svelte';
 import { GlobalSearch } from '$lib/components/sidebar/global-search';
 import { setCurrentWorkspace } from '$lib/currentworkspace.svelte';
 
-const { children } = $props();
+const { data, children } = $props();
 
 setGlobalSettings();
-const authContext = getAuthContext();
 const workspaces = setWorkspacesContext();
 const notes = setNotesContext();
 const storage = setStorageContext();
 setVersionsContext();
 
 const currentWorkspace = setCurrentWorkspace();
-const user = $derived(authContext.user);
 
 let sidebarOpen = $state(true);
 
 onMount(async () => {
-  if (user) {
+  if (data.user) {
     await workspaces.fetch();
     // Auto-select first workspace if none is selected
     if (!currentWorkspace.get() && workspaces.workspaces.length > 0) {

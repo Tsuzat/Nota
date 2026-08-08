@@ -1,5 +1,5 @@
 <script lang="ts">
-import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
+import { ToggleMode } from '@nota/ui/custom/index.js';
 import { BarSpinner, Github, icons } from '@nota/ui/icons';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
@@ -440,7 +440,7 @@ onMount(() => {
 
       <!-- 2. Playground -->
       <Button
-        variant="secondary"
+        variant="outline"
         href="https://edra.tsuzat.com/templates/notion"
         target="_blank"
         rel="noopener noreferrer"
@@ -713,7 +713,11 @@ onMount(() => {
   <section id="pricing" class="text-start!">
     <Pricing />
     <div class="mt-8 flex justify-center">
-      <Button variant="link" href="/pricing" class="text-primary hover:text-primary/80">
+      <Button
+        variant="link"
+        href="/pricing"
+        class="text-primary hover:text-primary/80"
+      >
         View full feature comparison &xrarr;
       </Button>
     </div>
@@ -807,9 +811,7 @@ onMount(() => {
       >Privacy Policy</a
     >
     •
-    <a href="/blog" title="Open Blog & Insights" class="text-primary"
-      >Blog</a
-    >
+    <a href="/blog" title="Open Blog & Insights" class="text-primary">Blog</a>
     •
     <a href="mailto:contact@nota.ink" title="Contact Us" class="text-primary"
       >Contact Us</a
