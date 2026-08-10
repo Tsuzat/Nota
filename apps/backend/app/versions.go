@@ -42,7 +42,7 @@ func ListWorkspaceVersions(c fiber.Ctx) error {
 	}
 	offset := (page - 1) * limit
 
-	var versions []models.NoteVersionListItem
+	versions := []models.NoteVersionListItem{}
 
 	query := config.DB.NewSelect().
 		Model((*models.NoteVersion)(nil)).

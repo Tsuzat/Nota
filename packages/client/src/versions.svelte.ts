@@ -26,7 +26,7 @@ class Versions {
     const res = await request(url.toString());
     if (res.ok) {
       const json = await res.json();
-      const versions = json.data.versions.map((v: any) => NoteVersionSchema.parse(v));
+      const versions = (json.data.versions || []).map((v: any) => NoteVersionSchema.parse(v));
       return {
         versions,
         total: json.data.total as number,

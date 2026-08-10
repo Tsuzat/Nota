@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@nota/ui/shadc
 import { Input } from '@nota/ui/shadcn/input';
 import * as Select from '@nota/ui/shadcn/select';
 import { toast } from '@nota/ui/shadcn/sonner';
-import { onDestroy } from 'svelte';
 import { page as appPage } from '$app/state';
 import Topbar from '$lib/components/topbar.svelte';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
@@ -26,6 +25,7 @@ let total = $state(0);
 let page = $state(1);
 let loading = $state(false);
 
+let searchInput = $state(appPage.url.searchParams.get('search') || '');
 let search = $state(appPage.url.searchParams.get('search') || '');
 let typeFilter = $state<string>(appPage.url.searchParams.get('type') || '');
 let selectedNoteId = $state<string>(appPage.url.searchParams.get('note_ids') || '');
@@ -71,22 +71,21 @@ async function loadVersions() {
 
 $effect(() => {
   if (workspacesCtx.get() && isPro) {
-    page = 1;
+    void [page, typeFilter, selectedNoteId, search];
     loadVersions();
   }
 });
 
-let debounceTimer: ReturnType<typeof setTimeout>;
-onDestroy(() => clearTimeout(debounceTimer));
-function handleSearch(e: Event) {
-  const val = (e.target as HTMLInputElement).value;
-  search = val;
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
-    page = 1;
-    loadVersions();
+$effect(() => {
+  const val = searchInput;
+  const timer = setTimeout(() => {
+    if (search !== val) {
+      search = val;
+      page = 1;
+    }
   }, 300);
-}
+  return () => clearTimeout(timer);
+});
 
 async function openPreview(v: NoteVersion) {
   try {
@@ -172,8 +171,10 @@ function formatSize(bytes: number) {
           <div class="flex-1">
             <Input
               placeholder="Search by label..."
-              value={search}
-              oninput={handleSearch}
+              value={searchInput}
+              oninput={(e: Event) => {
+                searchInput = (e.target as HTMLInputElement).value;
+              }}
             />
           </div>
           <Select.Root
@@ -181,7 +182,6 @@ function formatSize(bytes: number) {
             bind:value={selectedNoteId}
             onValueChange={() => {
               page = 1;
-              loadVersions();
             }}
           >
             <Select.Trigger class="w-50">
@@ -212,7 +212,6 @@ function formatSize(bytes: number) {
             bind:value={typeFilter}
             onValueChange={() => {
               page = 1;
-              loadVersions();
             }}
           >
             <Select.Trigger class="w-38">
@@ -339,7 +338,6 @@ function formatSize(bytes: number) {
                 disabled={page === 1}
                 onclick={() => {
                   page--;
-                  loadVersions();
                 }}
               >
                 Previous
@@ -350,7 +348,6 @@ function formatSize(bytes: number) {
                 disabled={versions.length < 20}
                 onclick={() => {
                   page++;
-                  loadVersions();
                 }}
               >
                 Next
