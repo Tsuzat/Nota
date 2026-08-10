@@ -6,7 +6,14 @@ import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
 import { Badge } from '@nota/ui/shadcn/badge';
 import { Button } from '@nota/ui/shadcn/button';
 import { Card, CardContent } from '@nota/ui/shadcn/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@nota/ui/shadcn/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@nota/ui/shadcn/dialog';
 import { Input } from '@nota/ui/shadcn/input';
 import * as Select from '@nota/ui/shadcn/select';
 import { toast } from '@nota/ui/shadcn/sonner';
@@ -36,6 +43,9 @@ let previewOpen = $state(false);
 let previewLoading = $state(false);
 let previewVersion = $state<NoteVersion | null>(null);
 let previewContent = $state<Content | null>(null);
+
+let deleteDialogOpen = $state(false);
+let versionToDelete = $state<NoteVersion | null>(null);
 
 const previewEditor = createEditor();
 
@@ -112,14 +122,22 @@ async function restoreVersion(v: NoteVersion) {
   }
 }
 
-async function deleteVersion(v: NoteVersion) {
-  if (!confirm('Are you sure you want to delete this manual snapshot?')) return;
+function deleteVersion(v: NoteVersion) {
+  versionToDelete = v;
+  deleteDialogOpen = true;
+}
+
+async function performDelete() {
+  if (!versionToDelete) return;
   try {
-    await versionsCtx.deleteVersion(v.note_id, v.id);
+    await versionsCtx.deleteVersion(versionToDelete.note_id, versionToDelete.id);
     toast.success('Version deleted');
     loadVersions();
   } catch (e: any) {
     toast.error(e.message || 'Failed to delete version');
+  } finally {
+    deleteDialogOpen = false;
+    versionToDelete = null;
   }
 }
 
@@ -312,15 +330,13 @@ function formatSize(bytes: number) {
                     >
                       Restore
                     </Button>
-                    {#if v.version_type === "manual"}
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onclick={() => deleteVersion(v)}
-                      >
-                        <icons.Trash2 class="w-4 h-4" />
-                      </Button>
-                    {/if}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onclick={() => deleteVersion(v)}
+                    >
+                      <icons.Trash2 class="w-4 h-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -404,5 +420,20 @@ function formatSize(bytes: number) {
         </Edra>
       {/if}
     </div>
+  </DialogContent>
+</Dialog>
+
+<Dialog bind:open={deleteDialogOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Delete Snapshot</DialogTitle>
+      <DialogDescription>
+        Are you sure you want to delete this snapshot? This action cannot be undone.
+      </DialogDescription>
+    </DialogHeader>
+    <DialogFooter>
+      <Button variant="outline" onclick={() => { versionToDelete = null; }}>Cancel</Button>
+      <Button variant="destructive" onclick={performDelete}>Delete</Button>
+    </DialogFooter>
   </DialogContent>
 </Dialog>
