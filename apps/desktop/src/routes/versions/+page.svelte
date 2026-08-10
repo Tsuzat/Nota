@@ -1,7 +1,6 @@
 <script lang="ts">
-import { IconRenderer, icons } from '@lib/icons';
-import BarSpinner from '@lib/icons/moving-icons/bar-spinner.svelte';
-import { getAuthContext, getNotesContext, getVersionsContext, type Note, type NoteVersion } from '@nota/client';
+import { BarSpinner, IconRenderer, icons } from '@lib/icons';
+import { getAuthContext, getNotesContext, getVersionsContext, type NoteVersion } from '@nota/client';
 import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
 import { Badge } from '@nota/ui/shadcn/badge';
@@ -12,6 +11,7 @@ import { Input } from '@nota/ui/shadcn/input';
 import * as Select from '@nota/ui/shadcn/select';
 import { toast } from '@nota/ui/shadcn/sonner';
 import * as Tabs from '@nota/ui/shadcn/tabs';
+import { timeAgo } from '@nota/ui/utils';
 import { page as appPage } from '$app/state';
 import Topbar from '$lib/components/topbar.svelte';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
@@ -214,7 +214,7 @@ function getEmptyStateMessage(): string {
   <title>Version History - Nota</title>
 </svelte:head>
 
-<div class="flex size-full min-h-0 flex-col overflow-hidden">
+<div class="flex max-h-screen! min-h-screen! w-full! flex-col overflow-hidden!">
   <Topbar showSeparator={true}>
     {#snippet left()}
       <span class="font-semibold"> Version History </span>
@@ -247,16 +247,24 @@ function getEmptyStateMessage(): string {
       {#if !isLocal && isPro}
         <Tabs.Root
           value={viewSource}
-          onValueChange={(v) => {
+          onValueChange={(v: string) => {
             if (!v) return;
             viewSource = v as "cloud" | "local";
             page = 1;
             loadVersions();
           }}
         >
-          <Tabs.List class="grid grid-cols-2">
-            <Tabs.Trigger value="cloud">Cloud Snapshots</Tabs.Trigger>
-            <Tabs.Trigger value="local">Local Snapshots</Tabs.Trigger>
+          <Tabs.List class="flex w-full overflow-x-auto">
+            <Tabs.Trigger
+              value="cloud"
+              class="flex-1 shrink-0 whitespace-nowrap"
+              >Cloud Snapshots</Tabs.Trigger
+            >
+            <Tabs.Trigger
+              value="local"
+              class="flex-1 shrink-0 whitespace-nowrap"
+              >Local Snapshots</Tabs.Trigger
+            >
           </Tabs.List>
         </Tabs.Root>
       {/if}
@@ -266,7 +274,7 @@ function getEmptyStateMessage(): string {
           <Input
             placeholder="Search by label..."
             value={searchInput}
-            oninput={(e) => {
+            oninput={(e: Event) => {
               searchInput = (e.target as HTMLInputElement).value;
             }}
           />
@@ -285,7 +293,7 @@ function getEmptyStateMessage(): string {
               All Notes
             {/if}
           </Select.Trigger>
-          <Select.Content>
+          <Select.Content class="max-h-75 overflow-y-auto">
             <Select.Group>
               <Select.GroupHeading>Select Notes</Select.GroupHeading>
               <Select.Item value="">All Notes</Select.Item>
@@ -379,7 +387,7 @@ function getEmptyStateMessage(): string {
                     <div
                       class="text-sm text-muted-foreground mt-1 flex flex-col sm:flex-row sm:items-center gap-2"
                     >
-                      <span>{new Date(v.created_at).toLocaleString()}</span>
+                      <span>{timeAgo(v.created_at)}</span>
                       <span class="hidden sm:inline">•</span>
                       <span>{formatSize(v.size_bytes)}</span>
                       {#if v.label}
@@ -412,7 +420,9 @@ function getEmptyStateMessage(): string {
                       {restoringId === v.id ? "Restoring..." : "Restore"}
                     </Button>
                   {:else}
-                    <SimpleToolTip content="Restore is available in the note editor">
+                    <SimpleToolTip
+                      content="Restore is available in the note editor"
+                    >
                       <Button
                         variant="secondary"
                         size="sm"
