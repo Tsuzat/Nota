@@ -2,12 +2,26 @@ import { Hocuspocus } from "@hocuspocus/server";
 import { Logger } from "@hocuspocus/extension-logger";
 import { parseCookie } from "cookie";
 import { z } from "zod/v4";
-import type { BufferSource, HeadersInit } from "bun";
+import { type BufferSource, type HeadersInit } from "bun";
+import { Redis } from "@hocuspocus/extension-redis";
 
 // ─── Environment ────────────────────────────────────────────────────────────────
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL || "";
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || "";
 const PORT = Number(process.env.PORT) || 1234;
+const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
+const REDIS_PORT = Number(process.env.REDIS_PORT) || 6379;
+const REDIS_USERNAME = process.env.REDIS_USERNAME;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+
+const redisOptions = {
+  host: REDIS_HOST,
+  port: REDIS_PORT,
+  options: {
+    username: REDIS_USERNAME,
+    password: REDIS_PASSWORD,
+  },
+};
 
 // ─── Zod schema for the backend's collab access response ────────────────────────
 const CollabAccessResponseSchema = z.object({
@@ -24,34 +38,29 @@ const CollabAccessResponseSchema = z.object({
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 /**
- * Extract the raw access_token from the WebSocket payload, URL query, or cookies.
- * Order: Hocuspocus payload token → ?token=/ ?access_token= → Cookie.
- * This covers Cloudflare/Bun proxy stripping the payload and HocuspocusProvider
- * versions that send the token as ws query string.
+ * Extract the raw access_token from the WebSocket connection.
+ *
+ * - Desktop: token is set directly on the HocuspocusProvider and arrives as
+ *   `payloadToken` in the onAuthenticate callback.
+ * - Web: token is read from the `access_token` HTTP cookie sent by the browser.
  */
 function extractAccessToken(request: Request, payloadToken?: string): string {
-  if (payloadToken && payloadToken !== "use-cookie") {
+  // Desktop path — token supplied by @hocuspocus/provider
+  if (payloadToken) {
     return payloadToken;
   }
 
-  try {
-    const url = new URL(request.url);
-    const qp = url.searchParams.get("token") ?? url.searchParams.get("access_token");
-    if (qp && qp !== "use-cookie") return qp;
-  } catch {
-    // ignore malformed URL — fall through to cookie
+  // Web path — token in the browser cookie
+  const cookieHeader = request.headers.get("cookie");
+  if (cookieHeader) {
+    const cookies = parseCookie(cookieHeader);
+    const cookieToken = cookies["access_token"];
+    if (cookieToken) return cookieToken;
   }
 
-  const cookieHeader = request.headers.get("cookie");
-  if (!cookieHeader) {
-    throw new Error("No authentication token found in payload, query, or cookies");
-  }
-  const cookies = parseCookie(cookieHeader);
-  const rawToken = cookies["access_token"];
-  if (!rawToken) {
-    throw new Error("No access_token cookie present");
-  }
-  return rawToken;
+  throw new Error(
+    "No access token found: expected a provider token (desktop) or an access_token cookie (web).",
+  );
 }
 
 /**
@@ -70,7 +79,7 @@ function internalHeaders(accessToken?: string): HeadersInit {
 // ─── Hocuspocus Core (no crossws — we use Bun.serve directly) ───────────────────
 const hocuspocus = new Hocuspocus({
   name: "Nota Collaboration",
-  extensions: [new Logger()],
+  extensions: [new Logger(), new Redis(redisOptions)],
   timeout: 30000,
   debounce: 5000,
   maxDebounce: 30000,
