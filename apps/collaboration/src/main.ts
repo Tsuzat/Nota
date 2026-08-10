@@ -1,9 +1,9 @@
 import { Hocuspocus } from "@hocuspocus/server";
 import { Logger } from "@hocuspocus/extension-logger";
+import { Redis } from "@hocuspocus/extension-redis";
 import { parseCookie } from "cookie";
 import { z } from "zod/v4";
 import { type BufferSource, type HeadersInit } from "bun";
-import { Redis } from "@hocuspocus/extension-redis";
 
 // ─── Environment ────────────────────────────────────────────────────────────────
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL || "";
@@ -13,6 +13,9 @@ const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
 const REDIS_PORT = Number(process.env.REDIS_PORT) || 6379;
 const REDIS_USERNAME = process.env.REDIS_USERNAME;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+// Use REDIS_TLS=true for public/external Redis endpoints.
+// Railway's private network (*.railway.internal) does NOT need TLS.
+const REDIS_TLS = process.env.REDIS_TLS === "true";
 
 const redisOptions = {
   host: REDIS_HOST,
@@ -20,6 +23,7 @@ const redisOptions = {
   options: {
     username: REDIS_USERNAME,
     password: REDIS_PASSWORD,
+    ...(REDIS_TLS ? { tls: {} } : {}),
   },
 };
 
@@ -37,6 +41,7 @@ const CollabAccessResponseSchema = z.object({
 });
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
+
 /**
  * Extract the raw access_token from the WebSocket connection.
  *
@@ -76,7 +81,7 @@ function internalHeaders(accessToken?: string): HeadersInit {
   return headers;
 }
 
-// ─── Hocuspocus Core (no crossws — we use Bun.serve directly) ───────────────────
+// ─── Hocuspocus ─────────────────────────────────────────────────────────────────
 const hocuspocus = new Hocuspocus({
   name: "Nota Collaboration",
   extensions: [new Logger(), new Redis(redisOptions)],
@@ -95,10 +100,10 @@ const hocuspocus = new Hocuspocus({
     const t0 = performance.now();
 
     const accessToken = extractAccessToken(request, token);
-    // redacted log — avoid dumping full JWT
     console.log(
-      `[Nota Collaboration ${new Date().toISOString()}] New connection to "${documentName}" token=...${accessToken.slice(-6)} url=${request.url}`,
+      `[auth] "${documentName}" token=...${accessToken.slice(-6)} url=${request.url}`,
     );
+
     const noteId = documentName.replace("note:", "");
 
     // Call the backend's collab access-check endpoint.
@@ -116,7 +121,7 @@ const hocuspocus = new Hocuspocus({
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       console.warn(
-        `[Nota Collaboration] Auth failed for "${documentName}" in ${authMs}ms status=${res.status}`,
+        `[auth] failed for "${documentName}" in ${authMs}ms status=${res.status}`,
       );
       throw new Error(
         (body as { error?: string }).error || "Not authorized for this note",
@@ -126,10 +131,10 @@ const hocuspocus = new Hocuspocus({
     const parsed = CollabAccessResponseSchema.parse(await res.json());
     const { data: access } = parsed;
 
-    // Attach the access token to the connection context so onLoadDocument
-    // and onStoreDocument can access the token without re-parsing cookies.
+    // Attach the access token to the connection context so onStoreDocument
+    // can use it without re-parsing cookies.
     console.log(
-      `[Nota Collaboration] User = ${access.user_id} (${access.role}) for "${documentName}" in ${authMs}ms`,
+      `[auth] user=${access.user_id} role=${access.role} doc="${documentName}" (${authMs}ms)`,
     );
     return {
       user: {
@@ -143,7 +148,7 @@ const hocuspocus = new Hocuspocus({
     };
   },
 
-  // 2. LOAD — fetch initial Y.js state when first client opens a doc
+  // 2. LOAD — fetch initial Y.js state when the first client opens a doc
   async onLoadDocument(data) {
     const noteId = data.documentName.replace("note:", "");
 
@@ -156,9 +161,7 @@ const hocuspocus = new Hocuspocus({
     if (res.status === 404) return;
 
     if (!res.ok) {
-      console.error(
-        `[LoadYDoc] Backend returned ${res.status} for note ${noteId}`,
-      );
+      console.error(`[load] backend returned ${res.status} for note ${noteId}`);
       return;
     }
 
@@ -187,16 +190,13 @@ const hocuspocus = new Hocuspocus({
 
     if (!res.ok) {
       console.error(
-        `[StoreYDoc] Backend returned ${res.status} for note ${noteId}`,
+        `[store] backend returned ${res.status} for note ${noteId}`,
       );
     }
   },
 });
 
 // ─── Bun Native WebSocket Server ────────────────────────────────────────────────
-// We bypass crossws entirely and use Bun.serve() with native WebSocket support,
-// bridging connections to Hocuspocus via handleConnection().
-
 interface WsData {
   request: Request;
   clientConnection: ReturnType<typeof hocuspocus.handleConnection> | null;
@@ -206,7 +206,6 @@ const server = Bun.serve<WsData>({
   port: PORT,
 
   fetch(req, server) {
-    // Upgrade WebSocket requests
     if (req.headers.get("upgrade")?.toLowerCase() === "websocket") {
       const success = server.upgrade(req, {
         data: { request: req, clientConnection: null },
@@ -219,7 +218,7 @@ const server = Bun.serve<WsData>({
 
   websocket: {
     open(ws) {
-      // Create a WebSocket-like wrapper that Hocuspocus expects
+      // Wrap the Bun WebSocket into the shape Hocuspocus expects
       const wsLike = {
         get readyState() {
           return ws.readyState;
@@ -256,5 +255,5 @@ const server = Bun.serve<WsData>({
 });
 
 console.log(
-  `\n  Nota Collaboration Server running on ws://${server.hostname}:${server.port}\n`,
+  `\n  Nota Collaboration Server  →  ws://${server.hostname}:${server.port}\n`,
 );
