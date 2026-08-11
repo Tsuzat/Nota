@@ -505,6 +505,7 @@
           {activeUsers}
           connectionStatus={status}
           currentUserId={data.user.id}
+          canShare={note?.owner === data.user.id || collaborators.members.find(m => m.user_id === data.user.id)?.role === 'admin'}
           versionsHref={`/versions?note_ids=${note!.id}`}
           publicUrl={`${PUBLIC_NOTA_FRONTEND_URL}/n/${note!.id}`}
           onTogglePublic={() => {

@@ -1,10 +1,12 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -342,7 +344,7 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 		if _, err := tx.NewInsert().Model(&restorePoint).Exec(ctx); err != nil {
 			return err
 		}
-		if _, err := tx.NewUpdate().Model(&note).Set("content = ?", data).Set("updated_at = ?", time.Now()).WherePK().Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(&note).Set("updated_at = ?", time.Now()).WherePK().Exec(ctx); err != nil {
 			return err
 		}
 		return nil
@@ -351,6 +353,12 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 	if err != nil {
 		log.Error("Restore failed: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed"})
+	}
+
+	// Trigger Bun restore
+	if err := triggerBunRestore(noteId, data); err != nil {
+		log.Error("Bun restore failed: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed to sync"})
 	}
 
 	// Invalidate caches
@@ -417,7 +425,7 @@ func RestoreNoteFromContent(c fiber.Ctx) error {
 		if _, err := tx.NewInsert().Model(&restorePoint).Exec(ctx); err != nil {
 			return err
 		}
-		if _, err := tx.NewUpdate().Model(&note).Set("content = ?", req.Content).Set("updated_at = ?", time.Now()).WherePK().Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(&note).Set("updated_at = ?", time.Now()).WherePK().Exec(ctx); err != nil {
 			return err
 		}
 		return nil
@@ -426,6 +434,12 @@ func RestoreNoteFromContent(c fiber.Ctx) error {
 	if err != nil {
 		log.Error("RestoreFromContent failed: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed"})
+	}
+
+	// Trigger Bun restore
+	if err := triggerBunRestore(noteId, req.Content); err != nil {
+		log.Error("Bun restore failed: ", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed to sync"})
 	}
 
 	// Invalidate caches
@@ -514,4 +528,37 @@ func maybeAutoSnapshot(ctx context.Context, noteId string, userId string) {
 	}
 	go utils.SetCache(cacheKey, newMeta, 24*time.Hour)
 	go utils.DeleteCache(fmt.Sprintf("note_versions_count:%s", noteId))
+}
+
+func triggerBunRestore(noteId string, content map[string]any) error {
+	url := fmt.Sprintf("%s/internal/restore/%s", config.COLLAB_INTERNAL_URL, noteId)
+	
+	payload := map[string]any{
+		"content": content,
+	}
+	bodyBytes, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bodyBytes))
+	if err != nil {
+		return err
+	}
+	
+	req.Header.Set("X-Internal-Api-Key", config.INTERNAL_API_KEY)
+	req.Header.Set("Content-Type", "application/json")
+	
+	client := &http.Client{Timeout: 10 * time.Second}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	
+	if res.StatusCode != 200 {
+		return fmt.Errorf("bun server returned status %d", res.StatusCode)
+	}
+	
+	return nil
 }

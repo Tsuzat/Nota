@@ -66,6 +66,7 @@ var GOTENBERG_URL string
 
 // Internal API Key (for service-to-service auth, e.g. collaboration server)
 var INTERNAL_API_KEY string
+var COLLAB_INTERNAL_URL string
 
 // Polar Related
 var POLAR_API_KEY string
@@ -138,6 +139,12 @@ func ConstsInit() {
 
 	// Internal API Key
 	INTERNAL_API_KEY = os.Getenv("INTERNAL_API_KEY")
+
+	// Collaboration Server Internal URL
+	COLLAB_INTERNAL_URL = os.Getenv("COLLAB_INTERNAL_URL")
+	if COLLAB_INTERNAL_URL == "" {
+		COLLAB_INTERNAL_URL = "http://localhost:1234"
+	}
 }
 
 // For Storage Limit & Subscription Plans

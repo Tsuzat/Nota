@@ -1,6 +1,8 @@
 package app
 
 import (
+	"encoding/base64"
+
 	"github.com/Tsuzat/Nota/config"
 	"github.com/Tsuzat/Nota/middleware"
 	"github.com/Tsuzat/Nota/models"
@@ -118,69 +120,92 @@ func LoadYDoc(c fiber.Ctx) error {
 // StoreYDoc persists the Y.js binary state for a note.
 // Called by the collaboration server during Hocuspocus onStoreDocument.
 func StoreYDoc(c fiber.Ctx) error {
-	// Authenticate the user via the forwarded access_token
-	user, err := middleware.AuthenticatedUser(c)
-	if err != nil {
-		log.Error("StoreYDoc - user authentication failed: ", err)
-		return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
-			Status: fiber.StatusUnauthorized,
-			Error:  "User is not authenticated",
-		})
-	}
-
 	noteId := c.Params("noteId")
+	isInternal := c.Get("X-Internal-Api-Key") == config.INTERNAL_API_KEY
 
-	// Check access permissions (must be owner or editor/admin)
-	hasAccess := false
+	if !isInternal {
+		// Authenticate the user via the forwarded access_token
+		user, err := middleware.AuthenticatedUser(c)
+		if err != nil {
+			log.Error("StoreYDoc - user authentication failed: ", err)
+			return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
+				Status: fiber.StatusUnauthorized,
+				Error:  "User is not authenticated",
+			})
+		}
 
-	var note models.Note
-	err = config.DB.NewSelect().
-		Model(&note).
-		Column("owner").
-		Where("id = ?", noteId).
-		Scan(c.Context())
+		// Check access permissions (must be owner or editor/admin)
+		hasAccess := false
 
-	if err != nil {
-		log.Error("StoreYDoc - note not found: ", err)
-		return c.Status(fiber.StatusNotFound).JSON(models.APIError{
-			Status: fiber.StatusNotFound,
-			Error:  "Note not found",
-		})
-	}
-
-	if note.Owner == user.Id {
-		hasAccess = true
-	} else {
-		var collab models.NoteCollaborator
+		var note models.Note
 		err = config.DB.NewSelect().
-			Model(&collab).
-			Where("note_id = ? AND user_id = ?", noteId, user.Id).
+			Model(&note).
+			Column("owner").
+			Where("id = ?", noteId).
 			Scan(c.Context())
 
-		if err == nil && (collab.Role == "editor" || collab.Role == "admin") {
+		if err != nil {
+			log.Error("StoreYDoc - note not found: ", err)
+			return c.Status(fiber.StatusNotFound).JSON(models.APIError{
+				Status: fiber.StatusNotFound,
+				Error:  "Note not found",
+			})
+		}
+
+		if note.Owner == user.Id {
 			hasAccess = true
+		} else {
+			var collab models.NoteCollaborator
+			err = config.DB.NewSelect().
+				Model(&collab).
+				Where("note_id = ? AND user_id = ?", noteId, user.Id).
+				Scan(c.Context())
+
+			if err == nil && (collab.Role == "editor" || collab.Role == "admin") {
+				hasAccess = true
+			}
+		}
+
+		if !hasAccess {
+			log.Error("StoreYDoc - user lacks write permission")
+			return c.Status(fiber.StatusForbidden).JSON(models.APIError{
+				Status: fiber.StatusForbidden,
+				Error:  "Not authorized to modify this note",
+			})
 		}
 	}
 
-	if !hasAccess {
-		log.Error("StoreYDoc - user lacks write permission")
-		return c.Status(fiber.StatusForbidden).JSON(models.APIError{
-			Status: fiber.StatusForbidden,
-			Error:  "Not authorized to modify this note",
+	var req struct {
+		YDocState string         `json:"ydoc_state"`
+		Content   map[string]any `json:"content"`
+	}
+
+	if err := c.Bind().Body(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Invalid payload",
 		})
 	}
 
-	body := c.Body()
-	if len(body) == 0 {
+	if req.YDocState == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Status: fiber.StatusBadRequest,
 			Error:  "Empty ydoc state",
 		})
 	}
 
+	ydocBytes, err := base64.StdEncoding.DecodeString(req.YDocState)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Status: fiber.StatusBadRequest,
+			Error:  "Invalid base64 ydoc_state",
+		})
+	}
+
 	_, err = config.DB.NewUpdate().
 		Model((*models.Note)(nil)).
-		Set("ydoc_state = ?", body).
+		Set("ydoc_state = ?", ydocBytes).
+		Set("content = ?", req.Content).
 		Where("id = ?", noteId).
 		Exec(c.Context())
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { PUBLIC_NOTA_FRONTEND_URL } from "$env/static/public";
   import {
     ALLOWED_MAX_FILE_SIZE,
     type FileType,
@@ -458,6 +459,8 @@
           {activeUsers}
           connectionStatus={status}
           currentUserId={authContext.user?.id}
+          canShare={note?.owner === authContext.user?.id || collaborators.members.find(m => m.user_id === authContext.user?.id)?.role === 'admin'}
+          publicUrl={`${PUBLIC_NOTA_FRONTEND_URL}/n/${note!.id}`}
           versionsHref={`/versions?note_ids=${note!.id}&source=cloud`}
           onTogglePublic={() => {
             if (note)
