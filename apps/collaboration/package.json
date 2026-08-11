@@ -15,9 +15,11 @@
     "start": "bun run src/main.ts"
   },
   "dependencies": {
-    "@hocuspocus/extension-logger": "^4.5.0",
+    "@hocuspocus/extension-logger": "^4.6.0",
     "@hocuspocus/extension-redis": "^4.6.0",
-    "@hocuspocus/server": "^4.5.0",
+    "@hocuspocus/server": "^4.6.0",
+    "@hocuspocus/transformer": "^4.6.0",
+    "@nota/ui": "workspace:*",
     "cookie": "^2.0.1",
     "ioredis": "^6.0.0",
     "yjs": "^13.6.32",

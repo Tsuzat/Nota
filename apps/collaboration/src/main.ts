@@ -172,7 +172,15 @@ const hocuspocus = new Hocuspocus({
   async onStoreDocument(data) {
     const noteId = data.documentName.replace("note:", "");
     const { encodeStateAsUpdate } = await import("yjs");
+    const { TiptapTransformer } = await import("@hocuspocus/transformer");
+
     const update = encodeStateAsUpdate(data.document);
+    const content = TiptapTransformer.fromYdoc(data.document, "default");
+
+    const payload = {
+      ydoc_state: Buffer.from(update).toString("base64"),
+      content: content,
+    };
 
     const res = await fetch(
       `${INTERNAL_API_URL}/api/v1/collab/notes/${noteId}/ydoc`,
@@ -180,9 +188,9 @@ const hocuspocus = new Hocuspocus({
         method: "PUT",
         headers: {
           ...internalHeaders(data.lastContext.token),
-          "Content-Type": "application/octet-stream",
+          "Content-Type": "application/json",
         },
-        body: Buffer.from(update),
+        body: JSON.stringify(payload),
       },
     );
 
@@ -204,6 +212,69 @@ const server = Bun.serve<WsData>({
   port: PORT,
 
   fetch(req, server) {
+    const url = new URL(req.url);
+
+    // Internal API for restoring snapshots
+    if (
+      req.method === "POST" &&
+      url.pathname.startsWith("/internal/restore/")
+    ) {
+      const authHeader = req.headers.get("X-Internal-Api-Key");
+      if (authHeader !== INTERNAL_API_KEY) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+
+      const noteId = url.pathname.split("/").pop();
+      return req
+        .json()
+        .then(async (body) => {
+          const { content } = body;
+
+          // 1. Generate new Y.Doc from restored JSON
+          const { TiptapTransformer } = await import("@hocuspocus/transformer");
+          const { encodeStateAsUpdate } = await import("yjs");
+          const newDoc = TiptapTransformer.toYdoc(content, "default");
+          const update = encodeStateAsUpdate(newDoc);
+
+          // 2. Save new YDoc state to backend
+          const res = await fetch(
+            `${INTERNAL_API_URL}/api/v1/collab/notes/${noteId}/ydoc`,
+            {
+              method: "PUT",
+              headers: {
+                "X-Internal-Api-Key": INTERNAL_API_KEY,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ydoc_state: Buffer.from(update).toString("base64"),
+                content: content,
+              }),
+            },
+          );
+
+          if (!res.ok) {
+            return new Response("Failed to save restored ydoc", {
+              status: 500,
+            });
+          }
+
+          // 3. Kick active clients so they reconnect and load the restored state
+          const docName = `note:${noteId}`;
+          const hpDoc = hocuspocus.documents?.get(docName);
+          if (hpDoc) {
+            hpDoc.connections.forEach((conn) => {
+              conn.close();
+            });
+          }
+
+          return new Response("Restored", { status: 200 });
+        })
+        .catch((err) => {
+          console.error("Restore failed:", err);
+          return new Response("Internal Server Error", { status: 500 });
+        });
+    }
+
     if (req.headers.get("upgrade")?.toLowerCase() === "websocket") {
       const success = server.upgrade(req, {
         data: { request: req, clientConnection: null },
