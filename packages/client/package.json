@@ -33,9 +33,11 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "@hocuspocus/provider": "^4.6.0",
     "@tauri-apps/api": "^2.11.0",
     "@tauri-apps/plugin-http": "^2.5.6",
     "@tauri-apps/plugin-stronghold": "^2.3.1",
+    "yjs": "^13.6.32",
     "zod": "^4.3.5"
   }
 }

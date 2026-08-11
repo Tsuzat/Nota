@@ -10,74 +10,165 @@
     getAuthContext,
     getNotesContext,
     getStorageContext,
+    getVersionsContext,
     getWorkspacesContext,
     type Note,
     type SelectableModel,
   } from "@nota/client";
-  import { SimpleToolTip } from "@nota/ui/custom/index.js";
-  import { type Content, createEditor, Edra } from "@nota/ui/edra/index.js";
-  import CollaboratorsDialog from "$lib/components/dialogs/collaborators-dialog.svelte";
+  import { NoteTopbarActions, type ActiveUser } from "@nota/ui/custom/index.js";
+  import { createEditor, Edra } from "@nota/ui/edra/index.js";
   import { setCollaboratorsContext } from "@nota/client";
-  import {
-    BarSpinner,
-    IconPicker,
-    IconRenderer,
-    icons,
-  } from "@nota/ui/icons/index.js";
+  import { IconPicker, IconRenderer, icons } from "@nota/ui/icons/index.js";
   import { Button, buttonVariants } from "@nota/ui/shadcn/button";
   import { toast } from "@nota/ui/shadcn/sonner";
-  import { compare } from "fast-json-patch";
-  import { onDestroy, onMount } from "svelte";
-  import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
+
+  import { onDestroy } from "svelte";
+  import { afterNavigate, goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { getGlobalSettings } from "$lib/components/settings/index.svelte";
   import NavActions from "$lib/components/sidebar/nav-actions.svelte";
   import Topbar from "$lib/components/topbar.svelte";
   import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
-  import { browser } from "$app/environment";
   import * as Y from "yjs";
   import { HocuspocusProvider } from "@hocuspocus/provider";
-  import { PUBLIC_COLLABORATION_URL } from "$env/static/public";
-  import UserAvatar from "$lib/components/custom/user-avatar.svelte";
+  import {
+    PUBLIC_COLLABORATION_URL,
+    PUBLIC_NOTA_FRONTEND_URL,
+  } from "$env/static/public";
   import { getRandomUserColor } from "@lib/utils.js";
 
   // --- Services & Context ---
   const cloudWorkspaces = getWorkspacesContext();
   const cloudNotes = getNotesContext();
   const cloudStorage = getStorageContext();
+  const versionsClient = getVersionsContext();
   const useGlobalSettings = getGlobalSettings();
   const authContext = getAuthContext();
   const collaborators = setCollaboratorsContext();
   const currentWorkspaceCtx = getCurrentWorkspace();
   const currentWorkspace = $derived(currentWorkspaceCtx.get());
+  const isPro = $derived(authContext.user?.subscription_plan === "pro");
+
+  // Stable colour for the local user across note navigations.
+  const userColor = getRandomUserColor();
 
   // --- State ---
   const { data } = $props();
-  let syncedContent = $state<Content>();
-  let isDirty = $state(false);
 
   // Note data derived from store
   let note = $state<Note>();
 
   let isLoading = $state(true);
-  let syncing = $state(false);
-  let syncingText = $state("");
   let availableModels = $state<Record<string, SelectableModel[]>>({});
+  let versionCount = $state(0);
+
+  let status = $state<"connecting" | "connected" | "disconnected">(
+    "connecting",
+  );
+  let activeUsers = $state<ActiveUser[]>([]);
+
+  let raf = 0;
+  function scheduleUpdate() {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      syncUsers();
+    });
+  }
+
+  function syncUsers() {
+    if (!provider?.awareness) {
+      if (status === "connected" && data.user) {
+        activeUsers = [
+          {
+            name: data.user.name || "User",
+            color: userColor,
+            avatar: data.user.avatar_url || "",
+            userId: data.user.id,
+            clientId: 0,
+          },
+        ];
+      } else {
+        if (activeUsers.length) activeUsers = [];
+      }
+      return;
+    }
+    const selfId = provider.awareness.clientID as number;
+    const states = provider.awareness.getStates();
+    const list: ActiveUser[] = [];
+    states.forEach((st: unknown, clientId: number) => {
+      const user = (
+        st as {
+          user?: {
+            name?: string;
+            color?: string;
+            avatar?: string;
+            userId?: string;
+          };
+        }
+      )?.user;
+      if (user?.name) {
+        list.push({
+          name: String(user.name).slice(0, 32),
+          color: user.color || "#7C3AED",
+          avatar: user.avatar,
+          userId: user.userId,
+          clientId,
+        });
+      }
+    });
+
+    list.sort((a, b) => {
+      if (a.clientId === selfId) return -1;
+      if (b.clientId === selfId) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    if (
+      list.length === activeUsers.length &&
+      list.every(
+        (u, i) =>
+          u.clientId === activeUsers[i]?.clientId &&
+          u.name === activeUsers[i]?.name &&
+          u.color === activeUsers[i]?.color,
+      )
+    ) {
+      return;
+    }
+    activeUsers = list;
+  }
+
+  // Fetch version count whenever note changes.
+  $effect(() => {
+    if (note?.id && isPro) {
+      versionsClient.getVersionCount(note.id).then((c) => (versionCount = c));
+    } else {
+      versionCount = 0;
+    }
+  });
 
   // --- File Handling Utilities ---
-  const getAssets = async (fileType: FileType) => {
-    const files = cloudStorage.files;
-    const extensions = new Set(getFileTypeExtensions(fileType));
-    const assets: string[] = [];
-    for (const file of files) {
-      const key = file.key;
-      const fileExtension = key.split(".").pop();
-      if (fileExtension !== undefined && extensions.has(fileExtension)) {
-        assets.push(file.url);
+
+  // Pre-compute a Map<FileType, url[]> that re-runs only when storage files change.
+  const assetsByType = $derived.by(() => {
+    const map = new Map<FileType, string[]>();
+    for (const file of cloudStorage.files) {
+      const ext = file.key.split(".").pop();
+      if (ext === undefined) continue;
+      for (const ft of Object.values(FileType)) {
+        const extensions = new Set(getFileTypeExtensions(ft));
+        if (extensions.has(ext)) {
+          const list = map.get(ft) ?? [];
+          list.push(file.url);
+          map.set(ft, list);
+        }
       }
     }
-    return assets;
-  };
+    return map;
+  });
+
+  const getAssets = async (fileType: FileType): Promise<string[]> =>
+    assetsByType.get(fileType) ?? [];
 
   const getLocalFile = async (fileType: FileType) => {
     return new Promise<string | null>((resolve) => {
@@ -88,19 +179,35 @@
       else if (fileType === FileType.VIDEO) input.accept = "video/*";
       else if (fileType === FileType.AUDIO) input.accept = "audio/*";
 
+      const cleanup = () => input.remove();
+
+      // Resolve with null when the user cancels the file picker.
+      input.oncancel = () => {
+        resolve(null);
+        cleanup();
+      };
+
       input.onchange = async (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
-        if (!file) return resolve(null);
+        if (!file) {
+          resolve(null);
+          cleanup();
+          return;
+        }
 
         if (file.size > ALLOWED_MAX_FILE_SIZE) {
           toast.error(`File ${file.name} is too large (max 50MB).`);
-          return resolve(null);
+          resolve(null);
+          cleanup();
+          return;
         }
 
         const user = authContext.user;
         if (user && user.used_storage + file.size > user.assigned_storage) {
           toast.error(`Not enough storage to upload ${file.name}.`);
-          return resolve(null);
+          resolve(null);
+          cleanup();
+          return;
         }
 
         try {
@@ -118,6 +225,8 @@
         } catch (err) {
           console.error(err);
           resolve(null);
+        } finally {
+          cleanup();
         }
       };
       input.click();
@@ -129,64 +238,69 @@
   let editor = $state.raw<ReturnType<typeof createEditor> | undefined>(
     undefined,
   );
-  let isCollaborative = $state(false);
   let currentNoteId = $state<string | undefined>(undefined);
+  // Track the provider name locally to avoid reading private internals via `as any`.
+  let currentProviderName = $state<string | undefined>(undefined);
   let loadInFlight = $state(false);
   let loadSeq = 0;
 
-  async function setupEditor(nextId: string, shouldCollab: boolean) {
+  /** Tears down the current editor, provider, and Y.Doc cleanly. */
+  function teardownEditor() {
+    if (raf) cancelAnimationFrame(raf);
+    editor?.destroy();
+    try {
+      provider?.disconnect();
+      provider?.destroy();
+    } catch {}
+    ydoc?.destroy();
+    currentProviderName = undefined;
+  }
+
+  /**
+   * Creates the Y.Doc + HocuspocusProvider + Tiptap editor for `nextId`.
+   * Returns a Promise that resolves once the provider fires its first `synced`
+   * event (or after a 10 s timeout so a slow server never blocks forever).
+   */
+  async function setupEditor(nextId: string): Promise<void> {
     const providerName = `note:${nextId}`;
-    const currentName = (provider as any)?.configuration?.name as
-      | string
-      | undefined;
     if (
       currentNoteId === nextId &&
-      isCollaborative === shouldCollab &&
-      currentName === providerName &&
+      currentProviderName === providerName &&
       editor
     ) {
       return;
     }
 
-    editor?.destroy();
-    try {
-      provider?.disconnect();
-    } catch {}
-    try {
-      (provider as any)?.destroy?.();
-    } catch {}
-    ydoc?.destroy();
-
+    teardownEditor();
     currentNoteId = nextId;
-    isCollaborative = shouldCollab;
+    currentProviderName = providerName;
 
-    if (shouldCollab) {
-      ydoc = new Y.Doc();
-      provider = new HocuspocusProvider({
-        url: PUBLIC_COLLABORATION_URL,
-        name: providerName,
-        document: ydoc,
-        token: data.token,
-      });
-      provider.on("authenticationFailed", () => {
-        toast.error("Collaboration authentication failed");
-        isCollaborative = false;
-        setupEditor(nextId, false);
-      });
-      provider.on("close" as any, (event: any) => {
-        if (event?.event?.code === 1001 || event?.code === 1001) {
-          console.warn("[collab] ws closed with 1001 (unauth queue)", event);
-        }
-      });
-    } else {
-      ydoc = undefined;
-      provider = undefined;
-    }
+    ydoc = new Y.Doc();
+    provider = new HocuspocusProvider({
+      url: PUBLIC_COLLABORATION_URL,
+      name: providerName,
+      document: ydoc,
+    });
+
+    provider.on("authenticationFailed", () => {
+      toast.error("Collaboration authentication failed");
+      goto(resolve("/(app)/home"));
+    });
+
+    // Mirror the WebSocket connection state
+    provider.on("status", ({ status: newStatus }: { status: string }) => {
+      status = newStatus as any;
+      scheduleUpdate();
+    });
+    provider.on("synced", () => scheduleUpdate());
+    provider.on("connect", () => scheduleUpdate());
+    provider.on("disconnect", () => {
+      status = "disconnected";
+      scheduleUpdate();
+    });
+    provider.awareness?.on("update", () => scheduleUpdate());
 
     editor = createEditor({
-      onUpdate: () => {
-        isDirty = true;
-      },
       onFileUpload: (file) => {
         const user = authContext.user;
         if (user && user.used_storage + file.size > user.assigned_storage) {
@@ -207,103 +321,60 @@
       ) => {
         return callAI(prompt, note?.id || "", onChunk, onError);
       },
-      openCollaboration: shouldCollab,
+      openCollaboration: true,
       document: ydoc,
       provider,
       user: {
         name: data.user.name || "User",
-        color: getRandomUserColor(),
+        color: userColor,
         avatar: data.user.avatar_url || "",
-      },
+        userId: data.user.id,
+      } as any,
+    });
+
+    // Wait for the initial Y.Doc state to arrive from the server.
+    return new Promise<void>((done) => {
+      let settled = false;
+      const finish = () => {
+        if (!settled) {
+          settled = true;
+          done();
+        }
+      };
+      const onSynced = () => {
+        provider!.off("synced", onSynced);
+        finish();
+      };
+      provider!.on("synced", onSynced);
+      setTimeout(finish, 10_000);
     });
   }
 
   // --- Hooks ---
   // afterNavigate fires on every client navigation including the initial
-  // hydration; keep it but dedup via loadInFlight/seq so we don't spawn
-  // two concurrent providers.
+  // hydration — no need for a redundant onMount call.
   afterNavigate(() => {
     if (data.id) loadData();
   });
 
+  // Lift the workspace lookup into a $derived so it is cached and only
+  // recomputed when `note.workspace_id` or the workspaces list actually changes.
+  const noteWorkspace = $derived(
+    cloudWorkspaces.workspaces.find((w) => w.id === note?.workspace_id),
+  );
+
   $effect(() => {
-    if (note?.workspace_id && cloudWorkspaces.workspaces.length > 0) {
-      const workspace = cloudWorkspaces.workspaces.find(
-        (w) => w.id === note?.workspace_id,
-      );
-      if (workspace && currentWorkspaceCtx.get()?.id !== workspace.id) {
-        currentWorkspaceCtx.set(workspace);
-      }
-    }
-  });
-
-  onMount(() => {
-    if (browser && data.id) loadData();
-    // auto save is called in every 2 mins
-    const saveInterval = setInterval(() => {
-      saveNoteContent();
-    }, 120000);
-    return () => clearInterval(saveInterval);
-  });
-
-  beforeNavigate(async () => {
-    if (isDirty && !isCollaborative) {
-      await saveNoteContent();
+    if (noteWorkspace && currentWorkspaceCtx.get()?.id !== noteWorkspace.id) {
+      currentWorkspaceCtx.set(noteWorkspace);
     }
   });
 
   onDestroy(() => {
-    editor?.destroy();
-    try {
-      provider?.disconnect();
-    } catch {}
-    try {
-      (provider as any)?.destroy?.();
-    } catch {}
-    ydoc?.destroy();
+    teardownEditor();
     currentNoteId = undefined;
   });
 
   // --- Data Operations ---
-  async function saveNoteContent() {
-    if (!isDirty || !note || !editor || isCollaborative) return;
-
-    const currentContent = editor.getJSON();
-    if (
-      syncedContent === undefined ||
-      syncedContent === null ||
-      typeof syncedContent === "string"
-    ) {
-      syncedContent = {};
-    }
-    const patch = compare(syncedContent as object, currentContent);
-
-    if (patch.length === 0) {
-      isDirty = false;
-      return;
-    }
-
-    syncing = true;
-    syncingText = `Syncing ${patch.length} changes`;
-    try {
-      await cloudNotes.patch(note.id, patch);
-      syncedContent = currentContent;
-      isDirty = false;
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong when saving content to cloud");
-    } finally {
-      syncing = false;
-    }
-  }
-
-  const withTimeout = <T,>(p: Promise<T>, ms: number) =>
-    Promise.race([
-      p,
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`timeout ${ms}ms`)), ms),
-      ),
-    ]);
 
   async function loadData() {
     if (loadInFlight) return;
@@ -325,38 +396,16 @@
       return goto(resolve("/(app)/home"));
     }
 
-    let shouldCollab = false;
-    try {
-      await withTimeout(collaborators.fetchMembers(id), 8000);
-      shouldCollab = collaborators.members.length > 0;
-    } catch (e) {
-      console.error(e);
-      shouldCollab = false;
-    }
+    // Fetch collaborators for the avatar row in the topbar — non-blocking.
+    collaborators.fetchMembers(id).catch(console.error);
+
     if (seq !== loadSeq) {
       loadInFlight = false;
       return;
     }
 
-    await setupEditor(id, shouldCollab);
-    if (seq !== loadSeq) {
-      loadInFlight = false;
-      return;
-    }
     try {
-      const fetched = await withTimeout(cloudNotes.fetchContent(id), 8000);
-      if (seq !== loadSeq) {
-        loadInFlight = false;
-        return;
-      }
-      if (fetched) {
-        const dbContent = fetched as Content;
-        if (!isCollaborative) {
-          editor?.commands.setContent(dbContent, { contentType: "json" });
-          syncedContent = dbContent;
-        }
-        // collaborative: Yjs hydrates content via provider — skip setContent
-      }
+      await setupEditor(id);
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong when loading note");
@@ -369,7 +418,6 @@
 
   async function updateNote(name: string, icon: string, pinned: boolean) {
     if (!note) return;
-    syncing = true;
     try {
       await cloudNotes.update(note.id, { name, icon, pinned });
       note.name = name;
@@ -378,32 +426,20 @@
     } catch (e) {
       toast.error("Could not update note");
       console.error(e);
-    } finally {
-      syncing = false;
     }
   }
 
   async function handleNameChange(e: Event) {
     if (!note) return;
-    const target = e.target as HTMLInputElement;
-    const value = target.value.trim();
+    const value = (e.target as HTMLInputElement).value.trim();
     if (!value) return;
     await updateNote(value, note.icon, note.pinned);
-  }
-
-  function handleKeydown(e: KeyboardEvent) {
-    if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      saveNoteContent();
-    }
   }
 </script>
 
 <svelte:head>
   <title>{note?.name ? `${note.name} | Nota` : "Nota"}</title>
 </svelte:head>
-
-<svelte:document onkeydown={handleKeydown} />
 
 {#if isLoading}
   <div class="flex size-full min-h-0 flex-col overflow-hidden">
@@ -461,46 +497,30 @@
       {/snippet}
 
       {#snippet right()}
-        {#if isCollaborative && collaborators.members.length > 0}
-          <div class="flex items-center -space-x-2 mr-2">
-            {#each collaborators.members.slice(0, 3) as member (member.id)}
-              <UserAvatar
-                image={member.avatar_url ?? ""}
-                name={member.name ?? "Unknown"}
-              />
-            {/each}
-            {#if collaborators.members.length > 3}
-              <div
-                class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium z-10"
-              >
-                +{collaborators.members.length - 3}
-              </div>
-            {/if}
-          </div>
-        {/if}
-        {#if note?.is_public}
-          <SimpleToolTip>
-            <Button variant="ghost" size="icon">
-              <icons.Globe />
-            </Button>
-            {#snippet child()}
-              <div class="flex flex-col items-center">
-                <p class="font-semibold">This is a public note</p>
-                <span>Anyone with the link can view this note</span>
-              </div>
-            {/snippet}
-          </SimpleToolTip>
-        {/if}
-        <SimpleToolTip content={syncing ? syncingText : "Synced"}>
-          <Button variant="ghost" size="icon">
-            {#if syncing}
-              <BarSpinner />
-            {:else}
-              <icons.Cloud />
-            {/if}
-          </Button>
-        </SimpleToolTip>
-        <CollaboratorsDialog noteId={data.id} />
+        <NoteTopbarActions
+          members={collaborators.members}
+          isLoadingMembers={collaborators.isLoading}
+          isPublic={note?.is_public ?? false}
+          {versionCount}
+          {activeUsers}
+          connectionStatus={status}
+          currentUserId={data.user.id}
+          versionsHref={`/versions?note_ids=${note!.id}`}
+          publicUrl={`${PUBLIC_NOTA_FRONTEND_URL}/n/${note!.id}`}
+          onTogglePublic={() => {
+            if (note)
+              cloudNotes.update(note.id, { is_public: !note.is_public });
+          }}
+          onAddMember={async (email, role) => {
+            await collaborators.addMember(data.id, email, role);
+          }}
+          onRemoveMember={async (id) => {
+            await collaborators.removeMember(data.id, id);
+          }}
+          onUpdateRole={async (id, role) => {
+            await collaborators.updateRole(data.id, id, role);
+          }}
+        />
         <NavActions
           starred={Boolean(note?.pinned)}
           toggleStar={() => {
@@ -508,6 +528,7 @@
           }}
           editor={editor!}
           note={note!}
+          bind:versionCount
         />
       {/snippet}
     </Topbar>

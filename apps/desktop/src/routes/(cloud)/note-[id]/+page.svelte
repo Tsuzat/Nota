@@ -13,26 +13,21 @@
     getNotesContext,
     getStorageContext,
     getCollaboratorsContext,
+    getVersionsContext,
     type Note,
     type SelectableModel,
     secureStorage,
   } from "@nota/client";
-  import { SimpleToolTip } from "@nota/ui/custom/index.js";
-  import { type Content, createEditor, Edra } from "@nota/ui/edra/index.js";
-  import {
-    BarSpinner,
-    IconPicker,
-    IconRenderer,
-    icons,
-  } from "@nota/ui/icons/index.js";
+  import { NoteTopbarActions, type ActiveUser } from "@nota/ui/custom/index.js";
+  import { createEditor, Edra } from "@nota/ui/edra/index.js";
+  import { IconPicker, IconRenderer, icons } from "@nota/ui/icons/index.js";
   import { Button, buttonVariants } from "@nota/ui/shadcn/button";
   import { toast } from "@nota/ui/shadcn/sonner";
   import { basename } from "@tauri-apps/api/path";
   import { open } from "@tauri-apps/plugin-dialog";
   import { readFile } from "@tauri-apps/plugin-fs";
-  import { compare } from "fast-json-patch";
   import { onDestroy, onMount } from "svelte";
-  import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
+  import { afterNavigate, goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { getGlobalSettings } from "$lib/components/settings/index.js";
   import NavActions from "$lib/components/sidebar/nav-actions.svelte";
@@ -42,13 +37,12 @@
   // --- Services & Context ---
   const cloudNotes = getNotesContext();
   const cloudStorage = getStorageContext();
+  const versionsClient = getVersionsContext();
   const useGlobalSettings = getGlobalSettings();
   const useCurrentWorkspace = getCurrentWorkspace();
   const authContext = getAuthContext();
   const collaborators = getCollaboratorsContext();
-
-  import { Avatar, AvatarFallback, AvatarImage } from "@nota/ui/shadcn/avatar";
-  import CollaboratorsDialog from "$lib/components/dialogs/collaborators-dialog.svelte";
+  const isPro = $derived(authContext.user?.subscription_plan === "pro");
 
   import * as Y from "yjs";
   import { HocuspocusProvider } from "@hocuspocus/provider";
@@ -56,14 +50,96 @@
   import { quickcolors } from "@lib/components/edra/utils.js";
   // --- State ---
   const { data } = $props();
-  let syncedContent = $state<Content>();
-  let isDirty = $state(false);
 
   let isLoading = $state(true);
   let note = $state<Note>();
-  let syncing = $state(false);
-  let syncingText = $state("");
   let availableModels = $state<Record<string, SelectableModel[]>>({});
+  let versionCount = $state(0);
+
+  let status = $state<"connecting" | "connected" | "disconnected">(
+    "connecting",
+  );
+  let activeUsers = $state<ActiveUser[]>([]);
+
+  let raf = 0;
+
+  function scheduleUpdate() {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      syncUsers();
+    });
+  }
+
+  function syncUsers() {
+    if (!provider?.awareness) {
+      if (status === "connected" && authContext.user) {
+        activeUsers = [
+          {
+            name: authContext.user.name || "User",
+            color: getRandomUserColor(),
+            avatar: authContext.user.avatar_url || "",
+            userId: authContext.user.id,
+            clientId: 0,
+          },
+        ];
+      } else {
+        if (activeUsers.length) activeUsers = [];
+      }
+      return;
+    }
+    const selfId = provider.awareness.clientID as number;
+    const states = provider.awareness.getStates();
+    const list: ActiveUser[] = [];
+    states.forEach((st: unknown, clientId: number) => {
+      const user = (
+        st as {
+          user?: {
+            name?: string;
+            color?: string;
+            avatar?: string;
+            userId?: string;
+          };
+        }
+      )?.user;
+      if (user?.name) {
+        list.push({
+          name: String(user.name).slice(0, 32),
+          color: user.color || "#7C3AED",
+          avatar: user.avatar,
+          userId: user.userId,
+          clientId,
+        });
+      }
+    });
+
+    list.sort((a, b) => {
+      if (a.clientId === selfId) return -1;
+      if (b.clientId === selfId) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    if (
+      list.length === activeUsers.length &&
+      list.every(
+        (u, i) =>
+          u.clientId === activeUsers[i]?.clientId &&
+          u.name === activeUsers[i]?.name &&
+          u.color === activeUsers[i]?.color,
+      )
+    ) {
+      return;
+    }
+    activeUsers = list;
+  }
+  // Fetch version count whenever note changes.
+  $effect(() => {
+    if (note?.id && isPro) {
+      versionsClient.getVersionCount(note.id).then((c) => (versionCount = c));
+    } else {
+      versionCount = 0;
+    }
+  });
 
   // --- File Handling Utilities ---
   const onFileSelect = async (path: string) => {
@@ -134,32 +210,67 @@
     return await onFileSelect(file);
   };
 
-  let ydoc = $state<Y.Doc>();
-  let provider = $state<HocuspocusProvider>();
-  let editor = $state<ReturnType<typeof createEditor>>();
-  let isCollaborative = $state(false);
+  let ydoc = $state.raw<Y.Doc | undefined>(undefined);
+  let provider = $state.raw<HocuspocusProvider | undefined>(undefined);
+  let editor = $state.raw<ReturnType<typeof createEditor> | undefined>(undefined);
+  let currentNoteId = $state<string | undefined>(undefined);
+  let currentProviderName = $state<string | undefined>(undefined);
+  let loadInFlight = $state(false);
+  let loadSeq = 0;
 
   function getRandomUserColor(): string {
     return quickcolors[Math.floor(Math.random() * quickcolors.length)].value;
   }
 
+  function teardownEditor() {
+    if (raf) cancelAnimationFrame(raf);
+    editor?.destroy();
+    try {
+      provider?.disconnect();
+      provider?.destroy();
+    } catch {}
+    ydoc?.destroy();
+    currentProviderName = undefined;
+  }
+
   // --- Editor Setup ---
-  async function setupEditor() {
-    if (isCollaborative) {
-      const token = await secureStorage.getItem("access_token");
-      ydoc = new Y.Doc();
-      provider = new HocuspocusProvider({
-        url: PUBLIC_COLLABORATION_URL,
-        name: `note:${data.id}`,
-        document: ydoc,
-        token,
-      });
+  async function setupEditor(nextId: string): Promise<void> {
+    const providerName = `note:${nextId}`;
+    if (
+      currentNoteId === nextId &&
+      currentProviderName === providerName &&
+      editor
+    ) {
+      return;
     }
 
+    teardownEditor();
+    currentNoteId = nextId;
+    currentProviderName = providerName;
+    const userColor = getRandomUserColor();
+
+    const token = await secureStorage.getItem("access_token");
+    ydoc = new Y.Doc();
+    provider = new HocuspocusProvider({
+      url: PUBLIC_COLLABORATION_URL,
+      name: providerName,
+      document: ydoc,
+      token: token || undefined,
+    });
+
+    provider.on("status", ({ status: newStatus }: { status: string }) => {
+      status = newStatus as any;
+      scheduleUpdate();
+    });
+    provider.on("synced", () => scheduleUpdate());
+    provider.on("connect", () => scheduleUpdate());
+    provider.on("disconnect", () => {
+      status = "disconnected";
+      scheduleUpdate();
+    });
+    provider.awareness?.on("update", () => scheduleUpdate());
+
     editor = createEditor({
-      onUpdate: () => {
-        isDirty = true;
-      },
       onFileUpload: (file) => {
         const user = authContext.user;
         if (user && user.used_storage + file.size > user.assigned_storage) {
@@ -180,14 +291,31 @@
       ) => {
         return callAI(prompt, note?.id || "", onChunk, onError);
       },
-      openCollaboration: isCollaborative,
+      openCollaboration: true,
       document: ydoc,
       provider,
       user: {
         name: authContext.user?.name || "User",
-        color: getRandomUserColor(),
+        color: userColor,
         avatar: authContext.user?.avatar_url || "",
-      },
+        userId: authContext.user?.id,
+      } as any,
+    });
+
+    return new Promise<void>((done) => {
+      let settled = false;
+      const finish = () => {
+        if (!settled) {
+          settled = true;
+          done();
+        }
+      };
+      const onSynced = () => {
+        provider!.off("synced", onSynced);
+        finish();
+      };
+      provider!.on("synced", onSynced);
+      setTimeout(finish, 10_000);
     });
   }
 
@@ -199,60 +327,16 @@
     });
   });
 
-  // Removed redundant effect since fetch is in loadData
-  onMount(() => {
-    // auto save is called in every 2 mins
-    const saveInterval = setInterval(() => {
-      saveNoteContent();
-    }, 120000);
-    return () => clearInterval(saveInterval);
-  });
-
-  beforeNavigate(async () => {
-    if (isDirty && !isCollaborative) {
-      await saveNoteContent();
-    }
-  });
-
   onDestroy(() => {
-    editor?.destroy();
-    provider?.disconnect();
+    teardownEditor();
+    currentNoteId = undefined;
   });
 
   // --- Data Operations ---
-  async function saveNoteContent() {
-    if (!isDirty || !note || !editor || isCollaborative) return;
-
-    const currentContent = editor.getJSON();
-    if (
-      syncedContent === undefined ||
-      syncedContent === null ||
-      typeof syncedContent === "string"
-    ) {
-      syncedContent = {};
-    }
-    const patch = compare(syncedContent as object, currentContent);
-
-    if (patch.length === 0) {
-      isDirty = false;
-      return;
-    }
-
-    syncing = true;
-    syncingText = `Syncing ${patch.length} changes`;
-    try {
-      await cloudNotes.patch(note.id, patch);
-      syncedContent = currentContent;
-      isDirty = false;
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong when saving content to cloud");
-    } finally {
-      syncing = false;
-    }
-  }
-
   async function loadData() {
+    if (loadInFlight) return;
+    loadInFlight = true;
+    const seq = ++loadSeq;
     const id = data.id;
     isLoading = true;
     note = cloudNotes.notes.find((n) => n.id === id);
@@ -265,43 +349,31 @@
     }
     if (!note) {
       toast.error(`Note with id ${id} not found`);
+      loadInFlight = false;
       return goto(resolve("/"));
     }
 
-    try {
-      await collaborators.fetchMembers(id);
-      isCollaborative = collaborators.members.length > 0;
-    } catch (e) {
-      console.error(e);
-      isCollaborative = false;
+    collaborators.fetchMembers(id).catch(console.error);
+
+    if (seq !== loadSeq) {
+      loadInFlight = false;
+      return;
     }
 
     try {
-      const data = await cloudNotes.fetchContent(id);
-      if (data) {
-        const dbContent = data as Content;
-
-        if (!editor) await setupEditor();
-
-        if (!isCollaborative) {
-          editor?.commands.setContent(dbContent, { contentType: "json" });
-          syncedContent = dbContent;
-        }
-      } else {
-        if (!editor) await setupEditor();
-      }
+      await setupEditor(id);
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong when loading note");
       goto(resolve("/"));
     } finally {
-      isLoading = false;
+      if (seq === loadSeq) isLoading = false;
+      loadInFlight = false;
     }
   }
 
   async function updateNote(name: string, icon: string, pinned: boolean) {
     if (!note) return;
-    syncing = true;
     try {
       await cloudNotes.update(note.id, { name, icon, pinned });
       note.name = name;
@@ -310,8 +382,6 @@
     } catch (e) {
       toast.error("Could not update note");
       console.error(e);
-    } finally {
-      syncing = false;
     }
   }
 
@@ -322,16 +392,7 @@
     if (!value) return;
     await updateNote(value, note.icon, note.pinned);
   }
-
-  function handleKeydown(e: KeyboardEvent) {
-    if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      saveNoteContent();
-    }
-  }
 </script>
-
-<svelte:document onkeydown={handleKeydown} />
 
 {#if isLoading}
   <div class="flex size-full min-h-0 flex-col overflow-hidden">
@@ -389,49 +450,29 @@
       {/snippet}
 
       {#snippet right()}
-        {#if isCollaborative && collaborators.members.length > 0}
-          <div class="flex items-center -space-x-2 mr-2">
-            {#each collaborators.members.slice(0, 3) as member}
-              <Avatar class="border-2 border-background h-8 w-8">
-                <AvatarImage src={member.avatar_url || ""} />
-                <AvatarFallback class="text-xs">
-                  {member.name?.[0]?.toUpperCase() ||
-                    member.email[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            {/each}
-            {#if collaborators.members.length > 3}
-              <div
-                class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium z-10"
-              >
-                +{collaborators.members.length - 3}
-              </div>
-            {/if}
-          </div>
-        {/if}
-        {#if note?.is_public}
-          <SimpleToolTip>
-            <Button variant="ghost" size="icon">
-              <icons.Globe />
-            </Button>
-            {#snippet child()}
-              <div class="flex flex-col items-center">
-                <p class="font-semibold">This is a public note</p>
-                <span>Anyone with the link can view this note</span>
-              </div>
-            {/snippet}
-          </SimpleToolTip>
-        {/if}
-        <CollaboratorsDialog noteId={data.id} />
-        <SimpleToolTip content={syncing ? syncingText : "Synced"}>
-          <Button variant="ghost" size="icon">
-            {#if syncing}
-              <BarSpinner />
-            {:else}
-              <icons.Cloud />
-            {/if}
-          </Button>
-        </SimpleToolTip>
+        <NoteTopbarActions
+          members={collaborators.members}
+          isLoadingMembers={collaborators.isLoading}
+          isPublic={note?.is_public ?? false}
+          {versionCount}
+          {activeUsers}
+          connectionStatus={status}
+          currentUserId={authContext.user?.id}
+          versionsHref={`/versions?note_ids=${note!.id}&source=cloud`}
+          onTogglePublic={() => {
+            if (note)
+              cloudNotes.update(note.id, { is_public: !note.is_public });
+          }}
+          onAddMember={async (email, role) => {
+            await collaborators.addMember(data.id, email, role);
+          }}
+          onRemoveMember={async (id) => {
+            await collaborators.removeMember(data.id, id);
+          }}
+          onUpdateRole={async (id, role) => {
+            await collaborators.updateRole(data.id, id, role);
+          }}
+        />
         <NavActions
           starred={Boolean(note?.pinned)}
           toggleStar={() => {
@@ -439,6 +480,7 @@
           }}
           editor={editor!}
           note={note!}
+          bind:versionCount
         />
       {/snippet}
     </Topbar>

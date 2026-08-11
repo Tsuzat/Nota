@@ -13,8 +13,6 @@ const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
 const REDIS_PORT = Number(process.env.REDIS_PORT) || 6379;
 const REDIS_USERNAME = process.env.REDIS_USERNAME;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
-// Use REDIS_TLS=true for public/external Redis endpoints.
-// Railway's private network (*.railway.internal) does NOT need TLS.
 const REDIS_TLS = process.env.REDIS_TLS === "true";
 
 const redisOptions = {

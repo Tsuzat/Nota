@@ -33,7 +33,7 @@ $effect(() => {
 });
 
 function openNote(note: Note) {
-  goto(resolve('/(app)/note-[id]', { id: note.id }));
+  goto(resolve('/(app)/n/[id]', { id: note.id }));
 }
 
 async function updateWorkspace(icon: string, name: string) {

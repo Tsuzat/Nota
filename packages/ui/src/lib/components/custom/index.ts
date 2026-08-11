@@ -13,3 +13,9 @@ export {
   default as ConfirmDelete,
   confirmDelete,
 } from './dialogs/confirm-delete.svelte';
+
+export {
+  default as NoteTopbarActions,
+  type CollaboratorMember,
+  type ActiveUser,
+} from './NoteTopbarActions.svelte';

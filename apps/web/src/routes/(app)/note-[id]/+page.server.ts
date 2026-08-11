@@ -1,8 +1,5 @@
-export const load = async ({ params, cookies, depends }) => {
-  depends("data:collab-token");
-  const token = cookies.get("access_token");
-  return {
-    id: params.id,
-    token,
-  };
+import { redirect } from '@sveltejs/kit';
+
+export const load = ({ params }) => {
+  throw redirect(301, `/n/${params.id}`);
 };

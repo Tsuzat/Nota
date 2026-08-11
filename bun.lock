@@ -32,7 +32,7 @@
     },
     "apps/desktop": {
       "name": "@nota/desktop",
-      "version": "0.9.82-beta",
+      "version": "0.9.90-beta",
       "dependencies": {
         "@google/genai": "^1.52.0",
         "@hocuspocus/provider": "^4.5.0",
@@ -109,9 +109,11 @@
       "name": "@nota/client",
       "version": "0.0.1",
       "dependencies": {
+        "@hocuspocus/provider": "^4.6.0",
         "@tauri-apps/api": "^2.11.0",
         "@tauri-apps/plugin-http": "^2.5.6",
         "@tauri-apps/plugin-stronghold": "^2.3.1",
+        "yjs": "^13.6.32",
         "zod": "^4.3.5",
       },
       "devDependencies": {
@@ -335,7 +337,7 @@
 
     "@hocuspocus/extension-redis": ["@hocuspocus/extension-redis@4.6.0", "", { "dependencies": { "@hocuspocus/common": "^4.6.0", "@hocuspocus/server": "^4.6.0", "@sesamecare-oss/redlock": "^1.4.0", "ioredis": "~5.6.1", "kleur": "^4.1.5" }, "peerDependencies": { "y-protocols": "^1.0.6", "yjs": "^13.6.8" } }, "sha512-inh4TMzHTAXgRukB9nDRls+ztc3TO5B085FIv0E78wlbY2rfh1vyxIREPBv52j4XDoSm+xwwK2EnZfT9GFKx3Q=="],
 
-    "@hocuspocus/provider": ["@hocuspocus/provider@4.5.0", "", { "dependencies": { "@hocuspocus/common": "^4.5.0", "@lifeomic/attempt": "^3.1.0", "lib0": "^0.2.117" }, "peerDependencies": { "y-protocols": "^1.0.6", "yjs": "^13.6.8" } }, "sha512-zpu68EIVZCzem1aCRjXeeeRVgaJHZa+p2rpherneUpwTnrb3WInL4IJ7cgMk0yP1/I2KPzve6meGODl1JPNTZQ=="],
+    "@hocuspocus/provider": ["@hocuspocus/provider@4.6.0", "", { "dependencies": { "@hocuspocus/common": "^4.6.0", "@lifeomic/attempt": "^3.1.0", "lib0": "^0.2.117" }, "peerDependencies": { "y-protocols": "^1.0.6", "yjs": "^13.6.8" } }, "sha512-twKgZb1PbDSapfdghvLWR1zQEvSiQLCH7DjKL4QmSoG2P1a0D7p5MUrm/RzXKscPpzVjHyGzHPlIWAXEEcvfxQ=="],
 
     "@hocuspocus/server": ["@hocuspocus/server@4.6.0", "", { "dependencies": { "@hocuspocus/common": "^4.6.0", "async-mutex": "^0.5.0", "crossws": "^0.4.4", "kleur": "^4.1.5", "lib0": "^0.2.117" }, "peerDependencies": { "y-protocols": "^1.0.6", "yjs": "^13.6.8" } }, "sha512-Ex4tka1vsm9NycHU1vPwxj3weQj+L2+736U8uentRyykAefUcYkHEh7Gfxiy9PHBholWcw1H+oYgZ3LP0ShTWQ=="],
 
@@ -1359,9 +1361,9 @@
 
     "@hocuspocus/extension-redis/ioredis": ["ioredis@5.6.1", "", { "dependencies": { "@ioredis/commands": "^1.1.1", "cluster-key-slot": "^1.1.0", "debug": "^4.3.4", "denque": "^2.1.0", "lodash.defaults": "^4.2.0", "lodash.isarguments": "^3.1.0", "redis-errors": "^1.2.0", "redis-parser": "^3.0.0", "standard-as-callback": "^2.1.0" } }, "sha512-UxC0Yv1Y4WRJiGQxQkP0hfdL0/5/6YvdfOOClRgJ0qppSarkhneSa6UvkMkms0AkdGimSH3Ikqm+6mkMmX7vGA=="],
 
-    "@hocuspocus/provider/@hocuspocus/common": ["@hocuspocus/common@4.5.0", "", { "dependencies": { "lib0": "^0.2.117" } }, "sha512-hz6IBLLNKOWrWf+8r236CFFhpkcjEVXtZH1XRrkY0b5dYoQgR5gmuV5/5dJm1Vvyc8I70D+SHCvOch2AsRXonA=="],
-
     "@img/sharp-wasm32/@emnapi/runtime": ["@emnapi/runtime@1.11.2", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-kyOl3X0DuTiT1h2ft8r2fYO8JYtU9a9Xis/zBSiGArNaagCOWx90N1k2wxp18czFDH+OgcWGb5ZP/XMt3dcyPA=="],
+
+    "@nota/desktop/@hocuspocus/provider": ["@hocuspocus/provider@4.5.0", "", { "dependencies": { "@hocuspocus/common": "^4.5.0", "@lifeomic/attempt": "^3.1.0", "lib0": "^0.2.117" }, "peerDependencies": { "y-protocols": "^1.0.6", "yjs": "^13.6.8" } }, "sha512-zpu68EIVZCzem1aCRjXeeeRVgaJHZa+p2rpherneUpwTnrb3WInL4IJ7cgMk0yP1/I2KPzve6meGODl1JPNTZQ=="],
 
     "@nota/desktop/@sveltejs/vite-plugin-svelte": ["@sveltejs/vite-plugin-svelte@5.1.1", "", { "dependencies": { "@sveltejs/vite-plugin-svelte-inspector": "^4.0.1", "debug": "^4.4.1", "deepmerge": "^4.3.1", "kleur": "^4.1.5", "magic-string": "^0.30.17", "vitefu": "^1.0.6" }, "peerDependencies": { "svelte": "^5.0.0", "vite": "^6.0.0" } }, "sha512-Y1Cs7hhTc+a5E9Va/xwKlAJoariQyHY+5zBgCZg4PFWNYQ1nMN9sjK1zhw1gK69DuqVP++sht/1GZg1aRwmAXQ=="],
 
@@ -1434,6 +1436,8 @@
     "@hocuspocus/extension-redis/ioredis/@ioredis/commands": ["@ioredis/commands@1.11.0", "", {}, "sha512-tuMmOu6dtyGFv/fzCjtapCJj/zgoHaFsqs3wKsroJSRXtlLmyL/t+B7uaQiavGk1F3WWFQcUqZwk92bpp9jKcA=="],
 
     "@hocuspocus/extension-redis/ioredis/cluster-key-slot": ["cluster-key-slot@1.1.2", "", {}, "sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA=="],
+
+    "@nota/desktop/@hocuspocus/provider/@hocuspocus/common": ["@hocuspocus/common@4.5.0", "", { "dependencies": { "lib0": "^0.2.117" } }, "sha512-hz6IBLLNKOWrWf+8r236CFFhpkcjEVXtZH1XRrkY0b5dYoQgR5gmuV5/5dJm1Vvyc8I70D+SHCvOch2AsRXonA=="],
 
     "@nota/desktop/@sveltejs/vite-plugin-svelte/@sveltejs/vite-plugin-svelte-inspector": ["@sveltejs/vite-plugin-svelte-inspector@4.0.1", "", { "dependencies": { "debug": "^4.3.7" }, "peerDependencies": { "@sveltejs/vite-plugin-svelte": "^5.0.0", "svelte": "^5.0.0", "vite": "^6.0.0" } }, "sha512-J/Nmb2Q2y7mck2hyCX4ckVHcR5tu2J+MtBEQqpDrrgELZ2uvraQcK/ioCV61AqkdXFgriksOKIceDcQmqnGhVw=="],
 
