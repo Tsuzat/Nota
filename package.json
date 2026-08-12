@@ -1,0 +1,52 @@
+{
+  "name": "nota",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "dotenv": "^17.4.2",
+      "zod": "^4.4.3",
+      "typescript": "^6.0.3",
+      "@types/bun": "^1.3.14",
+      "hono": "^4.12.32",
+      "@orpc/server": "^1.14.12",
+      "@orpc/openapi": "^1.14.12",
+      "@orpc/zod": "^1.14.12",
+      "better-auth": "1.6.25",
+      "@orpc/client": "^1.14.12",
+      "@polar-sh/better-auth": "^1.8.4"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check-types": "turbo run check-types",
+    "dev:web": "turbo run dev -F web",
+    "dev:server": "turbo run dev -F server",
+    "dev:app": "turbo run dev -F app",
+    "db:push": "turbo run db:push -F @nota/db",
+    "db:studio": "turbo run db:studio -F @nota/db",
+    "db:generate": "turbo run db:generate -F @nota/db",
+    "db:migrate": "turbo run db:migrate -F @nota/db",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "dependencies": {
+    "@nota/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@nota/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "turbo": "^2.10.7",
+    "typescript": "catalog:"
+  },
+  "packageManager": "bun@1.3.14"
+}

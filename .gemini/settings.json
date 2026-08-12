@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "better-t-stack": {
+      "command": "bunx",
+      "args": ["create-better-t-stack@latest", "mcp"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "svelte": {
+      "type": "http",
+      "url": "https://mcp.svelte.dev/mcp"
+    },
+    "better-auth": {
+      "type": "http",
+      "url": "https://mcp.inkeep.com/better-auth/mcp"
+    },
+    "polar": {
+      "type": "http",
+      "url": "https://mcp.polar.sh/mcp/polar-mcp"
+    }
+  }
+}
