@@ -1,5 +1,0 @@
-# allow crawling everything by default
-User-agent: *
-Allow: /
-
-Sitemap: https://nota.ink/sitemap.xml
