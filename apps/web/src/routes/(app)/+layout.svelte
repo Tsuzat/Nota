@@ -1,12 +1,6 @@
 <script lang="ts">
 import { DeleteWorkspaceDialog } from '@lib/components/custom';
-import {
-  getAuthContext,
-  setNotesContext,
-  setStorageContext,
-  setVersionsContext,
-  setWorkspacesContext,
-} from '@nota/client';
+import { setNotesContext, setStorageContext, setVersionsContext, setWorkspacesContext } from '@nota/client';
 import * as Sidebar from '@nota/ui/shadcn/sidebar';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { onMount } from 'svelte';

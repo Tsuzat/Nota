@@ -6,6 +6,26 @@
   },
   "overrides": [
     {
+      "includes": ["src/app.css"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noImportantStyles": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/routes/(cloud)/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["src/**/*.svelte"],
       "linter": {
         "rules": {

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { getNotesContext } from "@nota/client";
-  import { icons } from "@nota/ui/icons/index.js";
-  import * as Collapsible from "@nota/ui/shadcn/collapsible";
-  import * as Sidebar from "@nota/ui/shadcn/sidebar";
-  import NoteTile from "./note-tile.svelte";
+import { getNotesContext } from '@nota/client';
+import { icons } from '@nota/ui/icons/index.js';
+import * as Collapsible from '@nota/ui/shadcn/collapsible';
+import * as Sidebar from '@nota/ui/shadcn/sidebar';
+import NoteTile from './note-tile.svelte';
 
-  const cloudNotes = getNotesContext();
-  const sharedNotes = $derived(cloudNotes.sharedNotes);
+const cloudNotes = getNotesContext();
+const sharedNotes = $derived(cloudNotes.sharedNotes);
 </script>
 
 {#if sharedNotes.length > 0}

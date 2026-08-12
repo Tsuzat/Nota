@@ -206,7 +206,7 @@ export class LocalVersions {
         noteId,
         workspaceId,
         currentContent,
-        'Restored From ' + versionId.substring(0, 8),
+        `Restored From ${versionId.substring(0, 8)}`,
         'restore',
         source
       );

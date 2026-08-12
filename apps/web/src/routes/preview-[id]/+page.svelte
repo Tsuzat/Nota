@@ -1,6 +1,7 @@
 <script lang="ts">
 import { ToggleMode } from '@lib/components/custom';
-import { createEditor, type Editor, Edra } from '@nota/ui/edra/index.js';
+import type { Editor } from '@lib/components/edra/tiptap/index.js';
+import { createEditor, Edra } from '@nota/ui/edra/shadcn/index.js';
 import { IconRenderer } from '@nota/ui/icons';
 import { Button } from '@nota/ui/shadcn/button';
 import { Skeleton } from '@nota/ui/shadcn/skeleton';

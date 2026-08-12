@@ -4,7 +4,6 @@ import { Button } from '@nota/ui/shadcn/button';
 import { resolve } from '$app/paths';
 import Particles from '$lib/components/custom/landing/particles.svelte';
 import Pricing from '$lib/components/custom/landing/pricing/pricing.svelte';
-import Spotlight from '$lib/components/custom/landing/spotlight.svelte';
 
 const features = [
   {

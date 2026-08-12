@@ -84,7 +84,9 @@ const displayedArticles = $derived(
 </script>
 
 <svelte:head>
-  <title>Blog & Insights | Nota — Fast, Local-First Note-Taking & AI Workspace</title>
+  <title
+    >Blog & Insights | Nota — Fast, Local-First Note-Taking & AI Workspace</title
+  >
   <meta
     name="description"
     content="Explore authoritative engineering deep dives on Rust and Tauri, side-by-side app showdowns against Notion and Obsidian, and local-first BYOK AI productivity guides."
@@ -233,7 +235,11 @@ const displayedArticles = $derived(
   </div>
 
   <!-- Category Filters -->
-  <div role="tablist" aria-label="Blog Category Filters" class="mb-10 flex flex-wrap items-center gap-2 border-b pb-6">
+  <div
+    role="tablist"
+    aria-label="Blog Category Filters"
+    class="mb-10 flex flex-wrap items-center gap-2 border-b pb-6"
+  >
     {#each categories as cat (cat)}
       <Button
         role="tab"
@@ -413,9 +419,15 @@ const displayedArticles = $derived(
         </div>
       </a>
     {:else}
-      <div class="col-span-full py-16 text-center text-muted-foreground border rounded-xl bg-card/20">
-        <p class="text-base font-semibold">No articles found in this category.</p>
-        <p class="mt-1 text-sm">Check back soon as our technical writing library continues to grow!</p>
+      <div
+        class="col-span-full py-16 text-center text-muted-foreground border rounded-xl bg-card/20"
+      >
+        <p class="text-base font-semibold">
+          No articles found in this category.
+        </p>
+        <p class="mt-1 text-sm">
+          Check back soon as our technical writing library continues to grow!
+        </p>
       </div>
     {/each}
   </div>

@@ -89,12 +89,12 @@ func ConfirmUpload(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: err.Error()})
 	}
 
-	if (req.WorkspaceId == nil || *req.WorkspaceId == "") && (req.NoteId == nil || *req.NoteId == "") {
-		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: "Either WorkspaceId or NoteId is required"})
-	}
-
 	if !strings.HasPrefix(req.Key, userId+"/") {
 		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: fiber.StatusForbidden, Error: "Invalid key ownership"})
+	}
+
+	if (req.WorkspaceId == nil || *req.WorkspaceId == "") && (req.NoteId == nil || *req.NoteId == "") {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: fiber.StatusBadRequest, Error: "Either WorkspaceId or NoteId is required"})
 	}
 
 	headOutput, err := utils.S3CLIENT.HeadObject(c.Context(), &s3.HeadObjectInput{

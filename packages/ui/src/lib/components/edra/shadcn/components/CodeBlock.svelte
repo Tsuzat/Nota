@@ -3,6 +3,7 @@
   import {
     NodeViewContent,
     NodeViewWrapper,
+    useEditorTransaction,
     type NodeViewProps,
   } from "../../tiptap/index.js";
 
@@ -58,6 +59,11 @@
       })
       .run();
   }
+  const transaction = useEditorTransaction(editor);
+  const isEditable = () => {
+    void transaction.version;
+    return editor.isEditable;
+  };
 </script>
 
 <NodeViewWrapper class="my-4 rounded-lg bg-muted pb-4 px-4 dark:bg-muted/20">
@@ -65,7 +71,7 @@
     class="mx-2 flex items-center z-0 justify-end gap-2 print:justify-start"
     contenteditable="false"
   >
-    {#if defaultLanguage.toLowerCase() === "mermaid"}
+    {#if defaultLanguage.toLowerCase() === "mermaid" && isEditable()}
       <Tooltip tooltip="Convert to Mermaid Diagram">
         <Button
           variant="ghost"
@@ -77,59 +83,68 @@
         </Button>
       </Tooltip>
     {/if}
-    <Popover.Root>
-      <Tooltip tooltip="Change Language">
-        <Popover.Trigger
-          contenteditable="false"
-          disabled={!editor.isEditable}
-          class={buttonVariants({
-            variant: "ghost",
-            size: "sm",
-            class: "text-muted-foreground capitalize",
-          })}
+    {#if isEditable()}
+      <Popover.Root>
+        <Tooltip tooltip="Change Language">
+          <Popover.Trigger
+            contenteditable="false"
+            class={buttonVariants({
+              variant: "ghost",
+              size: "sm",
+              class: "text-muted-foreground capitalize",
+            })}
+          >
+            {defaultLanguage}
+          </Popover.Trigger>
+        </Tooltip>
+        <Popover.Content
+          class="max-h-96 h-auto w-42 p-0! text-primary!"
+          portalProps={{ disabled: true, to: undefined }}
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onEscapeKeydown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
-          {defaultLanguage}
-        </Popover.Trigger>
-      </Tooltip>
-      <Popover.Content
-        class="max-h-96 h-auto w-42 p-0! text-primary!"
-        portalProps={{ disabled: true, to: undefined }}
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onEscapeKeydown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
+          <Command.Root class="p-0!">
+            <Command.Input
+              placeholder={strings.extension.code.searchLanguagePlaceholder}
+            />
+            <Command.List>
+              <Command.Empty
+                >{strings.extension.code.searchLanguageEmpty}</Command.Empty
+              >
+              <Command.Group value="languages">
+                {#each languages as language (language)}
+                  <Command.Item
+                    value={language}
+                    onSelect={() => changeLanguage(language)}
+                    onclick={() => changeLanguage(language)}
+                    class="text-primary capitalize"
+                  >
+                    <Check
+                      class={cn(language !== defaultLanguage && "invisible")}
+                    />
+                    {language}
+                  </Command.Item>
+                {/each}
+              </Command.Group>
+            </Command.List>
+          </Command.Root>
+        </Popover.Content>
+      </Popover.Root>
+    {:else}
+      <span
+        class={buttonVariants({
+          variant: "ghost",
+          size: "sm",
+          class: "text-muted-foreground capitalize",
+        })}>{defaultLanguage}</span
       >
-        <Command.Root class="p-0!">
-          <Command.Input
-            placeholder={strings.extension.code.searchLanguagePlaceholder}
-          />
-          <Command.List>
-            <Command.Empty
-              >{strings.extension.code.searchLanguageEmpty}</Command.Empty
-            >
-            <Command.Group value="languages">
-              {#each languages as language (language)}
-                <Command.Item
-                  value={language}
-                  onSelect={() => changeLanguage(language)}
-                  onclick={() => changeLanguage(language)}
-                  class="text-primary capitalize"
-                >
-                  <Check
-                    class={cn(language !== defaultLanguage && "invisible")}
-                  />
-                  {language}
-                </Command.Item>
-              {/each}
-            </Command.Group>
-          </Command.List>
-        </Command.Root>
-      </Popover.Content>
-    </Popover.Root>
+    {/if}
     <Button
       variant="ghost"
       size="icon-xs"

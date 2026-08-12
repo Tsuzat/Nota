@@ -1,69 +1,58 @@
 <script lang="ts">
-  import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-  } from "@nota/ui/shadcn/dialog";
-  import { Button } from "@nota/ui/shadcn/button";
-  import { Input } from "@nota/ui/shadcn/input";
-  import { Label } from "@nota/ui/shadcn/label";
-  import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-  } from "@nota/ui/shadcn/select";
-  import { getCollaboratorsContext, getAuthContext } from "@nota/client";
-  import { Avatar, AvatarFallback, AvatarImage } from "@nota/ui/shadcn/avatar";
-  import { toast } from "@nota/ui/shadcn/sonner";
-  import { BarSpinner, icons } from "@nota/ui/icons";
+import { getAuthContext, getCollaboratorsContext } from '@nota/client';
+import { BarSpinner, icons } from '@nota/ui/icons';
+import { Avatar, AvatarFallback, AvatarImage } from '@nota/ui/shadcn/avatar';
+import { Button } from '@nota/ui/shadcn/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@nota/ui/shadcn/dialog';
+import { Input } from '@nota/ui/shadcn/input';
+import { Label } from '@nota/ui/shadcn/label';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@nota/ui/shadcn/select';
+import { toast } from '@nota/ui/shadcn/sonner';
 
-  const { noteId } = $props<{ noteId: string }>();
+const { noteId } = $props<{ noteId: string }>();
 
-  const collaborators = getCollaboratorsContext();
-  const auth = getAuthContext();
+const collaborators = getCollaboratorsContext();
+const auth = getAuthContext();
 
-  let email = $state("");
-  let role = $state("editor");
-  let open = $state(false);
+let email = $state('');
+let role = $state('editor');
+let open = $state(false);
 
-  // Load members when opened
-  $effect(() => {
-    if (open && noteId) {
-      collaborators.fetchMembers(noteId).catch(console.error);
-    }
-  });
-
-  async function handleAdd() {
-    if (!email) return;
-    try {
-      await collaborators.addMember(noteId, email, role);
-      email = "";
-      toast.success("Collaborator added");
-    } catch (e: any) {
-      toast.error(e.message || "Failed to add collaborator");
-    }
+// Load members when opened
+$effect(() => {
+  if (open && noteId) {
+    collaborators.fetchMembers(noteId).catch(console.error);
   }
+});
 
-  async function handleRemove(collabId: string) {
-    try {
-      await collaborators.removeMember(noteId, collabId);
-      toast.success("Collaborator removed");
-    } catch (e: any) {
-      toast.error(e.message || "Failed to remove collaborator");
-    }
+async function handleAdd() {
+  if (!email) return;
+  try {
+    await collaborators.addMember(noteId, email, role);
+    email = '';
+    toast.success('Collaborator added');
+  } catch (e: any) {
+    toast.error(e.message || 'Failed to add collaborator');
   }
+}
 
-  async function handleRoleChange(collabId: string, newRole: string) {
-    try {
-      await collaborators.updateRole(noteId, collabId, newRole);
-      toast.success("Role updated");
-    } catch (e: any) {
-      toast.error(e.message || "Failed to update role");
-    }
+async function handleRemove(collabId: string) {
+  try {
+    await collaborators.removeMember(noteId, collabId);
+    toast.success('Collaborator removed');
+  } catch (e: any) {
+    toast.error(e.message || 'Failed to remove collaborator');
   }
+}
+
+async function handleRoleChange(collabId: string, newRole: string) {
+  try {
+    await collaborators.updateRole(noteId, collabId, newRole);
+    toast.success('Role updated');
+  } catch (e: any) {
+    toast.error(e.message || 'Failed to update role');
+  }
+}
 </script>
 
 <Dialog bind:open>

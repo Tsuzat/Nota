@@ -1,11 +1,12 @@
 import type { Editor } from '../Editor.ts';
+import type { Editor as CoreEditor} from '@tiptap/core'
 
 /**
  * Svelte 5 rune-based hook that provides a reactive transaction counter.
  * Reading `version` inside a template expression creates a dependency
  * that re-evaluates on every editor transaction.
  */
-export function useEditorTransaction(editor: Editor) {
+export function useEditorTransaction(editor: Editor | CoreEditor) {
   let version = $state(0);
 
   $effect(() => {

@@ -11,8 +11,8 @@ import type { ComponentProps } from 'svelte';
 import NavMain from './nav-main.svelte';
 import NavNotes from './nav-notes.svelte';
 import NavPinned from './nav-pinned.svelte';
-import NavShared from './nav-shared.svelte';
 import NavSecondary from './nav-secondary.svelte';
+import NavShared from './nav-shared.svelte';
 import WorkspaceSwitcher from './workspace-switcher.svelte';
 
 let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> = $props();

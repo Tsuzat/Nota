@@ -4,12 +4,11 @@ import { SimpleToolTip } from '@nota/ui/custom/index.js';
 import { IconPicker, IconRenderer, icons } from '@nota/ui/icons/index.js';
 import { Button, buttonVariants } from '@nota/ui/shadcn/button';
 import * as Card from '@nota/ui/shadcn/card';
-import * as DropdownMenu from '@nota/ui/shadcn/dropdown-menu';
 import { toast } from '@nota/ui/shadcn/sonner';
 import { timeAgo } from '@nota/ui/utils';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { openMoveNote, openNewNote } from '$lib/components/dialogs/index.js';
+import { openNewNote } from '$lib/components/dialogs/index.js';
 import Topbar from '$lib/components/topbar.svelte';
 import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
 

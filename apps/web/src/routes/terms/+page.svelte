@@ -1,11 +1,10 @@
 <script lang="ts">
 import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
-import { icons } from '@nota/ui/icons/index.ts';
+import { icons } from '@nota/ui/icons/index.js';
 import { Button } from '@nota/ui/shadcn/button';
 import { resolve } from '$app/paths';
 import AppLogo from '$lib/components/custom/applogo.svelte';
 import Particles from '$lib/components/custom/landing/particles.svelte';
-import Spotlight from '$lib/components/custom/landing/spotlight.svelte';
 
 const lastUpdated = 'July 26, 2026';
 

@@ -1,11 +1,9 @@
 <script lang="ts">
-import { BorderBeam } from '@lib/components/custom';
 import { Button } from '@lib/components/ui/button';
 import { Github, Google, icons } from '@lib/icons';
 import { cn } from '@lib/utils';
 import { getAuthContext } from '@nota/client';
 import { resolve } from '$app/paths';
-import { env } from '$env/dynamic/public';
 import Applogo from '$lib/components/custom/applogo.svelte';
 import Particles from '$lib/components/custom/landing/particles.svelte';
 import Tiltcard from '$lib/components/custom/landing/utils/tiltcard.svelte';
