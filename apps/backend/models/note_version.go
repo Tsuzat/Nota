@@ -13,6 +13,7 @@ type NoteVersion struct {
 	NoteId              string    `json:"note_id" bun:"note_id,type:uuid,notnull"`
 	WorkspaceId         string    `json:"workspace_id" bun:"workspace_id,type:uuid,notnull"`
 	ContentCompressed   []byte    `json:"-" bun:"content_compressed,notnull"`
+	YDocStateCompressed []byte    `json:"-" bun:"ydoc_state_compressed,type:bytea"`
 	ContentHash         string    `json:"content_hash" bun:"content_hash,notnull"`
 	SizeBytes           int       `json:"size_bytes" bun:"size_bytes,notnull"`
 	CompressedSizeBytes int       `json:"compressed_size_bytes" bun:"compressed_size_bytes,notnull"`

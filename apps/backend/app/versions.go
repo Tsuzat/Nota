@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"net/http"
@@ -177,6 +178,13 @@ func GetNoteVersion(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Failed to parse content"})
 	}
 
+	if len(version.YDocStateCompressed) > 0 {
+		ydocDecompressed, err := zstdDecoder.DecodeAll(version.YDocStateCompressed, nil)
+		if err == nil {
+			data["ydoc_state"] = base64.StdEncoding.EncodeToString(ydocDecompressed)
+		}
+	}
+
 	return c.JSON(models.APIResponse{Status: 200, Message: "Version retrieved", Data: data})
 }
 
@@ -215,9 +223,16 @@ func CreateManualSnapshot(c fiber.Ctx) error {
 	hashStr := hex.EncodeToString(hashBytes[:])
 	compressed := zstdEncoder.EncodeAll(contentJson, make([]byte, 0, len(contentJson)))
 
+	var compressedYDoc []byte
+	if len(note.YDocState) > 0 {
+		compressedYDoc = zstdEncoder.EncodeAll(note.YDocState, make([]byte, 0, len(note.YDocState)))
+	}
+
+	totalCompressedSize := len(compressed) + len(compressedYDoc)
+
 	// Quota check
-	if user.SubscriptionPlan != "pro" {
-		if user.UsedStorage+int64(len(compressed)) > user.AssignedStorage {
+	if user.SubscriptionPlan != config.PRO_PLAN {
+		if user.UsedStorage+int64(totalCompressedSize) > user.AssignedStorage {
 			return c.Status(fiber.StatusPaymentRequired).JSON(models.APIError{Status: fiber.StatusPaymentRequired, Error: "Storage quota exceeded. Upgrade to Pro."})
 		}
 	}
@@ -226,9 +241,10 @@ func CreateManualSnapshot(c fiber.Ctx) error {
 		NoteId:              note.Id,
 		WorkspaceId:         note.WorkspaceId,
 		ContentCompressed:   compressed,
+		YDocStateCompressed: compressedYDoc,
 		ContentHash:         hashStr,
-		SizeBytes:           len(contentJson),
-		CompressedSizeBytes: len(compressed),
+		SizeBytes:           len(contentJson) + len(note.YDocState),
+		CompressedSizeBytes: totalCompressedSize,
 		VersionType:         "manual",
 		Label:               req.Label,
 		CreatedBy:           &user.Id,
@@ -240,7 +256,7 @@ func CreateManualSnapshot(c fiber.Ctx) error {
 	}
 
 	// Update storage
-	if _, err := config.DB.NewUpdate().Model(user).Set("used_storage = used_storage + ?", len(compressed)).WherePK().Exec(c.Context()); err != nil {
+	if _, err := config.DB.NewUpdate().Model(user).Set("used_storage = used_storage + ?", totalCompressedSize).WherePK().Exec(c.Context()); err != nil {
 		log.Error("Failed to update used_storage", err)
 	}
 
@@ -283,6 +299,37 @@ func DeleteNoteVersion(c fiber.Ctx) error {
 	return c.JSON(models.APIResponse{Status: 200, Message: "Version deleted"})
 }
 
+// pruneAutoAndRestoreSnapshots ensures there are at most maxAllowed 'auto' and 'restore' snapshots for a note.
+func pruneAutoAndRestoreSnapshots(ctx context.Context, noteId string, maxAllowed int) {
+	var allVersions []models.NoteVersion
+	err := config.DB.NewSelect().
+		Model(&allVersions).
+		Column("id", "compressed_size_bytes", "created_by").
+		Where("note_id = ? AND version_type IN ('auto', 'restore')", noteId).
+		Order("created_at DESC"). // Newest first
+		Scan(ctx)
+
+	if err != nil || len(allVersions) <= maxAllowed {
+		return
+	}
+
+	versionsToDelete := allVersions[maxAllowed:] // Oldest versions beyond maxAllowed
+	deleteIds := make([]string, len(versionsToDelete))
+	for i, v := range versionsToDelete {
+		deleteIds[i] = v.Id
+	}
+
+	if len(deleteIds) > 0 {
+		_, err := config.DB.NewDelete().
+			Model((*models.NoteVersion)(nil)).
+			Where("id IN (?)", bun.In(deleteIds)).
+			Exec(ctx)
+		if err != nil {
+			log.Error("pruneAutoAndRestoreSnapshots: failed to delete old snapshots: ", err)
+		}
+	}
+}
+
 func RestoreNoteVersion(c fiber.Ctx) error {
 	user := c.Locals("user").(*models.User)
 	noteId := c.Params("id")
@@ -293,12 +340,7 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 	var req struct {
 		RestoreUpdate string `json:"restore_update"`
 	}
-	if err := c.Bind().Body(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "Invalid request body"})
-	}
-	if req.RestoreUpdate == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "restore_update is required"})
-	}
+	_ = c.Bind().Body(&req)
 
 	log.Infof("[RestoreNoteVersion] Starting restore for noteId=%s, versionId=%s by user=%s", noteId, versionId, user.Id)
 
@@ -316,6 +358,16 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 	var versionToRestore models.NoteVersion
 	if err := config.DB.NewSelect().Model(&versionToRestore).Where("id = ? AND note_id = ?", versionId, noteId).Scan(c.Context()); err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(models.APIError{Status: 404, Error: "Version not found"})
+	}
+
+	if req.RestoreUpdate == "" && len(versionToRestore.YDocStateCompressed) > 0 {
+		ydocDecompressed, err := zstdDecoder.DecodeAll(versionToRestore.YDocStateCompressed, nil)
+		if err == nil {
+			req.RestoreUpdate = base64.StdEncoding.EncodeToString(ydocDecompressed)
+		}
+	}
+	if req.RestoreUpdate == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "restore_update is required"})
 	}
 
 	decompressed, err := zstdDecoder.DecodeAll(versionToRestore.ContentCompressed, nil)
@@ -341,14 +393,20 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 	hashStr := hex.EncodeToString(hashBytes[:])
 	compressed := zstdEncoder.EncodeAll(contentJson, make([]byte, 0, len(contentJson)))
 
+	var currentCompressedYDoc []byte
+	if len(note.YDocState) > 0 {
+		currentCompressedYDoc = zstdEncoder.EncodeAll(note.YDocState, make([]byte, 0, len(note.YDocState)))
+	}
+
 	restoreLabel := "Restore point"
 	restorePoint := models.NoteVersion{
 		NoteId:              note.Id,
 		WorkspaceId:         note.WorkspaceId,
 		ContentCompressed:   compressed,
+		YDocStateCompressed: currentCompressedYDoc,
 		ContentHash:         hashStr,
-		SizeBytes:           len(contentJson),
-		CompressedSizeBytes: len(compressed),
+		SizeBytes:           len(contentJson) + len(note.YDocState),
+		CompressedSizeBytes: len(compressed) + len(currentCompressedYDoc),
 		VersionType:         "restore",
 		Label:               &restoreLabel,
 		CreatedBy:           &user.Id,
@@ -379,11 +437,12 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 
 	log.Info("[RestoreNoteVersion] Restore completed successfully")
 
-	// Invalidate caches
+	// Invalidate caches & enforce max 50 auto/restore snapshots
 	go utils.DeleteCache(fmt.Sprintf("note_versions_latest:%s", noteId))
 	go utils.DeleteCache(fmt.Sprintf("note_versions_count:%s", noteId))
 	go utils.DeleteCache(fmt.Sprintf("note:%s:preview", noteId))
 	go utils.DeleteCache(fmt.Sprintf("note:%s:content", noteId))
+	go pruneAutoAndRestoreSnapshots(context.Background(), noteId, 50)
 
 	return c.JSON(models.APIResponse{Status: 200, Message: "Restored successfully", Data: data})
 }
@@ -425,6 +484,11 @@ func RestoreNoteFromContent(c fiber.Ctx) error {
 	currentHashStr := hex.EncodeToString(currentHash[:])
 	currentCompressed := zstdEncoder.EncodeAll(currentJson, make([]byte, 0, len(currentJson)))
 
+	var currentCompressedYDoc []byte
+	if len(note.YDocState) > 0 {
+		currentCompressedYDoc = zstdEncoder.EncodeAll(note.YDocState, make([]byte, 0, len(note.YDocState)))
+	}
+
 	restoreLabel := "Restore point"
 	if req.Label != nil {
 		restoreLabel = *req.Label
@@ -433,9 +497,10 @@ func RestoreNoteFromContent(c fiber.Ctx) error {
 		NoteId:              note.Id,
 		WorkspaceId:         note.WorkspaceId,
 		ContentCompressed:   currentCompressed,
+		YDocStateCompressed: currentCompressedYDoc,
 		ContentHash:         currentHashStr,
-		SizeBytes:           len(currentJson),
-		CompressedSizeBytes: len(currentCompressed),
+		SizeBytes:           len(currentJson) + len(note.YDocState),
+		CompressedSizeBytes: len(currentCompressed) + len(currentCompressedYDoc),
 		VersionType:         "restore",
 		Label:               &restoreLabel,
 		CreatedBy:           &user.Id,
@@ -463,17 +528,18 @@ func RestoreNoteFromContent(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed to sync"})
 	}
 
-	// Invalidate caches
+	// Invalidate caches & enforce max 50 auto/restore snapshots
 	go utils.DeleteCache(fmt.Sprintf("note_versions_latest:%s", noteId))
 	go utils.DeleteCache(fmt.Sprintf("note_versions_count:%s", noteId))
 	go utils.DeleteCache(fmt.Sprintf("note:%s:preview", noteId))
 	go utils.DeleteCache(fmt.Sprintf("note:%s:content", noteId))
+	go pruneAutoAndRestoreSnapshots(context.Background(), noteId, 50)
 
 	return c.JSON(models.APIResponse{Status: 200, Message: "Restored from content successfully", Data: req.Content})
 }
 
-// maybeAutoSnapshot is called as a goroutine after a successful patch operation
-func maybeAutoSnapshot(ctx context.Context, noteId string, userId string) {
+// maybeAutoSnapshot is called as a goroutine after a successful patch or ydoc store operation
+func maybeAutoSnapshot(ctx context.Context, noteId string, userId string, ydocBytes ...[]byte) {
 	var note models.Note
 	if err := config.DB.NewSelect().Model(&note).Where("id = ?", noteId).Scan(ctx); err != nil {
 		log.Error("maybeAutoSnapshot: failed to fetch note: ", err)
@@ -523,15 +589,28 @@ func maybeAutoSnapshot(ctx context.Context, noteId string, userId string) {
 		}
 	}
 
-	compressed := zstdEncoder.EncodeAll(contentJson, make([]byte, 0, len(contentJson)))
+	compressedContent := zstdEncoder.EncodeAll(contentJson, make([]byte, 0, len(contentJson)))
+
+	var rawYDoc []byte
+	if len(ydocBytes) > 0 && len(ydocBytes[0]) > 0 {
+		rawYDoc = ydocBytes[0]
+	} else {
+		rawYDoc = note.YDocState
+	}
+
+	var compressedYDoc []byte
+	if len(rawYDoc) > 0 {
+		compressedYDoc = zstdEncoder.EncodeAll(rawYDoc, make([]byte, 0, len(rawYDoc)))
+	}
 
 	version := models.NoteVersion{
 		NoteId:              note.Id,
 		WorkspaceId:         note.WorkspaceId,
-		ContentCompressed:   compressed,
+		ContentCompressed:   compressedContent,
+		YDocStateCompressed: compressedYDoc,
 		ContentHash:         hashStr,
-		SizeBytes:           len(contentJson),
-		CompressedSizeBytes: len(compressed),
+		SizeBytes:           len(contentJson) + len(rawYDoc),
+		CompressedSizeBytes: len(compressedContent) + len(compressedYDoc),
 		VersionType:         "auto",
 		CreatedBy:           &userId,
 	}
@@ -549,6 +628,9 @@ func maybeAutoSnapshot(ctx context.Context, noteId string, userId string) {
 	}
 	go utils.SetCache(cacheKey, newMeta, 24*time.Hour)
 	go utils.DeleteCache(fmt.Sprintf("note_versions_count:%s", noteId))
+
+	// Enforce max 50 auto & restore snapshots limit
+	pruneAutoAndRestoreSnapshots(ctx, noteId, 50)
 }
 
 func triggerCollabRestore(noteId string, restoreUpdate string, content map[string]any) error {

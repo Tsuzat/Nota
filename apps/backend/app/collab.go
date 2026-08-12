@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"encoding/base64"
 
 	"github.com/Tsuzat/Nota/config"
@@ -122,10 +123,12 @@ func LoadYDoc(c fiber.Ctx) error {
 func StoreYDoc(c fiber.Ctx) error {
 	noteId := c.Params("noteId")
 	isInternal := c.Get("X-Internal-Api-Key") == config.INTERNAL_API_KEY
+	var user *models.User
 
 	if !isInternal {
 		// Authenticate the user via the forwarded access_token
-		user, err := middleware.AuthenticatedUser(c)
+		var err error
+		user, err = middleware.AuthenticatedUser(c)
 		if err != nil {
 			log.Error("StoreYDoc - user authentication failed: ", err)
 			return c.Status(fiber.StatusUnauthorized).JSON(models.APIError{
@@ -215,6 +218,24 @@ func StoreYDoc(c fiber.Ctx) error {
 			Status: fiber.StatusInternalServerError,
 			Error:  "Failed to store ydoc state",
 		})
+	}
+
+	// Trigger auto-snapshot for Pro plan users
+	if user != nil {
+		if user.SubscriptionPlan == config.PRO_PLAN {
+			go maybeAutoSnapshot(context.Background(), noteId, user.Id, ydocBytes)
+		}
+	} else {
+		// Internal call from collaboration server - check note owner's subscription plan
+		var note models.Note
+		if err := config.DB.NewSelect().Model(&note).Column("owner").Where("id = ?", noteId).Scan(c.Context()); err == nil {
+			var ownerUser models.User
+			if err := config.DB.NewSelect().Model(&ownerUser).Column("subscription_plan").Where("id = ?", note.Owner).Scan(c.Context()); err == nil {
+				if ownerUser.SubscriptionPlan == config.PRO_PLAN {
+					go maybeAutoSnapshot(context.Background(), noteId, ownerUser.Id, ydocBytes)
+				}
+			}
+		}
 	}
 
 	return c.JSON(models.APIResponse{
