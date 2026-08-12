@@ -15,6 +15,15 @@ interface UpdateNotes {
 
 class Notes {
   #notes = $state<Note[]>([]);
+  #sharedNotes = $state<Note[]>([]);
+
+  get sharedNotes() {
+    return this.#sharedNotes;
+  }
+
+  set sharedNotes(notes: Note[]) {
+    this.#sharedNotes = notes;
+  }
 
   get notes() {
     return this.#notes;
@@ -41,6 +50,28 @@ class Notes {
       const notes = json.data as Note[];
       const parsedNotes = notes.map((note) => NoteSchema.parse(note));
       this.notes = parsedNotes;
+    } else {
+      throw new Error(await res.text());
+    }
+  }
+
+  /**
+   * Fetch all shared notes from the backend
+   * @throws {Error} If the request fails with a non-200 status code
+   */
+  async fetchShared() {
+    const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/shared`;
+    const res = await request(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const notes = json.data as Note[];
+      const parsedNotes = notes.map((note) => NoteSchema.parse(note));
+      this.sharedNotes = parsedNotes;
     } else {
       throw new Error(await res.text());
     }

@@ -22,9 +22,10 @@ interface Props {
   toggleStar?: () => void;
   note: LocalNote | Note;
   editor: Editor;
+  versionCount?: number;
 }
 
-let { starred, toggleStar, note, editor }: Props = $props();
+let { starred, toggleStar, note, editor, versionCount = $bindable(0) }: Props = $props();
 
 const localNotes = getLocalNotes();
 const cloudNotes = getNotesContext();
@@ -49,20 +50,7 @@ let open = $state(false);
 const versionsClient = getVersionsContext();
 const localVersions = getLocalVersions();
 
-let versionCount = $state(0);
-$effect(() => {
-  if (note.id) {
-    if ('owner' in note && isPro) {
-      versionsClient.getVersionCount(note.id).then((count) => {
-        versionCount = count;
-      });
-    } else {
-      localVersions.getVersionCount(note.id).then((count) => {
-        versionCount = count;
-      });
-    }
-  }
-});
+// versionCount is now a bindable prop — parent manages fetching.
 
 let snapshotDialogOpen = $state(false);
 let snapshotLabel = $state('');
@@ -110,7 +98,6 @@ async function handleCreateSnapshot() {
 </script>
 
 <div class="flex items-center gap-2 text-sm">
-  <small class="text-muted-foreground">{$editorState.words} words</small>
   <SimpleToolTip content="Toggle Pin">
     <Button variant="ghost" size="icon" onclick={toggleStar}>
       <icons.Pin class={cn(starred && "fill-yellow-500 text-yellow-500")} />
@@ -153,15 +140,7 @@ async function handleCreateSnapshot() {
       </Dropdown.Group>
       <Dropdown.Separator />
       <Dropdown.Group>
-        {#if "owner" in note}
-          <Dropdown.Item
-            onclick={() =>
-              cloudNotes.update(note.id, { is_public: !note.is_public })}
-          >
-            <icons.Globe />
-            {note.is_public ? "Make Private" : "Make Public"}
-          </Dropdown.Item>
-        {/if}
+  
         <Dropdown.Item
           onclick={() => {
             if ("owner" in note) cloudNotes.duplicate(note.id);
@@ -222,18 +201,7 @@ async function handleCreateSnapshot() {
           <icons.Camera />
           Save Snapshot
         </Dropdown.Item>
-        <Dropdown.Item>
-          <a
-            href={`/versions?note_ids=${note.id}&source=${"owner" in note ? "cloud" : "local"}`}
-            class="flex w-full items-center justify-between"
-          >
-            <span class="flex items-center gap-2">
-              <icons.Clock />
-              Version History
-            </span>
-            <span class="text-xs text-muted-foreground">{versionCount}</span>
-          </a>
-        </Dropdown.Item>
+
       </Dropdown.Group>
       <Dropdown.Separator />
       <Dropdown.Group>

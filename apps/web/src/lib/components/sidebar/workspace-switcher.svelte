@@ -19,7 +19,7 @@ const activeWorkspace = $derived(currentWorkspaceCtx.get());
 
 const href = $derived.by(() => {
   if (!activeWorkspace) return '';
-  return resolve('/(app)/workspace-[id]', { id: activeWorkspace.id });
+  return resolve('/(app)/w/[id]', { id: activeWorkspace.id });
 });
 
 function switchWorkspace(workspace: Workspace) {
@@ -27,7 +27,7 @@ function switchWorkspace(workspace: Workspace) {
     return toast.info('Already in this workspace.');
   }
   currentWorkspaceCtx.set(workspace);
-  const targetHref = resolve('/(app)/workspace-[id]', { id: workspace.id });
+  const targetHref = resolve('/(app)/w/[id]', { id: workspace.id });
   goto(targetHref);
 }
 </script>

@@ -9,11 +9,16 @@ export function useEditorTransaction(editor: Editor) {
   let version = $state(0);
 
   $effect(() => {
+    let raf = 0;
     const handler = () => {
-      version++;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        version++;
+      });
     };
     editor.on('transaction', handler);
     return () => {
+      cancelAnimationFrame(raf);
       editor.off('transaction', handler);
     };
   });

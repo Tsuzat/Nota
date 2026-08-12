@@ -8,24 +8,30 @@ import {
   SvelteNodeViewRenderer,
   useEditor,
   VideoExtended,
-} from '../tiptap/index.ts';
-import { all, createLowlight } from 'lowlight';
-import extensions from '../extensions.ts';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import CodeBlock from './components/CodeBlock.svelte';
-import { MediaPlaceholder } from '../tiptap/extensions/MediaPlaceHolder.ts';
-import MediaPlaceholderComp from './components/MediaPlaceHolder.svelte';
-import ImageExtendedComp from './components/ImageExtended.svelte';
-import VideoExtendedComp from './components/VideoExtended.svelte';
-import IFrameComp from './components/IFrame.svelte';
-import MermaidComp from './components/Mermaid.svelte';
-import SlashCommandComp from './components/SlashCommand.svelte';
-import FileHandler from '@tiptap/extension-file-handler';
-import CalloutComp from './components/Callout.svelte';
-import TableOfContents, { getHierarchicalIndexes } from '@tiptap/extension-table-of-contents';
-import { setToC } from './toc.svelte';
-import { ALLOWED_MAX_FILE_SIZE, FileType } from '../utils.ts';
-import { toast } from 'svelte-sonner';
+} from "../tiptap/index.ts";
+import { all, createLowlight } from "lowlight";
+import extensions from "../extensions.ts";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import CodeBlock from "./components/CodeBlock.svelte";
+import { MediaPlaceholder } from "../tiptap/extensions/MediaPlaceHolder.ts";
+import MediaPlaceholderComp from "./components/MediaPlaceHolder.svelte";
+import ImageExtendedComp from "./components/ImageExtended.svelte";
+import VideoExtendedComp from "./components/VideoExtended.svelte";
+import IFrameComp from "./components/IFrame.svelte";
+import MermaidComp from "./components/Mermaid.svelte";
+import SlashCommandComp from "./components/SlashCommand.svelte";
+import FileHandler from "@tiptap/extension-file-handler";
+import CalloutComp from "./components/Callout.svelte";
+import TableOfContents, {
+  getHierarchicalIndexes,
+} from "@tiptap/extension-table-of-contents";
+import { setToC } from "./toc.svelte";
+import { ALLOWED_MAX_FILE_SIZE, FileType } from "../utils.ts";
+import { toast } from "svelte-sonner";
+import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCaret from "@tiptap/extension-collaboration-caret";
+import type { Doc } from "yjs";
+import type { HocuspocusProvider } from "@hocuspocus/provider";
 
 const lowlight = createLowlight(all);
 
@@ -44,14 +50,78 @@ export interface EdraEditorProps {
   onFileUpload?: (file: File) => Promise<string>;
   selectFile?: (fileType: FileType) => Promise<string | null>;
   getAssets?: (fileType: FileType) => Promise<string[]>;
-  callAI?: (prompt: string, onChunk: (chunk: string) => void, onError: (error: Error) => void) => Promise<void>;
+  callAI?: (
+    prompt: string,
+    onChunk: (chunk: string) => void,
+    onError: (error: Error) => void,
+  ) => Promise<void>;
+  openCollaboration?: boolean;
+  document?: Doc;
+  provider?: HocuspocusProvider;
+  user?: {
+    name: string;
+    color: string;
+    avatar: string;
+  };
 }
 
 export const createEditor = (props?: EdraEditorProps) =>
   useEditor({
     editable: props?.editable ?? true,
     extensions: [
-      ...extensions,
+      ...extensions(props?.openCollaboration ?? false),
+      ...(props?.openCollaboration && props?.user
+        ? [
+            Collaboration.configure({
+              provider: props?.provider,
+              document: props?.document,
+            }),
+            CollaborationCaret.configure({
+              provider: props?.provider,
+              user: props?.user,
+              render(user) {
+                const cursor = document.createElement('span');
+                cursor.classList.add('collaboration-carets__caret');
+                cursor.setAttribute('style', `border-color: ${user.color}`);
+
+                const label = document.createElement('div');
+                label.classList.add('collaboration-carets__label');
+                label.setAttribute('style', `background-color: ${user.color}`);
+
+                const avatarWrapper = document.createElement('div');
+                avatarWrapper.classList.add('collaboration-carets__avatar');
+
+                if (user.avatar) {
+                  const img = document.createElement('img');
+                  img.src = user.avatar;
+                  img.alt = user.name || 'User';
+                  avatarWrapper.appendChild(img);
+                } else {
+                  const initials = document.createElement('span');
+                  initials.innerText = user.name ? user.name.charAt(0).toUpperCase() : '?';
+                  avatarWrapper.appendChild(initials);
+                }
+
+                const nameSpan = document.createElement('span');
+                nameSpan.classList.add('collaboration-carets__name');
+                nameSpan.innerText = user.name || 'Unknown';
+
+                label.appendChild(avatarWrapper);
+                label.appendChild(nameSpan);
+                cursor.appendChild(label);
+
+                return cursor;
+              },
+            }),
+          ]
+        : props?.openCollaboration
+          ? [
+              Collaboration.configure({
+                provider: props?.provider,
+                document: props?.document,
+              }),
+            ]
+          : []),
       CodeBlockLowlight.configure({
         lowlight,
       }).extend({
@@ -86,7 +156,9 @@ export const createEditor = (props?: EdraEditorProps) =>
             window.removeEventListener(event, handler, { capture: true });
           },
           get scrollY() {
-            return document.querySelector('.tiptap')?.parentElement?.scrollTop ?? 0;
+            return (
+              document.querySelector(".tiptap")?.parentElement?.scrollTop ?? 0
+            );
           },
         } as any,
       }),
@@ -108,17 +180,29 @@ export const createEditor = (props?: EdraEditorProps) =>
                 });
                 const src = await uploadPromise;
                 if (!src) continue;
-                if (file.type.startsWith('image/')) {
-                  currentEditor.chain().insertContentAt(pos, { type: 'image', attrs: { src } }).focus().run();
-                } else if (file.type.startsWith('video/')) {
-                  currentEditor.chain().insertContentAt(pos, { type: 'video', attrs: { src } }).focus().run();
-                } else if (file.type.startsWith('audio/')) {
-                  currentEditor.chain().insertContentAt(pos, { type: 'audio', attrs: { src } }).focus().run();
+                if (file.type.startsWith("image/")) {
+                  currentEditor
+                    .chain()
+                    .insertContentAt(pos, { type: "image", attrs: { src } })
+                    .focus()
+                    .run();
+                } else if (file.type.startsWith("video/")) {
+                  currentEditor
+                    .chain()
+                    .insertContentAt(pos, { type: "video", attrs: { src } })
+                    .focus()
+                    .run();
+                } else if (file.type.startsWith("audio/")) {
+                  currentEditor
+                    .chain()
+                    .insertContentAt(pos, { type: "audio", attrs: { src } })
+                    .focus()
+                    .run();
                 } else {
-                  toast.error('This file type is not supported yet.');
+                  toast.error("This file type is not supported yet.");
                 }
               } catch (err) {
-                console.error('Failed to upload dropped file:', err);
+                console.error("Failed to upload dropped file:", err);
               }
             }
           })();
@@ -140,17 +224,17 @@ export const createEditor = (props?: EdraEditorProps) =>
                 });
                 const src = await uploadPromise;
                 if (!src) continue;
-                if (file.type.startsWith('image/')) {
+                if (file.type.startsWith("image/")) {
                   currentEditor.chain().setImage({ src }).focus().run();
-                } else if (file.type.startsWith('video/')) {
+                } else if (file.type.startsWith("video/")) {
                   currentEditor.chain().setVideo({ src }).focus().run();
-                } else if (file.type.startsWith('audio/')) {
+                } else if (file.type.startsWith("audio/")) {
                   currentEditor.chain().setAudio({ src }).focus().run();
                 } else {
-                  toast.error('This file type is not supported yet.');
+                  toast.error("This file type is not supported yet.");
                 }
               } catch (err) {
-                console.error('Failed to upload pasted file:', err);
+                console.error("Failed to upload pasted file:", err);
               }
             }
           })();

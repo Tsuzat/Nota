@@ -55,7 +55,7 @@ function getGreeting(): string {
 }
 
 function getNoteHref(note: (typeof recentNotes)[number]): string {
-  return resolve('/(app)/note-[id]', { id: String(note.id) });
+  return resolve('/(app)/n/[id]', { id: String(note.id) });
 }
 
 function isActiveWorkspace(id: string): boolean {
@@ -180,7 +180,7 @@ function switchWorkspace(workspace: Workspace) {
         <!-- Cloud Workspaces -->
         {#each allCloudWorkspaces as ws (ws.id)}
           {@const isActive = isActiveWorkspace(String(ws.id))}
-          {@const href = resolve("/(app)/workspace-[id]", {
+          {@const href = resolve("/(app)/w/[id]", {
             id: String(ws.id),
           })}
           <div class="group relative">

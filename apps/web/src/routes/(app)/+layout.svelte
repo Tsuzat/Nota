@@ -31,6 +31,7 @@ let sidebarOpen = $state(true);
 onMount(async () => {
   if (data.user) {
     await workspaces.fetch();
+    await notes.fetchShared().catch(console.error);
     // Auto-select first workspace if none is selected
     if (!currentWorkspace.get() && workspaces.workspaces.length > 0) {
       const lastWorkspaceId = localStorage.getItem('lastWorkspaceId');

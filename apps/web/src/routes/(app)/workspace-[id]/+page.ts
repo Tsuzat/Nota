@@ -1,3 +1,5 @@
+import { redirect } from '@sveltejs/kit';
+
 export const load = ({ params }) => {
-  return { id: params.id };
+  throw redirect(301, `/w/${params.id}`);
 };

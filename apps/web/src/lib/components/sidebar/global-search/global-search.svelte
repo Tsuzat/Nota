@@ -137,7 +137,7 @@ export const openGlobalSearch = () => {
         {@const onselect = () => {
           switchWorkspace(workspace);
           goto(
-            resolve("/(app)/workspace-[id]", {
+            resolve("/(app)/w/[id]", {
               id: workspace.id.toString(),
             }),
           );
@@ -173,7 +173,7 @@ export const openGlobalSearch = () => {
       {#each notes as note (note.id)}
         {@const onselect = () => {
           goto(
-            resolve("/(app)/note-[id]", {
+            resolve("/(app)/n/[id]", {
               id: note.id.toString(),
             }),
           );
@@ -206,7 +206,7 @@ export const openGlobalSearch = () => {
         {#each trashedNotes as note (note.id)}
           {@const onselect = () => {
             goto(
-              resolve("/(app)/note-[id]", {
+              resolve("/(app)/n/[id]", {
                 id: note.id.toString(),
               }),
             );

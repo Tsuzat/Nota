@@ -8,10 +8,10 @@ import (
 
 func InitVersionRoutes() {
 	group := config.APP.Group("/api/v1/db/note", middleware.Authenticate, middleware.CheckPro)
-	
+
 	// Workspace-scoped list
 	group.Get("/workspace/:workspaceId<guid>/versions", app.ListWorkspaceVersions)
-	
+
 	// Note-scoped endpoints
 	group.Get("/:id<guid>/versions/count", app.GetNoteVersionCount)
 	group.Get("/:id<guid>/versions/:versionId<guid>", app.GetNoteVersion)

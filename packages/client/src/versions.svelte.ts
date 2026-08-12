@@ -1,7 +1,7 @@
-import { getContext, setContext } from 'svelte';
-import { PUBLIC_BACKEND_URL } from '$env/static/public';
-import request from './request';
-import { NoteVersionSchema } from './types';
+import { getContext, setContext } from "svelte";
+import { PUBLIC_BACKEND_URL } from "$env/static/public";
+import request from "./request";
+import { NoteVersionSchema } from "./types";
 
 class Versions {
   async listWorkspaceVersions(
@@ -12,21 +12,28 @@ class Versions {
       note_ids?: string;
       type?: string;
       search?: string;
-    }
+    },
   ) {
-    const url = new URL(`${PUBLIC_BACKEND_URL}/api/v1/db/note/workspace/${workspaceId}/versions`);
+    const url = new URL(
+      `${PUBLIC_BACKEND_URL}/api/v1/db/note/workspace/${workspaceId}/versions`,
+    );
     if (filters) {
-      if (filters.page) url.searchParams.append('page', filters.page.toString());
-      if (filters.limit) url.searchParams.append('limit', filters.limit.toString());
-      if (filters.note_ids) url.searchParams.append('note_ids', filters.note_ids);
-      if (filters.type) url.searchParams.append('type', filters.type);
-      if (filters.search) url.searchParams.append('search', filters.search);
+      if (filters.page)
+        url.searchParams.append("page", filters.page.toString());
+      if (filters.limit)
+        url.searchParams.append("limit", filters.limit.toString());
+      if (filters.note_ids)
+        url.searchParams.append("note_ids", filters.note_ids);
+      if (filters.type) url.searchParams.append("type", filters.type);
+      if (filters.search) url.searchParams.append("search", filters.search);
     }
 
     const res = await request(url.toString());
     if (res.ok) {
       const json = await res.json();
-      const versions = (json.data.versions || []).map((v: any) => NoteVersionSchema.parse(v));
+      const versions = (json.data.versions || []).map((v: any) =>
+        NoteVersionSchema.parse(v),
+      );
       return {
         versions,
         total: json.data.total as number,
@@ -60,9 +67,9 @@ class Versions {
   async createManualSnapshot(noteId: string, label?: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/versions`;
     const res = await request(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ label }),
     });
@@ -76,41 +83,71 @@ class Versions {
   async deleteVersion(noteId: string, versionId: string) {
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/versions/${versionId}`;
     const res = await request(url, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     if (!res.ok) {
-      throw new Error(await res.text());
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.error || "Failed to delete version");
     }
   }
 
-  async restoreVersion(noteId: string, versionId: string) {
+  async restoreVersion(
+    noteId: string,
+    versionId: string,
+    restoreUpdate: string,
+  ) {
+    console.log(
+      `[Versions API] restoreVersion: noteId=${noteId}, versionId=${versionId}`,
+    );
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/versions/${versionId}/restore`;
     const res = await request(url, {
-      method: 'POST',
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ restore_update: restoreUpdate }),
     });
     if (res.ok) {
       const json = await res.json();
+      console.log(`[Versions API] restoreVersion SUCCESS: noteId=${noteId}`);
       return json.data;
     }
-    throw new Error(await res.text());
+    const errText = await res.text();
+    console.error(
+      `[Versions API] restoreVersion FAILED: noteId=${noteId}, err=${errText}`,
+    );
+    throw new Error(errText);
   }
 
-  async restoreFromContent(noteId: string, content: any, label?: string) {
+  async restoreFromContent(
+    noteId: string,
+    content: any,
+    label: string | undefined,
+    restoreUpdate: string,
+  ) {
+    console.log(
+      `[Versions API] restoreFromContent: noteId=${noteId}, label=${label}`,
+    );
     const url = `${PUBLIC_BACKEND_URL}/api/v1/db/note/${noteId}/restore-from-content`;
     const res = await request(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content, label }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content, label, restore_update: restoreUpdate }),
     });
     if (res.ok) {
       const json = await res.json();
+      console.log(
+        `[Versions API] restoreFromContent SUCCESS: noteId=${noteId}`,
+      );
       return json.data;
     }
-    throw new Error(await res.text());
+    const errText = await res.text();
+    console.error(
+      `[Versions API] restoreFromContent FAILED: noteId=${noteId}, err=${errText}`,
+    );
+    throw new Error(errText);
   }
 }
 
-const NOTAVERSIONSKEY = Symbol('NOTAVERSIONSKEY');
+const NOTAVERSIONSKEY = Symbol("NOTAVERSIONSKEY");
 
 export const setVersionsContext = () => {
   return setContext(NOTAVERSIONSKEY, new Versions());

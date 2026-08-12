@@ -27,8 +27,9 @@ type CreateManualSnapshotRequest struct {
 }
 
 type RestoreFromContentRequest struct {
-	Content map[string]any `json:"content" validate:"required"`
-	Label   *string        `json:"label" validate:"omitempty,max=255"`
+	Content       map[string]any `json:"content" validate:"required"`
+	RestoreUpdate string         `json:"restore_update" validate:"required"`
+	Label         *string        `json:"label" validate:"omitempty,max=255"`
 }
 
 type NoteVersionListItem struct {

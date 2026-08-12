@@ -17,9 +17,10 @@ interface Props {
   toggleStar?: () => void;
   note: Note;
   editor: Editor;
+  versionCount?: number;
 }
 
-let { starred, toggleStar, note, editor }: Props = $props();
+let { starred, toggleStar, note, editor, versionCount = $bindable(0) }: Props = $props();
 
 const cloudNotes = getNotesContext();
 const versionsClient = getVersionsContext();
@@ -27,16 +28,7 @@ const globalSettings = getGlobalSettings();
 const authContext = getAuthContext();
 const isPro = $derived(authContext.user?.subscription_plan === 'pro');
 
-let versionCount = $state(0);
-$effect(() => {
-  if (note.id && isPro) {
-    versionsClient.getVersionCount(note.id).then((count) => {
-      versionCount = count;
-    });
-  } else {
-    versionCount = 0;
-  }
-});
+// versionCount is now a bindable prop — parent manages fetching.
 
 const editorState = useEditorState({
   editor,
@@ -107,16 +99,6 @@ async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
 </script>
 
 <div class="flex items-center gap-2 text-sm">
-  {#if versionCount > 0}
-    <a
-      href={`/versions?note_ids=${note.id}`}
-      class="text-muted-foreground hover:text-foreground hover:underline mr-2"
-    >
-      {versionCount}
-      {versionCount > 1 ? "Versions" : "Version"}
-    </a>
-  {/if}
-  <small class="text-muted-foreground">{$editorState.words} words</small>
   <SimpleToolTip content="Toggle Pin">
     <Button variant="ghost" size="icon" onclick={toggleStar}>
       <icons.Pin class={cn(starred && "fill-yellow-500 text-yellow-500")} />
@@ -171,22 +153,9 @@ async function handleExport(type: 'PDF' | 'JSON' | 'HTML' | 'TEXT' | 'MD') {
           <icons.Save />
           Save Snapshot {!isPro ? "(Pro)" : ""}
         </Dropdown.Item>
-        <a href={`/versions?note_ids=${note.id}`}>
-          <Dropdown.Item>
-            <icons.Clock />
-            Version History
-          </Dropdown.Item>
-        </a>
       </Dropdown.Group>
       <Dropdown.Separator />
       <Dropdown.Group>
-        <Dropdown.Item
-          onclick={() =>
-            cloudNotes.update(note.id, { is_public: !note.is_public })}
-        >
-          <icons.Globe />
-          {note.is_public ? "Make Private" : "Make Public"}
-        </Dropdown.Item>
         <Dropdown.Item
           onclick={() => {
             cloudNotes.duplicate(note.id);

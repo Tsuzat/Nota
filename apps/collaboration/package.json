@@ -1,0 +1,31 @@
+{
+  "name": "@nota/collaboration",
+  "main": "src/main.ts",
+  "module": "src/main.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "dev": "bun --watch run src/main.ts",
+    "start": "bun run src/main.ts",
+    "test": "bun test",
+    "format": "biome format . --write",
+    "lint": "biome check .",
+    "ci": "biome ci"
+  },
+  "dependencies": {
+    "@hocuspocus/extension-logger": "^4.6.0",
+    "@hocuspocus/extension-redis": "^4.6.0",
+    "@hocuspocus/server": "^4.6.0",
+    "@hocuspocus/transformer": "^4.6.0",
+    "cookie": "^2.0.1",
+    "ioredis": "^6.0.0",
+    "yjs": "^13.6.32",
+    "zod": "^4.4.3"
+  }
+}
