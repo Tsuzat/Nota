@@ -1,9 +1,13 @@
 import { Hocuspocus } from "@hocuspocus/server";
+import { TiptapTransformer } from "@hocuspocus/transformer";
 import { Logger } from "@hocuspocus/extension-logger";
 import { Redis } from "@hocuspocus/extension-redis";
 import { parseCookie } from "cookie";
 import { z } from "zod/v4";
 import { type BufferSource, type HeadersInit } from "bun";
+import type { XmlElement, XmlText } from "yjs";
+import * as Y from "yjs";
+import { prepareRestoreContent, replaceDocumentContent } from "./restore";
 
 // ─── Environment ────────────────────────────────────────────────────────────────
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL || "";
@@ -77,6 +81,37 @@ function internalHeaders(accessToken?: string): HeadersInit {
     headers["Authorization"] = `Bearer ${accessToken}`;
   }
   return headers;
+}
+
+async function persistDocument(
+  documentName: string,
+  document: Y.Doc,
+  accessToken?: string,
+): Promise<void> {
+  const noteId = documentName.replace("note:", "");
+  const update = Y.encodeStateAsUpdate(document);
+  const content = TiptapTransformer.fromYdoc(document, "default");
+
+  const res = await fetch(
+    `${INTERNAL_API_URL}/api/v1/collab/notes/${noteId}/ydoc`,
+    {
+      method: "PUT",
+      headers: {
+        ...internalHeaders(accessToken),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ydoc_state: Buffer.from(update).toString("base64"),
+        content,
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    throw new Error(
+      `Backend returned ${res.status} while storing ${documentName}`,
+    );
+  }
 }
 
 // ─── Hocuspocus ─────────────────────────────────────────────────────────────────
@@ -170,37 +205,60 @@ const hocuspocus = new Hocuspocus({
 
   // 3. STORE — debounced save, and on last-client-disconnect
   async onStoreDocument(data) {
-    const noteId = data.documentName.replace("note:", "");
-    const { encodeStateAsUpdate } = await import("yjs");
-    const { TiptapTransformer } = await import("@hocuspocus/transformer");
-
-    const update = encodeStateAsUpdate(data.document);
-    const content = TiptapTransformer.fromYdoc(data.document, "default");
-
-    const payload = {
-      ydoc_state: Buffer.from(update).toString("base64"),
-      content: content,
-    };
-
-    const res = await fetch(
-      `${INTERNAL_API_URL}/api/v1/collab/notes/${noteId}/ydoc`,
-      {
-        method: "PUT",
-        headers: {
-          ...internalHeaders(data.lastContext.token),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      },
+    await persistDocument(
+      data.documentName,
+      data.document,
+      data.lastContext.token,
     );
-
-    if (!res.ok) {
-      console.error(
-        `[store] backend returned ${res.status} for note ${noteId}`,
-      );
-    }
   },
 });
+
+async function restoreCollaborativeDocument(
+  noteId: string,
+  req: Request,
+): Promise<Response> {
+  let body: { restore_update?: string; content?: Record<string, unknown> };
+  try {
+    body = await req.json();
+  } catch {
+    return new Response("Invalid restore payload", { status: 400 });
+  }
+
+  if (!body.restore_update || !body.content) {
+    return new Response("restore_update and content are required", {
+      status: 400,
+    });
+  }
+
+  let restoredContent: Array<XmlElement | XmlText>;
+  try {
+    restoredContent = prepareRestoreContent(body.restore_update, body.content);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Invalid restore update";
+    return new Response(message, { status: 400 });
+  }
+
+  const documentName = `note:${noteId}`;
+  const connection = await hocuspocus.openDirectConnection(documentName, {});
+
+  try {
+    await connection.transact((document) => {
+      replaceDocumentContent(document, restoredContent);
+    });
+    if (!connection.document) {
+      throw new Error(`Direct connection closed before storing ${documentName}`);
+    }
+    await persistDocument(documentName, connection.document);
+    await connection.disconnect();
+  } catch (error) {
+    await connection.disconnect().catch(() => {});
+    throw error;
+  }
+
+  console.log(`[restore] Replaced collaborative content for ${documentName}`);
+  return new Response("Restored", { status: 200 });
+}
 
 // ─── Bun Native WebSocket Server ────────────────────────────────────────────────
 interface WsData {
@@ -225,54 +283,12 @@ const server = Bun.serve<WsData>({
       }
 
       const noteId = url.pathname.split("/").pop();
-      return req
-        .json()
-        .then(async (body) => {
-          const { content } = body;
+      if (!noteId) return new Response("Missing note id", { status: 400 });
 
-          // 1. Generate new Y.Doc from restored JSON
-          const { TiptapTransformer } = await import("@hocuspocus/transformer");
-          const { encodeStateAsUpdate } = await import("yjs");
-          const newDoc = TiptapTransformer.toYdoc(content, "default");
-          const update = encodeStateAsUpdate(newDoc);
-
-          // 2. Save new YDoc state to backend
-          const res = await fetch(
-            `${INTERNAL_API_URL}/api/v1/collab/notes/${noteId}/ydoc`,
-            {
-              method: "PUT",
-              headers: {
-                "X-Internal-Api-Key": INTERNAL_API_KEY,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                ydoc_state: Buffer.from(update).toString("base64"),
-                content: content,
-              }),
-            },
-          );
-
-          if (!res.ok) {
-            return new Response("Failed to save restored ydoc", {
-              status: 500,
-            });
-          }
-
-          // 3. Kick active clients so they reconnect and load the restored state
-          const docName = `note:${noteId}`;
-          const hpDoc = hocuspocus.documents?.get(docName);
-          if (hpDoc) {
-            hpDoc.connections.forEach((conn) => {
-              conn.close();
-            });
-          }
-
-          return new Response("Restored", { status: 200 });
-        })
-        .catch((err) => {
-          console.error("Restore failed:", err);
-          return new Response("Internal Server Error", { status: 500 });
-        });
+      return restoreCollaborativeDocument(noteId, req).catch((error) => {
+        console.error("Collaborative restore failed:", error);
+        return new Response("Internal Server Error", { status: 500 });
+      });
     }
 
     if (req.headers.get("upgrade")?.toLowerCase() === "websocket") {
