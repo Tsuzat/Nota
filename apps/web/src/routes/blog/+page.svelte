@@ -1,6 +1,6 @@
 <script lang="ts">
 import ToggleMode from '@nota/ui/custom/ToggleMode.svelte';
-import { icons } from '@nota/ui/icons';
+import { Github, icons } from '@nota/ui/icons';
 import { Button } from '@nota/ui/shadcn/button';
 import { resolve } from '$app/paths';
 import AppLogo from '$lib/components/custom/applogo.svelte';
@@ -30,7 +30,7 @@ interface BlogPost {
 
 const articles: BlogPost[] = [
   {
-    slug: 'nota-feature-showcase',
+    slug: resolve('/blog/nota-feature-showcase'),
     title: 'The Ultimate Nota Feature Showcase: Rich Editor, Mermaid, LaTeX, BYOK AI & Rust Speed',
     excerpt:
       'Why should modern thinkers choose between barebones plain-text apps and cluttered enterprise cloud tools? From instant slash commands and Mermaid diagram rendering to sovereign BYOK AI and one-click PDF export, discover why Nota is built different.',
@@ -40,7 +40,7 @@ const articles: BlogPost[] = [
     badge: 'New Feature Guide',
   },
   {
-    slug: 'rust-and-tauri-vs-electron',
+    slug: resolve('/blog/rust-and-tauri-vs-electron'),
     title: 'Why We Built Nota with Rust and Tauri Instead of Electron',
     excerpt:
       'Electron apps devour RAM and drain laptop battery life. Learn how building our desktop core with Rust and Tauri cut memory usage by 80% while achieving instantaneous Raycast-style cold starts.',
@@ -49,7 +49,7 @@ const articles: BlogPost[] = [
     date: 'July 24, 2026',
   },
   {
-    slug: 'byok-ai-note-taking',
+    slug: resolve('/blog/byok-ai-note-taking'),
     title: 'Bring Your Own Key (BYOK): Ending Overpriced AI Subscription Taxes',
     excerpt:
       'Why are note apps charging $10/month extra for simple wrapper AI assistants? How Nota lets you plug in your OpenAI, Anthropic, or Gemini keys to summarize and write practically at cost.',
@@ -58,7 +58,7 @@ const articles: BlogPost[] = [
     date: 'July 15, 2026',
   },
   {
-    slug: 'local-first-hybrid-engine',
+    slug: resolve('/blog/local-first-hybrid-engine'),
     title: 'Local-First Without the Complexity: Inside Nota’s Hybrid Engine',
     excerpt:
       'You should never have to set up Git sync hooks or worry about losing access to your thoughts when AWS has an outage. Here is how Nota balances SQLite device-local vaults with seamless real-time cloud workspaces.',
@@ -260,7 +260,7 @@ const displayedArticles = $derived(
   {#if selectedCategory === "All" || selectedCategory === featuredArticle.category}
     <div class="mb-14">
       <a
-        href={resolve(`/blog/${featuredArticle.slug}`)}
+        href={featuredArticle.slug}
         class="group relative block overflow-hidden rounded-2xl border bg-linear-to-br from-card via-card to-muted/30 p-1 transition-all duration-300 hover:shadow-xl hover:ring-2 hover:ring-primary/50"
       >
         <div
@@ -369,7 +369,7 @@ const displayedArticles = $derived(
   <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {#each displayedArticles as article (article.slug)}
       <a
-        href={resolve(`/blog/${article.slug}`)}
+        href={article.slug}
         class="group flex flex-col justify-between rounded-xl border bg-card/60 p-6 backdrop-blur-xs transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:bg-card hover:shadow-lg"
       >
         <div>
@@ -459,7 +459,7 @@ const displayedArticles = $derived(
           target="_blank"
           class="rounded-full gap-2 font-medium"
         >
-          <icons.Github class="size-4" />
+          <Github />
           <span>Star on GitHub</span>
         </Button>
       </div>
