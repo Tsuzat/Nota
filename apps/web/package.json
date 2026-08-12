@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@hocuspocus/provider": "^4.5.0",
+    "@hocuspocus/transformer": "^4.6.0",
     "@nota/client": "workspace:*",
     "@nota/ui": "workspace:*",
     "@number-flow/svelte": "^0.4.2",

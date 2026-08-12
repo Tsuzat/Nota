@@ -13,7 +13,10 @@
   "scripts": {
     "dev": "bun --watch run src/main.ts",
     "start": "bun run src/main.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "format": "biome format . --write",
+    "lint": "biome check .",
+    "ci": "biome ci"
   },
   "dependencies": {
     "@hocuspocus/extension-logger": "^4.6.0",

@@ -1,138 +1,192 @@
 <script lang="ts">
-import { IconRenderer, icons } from '@lib/icons';
-import BarSpinner from '@lib/icons/moving-icons/bar-spinner.svelte';
-import { getAuthContext, getNotesContext, getVersionsContext, type Note, type NoteVersion } from '@nota/client';
-import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
-import { Badge } from '@nota/ui/shadcn/badge';
-import { Button } from '@nota/ui/shadcn/button';
-import { Card, CardContent } from '@nota/ui/shadcn/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@nota/ui/shadcn/dialog';
-import { Input } from '@nota/ui/shadcn/input';
-import * as Select from '@nota/ui/shadcn/select';
-import { toast } from '@nota/ui/shadcn/sonner';
-import { onDestroy } from 'svelte';
-import { page as appPage } from '$app/state';
-import Topbar from '$lib/components/topbar.svelte';
-import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
+  import { IconRenderer, icons } from "@lib/icons";
+  import BarSpinner from "@lib/icons/moving-icons/bar-spinner.svelte";
+  import {
+    getAuthContext,
+    getNotesContext,
+    getVersionsContext,
+    type Note,
+    type NoteVersion,
+  } from "@nota/client";
+  import { type Content, createEditor, Edra } from "@nota/ui/edra/index.js";
+  import { Badge } from "@nota/ui/shadcn/badge";
+  import { Button } from "@nota/ui/shadcn/button";
+  import { Card, CardContent } from "@nota/ui/shadcn/card";
+  import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+  } from "@nota/ui/shadcn/dialog";
+  import { Input } from "@nota/ui/shadcn/input";
+  import * as Select from "@nota/ui/shadcn/select";
+  import { toast } from "@nota/ui/shadcn/sonner";
+  import { onDestroy } from "svelte";
+  import { page as appPage } from "$app/state";
+  import Topbar from "$lib/components/topbar.svelte";
+  import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
 
-const authContext = getAuthContext();
-const isPro = $derived(authContext.user?.subscription_plan === 'pro');
-const versionsCtx = getVersionsContext();
-const workspacesCtx = getCurrentWorkspace();
-const notes = getNotesContext();
+  const authContext = getAuthContext();
+  const isPro = $derived(authContext.user?.subscription_plan === "pro");
+  const versionsCtx = getVersionsContext();
+  const workspacesCtx = getCurrentWorkspace();
+  const notes = getNotesContext();
 
-let versions = $state<NoteVersion[]>([]);
-let total = $state(0);
-let page = $state(1);
-let loading = $state(false);
+  let versions = $state<NoteVersion[]>([]);
+  let total = $state(0);
+  let page = $state(1);
+  let loading = $state(false);
 
-let search = $state(appPage.url.searchParams.get('search') || '');
-let typeFilter = $state<string>(appPage.url.searchParams.get('type') || '');
-let selectedNoteId = $state<string>(appPage.url.searchParams.get('note_ids') || '');
+  let search = $state(appPage.url.searchParams.get("search") || "");
+  let typeFilter = $state<string>(appPage.url.searchParams.get("type") || "");
+  let selectedNoteId = $state<string>(
+    appPage.url.searchParams.get("note_ids") || "",
+  );
 
-let workspaceNotes = $derived(notes.notes.filter((n) => n.workspace_id === workspacesCtx.get()?.id));
+  let workspaceNotes = $derived(
+    notes.notes.filter((n) => n.workspace_id === workspacesCtx.get()?.id),
+  );
 
-let previewOpen = $state(false);
-let previewLoading = $state(false);
-let previewVersion = $state<NoteVersion | null>(null);
-let previewContent = $state<Content | null>(null);
+  const noteMap = $derived(new Map(workspaceNotes.map((n) => [n.id, n])));
 
-const previewEditor = createEditor();
+  let previewOpen = $state(false);
+  let previewLoading = $state(false);
+  let previewVersion = $state<NoteVersion | null>(null);
+  let previewContent = $state<Content | null>(null);
+  let restoringId = $state<string | null>(null);
 
-$effect(() => {
-  if (previewEditor && previewContent) {
-    previewEditor.commands.setContent(previewContent, {
-      contentType: 'json',
-    });
-    previewEditor.setEditable(false);
+  const previewEditor = createEditor({ editable: false });
+
+  $effect(() => {
+    if (previewEditor && previewContent) {
+      previewEditor.commands.setContent(previewContent, {
+        contentType: "json",
+      });
+    }
+  });
+
+  const contentToRestoreUpdate = async (content: Content): Promise<string> => {
+    const { TiptapTransformer } = await import("@hocuspocus/transformer");
+    const { encodeStateAsUpdate } = await import("yjs");
+
+    const ydoc = TiptapTransformer.toYdoc(
+      content,
+      "default",
+      previewEditor?.extensionManager.extensions,
+    );
+    const update = encodeStateAsUpdate(ydoc);
+
+    let binary = "";
+    for (let offset = 0; offset < update.length; offset += 0x8000) {
+      binary += String.fromCharCode(...update.subarray(offset, offset + 0x8000));
+    }
+    const base64 = btoa(binary);
+    ydoc.destroy();
+    return base64;
+  };
+
+  async function loadVersions() {
+    const ws = workspacesCtx.get();
+    if (!ws) return;
+    loading = true;
+    try {
+      const res = await versionsCtx.listWorkspaceVersions(ws.id, {
+        page,
+        limit: 20,
+        search,
+        type: typeFilter,
+        note_ids: selectedNoteId,
+      });
+      versions = res.versions;
+      total = res.total;
+    } catch (e: any) {
+      toast.error(e.message || "Failed to load versions");
+    } finally {
+      loading = false;
+    }
   }
-});
 
-async function loadVersions() {
-  const ws = workspacesCtx.get();
-  if (!ws) return;
-  loading = true;
-  try {
-    const res = await versionsCtx.listWorkspaceVersions(ws.id, {
-      page,
-      limit: 20,
-      search,
-      type: typeFilter,
-      note_ids: selectedNoteId,
-    });
-    versions = res.versions;
-    total = res.total;
-  } catch (e: any) {
-    toast.error(e.message || 'Failed to load versions');
-  } finally {
-    loading = false;
+  $effect(() => {
+    if (workspacesCtx.get() && isPro) {
+      page = 1;
+      loadVersions();
+    }
+  });
+
+  let debounceTimer: ReturnType<typeof setTimeout>;
+  onDestroy(() => clearTimeout(debounceTimer));
+  function handleSearch(e: Event) {
+    const val = (e.target as HTMLInputElement).value;
+    search = val;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      page = 1;
+      loadVersions();
+    }, 300);
   }
-}
 
-$effect(() => {
-  if (workspacesCtx.get() && isPro) {
-    page = 1;
-    loadVersions();
+  async function openPreview(v: NoteVersion) {
+    try {
+      previewOpen = true;
+      previewLoading = true;
+      previewContent = await versionsCtx.getVersionContent(v.note_id, v.id);
+      previewVersion = v;
+    } catch (e: any) {
+      toast.error(e.message || "Failed to load content");
+    } finally {
+      previewLoading = false;
+    }
   }
-});
 
-let debounceTimer: ReturnType<typeof setTimeout>;
-onDestroy(() => clearTimeout(debounceTimer));
-function handleSearch(e: Event) {
-  const val = (e.target as HTMLInputElement).value;
-  search = val;
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
-    page = 1;
-    loadVersions();
-  }, 300);
-}
+  async function restoreVersion(v: NoteVersion) {
+    if (
+      !confirm(
+        "Are you sure you want to restore this version? The current state will be saved as a restore point.",
+      )
+    )
+      return;
+    restoringId = v.id;
+    try {
+      console.log(
+        `[restore] Initiating restore for noteId=${v.note_id}, versionId=${v.id}`,
+      );
 
-async function openPreview(v: NoteVersion) {
-  try {
-    previewOpen = true;
-    previewLoading = true;
-    previewContent = await versionsCtx.getVersionContent(v.note_id, v.id);
-    previewVersion = v;
-  } catch (e: any) {
-    toast.error(e.message || 'Failed to load content');
-  } finally {
-    previewLoading = false;
+      const content = await versionsCtx.getVersionContent(v.note_id, v.id);
+      const restoreUpdate = await contentToRestoreUpdate(content);
+
+      await versionsCtx.restoreVersion(v.note_id, v.id, restoreUpdate);
+      console.log(`[restore] Restore completed for noteId=${v.note_id}`);
+      toast.success("Version restored successfully");
+      loadVersions(); // refresh
+    } catch (e: any) {
+      console.error(`[restore] Restore failed:`, e);
+      toast.error(e.message || "Failed to restore version");
+    } finally {
+      restoringId = null;
+    }
   }
-}
 
-async function restoreVersion(v: NoteVersion) {
-  if (!confirm('Are you sure you want to restore this version? The current state will be saved as a restore point.'))
-    return;
-  try {
-    await versionsCtx.restoreVersion(v.note_id, v.id);
-    toast.success('Version restored successfully');
-    loadVersions(); // refresh
-  } catch (e: any) {
-    toast.error(e.message || 'Failed to restore version');
+  async function deleteVersion(v: NoteVersion) {
+    if (!confirm("Are you sure you want to delete this manual snapshot?"))
+      return;
+    try {
+      await versionsCtx.deleteVersion(v.note_id, v.id);
+      toast.success("Version deleted");
+      loadVersions();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to delete version");
+    }
   }
-}
 
-async function deleteVersion(v: NoteVersion) {
-  if (!confirm('Are you sure you want to delete this manual snapshot?')) return;
-  try {
-    await versionsCtx.deleteVersion(v.note_id, v.id);
-    toast.success('Version deleted');
-    loadVersions();
-  } catch (e: any) {
-    toast.error(e.message || 'Failed to delete version');
+  function getNote(id: string): Note | undefined {
+    return notes.notes.find((n) => n.id === id);
   }
-}
 
-function getNote(id: string): Note | undefined {
-  return notes.notes.find((n) => n.id === id);
-}
-
-function formatSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1048576).toFixed(1)} MB`;
-}
+  function formatSize(bytes: number) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1048576).toFixed(1)} MB`;
+  }
 </script>
 
 <svelte:head>
@@ -237,7 +291,7 @@ function formatSize(bytes: number) {
 
         {#if loading}
           <div class="flex justify-center p-12">
-            <BarSpinner size={20} />
+            <BarSpinner size={32} />
           </div>
         {:else if versions.length === 0}
           <Card class="border-dashed">
@@ -257,7 +311,7 @@ function formatSize(bytes: number) {
             {#each versions as v (v.id)}
               <Card>
                 <CardContent
-                  class="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                  class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                 >
                   <div class="flex items-start gap-3">
                     <div class="mt-1">
@@ -299,7 +353,6 @@ function formatSize(bytes: number) {
                   <div class="flex items-center gap-2 w-full sm:w-auto">
                     <Button
                       variant="outline"
-                      size="sm"
                       class="flex-1 sm:flex-none"
                       onclick={() => openPreview(v)}
                     >
@@ -307,16 +360,19 @@ function formatSize(bytes: number) {
                     </Button>
                     <Button
                       variant="secondary"
-                      size="sm"
-                      class="flex-1 sm:flex-none"
+                      class="flex-1 sm:flex-none min-w-[80px]"
+                      disabled={restoringId === v.id}
                       onclick={() => restoreVersion(v)}
                     >
-                      Restore
+                      {#if restoringId === v.id}
+                        <BarSpinner size={16} class="mr-2" />
+                      {/if}
+                      {restoringId === v.id ? "Restoring..." : "Restore"}
                     </Button>
-                    {#if v.version_type === "manual"}
+                    {#if noteMap.get(v.note_id)?.owner === authContext.user?.id}
                       <Button
                         variant="destructive"
-                        size="sm"
+                        size="icon"
                         onclick={() => deleteVersion(v)}
                       >
                         <icons.Trash2 class="w-4 h-4" />

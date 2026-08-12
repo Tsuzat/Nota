@@ -36,7 +36,7 @@ func userHasNoteReadAccess(ctx context.Context, noteId string, userId string) bo
 		Model((*models.Note)(nil)).
 		Where("id = ? AND (owner = ? OR id IN (SELECT note_id FROM note_collaborators WHERE user_id = ?))", noteId, userId, userId).
 		Exists(ctx)
-	
+
 	go utils.SetCache(cacheKey, exists, 5*time.Minute)
 	return exists
 }
@@ -51,7 +51,7 @@ func userHasNoteWriteAccess(ctx context.Context, noteId string, userId string) b
 		Model((*models.Note)(nil)).
 		Where("id = ? AND (owner = ? OR id IN (SELECT note_id FROM note_collaborators WHERE user_id = ? AND role IN ('editor', 'admin')))", noteId, userId, userId).
 		Exists(ctx)
-	
+
 	go utils.SetCache(cacheKey, exists, 5*time.Minute)
 	return exists
 }
@@ -261,12 +261,10 @@ func DeleteNoteVersion(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(models.APIError{Status: 404, Error: "Version not found"})
 	}
 
-	if version.VersionType != "manual" {
-		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Only manual snapshots can be deleted"})
-	}
-
-	if !userHasNoteWriteAccess(c.Context(), noteId, user.Id) {
-		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Forbidden"})
+	// Only the note owner can delete snapshots (of any type)
+	var note models.Note
+	if err := config.DB.NewSelect().Model(&note).Where("id = ? AND owner = ?", noteId, user.Id).Scan(c.Context()); err != nil {
+		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Only note owner can delete snapshots"})
 	}
 
 	if _, err := config.DB.NewDelete().Model(&version).WherePK().Exec(c.Context()); err != nil {
@@ -290,6 +288,20 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 	noteId := c.Params("id")
 	versionId := c.Params("versionId")
 
+	// The client builds this update with the editor's complete Tiptap schema.
+	// It is applied as part of a replacement transaction by the collaboration service.
+	var req struct {
+		RestoreUpdate string `json:"restore_update"`
+	}
+	if err := c.Bind().Body(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "Invalid request body"})
+	}
+	if req.RestoreUpdate == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "restore_update is required"})
+	}
+
+	log.Infof("[RestoreNoteVersion] Starting restore for noteId=%s, versionId=%s by user=%s", noteId, versionId, user.Id)
+
 	if !userHasNoteWriteAccess(c.Context(), noteId, user.Id) {
 		return c.Status(fiber.StatusForbidden).JSON(models.APIError{Status: 403, Error: "Forbidden"})
 	}
@@ -308,8 +320,10 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 
 	decompressed, err := zstdDecoder.DecodeAll(versionToRestore.ContentCompressed, nil)
 	if err != nil {
+		log.Error("[RestoreNoteVersion] Failed to read and decompress content: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Failed to read content"})
 	}
+	log.Infof("[RestoreNoteVersion] Decompressed content size: %d bytes", len(decompressed))
 
 	var data map[string]any
 	if err := json.Unmarshal(decompressed, &data); err != nil {
@@ -317,6 +331,7 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 	}
 
 	// Create restore point of current content
+	log.Info("[RestoreNoteVersion] Creating restore point for current state")
 	contentJson, err := json.Marshal(note.Content)
 	if err != nil {
 		log.Error("Failed to marshal existing note content during restore: ", err)
@@ -339,7 +354,8 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 		CreatedBy:           &user.Id,
 	}
 
-	// Transaction to save restore point and update note
+	// Keep the existing database-backed restore-point semantics. The live Y.Doc
+	// replacement and its persistence happen through the collaboration service.
 	err = config.DB.RunInTx(c.Context(), nil, func(ctx context.Context, tx bun.Tx) error {
 		if _, err := tx.NewInsert().Model(&restorePoint).Exec(ctx); err != nil {
 			return err
@@ -355,11 +371,13 @@ func RestoreNoteVersion(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed"})
 	}
 
-	// Trigger Bun restore
-	if err := triggerBunRestore(noteId, data); err != nil {
-		log.Error("Bun restore failed: ", err)
+	log.Info("[RestoreNoteVersion] Replacing content in authoritative collaborative document")
+	if err := triggerCollabRestore(noteId, req.RestoreUpdate, data); err != nil {
+		log.Error("[RestoreNoteVersion] Collaborative restore failed: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed to sync"})
 	}
+
+	log.Info("[RestoreNoteVersion] Restore completed successfully")
 
 	// Invalidate caches
 	go utils.DeleteCache(fmt.Sprintf("note_versions_latest:%s", noteId))
@@ -382,6 +400,9 @@ func RestoreNoteFromContent(c fiber.Ctx) error {
 
 	if req.Content == nil {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "Content is required"})
+	}
+	if req.RestoreUpdate == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIError{Status: 400, Error: "restore_update is required"})
 	}
 
 	// Fetch note and verify ownership
@@ -420,7 +441,8 @@ func RestoreNoteFromContent(c fiber.Ctx) error {
 		CreatedBy:           &user.Id,
 	}
 
-	// Transaction: save restore point + update note content
+	// Save the restore point before asking collaboration to replace and persist
+	// the authoritative document.
 	err = config.DB.RunInTx(c.Context(), nil, func(ctx context.Context, tx bun.Tx) error {
 		if _, err := tx.NewInsert().Model(&restorePoint).Exec(ctx); err != nil {
 			return err
@@ -436,9 +458,8 @@ func RestoreNoteFromContent(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed"})
 	}
 
-	// Trigger Bun restore
-	if err := triggerBunRestore(noteId, req.Content); err != nil {
-		log.Error("Bun restore failed: ", err)
+	if err := triggerCollabRestore(noteId, req.RestoreUpdate, req.Content); err != nil {
+		log.Error("Collaborative restore failed: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(models.APIError{Status: 500, Error: "Restore failed to sync"})
 	}
 
@@ -530,35 +551,38 @@ func maybeAutoSnapshot(ctx context.Context, noteId string, userId string) {
 	go utils.DeleteCache(fmt.Sprintf("note_versions_count:%s", noteId))
 }
 
-func triggerBunRestore(noteId string, content map[string]any) error {
+func triggerCollabRestore(noteId string, restoreUpdate string, content map[string]any) error {
+	log.Infof("[triggerCollabRestore] Replacing collaborative document for noteId=%s", noteId)
 	url := fmt.Sprintf("%s/internal/restore/%s", config.COLLAB_INTERNAL_URL, noteId)
-	
-	payload := map[string]any{
-		"content": content,
-	}
-	bodyBytes, err := json.Marshal(payload)
+
+	body, err := json.Marshal(map[string]any{
+		"restore_update": restoreUpdate,
+		"content":        content,
+	})
 	if err != nil {
 		return err
 	}
-	
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bodyBytes))
+
+	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
-	
+
 	req.Header.Set("X-Internal-Api-Key", config.INTERNAL_API_KEY)
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	client := &http.Client{Timeout: 10 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
-	
+
+	log.Infof("[triggerCollabRestore] Collab server responded with status: %d", res.StatusCode)
+
 	if res.StatusCode != 200 {
 		return fmt.Errorf("bun server returned status %d", res.StatusCode)
 	}
-	
+
 	return nil
 }

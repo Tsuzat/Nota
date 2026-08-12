@@ -1,213 +1,274 @@
 <script lang="ts">
-import { IconRenderer, icons } from '@lib/icons';
-import BarSpinner from '@lib/icons/moving-icons/bar-spinner.svelte';
-import { getAuthContext, getNotesContext, getVersionsContext, type Note, type NoteVersion } from '@nota/client';
-import { SimpleToolTip } from '@nota/ui/custom/index.js';
-import { type Content, createEditor, Edra } from '@nota/ui/edra/index.js';
-import { Badge } from '@nota/ui/shadcn/badge';
-import { Button } from '@nota/ui/shadcn/button';
-import { Card, CardContent } from '@nota/ui/shadcn/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@nota/ui/shadcn/dialog';
-import { Input } from '@nota/ui/shadcn/input';
-import * as Select from '@nota/ui/shadcn/select';
-import { toast } from '@nota/ui/shadcn/sonner';
-import * as Tabs from '@nota/ui/shadcn/tabs';
-import { page as appPage } from '$app/state';
-import Topbar from '$lib/components/topbar.svelte';
-import { getCurrentWorkspace } from '$lib/currentworkspace.svelte';
-import { getLocalNotes } from '$lib/local/notes.svelte';
-import { getLocalVersions } from '$lib/local/versions.svelte';
+  import { IconRenderer, icons } from "@lib/icons";
+  import BarSpinner from "@lib/icons/moving-icons/bar-spinner.svelte";
+  import {
+    getAuthContext,
+    getNotesContext,
+    getVersionsContext,
+    type Note,
+    type NoteVersion,
+  } from "@nota/client";
+  import { SimpleToolTip } from "@nota/ui/custom/index.js";
+  import { type Content, createEditor, Edra } from "@nota/ui/edra/index.js";
+  import { Badge } from "@nota/ui/shadcn/badge";
+  import { Button } from "@nota/ui/shadcn/button";
+  import { Card, CardContent } from "@nota/ui/shadcn/card";
+  import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+  } from "@nota/ui/shadcn/dialog";
+  import { Input } from "@nota/ui/shadcn/input";
+  import * as Select from "@nota/ui/shadcn/select";
+  import { toast } from "@nota/ui/shadcn/sonner";
+  import * as Tabs from "@nota/ui/shadcn/tabs";
+  import { page as appPage } from "$app/state";
+  import Topbar from "$lib/components/topbar.svelte";
+  import { getCurrentWorkspace } from "$lib/currentworkspace.svelte";
+  import { getLocalNotes } from "$lib/local/notes.svelte";
+  import { getLocalVersions } from "$lib/local/versions.svelte";
 
-// --- Contexts ---
-const authContext = getAuthContext();
-const versionsCtx = getVersionsContext();
-const localVersionsCtx = getLocalVersions();
-const cloudNotes = getNotesContext();
-const localNotes = getLocalNotes();
+  // --- Contexts ---
+  const authContext = getAuthContext();
+  const versionsCtx = getVersionsContext();
+  const localVersionsCtx = getLocalVersions();
+  const cloudNotes = getNotesContext();
+  const localNotes = getLocalNotes();
 
-// --- Derived state ---
-const isPro = $derived(authContext.user?.subscription_plan === 'pro');
-const currentWorkspace = $derived(getCurrentWorkspace().get());
-const isLocal = $derived(currentWorkspace ? !('owner' in currentWorkspace) : false);
+  // --- Derived state ---
+  const isPro = $derived(authContext.user?.subscription_plan === "pro");
+  const currentWorkspace = $derived(getCurrentWorkspace().get());
+  const isLocal = $derived(
+    currentWorkspace ? !("owner" in currentWorkspace) : false,
+  );
 
-// --- View source: "local" or "cloud" ---
-let viewSource = $state<'local' | 'cloud'>('cloud');
+  // --- View source: "local" or "cloud" ---
+  let viewSource = $state<"local" | "cloud">("cloud");
 
-// --- Filter state ---
-let versions = $state<NoteVersion[]>([]);
-let total = $state(0);
-let page = $state(1);
-let loading = $state(true);
-let searchInput = $state(appPage.url.searchParams.get('search') || '');
-let search = $state(appPage.url.searchParams.get('search') || '');
-let typeFilter = $state<string>(appPage.url.searchParams.get('type') || '');
-let selectedNoteId = $state<string>(appPage.url.searchParams.get('note_ids') || '');
+  // --- Filter state ---
+  let versions = $state<NoteVersion[]>([]);
+  let total = $state(0);
+  let page = $state(1);
+  let loading = $state(true);
+  let searchInput = $state(appPage.url.searchParams.get("search") || "");
+  let search = $state(appPage.url.searchParams.get("search") || "");
+  let typeFilter = $state<string>(appPage.url.searchParams.get("type") || "");
+  let selectedNoteId = $state<string>(
+    appPage.url.searchParams.get("note_ids") || "",
+  );
 
-// --- O(1) note lookup map ---
-const noteMap = $derived.by(() => {
-  const notes = isLocal
-    ? localNotes.getNotes().filter((n) => n.workspace_id === currentWorkspace?.id)
-    : cloudNotes.notes.filter((n) => n.workspace_id === currentWorkspace?.id);
-  return new Map(notes.map((n) => [n.id, n]));
-});
+  // --- O(1) note lookup map ---
+  const noteMap = $derived.by(() => {
+    const notes = isLocal
+      ? localNotes
+          .getNotes()
+          .filter((n) => n.workspace_id === currentWorkspace?.id)
+      : cloudNotes.notes.filter((n) => n.workspace_id === currentWorkspace?.id);
+    return new Map(notes.map((n) => [n.id, n]));
+  });
 
-// --- Unified versions provider ---
-const versionsProvider = $derived.by(() => {
-  if (viewSource === 'local') {
+  // --- Unified versions provider ---
+  const versionsProvider = $derived.by(() => {
+    if (viewSource === "local") {
+      return {
+        list: (wsId: string, filters: any) =>
+          localVersionsCtx.listWorkspaceVersions(wsId, filters),
+        getContent: (noteId: string, vId: string) =>
+          localVersionsCtx.getVersionContent(noteId, vId),
+        deleteVersion: (noteId: string, vId: string) =>
+          localVersionsCtx.deleteVersion(noteId, vId),
+      };
+    }
     return {
-      list: (wsId: string, filters: any) => localVersionsCtx.listWorkspaceVersions(wsId, filters),
-      getContent: (noteId: string, vId: string) => localVersionsCtx.getVersionContent(noteId, vId),
-      deleteVersion: (noteId: string, vId: string) => localVersionsCtx.deleteVersion(noteId, vId),
+      list: (wsId: string, filters: any) =>
+        versionsCtx.listWorkspaceVersions(wsId, filters),
+      getContent: (noteId: string, vId: string) =>
+        versionsCtx.getVersionContent(noteId, vId),
+      deleteVersion: (noteId: string, vId: string) =>
+        versionsCtx.deleteVersion(noteId, vId),
     };
+  });
+
+  // Can restore from this view?
+  // - Local workspace: no (restore happens in the note editor)
+  // - Cloud workspace + cloud tab: yes (backend has the version)
+  // - Cloud workspace + local tab: yes (send content to backend)
+  const canRestore = $derived(!isLocal);
+
+  // --- Preview state ---
+  let previewOpen = $state(false);
+  let previewLoading = $state(false);
+  let previewVersion = $state<NoteVersion | null>(null);
+  let previewContent = $state<Content | null>(null);
+  let restoringId = $state<string | null>(null);
+
+  const previewEditor = createEditor();
+
+  $effect(() => {
+    if (previewEditor && previewContent) {
+      previewEditor.commands.setContent(previewContent, {
+        contentType: "json",
+      });
+      previewEditor.setEditable(false);
+    }
+  });
+
+  // --- Data loading ---
+  async function loadVersions() {
+    const ws = currentWorkspace;
+    if (!ws) return;
+    loading = true;
+    try {
+      const filters = {
+        page,
+        limit: 20,
+        search,
+        type: typeFilter,
+        note_ids: selectedNoteId,
+      };
+      const res = await versionsProvider.list(ws.id, filters);
+      versions = res.versions;
+      total = res.total;
+    } catch (e: any) {
+      toast.error(e.message || "Failed to load versions");
+    } finally {
+      loading = false;
+    }
   }
-  return {
-    list: (wsId: string, filters: any) => versionsCtx.listWorkspaceVersions(wsId, filters),
-    getContent: (noteId: string, vId: string) => versionsCtx.getVersionContent(noteId, vId),
-    deleteVersion: (noteId: string, vId: string) => versionsCtx.deleteVersion(noteId, vId),
-  };
-});
 
-// Can restore from this view?
-// - Local workspace: no (restore happens in the note editor)
-// - Cloud workspace + cloud tab: yes (backend has the version)
-// - Cloud workspace + local tab: yes (send content to backend)
-const canRestore = $derived(!isLocal);
-
-// --- Preview state ---
-let previewOpen = $state(false);
-let previewLoading = $state(false);
-let previewVersion = $state<NoteVersion | null>(null);
-let previewContent = $state<Content | null>(null);
-let restoringId = $state<string | null>(null);
-
-const previewEditor = createEditor();
-
-$effect(() => {
-  if (previewEditor && previewContent) {
-    previewEditor.commands.setContent(previewContent, {
-      contentType: 'json',
-    });
-    previewEditor.setEditable(false);
-  }
-});
-
-// --- Data loading ---
-async function loadVersions() {
-  const ws = currentWorkspace;
-  if (!ws) return;
-  loading = true;
-  try {
-    const filters = {
-      page,
-      limit: 20,
-      search,
-      type: typeFilter,
-      note_ids: selectedNoteId,
-    };
-    const res = await versionsProvider.list(ws.id, filters);
-    versions = res.versions;
-    total = res.total;
-  } catch (e: any) {
-    toast.error(e.message || 'Failed to load versions');
-  } finally {
-    loading = false;
-  }
-}
-
-// Effect 1: When workspace changes, reset everything
-$effect(() => {
-  if (currentWorkspace) {
-    viewSource = isLocal || !isPro ? 'local' : 'cloud';
-    searchInput = '';
-    search = '';
-    typeFilter = '';
-    selectedNoteId = '';
-    page = 1;
-  }
-});
-
-// Effect 2: When any filter/source changes, reload data
-$effect(() => {
-  // Touch all reactive deps explicitly
-  void [currentWorkspace, viewSource, page, typeFilter, selectedNoteId, search];
-  loadVersions();
-});
-
-// Effect 3: Debounced search — searchInput → search after 300ms
-$effect(() => {
-  const val = searchInput;
-  const timer = setTimeout(() => {
-    if (search !== val) {
-      search = val;
+  // Effect 1: When workspace changes, reset everything
+  $effect(() => {
+    if (currentWorkspace) {
+      viewSource = isLocal || !isPro ? "local" : "cloud";
+      searchInput = "";
+      search = "";
+      typeFilter = "";
+      selectedNoteId = "";
       page = 1;
     }
-  }, 300);
-  return () => clearTimeout(timer);
-});
+  });
 
-// --- Actions ---
-async function openPreview(v: NoteVersion) {
-  try {
-    previewOpen = true;
-    previewLoading = true;
-    previewContent = await versionsProvider.getContent(v.note_id, v.id);
-    previewVersion = v;
-  } catch (e: any) {
-    toast.error(e.message || 'Failed to load content');
-  } finally {
-    previewLoading = false;
-  }
-}
+  // Effect 2: When any filter/source changes, reload data
+  $effect(() => {
+    loadVersions();
+  });
 
-async function restoreVersion(v: NoteVersion) {
-  if (!confirm('Are you sure you want to restore this version? The current state will be saved as a restore point.'))
-    return;
-  restoringId = v.id;
-  try {
-    if (viewSource === 'local' && !isLocal) {
-      // Cloud note + local snapshot → decompress locally, send content to backend
-      const content = await localVersionsCtx.getVersionContent(v.note_id, v.id);
-      await versionsCtx.restoreFromContent(v.note_id, content, 'Restored from local snapshot');
-    } else if (viewSource === 'cloud') {
-      // Cloud note + cloud snapshot → existing backend endpoint
-      await versionsCtx.restoreVersion(v.note_id, v.id);
+  // Effect 3: Debounced search — searchInput → search after 300ms
+  $effect(() => {
+    const val = searchInput;
+    const timer = setTimeout(() => {
+      if (search !== val) {
+        search = val;
+        page = 1;
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  });
+
+  const contentToRestoreUpdate = async (content: Content): Promise<string> => {
+    const { TiptapTransformer } = await import("@hocuspocus/transformer");
+    const { encodeStateAsUpdate } = await import("yjs");
+
+    const ydoc = TiptapTransformer.toYdoc(
+      content,
+      "default",
+      previewEditor?.extensionManager.extensions,
+    );
+    const update = encodeStateAsUpdate(ydoc);
+
+    let binary = "";
+    for (let offset = 0; offset < update.length; offset += 0x8000) {
+      binary += String.fromCharCode(...update.subarray(offset, offset + 0x8000));
     }
-    toast.success('Version restored successfully');
-    loadVersions();
-  } catch (e: any) {
-    toast.error(e.message || 'Failed to restore version');
-  } finally {
-    restoringId = null;
-  }
-}
+    const base64 = btoa(binary);
+    ydoc.destroy();
+    return base64;
+  };
 
-async function deleteVersion(v: NoteVersion) {
-  if (!confirm('Are you sure you want to delete this snapshot?')) return;
-  try {
-    await versionsProvider.deleteVersion(v.note_id, v.id);
-    toast.success('Version deleted');
-    loadVersions();
-  } catch (e: any) {
-    toast.error(e.message || 'Failed to delete version');
+  // --- Actions ---
+  async function openPreview(v: NoteVersion) {
+    try {
+      previewOpen = true;
+      previewLoading = true;
+      previewContent = await versionsProvider.getContent(v.note_id, v.id);
+      previewVersion = v;
+    } catch (e: any) {
+      toast.error(e.message || "Failed to load content");
+    } finally {
+      previewLoading = false;
+    }
   }
-}
 
-// --- Utilities ---
-function formatSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1048576).toFixed(1)} MB`;
-}
+  async function restoreVersion(v: NoteVersion) {
+    if (
+      !confirm(
+        "Are you sure you want to restore this version? The current state will be saved as a restore point.",
+      )
+    )
+      return;
+    restoringId = v.id;
+    try {
+      console.log(
+        `[restore] Initiating restore for noteId=${v.note_id}, versionId=${v.id}`,
+      );
 
-function getEmptyStateMessage(): string {
-  if (isLocal) {
-    return 'No local snapshots found. Snapshots are created automatically as you edit your notes.';
+      if (viewSource === "local" && !isLocal) {
+        // Cloud note + local snapshot → decompress locally, send content to backend
+        const content = await localVersionsCtx.getVersionContent(
+          v.note_id,
+          v.id,
+        );
+        const restoreUpdate = await contentToRestoreUpdate(content);
+        await versionsCtx.restoreFromContent(
+          v.note_id,
+          content,
+          "Restored from local snapshot",
+          restoreUpdate,
+        );
+      } else if (viewSource === "cloud") {
+        // Cloud note + cloud snapshot → existing backend endpoint
+        const content = await versionsCtx.getVersionContent(v.note_id, v.id);
+        const restoreUpdate = await contentToRestoreUpdate(content);
+        await versionsCtx.restoreVersion(v.note_id, v.id, restoreUpdate);
+      }
+      console.log(`[restore] Restore completed for noteId=${v.note_id}`);
+      toast.success("Version restored successfully");
+      loadVersions();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to restore version");
+    } finally {
+      restoringId = null;
+    }
   }
-  if (viewSource === 'local') {
-    return 'No local snapshots for this cloud workspace.';
+
+  async function deleteVersion(v: NoteVersion) {
+    if (!confirm("Are you sure you want to delete this snapshot?")) return;
+    try {
+      await versionsProvider.deleteVersion(v.note_id, v.id);
+      toast.success("Version deleted");
+      loadVersions();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to delete version");
+    }
   }
-  return 'No cloud snapshots found. Cloud snapshots are created automatically as you type.';
-}
+
+  // --- Utilities ---
+  function formatSize(bytes: number) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1048576).toFixed(1)} MB`;
+  }
+
+  function getEmptyStateMessage(): string {
+    if (isLocal) {
+      return "No local snapshots found. Snapshots are created automatically as you edit your notes.";
+    }
+    if (viewSource === "local") {
+      return "No local snapshots for this cloud workspace.";
+    }
+    return "No cloud snapshots found. Cloud snapshots are created automatically as you type.";
+  }
 </script>
 
 <svelte:head>
@@ -412,7 +473,9 @@ function getEmptyStateMessage(): string {
                       {restoringId === v.id ? "Restoring..." : "Restore"}
                     </Button>
                   {:else}
-                    <SimpleToolTip content="Restore is available in the note editor">
+                    <SimpleToolTip
+                      content="Restore is available in the note editor"
+                    >
                       <Button
                         variant="secondary"
                         size="sm"
@@ -423,7 +486,7 @@ function getEmptyStateMessage(): string {
                       </Button>
                     </SimpleToolTip>
                   {/if}
-                  {#if v.version_type === "manual"}
+                  {#if noteMap.get(v.note_id)?.owner === authContext.user?.id}
                     <Button
                       variant="destructive"
                       size="sm"

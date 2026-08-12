@@ -26,6 +26,8 @@
   import Share2Icon from "@lucide/svelte/icons/share-2";
   import Trash2Icon from "@lucide/svelte/icons/trash-2";
   import UserPlusIcon from "@lucide/svelte/icons/user-plus";
+  import SelectGroup from "../ui/select/select-group.svelte";
+  import SelectGroupHeading from "../ui/select/select-group-heading.svelte";
 
   // ── Types ──────────────────────────────────────────────
   export interface CollaboratorMember {
@@ -64,7 +66,7 @@
     // Versions
     versionCount?: number;
     versionsHref?: string;
-    
+
     // Permissions
     canShare?: boolean;
   }
@@ -286,7 +288,7 @@
       </Popover.Trigger>
       <Popover.Content align="end" class="w-100 p-0">
         <Tabs.Root value="share" class="w-full">
-          <Tabs.List class="w-full rounded-none border-b">
+          <Tabs.List>
             <Tabs.Trigger value="share" class="flex-1">Share</Tabs.Trigger>
             <Tabs.Trigger value="publish" class="flex-1">Publish</Tabs.Trigger>
           </Tabs.List>
@@ -307,13 +309,16 @@
                   }}
                 />
                 <Select type="single" bind:value={inviteRole}>
-                  <SelectTrigger class="w-24">
+                  <SelectTrigger>
                     <span class="capitalize">{inviteRole}</span>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="viewer">Viewer</SelectItem>
-                    <SelectItem value="editor">Editor</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectGroup>
+                      <SelectGroupHeading>Role</SelectGroupHeading>
+                      <SelectItem value="viewer">Viewer</SelectItem>
+                      <SelectItem value="editor">Editor</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
                 <Button
@@ -353,7 +358,9 @@
                           </AvatarFallback>
                         </Avatar>
                         <div class="flex flex-col min-w-0">
-                          <span class="truncate text-sm font-medium leading-none">
+                          <span
+                            class="truncate text-sm font-medium leading-none"
+                          >
                             {member.name || "Unknown"}
                           </span>
                           <span class="truncate text-xs text-muted-foreground">
@@ -393,7 +400,9 @@
 
             <!-- Copy Link -->
             <div class="pt-2 border-t flex items-center justify-between">
-              <span class="text-sm font-medium text-muted-foreground">Copy note link</span>
+              <span class="text-sm font-medium text-muted-foreground"
+                >Copy note link</span
+              >
               <Button
                 variant="outline"
                 size="sm"
@@ -416,19 +425,19 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 {#if isPublic}
-                  <GlobeIcon class="size-4 text-green-500" />
+                  <GlobeIcon class="size-8 text-green-500" />
                 {:else}
-                  <LockIcon class="size-4 text-muted-foreground" />
+                  <LockIcon class="size-8 text-muted-foreground" />
                 {/if}
-                <div>
-                  <p class="text-sm font-medium">
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium">
                     {isPublic ? "Public access" : "Private"}
-                  </p>
-                  <p class="text-xs text-muted-foreground">
+                  </span>
+                  <span class="text-xs text-muted-foreground">
                     {isPublic
                       ? "Anyone with the link can view"
                       : "Only invited people can access"}
-                  </p>
+                  </span>
                 </div>
               </div>
               <Button
@@ -464,7 +473,6 @@
               </div>
             {/if}
           </Tabs.Content>
-
         </Tabs.Root>
       </Popover.Content>
     </Popover.Root>
@@ -480,7 +488,7 @@
         <ClockIcon class="size-4" />
       </a>
       {#snippet child()}
-        <span>
+        <span class="p-1">
           {versionCount > 0
             ? `${versionCount} ${versionCount === 1 ? "version" : "versions"}`
             : "Version history"}
