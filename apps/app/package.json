@@ -1,6 +1,6 @@
 {
   "name": "app",
-  "version": "0.0.1",
+  "version": "0.9.91-beta",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,6 +15,7 @@
     "desktop:build": "tauri build"
   },
   "dependencies": {
+    "@lucide/svelte": "catalog:",
     "@nota/api": "workspace:*",
     "@nota/db-local": "workspace:*",
     "@nota/env": "workspace:*",
@@ -28,6 +29,7 @@
     "@tauri-apps/plugin-deep-link": "~2",
     "@tauri-apps/plugin-dialog": "~2",
     "@tauri-apps/plugin-opener": "~2",
+    "@tauri-apps/plugin-os": "~2",
     "@tauri-apps/plugin-sql": "~2",
     "@tauri-apps/plugin-updater": "~2",
     "better-auth": "catalog:",

@@ -16,7 +16,7 @@
   "dependencies": {
     "@tauri-apps/plugin-sql": "~2",
     "drizzle-orm": "^1.0.0-rc.4",
-    "zod": "^4.4.3"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@nota/config": "workspace:*",

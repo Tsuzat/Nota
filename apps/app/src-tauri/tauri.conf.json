@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "nota",
-  "version": "0.1.0",
+  "version": "0.9.91-beta",
   "identifier": "app.nota.ink",
   "build": {
     "frontendDist": "../build",
@@ -18,14 +18,16 @@
         "height": 720,
         "resizable": true,
         "fullscreen": false,
-        "transparent": true,
-        "windowEffects": {
-          "effects": ["sidebar"]
-        }
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true 
       }
     ],
     "security": {
-      "csp": null
+      "csp": "asset: http://asset.localhost",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      }
     }
   },
   "bundle": {
@@ -40,7 +42,8 @@
     ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
-    }
+    },
+    "createUpdaterArtifacts": true
   },
   "plugins": {
     "updater": {

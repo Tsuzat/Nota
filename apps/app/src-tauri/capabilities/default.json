@@ -11,6 +11,8 @@
     "deep-link:default",
     "dialog:default",
     "sql:default",
-    "sql:allow-execute"
+    "sql:allow-execute",
+    "core:window:allow-start-dragging",
+    "os:default"
   ]
 }
