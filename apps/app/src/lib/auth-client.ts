@@ -1,4 +1,4 @@
-import { PUBLIC_SERVER_URL } from "$env/static/public";
+import { PUBLIC_SERVER_URL } from "$app/env/public";
 import { polarClient } from "@polar-sh/better-auth/client";
 import { createAuthClient } from "better-auth/svelte";
 
@@ -14,16 +14,18 @@ function getServerUrl(url: string) {
   }
 
   const processEnv = (
-    globalThis as {
-      process?: { env?: Record<string, string | undefined> };
-    }
+    globalThis as { process?: { env?: Record<string, string | undefined> } }
   ).process?.env;
+
   const vercelUrl =
     processEnv?.VERCEL_ENV === "production"
       ? (processEnv?.VERCEL_PROJECT_PRODUCTION_URL ?? processEnv?.VERCEL_URL)
       : (processEnv?.VERCEL_URL ?? processEnv?.VERCEL_PROJECT_PRODUCTION_URL);
+
   if (vercelUrl) {
-    const origin = vercelUrl.startsWith("http") ? vercelUrl : `https://${vercelUrl}`;
+    const origin = vercelUrl.startsWith("http")
+      ? vercelUrl
+      : `https://${vercelUrl}`;
     return `${origin}${normalized}`;
   }
 

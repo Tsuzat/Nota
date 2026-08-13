@@ -16,29 +16,40 @@
   },
   "dependencies": {
     "@nota/api": "workspace:*",
+    "@nota/db-local": "workspace:*",
     "@nota/env": "workspace:*",
+    "@nota/ui": "workspace:*",
     "@orpc/client": "catalog:",
     "@orpc/server": "catalog:",
-    "@orpc/tanstack-query": "^1.14.12",
+    "@orpc/tanstack-query": "catalog:",
     "@polar-sh/better-auth": "catalog:",
-    "@tanstack/svelte-form": "^1.33.2",
-    "@tanstack/svelte-query": "^6.1.38",
+    "@tanstack/svelte-form": "catalog:",
+    "@tanstack/svelte-query": "catalog:",
+    "@tauri-apps/plugin-deep-link": "~2",
+    "@tauri-apps/plugin-dialog": "~2",
+    "@tauri-apps/plugin-opener": "~2",
+    "@tauri-apps/plugin-sql": "~2",
+    "@tauri-apps/plugin-updater": "~2",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@nota/config": "workspace:*",
-    "@sveltejs/adapter-static": "^3.0.10",
-    "@sveltejs/kit": "^2.70.1",
-    "@sveltejs/vite-plugin-svelte": "^7.2.0",
-    "@tailwindcss/vite": "^4.3.3",
-    "@tanstack/svelte-query-devtools": "^6.1.38",
+    "@sveltejs/adapter-static": "next",
+    "@sveltejs/kit": "catalog:",
+    "@sveltejs/vite-plugin-svelte": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@tanstack/svelte-query-devtools": "catalog:",
     "@tauri-apps/cli": "^2.11.4",
-    "svelte": "^5.56.8",
-    "svelte-check": "^4.7.4",
-    "tailwindcss": "^4.3.3",
+    "svelte": "catalog:",
+    "svelte-check": "catalog:",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "vite": "^8.1.5"
+    "vite": "catalog:"
+  },
+  "imports": {
+    "#lib": "./src/lib/index.js",
+    "#lib/*": "./src/lib/*"
   }
 }

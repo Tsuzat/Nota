@@ -1,0 +1,27 @@
+{
+  "name": "@nota/db-local",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@tauri-apps/plugin-sql": "~2",
+    "drizzle-orm": "^1.0.0-rc.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@nota/config": "workspace:*",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "catalog:",
+    "nanoid": "catalog:"
+  }
+}

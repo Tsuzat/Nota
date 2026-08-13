@@ -17,7 +17,19 @@
       "@orpc/zod": "^1.14.12",
       "better-auth": "1.6.25",
       "@orpc/client": "^1.14.12",
-      "@polar-sh/better-auth": "^1.8.4"
+      "@polar-sh/better-auth": "^1.8.4",
+      "@orpc/tanstack-query": "^1.14.12",
+      "@sveltejs/kit": "next",
+      "@sveltejs/vite-plugin-svelte": "^7.2.0",
+      "@tailwindcss/vite": "^4.3.3",
+      "@tanstack/svelte-form": "^1.33.2",
+      "@tanstack/svelte-query": "^6.1.38",
+      "@tanstack/svelte-query-devtools": "^6.1.38",
+      "svelte": "^5.56.8",
+      "svelte-check": "^4.7.5",
+      "tailwindcss": "^4.3.3",
+      "vite": "^8.1.5",
+      "nanoid": "^6.0.1"
     }
   },
   "type": "module",

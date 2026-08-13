@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createForm } from '@tanstack/svelte-form';
 	import { z } from 'zod';
-	import { authClient } from '$lib/auth-client';
+	import { authClient } from '#lib/auth-client.js';
 	import { goto } from '$app/navigation';
 
 	let { switchToSignIn } = $props<{ switchToSignIn: () => void }>();

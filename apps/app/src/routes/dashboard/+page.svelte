@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { authClient } from '$lib/auth-client';
-	import { orpc } from '$lib/orpc';
+	import { authClient } from '#lib/auth-client.js';
+	import { orpc } from '#lib/orpc.js';
 	import { createQuery } from '@tanstack/svelte-query';
 	let customerState = $state<{ activeSubscriptions?: unknown[] } | null>(null);
 

@@ -1,14 +1,12 @@
 [package]
 name = "app"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+description = "Nota"
+authors = ["Tsuzat"]
+license = "MIT"
+repository = "https://github.com/Tsuzat/Nota"
 edition = "2021"
 rust-version = "1.77.2"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 name = "app_lib"
@@ -23,3 +21,24 @@ serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 tauri = { version = "2.11.3", features = ["macos-private-api"] }
 tauri-plugin-log = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-sql = { version = "2", features = ["sqlite"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-deep-link = "2"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "z"
+panic = "abort"
+strip = true
+incremental = false
+
+# Proc-macros / build scripts get normal, safe settings — NOT the aggressive ones above
+[profile.release.build-override]
+opt-level = 0
+codegen-units = 16
+debug = false

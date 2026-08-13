@@ -19,6 +19,12 @@
       "skillPath": "skills/hono/SKILL.md",
       "computedHash": "220e5e1b12bbaeec49ec362b6e2262d77632d0536e9758bba9acbbc323fef990"
     },
+    "shadcn-svelte": {
+      "source": "huntabyte/shadcn-svelte",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn-svelte/SKILL.md",
+      "computedHash": "d4f3f983a71466a86649985a8a7fbce47da29f44de3a9d02540bbcf3167134e0"
+    },
     "tauri-v2": {
       "source": "nodnarbnitram/claude-code-extensions",
       "sourceType": "github",
