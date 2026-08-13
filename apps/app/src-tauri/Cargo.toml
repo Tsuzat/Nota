@@ -37,8 +37,16 @@ panic = "abort"
 strip = true
 incremental = false
 
-# Proc-macros / build scripts get normal, safe settings — NOT the aggressive ones above
+# Proc-macros / build scripts get normal, safe settings — NOT the aggressive ones above.
+# Explicit strip/lto overrides required for macOS 15+/27 beta linker compatibility.
 [profile.release.build-override]
 opt-level = 0
 codegen-units = 16
 debug = false
+strip = false
+
+# Belt-and-suspenders: ensure sqlx-macros proc-macro dylib isn't stripped
+# (macOS 27 beta linker produces mis-aligned LINKEDIT with strip+opt-level=z)
+[profile.release.package.sqlx-macros]
+strip = false
+opt-level = 0
