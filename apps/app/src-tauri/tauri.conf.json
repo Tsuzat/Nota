@@ -18,8 +18,12 @@
         "height": 720,
         "resizable": true,
         "fullscreen": false,
+        "transparent": true,
         "titleBarStyle": "Overlay",
-        "hiddenTitle": true 
+        "hiddenTitle": true,
+        "windowEffects": {
+          "effects": ["sidebar", "acrylic"]
+        }
       }
     ],
     "security": {

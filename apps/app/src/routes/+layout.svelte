@@ -14,9 +14,9 @@
   let open = $state(localStorage.getItem("sidebar-state") === "open");
 
   onMount(() => {
-    // if (ISDESKTOP) {
-    //   document.documentElement.style.setProperty("--sidebar", "transparent");
-    // }
+    if (ISDESKTOP) {
+      document.documentElement.style.setProperty("--sidebar", "transparent");
+    }
   });
 </script>
 

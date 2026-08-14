@@ -9,7 +9,9 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "auth:generate": "SKIP_ENV_VALIDATION=1 bun --bun better-auth generate --config ./src/index.ts --output ../db/src/schema/auth.ts -y"
+  },
   "dependencies": {
     "@nota/db": "workspace:*",
     "@nota/env": "workspace:*",
@@ -20,6 +22,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@better-auth/cli": "catalog:",
     "@nota/config": "workspace:*",
     "typescript": "catalog:"
   }

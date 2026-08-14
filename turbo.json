@@ -17,6 +17,9 @@
       "cache": false,
       "persistent": true
     },
+    "auth:generate": {
+      "cache": false
+    },
     "db:push": {
       "cache": false
     },
