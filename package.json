@@ -9,7 +9,7 @@
     "catalog": {
       "dotenv": "^17.4.2",
       "zod": "^4.4.3",
-      "typescript": "^7.0.2",
+      "typescript": "^6.0.3",
       "@types/bun": "^1.3.14",
       "hono": "^4.12.32",
       "@orpc/server": "^1.14.12",

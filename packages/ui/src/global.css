@@ -9,11 +9,11 @@
 @source "./**/*.{html,js,svelte,ts}";
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --background: oklch(90.975% 0.0001 271.152);
+  --foreground: oklch(19.125% 0.00002 271.152);
+  --card: oklch(90.975% 0.0001 271.152);
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
+  --popover: oklch(90.975% 0.0001 271.152);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
@@ -61,9 +61,9 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(20.019% 0.00002 271.152);
 
-  --foreground: oklch(0.985 0 0);
+  --foreground: oklch(94.007% 0.00011 271.152);
 
   --card: oklch(0.205 0 0);
 
@@ -81,7 +81,7 @@
 
   --secondary-foreground: oklch(0.985 0 0);
 
-  --muted: oklch(0.269 0 0);
+  --muted: oklch(33.289% 0.00004 271.152);
 
   --muted-foreground: oklch(0.708 0 0);
 
@@ -89,7 +89,7 @@
 
   --accent-foreground: oklch(0.205 0 0);
 
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(50.341% 0.20637 28.901);
 
   --border: oklch(1 0 0 / 10%);
 
@@ -212,7 +212,7 @@
   }
 
   body {
-    @apply bg-transparent! text-foreground;
+    @apply text-foreground;
   }
 
   html {

@@ -29,10 +29,13 @@
   variant={ISDESKTOP ? "sidebar" : "floating"}
   {...restProps}
 >
-  <SidebarHeader class="border-b border-b-border/50 bg-transparent!">
+  <SidebarHeader
+    data-tauri-drag-region
+    class="border-b z-100 border-b-border/50 bg-transparent!"
+  >
     <div
       data-tauri-drag-region
-      class="flex h-12! z-100 items-center justify-between"
+      class="flex h-8 z-0 items-center justify-between"
     >
       {#if !ISMACOS}
         <AppLogoMenu />

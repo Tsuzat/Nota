@@ -13,6 +13,8 @@
     "sql:default",
     "sql:allow-execute",
     "core:window:allow-start-dragging",
-    "os:default"
+    "os:default",
+    "core:window:allow-set-theme",
+    "core:window:allow-theme"
   ]
 }

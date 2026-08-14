@@ -6,10 +6,18 @@
   import ArrowLeft from "@lucide/svelte/icons/arrow-left";
   import ArrowRight from "@lucide/svelte/icons/arrow-right";
   import { getKeyboardShortcut } from "#lib/utils.ts";
-  import { SimpleToolTip } from "@nota/ui";
+  import { SimpleToolTip, ToggleMode } from "@nota/ui";
+  import { getCurrentWindow } from "@tauri-apps/api/window";
+
+  // const handleClick = async () => {
+  //   const window = getCurrentWindow();
+  //   const theme = await window.theme();
+  //   await window.setTheme(theme === "dark" ? "light" : "dark");
+  // };
 </script>
 
 <div class={cn("flex items-center gap-2", className)}>
+  <!-- <ToggleMode onclick={handleClick} /> -->
   <SimpleToolTip
     content="Toggle Sidebar"
     keyboard={getKeyboardShortcut("\\", true)}

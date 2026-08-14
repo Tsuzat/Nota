@@ -16,12 +16,12 @@
     keyboard,
     children,
     child,
-    delayDuration = 100,
+    delayDuration = 300,
     side,
   }: Props = $props();
 </script>
 
-<Tooltip {delayDuration} {side}>
+<Tooltip {delayDuration}>
   <TooltipTrigger>
     {@render children()}
   </TooltipTrigger>
