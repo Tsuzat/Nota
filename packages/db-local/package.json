@@ -11,7 +11,8 @@
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "test": "bun --watch test"
   },
   "dependencies": {
     "@tauri-apps/plugin-sql": "~2",

@@ -6,6 +6,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 import { polarClient } from "./lib/payments";
+import { bearer } from "better-auth/plugins";
 
 export function createAuth() {
   const db = createDb();
@@ -21,7 +22,7 @@ export function createAuth() {
       enabled: true,
     },
     secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL,
+    baseURL: env.BETTER_AUTH_URL, 
     advanced: {
       defaultCookieAttributes: {
         sameSite: "none",
@@ -30,6 +31,7 @@ export function createAuth() {
       },
     },
     plugins: [
+      bearer(),
       polar({
         client: polarClient,
         createCustomerOnSignUp: true,

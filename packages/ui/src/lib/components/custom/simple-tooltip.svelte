@@ -1,9 +1,5 @@
 <script lang="ts">
-  import {
-    Tooltip,
-    TooltipTrigger,
-    TooltipContent,
-  } from "@nota/ui/shadcn/tooltip/index.ts";
+  import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
   import type { Snippet } from "svelte";
 
   interface Props {

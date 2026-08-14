@@ -7,7 +7,7 @@ pub fn run() {
         Migration {
             version: 1,
             description: "create_initial_tables",
-            sql: include_str!("../migrations/0000_unique_amazoness.sql"),
+            sql: include_str!("../migrations/0001_boring_barracuda.sql"),
             kind: MigrationKind::Up,
         },
     ];
