@@ -17,6 +17,7 @@ export type UpdateWorkspaceInput = Partial<
   z.infer<typeof updateWorkspaceSchema>
 > & {
   id: string;
+  ownerId: string;
 };
 
 /**
@@ -66,8 +67,8 @@ export const getUserWorkspaceCount = async (
  */
 export const updateWorkspace = async (
   input: UpdateWorkspaceInput,
-): Promise<Workspace> => {
-  const { id, ...values } = input;
+): Promise<Workspace | null> => {
+  const { id, ownerId, ...values } = input;
   const workspaceUpdate = updateWorkspaceSchema.parse({
     ...values,
     updatedAt: new Date(),
@@ -75,25 +76,9 @@ export const updateWorkspace = async (
   const [data] = await db
     .update(workspace)
     .set(workspaceUpdate)
-    .where(eq(workspace.id, id))
+    .where(and(eq(workspace.id, id), eq(workspace.ownerId, ownerId)))
     .returning();
-  return selectWorkspaceSchema.parse(data);
-};
-
-/**
- * Check if the user is the owner of the workspace
- * @param workspaceId Workspace Id
- * @returns Owner id of the workspace
- */
-export const isUserOwnerOfWorkspace = async (
-  userId: string,
-  workspaceId: string,
-) => {
-  const count = await db.$count(
-    workspace,
-    and(eq(workspace.ownerId, userId), eq(workspace.id, workspaceId)),
-  );
-  return count == 1;
+  return data ? selectWorkspaceSchema.parse(data) : null;
 };
 
 /**
@@ -101,10 +86,13 @@ export const isUserOwnerOfWorkspace = async (
  * @param id string
  * @returns Promise<boolean>
  */
-export const deleteWorkspace = async (id: string): Promise<boolean> => {
+export const deleteWorkspace = async (
+  id: string,
+  userId: string,
+): Promise<boolean> => {
   const result = await db
     .delete(workspace)
-    .where(eq(workspace.id, id))
+    .where(and(eq(workspace.id, id), eq(workspace.ownerId, userId)))
     .returning();
   return result.length > 0;
 };

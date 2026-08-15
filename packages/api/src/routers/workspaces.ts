@@ -5,7 +5,6 @@ import {
   insertWorkspaceSchema,
   updateWorkspaceSchema,
   updateWorkspace,
-  isUserOwnerOfWorkspace,
   deleteWorkspace,
 } from "@nota/db/data/workspace";
 import { isUserPro } from "@nota/db/data/user_quota";
@@ -13,11 +12,29 @@ import { protectedProcedure } from "../index";
 
 import { ORPCError } from "@orpc/server";
 import z from "zod";
+import {
+  deleteCachedUserWorkspaces,
+  getCachedUserWorkspaces,
+  setCachedUserWorkspaces,
+} from "@nota/cache/workspace";
 
 export const workspaceRouter = {
-  fetchUsers: protectedProcedure.handler(async ({ context }) => {
+  fetchForUser: protectedProcedure.handler(async ({ context }) => {
     try {
-      return await fetchUserWorkspaces(context.session.user.id);
+      const cachedWorkspaces = await getCachedUserWorkspaces(
+        context.session.user.id,
+      );
+      if (cachedWorkspaces) {
+        return cachedWorkspaces;
+      }
+      const workspaces = await fetchUserWorkspaces(context.session.user.id);
+      // don't await this, fire and forget, so that the response is faster
+      void setCachedUserWorkspaces(context.session.user.id, workspaces).catch(
+        (err) => {
+          console.error("Cache write failed", { err });
+        },
+      );
+      return workspaces;
     } catch (err) {
       console.error("fetchUserWorkspaces failed", {
         userId: context.session.user.id,
@@ -62,6 +79,10 @@ export const workspaceRouter = {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Failed to create workspace",
         });
+      } finally {
+        void deleteCachedUserWorkspaces(userId).catch((err) => {
+          console.error("Cache delete failed", { err });
+        });
       }
     }),
 
@@ -74,13 +95,14 @@ export const workspaceRouter = {
     .handler(async ({ context, input }) => {
       const userId = context.session.user.id;
       try {
-        const isUserOwner = await isUserOwnerOfWorkspace(userId, input.id);
-        if (!isUserOwner) {
-          throw new ORPCError("UNAUTHORIZED", {
-            message: "User is not the owner of the workspace",
-          });
+        const updated = await updateWorkspace({ ...input, ownerId: userId });
+        if (!updated) {
+          throw new ORPCError("NOT_FOUND", { message: "Workspace not found" });
         }
-        return await updateWorkspace(input);
+        void deleteCachedUserWorkspaces(userId).catch((err) =>
+          console.error("Cache delete failed", { err }),
+        );
+        return updated;
       } catch (err) {
         console.error("updateWorkspace failed", {
           userId: context.session.user.id,
@@ -101,13 +123,14 @@ export const workspaceRouter = {
     .handler(async ({ context, input }) => {
       const userId = context.session.user.id;
       try {
-        const isUserOwner = await isUserOwnerOfWorkspace(userId, input.id);
-        if (!isUserOwner) {
-          throw new ORPCError("UNAUTHORIZED", {
-            message: "User is not the owner of the workspace",
-          });
+        const deleted = await deleteWorkspace(input.id, userId);
+        if (!deleted) {
+          throw new ORPCError("NOT_FOUND", { message: "Workspace not found" });
         }
-        return await deleteWorkspace(input.id);
+        void deleteCachedUserWorkspaces(userId).catch((err) =>
+          console.error("Cache delete failed", { err }),
+        );
+        return deleted;
       } catch (err) {
         console.error("deleteWorkspace failed", {
           userId: context.session.user.id,

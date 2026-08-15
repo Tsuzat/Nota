@@ -116,6 +116,7 @@
       "name": "@nota/api",
       "dependencies": {
         "@nota/auth": "workspace:*",
+        "@nota/cache": "workspace:*",
         "@nota/db": "workspace:*",
         "@nota/env": "workspace:*",
         "@orpc/client": "catalog:",
@@ -144,6 +145,20 @@
       },
       "devDependencies": {
         "@better-auth/cli": "catalog:",
+        "@nota/config": "workspace:*",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/cache": {
+      "name": "@nota/cache",
+      "dependencies": {
+        "@nota/db": "workspace:*",
+        "@nota/env": "workspace:*",
+        "@types/bun": "catalog:",
+        "dotenv": "catalog:",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
         "@nota/config": "workspace:*",
         "typescript": "catalog:",
       },
@@ -520,6 +535,8 @@
     "@nota/api": ["@nota/api@workspace:packages/api"],
 
     "@nota/auth": ["@nota/auth@workspace:packages/auth"],
+
+    "@nota/cache": ["@nota/cache@workspace:packages/cache"],
 
     "@nota/config": ["@nota/config@workspace:packages/config"],
 
