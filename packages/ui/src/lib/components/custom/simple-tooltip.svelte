@@ -6,7 +6,7 @@ interface Props {
 	content?: string;
 	keyboard?: string;
 	children: Snippet<[]>;
-	child?: Snippet<[]>;
+	childContent?: Snippet<[]>;
 	delayDuration?: number;
 	side?: "top" | "bottom" | "left" | "right";
 }
@@ -15,7 +15,7 @@ const {
 	content,
 	keyboard,
 	children,
-	child,
+	childContent,
 	delayDuration = 300,
 	side,
 }: Props = $props();
@@ -23,7 +23,9 @@ const {
 
 <Tooltip {delayDuration}>
   <TooltipTrigger>
+  {#snippet child()}
     {@render children()}
+  {/snippet}
   </TooltipTrigger>
   <TooltipContent {side}>
     {#if content}
@@ -34,6 +36,6 @@ const {
         {keyboard}
       </span>
     {/if}
-    {@render child?.()}
+    {@render childContent?.()}
   </TooltipContent>
 </Tooltip>
