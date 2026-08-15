@@ -1,1 +1,1 @@
-export {default as BarSpinner} from './bar-spinner.svelte'
+export { default as BarSpinner } from "./bar-spinner.svelte";

@@ -8,6 +8,7 @@
     ".": "./src/lib/index.ts",
     "./shadcn/*": "./src/lib/components/ui/*",
     "./custom/*": "./src/lib/components/custom/*",
+    "./icons/*": "./src/lib/components/icons/*",
     "./utils": "./src/lib/utils.ts",
     "./global.css": "./src/global.css",
     "./*": "./src/lib/*"

@@ -27,10 +27,10 @@
   </TooltipTrigger>
   <TooltipContent {side}>
     {#if content}
-      <p>{content}</p>
+      <span class="text-xs">{content}</span>
     {/if}
     {#if keyboard}
-      <span class="bg-background text-primary rounded p-0.5">
+      <span class="bg-background text-xs text-primary rounded py-0.25 px-0.5">
         {keyboard}
       </span>
     {/if}

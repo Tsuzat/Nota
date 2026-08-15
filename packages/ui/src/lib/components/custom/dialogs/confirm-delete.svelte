@@ -91,17 +91,21 @@
         >{DEFAULT_DELETE_DIALOG_PARAMS.description}</DialogDescription
       >
     </DialogHeader>
-    
+
     {#if DEFAULT_DELETE_DIALOG_PARAMS.warning}
       <div class="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-        <p><strong>Warning:</strong> {DEFAULT_DELETE_DIALOG_PARAMS.warning.text}</p>
+        <p>
+          <strong>Warning:</strong>
+          {DEFAULT_DELETE_DIALOG_PARAMS.warning.text}
+        </p>
       </div>
     {/if}
 
     {#if DEFAULT_DELETE_DIALOG_PARAMS.confirmation}
       <div class="space-y-2">
         <label for="delete-input" class="text-sm font-medium"
-          >Type <strong>{DEFAULT_DELETE_DIALOG_PARAMS.confirmation.text}</strong> to confirm</label
+          >Type <strong>{DEFAULT_DELETE_DIALOG_PARAMS.confirmation.text}</strong
+          > to confirm</label
         >
         <Input
           id="delete-input"
