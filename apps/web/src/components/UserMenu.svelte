@@ -1,6 +1,9 @@
 <script lang="ts">
+import { toast } from "@nota/ui";
+import { Button } from "@nota/ui/shadcn/button/index.ts";
 import { authClient } from "#lib/auth-client.ts";
 import { goto } from "$app/navigation";
+import { resolve } from "$app/paths";
 
 const sessionQuery = authClient.useSession();
 
@@ -11,14 +14,11 @@ async function handleSignOut() {
 				goto("/");
 			},
 			onError: (error) => {
+				toast.error("Something went wrong. Please try again.");
 				console.error("Sign out failed:", error);
 			},
 		},
 	});
-}
-
-function goToLogin() {
-	goto("/login");
 }
 </script>
 
@@ -34,21 +34,15 @@ function goToLogin() {
       >
         {user.name || user.email?.split("@")[0] || "User"}
       </span>
-      <button
-        onclick={handleSignOut}
-        class="rounded px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white transition-colors"
-      >
+      <Button variant="destructive" onclick={handleSignOut}>
         Sign Out
-      </button>
+      </Button>
     </div>
   {:else}
     <div class="flex items-center gap-2">
-      <button
-        onclick={goToLogin}
-        class="rounded px-3 py-1 text-sm bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
-      >
+      <Button href={resolve("/signin")}>
         Sign In
-      </button>
+      </Button>
     </div>
   {/if}
 </div>
