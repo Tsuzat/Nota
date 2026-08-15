@@ -26,7 +26,7 @@ export const insertNoteSchema = createInsertSchema(notes, {
   content: z.any(),
 });
 export const updateNoteSchema = createUpdateSchema(notes, {
-  content: z.any(),
+  content: z.any().optional(),
 });
 
 export type CreateNoteInput = z.infer<typeof insertNoteSchema>;
