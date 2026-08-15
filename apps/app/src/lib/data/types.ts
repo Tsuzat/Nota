@@ -1,22 +1,13 @@
-interface WorkspaceBase {
-    id: string;
-    icon: string;
-    name: string;
-    description?: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
+import type { CloudWorkspace } from "@nota/db/types";
+import type {
+  CreateLocalWorkspace,
+  LocalWorkspace,
+} from "@nota/db-local/types";
 
-interface LocalWorkspace extends WorkspaceBase {};
-interface CloudWorkspace extends WorkspaceBase { owner: string}
-
-type Workspace = LocalWorkspace | CloudWorkspace;
-    
+export type Workspace = LocalWorkspace | CloudWorkspace;
 
 export interface ILocalWorkspaces {
-  readonly workspaces: LocalWorkspace[]
-  fetch(): Promise<void>
-  insert(input: CreateLocalWorkspace): Promise<void>
-  update(input: UpdateLoacalWorkspace): Promise<void>
-  delete(id: string): Promise<void>
+  readonly workspaces: LocalWorkspace[];
+  insert(input: CreateLocalWorkspace): Promise<void>;
+  fetch(): Promise<void>;
 }

@@ -4,6 +4,8 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 
+const isDesktop = !!process.env.TAURI_ENV_PLATFORM;
+
 export default defineConfig({
   plugins: [
     tailwindcss(),
@@ -20,5 +22,12 @@ export default defineConfig({
       }),
     }),
   ],
+  resolve: {
+    alias: {
+      "$local-workspaces": isDesktop
+        ? "/src/lib/data/local/workspace.svelte.ts"
+        : "/src/lib/data/local/workspace.stub.svelte.ts",
+    },
+  },
   server: { port: 8080 },
 });

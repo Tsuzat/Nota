@@ -18,6 +18,7 @@
     "@lucide/svelte": "catalog:",
     "@nota/api": "workspace:*",
     "@nota/db-local": "workspace:*",
+    "@nota/db": "workspace:*",
     "@nota/env": "workspace:*",
     "@nota/ui": "workspace:*",
     "@orpc/client": "catalog:",

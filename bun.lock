@@ -22,6 +22,7 @@
       "dependencies": {
         "@lucide/svelte": "catalog:",
         "@nota/api": "workspace:*",
+        "@nota/db": "workspace:*",
         "@nota/db-local": "workspace:*",
         "@nota/env": "workspace:*",
         "@nota/ui": "workspace:*",

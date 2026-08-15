@@ -23,7 +23,7 @@
         "hiddenTitle": true,
         "trafficLightPosition": {
           "x": 14,
-          "y": 24
+          "y": 26
         },
         "windowEffects": {
           "effects": ["sidebar", "acrylic"]

@@ -11,6 +11,7 @@
   import { ISDESKTOP, ISMACOS } from "#lib/utils.ts";
   import { AppLogoMenu } from "../custom";
   import ToggleSidebar from "../custom/toggle-sidebar.svelte";
+  import WorkspaceSwitcher from "./workspace-switcher.svelte";
   //   import AppLogoMenu from "../app-menu.svelte";
   //   import BackAndForthButtons from "../back-and-forth-buttons.svelte";
   //   import NavMain from "./nav-main.svelte";
@@ -42,8 +43,8 @@
       {/if}
       <ToggleSidebar class="ml-auto" />
     </div>
-    <!-- <WorkspaceSwitcher />
-    <NavMain /> -->
+    <WorkspaceSwitcher />
+    <!-- <NavMain /> -->
   </SidebarHeader>
   <SidebarContent>
     <!-- <NavShared />
