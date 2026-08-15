@@ -1,8 +1,7 @@
-import {  sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import * as p from 'drizzle-orm/pg-core'
 import { nanoid } from 'nanoid'
 import { user } from './auth'
-import { relations } from 'drizzle-orm/_relations'
 
 const bytea = p.customType<{ data: Buffer }>({ dataType: () => 'bytea' })
 const tsvector = p.customType<{ data: string }>({ dataType: () => 'tsvector' })
@@ -130,96 +129,3 @@ export const publish = p.pgTable('publish', {
 }, (t) => [
   p.uniqueIndex('publish_slug_uq').on(t.slug),
 ])
-
-// ── Relations ──────────────────────────────────────────────
-
-export const userQuotaRelations = relations(userQuota, ({ one }) => ({
-  user: one(user, {
-    fields: [userQuota.userId],
-    references: [user.id],
-  }),
-}))
-
-export const workspaceRelations = relations(workspace, ({ one, many }) => ({
-  owner: one(user, {
-    fields: [workspace.ownerId],
-    references: [user.id],
-  }),
-  notes: many(notes),
-}))
-
-export const notesRelations = relations(notes, ({ one, many }) => ({
-  workspace: one(workspace, {
-    fields: [notes.workspaceId],
-    references: [workspace.id],
-  }),
-  owner: one(user, {
-    fields: [notes.ownerId],
-    references: [user.id],
-  }),
-  parent: one(notes, {
-    fields: [notes.parentNoteId],
-    references: [notes.id],
-    relationName: 'note_children',
-  }),
-  children: many(notes, {
-    relationName: 'note_children',
-  }),
-  guests: many(noteGuests),
-  snapshots: many(noteSnapshots),
-  assets: many(assets),
-  publish: one(publish, {
-    fields: [notes.id],
-    references: [publish.id],
-  }),
-}))
-
-export const noteGuestsRelations = relations(noteGuests, ({ one }) => ({
-  note: one(notes, {
-    fields: [noteGuests.noteId],
-    references: [notes.id],
-  }),
-  user: one(user, {
-    fields: [noteGuests.userId],
-    references: [user.id],
-    relationName: 'note_guest_user',
-  }),
-  inviter: one(user, {
-    fields: [noteGuests.invitedBy],
-    references: [user.id],
-    relationName: 'note_guest_inviter',
-  }),
-}))
-
-export const noteSnapshotsRelations = relations(noteSnapshots, ({ one }) => ({
-  note: one(notes, {
-    fields: [noteSnapshots.noteId],
-    references: [notes.id],
-  }),
-  creator: one(user, {
-    fields: [noteSnapshots.createdBy],
-    references: [user.id],
-  }),
-}))
-
-export const assetsRelations = relations(assets, ({ one }) => ({
-  note: one(notes, {
-    fields: [assets.noteId],
-    references: [notes.id],
-  }),
-  uploader: one(user, {
-    fields: [assets.uploadedBy],
-    references: [user.id],
-  }),
-}))
-
-export const publishRelations = relations(publish, ({ one }) => ({
-  note: one(notes, {
-    fields: [publish.id],
-    references: [notes.id],
-  }),
-  publisher: one(user, {
-    fields: [publish.publishedBy],
-    references: [user.id],
-  }),
-}))

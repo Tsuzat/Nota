@@ -1,10 +1,14 @@
 import { env } from "@nota/env/server";
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/bun-sql";
+import { relations } from "./schema/relations";
 
-import * as schema from "./schema";
+import { SQL } from "bun";
 
 export function createDb() {
-  return drizzle(env.DATABASE_URL, { schema });
+  const client = new SQL(env.DATABASE_URL);
+  return drizzle({ client, relations });
 }
 
 export const db = createDb();
+
+export * from "./types";
