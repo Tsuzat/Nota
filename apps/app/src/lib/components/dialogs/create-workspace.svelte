@@ -8,7 +8,6 @@ export const openCreateWorkspace = () => {
 
 <script lang="ts">
   import { buttonVariants, Button } from "@nota/ui/shadcn/button/index.ts";
-  import {} from "@nota/ui";
   import {
     Dialog,
     DialogClose,
@@ -36,7 +35,6 @@ export const openCreateWorkspace = () => {
     try {
       if (isLocal) {
         await workspaceCxt.local.insert({ icon: "📁", name });
-      } else {
       }
       open = false;
     } catch (e) {

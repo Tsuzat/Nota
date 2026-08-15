@@ -1,7 +1,7 @@
 <script lang="ts">
 import ChevronUpDown from "@lucide/svelte/icons/chevrons-up-down";
 import CirclePlus from "@lucide/svelte/icons/circle-plus";
-import { Button, buttonVariants } from "@nota/ui/shadcn/button/index.js";
+import { buttonVariants } from "@nota/ui/shadcn/button/index.js";
 import {
 	DropdownMenu,
 	DropdownMenuContent,

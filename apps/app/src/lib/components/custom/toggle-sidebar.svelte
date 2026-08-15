@@ -7,8 +7,7 @@ let { class: className }: { class?: string } = $props();
 
 import ArrowLeft from "@lucide/svelte/icons/arrow-left";
 import ArrowRight from "@lucide/svelte/icons/arrow-right";
-import { SimpleToolTip, ToggleMode } from "@nota/ui";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { SimpleToolTip } from "@nota/ui";
 import { getKeyboardShortcut } from "#lib/utils.ts";
 
 // const handleClick = async () => {

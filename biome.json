@@ -19,7 +19,11 @@
 		"ignoreUnknown": false,
 		"includes": [
 			"**",
-			"!**/src-tauri"
+			"!**/src-tauri",
+			"!**/worker-configuration.d.ts",
+			"!**/.svelte-kit",
+			"!**/dist",
+			"!**/build"
 		]
 	},
 	"formatter": {

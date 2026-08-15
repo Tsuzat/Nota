@@ -1,0 +1,41 @@
+name: "Check Lint, Formatting and Runs tests"
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, Format & Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Cloudflare types (Web)
+        run: bun run --filter web gen
+
+      - name: Biome Format & Lint Check
+        run: bun run check:ci
+
+      - name: ESLint & Svelte Lint
+        run: bun run lint
+
+      - name: Run Tests
+        run: bun test

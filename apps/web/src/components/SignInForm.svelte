@@ -62,7 +62,7 @@ type SubmitState = Pick<typeof form.state, "canSubmit" | "isSubmitting">;
             }}
           />
           {#if field.state.meta.isTouched}
-            {#each field.state.meta.errors as error}
+            {#each field.state.meta.errors as error (error)}
               <p class="text-sm text-red-500" role="alert">{error}</p>
             {/each}
           {/if}
@@ -87,7 +87,7 @@ type SubmitState = Pick<typeof form.state, "canSubmit" | "isSubmitting">;
             }}
           />
           {#if field.state.meta.isTouched}
-            {#each field.state.meta.errors as error}
+            {#each field.state.meta.errors as error (error)}
               <p class="text-sm text-red-500" role="alert">{error}</p>
             {/each}
           {/if}
