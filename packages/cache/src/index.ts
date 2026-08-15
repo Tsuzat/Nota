@@ -35,3 +35,5 @@ export const cache = {
 };
 
 export * from "./workspace";
+export * from "./notes";
+export * from "./permissions";

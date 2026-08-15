@@ -6,14 +6,9 @@ import { cache } from ".";
 
 const USER_WORKSPACE_CACHE_PREFIX = "user_workspaces";
 const USER_WORKSPACE_CACHE_TTL_SECONDS = 60 * 60 * 24;
-const WORKSPACE_CACHE_PREFIX = "workspace";
-const WORKSPACE_CACHE_TTL_SECONDS = 60 * 60 * 24;
 
 const getUserWorkspaceCacheKey = (userId: string) =>
   `${USER_WORKSPACE_CACHE_PREFIX}:${userId}`;
-
-const getWorkspaceCacheKey = (workspaceId: string) =>
-  `${WORKSPACE_CACHE_PREFIX}:${workspaceId}`;
 
 /**
  * Get cached user workspaces
