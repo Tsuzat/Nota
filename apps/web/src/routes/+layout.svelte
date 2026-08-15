@@ -2,18 +2,20 @@
 import { QueryClientProvider } from "@tanstack/svelte-query";
 import { SvelteQueryDevtools } from "@tanstack/svelte-query-devtools";
 import "../app.css";
+import { ModeWatcher } from "@nota/ui";
+import { Toaster } from "@nota/ui/shadcn/sonner/index.js";
+import * as Tooltip from "@nota/ui/shadcn/tooltip/index.js";
 import { queryClient } from "#lib/orpc.ts";
-import Header from "../components/Header.svelte";
 
 const { children } = $props();
 </script>
 
+<ModeWatcher />
+<Toaster closeButton richColors />
+
 <QueryClientProvider client={queryClient}>
-  <div class="grid h-svh grid-rows-[auto_1fr]">
-    <Header />
-    <main class="overflow-y-auto">
-      {@render children()}
-    </main>
-  </div>
+  <Tooltip.Provider>
+    {@render children()}
+  </Tooltip.Provider>
   <SvelteQueryDevtools />
 </QueryClientProvider>

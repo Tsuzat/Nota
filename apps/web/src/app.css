@@ -1,1 +1,5 @@
 @import "@nota/ui/global.css";
+
+:root {
+	background-color: var(--color-background);
+}

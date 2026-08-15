@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "wrangler types --check && vite build",
+		"build": "wrangler types && vite build",
 		"preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "bunx @biomejs/biome check --write .",
@@ -16,9 +16,11 @@
 		"check:ci": "bunx @biomejs/biome check ."
 	},
 	"dependencies": {
+		"@lucide/svelte": "catalog:",
 		"@nota/api": "workspace:*",
 		"@nota/env": "workspace:*",
 		"@nota/ui": "workspace:*",
+		"@number-flow/svelte": "^0.4.2",
 		"@orpc/client": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/tanstack-query": "catalog:",
@@ -27,6 +29,7 @@
 		"@tanstack/svelte-query": "catalog:",
 		"better-auth": "catalog:",
 		"dotenv": "catalog:",
+		"motion-sv": "^0.1.13",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
@@ -51,6 +54,8 @@
 	},
 	"imports": {
 		"#lib": "./src/lib/index.js",
-		"#lib/*": "./src/lib/*"
+		"#lib/*": "./src/lib/*",
+		"#components": "./src/components/index.js",
+		"#components/*": "./src/components/*"
 	}
 }
