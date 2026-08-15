@@ -1,9 +1,9 @@
 <script lang="ts" module>
-  let open = $state(false);
+let open = $state(false);
 
-  export const openCreateWorkspace = () => {
-    open = true;
-  };
+export const openCreateWorkspace = () => {
+	open = true;
+};
 </script>
 
 <script lang="ts">

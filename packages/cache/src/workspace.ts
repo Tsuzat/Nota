@@ -8,7 +8,7 @@ const USER_WORKSPACE_CACHE_PREFIX = "user_workspaces";
 const USER_WORKSPACE_CACHE_TTL_SECONDS = 60 * 60 * 24;
 
 const getUserWorkspaceCacheKey = (userId: string) =>
-  `${USER_WORKSPACE_CACHE_PREFIX}:${userId}`;
+	`${USER_WORKSPACE_CACHE_PREFIX}:${userId}`;
 
 /**
  * Get cached user workspaces
@@ -16,19 +16,19 @@ const getUserWorkspaceCacheKey = (userId: string) =>
  * @returns Array of workspaces or null if cache miss / invalid
  */
 export const getCachedUserWorkspaces = async (
-  userId: string,
+	userId: string,
 ): Promise<Workspace[] | null> => {
-  const key = getUserWorkspaceCacheKey(userId);
-  const data = await cache.get<Workspace[]>(key);
-  if (!data) {
-    return null;
-  }
-  try {
-    return selectWorkspaceSchema.array().parse(data);
-  } catch (error) {
-    console.error("Failed to parse user workspaces cache:", error);
-    return null;
-  }
+	const key = getUserWorkspaceCacheKey(userId);
+	const data = await cache.get<Workspace[]>(key);
+	if (!data) {
+		return null;
+	}
+	try {
+		return selectWorkspaceSchema.array().parse(data);
+	} catch (error) {
+		console.error("Failed to parse user workspaces cache:", error);
+		return null;
+	}
 };
 
 /**
@@ -38,17 +38,17 @@ export const getCachedUserWorkspaces = async (
  * @param ttlSeconds Optional TTL in seconds (defaults to 24 hours)
  */
 export const setCachedUserWorkspaces = async (
-  userId: string,
-  workspaces: Workspace[],
-  ttlSeconds: number = USER_WORKSPACE_CACHE_TTL_SECONDS,
+	userId: string,
+	workspaces: Workspace[],
+	ttlSeconds: number = USER_WORKSPACE_CACHE_TTL_SECONDS,
 ): Promise<void> => {
-  const key = getUserWorkspaceCacheKey(userId);
-  try {
-    const validated = selectWorkspaceSchema.array().parse(workspaces);
-    await cache.set(key, validated, ttlSeconds);
-  } catch (error) {
-    console.error("Failed to cache user workspaces:", error);
-  }
+	const key = getUserWorkspaceCacheKey(userId);
+	try {
+		const validated = selectWorkspaceSchema.array().parse(workspaces);
+		await cache.set(key, validated, ttlSeconds);
+	} catch (error) {
+		console.error("Failed to cache user workspaces:", error);
+	}
 };
 
 /**
@@ -56,8 +56,8 @@ export const setCachedUserWorkspaces = async (
  * @param userId User ID
  */
 export const deleteCachedUserWorkspaces = async (
-  userId: string,
+	userId: string,
 ): Promise<void> => {
-  const key = getUserWorkspaceCacheKey(userId);
-  await cache.del(key);
+	const key = getUserWorkspaceCacheKey(userId);
+	await cache.del(key);
 };

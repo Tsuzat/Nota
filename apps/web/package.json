@@ -1,47 +1,56 @@
 {
-  "name": "web",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite dev",
-    "build": "wrangler types --check && vite build",
-    "preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
-    "prepare": "svelte-kit sync || echo ''",
-    "check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "gen": "wrangler types"
-  },
-  "dependencies": {
-    "@nota/api": "workspace:*",
-    "@nota/env": "workspace:*",
-    "@nota/ui": "workspace:*",
-    "@orpc/client": "catalog:",
-    "@orpc/server": "catalog:",
-    "@orpc/tanstack-query": "catalog:",
-    "@polar-sh/better-auth": "catalog:",
-    "@tanstack/svelte-form": "catalog:",
-    "@tanstack/svelte-query": "catalog:",
-    "better-auth": "catalog:",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@nota/config": "workspace:*",
-    "@sveltejs/adapter-cloudflare": "next",
-    "@sveltejs/kit": "catalog:",
-    "@sveltejs/vite-plugin-svelte": "catalog:",
-    "@tailwindcss/vite": "catalog:",
-    "@tanstack/svelte-query-devtools": "catalog:",
-    "svelte": "catalog:",
-    "svelte-check": "catalog:",
-    "tailwindcss": "catalog:",
-    "typescript": "catalog:",
-    "vite": "catalog:",
-    "wrangler": "^4.97.0"
-  },
-  "imports": {
-    "#lib": "./src/lib/index.js",
-    "#lib/*": "./src/lib/*"
-  }
+	"name": "web",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "wrangler types --check && vite build",
+		"preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "bunx @biomejs/biome check --write .",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"gen": "wrangler types",
+		"lint": "bunx @biomejs/biome lint . && eslint .",
+		"format": "bunx @biomejs/biome format --write .",
+		"check:ci": "bunx @biomejs/biome check ."
+	},
+	"dependencies": {
+		"@nota/api": "workspace:*",
+		"@nota/env": "workspace:*",
+		"@nota/ui": "workspace:*",
+		"@orpc/client": "catalog:",
+		"@orpc/server": "catalog:",
+		"@orpc/tanstack-query": "catalog:",
+		"@polar-sh/better-auth": "catalog:",
+		"@tanstack/svelte-form": "catalog:",
+		"@tanstack/svelte-query": "catalog:",
+		"better-auth": "catalog:",
+		"dotenv": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@nota/config": "workspace:*",
+		"@sveltejs/adapter-cloudflare": "next",
+		"@sveltejs/kit": "catalog:",
+		"@sveltejs/vite-plugin-svelte": "catalog:",
+		"@tailwindcss/vite": "catalog:",
+		"@tanstack/svelte-query-devtools": "catalog:",
+		"@types/node": "^24",
+		"eslint": "^10.4.1",
+		"eslint-plugin-svelte": "^3.19.0",
+		"globals": "^17.6.0",
+		"svelte": "catalog:",
+		"svelte-check": "catalog:",
+		"tailwindcss": "catalog:",
+		"typescript": "catalog:",
+		"typescript-eslint": "^8.60.1",
+		"vite": "catalog:",
+		"wrangler": "^4.97.0"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
+	}
 }

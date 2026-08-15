@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { getWorkspaceContext } from "#lib/data/workspace.svelte.ts";
-  import { SidebarMenuButton } from "@nota/ui/shadcn/sidebar/index.ts";
-  import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuLabel,
-  } from "@nota/ui/shadcn/dropdown-menu/index.ts";
-  import { Button, buttonVariants } from "@nota/ui/shadcn/button/index.js";
-  import ChevronUpDown from "@lucide/svelte/icons/chevrons-up-down";
-  import CirclePlus from "@lucide/svelte/icons/circle-plus";
-  import { openCreateWorkspace } from "../dialogs";
+import ChevronUpDown from "@lucide/svelte/icons/chevrons-up-down";
+import CirclePlus from "@lucide/svelte/icons/circle-plus";
+import { Button, buttonVariants } from "@nota/ui/shadcn/button/index.js";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@nota/ui/shadcn/dropdown-menu/index.ts";
+import { SidebarMenuButton } from "@nota/ui/shadcn/sidebar/index.ts";
+import { getWorkspaceContext } from "#lib/data/workspace.svelte.ts";
+import { openCreateWorkspace } from "../dialogs";
 
-  const workspaceCxt = getWorkspaceContext();
-  const currentWorkspace = $derived(workspaceCxt.current);
-  const isCloud = $derived("ownerId" in (currentWorkspace ?? {}));
+const workspaceCxt = getWorkspaceContext();
+const currentWorkspace = $derived(workspaceCxt.current);
+const isCloud = $derived("ownerId" in (currentWorkspace ?? {}));
 </script>
 
 <div class="flex items-center gap-1!">

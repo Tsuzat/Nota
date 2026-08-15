@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ISDESKTOP } from "#lib/utils.ts";
+import { ISDESKTOP } from "#lib/utils.ts";
 </script>
 
 {#if ISDESKTOP}{:else}

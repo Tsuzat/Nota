@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { orpc } from "#lib/orpc.ts";
-  import { createQuery } from "@tanstack/svelte-query";
-  const healthCheck = createQuery(() => orpc.healthCheck.queryOptions());
+import { createQuery } from "@tanstack/svelte-query";
+import { orpc } from "#lib/orpc.ts";
 
-  const TITLE_TEXT = `
+const healthCheck = createQuery(() => orpc.healthCheck.queryOptions());
+
+const TITLE_TEXT = `
    ██████╗ ███████╗████████╗████████╗███████╗██████╗
    ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
    ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝

@@ -1,29 +1,33 @@
 {
-  "name": "@nota/auth",
-  "type": "module",
-  "exports": {
-    ".": {
-      "default": "./src/index.ts"
-    },
-    "./*": {
-      "default": "./src/*.ts"
-    }
-  },
-  "scripts": {
-    "auth:generate": "SKIP_ENV_VALIDATION=1 bun --bun better-auth generate --config ./src/index.ts --output ../db/src/schema/auth.ts -y"
-  },
-  "dependencies": {
-    "@nota/db": "workspace:*",
-    "@nota/env": "workspace:*",
-    "@polar-sh/better-auth": "catalog:",
-    "@polar-sh/sdk": "^0.49.0",
-    "better-auth": "catalog:",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@better-auth/cli": "catalog:",
-    "@nota/config": "workspace:*",
-    "typescript": "catalog:"
-  }
+	"name": "@nota/auth",
+	"type": "module",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"default": "./src/*.ts"
+		}
+	},
+	"scripts": {
+		"auth:generate": "SKIP_ENV_VALIDATION=1 bun --bun better-auth generate --config ./src/index.ts --output ../db/src/schema/auth.ts -y",
+		"lint": "bunx @biomejs/biome lint .",
+		"format": "bunx @biomejs/biome format --write .",
+		"check": "bunx @biomejs/biome check --write .",
+		"check:ci": "bunx @biomejs/biome check ."
+	},
+	"dependencies": {
+		"@nota/db": "workspace:*",
+		"@nota/env": "workspace:*",
+		"@polar-sh/better-auth": "catalog:",
+		"@polar-sh/sdk": "^0.49.0",
+		"better-auth": "catalog:",
+		"dotenv": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@better-auth/cli": "catalog:",
+		"@nota/config": "workspace:*",
+		"typescript": "catalog:"
+	}
 }

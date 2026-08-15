@@ -1,1 +1,1 @@
-export {default as AppSideBar} from './app-bar.svelte'
+export { default as AppSideBar } from "./app-bar.svelte";

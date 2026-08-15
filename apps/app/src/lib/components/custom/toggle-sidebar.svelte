@@ -1,19 +1,21 @@
 <script lang="ts">
-  import { Button } from "@nota/ui/shadcn/button/index.js";
-  import { SidebarTrigger } from "@nota/ui/shadcn/sidebar/index.js";
-  import { cn } from "@nota/ui/utils.ts";
-  let { class: className }: { class?: string } = $props();
-  import ArrowLeft from "@lucide/svelte/icons/arrow-left";
-  import ArrowRight from "@lucide/svelte/icons/arrow-right";
-  import { getKeyboardShortcut } from "#lib/utils.ts";
-  import { SimpleToolTip, ToggleMode } from "@nota/ui";
-  import { getCurrentWindow } from "@tauri-apps/api/window";
+import { Button } from "@nota/ui/shadcn/button/index.js";
+import { SidebarTrigger } from "@nota/ui/shadcn/sidebar/index.js";
+import { cn } from "@nota/ui/utils.ts";
 
-  // const handleClick = async () => {
-  //   const window = getCurrentWindow();
-  //   const theme = await window.theme();
-  //   await window.setTheme(theme === "dark" ? "light" : "dark");
-  // };
+let { class: className }: { class?: string } = $props();
+
+import ArrowLeft from "@lucide/svelte/icons/arrow-left";
+import ArrowRight from "@lucide/svelte/icons/arrow-right";
+import { SimpleToolTip, ToggleMode } from "@nota/ui";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getKeyboardShortcut } from "#lib/utils.ts";
+
+// const handleClick = async () => {
+//   const window = getCurrentWindow();
+//   const theme = await window.theme();
+//   await window.setTheme(theme === "dark" ? "light" : "dark");
+// };
 </script>
 
 <div class={cn("flex items-center gap-2", className)}>

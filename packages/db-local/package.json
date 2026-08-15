@@ -1,28 +1,32 @@
 {
-  "name": "@nota/db-local",
-  "type": "module",
-  "exports": {
-    ".": {
-      "default": "./src/index.ts"
-    },
-    "./*": {
-      "default": "./src/*.ts"
-    }
-  },
-  "scripts": {
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "test": "bun --watch test"
-  },
-  "dependencies": {
-    "@tauri-apps/plugin-sql": "~2",
-    "drizzle-orm": "^1.0.0-rc.4",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@nota/config": "workspace:*",
-    "drizzle-kit": "^0.31.10",
-    "typescript": "catalog:",
-    "nanoid": "catalog:"
-  }
+	"name": "@nota/db-local",
+	"type": "module",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"default": "./src/*.ts"
+		}
+	},
+	"scripts": {
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"test": "bun --watch test",
+		"lint": "bunx @biomejs/biome lint .",
+		"format": "bunx @biomejs/biome format --write .",
+		"check": "bunx @biomejs/biome check --write .",
+		"check:ci": "bunx @biomejs/biome check ."
+	},
+	"dependencies": {
+		"@tauri-apps/plugin-sql": "~2",
+		"drizzle-orm": "^1.0.0-rc.4",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@nota/config": "workspace:*",
+		"drizzle-kit": "^0.31.10",
+		"typescript": "catalog:",
+		"nanoid": "catalog:"
+	}
 }

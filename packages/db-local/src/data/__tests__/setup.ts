@@ -4,8 +4,8 @@
  */
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import * as schema from "../../schema/index";
 import { nanoid } from "nanoid";
+import * as schema from "../../schema/index";
 
 // ─── DDL ─────────────────────────────────────────────────────
 
@@ -72,12 +72,12 @@ const DDL = `
  * Each call returns an isolated database — safe for parallel tests.
  */
 export function createTestDb() {
-  const sqlite = new Database(":memory:");
-  sqlite.run("PRAGMA foreign_keys = ON;");
-  sqlite.run(DDL);
+	const sqlite = new Database(":memory:");
+	sqlite.run("PRAGMA foreign_keys = ON;");
+	sqlite.run(DDL);
 
-  const db = drizzle({ client: sqlite });
-  return { db, sqlite };
+	const db = drizzle({ client: sqlite });
+	return { db, sqlite };
 }
 
 export type TestDb = ReturnType<typeof createTestDb>;
@@ -88,44 +88,44 @@ export type TestDb = ReturnType<typeof createTestDb>;
  * Seeds a workspace and returns its ID.
  */
 export function seedWorkspace(db: TestDb["db"]) {
-  const id = nanoid();
-  const now = new Date();
-  db.insert(schema.workspace)
-    .values({
-      id,
-      icon: "📓",
-      name: "Test Workspace",
-      description: "A test workspace",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .run();
-  return id;
+	const id = nanoid();
+	const now = new Date();
+	db.insert(schema.workspace)
+		.values({
+			id,
+			icon: "📓",
+			name: "Test Workspace",
+			description: "A test workspace",
+			createdAt: now,
+			updatedAt: now,
+		})
+		.run();
+	return id;
 }
 
 /**
  * Seeds a note directly via the DB (bypassing the data layer).
  */
 export function seedNote(
-  db: TestDb["db"],
-  workspaceId: string,
-  overrides: Partial<typeof schema.notes.$inferInsert> = {}
+	db: TestDb["db"],
+	workspaceId: string,
+	overrides: Partial<typeof schema.notes.$inferInsert> = {},
 ) {
-  const id = overrides.id ?? nanoid();
-  const now = new Date();
-  const values = {
-    id,
-    workspaceId,
-    icon: "📝",
-    name: "Test Note",
-    content: { type: "doc", content: [] },
-    contentText: "test content text",
-    starred: false,
-    createdAt: now,
-    updatedAt: now,
-    ...overrides,
-  };
+	const id = overrides.id ?? nanoid();
+	const now = new Date();
+	const values = {
+		id,
+		workspaceId,
+		icon: "📝",
+		name: "Test Note",
+		content: { type: "doc", content: [] },
+		contentText: "test content text",
+		starred: false,
+		createdAt: now,
+		updatedAt: now,
+		...overrides,
+	};
 
-  db.insert(schema.notes).values(values).run();
-  return values;
+	db.insert(schema.notes).values(values).run();
+	return values;
 }

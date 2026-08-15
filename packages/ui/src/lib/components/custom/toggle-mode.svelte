@@ -1,13 +1,14 @@
 <script lang="ts">
-  import { Button } from "../ui/button";
-  import Sun from "@lucide/svelte/icons/sun";
-  import MoonStar from "@lucide/svelte/icons/moon-star";
-  import { toggleMode } from "mode-watcher";
-  let { onclick }: { onclick?: () => void } = $props();
-  function handleClick() {
-    onclick?.();
-    toggleMode();
-  }
+import MoonStar from "@lucide/svelte/icons/moon-star";
+import Sun from "@lucide/svelte/icons/sun";
+import { toggleMode } from "mode-watcher";
+import { Button } from "../ui/button";
+
+let { onclick }: { onclick?: () => void } = $props();
+function handleClick() {
+	onclick?.();
+	toggleMode();
+}
 </script>
 
 <Button variant="ghost" size="icon" class="relative" onclick={handleClick}>

@@ -1,37 +1,36 @@
 <script lang="ts" module>
-  let open = $state(false);
+let open = $state(false);
+interface ConfirmDeleteParams {
+	title?: string;
+	description?: string;
+	confirmation?: { text: string };
+	warning?: { text: string; allowDelete?: boolean };
+	buttonText?: string;
+	onClick?: () => Promise<void>;
+}
 
-  interface ConfirmDeleteParams {
-    title?: string;
-    description?: string;
-    confirmation?: { text: string };
-    warning?: { text: string; allowDelete?: boolean };
-    buttonText?: string;
-    onClick?: () => Promise<void>;
-  }
+const DEFAULT_DELETE_DIALOG_PARAMS = $state<ConfirmDeleteParams>({
+	title: "Delete",
+	description: "Are you sure you want to delete?",
+	buttonText: "Delete",
+});
 
-  const DEFAULT_DELETE_DIALOG_PARAMS = $state<ConfirmDeleteParams>({
-    title: "Delete",
-    description: "Are you sure you want to delete?",
-    buttonText: "Delete",
-  });
-
-  export const openDeleteConfirmation = ({
-    title = "Delete",
-    description = "Are you sure you want to delete?",
-    confirmation,
-    warning,
-    buttonText = "Delete",
-    onClick,
-  }: ConfirmDeleteParams) => {
-    DEFAULT_DELETE_DIALOG_PARAMS.title = title;
-    DEFAULT_DELETE_DIALOG_PARAMS.description = description;
-    DEFAULT_DELETE_DIALOG_PARAMS.confirmation = confirmation;
-    DEFAULT_DELETE_DIALOG_PARAMS.warning = warning;
-    DEFAULT_DELETE_DIALOG_PARAMS.buttonText = buttonText;
-    DEFAULT_DELETE_DIALOG_PARAMS.onClick = onClick;
-    open = true;
-  };
+export const openDeleteConfirmation = ({
+	title = "Delete",
+	description = "Are you sure you want to delete?",
+	confirmation,
+	warning,
+	buttonText = "Delete",
+	onClick,
+}: ConfirmDeleteParams) => {
+	DEFAULT_DELETE_DIALOG_PARAMS.title = title;
+	DEFAULT_DELETE_DIALOG_PARAMS.description = description;
+	DEFAULT_DELETE_DIALOG_PARAMS.confirmation = confirmation;
+	DEFAULT_DELETE_DIALOG_PARAMS.warning = warning;
+	DEFAULT_DELETE_DIALOG_PARAMS.buttonText = buttonText;
+	DEFAULT_DELETE_DIALOG_PARAMS.onClick = onClick;
+	open = true;
+};
 </script>
 
 <script lang="ts">

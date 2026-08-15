@@ -1,13 +1,13 @@
-import { db } from "../db";
-import type { LocalWorkspace } from "../types.js";
-import { workspace } from "../schema/index.js";
+import { eq } from "drizzle-orm/sqlite-core/expressions";
 import {
-  createSelectSchema,
-  createInsertSchema,
-  createUpdateSchema,
+	createInsertSchema,
+	createSelectSchema,
+	createUpdateSchema,
 } from "drizzle-orm/zod";
 import type z from "zod";
-import { eq } from "drizzle-orm/sqlite-core/expressions";
+import { db } from "../db";
+import { workspace } from "../schema/index.js";
+import type { LocalWorkspace } from "../types.js";
 
 const selectWorkspaceSchema = createSelectSchema(workspace);
 const insertWorkspaceSchema = createInsertSchema(workspace);
@@ -18,14 +18,14 @@ const updateWorkspaceSchema = createUpdateSchema(workspace);
  * @returns A promise that resolves to an array of LocalWorkspace.
  */
 export async function fetchWorkspace(): Promise<LocalWorkspace[]> {
-  try {
-    const data = await db.select().from(workspace);
-    const result = selectWorkspaceSchema.array().parse(data);
-    return result;
-  } catch (error) {
-    console.log(error);
-    throw new Error("Failed to fetch workspaces");
-  }
+	try {
+		const data = await db.select().from(workspace);
+		const result = selectWorkspaceSchema.array().parse(data);
+		return result;
+	} catch (error) {
+		console.log(error);
+		throw new Error("Failed to fetch workspaces");
+	}
 }
 
 /**
@@ -34,19 +34,19 @@ export async function fetchWorkspace(): Promise<LocalWorkspace[]> {
  * @returns A promise that resolves to the created LocalWorkspace.
  */
 export async function createWorkspace(
-  input: z.infer<typeof insertWorkspaceSchema>,
+	input: z.infer<typeof insertWorkspaceSchema>,
 ) {
-  try {
-    const workspaceInsert = insertWorkspaceSchema.parse(input);
-    const result = await db
-      .insert(workspace)
-      .values(workspaceInsert)
-      .returning();
-    return selectWorkspaceSchema.parse(result[0]);
-  } catch (error) {
-    console.log(error);
-    throw new Error("Failed to create workspace");
-  }
+	try {
+		const workspaceInsert = insertWorkspaceSchema.parse(input);
+		const result = await db
+			.insert(workspace)
+			.values(workspaceInsert)
+			.returning();
+		return selectWorkspaceSchema.parse(result[0]);
+	} catch (error) {
+		console.log(error);
+		throw new Error("Failed to create workspace");
+	}
 }
 
 /**
@@ -55,16 +55,16 @@ export async function createWorkspace(
  * @returns A promise that resolves to the updated LocalWorkspace.
  */
 export async function updateWorkspace(
-  input: Partial<z.infer<typeof updateWorkspaceSchema>> & { id: string },
+	input: Partial<z.infer<typeof updateWorkspaceSchema>> & { id: string },
 ) {
-  try {
-    const workspaceUpdate = updateWorkspaceSchema.parse(input);
-    const result = await db.update(workspace).set(workspaceUpdate).returning();
-    return selectWorkspaceSchema.parse(result[0]);
-  } catch (error) {
-    console.log(error);
-    throw new Error("Failed to update workspace");
-  }
+	try {
+		const workspaceUpdate = updateWorkspaceSchema.parse(input);
+		const result = await db.update(workspace).set(workspaceUpdate).returning();
+		return selectWorkspaceSchema.parse(result[0]);
+	} catch (error) {
+		console.log(error);
+		throw new Error("Failed to update workspace");
+	}
 }
 
 /**
@@ -73,14 +73,14 @@ export async function updateWorkspace(
  * @returns A promise that resolves to the deleted LocalWorkspace.
  */
 export async function deleteWorkspace(id: string): Promise<boolean> {
-  try {
-    const result = await db
-      .delete(workspace)
-      .where(eq(workspace.id, id))
-      .returning();
-    return result.length === 1;
-  } catch (error) {
-    console.log(error);
-    throw new Error("Failed to delete workspace");
-  }
+	try {
+		const result = await db
+			.delete(workspace)
+			.where(eq(workspace.id, id))
+			.returning();
+		return result.length === 1;
+	} catch (error) {
+		console.log(error);
+		throw new Error("Failed to delete workspace");
+	}
 }

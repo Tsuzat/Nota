@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	export type Side = "top" | "right" | "bottom" | "left";
+export type Side = "top" | "right" | "bottom" | "left";
 </script>
 
 <script lang="ts">

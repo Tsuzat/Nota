@@ -1,9 +1,9 @@
 {
-  "extends": "$app/tsconfig",
-  "compilerOptions": {
-    "sourceMap": true,
-    "strict": true,
-    "types": ["./worker-configuration.d.ts", "$app/types"]
-  },
-  "include": ["src"]
+	"extends": "$app/tsconfig",
+	"compilerOptions": {
+		"sourceMap": true,
+		"strict": true,
+		"types": ["./worker-configuration.d.ts", "$app/types"]
+	},
+	"include": ["src"]
 }

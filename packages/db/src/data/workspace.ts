@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import {
-  createInsertSchema,
-  createSelectSchema,
-  createUpdateSchema,
+	createInsertSchema,
+	createSelectSchema,
+	createUpdateSchema,
 } from "drizzle-orm/zod";
 import type z from "zod";
 import { db, type Workspace } from "..";
@@ -14,10 +14,10 @@ export const updateWorkspaceSchema = createUpdateSchema(workspace);
 
 export type CreateWorkspaceInput = z.infer<typeof insertWorkspaceSchema>;
 export type UpdateWorkspaceInput = Partial<
-  z.infer<typeof updateWorkspaceSchema>
+	z.infer<typeof updateWorkspaceSchema>
 > & {
-  id: string;
-  ownerId: string;
+	id: string;
+	ownerId: string;
 };
 
 /**
@@ -26,13 +26,13 @@ export type UpdateWorkspaceInput = Partial<
  * @returns Promise<Workspace[]>
  */
 export const fetchUserWorkspaces = async (
-  userId: string,
+	userId: string,
 ): Promise<Workspace[]> => {
-  const data = await db
-    .select()
-    .from(workspace)
-    .where(eq(workspace.ownerId, userId));
-  return selectWorkspaceSchema.array().parse(data);
+	const data = await db
+		.select()
+		.from(workspace)
+		.where(eq(workspace.ownerId, userId));
+	return selectWorkspaceSchema.array().parse(data);
 };
 
 /**
@@ -41,11 +41,11 @@ export const fetchUserWorkspaces = async (
  * @returns Promise<Workspace>
  */
 export const createWorkspace = async (
-  input: CreateWorkspaceInput,
+	input: CreateWorkspaceInput,
 ): Promise<Workspace> => {
-  const workspaceInsert = insertWorkspaceSchema.parse(input);
-  const [data] = await db.insert(workspace).values(workspaceInsert).returning();
-  return selectWorkspaceSchema.parse(data);
+	const workspaceInsert = insertWorkspaceSchema.parse(input);
+	const [data] = await db.insert(workspace).values(workspaceInsert).returning();
+	return selectWorkspaceSchema.parse(data);
 };
 
 /**
@@ -54,10 +54,10 @@ export const createWorkspace = async (
  * @returns Promise<number>
  */
 export const getUserWorkspaceCount = async (
-  userId: string,
+	userId: string,
 ): Promise<number> => {
-  const count = await db.$count(workspace, eq(workspace.ownerId, userId));
-  return count;
+	const count = await db.$count(workspace, eq(workspace.ownerId, userId));
+	return count;
 };
 
 /**
@@ -66,19 +66,19 @@ export const getUserWorkspaceCount = async (
  * @returns Promise<Workspace>
  */
 export const updateWorkspace = async (
-  input: UpdateWorkspaceInput,
+	input: UpdateWorkspaceInput,
 ): Promise<Workspace | null> => {
-  const { id, ownerId, ...values } = input;
-  const workspaceUpdate = updateWorkspaceSchema.parse({
-    ...values,
-    updatedAt: new Date(),
-  });
-  const [data] = await db
-    .update(workspace)
-    .set(workspaceUpdate)
-    .where(and(eq(workspace.id, id), eq(workspace.ownerId, ownerId)))
-    .returning();
-  return data ? selectWorkspaceSchema.parse(data) : null;
+	const { id, ownerId, ...values } = input;
+	const workspaceUpdate = updateWorkspaceSchema.parse({
+		...values,
+		updatedAt: new Date(),
+	});
+	const [data] = await db
+		.update(workspace)
+		.set(workspaceUpdate)
+		.where(and(eq(workspace.id, id), eq(workspace.ownerId, ownerId)))
+		.returning();
+	return data ? selectWorkspaceSchema.parse(data) : null;
 };
 
 /**
@@ -87,12 +87,12 @@ export const updateWorkspace = async (
  * @returns Promise<boolean>
  */
 export const deleteWorkspace = async (
-  id: string,
-  userId: string,
+	id: string,
+	userId: string,
 ): Promise<boolean> => {
-  const result = await db
-    .delete(workspace)
-    .where(and(eq(workspace.id, id), eq(workspace.ownerId, userId)))
-    .returning();
-  return result.length > 0;
+	const result = await db
+		.delete(workspace)
+		.where(and(eq(workspace.id, id), eq(workspace.ownerId, userId)))
+		.returning();
+	return result.length > 0;
 };

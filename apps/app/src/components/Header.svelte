@@ -1,6 +1,6 @@
 <script lang="ts">
-  import UserMenu from "./UserMenu.svelte";
-  import { ToggleMode } from "@nota/ui/custom/index.ts";
+import { ToggleMode } from "@nota/ui/custom/index.ts";
+import UserMenu from "./UserMenu.svelte";
 </script>
 
 <header

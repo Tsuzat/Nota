@@ -1,27 +1,28 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { authClient } from '#lib/auth-client.js';
-	import { orpc } from '#lib/orpc.js';
-	import { createQuery } from '@tanstack/svelte-query';
-	let customerState = $state<{ activeSubscriptions?: unknown[] } | null>(null);
+import { createQuery } from "@tanstack/svelte-query";
+import { authClient } from "#lib/auth-client.js";
+import { orpc } from "#lib/orpc.js";
+import { goto } from "$app/navigation";
 
-	const sessionQuery = authClient.useSession();
+let customerState = $state<{ activeSubscriptions?: unknown[] } | null>(null);
 
-	const privateDataQuery = createQuery(() => orpc.privateData.queryOptions());
+const sessionQuery = authClient.useSession();
 
-	$effect(() => {
-		if (!$sessionQuery.isPending && !$sessionQuery.data) {
-			goto('/login');
-		}
-	});
+const privateDataQuery = createQuery(() => orpc.privateData.queryOptions());
 
-	$effect(() => {
-		if ($sessionQuery.data) {
-			authClient.customer.state().then(({ data }) => {
-				customerState = data;
-			});
-		}
-	});
+$effect(() => {
+	if (!$sessionQuery.isPending && !$sessionQuery.data) {
+		goto("/login");
+	}
+});
+
+$effect(() => {
+	if ($sessionQuery.data) {
+		authClient.customer.state().then(({ data }) => {
+			customerState = data;
+		});
+	}
+});
 </script>
 
 {#if $sessionQuery.isPending}

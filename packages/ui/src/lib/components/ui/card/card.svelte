@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { cn, type WithElementRef } from "#lib/utils.js";
-	import type { HTMLAttributes } from "svelte/elements";
+import type { HTMLAttributes } from "svelte/elements";
+import { cn, type WithElementRef } from "#lib/utils.js";
 
-	let {
-		ref = $bindable(null),
-		class: className,
-		children,
-		size = "default",
-		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & { size?: "default" | "sm" } = $props();
+let {
+	ref = $bindable(null),
+	class: className,
+	children,
+	size = "default",
+	...restProps
+}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
+	size?: "default" | "sm";
+} = $props();
 </script>
 
 <div

@@ -1,25 +1,29 @@
 {
-  "name": "@nota/cache",
-  "type": "module",
-  "exports": {
-    ".": {
-      "default": "./src/index.ts"
-    },
-    "./*": {
-      "default": "./src/*.ts"
-    }
-  },
-  "scripts": {
-  },
-  "dependencies": {
-    "@nota/env": "workspace:*",
-    "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@nota/db": "workspace:*",
-    "@types/bun": "catalog:"
-  },
-  "devDependencies": {
-    "@nota/config": "workspace:*",
-    "typescript": "catalog:"
-  }
+	"name": "@nota/cache",
+	"type": "module",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"default": "./src/*.ts"
+		}
+	},
+	"scripts": {
+		"lint": "bunx @biomejs/biome lint .",
+		"format": "bunx @biomejs/biome format --write .",
+		"check": "bunx @biomejs/biome check --write .",
+		"check:ci": "bunx @biomejs/biome check ."
+	},
+	"dependencies": {
+		"@nota/env": "workspace:*",
+		"dotenv": "catalog:",
+		"zod": "catalog:",
+		"@nota/db": "workspace:*",
+		"@types/bun": "catalog:"
+	},
+	"devDependencies": {
+		"@nota/config": "workspace:*",
+		"typescript": "catalog:"
+	}
 }

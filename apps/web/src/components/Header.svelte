@@ -1,7 +1,5 @@
 <script lang="ts">
-
-	import UserMenu from './UserMenu.svelte';
-
+import UserMenu from "./UserMenu.svelte";
 </script>
 
 <div>

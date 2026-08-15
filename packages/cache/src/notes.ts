@@ -10,103 +10,103 @@ const COLLAB_NOTES_CACHE_PREFIX = "collab_notes";
 const TTL_SECONDS = 60 * 60 * 24; // 24 hours
 
 export const getWorkspaceNotesCacheKey = (workspaceId: string) =>
-  `${WORKSPACE_NOTES_CACHE_PREFIX}:${workspaceId}`;
+	`${WORKSPACE_NOTES_CACHE_PREFIX}:${workspaceId}`;
 
 export const getNoteMetaCacheKey = (noteId: string) =>
-  `${NOTE_META_CACHE_PREFIX}:${noteId}`;
+	`${NOTE_META_CACHE_PREFIX}:${noteId}`;
 
 export const getCollabNotesCacheKey = (userId: string) =>
-  `${COLLAB_NOTES_CACHE_PREFIX}:${userId}`;
+	`${COLLAB_NOTES_CACHE_PREFIX}:${userId}`;
 
 // ── Workspace Notes ─────────────────────────────────────────────────────────
 
 export const getCachedNotesByWorkspace = async (
-  workspaceId: string,
+	workspaceId: string,
 ): Promise<NoteMeta[] | null> => {
-  const key = getWorkspaceNotesCacheKey(workspaceId);
-  const data = await cache.get<NoteMeta[]>(key);
-  if (!data) return null;
-  return data;
+	const key = getWorkspaceNotesCacheKey(workspaceId);
+	const data = await cache.get<NoteMeta[]>(key);
+	if (!data) return null;
+	return data;
 };
 
 export const setCachedNotesByWorkspace = async (
-  workspaceId: string,
-  notes: NoteMeta[],
-  ttlSeconds: number = TTL_SECONDS,
+	workspaceId: string,
+	notes: NoteMeta[],
+	ttlSeconds: number = TTL_SECONDS,
 ): Promise<void> => {
-  const key = getWorkspaceNotesCacheKey(workspaceId);
-  try {
-    await cache.set(key, notes, ttlSeconds);
-  } catch (error) {
-    console.error("Failed to cache workspace notes:", error);
-  }
+	const key = getWorkspaceNotesCacheKey(workspaceId);
+	try {
+		await cache.set(key, notes, ttlSeconds);
+	} catch (error) {
+		console.error("Failed to cache workspace notes:", error);
+	}
 };
 
 export const deleteCachedNotesByWorkspace = async (
-  workspaceId: string,
+	workspaceId: string,
 ): Promise<void> => {
-  const key = getWorkspaceNotesCacheKey(workspaceId);
-  await cache.del(key);
+	const key = getWorkspaceNotesCacheKey(workspaceId);
+	await cache.del(key);
 };
 
 // ── Note Meta ───────────────────────────────────────────────────────────────
 
 export const getCachedNoteMeta = async (
-  noteId: string,
+	noteId: string,
 ): Promise<NoteMeta | null> => {
-  const key = getNoteMetaCacheKey(noteId);
-  const data = await cache.get<NoteMeta>(key);
-  if (!data) return null;
-  return data;
+	const key = getNoteMetaCacheKey(noteId);
+	const data = await cache.get<NoteMeta>(key);
+	if (!data) return null;
+	return data;
 };
 
 export const setCachedNoteMeta = async (
-  noteId: string,
-  meta: NoteMeta,
-  ttlSeconds: number = TTL_SECONDS,
+	noteId: string,
+	meta: NoteMeta,
+	ttlSeconds: number = TTL_SECONDS,
 ): Promise<void> => {
-  const key = getNoteMetaCacheKey(noteId);
-  try {
-    await cache.set(key, meta, ttlSeconds);
-  } catch (error) {
-    console.error("Failed to cache note meta:", error);
-  }
+	const key = getNoteMetaCacheKey(noteId);
+	try {
+		await cache.set(key, meta, ttlSeconds);
+	} catch (error) {
+		console.error("Failed to cache note meta:", error);
+	}
 };
 
 export const deleteCachedNoteMeta = async (noteId: string): Promise<void> => {
-  const key = getNoteMetaCacheKey(noteId);
-  await cache.del(key);
+	const key = getNoteMetaCacheKey(noteId);
+	await cache.del(key);
 };
 
 // ── Collab Notes ────────────────────────────────────────────────────────────
 
 export const getCachedCollabNotes = async (
-  userId: string,
+	userId: string,
 ): Promise<(NoteMeta & { role: string })[] | null> => {
-  const key = getCollabNotesCacheKey(userId);
-  const data = await cache.get<(NoteMeta & { role: string })[]>(key);
-  if (!data) return null;
-  return data;
+	const key = getCollabNotesCacheKey(userId);
+	const data = await cache.get<(NoteMeta & { role: string })[]>(key);
+	if (!data) return null;
+	return data;
 };
 
 export const setCachedCollabNotes = async (
-  userId: string,
-  notes: (NoteMeta & { role: string })[],
-  ttlSeconds: number = TTL_SECONDS,
+	userId: string,
+	notes: (NoteMeta & { role: string })[],
+	ttlSeconds: number = TTL_SECONDS,
 ): Promise<void> => {
-  const key = getCollabNotesCacheKey(userId);
-  try {
-    await cache.set(key, notes, ttlSeconds);
-  } catch (error) {
-    console.error("Failed to cache collab notes:", error);
-  }
+	const key = getCollabNotesCacheKey(userId);
+	try {
+		await cache.set(key, notes, ttlSeconds);
+	} catch (error) {
+		console.error("Failed to cache collab notes:", error);
+	}
 };
 
 export const deleteCachedCollabNotes = async (
-  userId: string,
+	userId: string,
 ): Promise<void> => {
-  const key = getCollabNotesCacheKey(userId);
-  await cache.del(key);
+	const key = getCollabNotesCacheKey(userId);
+	await cache.del(key);
 };
 
 // ── Composite Invalidation Helpers ──────────────────────────────────────────
@@ -116,13 +116,13 @@ export const deleteCachedCollabNotes = async (
  * clearing the specific note's meta and its parent workspace's notes list.
  */
 export const invalidateNoteMetaCache = async (
-  noteId: string,
-  workspaceId?: string,
+	noteId: string,
+	workspaceId?: string,
 ): Promise<void> => {
-  const operations: Promise<void>[] = [];
-  operations.push(deleteCachedNoteMeta(noteId));
-  if (workspaceId) {
-    operations.push(deleteCachedNotesByWorkspace(workspaceId));
-  }
-  await Promise.all(operations);
+	const operations: Promise<void>[] = [];
+	operations.push(deleteCachedNoteMeta(noteId));
+	if (workspaceId) {
+		operations.push(deleteCachedNotesByWorkspace(workspaceId));
+	}
+	await Promise.all(operations);
 };

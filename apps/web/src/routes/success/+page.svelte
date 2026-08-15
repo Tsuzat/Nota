@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	
-	const checkout_id = $derived(page.url.searchParams.get('checkout_id'));
+import { page } from "$app/state";
+
+const checkout_id = $derived(page.url.searchParams.get("checkout_id"));
 </script>
 
 <div class="container mx-auto px-4 py-8">
