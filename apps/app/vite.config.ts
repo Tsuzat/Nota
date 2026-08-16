@@ -29,5 +29,5 @@ export default defineConfig({
 				: "/src/lib/data/local/workspace.stub.svelte.ts",
 		},
 	},
-	server: { port: 8080 },
+	server: { port: 8080, allowedHosts: ["local-app.nota.ink"] },
 });

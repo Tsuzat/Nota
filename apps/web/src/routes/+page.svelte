@@ -27,7 +27,7 @@ import * as Dropdown from "@nota/ui/shadcn/dropdown-menu/index.ts";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
 import { fade } from "svelte/transition";
-// import ArtifactDownloader from "$lib/artefact/artifact-downloader.svelte";
+import ArtifactDownloader from "#components/artefact/artifact-downloader.svelte";
 import AppLogo from "#components/custom/app-logo.svelte";
 import BorderBeam from "#components/custom/landing/border-beam.svelte";
 import Multistream from "#components/custom/landing/multistream.svelte";
@@ -37,8 +37,7 @@ import Spotlight from "#components/custom/landing/spotlight.svelte";
 import Tiltcard from "#components/custom/tilt-card.svelte";
 import { authClient } from "#lib/auth-client.ts";
 import { resolve } from "$app/paths";
-
-// import { getArtefacts } from "./data.remote";
+import { getArtefacts } from "./data.remote";
 
 const sessionQuery = authClient.useSession();
 
@@ -187,7 +186,7 @@ const filteredFaqs = $derived(
 		: faqItems.filter((item) => item.category === faqCategory),
 );
 
-const faqJsonLd = JSON.stringify({
+const faqJsonLdSafe = JSON.stringify({
 	"@context": "https://schema.org",
 	"@type": "FAQPage",
 	mainEntity: faqItems.map((item) => ({
@@ -198,7 +197,7 @@ const faqJsonLd = JSON.stringify({
 			text: item.answer,
 		},
 	})),
-});
+}).replace(/</g, "\\u003c");
 
 let copied = $state(false);
 function copyBrewCommand() {
@@ -303,7 +302,7 @@ onMount(() => {
   </script>
   <!-- Schema.org FAQPage JSON-LD -->
   <script type="application/ld+json">
-    {faqJsonLd}
+    {@html faqJsonLdSafe}
   </script>
 </svelte:head>
 
@@ -476,7 +475,7 @@ onMount(() => {
         <span>Playground</span>
       </Button>
 
-      <!-- {#await getArtefacts()}
+      {#await getArtefacts()}
         <Button>
           <BarSpinner />
           Loading
@@ -485,9 +484,9 @@ onMount(() => {
         {#if artefacts}
           <ArtifactDownloader platforms={artefacts.platforms} />
         {/if}
-      {:catch error}
-        {console.error(error)}
-      {/await} -->
+      {:catch}
+        <span></span>
+      {/await}
     </div>
 
     <div class="relative my-4 flex items-center justify-center">

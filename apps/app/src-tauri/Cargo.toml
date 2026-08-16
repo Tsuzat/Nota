@@ -26,6 +26,12 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-deep-link = "2"
 tauri-plugin-os = "2"
+tauri-plugin-http = "2"
+tauri-plugin-stronghold = "2"
+rand = "0.9.5"
+sha2 = "0.10.9"
+td = "0.1.0"
+zstd = "0.13.3"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"

@@ -20,4 +20,7 @@ export default defineConfig({
 			},
 		}),
 	],
+	server: {
+		allowedHosts: ["local.nota.ink"],
+	},
 });
