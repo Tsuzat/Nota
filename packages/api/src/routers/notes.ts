@@ -1,4 +1,8 @@
-import { invalidateNoteMetaCache } from "@nota/cache/notes";
+import {
+	getCachedNotesByWorkspace,
+	invalidateNoteMetaCache,
+	setCachedNotesByWorkspace,
+} from "@nota/cache/notes";
 import {
 	getCachedNoteUserPermission,
 	invalidateNoteUserPermission,
@@ -8,6 +12,7 @@ import {
 	createNotes,
 	deleteNotes,
 	getCollabNotes,
+	getNotesByWorkspace,
 	getNotesMeta,
 	insertNoteSchema,
 	updateContent,
@@ -15,6 +20,7 @@ import {
 	updateNotesMeta,
 } from "@nota/db/data/notes";
 import { getNoteUserPermission } from "@nota/db/data/permissions";
+import { isWorkspaceOwner } from "@nota/db/data/workspace";
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { protectedProcedure } from "../index";
@@ -50,14 +56,9 @@ export const notesRouter = {
 				});
 			}
 
-			try {
-				const meta = await getNotesMeta(input.id);
-				if (!meta) throw new ORPCError("NOT_FOUND");
-				return meta;
-			} catch (err) {
-				console.error("Failed to fetch note meta:", err);
-				throw new ORPCError("INTERNAL_SERVER_ERROR");
-			}
+			const meta = await getNotesMeta(input.id);
+			if (!meta) throw new ORPCError("NOT_FOUND");
+			return meta;
 		}),
 
 	create: protectedProcedure
@@ -65,22 +66,24 @@ export const notesRouter = {
 		.handler(async ({ context, input }) => {
 			const userId = context.session.user.id;
 
-			try {
-				const note = await createNotes({
-					...input,
-					ownerId: userId,
+			const isOwner = await isWorkspaceOwner(input.workspaceId, userId);
+			if (!isOwner) {
+				throw new ORPCError("UNAUTHORIZED", {
+					message: "You are not authorized to create notes in this workspace",
 				});
-
-				// After creation, invalidate workspace list cache to reflect new note
-				void invalidateNoteMetaCache(note.id, note.workspaceId).catch(
-					console.error,
-				);
-
-				return note;
-			} catch (err) {
-				console.error("Failed to create note:", err);
-				throw new ORPCError("INTERNAL_SERVER_ERROR");
 			}
+
+			const note = await createNotes({
+				...input,
+				ownerId: userId,
+			});
+
+			// After creation, invalidate workspace list cache to reflect new note
+			void invalidateNoteMetaCache(note.id, note.workspaceId).catch(
+				console.error,
+			);
+
+			return note;
 		}),
 
 	updateMeta: protectedProcedure
@@ -99,19 +102,14 @@ export const notesRouter = {
 				});
 			}
 
-			try {
-				const updated = await updateNotesMeta(input);
-				if (!updated) throw new ORPCError("NOT_FOUND");
+			const updated = await updateNotesMeta(input);
+			if (!updated) throw new ORPCError("NOT_FOUND");
 
-				// Invalidate specific note cache and parent workspace's notes cache
-				void invalidateNoteMetaCache(updated.id, updated.workspaceId).catch(
-					console.error,
-				);
-				return updated;
-			} catch (err) {
-				console.error("Failed to update note meta:", err);
-				throw new ORPCError("INTERNAL_SERVER_ERROR");
-			}
+			// Invalidate specific note cache and parent workspace's notes cache
+			void invalidateNoteMetaCache(updated.id, updated.workspaceId).catch(
+				console.error,
+			);
+			return updated;
 		}),
 
 	updateContent: protectedProcedure
@@ -136,22 +134,17 @@ export const notesRouter = {
 				});
 			}
 
-			try {
-				const success = await updateContent(
-					input.id,
-					input.content as Buffer,
-					input.contextText,
-				);
-				if (!success) throw new ORPCError("NOT_FOUND");
+			const success = await updateContent(
+				input.id,
+				input.content as Buffer,
+				input.contextText,
+			);
+			if (!success) throw new ORPCError("NOT_FOUND");
 
-				// Note: Content updates might not change meta immediately, but good practice to clear cache if updatedAt changes
-				void invalidateNoteMetaCache(input.id).catch(console.error);
+			// Note: Content updates might not change meta immediately, but good practice to clear cache if updatedAt changes
+			void invalidateNoteMetaCache(input.id).catch(console.error);
 
-				return success;
-			} catch (err) {
-				console.error("Failed to update note content:", err);
-				throw new ORPCError("INTERNAL_SERVER_ERROR");
-			}
+			return success;
 		}),
 
 	delete: protectedProcedure
@@ -171,32 +164,36 @@ export const notesRouter = {
 				});
 			}
 
-			try {
-				const success = await deleteNotes(input.id);
-				if (!success) throw new ORPCError("NOT_FOUND");
+			const meta = await getNotesMeta(input.id);
+			const success = await deleteNotes(input.id);
+			if (!success) throw new ORPCError("NOT_FOUND");
 
-				void invalidateNoteUserPermission(input.id, userId).catch(
-					console.error,
-				);
-				void invalidateNoteMetaCache(input.id).catch(console.error); // Best effort, don't have workspaceId easily here unless fetched
+			void invalidateNoteUserPermission(input.id, userId).catch(console.error);
+			void invalidateNoteMetaCache(input.id, meta?.workspaceId).catch(
+				console.error,
+			);
 
-				return success;
-			} catch (err) {
-				console.error("Failed to delete note:", err);
-				throw new ORPCError("INTERNAL_SERVER_ERROR");
-			}
+			return success;
 		}),
 
 	getCollabNotes: protectedProcedure.handler(async ({ context }) => {
 		const userId = context.session.user.id;
-
-		try {
-			// In a real scenario we'd cache collab notes per user as well,
-			// but for now directly querying DB as requested in plan
-			return await getCollabNotes(userId);
-		} catch (err) {
-			console.error("Failed to fetch collab notes:", err);
-			throw new ORPCError("INTERNAL_SERVER_ERROR");
-		}
+		return await getCollabNotes(userId);
 	}),
+
+	listByWorkspace: protectedProcedure
+		.input(z.object({ workspaceId: z.string() }))
+		.handler(async ({ context, input }) => {
+			const userId = context.session.user.id;
+			const { workspaceId } = input;
+
+			const cached = await getCachedNotesByWorkspace(workspaceId, userId);
+			if (cached) return cached;
+
+			const notes = await getNotesByWorkspace(workspaceId, userId);
+			void setCachedNotesByWorkspace(workspaceId, userId, notes).catch(
+				console.error,
+			);
+			return notes;
+		}),
 };

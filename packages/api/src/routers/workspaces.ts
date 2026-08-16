@@ -20,35 +20,20 @@ import { protectedProcedure } from "../index";
 
 export const workspaceRouter = {
 	fetchForUser: protectedProcedure.handler(async ({ context }) => {
-		try {
-			const cachedWorkspaces = await getCachedUserWorkspaces(
-				context.session.user.id,
-			);
-			if (cachedWorkspaces) {
-				return cachedWorkspaces;
-			}
-			const workspaces = await fetchUserWorkspaces(context.session.user.id);
-			// don't await this, fire and forget, so that the response is faster
-			void setCachedUserWorkspaces(context.session.user.id, workspaces).catch(
-				(err) => {
-					console.error("Cache write failed", { err });
-				},
-			);
-			return workspaces;
-		} catch (err) {
-			console.error("fetchUserWorkspaces failed", {
-				userId: context.session.user.id,
-				err,
-			});
-			if (err instanceof z.ZodError) {
-				throw new ORPCError("INTERNAL_SERVER_ERROR", {
-					message: "Data integrity error",
-				});
-			}
-			throw new ORPCError("INTERNAL_SERVER_ERROR", {
-				message: "Failed to fetch workspaces",
-			});
+		const cachedWorkspaces = await getCachedUserWorkspaces(
+			context.session.user.id,
+		);
+		if (cachedWorkspaces) {
+			return cachedWorkspaces;
 		}
+		const workspaces = await fetchUserWorkspaces(context.session.user.id);
+		// don't await this, fire and forget, so that the response is faster
+		void setCachedUserWorkspaces(context.session.user.id, workspaces).catch(
+			(err) => {
+				console.error("Cache write failed", { err });
+			},
+		);
+		return workspaces;
 	}),
 	create: protectedProcedure
 		.input(insertWorkspaceSchema.omit({ id: true, ownerId: true }))
@@ -61,29 +46,16 @@ export const workspaceRouter = {
 					message: "You have reached the maximum number of workspaces",
 				});
 			}
-			try {
-				return await createWorkspace({
-					ownerId: userId,
-					name: input.name,
-				});
-			} catch (err) {
-				console.error("createWorkspace failed", {
-					userId: context.session.user.id,
-					err,
-				});
-				if (err instanceof z.ZodError) {
-					throw new ORPCError("INTERNAL_SERVER_ERROR", {
-						message: "Data integrity error",
-					});
-				}
-				throw new ORPCError("INTERNAL_SERVER_ERROR", {
-					message: "Failed to create workspace",
-				});
-			} finally {
-				void deleteCachedUserWorkspaces(userId).catch((err) => {
-					console.error("Cache delete failed", { err });
-				});
-			}
+			const result = await createWorkspace({
+				ownerId: userId,
+				name: input.name,
+			});
+
+			void deleteCachedUserWorkspaces(userId).catch((err) => {
+				console.error("Cache delete failed", { err });
+			});
+
+			return result;
 		}),
 
 	update: protectedProcedure
@@ -94,56 +66,26 @@ export const workspaceRouter = {
 		)
 		.handler(async ({ context, input }) => {
 			const userId = context.session.user.id;
-			try {
-				const updated = await updateWorkspace({ ...input, ownerId: userId });
-				if (!updated) {
-					throw new ORPCError("NOT_FOUND", { message: "Workspace not found" });
-				}
-				void deleteCachedUserWorkspaces(userId).catch((err) =>
-					console.error("Cache delete failed", { err }),
-				);
-				return updated;
-			} catch (err) {
-				console.error("updateWorkspace failed", {
-					userId: context.session.user.id,
-					err,
-				});
-				if (err instanceof z.ZodError) {
-					throw new ORPCError("INTERNAL_SERVER_ERROR", {
-						message: "Data integrity error",
-					});
-				}
-				throw new ORPCError("INTERNAL_SERVER_ERROR", {
-					message: "Failed to update workspace",
-				});
+			const updated = await updateWorkspace({ ...input, ownerId: userId });
+			if (!updated) {
+				throw new ORPCError("NOT_FOUND", { message: "Workspace not found" });
 			}
+			void deleteCachedUserWorkspaces(userId).catch((err) =>
+				console.error("Cache delete failed", { err }),
+			);
+			return updated;
 		}),
 	delete: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.handler(async ({ context, input }) => {
 			const userId = context.session.user.id;
-			try {
-				const deleted = await deleteWorkspace(input.id, userId);
-				if (!deleted) {
-					throw new ORPCError("NOT_FOUND", { message: "Workspace not found" });
-				}
-				void deleteCachedUserWorkspaces(userId).catch((err) =>
-					console.error("Cache delete failed", { err }),
-				);
-				return deleted;
-			} catch (err) {
-				console.error("deleteWorkspace failed", {
-					userId: context.session.user.id,
-					err,
-				});
-				if (err instanceof z.ZodError) {
-					throw new ORPCError("INTERNAL_SERVER_ERROR", {
-						message: "Data integrity error",
-					});
-				}
-				throw new ORPCError("INTERNAL_SERVER_ERROR", {
-					message: "Failed to delete workspace",
-				});
+			const deleted = await deleteWorkspace(input.id, userId);
+			if (!deleted) {
+				throw new ORPCError("NOT_FOUND", { message: "Workspace not found" });
 			}
+			void deleteCachedUserWorkspaces(userId).catch((err) =>
+				console.error("Cache delete failed", { err }),
+			);
+			return deleted;
 		}),
 };
