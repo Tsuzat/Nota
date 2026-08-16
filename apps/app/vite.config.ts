@@ -27,6 +27,9 @@ export default defineConfig({
 			"$local-workspaces": isDesktop
 				? "/src/lib/data/local/workspace.svelte.ts"
 				: "/src/lib/data/local/workspace.stub.svelte.ts",
+			"$local-notes": isDesktop
+				? "/src/lib/data/local/notes.svelte.ts"
+				: "/src/lib/data/local/notes.stub.svelte.ts",
 		},
 	},
 	server: { port: 8080, allowedHosts: ["local-app.nota.ink"] },

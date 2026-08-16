@@ -26,6 +26,7 @@ let wasSignedIn = $state(false);
 $effect(() => {
 	if (wasSignedIn && !isSignedIn()) {
 		queryClient.removeQueries({ queryKey: orpc.workspace.key() });
+		queryClient.removeQueries({ queryKey: orpc.notes.key() });
 		if (!ISDESKTOP) {
 			window.location.href = `${PUBLIC_NOTA_URL}/signin`;
 		}

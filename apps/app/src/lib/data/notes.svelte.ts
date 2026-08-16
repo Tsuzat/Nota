@@ -1,0 +1,122 @@
+import { getContext, setContext } from "svelte";
+import { CloudNotes } from "./cloud/notes.svelte";
+import { LocalNotes } from "./local/notes.svelte.ts";
+import type { NoteMeta } from "./types";
+import { getWorkspaceContext } from "./workspace.svelte.ts";
+
+class Notes {
+	cloud = new CloudNotes();
+	local = new LocalNotes();
+	#workspaceCtx = getWorkspaceContext();
+	current = $state<NoteMeta | null>(null);
+
+	list = $derived.by(() => {
+		const ws = this.#workspaceCtx.current;
+		if (!ws) return [];
+		const isCloud = "ownerId" in ws;
+		return isCloud ? this.cloud.notes(ws.id) : this.local.notes(ws.id);
+	});
+
+	constructor() {
+		$effect(() => {
+			const ws = this.#workspaceCtx.current;
+			if (!ws) return;
+			const workspaceId = ws.id;
+			const isCloud = "ownerId" in ws;
+			(async () => {
+				if (isCloud) {
+					await this.cloud.fetchByWorkspace(workspaceId);
+				} else {
+					await this.local.fetchByWorkspace(workspaceId);
+				}
+			})();
+		});
+
+		$effect(() => {
+			if (this.current && this.list.some((n) => n.id === this.current?.id)) {
+				return;
+			}
+			this.current = this.list[0] ?? null;
+		});
+	}
+
+	async init() {}
+
+	async create(input: {
+		name: string;
+		icon: string;
+		description?: string | null;
+		parentNoteId?: string | null;
+		content?: unknown;
+		contextText?: string | null;
+	}) {
+		const ws = this.#workspaceCtx.current;
+		if (!ws) throw new Error("No active workspace");
+		const workspaceId = ws.id;
+		if ("ownerId" in ws) {
+			await this.cloud.create({
+				workspaceId,
+				name: input.name,
+				description: input.description ?? null,
+				icon: input.icon,
+				parentNoteId: input.parentNoteId ?? null,
+				content: (input.content ?? new Uint8Array([0, 0])) as never,
+				contextText: input.contextText ?? null,
+			});
+		} else {
+			await this.local.create({
+				workspaceId,
+				icon: input.icon ?? "📝",
+				name: input.name,
+				description: input.description ?? null,
+				parentNoteId: input.parentNoteId ?? null,
+				content: (input.content ?? {}) as never,
+				contentText: input.contextText ?? null,
+			});
+		}
+	}
+
+	async updateMeta(id: string, input: Record<string, unknown>) {
+		const ws = this.#workspaceCtx.current;
+		if (!ws) throw new Error("No active workspace");
+		if ("ownerId" in ws) {
+			await this.cloud.updateMeta({ id, ...input } as never);
+		} else {
+			await this.local.update(id, input);
+		}
+	}
+
+	async delete(id: string) {
+		const ws = this.#workspaceCtx.current;
+		if (!ws) throw new Error("No active workspace");
+		if ("ownerId" in ws) {
+			await this.cloud.delete(id);
+		} else {
+			await this.local.delete(id);
+		}
+	}
+
+	async updateContent(
+		id: string,
+		content: unknown,
+		contextText?: string | null,
+	) {
+		const ws = this.#workspaceCtx.current;
+		if (!ws) throw new Error("No active workspace");
+		if ("ownerId" in ws) {
+			await this.cloud.updateContent(id, content, contextText ?? "");
+		} else {
+			await this.local.saveContent(id, content, contextText);
+		}
+	}
+}
+
+const NOTES = Symbol("NOTES");
+
+export const setNotesContext = () => {
+	return setContext(NOTES, new Notes());
+};
+
+export const getNotesContext = () => {
+	return getContext<ReturnType<typeof setNotesContext>>(NOTES);
+};
