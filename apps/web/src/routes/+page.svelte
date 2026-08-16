@@ -1,242 +1,263 @@
 <script lang="ts">
-import { ToggleMode } from '@nota/ui/custom/index.js';
-import { BarSpinner, Github, icons } from '@nota/ui/icons';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@nota/ui/shadcn/accordion';
-import { Button, buttonVariants } from '@nota/ui/shadcn/button';
-import * as Dropdown from '@nota/ui/shadcn/dropdown-menu';
-import { cn } from '@nota/ui/utils';
-import { onMount } from 'svelte';
-import { fade } from 'svelte/transition';
-import { goto } from '$app/navigation';
-import { resolve } from '$app/paths';
-import ArtifactDownloader from '$lib/artefact/artifact-downloader.svelte';
-import AppLogo from '$lib/components/custom/applogo.svelte';
-import BorderBeam from '$lib/components/custom/landing/border-beam.svelte';
-import Multistream from '$lib/components/custom/landing/multistream.svelte';
-import Particles from '$lib/components/custom/landing/particles.svelte';
-import { Pricing } from '$lib/components/custom/landing/pricing';
-import Spotlight from '$lib/components/custom/landing/spotlight.svelte';
-import Tiltcard from '$lib/components/custom/landing/utils/tiltcard.svelte';
-import UserAvatar from '$lib/components/custom/user-avatar.svelte';
-import { getArtefacts } from './data.remote';
+import ArrowRight from "@lucide/svelte/icons/arrow-right";
+import Bot from "@lucide/svelte/icons/bot";
+import Check from "@lucide/svelte/icons/check";
+import Copy from "@lucide/svelte/icons/copy";
+import Database from "@lucide/svelte/icons/database";
+import Download from "@lucide/svelte/icons/download";
+import FolderLock from "@lucide/svelte/icons/folder-lock";
+import House from "@lucide/svelte/icons/house";
+import LogOut from "@lucide/svelte/icons/log-out";
+import Menu from "@lucide/svelte/icons/menu";
+import Pencil from "@lucide/svelte/icons/pencil";
+import Sparkles from "@lucide/svelte/icons/sparkles";
+import User from "@lucide/svelte/icons/user";
+import Zap from "@lucide/svelte/icons/zap";
+import { ToggleMode } from "@nota/ui/custom/index.js";
+import UserAvatar from "@nota/ui/custom/user-avarar.svelte";
+import { BarSpinner } from "@nota/ui/icons/index.js";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@nota/ui/shadcn/accordion/index.js";
+import { Button, buttonVariants } from "@nota/ui/shadcn/button/index.ts";
+import * as Dropdown from "@nota/ui/shadcn/dropdown-menu/index.ts";
+import { cn } from "@nota/ui/utils";
+import { onMount } from "svelte";
+import { fade } from "svelte/transition";
+// import ArtifactDownloader from "$lib/artefact/artifact-downloader.svelte";
+import AppLogo from "#components/custom/app-logo.svelte";
+import BorderBeam from "#components/custom/landing/border-beam.svelte";
+import Multistream from "#components/custom/landing/multistream.svelte";
+import Particles from "#components/custom/landing/particles.svelte";
+import { Pricing } from "#components/custom/landing/pricing/index.ts";
+import Spotlight from "#components/custom/landing/spotlight.svelte";
+import Tiltcard from "#components/custom/tilt-card.svelte";
+import { authClient } from "#lib/auth-client.ts";
+import { resolve } from "$app/paths";
 
-const { data } = $props();
-const user = $derived(data.user);
+// import { getArtefacts } from "./data.remote";
+
+const sessionQuery = authClient.useSession();
 
 let y = $state(0);
 let isScrolled = $derived(y > 20);
 const tabItems = [
-  {
-    url: '#features',
-    title: 'Features',
-  },
-  {
-    url: '#solutions',
-    title: 'Solution',
-  },
-  {
-    url: '#pricing',
-    title: 'Pricing',
-  },
-  {
-    url: '#faqs',
-    title: 'FAQs',
-  },
-  {
-    url: '/blog',
-    title: 'Blog',
-  },
+	{
+		url: "#features",
+		title: "Features",
+	},
+	{
+		url: "#solutions",
+		title: "Solution",
+	},
+	{
+		url: "#pricing",
+		title: "Pricing",
+	},
+	{
+		url: "#faqs",
+		title: "FAQs",
+	},
+	{
+		url: "/blog",
+		title: "Blog",
+	},
 ];
 
 const features = [
-  {
-    name: 'Rich Text Editor',
-    description:
-      'Powered by a custom editor with support for slash commands, markdown shortcuts, media embeds, and mathematical equations.',
-    icon: icons.Pencil,
-  },
-  {
-    name: 'AI Integration',
-    description:
-      'Built-in AI assistant for text generation and summarization with a Bring Your Own Key (BYOK) model to keep costs down.',
-    icon: icons.Bot,
-  },
-  {
-    name: 'Cross-Platform & Fast',
-    description:
-      'Available as a lightweight Desktop app built with Rust (Tauri) and on the Web with the same blazingly fast, responsive performance.',
-    icon: icons.Zap,
-  },
-  {
-    name: 'Secure & Organized',
-    description:
-      'Manage your notes with hierarchical workspaces. Protected by custom authentication flow and session management.',
-    icon: icons.FolderLock,
-  },
-  {
-    name: 'Multi-Format Export',
-    description:
-      'Export your notes anytime to PDF, JSON, HTML, and Markdown to maintain complete ownership of your data with zero vendor lock-in.',
-    icon: icons.Download,
-  },
-  {
-    name: 'Local-First & Offline',
-    description:
-      'Built on a robust device-local SQLite and filesystem architecture. Your notes remain instantaneous and accessible offline without internet.',
-    icon: icons.Database,
-  },
+	{
+		name: "Rich Text Editor",
+		description:
+			"Powered by a custom editor with support for slash commands, markdown shortcuts, media embeds, and mathematical equations.",
+		icon: Pencil,
+	},
+	{
+		name: "AI Integration",
+		description:
+			"Built-in AI assistant for text generation and summarization with a Bring Your Own Key (BYOK) model to keep costs down.",
+		icon: Bot,
+	},
+	{
+		name: "Cross-Platform & Fast",
+		description:
+			"Available as a lightweight Desktop app built with Rust (Tauri) and on the Web with the same blazingly fast, responsive performance.",
+		icon: Zap,
+	},
+	{
+		name: "Secure & Organized",
+		description:
+			"Manage your notes with hierarchical workspaces. Protected by custom authentication flow and session management.",
+		icon: FolderLock,
+	},
+	{
+		name: "Multi-Format Export",
+		description:
+			"Export your notes anytime to PDF, JSON, HTML, and Markdown to maintain complete ownership of your data with zero vendor lock-in.",
+		icon: Download,
+	},
+	{
+		name: "Local-First & Offline",
+		description:
+			"Built on a robust device-local SQLite and filesystem architecture. Your notes remain instantaneous and accessible offline without internet.",
+		icon: Database,
+	},
 ];
 
 const faqItems = [
-  {
-    id: 'item-1',
-    question: 'What makes Nota different from typical Electron note apps?',
-    answer:
-      'Nota is built natively with Tauri and Rust, making it blindingly fast, lightweight, and memory-efficient. You enjoy an expressive rich text editing experience without the sluggish performance or system resource bloat of standard desktop applications on macOS, Windows, Linux, and Web.',
-    category: 'General',
-  },
-  {
-    id: 'item-2',
-    question: 'Is Nota free for local-first users?',
-    answer:
-      'Yes! Our Free tier is tailored for local-first workflows, offering unlimited local notes and workspaces stored directly on your disk. You also receive 1 cloud workspace with up to 5 cloud notes completely free.',
-    category: 'Pricing',
-  },
-  {
-    id: 'item-3',
-    question: 'How does version history and snapshot restoration work?',
-    answer:
-      'Nota automatically preserves checkpoints of your writing as you edit. Local notes save snapshots directly to your disk, while Pro users on cloud workspaces maintain both cloud and local backups—enabling seamless content restoration across devices even for massive 100,000+ word documents.',
-    category: 'Features',
-  },
-  {
-    id: 'item-4',
-    question: 'How does the Bring Your Own Key (BYOK) AI model work?',
-    answer:
-      'Instead of paying expensive recurring AI subscription add-ons, Nota lets you connect your personal API keys (OpenAI, Anthropic, Google, etc.) to generate text, rephrase paragraphs, and summarize documents practically at cost. Pro subscribers also enjoy bundled AI credits ready out of the box.',
-    category: 'Features',
-  },
-  {
-    id: 'item-5',
-    question: 'What is the difference between the Free and Pro plans?',
-    answer:
-      'The Free plan unlocks unlimited local note creation, device-local media storage, and limited cloud syncing (1 workspace, 5 notes). Pro upgrades you to unlimited cloud notes and workspaces, 5 GB of cloud media storage, realtime teamwork collaboration, browser web access, advanced versioning, and AI credits.',
-    category: 'Pricing',
-  },
-  {
-    id: 'item-6',
-    question: 'Can I reliably work totally offline?',
-    answer:
-      'Absolutely! Because Nota relies on a robust local-first SQLite and filesystem architecture via Tauri, your notes remain instantaneous and fully accessible on your desktop regardless of your internet connection.',
-    category: 'General',
-  },
-  {
-    id: 'item-7',
-    question: 'What capabilities does the rich text editor offer?',
-    answer:
-      'Our high-speed custom Tiptap editor seamlessly supports markdown shortcuts, rapid slash commands (/), drag-and-drop media embeds (images, video, audio), LaTeX mathematical formulas, interactive task checklists, code blocks, and dynamic tables.',
-    category: 'Features',
-  },
-  {
-    id: 'item-8',
-    question: 'How secure is my personal writing and data?',
-    answer:
-      'We treat your privacy with rigorous respect. Your local workspaces never touch our servers. For cloud features, data is transferred with robust encryption, secured by modern authentication protocols, and tenant-isolated in state-of-the-art databases.',
-    category: 'Security',
-  },
-  {
-    id: 'item-9',
-    question: 'Can I export my notes to avoid lock-in?',
-    answer:
-      'Yes! We believe your writing belongs solely to you. Nota provides seamless export capabilities to PDF, JSON, HTML, and Markdown document formats at any time, guaranteeing zero vendor lock-in.',
-    category: 'General',
-  },
-  {
-    id: 'item-10',
-    question: 'Can I upgrade, downgrade, or cancel my subscription anytime?',
-    answer:
-      'Yes, you retain full control over your billing from your settings dashboard. You can upgrade, switch billing cycles, or cancel your Pro membership instantly without hassle.',
-    category: 'Pricing',
-  },
+	{
+		id: "item-1",
+		question: "What makes Nota different from typical Electron note apps?",
+		answer:
+			"Nota is built natively with Tauri and Rust, making it blindingly fast, lightweight, and memory-efficient. You enjoy an expressive rich text editing experience without the sluggish performance or system resource bloat of standard desktop applications on macOS, Windows, Linux, and Web.",
+		category: "General",
+	},
+	{
+		id: "item-2",
+		question: "Is Nota free for local-first users?",
+		answer:
+			"Yes! Our Free tier is tailored for local-first workflows, offering unlimited local notes and workspaces stored directly on your disk. You also receive 1 cloud workspace with up to 5 cloud notes completely free.",
+		category: "Pricing",
+	},
+	{
+		id: "item-3",
+		question: "How does version history and snapshot restoration work?",
+		answer:
+			"Nota automatically preserves checkpoints of your writing as you edit. Local notes save snapshots directly to your disk, while Pro users on cloud workspaces maintain both cloud and local backups—enabling seamless content restoration across devices even for massive 100,000+ word documents.",
+		category: "Features",
+	},
+	{
+		id: "item-4",
+		question: "How does the Bring Your Own Key (BYOK) AI model work?",
+		answer:
+			"Instead of paying expensive recurring AI subscription add-ons, Nota lets you connect your personal API keys (OpenAI, Anthropic, Google, etc.) to generate text, rephrase paragraphs, and summarize documents practically at cost. Pro subscribers also enjoy bundled AI credits ready out of the box.",
+		category: "Features",
+	},
+	{
+		id: "item-5",
+		question: "What is the difference between the Free and Pro plans?",
+		answer:
+			"The Free plan unlocks unlimited local note creation, device-local media storage, and limited cloud syncing (1 workspace, 5 notes). Pro upgrades you to unlimited cloud notes and workspaces, 5 GB of cloud media storage, realtime teamwork collaboration, browser web access, advanced versioning, and AI credits.",
+		category: "Pricing",
+	},
+	{
+		id: "item-6",
+		question: "Can I reliably work totally offline?",
+		answer:
+			"Absolutely! Because Nota relies on a robust local-first SQLite and filesystem architecture via Tauri, your notes remain instantaneous and fully accessible on your desktop regardless of your internet connection.",
+		category: "General",
+	},
+	{
+		id: "item-7",
+		question: "What capabilities does the rich text editor offer?",
+		answer:
+			"Our high-speed custom Tiptap editor seamlessly supports markdown shortcuts, rapid slash commands (/), drag-and-drop media embeds (images, video, audio), LaTeX mathematical formulas, interactive task checklists, code blocks, and dynamic tables.",
+		category: "Features",
+	},
+	{
+		id: "item-8",
+		question: "How secure is my personal writing and data?",
+		answer:
+			"We treat your privacy with rigorous respect. Your local workspaces never touch our servers. For cloud features, data is transferred with robust encryption, secured by modern authentication protocols, and tenant-isolated in state-of-the-art databases.",
+		category: "Security",
+	},
+	{
+		id: "item-9",
+		question: "Can I export my notes to avoid lock-in?",
+		answer:
+			"Yes! We believe your writing belongs solely to you. Nota provides seamless export capabilities to PDF, JSON, HTML, and Markdown document formats at any time, guaranteeing zero vendor lock-in.",
+		category: "General",
+	},
+	{
+		id: "item-10",
+		question: "Can I upgrade, downgrade, or cancel my subscription anytime?",
+		answer:
+			"Yes, you retain full control over your billing from your settings dashboard. You can upgrade, switch billing cycles, or cancel your Pro membership instantly without hassle.",
+		category: "Pricing",
+	},
 ];
 
-let faqCategory = $state('All');
-const faqCategories = ['All', 'General', 'Features', 'Pricing', 'Security'];
+let faqCategory = $state("All");
+const faqCategories = ["All", "General", "Features", "Pricing", "Security"];
 const filteredFaqs = $derived(
-  faqCategory === 'All' ? faqItems : faqItems.filter((item) => item.category === faqCategory)
+	faqCategory === "All"
+		? faqItems
+		: faqItems.filter((item) => item.category === faqCategory),
 );
 
 const faqJsonLd = JSON.stringify({
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faqItems.map((item) => ({
-    '@type': 'Question',
-    name: item.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: item.answer,
-    },
-  })),
+	"@context": "https://schema.org",
+	"@type": "FAQPage",
+	mainEntity: faqItems.map((item) => ({
+		"@type": "Question",
+		name: item.question,
+		acceptedAnswer: {
+			"@type": "Answer",
+			text: item.answer,
+		},
+	})),
 });
 
 let copied = $state(false);
 function copyBrewCommand() {
-  navigator.clipboard.writeText('brew install --cask Tsuzat/tap/nota');
-  copied = true;
-  setTimeout(() => {
-    copied = false;
-  }, 2000);
+	navigator.clipboard.writeText("brew install --cask Tsuzat/tap/nota");
+	copied = true;
+	setTimeout(() => {
+		copied = false;
+	}, 2000);
 }
 
 let showFirstSection = $state(false);
-let activeSection = $state('hero');
+let activeSection = $state("hero");
 onMount(() => {
-  setTimeout(() => {
-    showFirstSection = true;
-  }, 500);
+	setTimeout(() => {
+		showFirstSection = true;
+	}, 500);
 
-  // Intersection observer for section visibility (animations)
-  const sections = document.querySelectorAll('section:not(#landing)');
-  const animationObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('show');
-      }
-    });
-  });
-  sections.forEach((section) => {
-    section.classList.add('hide');
-    animationObserver.observe(section);
-  });
+	// Intersection observer for section visibility (animations)
+	const sections = document.querySelectorAll("section:not(#landing)");
+	const animationObserver = new IntersectionObserver((entries) => {
+		entries.forEach((entry) => {
+			if (entry.isIntersecting) {
+				entry.target.classList.add("show");
+			}
+		});
+	});
+	sections.forEach((section) => {
+		section.classList.add("hide");
+		animationObserver.observe(section);
+	});
 
-  // Intersection observer for active nav item
-  const navObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          activeSection = entry.target.id;
-        }
-      });
-    },
-    { rootMargin: '-20% 0px -60% 0px' }
-  );
-  const allSections = document.querySelectorAll('section');
-  allSections.forEach((section) => {
-    navObserver.observe(section);
-  });
+	// Intersection observer for active nav item
+	const navObserver = new IntersectionObserver(
+		(entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					activeSection = entry.target.id;
+				}
+			});
+		},
+		{ rootMargin: "-20% 0px -60% 0px" },
+	);
+	const allSections = document.querySelectorAll("section");
+	allSections.forEach((section) => {
+		navObserver.observe(section);
+	});
 
-  // Radiant card mouse effect
-  const radiantCards = document.querySelectorAll('.radiant-card');
-  radiantCards.forEach((card) => {
-    card.addEventListener('mousemove', (ev) => {
-      const e = ev as MouseEvent;
-      const rect = (card as HTMLElement).getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      (card as HTMLElement).style.setProperty('--mouse-x', `${x}px`);
-      (card as HTMLElement).style.setProperty('--mouse-y', `${y}px`);
-    });
-  });
+	// Radiant card mouse effect
+	const radiantCards = document.querySelectorAll(".radiant-card");
+	radiantCards.forEach((card) => {
+		card.addEventListener("mousemove", (ev) => {
+			const e = ev as MouseEvent;
+			const rect = (card as HTMLElement).getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			const y = e.clientY - rect.top;
+			(card as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
+			(card as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+		});
+	});
 });
 </script>
 
@@ -282,7 +303,7 @@ onMount(() => {
   </script>
   <!-- Schema.org FAQPage JSON-LD -->
   <script type="application/ld+json">
-    {@html faqJsonLd}
+    {faqJsonLd}
   </script>
 </svelte:head>
 
@@ -327,7 +348,7 @@ onMount(() => {
         <Dropdown.Trigger
           class={buttonVariants({ variant: "ghost", size: "icon" })}
         >
-          <icons.Menu />
+          <Menu />
           <span class="sr-only">Links</span>
         </Dropdown.Trigger>
         <Dropdown.Content class="w-fit md:hidden">
@@ -346,39 +367,36 @@ onMount(() => {
       </Dropdown.Root>
     </div>
     <ToggleMode />
-    {#if user}
+    {#if $sessionQuery.data?.user}
+      {@const user = $sessionQuery.data.user}
       <Dropdown.Root>
         <Dropdown.Trigger>
-          <UserAvatar
-            image={user.avatar_url ?? ""}
-            name={user.name ?? "Unknown"}
+          <UserAvatar image={user.image ?? ""} name={user.name ?? "Unknown"}
           />
         </Dropdown.Trigger>
         <Dropdown.Content class="w-fit">
           <Dropdown.Group>
             <Dropdown.Label>{user.name}</Dropdown.Label>
-            <a href={resolve("/profile")}>
               <Dropdown.Item>
-                <icons.User />
+                <User />
                 Profile
               </Dropdown.Item>
-            </a>
-            <a href={resolve("/(app)/home")}>
               <Dropdown.Item>
-                <icons.House />
+                <House />
                 Home
               </Dropdown.Item>
-            </a>
             <Dropdown.Item
               variant="destructive"
-              onclick={() => goto(resolve("/signout"))}
+              onclick={() => {}}
             >
-              <icons.LogOut />
+              <LogOut />
               Sign Out
             </Dropdown.Item>
           </Dropdown.Group>
         </Dropdown.Content>
       </Dropdown.Root>
+    {:else if $sessionQuery.isPending}
+      <BarSpinner />
     {:else}
       <Button href={resolve("/signin")}>Sign In</Button>
     {/if}
@@ -410,10 +428,10 @@ onMount(() => {
           class="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0"
         >
           <span class="flex size-6">
-            <icons.ArrowRight class="m-auto size-4 text-background!" />
+            <ArrowRight class="m-auto size-4 text-background!" />
           </span>
           <span class="flex size-6">
-            <icons.ArrowRight class="m-auto size-4 text-foreground!" />
+            <ArrowRight class="m-auto size-4 text-foreground!" />
           </span>
         </div>
       </div>
@@ -434,7 +452,16 @@ onMount(() => {
         rel="noopener noreferrer"
         class="z-100"
       >
-        <Github />
+         <img
+            class="hidden dark:block size-4"
+            src="https://svgl.app/library/github_light.svg"
+            alt="Github"
+          />
+          <img
+            class="block dark:hidden size-4"
+            src="https://svgl.app/library/github_dark.svg"
+            alt="Github"
+          />
         <span>GitHub Repo</span>
       </Button>
 
@@ -445,11 +472,11 @@ onMount(() => {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <icons.Sparkles />
+        <Sparkles />
         <span>Playground</span>
       </Button>
 
-      {#await getArtefacts()}
+      <!-- {#await getArtefacts()}
         <Button>
           <BarSpinner />
           Loading
@@ -460,7 +487,7 @@ onMount(() => {
         {/if}
       {:catch error}
         {console.error(error)}
-      {/await}
+      {/await} -->
     </div>
 
     <div class="relative my-4 flex items-center justify-center">
@@ -479,9 +506,9 @@ onMount(() => {
             ></code
           ></pre>
         {#if copied}
-          <icons.Check class="size-3.5 text-emerald-500" />
+          <Check class="size-3.5 text-emerald-500" />
         {:else}
-          <icons.Copy
+          <Copy
             class="size-3.5 opacity-60 transition-opacity group-hover:opacity-100"
           />
         {/if}

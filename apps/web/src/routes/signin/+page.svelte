@@ -1,14 +1,17 @@
 <script lang="ts">
-import { Button } from '@lib/components/ui/button';
-import { Github, Google, icons } from '@lib/icons';
-import { cn } from '@lib/utils';
-import { getAuthContext } from '@nota/client';
-import { resolve } from '$app/paths';
-import Applogo from '$lib/components/custom/applogo.svelte';
-import Particles from '$lib/components/custom/landing/particles.svelte';
-import Tiltcard from '$lib/components/custom/landing/utils/tiltcard.svelte';
+import ChevronLeft from "@lucide/svelte/icons/chevron-left";
+import { Button } from "@nota/ui/shadcn/button/index.js";
+import { cn } from "@nota/ui/utils";
+import { AppLogo, TiltCard } from "#components/custom/index.ts";
+import { authClient } from "#lib/auth-client.ts";
+import { resolve } from "$app/paths";
 
-const authClient = getAuthContext();
+const handleSignIn = async (provider: "google" | "github") => {
+	await authClient.signIn.social({
+		provider,
+		callbackURL: "/",
+	});
+};
 </script>
 
 <svelte:head>
@@ -17,20 +20,20 @@ const authClient = getAuthContext();
 </svelte:head>
 
 <div class={cn("relative w-full md:h-screen md:overflow-hidden")}>
-  <Particles class="absolute inset-0" ease={20} quantity={120} />
+  <!-- <Particles class="absolute inset-0" ease={20} quantity={120} /> -->
   <div
     class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-8"
   >
     <Button class="absolute top-4 left-4" href={resolve("/")} variant="ghost">
-      <icons.ChevronLeft data-icon="inline-start" />
+      <ChevronLeft data-icon="inline-start" />
       Home
     </Button>
-    <Tiltcard
+    <TiltCard
       scale={1.0125}
       tiltLimit={10}
-      class="dark:bg-card/75 bg-card mx-auto w-full max-w-sm space-y-4 rounded-xl p-4"
+      class="bg-card mx-auto w-full max-w-sm space-y-4 rounded-xl p-4"
     >
-      <Applogo />
+      <AppLogo />
       <div class="flex flex-col space-y-1">
         <h1 class="text-2xl font-bold tracking-wide">Sign In or Join Now!</h1>
         <p class="text-base text-muted-foreground">
@@ -38,31 +41,34 @@ const authClient = getAuthContext();
         </p>
       </div>
       <div class="space-y-2">
-        <Button
-          class="w-full"
-          onclick={() => authClient.signInWithOAuth("google")}
-        >
-          <Google />
+        <Button class="w-full" onclick={() => handleSignIn("google")}>
+          <img class="size-4" src="https://svgl.app/library/google.svg" alt="Google" />
           Continue with Google
         </Button>
-        <Button
-          class="w-full"
-          onclick={() => authClient.signInWithOAuth("github")}
-        >
-          <Github />
+        <Button class="w-full" onclick={() => handleSignIn("github")}>
+          <img
+            class="hidden dark:block size-4"
+            src="https://svgl.app/library/github_light.svg"
+            alt="Github"
+          />
+          <img
+            class="block dark:hidden size-4"
+            src="https://svgl.app/library/github_dark.svg"
+            alt="Github"
+          />
           Continue with GitHub
         </Button>
       </div>
       <span class="mt-8 text-sm text-muted-foreground">
         By clicking continue, you agree to our
-        <Button class="underline" variant="link" href={resolve("/terms")}
+        <Button class="underline" variant="link" href={resolve("/(tnc)/terms")}
           >Terms of Service</Button
         >
         and
-        <Button class="underline" variant="link" href={resolve("/privacy")}
+        <Button class="underline" variant="link" href={resolve("/(tnc)/privacy")}
           >Privacy Policy</Button
         >.
       </span>
-    </Tiltcard>
+    </TiltCard>
   </div>
 </div>

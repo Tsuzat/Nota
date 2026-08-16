@@ -1,39 +1,72 @@
 {
-  "name": "nota",
-  "module": "index.ts",
-  "type": "module",
-  "scripts": {
-    "web:dev": "bun --filter @nota/web dev",
-    "web:build": "bun --filter @nota/web build",
-    "web:format": "bun --filter @nota/web format",
-    "web:ci": "bun --filter @nota/web ci",
-    "desktop:dev": "bun --filter @nota/desktop dev",
-    "desktop:build": "bun --filter @nota/desktop build",
-    "desktop:tauri:dev": "bun --filter @nota/desktop tauri dev",
-    "desktop:tauri:build": "bun --filter @nota/desktop tauri build",
-    "desktop:ci": "bun --filter @nota/desktop ci",
-    "ui:shadcn": "bun --filter @nota/ui shadcn",
-    "ci:root": "biome ci",
-    "lint:root": "biome check .",
-    "format:root": "biome format . --write"
-  },
-  "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
-  "devDependencies": {
-    "@biomejs/biome": "2.3.8",
-    "@types/bun": "latest"
-  },
-  "dependencies": {
-    "zod": "^4.4.3"
-  },
-  "overrides": {
-    "prosemirror-model": "*",
-    "prosemirror-state": "*",
-    "prosemirror-view": "*",
-    "prosemirror-transform": "*",
-    "prosemirror-keymap": "*"
-  }
+	"name": "nota",
+	"private": true,
+	"workspaces": {
+		"packages": [
+			"apps/*",
+			"packages/*"
+		],
+		"catalog": {
+			"dotenv": "^17.4.2",
+			"zod": "^4.4.3",
+			"typescript": "^6.0.3",
+			"@types/bun": "^1.3.14",
+			"hono": "^4.12.32",
+			"@orpc/server": "^1.14.12",
+			"@orpc/openapi": "^1.14.12",
+			"@orpc/zod": "^1.14.12",
+			"better-auth": "1.6.25",
+			"@better-auth/cli": "^1.4.21",
+			"@orpc/client": "^1.14.12",
+			"@polar-sh/better-auth": "^1.8.4",
+			"@orpc/tanstack-query": "^1.14.12",
+			"@sveltejs/kit": "next",
+			"@sveltejs/vite-plugin-svelte": "^7.2.0",
+			"@tailwindcss/vite": "^4.3.3",
+			"@tanstack/svelte-form": "^1.33.2",
+			"@tanstack/svelte-query": "^6.1.38",
+			"@tanstack/svelte-query-devtools": "^6.1.38",
+			"svelte": "^5.56.8",
+			"svelte-check": "^4.7.5",
+			"tailwindcss": "^4.3.3",
+			"vite": "^8.1.5",
+			"nanoid": "^6.0.1",
+			"@lucide/svelte": "^1.31.0"
+		}
+	},
+	"type": "module",
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"format": "turbo run format",
+		"check": "turbo run check",
+		"check:ci": "turbo run check:ci",
+		"check-types": "turbo run check-types",
+		"dev:web": "turbo run dev -F web",
+		"dev:server": "turbo run dev -F server",
+		"dev:app": "turbo run dev -F app",
+		"auth:generate": "turbo run auth:generate -F @nota/auth",
+		"db:push": "turbo run db:push -F @nota/db",
+		"db:studio": "turbo run db:studio -F @nota/db",
+		"db:generate": "turbo run db:generate -F @nota/db",
+		"db:migrate": "turbo run db:migrate -F @nota/db",
+		"docker:build": "docker compose build",
+		"docker:up": "docker compose up -d --build",
+		"docker:down": "docker compose down",
+		"docker:logs": "docker compose logs -f"
+	},
+	"dependencies": {
+		"@nota/env": "workspace:*",
+		"dotenv": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.8",
+		"@nota/config": "workspace:*",
+		"@types/bun": "catalog:",
+		"turbo": "^2.10.10",
+		"typescript": "catalog:"
+	},
+	"packageManager": "bun@1.3.14"
 }

@@ -1,16 +1,9 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
-  "compilerOptions": {
-    "rewriteRelativeImportExtensions": true,
-    "allowJs": true,
-    "checkJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": true,
-    "moduleResolution": "bundler",
-    "types": ["./worker-configuration.d.ts"]
-  }
+	"extends": "$app/tsconfig",
+	"compilerOptions": {
+		"sourceMap": true,
+		"strict": true,
+		"types": ["./worker-configuration.d.ts", "$app/types"]
+	},
+	"include": ["src"]
 }

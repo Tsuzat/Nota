@@ -1,63 +1,140 @@
 <script lang="ts" module>
 let open = $state(false);
-let confirmationText = $state('delete');
-let onConfirm = $state<() => Promise<void>>();
-
-export function confirmDelete(inputText: string, onConfirmCb: () => Promise<void>) {
-  open = true;
-  confirmationText = inputText;
-  onConfirm = onConfirmCb;
+interface ConfirmDeleteParams {
+	title?: string;
+	description?: string;
+	confirmation?: { text: string };
+	warning?: { text: string; allowDelete?: boolean };
+	buttonText?: string;
+	onClick?: () => Promise<void>;
 }
+
+const DEFAULT_DELETE_DIALOG_PARAMS = $state<ConfirmDeleteParams>({
+	title: "Delete",
+	description: "Are you sure you want to delete?",
+	buttonText: "Delete",
+});
+
+export const openDeleteConfirmation = ({
+	title = "Delete",
+	description = "Are you sure you want to delete?",
+	confirmation,
+	warning,
+	buttonText = "Delete",
+	onClick,
+}: ConfirmDeleteParams) => {
+	DEFAULT_DELETE_DIALOG_PARAMS.title = title;
+	DEFAULT_DELETE_DIALOG_PARAMS.description = description;
+	DEFAULT_DELETE_DIALOG_PARAMS.confirmation = confirmation;
+	DEFAULT_DELETE_DIALOG_PARAMS.warning = warning;
+	DEFAULT_DELETE_DIALOG_PARAMS.buttonText = buttonText;
+	DEFAULT_DELETE_DIALOG_PARAMS.onClick = onClick;
+	open = true;
+};
 </script>
 
 <script lang="ts">
-  import * as Dialog from "@lib/components/ui/dialog";
-  import { Button, buttonVariants } from "@lib/components/ui/button";
-  import { Input } from "@lib/components/ui/input";
-  import { BarSpinner } from "@lib/icons";
-  let isDeleting = $state(false);
-  let inputText = $state("");
+  import { BarSpinner } from "../../icons";
 
-  async function onDelete() {
+  import { Button, buttonVariants } from "../../ui/button";
+
+  import {
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogTitle,
+    DialogDescription,
+    DialogHeader,
+    DialogFooter,
+    DialogClose,
+  } from "../../ui/dialog";
+  import { Input } from "../../ui/input";
+
+  let isDeleting = $state(false);
+  let confirmationInputText = $state("");
+  let errorMsg = $state<string | null>(null);
+
+  $effect(() => {
+    if (open) {
+      isDeleting = false;
+      confirmationInputText = "";
+      errorMsg = null;
+    }
+  });
+
+  let allowDelete = $derived(
+    !DEFAULT_DELETE_DIALOG_PARAMS.confirmation ||
+      confirmationInputText === DEFAULT_DELETE_DIALOG_PARAMS.confirmation.text,
+  );
+
+  async function handleDelete() {
     isDeleting = true;
-    onConfirm?.()
-      .then(() => {
-        open = false;
-      })
-      .finally(() => {
-        isDeleting = false;
-      });
+    errorMsg = null;
+    try {
+      await DEFAULT_DELETE_DIALOG_PARAMS.onClick?.();
+      open = false;
+    } catch (e) {
+      errorMsg = e instanceof Error ? e.message : "An error occurred";
+    } finally {
+      isDeleting = false;
+    }
   }
 </script>
 
-<Dialog.Root bind:open>
-  <Dialog.Content>
-    <Dialog.Header>
-      <Dialog.Title>Are you sure?</Dialog.Title>
-      <Dialog.Description class="flex flex-col gap-2">
-        <span>
-          Type out <code
-            class="bg-muted px-1 py-0.5 rounded text-muted-foreground"
-            >{confirmationText}</code
-          > to confirm the deletion of this workspace.
-        </span>
-        <Input placeholder={confirmationText} bind:value={inputText} />
-      </Dialog.Description>
-    </Dialog.Header>
-    <Dialog.Footer>
-      <Dialog.Close class={buttonVariants({variant: "outline"})}>Cancel</Dialog.Close>
-      <Button
-        disabled={inputText !== confirmationText || isDeleting}
-        variant="destructive"
-        onclick={onDelete}
+<Dialog bind:open>
+  <DialogTrigger class="sr-only">open</DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>{DEFAULT_DELETE_DIALOG_PARAMS.title}</DialogTitle>
+      <DialogDescription
+        >{DEFAULT_DELETE_DIALOG_PARAMS.description}</DialogDescription
       >
-        {#if isDeleting}
-          <BarSpinner />
-          Deleting...
-        {:else}
-          Delete
-        {/if}
-      </Button>
-    </Dialog.Footer>
-  </Dialog.Content>
-</Dialog.Root>
+    </DialogHeader>
+
+    {#if DEFAULT_DELETE_DIALOG_PARAMS.warning}
+      <div class="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+        <p>
+          <strong>Warning:</strong>
+          {DEFAULT_DELETE_DIALOG_PARAMS.warning.text}
+        </p>
+      </div>
+    {/if}
+
+    {#if DEFAULT_DELETE_DIALOG_PARAMS.confirmation}
+      <div class="space-y-2">
+        <label for="delete-input" class="text-sm font-medium"
+          >Type <strong>{DEFAULT_DELETE_DIALOG_PARAMS.confirmation.text}</strong
+          > to confirm</label
+        >
+        <Input
+          id="delete-input"
+          bind:value={confirmationInputText}
+          placeholder={DEFAULT_DELETE_DIALOG_PARAMS.confirmation.text}
+        />
+      </div>
+    {/if}
+
+    {#if errorMsg}
+      <div class="text-sm font-medium text-destructive">
+        {errorMsg}
+      </div>
+    {/if}
+    <DialogFooter>
+      <DialogClose class={buttonVariants({ variant: "outline" })}
+        >Cancel</DialogClose
+      >
+      {#if !DEFAULT_DELETE_DIALOG_PARAMS.warning || DEFAULT_DELETE_DIALOG_PARAMS.warning.allowDelete}
+        <Button
+          variant="destructive"
+          disabled={!allowDelete || isDeleting}
+          onclick={handleDelete}
+        >
+          {#if isDeleting}
+            <BarSpinner class="mr-2" />
+          {/if}
+          {DEFAULT_DELETE_DIALOG_PARAMS.buttonText}</Button
+        >
+      {/if}
+    </DialogFooter>
+  </DialogContent>
+</Dialog>

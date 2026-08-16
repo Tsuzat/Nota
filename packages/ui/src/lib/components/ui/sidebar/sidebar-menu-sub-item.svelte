@@ -1,12 +1,12 @@
 <script lang="ts">
-import { cn, type WithElementRef } from '@lib/utils.js';
-import type { HTMLAttributes } from 'svelte/elements';
+import type { HTMLAttributes } from "svelte/elements";
+import { cn, type WithElementRef } from "#lib/utils.js";
 
 let {
-  ref = $bindable(null),
-  children,
-  class: className,
-  ...restProps
+	ref = $bindable(null),
+	children,
+	class: className,
+	...restProps
 }: WithElementRef<HTMLAttributes<HTMLLIElement>> = $props();
 </script>
 

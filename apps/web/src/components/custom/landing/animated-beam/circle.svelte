@@ -1,0 +1,41 @@
+<script lang="ts">
+import * as Tooltip from "@nota/ui/shadcn/tooltip/index.ts";
+import { cn } from "@nota/ui/utils";
+import type { Snippet } from "svelte";
+
+interface Props {
+	class?: string;
+	ref: HTMLDivElement | null;
+	content: string;
+	children?: Snippet<[]>;
+}
+
+let {
+	class: className = "",
+	ref = $bindable(),
+	children,
+	content,
+}: Props = $props();
+</script>
+
+<Tooltip.Provider>
+  <Tooltip.Root>
+    <Tooltip.Trigger>
+      {#snippet child({ props })}
+        <div
+          bind:this={ref}
+          {...props}
+          class={cn(
+            "z-10 flex size-14 cursor-pointer items-center justify-center rounded-xl border bg-background p-2 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)] transition-all duration-200 dark:hover:border-primary",
+            className,
+          )}
+        >
+          {@render children?.()}
+        </div>
+      {/snippet}
+    </Tooltip.Trigger>
+    <Tooltip.Content class="p-2">
+      {content}
+    </Tooltip.Content>
+  </Tooltip.Root>
+</Tooltip.Provider>

@@ -1,24 +1,21 @@
 <script lang="ts">
-import { Toaster } from '@nota/ui/shadcn/sonner';
-import '../app.css';
-import { setAuthContext, setStorageContext } from '@nota/client';
-import { ModeWatcher } from '@nota/ui';
-import { onMount } from 'svelte';
+import { QueryClientProvider } from "@tanstack/svelte-query";
+import { SvelteQueryDevtools } from "@tanstack/svelte-query-devtools";
+import "../app.css";
+import { ModeWatcher } from "@nota/ui";
+import { Toaster } from "@nota/ui/shadcn/sonner/index.js";
+import * as Tooltip from "@nota/ui/shadcn/tooltip/index.js";
+import { queryClient } from "#lib/orpc.ts";
 
-let { children, data } = $props();
-
-const authClient = setAuthContext();
-setStorageContext();
-
-onMount(() => {
-  if (data.user && data.session) {
-    authClient.user = data.user;
-    authClient.session = data.session;
-  }
-});
+const { children } = $props();
 </script>
 
 <ModeWatcher />
-<Toaster closeButton richColors class="z-10000!" />
+<Toaster closeButton richColors />
 
-{@render children()}
+<QueryClientProvider client={queryClient}>
+  <Tooltip.Provider>
+    {@render children()}
+  </Tooltip.Provider>
+  <SvelteQueryDevtools />
+</QueryClientProvider>

@@ -1,22 +1,22 @@
 <script lang="ts">
-import * as Sheet from '@lib/components/ui/sheet/index.js';
-import { cn, type WithElementRef } from '@lib/utils.js';
-import type { HTMLAttributes } from 'svelte/elements';
-import { SIDEBAR_WIDTH_MOBILE } from './constants.js';
-import { useSidebar } from './context.svelte.js';
+import type { HTMLAttributes } from "svelte/elements";
+import * as Sheet from "#lib/components/ui/sheet/index.js";
+import { cn, type WithElementRef } from "#lib/utils.js";
+import { SIDEBAR_WIDTH_MOBILE } from "./constants.js";
+import { useSidebar } from "./context.svelte.js";
 
 let {
-  ref = $bindable(null),
-  side = 'left',
-  variant = 'sidebar',
-  collapsible = 'offcanvas',
-  class: className,
-  children,
-  ...restProps
+	ref = $bindable(null),
+	side = "left",
+	variant = "sidebar",
+	collapsible = "offcanvas",
+	class: className,
+	children,
+	...restProps
 }: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
-  side?: 'left' | 'right';
-  variant?: 'sidebar' | 'floating' | 'inset';
-  collapsible?: 'offcanvas' | 'icon' | 'none';
+	side?: "left" | "right";
+	variant?: "sidebar" | "floating" | "inset";
+	collapsible?: "offcanvas" | "icon" | "none";
 } = $props();
 
 const sidebar = useSidebar();
@@ -25,7 +25,7 @@ const sidebar = useSidebar();
 {#if collapsible === "none"}
 	<div
 		class={cn(
-			"bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
+			"flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground",
 			className
 		)}
 		bind:this={ref}
@@ -34,17 +34,14 @@ const sidebar = useSidebar();
 		{@render children?.()}
 	</div>
 {:else if sidebar.isMobile}
-	<Sheet.Root
-		bind:open={() => sidebar.openMobile, (v) => sidebar.setOpenMobile(v)}
-		{...restProps}
-	>
+	<Sheet.Root bind:open={() => sidebar.openMobile, (v) => sidebar.setOpenMobile(v)} {...restProps}>
 		<Sheet.Content
 			bind:ref
 			data-sidebar="sidebar"
 			data-slot="sidebar"
 			data-mobile="true"
 			class={cn(
-				"bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden",
+				"w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden",
 				className
 			)}
 			style="--sidebar-width: {SIDEBAR_WIDTH_MOBILE};"
@@ -62,7 +59,7 @@ const sidebar = useSidebar();
 {:else}
 	<div
 		bind:this={ref}
-		class="text-sidebar-foreground group peer hidden md:block"
+		class="group peer hidden text-sidebar-foreground md:block"
 		data-state={sidebar.state}
 		data-collapsible={sidebar.state === "collapsed" ? collapsible : ""}
 		data-variant={variant}
@@ -99,7 +96,7 @@ const sidebar = useSidebar();
 			<div
 				data-sidebar="sidebar"
 				data-slot="sidebar-inner"
-				class="bg-sidebar group-data-[variant=floating]:ring-sidebar-border group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 flex size-full flex-col"
+				class="bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border flex size-full flex-col"
 			>
 				{@render children?.()}
 			</div>

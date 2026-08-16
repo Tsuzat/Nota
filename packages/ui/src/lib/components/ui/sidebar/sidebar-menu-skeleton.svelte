@@ -1,16 +1,16 @@
 <script lang="ts">
-import { cn, type WithElementRef } from '@lib/utils.js';
-import { Skeleton } from '@lib/components/ui/skeleton/index.js';
-import type { HTMLAttributes } from 'svelte/elements';
+import type { HTMLAttributes } from "svelte/elements";
+import { Skeleton } from "#lib/components/ui/skeleton/index.js";
+import { cn, type WithElementRef } from "#lib/utils.js";
 
 let {
-  ref = $bindable(null),
-  class: className,
-  showIcon = false,
-  children,
-  ...restProps
+	ref = $bindable(null),
+	class: className,
+	showIcon = false,
+	children,
+	...restProps
 }: WithElementRef<HTMLAttributes<HTMLElement>> & {
-  showIcon?: boolean;
+	showIcon?: boolean;
 } = $props();
 
 // Random width between 50% and 90%

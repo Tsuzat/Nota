@@ -1,28 +1,19 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
-import type { User, Session } from '@nota/client';
-
 declare global {
-  namespace App {
-    interface Locals {
-      user: User | null;
-      session: Session | null;
-    }
+	namespace App {
+		interface Platform {
+			env: Env;
+			ctx: ExecutionContext;
+			caches: CacheStorage;
+			cf?: IncomingRequestCfProperties;
+		}
 
-    interface Error {
-      server: { message: string; stack?: string; status?: number };
-      client: { message: string; stack?: string; status?: number };
-    }
-
-    interface Platform {
-      env: Env;
-      ctx: ExecutionContext;
-      caches: CacheStorage;
-      cf?: IncomingRequestCfProperties;
-      env: Env;
-      ctx: ExecutionContext;
-      caches: CacheStorage;
-      cf?: IncomingRequestCfProperties;
-    }
-  }
+		// interface Error {}
+		// interface Locals {}
+		// interface PageData {}
+		// interface PageState {}
+	}
 }
+
+export {};

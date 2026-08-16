@@ -1,0 +1,36 @@
+{
+	"name": "@nota/db",
+	"type": "module",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"default": "./src/*.ts"
+		}
+	},
+	"scripts": {
+		"db:push": "drizzle-kit push",
+		"db:generate": "drizzle-kit generate",
+		"db:studio": "drizzle-kit studio",
+		"db:migrate": "drizzle-kit migrate",
+		"lint": "bunx @biomejs/biome lint .",
+		"format": "bunx @biomejs/biome format --write .",
+		"check": "bunx @biomejs/biome check --write .",
+		"check:ci": "bunx @biomejs/biome check ."
+	},
+	"dependencies": {
+		"@nota/env": "workspace:*",
+		"dotenv": "catalog:",
+		"drizzle-orm": "^1.0.0-rc.4",
+		"nanoid": "catalog:",
+		"pg": "^8.22.0",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@nota/config": "workspace:*",
+		"@types/pg": "^8.20.0",
+		"drizzle-kit": "^1.0.0-rc.4",
+		"typescript": "catalog:"
+	}
+}
