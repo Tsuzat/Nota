@@ -6,12 +6,9 @@ import Copy from "@lucide/svelte/icons/copy";
 import Database from "@lucide/svelte/icons/database";
 import Download from "@lucide/svelte/icons/download";
 import FolderLock from "@lucide/svelte/icons/folder-lock";
-import House from "@lucide/svelte/icons/house";
-import LogOut from "@lucide/svelte/icons/log-out";
 import Menu from "@lucide/svelte/icons/menu";
 import Pencil from "@lucide/svelte/icons/pencil";
 import Sparkles from "@lucide/svelte/icons/sparkles";
-import User from "@lucide/svelte/icons/user";
 import Zap from "@lucide/svelte/icons/zap";
 import { ToggleMode } from "@nota/ui/custom/index.js";
 import UserAvatar from "@nota/ui/custom/user-avarar.svelte";
@@ -36,6 +33,7 @@ import { Pricing } from "#components/custom/landing/pricing/index.ts";
 import Spotlight from "#components/custom/landing/spotlight.svelte";
 import Tiltcard from "#components/custom/tilt-card.svelte";
 import { authClient } from "#lib/auth-client.ts";
+import { handleSignout } from "#lib/utils.ts";
 import { resolve } from "$app/paths";
 import { getArtefacts } from "./data.remote";
 
@@ -185,19 +183,6 @@ const filteredFaqs = $derived(
 		? faqItems
 		: faqItems.filter((item) => item.category === faqCategory),
 );
-
-const faqJsonLdSafe = JSON.stringify({
-	"@context": "https://schema.org",
-	"@type": "FAQPage",
-	mainEntity: faqItems.map((item) => ({
-		"@type": "Question",
-		name: item.question,
-		acceptedAnswer: {
-			"@type": "Answer",
-			text: item.answer,
-		},
-	})),
-}).replace(/</g, "\\u003c");
 
 let copied = $state(false);
 function copyBrewCommand() {
@@ -377,18 +362,15 @@ onMount(() => {
           <Dropdown.Group>
             <Dropdown.Label>{user.name}</Dropdown.Label>
               <Dropdown.Item>
-                <User />
-                Profile
+                Go to App
               </Dropdown.Item>
               <Dropdown.Item>
-                <House />
                 Home
               </Dropdown.Item>
             <Dropdown.Item
               variant="destructive"
-              onclick={() => {}}
+              onclick={handleSignout}
             >
-              <LogOut />
               Sign Out
             </Dropdown.Item>
           </Dropdown.Group>
