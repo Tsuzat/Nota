@@ -1,18 +1,17 @@
 <script lang="ts">
 import { createQuery } from "@tanstack/svelte-query";
-import { authClient } from "#lib/auth-client.ts";
+import { getAuthSession } from "#lib/auth-session.svelte.ts";
 import { orpc } from "#lib/orpc.ts";
 
-const sessionQuery = authClient.useSession();
-
 const healthCheck = createQuery(() => orpc.healthCheck.queryOptions());
+const sessionAuth = getAuthSession();
 </script>
 
-<main class="w-full h-screen">
+<div >
   <h1>Hello WOrld</h1>
-  {#if $sessionQuery.data?.user}
-    <p>Logged in as {$sessionQuery.data.user.email}</p>
-  {:else if $sessionQuery.isRefetching || $sessionQuery.isPending}
+  {#if sessionAuth.data?.user}
+    <p>Logged in as {sessionAuth.data.user.email}</p>
+  {:else if sessionAuth.isRefetching || sessionAuth.isPending}
     <p>Loading...</p>
   {:else}
     <p>Not logged in</p>
@@ -25,4 +24,4 @@ const healthCheck = createQuery(() => orpc.healthCheck.queryOptions());
         ? "Connected"
         : "Disconnected"}
   </span>
-</main>
+</div>

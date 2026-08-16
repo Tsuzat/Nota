@@ -28,7 +28,7 @@ let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> =
 
 <SidebarRoot
   bind:ref
-  variant={ISDESKTOP ? "sidebar" : "floating"}
+  variant={ISDESKTOP ? "inset" : "floating"}
   {...restProps}
 >
   <SidebarHeader
