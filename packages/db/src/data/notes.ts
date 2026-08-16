@@ -23,8 +23,9 @@ export const selectNoteMetaSchema = fullNoteSchema.omit({
 export type NoteMeta = z.infer<typeof selectNoteMetaSchema>;
 
 export const insertNoteSchema = createInsertSchema(notes, {
-	content: z.any(),
+	content: z.any().optional(),
 });
+
 export const updateNoteSchema = createUpdateSchema(notes, {
 	content: z.any().optional(),
 });

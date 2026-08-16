@@ -96,3 +96,36 @@ export const deleteWorkspace = async (
 		.returning();
 	return result.length > 0;
 };
+
+/**
+ * Check if a user is the owner of a workspace
+ * @param id Workspace ID
+ * @param userId User ID
+ * @returns Promise<boolean>
+ */
+export const isWorkspaceOwner = async (
+	id: string,
+	userId: string,
+): Promise<boolean> => {
+	const count = await db.$count(
+		workspace,
+		and(eq(workspace.id, id), eq(workspace.ownerId, userId)),
+	);
+	return count > 0;
+};
+
+/**
+ * Get the owner ID of a workspace
+ * @param id Workspace ID
+ * @returns Promise<string | null>
+ */
+export const getWorkspaceOwnerId = async (
+	id: string,
+): Promise<string | null> => {
+	const [data] = await db
+		.select({ ownerId: workspace.ownerId })
+		.from(workspace)
+		.where(eq(workspace.id, id))
+		.limit(1);
+	return data?.ownerId ?? null;
+};
