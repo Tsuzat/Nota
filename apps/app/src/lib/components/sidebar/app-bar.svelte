@@ -11,11 +11,11 @@ import type { ComponentProps } from "svelte";
 import { ISDESKTOP, ISMACOS } from "#lib/utils.ts";
 import { AppLogoMenu } from "../custom";
 import ToggleSidebar from "../custom/toggle-sidebar.svelte";
-import WorkspaceSwitcher from "./workspace-switcher.svelte";
-
 //   import AppLogoMenu from "../app-menu.svelte";
 //   import BackAndForthButtons from "../back-and-forth-buttons.svelte";
-//   import NavMain from "./nav-main.svelte";
+import NavMain from "./nav-main.svelte";
+import WorkspaceSwitcher from "./workspace-switcher.svelte";
+
 //   import NavNotes from "./nav-notes.svelte";
 //   import NavPinned from "./nav-pinned.svelte";
 //   import NavSecondary from "./nav-secondary.svelte";
@@ -46,7 +46,7 @@ let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> =
       <ToggleSidebar class="ml-auto" />
     </div>
     <WorkspaceSwitcher />
-    <!-- <NavMain /> -->
+    <NavMain />
   </SidebarHeader>
   <SidebarContent>
     <!-- <NavShared />

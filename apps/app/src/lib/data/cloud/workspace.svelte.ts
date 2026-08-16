@@ -1,3 +1,4 @@
+import type { UpdateWorkspaceInput } from "@nota/db/data/workspace";
 import type { CloudWorkspace } from "@nota/db/types";
 import { createMutation, createQuery } from "@tanstack/svelte-query";
 import { isSignedIn } from "#lib/auth-session.svelte.ts";
@@ -55,11 +56,11 @@ export class CloudWorkspaces {
 		await this.#query.refetch();
 	}
 
-	async create(input: { name: string }) {
+	async insert(input: { name: string; icon: string }) {
 		return this.#createMutation.mutate(input);
 	}
 
-	async update(input: { id: string; name?: string; description?: string }) {
+	async update(input: UpdateWorkspaceInput) {
 		return this.#updateMutation.mutate(input);
 	}
 

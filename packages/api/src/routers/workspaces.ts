@@ -41,14 +41,14 @@ export const workspaceRouter = {
 			const userId = context.session.user.id;
 			const count = await getUserWorkspaceCount(userId);
 			const isPro = await isUserPro(userId);
-			if (!isPro && count >= 10) {
+			if (!isPro && count >= 1) {
 				throw new ORPCError("LIMIT_EXCEEDED", {
 					message: "You have reached the maximum number of workspaces",
 				});
 			}
 			const result = await createWorkspace({
 				ownerId: userId,
-				name: input.name,
+				...input,
 			});
 
 			void deleteCachedUserWorkspaces(userId).catch((err) => {

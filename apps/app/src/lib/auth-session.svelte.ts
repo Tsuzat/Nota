@@ -14,7 +14,9 @@ export function getAuthSession() {
 	return session;
 }
 
-const signedIn = $derived(!!session.data?.user && !session.isPending);
+const signedIn = $derived(
+	!!session.data?.user && !session.isPending && !session.isRefetching,
+);
 
 /**
  * True if the user is signed in.

@@ -9,13 +9,27 @@ import { orpc, queryClient } from "#lib/orpc.ts";
 
 export class CloudNotes {
 	#workspaceId = $state<string>();
+	#getWorkspaceId?: () => string | undefined;
+
+	constructor(getWorkspaceId?: () => string | undefined) {
+		this.#getWorkspaceId = getWorkspaceId;
+	}
+
+	get workspaceId(): string | undefined {
+		return this.#getWorkspaceId ? this.#getWorkspaceId() : this.#workspaceId;
+	}
+
+	set workspaceId(value: string | undefined) {
+		this.#workspaceId = value;
+	}
 
 	#listQuery = createQuery(() => {
+		const wsId = this.workspaceId;
 		return {
 			...orpc.notes.listByWorkspace.queryOptions({
-				input: { workspaceId: this.#workspaceId ?? "" },
+				input: { workspaceId: wsId ?? "" },
 			}),
-			enabled: isSignedIn() && !!this.#workspaceId,
+			enabled: isSignedIn() && !!wsId,
 		};
 	});
 
@@ -68,8 +82,7 @@ export class CloudNotes {
 		}),
 	);
 
-	notes(workspaceId: string): NoteMeta[] {
-		this.#workspaceId = workspaceId;
+	notes(_workspaceId?: string): NoteMeta[] {
 		return this.#listQuery.data ?? [];
 	}
 

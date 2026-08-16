@@ -34,7 +34,9 @@ export const openCreateWorkspace = () => {
     isLoading = true;
     try {
       if (isLocal) {
-        await workspaceCxt.local.insert({ icon: "📁", name });
+        await workspaceCxt.local.insert({ icon: "emoji:📁", name });
+      } else {
+        await workspaceCxt.cloud.insert({ icon: "emoji:📁", name });
       }
       open = false;
     } catch (e) {

@@ -8,7 +8,7 @@ import * as Sidebar from "@nota/ui/shadcn/sidebar/index.ts";
 import { Toaster } from "@nota/ui/shadcn/sonner/index.ts";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
-import { isSignedIn } from "#lib/auth-session.svelte.ts";
+import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.ts";
 import { CreateWorkspace } from "#lib/components/dialogs/index.ts";
 import { AppSideBar } from "#lib/components/index.ts";
 import { orpc, queryClient } from "#lib/orpc.js";
@@ -21,15 +21,16 @@ const { children } = $props();
 let open = $state(true);
 
 const shouldRenderContent = $derived(ISDESKTOP || isSignedIn());
+const session = getAuthSession();
 
 let wasSignedIn = $state(false);
 $effect(() => {
+	if (!ISDESKTOP && !session.isPending && !session.isRefetching) {
+		window.location.href = `${PUBLIC_NOTA_URL}/signin`;
+	}
 	if (wasSignedIn && !isSignedIn()) {
 		queryClient.removeQueries({ queryKey: orpc.workspace.key() });
 		queryClient.removeQueries({ queryKey: orpc.notes.key() });
-		if (!ISDESKTOP) {
-			window.location.href = `${PUBLIC_NOTA_URL}/signin`;
-		}
 	}
 	wasSignedIn = isSignedIn();
 });
@@ -44,11 +45,11 @@ onMount(async () => {
 </script>
 
 <ModeWatcher />
-<Toaster richColors closeButton />
-<CreateWorkspace />
 <QueryClientProvider client={queryClient}>
   {#if shouldRenderContent}
+    <Toaster richColors closeButton />
     <DataProviders>
+      <CreateWorkspace />
       <Sidebar.Provider
         bind:open
         onOpenChange={(value: boolean) => {

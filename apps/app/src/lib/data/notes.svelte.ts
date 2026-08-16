@@ -5,9 +5,12 @@ import type { NoteMeta } from "./types";
 import { getWorkspaceContext } from "./workspace.svelte.ts";
 
 class Notes {
-	cloud = new CloudNotes();
-	local = new LocalNotes();
 	#workspaceCtx = getWorkspaceContext();
+	cloud = new CloudNotes(() => {
+		const ws = this.#workspaceCtx.current;
+		return ws && "ownerId" in ws ? ws.id : undefined;
+	});
+	local = new LocalNotes();
 	current = $state<NoteMeta | null>(null);
 
 	list = $derived.by(() => {
