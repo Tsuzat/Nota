@@ -9,14 +9,20 @@
  */
 
 /** @type {Props} */
-let { color = 'currentColor', size = 24, strokeWidth = 2, isHovered = false, class: className = '' } = $props();
+let {
+	color = "currentColor",
+	size = 24,
+	strokeWidth = 2,
+	isHovered = false,
+	class: className = "",
+} = $props();
 
 function handleMouseEnter() {
-  isHovered = true;
+	isHovered = true;
 
-  setTimeout(() => {
-    isHovered = false;
-  }, 400);
+	setTimeout(() => {
+		isHovered = false;
+	}, 400);
 }
 </script>
 
