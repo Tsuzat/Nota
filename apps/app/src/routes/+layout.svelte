@@ -2,7 +2,7 @@
 import { QueryClientProvider } from "@tanstack/svelte-query";
 import { SvelteQueryDevtools } from "@tanstack/svelte-query-devtools";
 import "../app.css";
-import { ModeWatcher } from "@nota/ui";
+import { ModeWatcher, toast } from "@nota/ui";
 import ConfirmDelete from "@nota/ui/custom/dialogs/confirm-delete.svelte";
 import { BarSpinner } from "@nota/ui/icons/index.js";
 import * as Sidebar from "@nota/ui/shadcn/sidebar/index.ts";
@@ -12,7 +12,11 @@ import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
 import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.ts";
 import CreateNotes from "#lib/components/dialogs/create-notes.svelte";
-import { CreateWorkspace, Trashed } from "#lib/components/dialogs/index.ts";
+import {
+	CreateWorkspace,
+	SigninDevice,
+	Trashed,
+} from "#lib/components/dialogs/index.ts";
 import { AppSideBar } from "#lib/components/index.ts";
 import { orpc, queryClient } from "#lib/orpc.js";
 import { secureStorage } from "#lib/platform/securestorage.ts";
@@ -42,7 +46,9 @@ onMount(async () => {
 	open = localStorage.getItem("sidebar-state") === "open";
 	if (ISDESKTOP) {
 		document.documentElement.style.setProperty("--sidebar", "transparent");
-		await secureStorage.init();
+		secureStorage.init().then(() => {
+			if (!isSignedIn()) session.refetch();
+		});
 	}
 });
 </script>
@@ -57,6 +63,9 @@ onMount(async () => {
         <CreateNotes />
         <ConfirmDelete />
         <Trashed />
+        {#if ISDESKTOP}
+          <SigninDevice />
+        {/if}
         <Sidebar.Provider
           bind:open
           onOpenChange={(value: boolean) => {

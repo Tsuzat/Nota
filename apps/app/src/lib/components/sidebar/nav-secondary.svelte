@@ -19,6 +19,7 @@ import { openTrash } from "#lib/components/dialogs/transhed.svelte";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
 import { getKeyboardShortcut } from "#lib/utils.ts";
 import { PUBLIC_NOTA_URL } from "$app/env/public";
+import { openSigninDevice } from "../dialogs";
 
 // import Trashed from "../dialogs/trashed.svelte";
 
@@ -98,7 +99,7 @@ function getUserIntials(name?: string) {
               <Button
                 variant="outline"
                 size="icon-lg"
-                onclick={() => {}}
+                onclick={openSigninDevice}
                 onmouseenter={() => (isLoginHovered = true)}
                 onmouseleave={() => (isLoginHovered = false)}
               >
@@ -114,7 +115,7 @@ function getUserIntials(name?: string) {
                     {...props}
                     variant="outline"
                     size="icon-lg"
-                    class="p-0! overflow-hidden data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                    class="p-0! rounded-full overflow-hidden data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
                     <Avatar.Root class="size-full">
                       <Avatar.Image src={user.image} alt="User" />

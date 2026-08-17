@@ -49,3 +49,6 @@ incremental = false
 codegen-units = 16
 opt-level = 3
 strip = false      # Prevents macOS strip from corrupting proc-macro dylibs (mis-aligned LINKEDIT string pool)
+
+[profile.dev.package.scrypt]
+opt-level = 3

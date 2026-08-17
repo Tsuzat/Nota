@@ -1,20 +1,17 @@
 <script lang="ts">
 import { authClient } from "#lib/auth-client.js";
+import { signOut } from "#lib/signout.ts";
 import { goto } from "$app/navigation";
 
 const sessionQuery = authClient.useSession();
 
 async function handleSignOut() {
-	await authClient.signOut({
-		fetchOptions: {
-			onSuccess: () => {
-				goto("/");
-			},
-			onError: (error) => {
-				console.error("Sign out failed:", error);
-			},
-		},
-	});
+	try {
+		await signOut();
+		goto("/");
+	} catch (error) {
+		console.error("Sign out failed:", error);
+	}
 }
 
 function goToLogin() {

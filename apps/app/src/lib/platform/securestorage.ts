@@ -19,7 +19,7 @@ class SecureStorage {
 		const initTimeout = new Promise<void>((_, reject) =>
 			setTimeout(
 				() => reject(new Error("Timeout initializing secure storage")),
-				3000,
+				10000,
 			),
 		);
 
@@ -30,7 +30,7 @@ class SecureStorage {
 						"get_or_create_stronghold_password",
 					);
 					const localDataDir = await appLocalDataDir();
-					const path = await join(localDataDir, "nota-app.stronghold");
+					const path = await join(localDataDir, "nota.stronghold");
 					this.stronghold = await Stronghold.load(path, password);
 
 					// Load or create the client and get the store
