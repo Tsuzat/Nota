@@ -59,6 +59,7 @@ export const openCreateWorkspace = () => {
     <form onsubmit={handleSubmit}>
       <div class="flex flex-col space-y-4">
         <div class="flex items-center w-full">
+          
           <Input
             class="w-full"
             placeholder="Workspace name..."
