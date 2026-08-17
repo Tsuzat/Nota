@@ -19,6 +19,11 @@ app.use(
 	cors({
 		origin: (origin) => {
 			if (origin.endsWith(".nota.ink")) return origin;
+			if (
+				origin === "tauri://localhost" ||
+				origin === "https://tauri.localhost"
+			)
+				return origin;
 			return env.CORS_ORIGIN;
 		},
 		allowMethods: ["GET", "POST", "OPTIONS"],
