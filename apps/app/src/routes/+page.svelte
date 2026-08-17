@@ -8,7 +8,7 @@ const sessionAuth = getAuthSession();
 </script>
 
 <div >
-  <h1>Hello WOrld</h1>
+  <h1 class="text-center mt-16 text-6xl">Nota</h1>
   {#if sessionAuth.data?.user}
     <p>Logged in as {sessionAuth.data.user.email}</p>
   {:else if sessionAuth.isRefetching || sessionAuth.isPending}

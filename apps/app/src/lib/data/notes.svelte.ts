@@ -1,4 +1,7 @@
+import type { NoteMeta as CloudNoteMeta } from "@nota/db/data/notes";
+import type { LocalNoteMeta } from "@nota/db-local/types";
 import { getContext, setContext } from "svelte";
+import { isSignedIn } from "#lib/auth-session.svelte.ts";
 import { CloudNotes } from "./cloud/notes.svelte";
 import { LocalNotes } from "./local/notes.svelte.ts";
 import type { NoteMeta } from "./types";
@@ -56,7 +59,7 @@ class Notes {
 		const ws = this.#workspaceCtx.current;
 		if (!ws) throw new Error("No active workspace");
 		const workspaceId = ws.id;
-		if ("ownerId" in ws) {
+		if ("ownerId" in ws && isSignedIn()) {
 			await this.cloud.create({
 				workspaceId,
 				name: input.name,
@@ -79,13 +82,16 @@ class Notes {
 		}
 	}
 
-	async updateMeta(id: string, input: Record<string, unknown>) {
+	async updateMeta(
+		id: string,
+		input: Partial<LocalNoteMeta> | Partial<CloudNoteMeta>,
+	) {
 		const ws = this.#workspaceCtx.current;
 		if (!ws) throw new Error("No active workspace");
-		if ("ownerId" in ws) {
+		if ("ownerId" in ws && isSignedIn()) {
 			await this.cloud.updateMeta({ id, ...input } as never);
 		} else {
-			await this.local.update(id, input);
+			await this.local.update(id, input as LocalNoteMeta);
 		}
 	}
 
@@ -106,7 +112,7 @@ class Notes {
 	) {
 		const ws = this.#workspaceCtx.current;
 		if (!ws) throw new Error("No active workspace");
-		if ("ownerId" in ws) {
+		if ("ownerId" in ws && isSignedIn()) {
 			await this.cloud.updateContent(id, content, contextText ?? "");
 		} else {
 			await this.local.saveContent(id, content, contextText);

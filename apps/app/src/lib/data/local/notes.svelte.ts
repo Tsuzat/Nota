@@ -15,7 +15,7 @@ import type { ILocalNotes } from "../types";
 export class LocalNotes implements ILocalNotes {
 	#notes = $state<LocalNoteMeta[]>([]);
 
-	notes(_workspaceId: string): readonly LocalNoteMeta[] {
+	notes(_workspaceId: string): LocalNoteMeta[] {
 		return this.#notes;
 	}
 

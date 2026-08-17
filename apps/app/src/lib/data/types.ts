@@ -1,5 +1,5 @@
 import type { NoteMeta as CloudNoteMeta } from "@nota/db/data/notes";
-import type { CloudWorkspace } from "@nota/db/types";
+import type { CloudNote, CloudWorkspace } from "@nota/db/types";
 import type {
 	CreateLocalWorkspace,
 	InsertLocalNote,
@@ -19,7 +19,7 @@ export interface ILocalWorkspaces {
 
 export type NoteMeta = LocalNoteMeta | CloudNoteMeta;
 
-export type Note = LocalNote | (CloudNoteMeta & { ownerId: string });
+export type Note = LocalNote | CloudNote;
 
 export interface ILocalNotes {
 	notes(workspaceId: string): readonly LocalNoteMeta[];
