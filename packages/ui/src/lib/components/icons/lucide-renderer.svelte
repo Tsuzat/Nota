@@ -1,14 +1,29 @@
 <script lang="ts">
-import { icons } from "@lucide/svelte/icons";
+import { lucideComponentCache } from "./utils";
 
 interface Props {
-	icon: keyof typeof icons;
+	icon: string;
 	[key: string]: unknown;
 }
 
 const { icon, ...props }: Props = $props();
 
-const Icon = $derived.by(() => icons[icon]);
+const loadIcon = async (name: string) => {
+	if (lucideComponentCache.has(name)) return lucideComponentCache.get(name);
+	const mod = await import("./icon-imports.generated");
+	const loadFn = mod.iconImports[name];
+	if (!loadFn) return null;
+	const iconMod = await loadFn();
+	if (!iconMod) return null;
+	lucideComponentCache.set(name, iconMod.default);
+	return iconMod.default;
+};
 </script>
 
-<Icon {...props} />
+{#await loadIcon(icon)}
+  <div class="size-6 rounded bg-muted animate-pulse"></div>
+{:then Icon}
+  {#if Icon}
+    <Icon {...props} />
+  {/if}
+{/await}

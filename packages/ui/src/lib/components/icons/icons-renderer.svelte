@@ -11,7 +11,7 @@ const iconData: IconData = $derived(getIconData(icon));
 
 {#snippet renderIcon(iconData: IconData)}
 	{#if iconData.iconType === 'emoji'}
-		<span class={cn(className, "text-lg")}>{iconData.iconData}</span>
+		<span class={cn(className, "text-[1.025rem]")}>{iconData.iconData}</span>
 	{:else if iconData.iconType === 'lucide'}
 		<LucideRenderer icon={iconData.iconData as keyof typeof icons} class={className} />
 	{:else if iconData.iconType === 'url'}
