@@ -3,13 +3,16 @@ import { QueryClientProvider } from "@tanstack/svelte-query";
 import { SvelteQueryDevtools } from "@tanstack/svelte-query-devtools";
 import "../app.css";
 import { ModeWatcher } from "@nota/ui";
+import ConfirmDelete from "@nota/ui/custom/dialogs/confirm-delete.svelte";
 import { BarSpinner } from "@nota/ui/icons/index.js";
 import * as Sidebar from "@nota/ui/shadcn/sidebar/index.ts";
 import { Toaster } from "@nota/ui/shadcn/sonner/index.ts";
+import { TooltipProvider } from "@nota/ui/shadcn/tooltip/index.ts";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
 import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.ts";
-import { CreateWorkspace } from "#lib/components/dialogs/index.ts";
+import CreateNotes from "#lib/components/dialogs/create-notes.svelte";
+import { CreateWorkspace, Trashed } from "#lib/components/dialogs/index.ts";
 import { AppSideBar } from "#lib/components/index.ts";
 import { orpc, queryClient } from "#lib/orpc.js";
 import { secureStorage } from "#lib/platform/securestorage.ts";
@@ -49,19 +52,24 @@ onMount(async () => {
   {#if shouldRenderContent}
     <Toaster richColors closeButton />
     <DataProviders>
-      <CreateWorkspace />
-      <Sidebar.Provider
-        bind:open
-        onOpenChange={(value: boolean) => {
-          localStorage.setItem("sidebar-state", value ? "open" : "closed");
-        }}
-        class={cn(!ISDESKTOP && "bg-background")}
-      >
-        <AppSideBar />
-        <Sidebar.Inset class={cn(ISDESKTOP && "bg-background/75!")}>
-          {@render children()}
-        </Sidebar.Inset>
-      </Sidebar.Provider>
+      <TooltipProvider delayDuration={300}>
+        <CreateWorkspace />
+        <CreateNotes />
+        <ConfirmDelete />
+        <Trashed />
+        <Sidebar.Provider
+          bind:open
+          onOpenChange={(value: boolean) => {
+            localStorage.setItem("sidebar-state", value ? "open" : "closed");
+          }}
+          class={cn(!ISDESKTOP && "bg-background")}
+        >
+          <AppSideBar />
+          <Sidebar.Inset class={cn(ISDESKTOP && "bg-background/75!")}>
+            {@render children()}
+          </Sidebar.Inset>
+        </Sidebar.Provider>
+      </TooltipProvider>
     </DataProviders>
   {:else}
     <div class="flex h-screen w-full items-center justify-center bg-background">

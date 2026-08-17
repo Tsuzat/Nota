@@ -14,11 +14,13 @@ import ToggleSidebar from "../custom/toggle-sidebar.svelte";
 //   import AppLogoMenu from "../app-menu.svelte";
 //   import BackAndForthButtons from "../back-and-forth-buttons.svelte";
 import NavMain from "./nav-main.svelte";
-import WorkspaceSwitcher from "./workspace-switcher.svelte";
-
+import NavNotes from "./nav-notes.svelte";
 //   import NavNotes from "./nav-notes.svelte";
 //   import NavPinned from "./nav-pinned.svelte";
-//   import NavSecondary from "./nav-secondary.svelte";
+import NavSecondary from "./nav-secondary.svelte";
+import StarredNotes from "./starred-notes.svelte";
+import WorkspaceSwitcher from "./workspace-switcher.svelte";
+
 //   import NavShared from "./nav-shared.svelte";
 //   import WorkspaceSwitcher from "./workspace-switcher.svelte";
 
@@ -49,12 +51,12 @@ let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> =
     <NavMain />
   </SidebarHeader>
   <SidebarContent>
-    <!-- <NavShared />
-    <NavPinned />
-    <NavNotes /> -->
+    <!-- <NavShared /> -->
+    <StarredNotes />
+    <NavNotes />
   </SidebarContent>
   <SidebarFooter class="p-0 border-t border-t-border/50">
-    <!-- <NavSecondary /> -->
+    <NavSecondary />
   </SidebarFooter>
   <SidebarRail />
 </SidebarRoot>
