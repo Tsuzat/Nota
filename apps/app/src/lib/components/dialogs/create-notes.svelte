@@ -36,7 +36,7 @@ export const openCreateNotes = (pNoteId?: string) => {
       await notesCtx.create({
         icon: selectedIcon,
         name: title,
-		parentNoteId
+        parentNoteId,
       });
       open = false;
       title = "";

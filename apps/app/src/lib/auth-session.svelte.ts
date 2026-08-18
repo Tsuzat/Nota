@@ -24,7 +24,10 @@ export function getAuthSession() {
 		get error() {
 			return session.error;
 		},
-		refetch: () => session.refetch?.(),
+		refetch: () => {
+			const current = sessionStore.get ? sessionStore.get() : get(sessionStore);
+			return current?.refetch?.();
+		},
 	};
 }
 
@@ -36,6 +39,5 @@ const signedIn = $derived(
  * True if the user is signed in.
  */
 export function isSignedIn() {
-	console.log(session.data);
 	return signedIn;
 }

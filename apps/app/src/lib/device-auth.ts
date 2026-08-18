@@ -91,14 +91,10 @@ async function pollForToken(
 	initialInterval: number,
 	onStateChange: (state: DeviceAuthState) => void,
 ): Promise<void> {
-	console.log(
-		`[Device Auth] Starting token polling. Initial interval: ${initialInterval}s`,
-	);
 	let pollingInterval = initialInterval;
 
 	return new Promise<void>((resolve) => {
 		const poll = async () => {
-			console.log(`[Device Auth] Executing poll request...`);
 			try {
 				const { data, error } = await authClient.device.token({
 					grant_type: GRANT_TYPE,
@@ -106,10 +102,7 @@ async function pollForToken(
 					client_id: CLIENT_ID,
 				});
 
-				console.log(`[Device Auth] Poll response:`, { data, error });
-
 				if (data?.access_token) {
-					console.log(`[Device Auth] Successfully retrieved access token.`);
 					// Store the access token securely
 					await secureStorage.setItem("access_token", data.access_token);
 
@@ -119,7 +112,6 @@ async function pollForToken(
 				}
 
 				if (error) {
-					console.log(`[Device Auth] Polling error type: ${error.error}`);
 					switch (error.error) {
 						case "authorization_pending":
 							console.log(
@@ -166,12 +158,10 @@ async function pollForToken(
 			}
 
 			// Schedule the next poll
-			console.log(`[Device Auth] Scheduling next poll in ${pollingInterval}s`);
 			setTimeout(poll, pollingInterval * 1000);
 		};
 
 		// Start polling after the initial interval
-		console.log(`[Device Auth] Scheduling initial poll in ${pollingInterval}s`);
 		setTimeout(poll, pollingInterval * 1000);
 	});
 }

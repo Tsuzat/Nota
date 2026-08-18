@@ -20,7 +20,7 @@ export const authClient = createAuthClient({
 			},
 			auth: {
 				type: "Bearer",
-				token: secureStorage.getItem("access_token"),
+				token: () => secureStorage.getItem("access_token"),
 			},
 		},
 	}),

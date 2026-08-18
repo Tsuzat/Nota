@@ -29,10 +29,10 @@ const session = getAuthSession();
 function handleStateChange(newState: DeviceAuthState) {
 	stat = newState;
 	if (newState.status === "success") {
+		session.refetch();
 		setTimeout(() => {
 			open = false;
-			session.refetch();
-		}, 1000); // Increased delay slightly to show success animation
+		}, 1000);
 	}
 }
 

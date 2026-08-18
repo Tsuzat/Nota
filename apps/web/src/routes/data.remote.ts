@@ -10,7 +10,9 @@ interface ReleaseAsset {
 type OSType = "mac" | "windows" | "linux";
 
 export const getArtefacts = query(async () => {
-	console.log("[data.remote.ts] getArtefacts called. Checking GITHUB_API_TOKEN...");
+	console.log(
+		"[data.remote.ts] getArtefacts called. Checking GITHUB_API_TOKEN...",
+	);
 	if (!GITHUB_API_TOKEN) {
 		console.warn("[data.remote.ts] GITHUB_API_TOKEN is missing!");
 	}
@@ -33,12 +35,16 @@ export const getArtefacts = query(async () => {
 
 		if (!res.ok) {
 			const errorText = await res.text();
-			console.error(`[data.remote.ts] GitHub API error: ${res.status} - ${errorText}`);
+			console.error(
+				`[data.remote.ts] GitHub API error: ${res.status} - ${errorText}`,
+			);
 			throw new Error(`GitHub API error: ${res.status}`);
 		}
 
 		const release = (await res.json()) as any;
-		console.log(`[data.remote.ts] Successfully parsed JSON. Release tag: ${release?.tag_name}, Assets count: ${release?.assets?.length}`);
+		console.log(
+			`[data.remote.ts] Successfully parsed JSON. Release tag: ${release?.tag_name}, Assets count: ${release?.assets?.length}`,
+		);
 
 		const platforms: Record<OSType, ReleaseAsset[]> = {
 			mac: [],
@@ -85,7 +91,9 @@ export const getArtefacts = query(async () => {
 			published_at: release.published_at,
 			platforms,
 		};
-		console.log(`[data.remote.ts] Processed artefacts: ${JSON.stringify(artefacts.platforms)}`);
+		console.log(
+			`[data.remote.ts] Processed artefacts: ${JSON.stringify(artefacts.platforms)}`,
+		);
 		return artefacts;
 	} catch (error) {
 		console.error("[data.remote.ts] Error in getArtefacts:", error);
