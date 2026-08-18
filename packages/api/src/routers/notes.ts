@@ -196,4 +196,27 @@ export const notesRouter = {
 			);
 			return notes;
 		}),
+
+	getMetaById: protectedProcedure
+		.input(z.object({ noteId: z.string() }))
+		.handler(async ({ context, input }) => {
+			const userId = context.session.user.id;
+			const { noteId } = input;
+			const perm = await resolvePermission(noteId, userId);
+			if (!perm)
+				throw new ORPCError("NOT_FOUND", {
+					message: "Note not found",
+				});
+			if (!perm.isOwner && perm.role !== "editor" && perm.role !== "admin") {
+				throw new ORPCError("UNAUTHORIZED", {
+					message: "You are not authorized to access this note",
+				});
+			}
+			const note = await getNotesMeta(noteId);
+			if (!note)
+				throw new ORPCError("NOT_FOUND", {
+					message: "Note not found",
+				});
+			return note;
+		}),
 };
