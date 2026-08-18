@@ -2,6 +2,8 @@ import {
 	createNotes,
 	deleteNotes,
 	fetchNotesByWorkspace,
+	fetchNotesMeta,
+	getNotesContent,
 	saveNotesContent,
 	updateNotesMeta,
 } from "@nota/db-local/data/notes";
@@ -10,6 +12,7 @@ import type {
 	LocalNoteMeta,
 	UpdateLocalNote,
 } from "@nota/db-local/types";
+import type { Content } from "@nota/ui/edra/tiptap/index.js";
 import type { ILocalNotes } from "../types";
 
 export class LocalNotes implements ILocalNotes {
@@ -47,5 +50,14 @@ export class LocalNotes implements ILocalNotes {
 		contentText?: string | null,
 	): Promise<void> {
 		await saveNotesContent(id, content, contentText ?? null);
+	}
+
+	async fetchById(id: string): Promise<LocalNoteMeta | null> {
+		return await fetchNotesMeta(id);
+	}
+
+	async getContent(id: string): Promise<Content> {
+		const data = await getNotesContent(id);
+		return data as Content;
 	}
 }

@@ -82,6 +82,16 @@ export class CloudNotes {
 		}),
 	);
 
+	#getMetaByIdQuery = (id: string) =>
+		createQuery(() => {
+			return {
+				...orpc.notes.getMetaById.queryOptions({
+					input: { noteId: id },
+				}),
+				enabled: isSignedIn(),
+			};
+		});
+
 	notes(_workspaceId?: string): NoteMeta[] {
 		return this.#listQuery.data ?? [];
 	}
@@ -119,5 +129,9 @@ export class CloudNotes {
 
 	async updateContent(id: string, content: unknown, contextText: string) {
 		return this.#updateContentMutation.mutate({ id, content, contextText });
+	}
+
+	async fetchById(id: string) {
+		return this.#getMetaByIdQuery(id).data;
 	}
 }
