@@ -22,8 +22,8 @@
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true,
 				"trafficLightPosition": {
-					"x": 14,
-					"y": 26
+					"x": 16,
+					"y": 32
 				},
 				"windowEffects": {
 					"effects": ["sidebar", "acrylic"]

@@ -32,7 +32,6 @@ let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> =
   bind:ref
   variant={ISDESKTOP ? "inset" : "floating"}
   {...restProps}
-  class="p-1!"
 >
   <SidebarHeader
     data-tauri-drag-region

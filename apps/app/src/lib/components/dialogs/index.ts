@@ -6,6 +6,7 @@ export {
 	default as CreateWorkspace,
 	openCreateWorkspace,
 } from "./create-workspace.svelte";
+export * from "./settings/index";
 export {
 	default as SigninDevice,
 	openSigninDevice,

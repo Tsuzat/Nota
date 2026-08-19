@@ -14,7 +14,9 @@ import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.ts";
 import CreateNotes from "#lib/components/dialogs/create-notes.svelte";
 import {
 	CreateWorkspace,
+	GlobalSettings,
 	SigninDevice,
+	setGlobalSettings,
 	Trashed,
 } from "#lib/components/dialogs/index.ts";
 import { AppSideBar } from "#lib/components/index.ts";
@@ -26,6 +28,7 @@ import { PUBLIC_NOTA_URL } from "$app/env/public";
 
 const { children } = $props();
 let open = $state(true);
+setGlobalSettings();
 
 const shouldRenderContent = $derived(ISDESKTOP || isSignedIn());
 const session = getAuthSession();
@@ -63,6 +66,7 @@ onMount(async () => {
         <CreateNotes />
         <ConfirmDelete />
         <Trashed />
+        <GlobalSettings />
         {#if ISDESKTOP}
           <SigninDevice />
         {/if}

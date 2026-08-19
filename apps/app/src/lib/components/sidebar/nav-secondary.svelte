@@ -19,12 +19,7 @@ import { openTrash } from "#lib/components/dialogs/transhed.svelte";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
 import { getKeyboardShortcut } from "#lib/utils.ts";
 import { PUBLIC_NOTA_URL } from "$app/env/public";
-import { openSigninDevice } from "../dialogs";
-
-// import Trashed from "../dialogs/trashed.svelte";
-
-// import { getGlobalSignInContext } from "../global-signin";
-// import { getGlobalSettings } from "../settings";
+import { getGlobalSettings, openSigninDevice } from "../dialogs";
 
 let isTrashHovered = $state(false);
 let isLoginHovered = $state(false);
@@ -40,7 +35,7 @@ const sidebar = Sidebar.useSidebar();
 
 const session = getAuthSession();
 // const globalSignInContext = getGlobalSignInContext();
-// const useSettings = getGlobalSettings();
+const useSettings = getGlobalSettings();
 
 function getUserIntials(name?: string) {
 	if (!name) return "U";
@@ -68,7 +63,7 @@ function getUserIntials(name?: string) {
             <Button
               variant="outline"
               size="icon-lg"
-              onclick={() => {}}
+              onclick={() => { useSettings.open = true; }}
               onmouseenter={() => (isSettingsHovered = true)}
               onmouseleave={() => (isSettingsHovered = false)}
             >

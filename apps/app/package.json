@@ -24,6 +24,7 @@
 		"@nota/db-local": "workspace:*",
 		"@nota/env": "workspace:*",
 		"@nota/ui": "workspace:*",
+		"@nota/ai": "workspace:*",
 		"@orpc/client": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/tanstack-query": "catalog:",
