@@ -1,18 +1,30 @@
+import { createAsset } from "@nota/db-local/data/assets";
 import { toast } from "@nota/ui";
-import { type FileType, getFileTypeExtensions } from "@nota/ui/edra/utils.ts";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { appDataDir, resolve } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
-import { copyFile, exists, readDir, writeFile } from "@tauri-apps/plugin-fs";
+import {
+	copyFile,
+	exists,
+	readDir,
+	stat,
+	writeFile,
+} from "@tauri-apps/plugin-fs";
 import { nanoid } from "nanoid";
-import { ISWINDOWS } from "#lib/utils.ts";
+import {
+	type FileType,
+	getFileTypeExtensions,
+	getFileTypeFromExtension,
+	ISWINDOWS,
+} from "#lib/utils.ts";
 
 /**
  * Helping function to copy assets to the workspace
- * @param files - files to be moved
- * @returns - copied files
+ * @param file - file path to be moved
+ * @param noteId - note id to associate the asset with
+ * @returns - copied file path
  */
-export const moveFileToAssets = async (file: string) => {
+export const moveFileToAssets = async (file: string, noteId: string) => {
 	const assetsPath = await resolve(await appDataDir(), "assets");
 	const fileName = file.split(ISWINDOWS() ? "\\" : "/").pop();
 	if (fileName === undefined) throw new Error("Assets file is not supported");
@@ -21,10 +33,25 @@ export const moveFileToAssets = async (file: string) => {
 	await copyFile(file, finalPath);
 	const fileExists = await exists(finalPath);
 	if (!fileExists) throw new Error("Failed to move file to assets folder");
+
+	const fileStat = await stat(finalPath);
+	const mimeType =
+		getFileTypeFromExtension(fileName) || "application/octet-stream";
+
+	await createAsset({
+		noteId,
+		name: fileName,
+		mimeType,
+		size: fileStat.size,
+	});
+
 	return finalPath;
 };
 
-export const createFile = async (file: File): Promise<string> => {
+export const createFile = async (
+	file: File,
+	noteId: string,
+): Promise<string> => {
 	const id = toast.loading(`Saving ${file.name} of ${file.size} bytes...`);
 	const fileReader = new FileReader();
 
@@ -44,6 +71,14 @@ export const createFile = async (file: File): Promise<string> => {
 				const binary = new Uint8Array(fileReader.result);
 				try {
 					await writeFile(assetsPath, binary);
+
+					await createAsset({
+						noteId,
+						name: file.name,
+						mimeType: file.type || "application/octet-stream",
+						size: file.size,
+					});
+
 					res(convertFileSrc(assetsPath));
 					toast.success("File saved successfully!", { id });
 				} catch (err) {
@@ -80,22 +115,23 @@ export const getAssetsByFileType = async (
 	return files;
 };
 
-export const selectLocalFile = async (
+export const onFileUpload = async (
 	fileType: FileType,
+	noteId: string,
 ): Promise<string | null> => {
 	const extensions = getFileTypeExtensions(fileType);
 	const file = await open({
-		title: "Select Videos",
+		title: "Select File",
 		multiple: false,
 		directory: false,
 		filters: [
 			{
-				name: "Select Videos",
+				name: "Select File",
 				extensions,
 			},
 		],
 	});
 	if (!file) return null;
-	const finalPath = await moveFileToAssets(file);
+	const finalPath = await moveFileToAssets(file, noteId);
 	return convertFileSrc(finalPath);
 };

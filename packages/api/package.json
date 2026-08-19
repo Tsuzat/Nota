@@ -17,14 +17,15 @@
 	},
 	"dependencies": {
 		"@nota/auth": "workspace:*",
-		"@nota/db": "workspace:*",
 		"@nota/cache": "workspace:*",
+		"@nota/db": "workspace:*",
 		"@nota/env": "workspace:*",
 		"@orpc/client": "catalog:",
 		"@orpc/openapi": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/zod": "catalog:",
 		"dotenv": "catalog:",
+		"nanoid": "^6.0.1",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
