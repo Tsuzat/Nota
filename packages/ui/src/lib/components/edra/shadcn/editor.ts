@@ -17,6 +17,7 @@ import {
 	useEditor,
 	VideoExtended,
 } from "../tiptap/index.ts";
+import type { FileType } from "../utils.ts";
 import CalloutComp from "./components/Callout.svelte";
 import CodeBlock from "./components/CodeBlock.svelte";
 import IFrameComp from "./components/IFrame.svelte";
@@ -43,10 +44,11 @@ export interface EdraEditorProps {
 	 * It should upload the file to your storage (e.g., S3, Vercel Blob, etc.)
 	 * and return a promise resolving to the public URL of the uploaded file.
 	 *
-	 * @param file The file to be uploaded.
+	 * @param fileType Type of file to be uploaded.
+	 * @param noteId Id of the note to upload the file to.
 	 * @returns A promise resolving to the uploaded file's URL.
 	 */
-	onFileUpload?: (file: File) => Promise<string>;
+	onFileUpload?: (fileType: FileType) => Promise<string | null>;
 	callAI?: (
 		prompt: string,
 		onChunk: (chunk: string) => void,
@@ -80,6 +82,13 @@ export const createEditor = (props?: EdraEditorProps) =>
 			}),
 			TableOfContents.configure({
 				getIndex: getHierarchicalIndexes,
+				scrollParent: () => {
+					// In a browser context, try to find our specific scroll container
+					if (typeof window !== "undefined") {
+						return document.getElementById("editor-scroll-container") || window;
+					}
+					return undefined as any; // Type workaround for SSR
+				},
 				onUpdate: (indexes) => {
 					setTocItems(indexes);
 				},

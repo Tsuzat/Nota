@@ -25,7 +25,7 @@ interface Props {
 	type?: "simple" | "extended";
 	class?: string;
 }
-const { type = "simple", class: className }: Props = $props();
+const { type = "extended", class: className }: Props = $props();
 
 const alignments = commands.alignment;
 const turnIntos: Record<string, EdraCommand[]> = Object.entries(
@@ -221,7 +221,7 @@ const insertNode = () => {
 							>
 						</DropdownMenu.Item>
 					{/if}
-					<DropdownMenu.Sub>
+					<DropdownMenu.Sub >
 						<DropdownMenu.SubTrigger openDelay={300}>
 							<Repeat2 />
 							Turn Into
@@ -262,7 +262,7 @@ const insertNode = () => {
 						<Palette />
 						Colors
 					</DropdownMenu.SubTrigger>
-					<DropdownMenu.Content
+					<DropdownMenu.SubContent
 						side="right"
 						class="max-h-96 min-w-fit overflow-auto rounded-lg duration-300"
 					>
@@ -308,7 +308,7 @@ const insertNode = () => {
 								</DropdownMenu.Item>
 							{/each}
 						</DropdownMenu.Group>
-					</DropdownMenu.Content>
+					</DropdownMenu.SubContent>
 				</DropdownMenu.Sub>
 				<DropdownMenu.Sub>
 					<DropdownMenu.SubTrigger openDelay={300}>

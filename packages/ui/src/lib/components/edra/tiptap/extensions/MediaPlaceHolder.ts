@@ -1,11 +1,12 @@
 import { mergeAttributes, Node, type NodeViewProps } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
 import type { Component } from "svelte";
+import { FileType } from "../../utils.ts";
 import { SvelteNodeViewRenderer } from "../index.ts";
 
 export interface MediaPlaceholderOptions {
 	HTMLAttributes: Record<string, unknown>;
-	onUpload?: (file: File) => Promise<string>;
+	onUpload?: (fileType: FileType) => Promise<string | null>;
 }
 
 declare module "@tiptap/core" {
@@ -14,27 +15,25 @@ declare module "@tiptap/core" {
 			/**
 			 * Inserts a media placeholder
 			 */
-			insertMediaPlaceholder: (options: {
-				mediaType: "image" | "video" | "audio" | "iframe";
-			}) => ReturnType;
+			insertMediaPlaceholder: (options: { mediaType: FileType }) => ReturnType;
 
 			/**
 			 * Set the upload handler
 			 */
 			setMediaUploadHandler: (
-				handler: (file: File) => Promise<string>,
+				handler: (fileType: FileType) => Promise<string>,
 			) => ReturnType;
 
 			/**
 			 * Upload a media and insert the result
 			 */
-			uploadMedia: (file: File) => ReturnType;
+			uploadMedia: (fileType: FileType) => ReturnType;
 		};
 	}
 
 	interface Storage {
 		mediaPlaceholder: {
-			onUpload?: (file: File) => Promise<string>;
+			onUpload?: (fileType: FileType) => Promise<string>;
 		};
 	}
 }
@@ -119,7 +118,7 @@ export const MediaPlaceholder = (component: Component<NodeViewProps>) =>
 					},
 
 				uploadMedia:
-					(file: File) =>
+					(fileType: FileType) =>
 					({ editor }) => {
 						const onUpload =
 							editor.storage.mediaPlaceholder.onUpload || this.options.onUpload;
@@ -137,14 +136,15 @@ export const MediaPlaceholder = (component: Component<NodeViewProps>) =>
 							}
 						}
 
-						void onUpload(file)
+						void onUpload(fileType)
 							.then((src) => {
+								if (src === null) return;
 								editor.view.focus();
-								if (mediaType === "audio") {
+								if (mediaType === FileType.AUDIO) {
 									editor.commands.setAudio({ src });
-								} else if (mediaType === "video") {
+								} else if (mediaType === FileType.VIDEO) {
 									editor.commands.setVideo({ src });
-								} else {
+								} else if (mediaType === FileType.IMAGE) {
 									editor.commands.setImage({ src });
 								}
 							})

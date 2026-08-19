@@ -34,7 +34,7 @@ import { isTextSelection } from "@tiptap/core";
 import type { Node } from "@tiptap/pm/model";
 import strings from "../strings.js";
 import type { Editor } from "../tiptap/index.ts";
-import { ISMAC } from "../utils.js";
+import { FileType, ISMAC } from "../utils.js";
 
 export interface EdraCommand {
 	name: string;
@@ -83,7 +83,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleHeading({ level: 1 }).run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).setHeading({ level: 1 }).run();
 			},
 			clickable: (editor) => {
@@ -101,7 +101,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleHeading({ level: 2 }).run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).setHeading({ level: 2 }).run();
 			},
 			clickable: (editor) => {
@@ -119,7 +119,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleHeading({ level: 3 }).run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).setHeading({ level: 3 }).run();
 			},
 			clickable: (editor) => {
@@ -137,7 +137,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleHeading({ level: 4 }).run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).setHeading({ level: 4 }).run();
 			},
 			clickable: (editor) => {
@@ -175,7 +175,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().setParagraph().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).setParagraph().run();
 			},
 			clickable: (editor) => {
@@ -193,7 +193,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleBold().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).setMark("bold").run();
 			},
 			clickable: (editor) => {
@@ -211,7 +211,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleItalic().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).setMark("italic").run();
 			},
 			clickable: (editor) => {
@@ -229,7 +229,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleUnderline().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).setMark("underline").run();
 			},
 			clickable: (editor) => {
@@ -247,7 +247,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleStrike().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).setMark("strike").run();
 			},
 			clickable: (editor) => {
@@ -265,7 +265,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleBlockquote().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).toggleBlockquote().run();
 			},
 			clickable: (editor) => {
@@ -283,7 +283,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleCode().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).toggleCodeBlock().run();
 			},
 			clickable: (editor) => {
@@ -301,7 +301,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleCodeBlock({ language: "plaintext" }).run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor
 					.chain()
 					.setNodeSelection(pos)
@@ -355,7 +355,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleTextAlign("left").run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).toggleTextAlign("left").run();
 			},
 			clickable: (editor) => {
@@ -371,7 +371,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleTextAlign("center").run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).toggleTextAlign("center").run();
 			},
 			clickable: (editor) => {
@@ -387,7 +387,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleTextAlign("right").run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).toggleTextAlign("right").run();
 			},
 			clickable: (editor) => {
@@ -403,7 +403,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleTextAlign("justify").run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).toggleTextAlign("justify").run();
 			},
 			clickable: (editor) => {
@@ -421,7 +421,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleBulletList().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).toggleBulletList().run();
 			},
 			isActive: (editor) => editor.isActive("bulletList"),
@@ -434,7 +434,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleOrderedList().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).toggleOrderedList().run();
 			},
 			clickable: (editor) => {
@@ -452,7 +452,7 @@ export const commands: Record<string, EdraCommand[]> = {
 			onClick: (editor) => {
 				editor.chain().focus().toggleTaskList().run();
 			},
-			turnInto: (editor, node, pos) => {
+			turnInto: (editor, _node, pos) => {
 				editor.chain().setNodeSelection(pos).toggleTaskList().run();
 			},
 			clickable: (editor) => {
@@ -472,11 +472,11 @@ export const commands: Record<string, EdraCommand[]> = {
 				editor
 					.chain()
 					.focus()
-					.insertMediaPlaceholder({ mediaType: "image" })
+					.insertMediaPlaceholder({ mediaType: FileType.IMAGE })
 					.run();
 			},
 			isActive: (editor) =>
-				editor.isActive("mediaPlaceholder", { mediaType: "image" }),
+				editor.isActive("mediaPlaceholder", { mediaType: FileType.IMAGE }),
 		},
 		{
 			icon: Video,
@@ -486,11 +486,11 @@ export const commands: Record<string, EdraCommand[]> = {
 				editor
 					.chain()
 					.focus()
-					.insertMediaPlaceholder({ mediaType: "video" })
+					.insertMediaPlaceholder({ mediaType: FileType.VIDEO })
 					.run();
 			},
 			isActive: (editor) =>
-				editor.isActive("mediaPlaceholder", { mediaType: "video" }),
+				editor.isActive("mediaPlaceholder", { mediaType: FileType.VIDEO }),
 		},
 		{
 			icon: Audio,
@@ -500,11 +500,11 @@ export const commands: Record<string, EdraCommand[]> = {
 				editor
 					.chain()
 					.focus()
-					.insertMediaPlaceholder({ mediaType: "audio" })
+					.insertMediaPlaceholder({ mediaType: FileType.AUDIO })
 					.run();
 			},
 			isActive: (editor) =>
-				editor.isActive("mediaPlaceholder", { mediaType: "audio" }),
+				editor.isActive("mediaPlaceholder", { mediaType: FileType.AUDIO }),
 		},
 		{
 			icon: IFrame,
@@ -514,11 +514,11 @@ export const commands: Record<string, EdraCommand[]> = {
 				editor
 					.chain()
 					.focus()
-					.insertMediaPlaceholder({ mediaType: "iframe" })
+					.insertMediaPlaceholder({ mediaType: FileType.IFRAME })
 					.run();
 			},
 			isActive: (editor) =>
-				editor.isActive("mediaPlaceholder", { mediaType: "iframe" }),
+				editor.isActive("mediaPlaceholder", { mediaType: FileType.IFRAME }),
 		},
 	],
 	table: [

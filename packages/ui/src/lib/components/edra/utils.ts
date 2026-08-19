@@ -106,3 +106,12 @@ export const quickcolors = [
 	{ label: strings.toolbar.color.red, value: "#B30707" },
 	{ label: strings.toolbar.color.yellow, value: "#C4C404" },
 ];
+
+export enum FileType {
+	IMAGE = "image/*",
+	VIDEO = "video/*",
+	AUDIO = "audio/*",
+	DOCS = "docs/*",
+	IFRAME = "iframe",
+	UNKNOWN = "unknown",
+}
