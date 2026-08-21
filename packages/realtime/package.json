@@ -1,0 +1,32 @@
+{
+	"name": "@nota/realtime",
+	"type": "module",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"default": "./src/*.ts"
+		}
+	},
+	"scripts": {
+		"lint": "bunx @biomejs/biome lint .",
+		"format": "bunx @biomejs/biome format --write .",
+		"check": "bunx @biomejs/biome check --write .",
+		"check:ci": "bunx @biomejs/biome check ."
+	},
+	"dependencies": {
+		"@hocuspocus/extension-logger": "^4.6.0",
+		"@hocuspocus/extension-redis": "^4.6.0",
+		"@hocuspocus/server": "^4.6.0",
+		"@nota/auth": "workspace:*",
+		"@nota/db": "workspace:*",
+		"@nota/env": "workspace:*",
+		"dotenv": "catalog:",
+		"yjs": "^13.6.32"
+	},
+	"devDependencies": {
+		"@nota/config": "workspace:*",
+		"typescript": "catalog:"
+	}
+}

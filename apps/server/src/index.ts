@@ -2,12 +2,14 @@ import { createContext } from "@nota/api/context";
 import { appRouter } from "@nota/api/routers/index";
 import { auth } from "@nota/auth";
 import { env } from "@nota/env/server";
+import { hocuspocus } from "@nota/realtime";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { Hono } from "hono";
+import { upgradeWebSocket, websocket } from "hono/bun";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
@@ -33,6 +35,15 @@ app.use(
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+app.get(
+	"/collaboration",
+	upgradeWebSocket((c) => ({
+		onOpen(_event, ws) {
+			hocuspocus.handleConnection(ws.raw, c.req.raw);
+		},
+	})),
+);
 
 export const apiHandler = new OpenAPIHandler(appRouter, {
 	plugins: [
@@ -83,4 +94,7 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
-export default app;
+export default {
+	fetch: app.fetch,
+	websocket,
+};
