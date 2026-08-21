@@ -12,6 +12,7 @@ import {
 	createNotes,
 	deleteNotes,
 	getCollabNotes,
+	getContent,
 	getNotesByWorkspace,
 	getNotesMeta,
 	insertNoteSchema,
@@ -136,7 +137,7 @@ export const notesRouter = {
 
 			const success = await updateContent(
 				input.id,
-				input.content as Buffer,
+				Buffer.from(JSON.stringify(input.content)),
 				input.contextText,
 			);
 			if (!success) throw new ORPCError("NOT_FOUND");
@@ -207,7 +208,7 @@ export const notesRouter = {
 				throw new ORPCError("NOT_FOUND", {
 					message: "Note not found",
 				});
-			if (!perm.isOwner && perm.role !== "editor" && perm.role !== "admin") {
+			if (!perm.isOwner && !perm.role) {
 				throw new ORPCError("UNAUTHORIZED", {
 					message: "You are not authorized to access this note",
 				});
@@ -217,6 +218,24 @@ export const notesRouter = {
 				throw new ORPCError("NOT_FOUND", {
 					message: "Note not found",
 				});
+			return note;
+		}),
+	getNoteContent: protectedProcedure
+		.input(z.object({ noteId: z.string() }))
+		.handler(async ({ context, input }) => {
+			const userId = context.session.user.id;
+			const { noteId } = input;
+			const perm = await resolvePermission(noteId, userId);
+			if (!perm)
+				throw new ORPCError("NOT_FOUND", {
+					message: "Note not found",
+				});
+			if (!perm.isOwner && !perm.role) {
+				throw new ORPCError("UNAUTHORIZED", {
+					message: "You are not authorized to access this note",
+				});
+			}
+			const note = await getContent(noteId);
 			return note;
 		}),
 };

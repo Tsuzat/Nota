@@ -1,4 +1,5 @@
 import { createDb } from "@nota/db";
+import { userInit } from "@nota/db/data/utils";
 import * as schema from "@nota/db/schema/auth";
 import { env } from "@nota/env/server";
 import { checkout, polar, portal } from "@polar-sh/better-auth";
@@ -47,6 +48,18 @@ export function createAuth() {
 		},
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
+		databaseHooks: {
+			user: {
+				create: {
+					after: async (user) => {
+						await userInit({
+							ownerId: user.id,
+							name: user.name,
+						});
+					},
+				},
+			},
+		},
 		advanced: {
 			defaultCookieAttributes: {
 				sameSite: "none",

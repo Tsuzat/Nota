@@ -13,7 +13,6 @@ let s3Client: S3Client | null = null;
 const getS3Client = () => {
 	if (!s3Client) {
 		s3Client = new S3Client({
-			region: env.R2_REGION,
 			accessKeyId: env.R2_ACCESS_KEY_ID,
 			secretAccessKey: env.R2_SECRET_ACCESS_KEY,
 			endpoint: env.R2_ENDPOINT_URL,
