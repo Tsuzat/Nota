@@ -46,6 +46,7 @@ export const AIHighlight = Mark.create<AIHighlightOptions>({
 		return {
 			HTMLAttributes: {},
 			callAI: null,
+			availableModels: [],
 		};
 	},
 

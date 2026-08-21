@@ -1,4 +1,6 @@
 export { default as BarSpinner } from "./bar-spinner.svelte";
+export { default as Github } from "./github.svelte";
+export { default as Google } from "./google.svelte";
 export { default as IconPicker } from "./icon-picker.svelte";
 export { default as IconsRenderer } from "./icons-renderer.svelte";
 export { default as MovingDownload } from "./moving-icons/download.svelte";

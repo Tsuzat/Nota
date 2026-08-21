@@ -4,9 +4,12 @@ import {
 	Brain,
 	Check,
 	CheckCheck,
+	ChevronsUpDown,
 	Copy,
 	CornerDownLeft,
 	Feather,
+	FileText,
+	Info,
 	PenLine,
 	RefreshCcwDot,
 	RotateCcw,
@@ -18,7 +21,11 @@ import {
 } from "@lucide/svelte";
 import { fade, slide } from "svelte/transition";
 import { toast } from "svelte-sonner";
-import { Button } from "#lib/components/ui/button/index.js";
+import { Button, buttonVariants } from "#lib/components/ui/button/index.js";
+import * as Command from "#lib/components/ui/command/index.js";
+import * as Popover from "#lib/components/ui/popover/index.js";
+import * as Tooltip from "#lib/components/ui/tooltip/index.js";
+import { cn } from "#lib/utils.js";
 import {
 	AIState,
 	CONTINUE_WRITING_PROMPT,
@@ -37,6 +44,21 @@ import {
 	useEditorTransaction,
 } from "../../../tiptap/index.js";
 
+export interface AIModel {
+	id: string;
+	displayName: string;
+	provider?: string;
+	providerIcon?: string | { dark: string; light: string };
+	notes?: string;
+	[key: string]: unknown;
+}
+
+interface Props {
+	availableModels?: AIModel[];
+}
+
+let { availableModels: propAvailableModels = [] }: Props = $props();
+
 let inputTag = $state<HTMLTextAreaElement | null>(null);
 const editor = getEditor();
 
@@ -45,6 +67,15 @@ let aiState = $state(AIState.Idle);
 let aiResponse = $state("");
 let activeOptionIndex = $state(0);
 let generating = $state(false);
+
+// Model selector & note context state
+let selectedModelId = $state(
+	(typeof localStorage !== "undefined" &&
+		localStorage.getItem("ai_provider")) ||
+		"gpt-5.6-luna",
+);
+let includeEntireNote = $state(false);
+let modelSelectorOpen = $state(false);
 
 // Position tracking for inline editor streaming
 let originalFrom = $state(0);
@@ -57,6 +88,79 @@ const activeCallAI = $derived(
 	editor.extensionManager.extensions.find((e) => e.name === "ai-highlight")
 		?.options?.callAI,
 );
+
+const extensionAvailableModels = $derived(
+	editor.extensionManager.extensions.find((e) => e.name === "ai-highlight")
+		?.options?.availableModels ?? [],
+);
+
+const availableModels = $derived<AIModel[]>(
+	propAvailableModels.length > 0
+		? propAvailableModels
+		: extensionAvailableModels,
+);
+
+const displayModels = $derived<AIModel[]>(
+	availableModels.length > 0
+		? availableModels
+		: [
+				{
+					id: "gpt-5.6-luna",
+					displayName: "GPT-5.6 Luna",
+					provider: "openai",
+					notes: "Cost-optimized GPT-5.6 model for high-volume workloads.",
+				},
+				{
+					id: "gpt-5.6",
+					displayName: "GPT-5.6",
+					provider: "openai",
+					notes: "OpenAI's flagship frontier model.",
+				},
+				{
+					id: "claude-sonnet-5",
+					displayName: "Claude Sonnet 5",
+					provider: "anthropic",
+					notes: "Fast and intelligent reasoning model.",
+				},
+				{
+					id: "gemini-3.7-flash",
+					displayName: "Gemini 3.7 Flash",
+					provider: "google",
+					notes: "Latest GA Gemini Flash model for agentic workflows.",
+				},
+			],
+);
+
+const selectedModel = $derived(
+	displayModels.find((m) => m.id === selectedModelId) ?? {
+		id: selectedModelId,
+		displayName: selectedModelId,
+		provider: "openai",
+	},
+);
+
+function selectModel(id: string) {
+	selectedModelId = id;
+	if (typeof localStorage !== "undefined") {
+		localStorage.setItem("ai_provider", id);
+	}
+	modelSelectorOpen = false;
+}
+
+function getFullNoteMarkdown(): string {
+	try {
+		if (typeof editor.getMarkdown === "function") {
+			return editor.getMarkdown() || "";
+		}
+		if (editor.markdown && typeof editor.markdown.serialize === "function") {
+			return editor.markdown.serialize(editor.state.doc.toJSON()) || "";
+		}
+		return editor.state.doc.textContent || "";
+	} catch {
+		return editor.state.doc.textContent || "";
+	}
+}
+
 const transaction = useEditorTransaction(editor);
 
 function isAIActive() {
@@ -124,6 +228,14 @@ async function processText(
 				prompt = SIMPLIFY_LANGUAGE_PROMPT(selectedText);
 				break;
 		}
+
+		if (includeEntireNote) {
+			const fullNote = getFullNoteMarkdown();
+			if (fullNote) {
+				prompt = `[DOCUMENT_CONTEXT]:\n${fullNote}\n\n${prompt}`;
+			}
+		}
+
 		aiState = AIState.Confirmation;
 		await generateAIContent(prompt);
 	} catch (error) {
@@ -138,7 +250,18 @@ async function handleSubmit(e?: Event) {
 	if (!inputValue || inputValue.trim().length === 0) return;
 	const text = getAIHighlightedText() || "";
 	try {
-		const prompt = `${text}\n\n\n${inputValue}`;
+		const fullNote = includeEntireNote ? getFullNoteMarkdown() : "";
+		let prompt = "";
+		if (fullNote && text) {
+			prompt = `[DOCUMENT_CONTEXT]:\n${fullNote}\n\n[SELECTED_TEXT]:\n${text}\n\n[USER_PROMPT]:\n${inputValue}`;
+		} else if (fullNote) {
+			prompt = `[DOCUMENT_CONTEXT]:\n${fullNote}\n\n[USER_PROMPT]:\n${inputValue}`;
+		} else if (text) {
+			prompt = `${text}\n\n\n${inputValue}`;
+		} else {
+			prompt = inputValue;
+		}
+
 		inputValue = "";
 		if (inputTag) inputTag.style.height = "auto";
 		aiState = AIState.Confirmation;
@@ -423,11 +546,18 @@ function handleKeydown(event: KeyboardEvent) {
 
 	if (event.key === "Escape") {
 		event.preventDefault();
+		if (modelSelectorOpen) {
+			modelSelectorOpen = false;
+			return;
+		}
 		closeAI();
 		return;
 	}
 
 	if (aiState === AIState.Idle) {
+		// If model selector popup is open, let Command handle navigation
+		if (modelSelectorOpen) return;
+
 		const showQuickActions = isAIActive() && inputValue.trim()?.length === 0;
 		if (showQuickActions) {
 			if (event.key === "ArrowDown") {
@@ -482,6 +612,7 @@ function handleInput(e: Event) {
 		{/if}
 	</button>
 {/snippet}
+
 <BubbleMenu
 	{editor}
 	pluginKey="ai-bubble-menu"
@@ -513,13 +644,14 @@ function handleInput(e: Event) {
 		},
 		onHide() {
 			inputTag?.blur();
+			modelSelectorOpen = false;
 		}
 	}}
 >
 	{#if aiState === AIState.Idle}
 		<div class="flex w-xl flex-col overflow-hidden rounded-xl border shadow-2xl backdrop-blur-2xl">
 			<!-- Input Area -->
-			<form class="flex items-start px-3 py-3">
+			<form class="flex items-start px-3 py-3" onsubmit={handleSubmit}>
 				<textarea
 					bind:value={inputValue}
 					bind:this={inputTag}
@@ -530,11 +662,115 @@ function handleInput(e: Event) {
 				<Button type="submit" size="icon-lg" class="rounded-full"><Send /></Button>
 			</form>
 
+			<!-- Toolbar: Model selector on left, Include Entire Note on right -->
+			<div class="flex items-center justify-between border-t border-border/50 bg-muted/20 px-2 py-1.5">
+				<!-- Model Selector (Combobox) -->
+				<Popover.Root bind:open={modelSelectorOpen}>
+					<Popover.Trigger
+						class={buttonVariants({
+							variant: 'ghost',
+							size: 'sm',
+							class: 'h-7 gap-1.5 px-2 text-xs font-normal text-muted-foreground hover:text-foreground'
+						})}
+					>
+						{#if selectedModel}
+							{#if typeof selectedModel.providerIcon === 'object' && selectedModel.providerIcon !== null}
+								<img src={selectedModel.providerIcon.dark} alt="" class="size-3.5 shrink-0 rounded-xs hidden dark:block" />
+								<img src={selectedModel.providerIcon.light} alt="" class="size-3.5 shrink-0 rounded-xs block dark:hidden" />
+							{:else if typeof selectedModel.providerIcon === 'string'}
+								<img src={selectedModel.providerIcon} alt="" class="size-3.5 shrink-0 rounded-xs" />
+							{:else}
+								<Sparkles class="size-3.5 shrink-0 text-muted-foreground" />
+							{/if}
+							<span class="max-w-36 truncate font-medium">{selectedModel.displayName}</span>
+						{:else}
+							<Sparkles class="size-3.5 shrink-0 text-muted-foreground" />
+							<span class="max-w-36 truncate font-medium">{selectedModelId}</span>
+						{/if}
+						<ChevronsUpDown class="size-3 shrink-0 opacity-50" />
+					</Popover.Trigger>
+					<Popover.Content
+						align="start"
+						side="bottom"
+						sideOffset={4}
+						class="z-110 max-h-80 w-72 p-0! text-primary! shadow-2xl bg-popover/95 backdrop-blur-2xl border border-border"
+						onCloseAutoFocus={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
+						onEscapeKeydown={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
+					>
+						<Command.Root class="p-0!">
+							<Command.Input placeholder="Search models..." />
+							<Command.List class="max-h-60 overflow-y-auto p-1">
+								<Command.Empty class="py-4 text-center text-xs text-muted-foreground">No models available.</Command.Empty>
+								<Command.Group value="models">
+									<Tooltip.Provider delayDuration={150}>
+										{#each displayModels as model (model.id)}
+											<Command.Item
+												value={`${model.displayName} ${model.id} ${model.provider ?? ''} ${model.notes ?? ''}`}
+												onSelect={() => selectModel(model.id)}
+												onclick={() => selectModel(model.id)}
+												class="group/model-item flex cursor-pointer items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs"
+											>
+												<div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
+													<Check class={cn('size-3.5 shrink-0', model.id !== selectedModelId && 'invisible')} />
+													{#if typeof model.providerIcon === 'object' && model.providerIcon !== null}
+														<img src={model.providerIcon.dark} alt="" class="size-3.5 shrink-0 rounded-xs hidden dark:block" />
+														<img src={model.providerIcon.light} alt="" class="size-3.5 shrink-0 rounded-xs block dark:hidden" />
+													{:else if typeof model.providerIcon === 'string'}
+														<img src={model.providerIcon} alt="" class="size-3.5 shrink-0 rounded-xs" />
+													{:else}
+														<Sparkles class="size-3.5 shrink-0 text-muted-foreground" />
+													{/if}
+													<span class="font-medium text-foreground truncate">{model.displayName}</span>
+												</div>
+
+												{#if model.notes}
+													<Tooltip.Root>
+														<Tooltip.Trigger
+															onclick={(e: MouseEvent) => e.stopPropagation()}
+															class="text-muted-foreground ml-auto! hover:text-foreground shrink-0 rounded p-0.5 transition-colors focus:outline-hidden"
+														>
+															<Info class="size-3.5" />
+														</Tooltip.Trigger>
+														<Tooltip.Content side="right" sideOffset={8} class="max-w-xs z-150 text-xs shadow-lg leading-relaxed">
+															<span>{model.notes}</span>
+														</Tooltip.Content>
+													</Tooltip.Root>
+												{/if}
+											</Command.Item>
+										{/each}
+									</Tooltip.Provider>
+								</Command.Group>
+							</Command.List>
+						</Command.Root>
+					</Popover.Content>
+				</Popover.Root>
+
+				<!-- Include Entire Note -->
+				<Button
+					type="button"
+					variant={includeEntireNote ? 'default' : 'ghost'}
+					size="sm"
+					class="h-7 gap-1.5 px-2 text-xs transition-colors"
+					onclick={() => {
+						includeEntireNote = !includeEntireNote;
+					}}
+				>
+					<FileText class="size-3.5" />
+					<span>Include Entire Note</span>
+				</Button>
+			</div>
+
 			{#if isAIActive() && inputValue.trim()?.length === 0}
 				<!-- Quick Actions List -->
 				<div
 					transition:slide={{ axis: 'y', duration: 250 }}
-					class="flex max-h-72 flex-col overflow-y-auto p-1.5"
+					class="flex max-h-72 flex-col overflow-y-auto p-1.5 border-t border-border/50"
 				>
 					{#each quickActions as action, idx (action.id)}
 						{@render MenuButton(action, idx)}
