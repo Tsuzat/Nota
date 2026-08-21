@@ -6,4 +6,8 @@ export const variables = defineEnvVars({
 	GITHUB_API_TOKEN: {
 		schema: z.string().min(1),
 	},
+	PUBLIC_NOTA_APP_URL: {
+		public: true,
+		static: true,
+	},
 });

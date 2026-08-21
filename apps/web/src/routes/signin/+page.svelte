@@ -1,7 +1,7 @@
 <script lang="ts">
 import ChevronLeft from "@lucide/svelte/icons/chevron-left";
 import { toast } from "@nota/ui";
-import { BarSpinner } from "@nota/ui/icons/index.js";
+import { BarSpinner, Github, Google } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { cn } from "@nota/ui/utils";
 import { AppLogo, TiltCard } from "#components/custom/index.ts";
@@ -108,7 +108,7 @@ const handleSignIn = async (provider: "google" | "github") => {
           {#if loadingProvider === "google"}
             <BarSpinner size={16} />
           {:else}
-            <img class="size-4" src="https://svgl.app/library/google.svg" alt="Google" />
+            <Google />
           {/if}
           Continue with Google
         </Button>
@@ -120,16 +120,7 @@ const handleSignIn = async (provider: "google" | "github") => {
           {#if loadingProvider === "github"}
             <BarSpinner size={16} />
           {:else}
-            <img
-              class="hidden dark:block size-4"
-              src="https://svgl.app/library/github_light.svg"
-              alt="Github"
-            />
-            <img
-              class="block dark:hidden size-4"
-              src="https://svgl.app/library/github_dark.svg"
-              alt="Github"
-            />
+            <Github  /> 
           {/if}
           Continue with GitHub
         </Button>
