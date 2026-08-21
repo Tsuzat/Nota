@@ -18,13 +18,14 @@
 		"check:ci": "bunx @biomejs/biome check ."
 	},
 	"dependencies": {
+		"@hocuspocus/provider": "^4.6.0",
 		"@lucide/svelte": "catalog:",
+		"@nota/ai": "workspace:*",
 		"@nota/api": "workspace:*",
 		"@nota/db": "workspace:*",
 		"@nota/db-local": "workspace:*",
 		"@nota/env": "workspace:*",
 		"@nota/ui": "workspace:*",
-		"@nota/ai": "workspace:*",
 		"@orpc/client": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/tanstack-query": "catalog:",
@@ -41,9 +42,12 @@
 		"@tauri-apps/plugin-sql": "~2",
 		"@tauri-apps/plugin-stronghold": "~2",
 		"@tauri-apps/plugin-updater": "~2",
+		"@tiptap/extension-collaboration": "^3.30.2",
+		"@tiptap/extension-collaboration-caret": "^3.30.2",
 		"better-auth": "catalog:",
 		"dotenv": "catalog:",
 		"nanoid": "catalog:",
+		"yjs": "^13.6.32",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

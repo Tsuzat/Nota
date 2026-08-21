@@ -16,6 +16,8 @@
 				"title": "Nota",
 				"width": 1280,
 				"height": 720,
+				"minHeight": 500,
+				"minWidth": 800,
 				"resizable": true,
 				"fullscreen": false,
 				"transparent": true,

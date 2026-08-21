@@ -15,6 +15,7 @@ import X from "@lucide/svelte/icons/x";
 import type { CustomModelConfig, PredefinedProviderName } from "@nota/ai";
 import { LATEST_MODELS, testAIKey } from "@nota/ai";
 import { toast } from "@nota/ui";
+import { BarSpinner } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.ts";
 import { Input } from "@nota/ui/shadcn/input/index.ts";
 import * as Label from "@nota/ui/shadcn/label/index.ts";
@@ -420,6 +421,7 @@ async function handleDeleteCustomModel(id: string, name: string) {
         >
           Preset AI Providers
         </h3>
+        <small class="text-xs text-muted-foreground">Once you set up the API key of a provider, you can select them in editor's AI call.</small>
         <div
           class="rounded-xl border border-border/40 divide-y bg-muted/10 overflow-hidden"
         >
@@ -470,7 +472,6 @@ async function handleDeleteCustomModel(id: string, name: string) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      class="h-7 text-xs rounded-md"
                       onclick={cancelEditProviderKey}
                     >
                       Cancel
@@ -479,16 +480,14 @@ async function handleDeleteCustomModel(id: string, name: string) {
                     <Button
                       size="sm"
                       variant="outline"
-                      class="h-7 text-xs rounded-md gap-1"
                       onclick={() => startEditProviderKey(provider.id)}
                     >
                       <Pen class="size-3" />
                       <span>Edit</span>
                     </Button>
                     <Button
-                      size="sm"
+                      size="icon-sm"
                       variant="destructive"
-                      class="h-7 text-xs rounded-md gap-1"
                       onclick={() => handleRemovePresetKey(provider.id)}
                     >
                       <Trash2 class="size-3" />
@@ -553,8 +552,8 @@ async function handleDeleteCustomModel(id: string, name: string) {
                       onclick={() => handleValidatePresetKey(provider.id)}
                     >
                       {#if validatingProviderKey}
-                        <Loader2 class="size-3 animate-spin" />
-                        <span>Testing…</span>
+                        <BarSpinner size={10} />
+                        <span>Validating...</span>
                       {:else if isValidatedProviderKey}
                         <CircleCheck class="size-3 text-emerald-600" />
                         <span>Key Valid</span>
@@ -591,6 +590,7 @@ async function handleDeleteCustomModel(id: string, name: string) {
           </h3>
           <Button
             variant="outline"
+            size="sm"
             onclick={() => {
               showAddCustomModal = !showAddCustomModal;
               if (showAddCustomModal) resetCustomForm();

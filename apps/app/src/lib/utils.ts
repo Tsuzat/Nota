@@ -67,6 +67,8 @@ export const getFileTypeExtensions = (fileType: FileType) => {
 			return ["docx", "doc", "pptx", "ppt", "xlsx", "xls"];
 		case FileType.UNKNOWN:
 			return [];
+		default:
+			return [];
 	}
 };
 

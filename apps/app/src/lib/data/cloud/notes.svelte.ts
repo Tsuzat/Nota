@@ -70,27 +70,8 @@ export class CloudNotes {
 	);
 
 	#updateContentMutation = createMutation(() =>
-		orpc.notes.updateContent.mutationOptions({
-			onSuccess: () => {
-				void queryClient.invalidateQueries({
-					queryKey: orpc.notes.listByWorkspace.key(),
-				});
-				void queryClient.invalidateQueries({
-					queryKey: orpc.notes.getMeta.key(),
-				});
-			},
-		}),
+		orpc.notes.updateContent.mutationOptions(),
 	);
-
-	#getMetaByIdQuery = (id: string) =>
-		createQuery(() => {
-			return {
-				...orpc.notes.getMetaById.queryOptions({
-					input: { noteId: id },
-				}),
-				enabled: isSignedIn(),
-			};
-		});
 
 	notes(_workspaceId?: string): NoteMeta[] {
 		return this.#listQuery.data ?? [];
@@ -120,7 +101,11 @@ export class CloudNotes {
 	}
 
 	async updateMeta(input: UpdateNoteMetaInput) {
-		return this.#updateMetaMutation.mutate(input);
+		return this.#updateMetaMutation.mutateAsync(input);
+	}
+
+	async update(id: string, input: Partial<Omit<UpdateNoteMetaInput, "id">>) {
+		return this.#updateMetaMutation.mutateAsync({ id, ...input });
 	}
 
 	async delete(id: string) {
@@ -128,10 +113,38 @@ export class CloudNotes {
 	}
 
 	async updateContent(id: string, content: unknown, contextText: string) {
-		return this.#updateContentMutation.mutate({ id, content, contextText });
+		return this.#updateContentMutation.mutateAsync({
+			id,
+			content,
+			contextText,
+		});
 	}
 
-	async fetchById(id: string) {
-		return this.#getMetaByIdQuery(id).data;
+	async fetchById(id: string): Promise<NoteMeta | null> {
+		try {
+			return (
+				(await queryClient.fetchQuery(
+					orpc.notes.getMetaById.queryOptions({
+						input: { noteId: id },
+					}),
+				)) ?? null
+			);
+		} catch {
+			return null;
+		}
+	}
+
+	async getContent(id: string): Promise<unknown> {
+		try {
+			return (
+				(await queryClient.fetchQuery(
+					orpc.notes.getNoteContent.queryOptions({
+						input: { noteId: id },
+					}),
+				)) ?? null
+			);
+		} catch {
+			return null;
+		}
 	}
 }

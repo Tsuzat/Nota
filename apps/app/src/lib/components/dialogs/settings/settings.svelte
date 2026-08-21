@@ -1,6 +1,5 @@
 <script lang="ts">
 import Paintbrush from "@lucide/svelte/icons/paintbrush";
-import Pen from "@lucide/svelte/icons/pen";
 import Sparkles from "@lucide/svelte/icons/sparkles";
 import User from "@lucide/svelte/icons/user";
 import * as Dialog from "@nota/ui/shadcn/dialog/index.ts";
@@ -47,7 +46,7 @@ function handleKeydown(e: KeyboardEvent) {
     <Tabs.Root value={activeTab} class="flex h-140 w-full flex-col overflow-hidden">
       <header class="flex h-14 shrink-0 items-center justify-between px-6 pr-14 backdrop-blur-md sticky top-0">
         <div class="flex items-center justify-center flex-1 mx-4">
-          <Tabs.List>
+          <Tabs.List class="gap-4">
             {#each nav as item (item.value)}
               {@const Icon = item.icon}
               <Tabs.Trigger

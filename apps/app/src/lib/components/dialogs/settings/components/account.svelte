@@ -1,5 +1,7 @@
 <script lang="ts">
-import { icons, Sparkles } from "@lucide/svelte";
+import CloudSync from "@lucide/svelte/icons/cloud-sync";
+import LogOut from "@lucide/svelte/icons/log-out";
+import Sparkles from "@lucide/svelte/icons/sparkles";
 import User from "@lucide/svelte/icons/user";
 import { toast } from "@nota/ui";
 import * as Avatar from "@nota/ui/shadcn/avatar/index.ts";
@@ -60,7 +62,7 @@ async function handleDeleteUser() {
               {user.name ?? "User Profile"}
             </span>
 
-            {#if  true}
+            {#if userQuota.data?.planTier === "pro"}
               <Badge>Pro</Badge>
             {:else}
               <Badge variant="outline">Free</Badge>
@@ -103,21 +105,20 @@ async function handleDeleteUser() {
           <Button
             variant="outline"
             size="sm"
-            class="gap-1.5 rounded-lg"
             onclick={signOut}
           >
-            <icons.LogOut class="size-3.5" />
+            <LogOut  />
             <span>Sign Out</span>
           </Button>
         </div>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
-          class="text-destructive hover:bg-destructive/10 hover:text-destructive gap-1.5 rounded-lg"
-          onclick={handleDeleteUser}
+          href={`${PUBLIC_NOTA_URL}/account`}
+          target="_blank"
         >
-          <icons.Trash2 class="size-3.5" />
-          <span>Delete Account</span>
+          <User />
+          <span>Manage Your Account</span>
         </Button>
       </div>
     </div>
@@ -128,7 +129,7 @@ async function handleDeleteUser() {
         <div
           class="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-xs"
         >
-          <icons.CloudSync class="size-7" />
+          <CloudSync class="size-7" />
         </div>
         <div class="space-y-0.5 max-w-sm">
           <h3 class="font-semibold text-lg tracking-tight text-foreground">
@@ -140,14 +141,6 @@ async function handleDeleteUser() {
           </p>
         </div>
       </div> 
-
-      <!-- Privacy Footer -->
-      <div
-        class="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground/70 pt-1"
-      >
-        <icons.Lock class="size-3 text-muted-foreground/90" />
-        <span>Your notes & local data remain encrypted & private.</span>
-      </div>
     </div>
   {/if}
 </div>

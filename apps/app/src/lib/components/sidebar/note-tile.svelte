@@ -39,11 +39,11 @@ interface Props {
 const { note, depth = 0 }: Props = $props();
 
 const notesCtx = getNotesContext();
-const isCloud = $derived("owner" in note);
+const isCloud = $derived("ownerId" in note);
 
 const href = $derived(
 	isCloud
-		? resolve("/(cloud)/n/[id]", { id: note.id })
+		? resolve("/(cloud)/note-[id]", { id: note.id })
 		: resolve("/(local)/local-note-[id]", { id: note.id }),
 );
 const isActive = $derived(page.url.pathname.endsWith(href));
