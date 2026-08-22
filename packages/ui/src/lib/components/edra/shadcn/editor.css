@@ -116,7 +116,7 @@
 	color: var(--primary);
 	border: 1px solid var(--border);
 	padding: 0.125rem 0.25rem;
-	border-radius: var(--radius-sm);
+	border-radius: 0.25rem;
 }
 
 .tiptap pre {

@@ -10,16 +10,20 @@ export const useEditor = (options: Partial<EditorOptions> = {}) => {
 		editor = new Editor(options);
 	}
 
-	$effect(() => {
-		return () => {
-			if (editor) {
-				const nodes = editor.view.dom?.parentNode;
-				const newEl = nodes?.cloneNode(true) as HTMLElement;
-				nodes?.parentNode?.replaceChild(newEl, nodes);
-				editor.destroy();
-			}
-		};
-	});
+	try {
+		$effect(() => {
+			return () => {
+				if (editor) {
+					const nodes = editor.view.dom?.parentNode;
+					const newEl = nodes?.cloneNode(true) as HTMLElement;
+					nodes?.parentNode?.replaceChild(newEl, nodes);
+					editor.destroy();
+				}
+			};
+		});
+	} catch {
+		// Called outside an effect root (e.g. asynchronously during navigation)
+	}
 
 	return editor;
 };
