@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db, type GuestRole } from "..";
-import { noteGuests, notes } from "../schema/app";
+import { noteGuests, notes, workspace } from "../schema/app";
 
 export interface NoteUserPermission {
 	isOwner: boolean;
@@ -17,10 +17,11 @@ export const getNoteUserPermission = async (
 ): Promise<NoteUserPermission | null> => {
 	const [permission] = await db
 		.select({
-			isOwner: sql<boolean>`${notes.ownerId} = ${userId}`,
+			isOwner: sql<boolean>`COALESCE(${notes.ownerId}, ${workspace.ownerId}) = ${userId}`,
 			role: noteGuests.role,
 		})
 		.from(notes)
+		.leftJoin(workspace, eq(workspace.id, notes.workspaceId))
 		.leftJoin(
 			noteGuests,
 			and(eq(noteGuests.noteId, notes.id), eq(noteGuests.userId, userId)),

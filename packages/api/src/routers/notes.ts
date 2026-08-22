@@ -1,6 +1,8 @@
 import {
+	getCachedCollabNotes,
 	getCachedNotesByWorkspace,
 	invalidateNoteMetaCache,
+	setCachedCollabNotes,
 	setCachedNotesByWorkspace,
 } from "@nota/cache/notes";
 import {
@@ -179,7 +181,12 @@ export const notesRouter = {
 
 	getCollabNotes: protectedProcedure.handler(async ({ context }) => {
 		const userId = context.session.user.id;
-		return await getCollabNotes(userId);
+		const cached = await getCachedCollabNotes(userId);
+		if (cached) return cached;
+
+		const notes = await getCollabNotes(userId);
+		void setCachedCollabNotes(userId, notes).catch(console.error);
+		return notes;
 	}),
 
 	listByWorkspace: protectedProcedure

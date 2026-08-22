@@ -117,7 +117,7 @@ export const deleteNotes = async (id: string): Promise<boolean> => {
 };
 
 /**
- * Get all notes where the user is a guest.
+ * Get all notes where the user is a guest (shared notes).
  */
 export const getCollabNotes = async (
 	userId: string,

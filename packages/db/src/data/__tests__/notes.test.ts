@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { addNoteGuest } from "../guests";
 import {
 	createNotes,
 	deleteNotes,
+	getCollabNotes,
 	getNotesByWorkspace,
 	getNotesMeta,
 	updateContent,
@@ -11,12 +13,14 @@ import { cleanupTestData, createTestUser, createTestWorkspace } from "./setup";
 
 describe("Database - Notes", () => {
 	const userId = "test_owner_user";
+	const guestUserId = "test_shared_guest_user";
 	const workspaceId = "test_notes_workspace";
 	const noteId = "test_note_1";
 
 	beforeAll(async () => {
 		await cleanupTestData();
 		await createTestUser(userId, "Note Owner");
+		await createTestUser(guestUserId, "Guest User");
 		await createTestWorkspace(workspaceId, userId, "Note Workspace");
 	});
 
@@ -75,6 +79,44 @@ describe("Database - Notes", () => {
 			"updated text",
 		);
 		expect(success).toBeTrue();
+	});
+
+	test("getSharedNotes and getSharedNoted should return notes user is a guest of", async () => {
+		await addNoteGuest({
+			noteId,
+			email: `${guestUserId}@test.com`,
+			role: "editor",
+			actorUserId: userId,
+		});
+
+		const sharedNotes = await getCollabNotes(guestUserId);
+		expect(sharedNotes.length).toBe(1);
+		expect(sharedNotes[0]?.id).toBe(noteId);
+		expect(sharedNotes[0]?.role).toBe("editor");
+
+		const aliasNotes = await getCollabNotes(guestUserId);
+		expect(aliasNotes.length).toBe(1);
+		expect(aliasNotes[0]?.id).toBe(noteId);
+	});
+
+	test("getNoteUserPermission and getNoteGuests should work for owner and guest", async () => {
+		const { getNoteUserPermission } = await import("../permissions");
+		const { getNoteGuests } = await import("../guests");
+
+		const ownerPerm = await getNoteUserPermission(noteId, userId);
+		expect(ownerPerm).not.toBeNull();
+		expect(ownerPerm?.isOwner).toBeTrue();
+
+		const guestPerm = await getNoteUserPermission(noteId, guestUserId);
+		expect(guestPerm).not.toBeNull();
+		expect(guestPerm?.isOwner).toBeFalse();
+		expect(guestPerm?.role).toBe("editor");
+
+		const guestsData = await getNoteGuests(noteId);
+		expect(guestsData.owner).not.toBeNull();
+		expect(guestsData.owner?.id).toBe(userId);
+		expect(guestsData.guests.length).toBe(1);
+		expect(guestsData.guests[0]?.userId).toBe(guestUserId);
 	});
 
 	test("deleteNotes should delete the note", async () => {

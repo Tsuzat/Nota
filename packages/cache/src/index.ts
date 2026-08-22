@@ -34,6 +34,8 @@ export const cache = {
 	incrby: (key: string, amount: number) => redis.incrby(key, amount),
 };
 
+export * from "./guests";
 export * from "./notes";
 export * from "./permissions";
+export * from "./user_quota";
 export * from "./workspace";
