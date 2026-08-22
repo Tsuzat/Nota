@@ -3,15 +3,11 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import type { SelectableModel } from "@nota/ai";
 import { toast } from "@nota/ui";
 import { createEditor, Edra } from "@nota/ui/edra/shadcn/index.js";
-import type {
-	Editor,
-	Extension,
-	Extensions,
-} from "@nota/ui/edra/tiptap/index.js";
+import type { Editor } from "@nota/ui/edra/tiptap/index.js";
 import { IconPicker, IconsRenderer } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { Skeleton } from "@nota/ui/shadcn/skeleton/index.js";
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
 import type { Doc } from "yjs";
 import { getAuthSession } from "#lib/auth-session.svelte.js";
 import { Topbar } from "#lib/components/custom/index.ts";
@@ -20,8 +16,8 @@ import { onFileUpload } from "#lib/data/cloud/storage.js";
 import { callAI, getUserModels } from "#lib/data/local/ai/ai.js";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
 import type { NoteMeta } from "#lib/data/types.js";
-import { secureStorage } from "#lib/platform/securestorage.js";
-import { ISDESKTOP } from "#lib/utils.js";
+import "./page.css";
+
 import { afterNavigate, beforeNavigate } from "$app/navigation";
 
 const noteCtx = getNotesContext();
@@ -32,27 +28,62 @@ let availableModels = $state<SelectableModel[]>([]);
 let provider = $state.raw<HocuspocusProvider>();
 let editor = $state.raw<Editor>();
 let ydoc = $state.raw<Doc>();
+let connectionStatus = $state("disconnected");
 
 let isContentReady = $state(false);
 let isNotFound = $state(false);
-let isDirty = false;
-let isSaving = false;
-let pendingContent: any = null;
-let pendingText: string = "";
 
 onMount(() => {
 	getUserModels().then((models) => (availableModels = models));
 });
 
-beforeNavigate(async () => {
-	provider?.disconnect();
-	editor?.destroy();
-	ydoc?.destroy();
+onDestroy(() => {
+	teardownEditor();
+});
+
+beforeNavigate(() => {
+	teardownEditor();
 });
 
 afterNavigate(() => {
 	if (data.id) loadNote(data.id);
 });
+
+const setupEditor = async (id: string) => {
+	teardownEditor();
+	if (!user) {
+		throw new Error("User not signed in");
+	}
+	const {
+		ydoc: y,
+		provider: p,
+		extensions,
+	} = await realtimeProvider(
+		id,
+		user.name ?? "Unknow",
+		user.image ?? undefined,
+	);
+	ydoc = y;
+	provider = p;
+
+	provider.on("status", (event: any) => {
+		connectionStatus = event.status;
+	});
+
+	editor = createEditor({
+		collaborative: true,
+		onFileUpload: (fileType) => onFileUpload(fileType, data.id),
+		callAI,
+		extensions: [...extensions],
+	});
+};
+
+const teardownEditor = () => {
+	provider?.disconnect();
+	provider?.destroy();
+	editor?.destroy();
+	ydoc?.destroy();
+};
 
 const loadNote = async (id: string) => {
 	isContentReady = false;
@@ -64,19 +95,7 @@ const loadNote = async (id: string) => {
 			isNotFound = true;
 			return;
 		}
-		const {
-			ydoc: y,
-			provider: p,
-			extensions,
-		} = await realtimeProvider(id, user?.name ?? "Unknow");
-		ydoc = y;
-		provider = p;
-		editor = createEditor({
-			collaborative: true,
-			onFileUpload: (fileType) => onFileUpload(fileType, data.id),
-			callAI,
-			extensions: [...extensions],
-		});
+		await setupEditor(id);
 		isContentReady = true;
 	} catch (e) {
 		console.error("Failed to load note:", e);
@@ -108,6 +127,14 @@ const { data } = $props();
       <Skeleton class="size-8" />
       <Skeleton class="h-8 w-24" />
     {/if}
+  {/snippet}
+  {#snippet right()}
+    <div class="flex items-center mr-4">
+      <div class="text-xs uppercase px-2 py-1 bg-muted rounded font-medium flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full {connectionStatus === 'connected' ? 'bg-green-500' : connectionStatus === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}"></div>
+        {connectionStatus}
+      </div>
+    </div>
   {/snippet}
 </Topbar>
 

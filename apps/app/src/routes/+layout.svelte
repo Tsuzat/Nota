@@ -35,9 +35,9 @@ const session = getAuthSession();
 
 let wasSignedIn = $state(false);
 $effect(() => {
-	if (!ISDESKTOP && !session.isPending && !session.isRefetching) {
-		window.location.href = `${PUBLIC_NOTA_URL}/signin`;
-	}
+	// if (!ISDESKTOP && !isSignedIn()) {
+	// 	window.location.href = `${PUBLIC_NOTA_URL}/signin`;
+	// }
 	if (wasSignedIn && !isSignedIn()) {
 		queryClient.removeQueries({ queryKey: orpc.workspace.key() });
 		queryClient.removeQueries({ queryKey: orpc.notes.key() });

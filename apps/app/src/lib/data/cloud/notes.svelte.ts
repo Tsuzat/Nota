@@ -87,7 +87,6 @@ export class CloudNotes {
 
 	async fetchByWorkspace(workspaceId: string): Promise<void> {
 		this.#workspaceId = workspaceId;
-		await this.#listQuery.refetch();
 	}
 
 	async create(
