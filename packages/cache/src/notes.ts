@@ -30,7 +30,11 @@ export const getCachedNotesByWorkspace = async (
 	const key = getWorkspaceNotesCacheKey(workspaceId, userId);
 	const data = await cache.get<NoteMeta[]>(key);
 	if (!data) return null;
-	return data;
+	return data.map((item) => ({
+		...item,
+		createdAt: new Date(item.createdAt),
+		updatedAt: new Date(item.updatedAt),
+	}));
 };
 
 export const setCachedNotesByWorkspace = async (
@@ -63,7 +67,11 @@ export const getCachedNoteMeta = async (
 	const key = getNoteMetaCacheKey(noteId);
 	const data = await cache.get<NoteMeta>(key);
 	if (!data) return null;
-	return data;
+	return {
+		...data,
+		createdAt: new Date(data.createdAt),
+		updatedAt: new Date(data.updatedAt),
+	};
 };
 
 export const setCachedNoteMeta = async (
@@ -92,7 +100,11 @@ export const getCachedCollabNotes = async (
 	const key = getCollabNotesCacheKey(userId);
 	const data = await cache.get<(NoteMeta & { role: string })[]>(key);
 	if (!data) return null;
-	return data;
+	return data.map((item) => ({
+		...item,
+		createdAt: new Date(item.createdAt),
+		updatedAt: new Date(item.updatedAt),
+	}));
 };
 
 export const setCachedCollabNotes = async (

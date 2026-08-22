@@ -24,7 +24,12 @@ export const getCachedUserWorkspaces = async (
 		return null;
 	}
 	try {
-		return selectWorkspaceSchema.array().parse(data);
+		const parsed = data.map((item) => ({
+			...item,
+			createdAt: new Date(item.createdAt),
+			updatedAt: new Date(item.updatedAt),
+		}));
+		return selectWorkspaceSchema.array().parse(parsed);
 	} catch (error) {
 		console.error("Failed to parse user workspaces cache:", error);
 		return null;
