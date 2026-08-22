@@ -28,4 +28,20 @@ export const hocuspocus = new Hocuspocus({
 	onAuthenticate,
 	onLoadDocument,
 	onStoreDocument,
+	async onConnect(data) {
+		console.log(
+			`[Hocuspocus] onConnect: ${data.documentName} (ID: ${data.socketId})`,
+		);
+	},
+	async onDisconnect(data) {
+		console.log(
+			`[Hocuspocus] onDisconnect: ${data.documentName} (ID: ${data.socketId})`,
+		);
+	},
+	async onUpgrade(data) {
+		console.log(`[Hocuspocus] onUpgrade: ${data.request.url}`);
+	},
+	async onRequest(data) {
+		console.log(`[Hocuspocus] onRequest: ${data.request.url}`);
+	},
 });

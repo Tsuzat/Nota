@@ -1,8 +1,9 @@
+import type { onAuthenticatePayload } from "@hocuspocus/server";
 import { auth } from "@nota/auth";
 import { getNoteUserPermission } from "@nota/db/data/permissions";
 
-export const onAuthenticate = async (data: any) => {
-	const { token, requestHeaders, documentName, connection } = data;
+export const onAuthenticate = async (data: onAuthenticatePayload) => {
+	const { token, requestHeaders, documentName, connectionConfig } = data;
 
 	// Build headers — merge upgrade request headers + bearer token
 	const headers = new Headers(requestHeaders);
@@ -29,7 +30,7 @@ export const onAuthenticate = async (data: any) => {
 	if (!permission.role) throw new Error("Access denied");
 
 	if (permission.role === "viewer" || permission.role === "comment") {
-		connection.readOnly = true;
+		connectionConfig.readOnly = true;
 	}
 
 	return { user: session.user, noteId };
