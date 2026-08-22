@@ -21,25 +21,17 @@ import { Input } from "@nota/ui/shadcn/input/index.ts";
 import * as Label from "@nota/ui/shadcn/label/index.ts";
 import * as Switch from "@nota/ui/shadcn/switch/index.ts";
 import { cn } from "@nota/ui/utils.ts";
-import { createQuery } from "@tanstack/svelte-query";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { onMount } from "svelte";
 import { fade, slide } from "svelte/transition";
-import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.ts";
-import { orpc } from "#lib/orpc.ts";
+import { getAuthSession, getUserQuota } from "#lib/auth-session.svelte.ts";
 import { secureStorage } from "#lib/platform/securestorage.ts";
 import { PUBLIC_NOTA_URL } from "$app/env/public";
 import { getGlobalSettings } from "../constants.svelte";
 
 const useSettings = getGlobalSettings();
 const user = $derived(getAuthSession().data?.user);
-
-const userQuota = createQuery(() => {
-	return {
-		...orpc.userquota.getQuota.queryOptions(),
-		enabled: isSignedIn(),
-	};
-});
+const userQuota = getUserQuota();
 
 function getAICredits() {
 	if (!user || !userQuota.data?.aiCreditBalanceCents) return "0";

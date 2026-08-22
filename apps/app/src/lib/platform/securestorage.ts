@@ -11,6 +11,7 @@ class SecureStorage {
 	private stronghold: Stronghold | null = null;
 	private store: Store | null = null;
 	private initPromise: Promise<void> | null = null;
+	private memoryCache = new Map<string, string>();
 
 	async init() {
 		if (!ISDESKTOP) return;
@@ -19,7 +20,7 @@ class SecureStorage {
 		const initTimeout = new Promise<void>((_, reject) =>
 			setTimeout(
 				() => reject(new Error("Timeout initializing secure storage")),
-				10000,
+				3000,
 			),
 		);
 
@@ -42,6 +43,17 @@ class SecureStorage {
 						client = await this.stronghold.createClient("nota_client");
 					}
 					this.store = client.getStore();
+
+					// Preload token into memory cache
+					if (this.store) {
+						const valueBytes = await this.store.get("access_token");
+						if (valueBytes) {
+							const str = new TextDecoder().decode(new Uint8Array(valueBytes));
+							if (str && str !== "null" && str !== "undefined") {
+								this.memoryCache.set("access_token", str);
+							}
+						}
+					}
 				} catch (e) {
 					console.error("Failed to initialize Stronghold secure storage:", e);
 				}
@@ -63,6 +75,10 @@ class SecureStorage {
 	async getItem(key: string): Promise<string | undefined> {
 		if (!ISDESKTOP) return undefined;
 
+		if (this.memoryCache.has(key)) {
+			return this.memoryCache.get(key);
+		}
+
 		const store = await this.getStore();
 		if (!store) return undefined;
 
@@ -70,11 +86,17 @@ class SecureStorage {
 		if (!valueBytes) return undefined;
 
 		const str = new TextDecoder().decode(new Uint8Array(valueBytes));
-		return str === "null" || str === "undefined" ? undefined : str;
+		const val = str === "null" || str === "undefined" ? undefined : str;
+		if (val) {
+			this.memoryCache.set(key, val);
+		}
+		return val;
 	}
 
 	async setItem(key: string, value: string): Promise<void> {
 		if (!ISDESKTOP) return;
+
+		this.memoryCache.set(key, value);
 
 		const store = await this.getStore();
 		if (!store) return;
@@ -91,6 +113,8 @@ class SecureStorage {
 
 	async removeItem(key: string): Promise<void> {
 		if (!ISDESKTOP) return;
+
+		this.memoryCache.delete(key);
 
 		const store = await this.getStore();
 		if (!store) return;

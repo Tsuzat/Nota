@@ -7,21 +7,13 @@ import { toast } from "@nota/ui";
 import * as Avatar from "@nota/ui/shadcn/avatar/index.ts";
 import { Badge } from "@nota/ui/shadcn/badge/index.ts";
 import { Button } from "@nota/ui/shadcn/button/index.ts";
-import { createQuery } from "@tanstack/svelte-query";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.ts";
-import { orpc } from "#lib/orpc.ts";
+import { getAuthSession, getUserQuota } from "#lib/auth-session.svelte.ts";
 import { signOut } from "#lib/signout.ts";
 import { PUBLIC_NOTA_URL } from "$app/env/public";
 
 const user = $derived(getAuthSession().data?.user);
-
-const userQuota = createQuery(() => {
-	return {
-		...orpc.userquota.getQuota.queryOptions(),
-		enabled: isSignedIn(),
-	};
-});
+const userQuota = getUserQuota();
 
 async function handleDeleteUser() {
 	toast.warning("Account deletion will be available soon in account dashboard");
