@@ -18,6 +18,7 @@
 		"@nota/auth": "workspace:*",
 		"@nota/db": "workspace:*",
 		"@nota/env": "workspace:*",
+		"@nota/realtime": "workspace:*",
 		"@orpc/openapi": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/zod": "catalog:",

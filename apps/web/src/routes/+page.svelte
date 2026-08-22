@@ -6,12 +6,9 @@ import Copy from "@lucide/svelte/icons/copy";
 import Database from "@lucide/svelte/icons/database";
 import Download from "@lucide/svelte/icons/download";
 import FolderLock from "@lucide/svelte/icons/folder-lock";
-import House from "@lucide/svelte/icons/house";
-import LogOut from "@lucide/svelte/icons/log-out";
 import Menu from "@lucide/svelte/icons/menu";
 import Pencil from "@lucide/svelte/icons/pencil";
 import Sparkles from "@lucide/svelte/icons/sparkles";
-import User from "@lucide/svelte/icons/user";
 import Zap from "@lucide/svelte/icons/zap";
 import { ToggleMode } from "@nota/ui/custom/index.js";
 import UserAvatar from "@nota/ui/custom/user-avarar.svelte";
@@ -27,7 +24,7 @@ import * as Dropdown from "@nota/ui/shadcn/dropdown-menu/index.ts";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
 import { fade } from "svelte/transition";
-// import ArtifactDownloader from "$lib/artefact/artifact-downloader.svelte";
+import ArtifactDownloader from "#components/artefact/artifact-downloader.svelte";
 import AppLogo from "#components/custom/app-logo.svelte";
 import BorderBeam from "#components/custom/landing/border-beam.svelte";
 import Multistream from "#components/custom/landing/multistream.svelte";
@@ -36,9 +33,9 @@ import { Pricing } from "#components/custom/landing/pricing/index.ts";
 import Spotlight from "#components/custom/landing/spotlight.svelte";
 import Tiltcard from "#components/custom/tilt-card.svelte";
 import { authClient } from "#lib/auth-client.ts";
+import { handleSignout } from "#lib/utils.ts";
 import { resolve } from "$app/paths";
-
-// import { getArtefacts } from "./data.remote";
+import { getArtefacts } from "./data.remote";
 
 const sessionQuery = authClient.useSession();
 
@@ -187,19 +184,6 @@ const filteredFaqs = $derived(
 		: faqItems.filter((item) => item.category === faqCategory),
 );
 
-const faqJsonLd = JSON.stringify({
-	"@context": "https://schema.org",
-	"@type": "FAQPage",
-	mainEntity: faqItems.map((item) => ({
-		"@type": "Question",
-		name: item.question,
-		acceptedAnswer: {
-			"@type": "Answer",
-			text: item.answer,
-		},
-	})),
-});
-
 let copied = $state(false);
 function copyBrewCommand() {
 	navigator.clipboard.writeText("brew install --cask Tsuzat/tap/nota");
@@ -303,7 +287,7 @@ onMount(() => {
   </script>
   <!-- Schema.org FAQPage JSON-LD -->
   <script type="application/ld+json">
-    {faqJsonLd}
+    {@html faqJsonLdSafe}
   </script>
 </svelte:head>
 
@@ -378,18 +362,15 @@ onMount(() => {
           <Dropdown.Group>
             <Dropdown.Label>{user.name}</Dropdown.Label>
               <Dropdown.Item>
-                <User />
-                Profile
+                Go to App
               </Dropdown.Item>
               <Dropdown.Item>
-                <House />
                 Home
               </Dropdown.Item>
             <Dropdown.Item
               variant="destructive"
-              onclick={() => {}}
+              onclick={handleSignout}
             >
-              <LogOut />
               Sign Out
             </Dropdown.Item>
           </Dropdown.Group>
@@ -476,7 +457,7 @@ onMount(() => {
         <span>Playground</span>
       </Button>
 
-      <!-- {#await getArtefacts()}
+      {#await getArtefacts()}
         <Button>
           <BarSpinner />
           Loading
@@ -485,9 +466,9 @@ onMount(() => {
         {#if artefacts}
           <ArtifactDownloader platforms={artefacts.platforms} />
         {/if}
-      {:catch error}
-        {console.error(error)}
-      {/await} -->
+      {:catch}
+        <span></span>
+      {/await}
     </div>
 
     <div class="relative my-4 flex items-center justify-center">

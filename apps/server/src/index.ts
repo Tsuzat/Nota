@@ -2,12 +2,14 @@ import { createContext } from "@nota/api/context";
 import { appRouter } from "@nota/api/routers/index";
 import { auth } from "@nota/auth";
 import { env } from "@nota/env/server";
+import { hocuspocus } from "@nota/realtime";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { Hono } from "hono";
+import { upgradeWebSocket, websocket } from "hono/bun";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
@@ -17,7 +19,15 @@ app.use(logger());
 app.use(
 	"/*",
 	cors({
-		origin: env.CORS_ORIGIN,
+		origin: (origin) => {
+			if (origin.endsWith(".nota.ink")) return origin;
+			if (
+				origin === "tauri://localhost" ||
+				origin === "https://tauri.localhost"
+			)
+				return origin;
+			return env.CORS_ORIGIN;
+		},
 		allowMethods: ["GET", "POST", "OPTIONS"],
 		allowHeaders: ["Content-Type", "Authorization"],
 		credentials: true,
@@ -25,6 +35,81 @@ app.use(
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+app.get(
+	"/collaboration",
+	upgradeWebSocket((c) => {
+		let clientConnection: ReturnType<
+			typeof hocuspocus.handleConnection
+		> | null = null;
+
+		return {
+			onOpen(_event, ws) {
+				console.log("[WebSocket] onOpen");
+				try {
+					const socket = {
+						send: (data: string | ArrayBufferLike | Blob | ArrayBufferView) => {
+							if (typeof data === "string" || data instanceof ArrayBuffer) {
+								ws.send(data);
+							} else if (ArrayBuffer.isView(data)) {
+								const buf = new Uint8Array(new ArrayBuffer(data.byteLength));
+								buf.set(
+									new Uint8Array(data.buffer, data.byteOffset, data.byteLength),
+								);
+								ws.send(buf);
+							}
+						},
+						close: (code?: number, reason?: string) => {
+							ws.close(code, reason);
+						},
+						get readyState() {
+							return ws.readyState;
+						},
+					};
+
+					clientConnection = hocuspocus.handleConnection(socket, c.req.raw);
+				} catch (e) {
+					console.error("[Hocuspocus] Error in handleConnection:", e);
+				}
+			},
+			onMessage(event) {
+				if (!clientConnection) return;
+				let data: Uint8Array;
+				if (event.data instanceof Uint8Array) {
+					data = event.data;
+				} else if (event.data instanceof ArrayBuffer) {
+					data = new Uint8Array(event.data);
+				} else if (typeof event.data === "string") {
+					data = new TextEncoder().encode(event.data);
+				} else if (
+					ArrayBuffer.isView(event.data) &&
+					event.data.buffer instanceof ArrayBuffer
+				) {
+					data = new Uint8Array(
+						event.data.buffer,
+						event.data.byteOffset,
+						event.data.byteLength,
+					);
+				} else {
+					return;
+				}
+				clientConnection.handleMessage(data);
+			},
+			onClose(event) {
+				console.log("[WebSocket] onClose");
+				if (clientConnection) {
+					clientConnection.handleClose({
+						code: event?.code,
+						reason: event?.reason,
+					});
+				}
+			},
+			onError(error) {
+				console.error("[WebSocket] onError", error);
+			},
+		};
+	}),
+);
 
 export const apiHandler = new OpenAPIHandler(appRouter, {
 	plugins: [
@@ -75,4 +160,7 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
-export default app;
+export default {
+	fetch: app.fetch,
+	websocket,
+};

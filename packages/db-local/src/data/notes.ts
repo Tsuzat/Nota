@@ -258,3 +258,22 @@ export async function createNotes(
 		throw new Error("Failed to create note");
 	}
 }
+
+export async function getNotesContent(id: string): Promise<unknown | null> {
+	try {
+		const result = await db
+			.select({
+				content: notes.content,
+			})
+			.from(notes)
+			.where(eq(notes.id, id))
+			.limit(1);
+		if (!result[0]) {
+			throw new Error(`Note with id ${id} not found`);
+		}
+		return result[0].content;
+	} catch (error) {
+		console.log(error);
+		throw new Error("Failed to get note content");
+	}
+}

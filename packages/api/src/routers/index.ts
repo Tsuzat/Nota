@@ -2,6 +2,8 @@ import type { RouterClient } from "@orpc/server";
 
 import { protectedProcedure, publicProcedure } from "../index";
 import { notesRouter } from "./notes";
+import { storageRouter } from "./storage";
+import { quotaRouter } from "./userquota";
 import { workspaceRouter } from "./workspaces";
 
 export const appRouter = {
@@ -16,6 +18,8 @@ export const appRouter = {
 	}),
 	workspace: workspaceRouter,
 	notes: notesRouter,
+	storage: storageRouter,
+	userquota: quotaRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

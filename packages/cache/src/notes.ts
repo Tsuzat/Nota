@@ -1,6 +1,7 @@
 /// This file holds all the cache utilities for notes
 
 import type { NoteMeta } from "@nota/db/data/notes";
+import { getWorkspaceOwnerId } from "@nota/db/data/workspace";
 import { cache } from ".";
 
 const WORKSPACE_NOTES_CACHE_PREFIX = "workspace_notes";
@@ -9,8 +10,10 @@ const COLLAB_NOTES_CACHE_PREFIX = "collab_notes";
 
 const TTL_SECONDS = 60 * 60 * 24; // 24 hours
 
-export const getWorkspaceNotesCacheKey = (workspaceId: string) =>
-	`${WORKSPACE_NOTES_CACHE_PREFIX}:${workspaceId}`;
+export const getWorkspaceNotesCacheKey = (
+	workspaceId: string,
+	userId: string,
+) => `${WORKSPACE_NOTES_CACHE_PREFIX}:${workspaceId}:${userId}`;
 
 export const getNoteMetaCacheKey = (noteId: string) =>
 	`${NOTE_META_CACHE_PREFIX}:${noteId}`;
@@ -22,19 +25,25 @@ export const getCollabNotesCacheKey = (userId: string) =>
 
 export const getCachedNotesByWorkspace = async (
 	workspaceId: string,
+	userId: string,
 ): Promise<NoteMeta[] | null> => {
-	const key = getWorkspaceNotesCacheKey(workspaceId);
+	const key = getWorkspaceNotesCacheKey(workspaceId, userId);
 	const data = await cache.get<NoteMeta[]>(key);
 	if (!data) return null;
-	return data;
+	return data.map((item) => ({
+		...item,
+		createdAt: new Date(item.createdAt),
+		updatedAt: new Date(item.updatedAt),
+	}));
 };
 
 export const setCachedNotesByWorkspace = async (
 	workspaceId: string,
+	userId: string,
 	notes: NoteMeta[],
 	ttlSeconds: number = TTL_SECONDS,
 ): Promise<void> => {
-	const key = getWorkspaceNotesCacheKey(workspaceId);
+	const key = getWorkspaceNotesCacheKey(workspaceId, userId);
 	try {
 		await cache.set(key, notes, ttlSeconds);
 	} catch (error) {
@@ -44,8 +53,9 @@ export const setCachedNotesByWorkspace = async (
 
 export const deleteCachedNotesByWorkspace = async (
 	workspaceId: string,
+	userId: string,
 ): Promise<void> => {
-	const key = getWorkspaceNotesCacheKey(workspaceId);
+	const key = getWorkspaceNotesCacheKey(workspaceId, userId);
 	await cache.del(key);
 };
 
@@ -57,7 +67,11 @@ export const getCachedNoteMeta = async (
 	const key = getNoteMetaCacheKey(noteId);
 	const data = await cache.get<NoteMeta>(key);
 	if (!data) return null;
-	return data;
+	return {
+		...data,
+		createdAt: new Date(data.createdAt),
+		updatedAt: new Date(data.updatedAt),
+	};
 };
 
 export const setCachedNoteMeta = async (
@@ -86,7 +100,11 @@ export const getCachedCollabNotes = async (
 	const key = getCollabNotesCacheKey(userId);
 	const data = await cache.get<(NoteMeta & { role: string })[]>(key);
 	if (!data) return null;
-	return data;
+	return data.map((item) => ({
+		...item,
+		createdAt: new Date(item.createdAt),
+		updatedAt: new Date(item.updatedAt),
+	}));
 };
 
 export const setCachedCollabNotes = async (
@@ -122,7 +140,10 @@ export const invalidateNoteMetaCache = async (
 	const operations: Promise<void>[] = [];
 	operations.push(deleteCachedNoteMeta(noteId));
 	if (workspaceId) {
-		operations.push(deleteCachedNotesByWorkspace(workspaceId));
+		const ownerId = await getWorkspaceOwnerId(workspaceId);
+		if (ownerId) {
+			operations.push(deleteCachedNotesByWorkspace(workspaceId, ownerId));
+		}
 	}
 	await Promise.all(operations);
 };

@@ -1,10 +1,11 @@
 import { createDb } from "@nota/db";
+import { userInit } from "@nota/db/data/utils";
 import * as schema from "@nota/db/schema/auth";
 import { env } from "@nota/env/server";
 import { checkout, polar, portal } from "@polar-sh/better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { bearer } from "better-auth/plugins";
+import { bearer, deviceAuthorization } from "better-auth/plugins";
 import { redis } from "bun";
 import { polarClient } from "./lib/payments";
 
@@ -37,12 +38,28 @@ export function createAuth() {
 				clientSecret: env.GOOGLE_CLIENT_SECRET,
 			},
 		},
-		trustedOrigins: [env.CORS_ORIGIN],
+		trustedOrigins: [
+			env.CORS_ORIGIN,
+			"tauri://localhost",
+			"https://tauri.localhost",
+		],
 		emailAndPassword: {
 			enabled: true,
 		},
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
+		databaseHooks: {
+			user: {
+				create: {
+					after: async (user) => {
+						await userInit({
+							ownerId: user.id,
+							name: user.name,
+						});
+					},
+				},
+			},
+		},
 		advanced: {
 			defaultCookieAttributes: {
 				sameSite: "none",
@@ -53,6 +70,14 @@ export function createAuth() {
 		},
 		plugins: [
 			bearer(),
+			deviceAuthorization({
+				verificationUri: `${env.CORS_ORIGIN}/device`,
+				expiresIn: "10m",
+				interval: "5s",
+				validateClient: async (clientId) => {
+					return clientId === "nota-desktop";
+				},
+			}),
 			polar({
 				client: polarClient,
 				createCustomerOnSignUp: true,

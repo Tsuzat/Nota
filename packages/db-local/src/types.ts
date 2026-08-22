@@ -3,6 +3,7 @@ import type { assets, notes, notesSnapshot, workspace } from "./schema/index";
 export type LocalNote = typeof notes.$inferSelect;
 export type InsertLocalNote = typeof notes.$inferInsert;
 export type UpdateLocalNote = Partial<typeof notes.$inferSelect>;
+export type LocalNoteMeta = Omit<LocalNote, "content" | "contentText">;
 export type LocalWorkspace = typeof workspace.$inferSelect;
 export type CreateLocalWorkspace = Omit<
 	typeof workspace.$inferInsert,

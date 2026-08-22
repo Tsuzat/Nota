@@ -4,7 +4,17 @@ import type { Context } from "./context";
 
 export const o = os.$context<Context>();
 
-export const publicProcedure = o;
+const errorMiddleware = o.middleware(async ({ next }) => {
+	try {
+		return await next();
+	} catch (err) {
+		if (err instanceof ORPCError) throw err;
+		console.error("unhandled procedure error", { err });
+		throw new ORPCError("INTERNAL_SERVER_ERROR");
+	}
+});
+
+export const publicProcedure = o.use(errorMiddleware);
 
 const requireAuth = o.middleware(async ({ context, next }) => {
 	if (!context.session?.user) {

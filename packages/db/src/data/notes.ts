@@ -23,8 +23,9 @@ export const selectNoteMetaSchema = fullNoteSchema.omit({
 export type NoteMeta = z.infer<typeof selectNoteMetaSchema>;
 
 export const insertNoteSchema = createInsertSchema(notes, {
-	content: z.any(),
+	content: z.any().optional(),
 });
+
 export const updateNoteSchema = createUpdateSchema(notes, {
 	content: z.any().optional(),
 });
@@ -149,6 +150,35 @@ export const updateContent = async (
 		.set({
 			content: yjsdoc,
 			contextText,
+			updatedAt: new Date(),
+		})
+		.where(eq(notes.id, id))
+		.returning({ id: notes.id });
+
+	return result.length > 0;
+};
+
+export const getContent = async (id: string) => {
+	const [data] = await db
+		.select({ content: notes.content })
+		.from(notes)
+		.where(eq(notes.id, id))
+		.limit(1);
+
+	return data ? data.content : null;
+};
+
+/**
+ * Update only binary content of a note (used by realtime collaboration)
+ */
+export const updateContentState = async (
+	id: string,
+	yjsdoc: Buffer,
+): Promise<boolean> => {
+	const result = await db
+		.update(notes)
+		.set({
+			content: yjsdoc,
 			updatedAt: new Date(),
 		})
 		.where(eq(notes.id, id))

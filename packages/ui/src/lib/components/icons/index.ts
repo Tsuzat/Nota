@@ -1,1 +1,13 @@
 export { default as BarSpinner } from "./bar-spinner.svelte";
+export { default as Github } from "./github.svelte";
+export { default as Google } from "./google.svelte";
+export { default as IconPicker } from "./icon-picker.svelte";
+export { default as IconsRenderer } from "./icons-renderer.svelte";
+export { default as MovingDownload } from "./moving-icons/download.svelte";
+export { default as MovingHome } from "./moving-icons/home.svelte";
+export { default as MovingLogin } from "./moving-icons/login.svelte";
+export { default as MovingSearch } from "./moving-icons/search.svelte";
+export { default as MovingSettings } from "./moving-icons/settings.svelte";
+export { default as MovingStorage } from "./moving-icons/storage.svelte";
+export { default as MovingTrash } from "./moving-icons/trash.svelte";
+export { default as MovingVersion } from "./moving-icons/version.svelte";

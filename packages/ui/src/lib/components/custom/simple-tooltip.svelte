@@ -23,9 +23,7 @@ const {
 
 <Tooltip {delayDuration}>
   <TooltipTrigger>
-  {#snippet child()}
     {@render children()}
-  {/snippet}
   </TooltipTrigger>
   <TooltipContent {side}>
     {#if content}

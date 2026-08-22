@@ -26,6 +26,13 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-deep-link = "2"
 tauri-plugin-os = "2"
+tauri-plugin-http = "2"
+tauri-plugin-stronghold = "2"
+rand = "0.9.5"
+sha2 = "0.10.9"
+td = "0.1.0"
+zstd = "0.13.3"
+tauri-plugin-fs = "2"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"
@@ -43,3 +50,6 @@ incremental = false
 codegen-units = 16
 opt-level = 3
 strip = false      # Prevents macOS strip from corrupting proc-macro dylibs (mis-aligned LINKEDIT string pool)
+
+[profile.dev.package.scrypt]
+opt-level = 3

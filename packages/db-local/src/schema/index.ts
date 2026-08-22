@@ -50,7 +50,7 @@ export const notes = sqliteTable(
 		icon: text("icon").notNull(),
 		name: text("name").notNull(),
 		description: text("description"),
-		content: text("content", { mode: "json" }).notNull(),
+		content: text("content", { mode: "json" }),
 		contentText: text("content_text"),
 		starred: integer("starred", { mode: "boolean" }).default(false).notNull(),
 		trashedAt: integer("trashed_at", { mode: "timestamp" }),

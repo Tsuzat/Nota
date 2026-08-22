@@ -1,6 +1,6 @@
 import { getContext, setContext } from "svelte";
+import { LocalWorkspaces } from "$local-workspaces";
 import { CloudWorkspaces } from "./cloud/workspace.svelte";
-import { LocalWorkspaces } from "./local/workspace.svelte";
 import type { Workspace } from "./types";
 
 class Workspaces {
@@ -10,10 +10,17 @@ class Workspaces {
 
 	all = $derived([...this.local.workspaces, ...this.cloud.workspaces]);
 
+	constructor() {
+		$effect(() => {
+			if (this.current && this.all.some((w) => w.id === this.current?.id)) {
+				return;
+			}
+			this.current = this.all[0] ?? null;
+		});
+	}
+
 	async init() {
-		await this.cloud.fetch();
 		await this.local.fetch();
-		this.current = this.local.workspaces[0] || this.cloud.workspaces[0];
 	}
 }
 

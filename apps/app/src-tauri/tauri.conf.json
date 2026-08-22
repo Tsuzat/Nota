@@ -16,14 +16,16 @@
 				"title": "Nota",
 				"width": 1280,
 				"height": 720,
+				"minHeight": 500,
+				"minWidth": 800,
 				"resizable": true,
 				"fullscreen": false,
 				"transparent": true,
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true,
 				"trafficLightPosition": {
-					"x": 14,
-					"y": 26
+					"x": 16,
+					"y": 32
 				},
 				"windowEffects": {
 					"effects": ["sidebar", "acrylic"]

@@ -91,7 +91,7 @@ export const notes = p.pgTable(
 		name: p.text("name").notNull(),
 		description: p.text("description"),
 
-		content: bytea("content").notNull(), // canonical Yjs binary state
+		content: bytea("content"), // canonical Yjs binary state
 
 		// plain-text extraction, client-sent on every save
 		contextText: p.text("context_text"),

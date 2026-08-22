@@ -11,14 +11,16 @@ import type { ComponentProps } from "svelte";
 import { ISDESKTOP, ISMACOS } from "#lib/utils.ts";
 import { AppLogoMenu } from "../custom";
 import ToggleSidebar from "../custom/toggle-sidebar.svelte";
-import WorkspaceSwitcher from "./workspace-switcher.svelte";
-
 //   import AppLogoMenu from "../app-menu.svelte";
 //   import BackAndForthButtons from "../back-and-forth-buttons.svelte";
-//   import NavMain from "./nav-main.svelte";
+import NavMain from "./nav-main.svelte";
+import NavNotes from "./nav-notes.svelte";
 //   import NavNotes from "./nav-notes.svelte";
 //   import NavPinned from "./nav-pinned.svelte";
-//   import NavSecondary from "./nav-secondary.svelte";
+import NavSecondary from "./nav-secondary.svelte";
+import StarredNotes from "./starred-notes.svelte";
+import WorkspaceSwitcher from "./workspace-switcher.svelte";
+
 //   import NavShared from "./nav-shared.svelte";
 //   import WorkspaceSwitcher from "./workspace-switcher.svelte";
 
@@ -28,7 +30,7 @@ let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> =
 
 <SidebarRoot
   bind:ref
-  variant={ISDESKTOP ? "sidebar" : "floating"}
+  variant={ISDESKTOP ? "inset" : "floating"}
   {...restProps}
 >
   <SidebarHeader
@@ -45,15 +47,15 @@ let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> =
       <ToggleSidebar class="ml-auto" />
     </div>
     <WorkspaceSwitcher />
-    <!-- <NavMain /> -->
+    <NavMain />
   </SidebarHeader>
   <SidebarContent>
-    <!-- <NavShared />
-    <NavPinned />
-    <NavNotes /> -->
+    <!-- <NavShared /> -->
+    <StarredNotes />
+    <NavNotes />
   </SidebarContent>
   <SidebarFooter class="p-0 border-t border-t-border/50">
-    <!-- <NavSecondary /> -->
+    <NavSecondary />
   </SidebarFooter>
   <SidebarRail />
 </SidebarRoot>

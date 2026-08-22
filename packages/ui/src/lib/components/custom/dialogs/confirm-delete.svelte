@@ -92,19 +92,19 @@ export const openDeleteConfirmation = ({
     </DialogHeader>
 
     {#if DEFAULT_DELETE_DIALOG_PARAMS.warning}
-      <div class="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-        <p>
+      <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+        <span>
           <strong>Warning:</strong>
           {DEFAULT_DELETE_DIALOG_PARAMS.warning.text}
-        </p>
+        </span>
       </div>
     {/if}
 
     {#if DEFAULT_DELETE_DIALOG_PARAMS.confirmation}
-      <div class="space-y-2">
-        <label for="delete-input" class="text-sm font-medium"
-          >Type <strong>{DEFAULT_DELETE_DIALOG_PARAMS.confirmation.text}</strong
-          > to confirm</label
+      <div class="flex flex-col gap-2">
+        <span for="delete-input" class="text-sm font-medium"
+          >Type <code class="bg-muted text-primary/80 rounded px-1 py-0.5">{DEFAULT_DELETE_DIALOG_PARAMS.confirmation.text}</code
+          > to confirm</span
         >
         <Input
           id="delete-input"
