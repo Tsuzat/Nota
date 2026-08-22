@@ -1,0 +1,63 @@
+/// This file holds all the cache utilities for user quota
+
+import { selectUserQuotaSchema } from "@nota/db/data/user_quota";
+import type { UserQuota } from "@nota/db/types";
+import { cache } from ".";
+
+const USER_QUOTA_CACHE_PREFIX = "user_quota";
+const USER_QUOTA_CACHE_TTL_SECONDS = 60 * 60 * 24; // 24 hours
+
+const getUserQuotaCacheKey = (userId: string) =>
+	`${USER_QUOTA_CACHE_PREFIX}:${userId}`;
+
+/**
+ * Get cached user quota
+ * @param userId User ID
+ * @returns UserQuota or null if cache miss / invalid
+ */
+export const getCachedUserQuota = async (
+	userId: string,
+): Promise<UserQuota | null> => {
+	const key = getUserQuotaCacheKey(userId);
+	const data = await cache.get<UserQuota>(key);
+	if (!data) return null;
+	try {
+		const parsed = {
+			...data,
+			updatedAt: new Date(data.updatedAt),
+		};
+		return selectUserQuotaSchema.parse(parsed);
+	} catch (error) {
+		console.error("Failed to parse user quota cache:", error);
+		return null;
+	}
+};
+
+/**
+ * Set cached user quota
+ * @param userId User ID
+ * @param quota UserQuota to cache
+ * @param ttlSeconds Optional TTL in seconds (defaults to 24 hours)
+ */
+export const setCachedUserQuota = async (
+	userId: string,
+	quota: UserQuota,
+	ttlSeconds: number = USER_QUOTA_CACHE_TTL_SECONDS,
+): Promise<void> => {
+	const key = getUserQuotaCacheKey(userId);
+	try {
+		const validated = selectUserQuotaSchema.parse(quota);
+		await cache.set(key, validated, ttlSeconds);
+	} catch (error) {
+		console.error("Failed to cache user quota:", error);
+	}
+};
+
+/**
+ * Delete cached user quota
+ * @param userId User ID
+ */
+export const deleteCachedUserQuota = async (userId: string): Promise<void> => {
+	const key = getUserQuotaCacheKey(userId);
+	await cache.del(key);
+};

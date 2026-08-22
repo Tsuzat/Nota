@@ -1,6 +1,9 @@
 import { eq, sql } from "drizzle-orm";
+import { createSelectSchema } from "drizzle-orm/zod";
 import { db, type UserQuota } from "..";
 import { userQuota } from "../schema/app";
+
+export const selectUserQuotaSchema = createSelectSchema(userQuota);
 
 /**
  * Get user quota.
