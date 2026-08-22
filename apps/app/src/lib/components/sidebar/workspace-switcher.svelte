@@ -12,7 +12,10 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@nota/ui/shadcn/dropdown-menu/index.ts";
-import { SidebarMenuButton } from "@nota/ui/shadcn/sidebar/index.ts";
+import {
+	SidebarMenuButton,
+	SidebarTrigger,
+} from "@nota/ui/shadcn/sidebar/index.ts";
 import { cn } from "@nota/ui/utils";
 import type { Workspace } from "#lib/data/types.ts";
 import { getWorkspaceContext } from "#lib/data/workspace.svelte.ts";
@@ -36,7 +39,7 @@ const switchWorkspace = (workspace: Workspace) => {
     size="lg"
     class={cn(
       "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground w-full select-none cursor-pointer",
-      ISDESKTOP && "hover:bg-foreground/10 "
+      ISDESKTOP && "hover:bg-foreground/10 ",
     )}
     onclick={() => {
       // goto(href);
@@ -107,5 +110,5 @@ const switchWorkspace = (workspace: Workspace) => {
         Create New Workspace
       </DropdownMenuItem>
     </DropdownMenuContent>
-  </DropdownMenu>
+  </DropdownMenu> 
 </div>

@@ -1,7 +1,6 @@
 <script lang="ts">
-import { ISDESKTOP } from "#lib/utils.ts";
 </script>
 
-{#if ISDESKTOP}{:else}
-  <a href="/"></a>
-{/if}
+<button onclick={() => {}} title="Menu">
+  <img src="/favicon.png" class="size-4" alt="logo" />
+</button>
