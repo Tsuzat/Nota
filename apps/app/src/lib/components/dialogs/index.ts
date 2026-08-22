@@ -7,6 +7,7 @@ export {
 	openCreateWorkspace,
 } from "./create-workspace.svelte";
 export * from "./settings/index";
+export { default as ShareNote } from "./share-note.svelte";
 export {
 	default as SigninDevice,
 	openSigninDevice,

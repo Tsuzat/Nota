@@ -33,6 +33,11 @@ export class CloudNotes {
 		};
 	});
 
+	#collabQuery = createQuery(() => ({
+		...orpc.notes.getCollabNotes.queryOptions(),
+		enabled: isSignedIn(),
+	}));
+
 	#createMutation = createMutation(() =>
 		orpc.notes.create.mutationOptions({
 			onSuccess: () => {
@@ -75,6 +80,10 @@ export class CloudNotes {
 
 	notes(_workspaceId?: string): NoteMeta[] {
 		return this.#listQuery.data ?? [];
+	}
+
+	get collaborated(): (NoteMeta & { role: string })[] {
+		return this.#collabQuery.data ?? [];
 	}
 
 	get isLoading() {
@@ -123,8 +132,8 @@ export class CloudNotes {
 		try {
 			return (
 				(await queryClient.fetchQuery(
-					orpc.notes.getMetaById.queryOptions({
-						input: { noteId: id },
+					orpc.notes.getMeta.queryOptions({
+						input: { id },
 					}),
 				)) ?? null
 			);

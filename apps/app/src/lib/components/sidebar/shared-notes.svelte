@@ -6,14 +6,14 @@ import { getNotesContext } from "#lib/data/notes.svelte.ts";
 import NoteTile from "./note-tile.svelte";
 
 const notesCtx = getNotesContext();
-const notes = $derived(notesCtx.list.filter((note) => note.starred));
+const notes = $derived(notesCtx.collaborated);
 </script>
 
 {#if notes.length > 0}
   <Collapsible.Root open={true} class="group/collapsible">
     <Sidebar.Group>
       <Sidebar.GroupLabel class="justify-between">
-        <span>Starred</span>
+        <span>Shared With Me</span>
         <Collapsible.Trigger>
           {#snippet child({ props })}
             <button
@@ -38,7 +38,7 @@ const notes = $derived(notesCtx.list.filter((note) => note.starred));
               <div
                 class="text-xs text-sidebar-foreground/50 px-3 py-4 text-center select-none font-medium"
               >
-                No notes in this workspace
+                No shared notes
               </div>
             {/if}
           </Sidebar.Menu>

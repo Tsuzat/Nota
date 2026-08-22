@@ -1,7 +1,7 @@
 <script lang="ts">
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import type { SelectableModel } from "@nota/ai";
-import { toast } from "@nota/ui";
+import { SimpleToolTip, toast } from "@nota/ui";
 import { createEditor, Edra } from "@nota/ui/edra/shadcn/index.js";
 import type { Editor } from "@nota/ui/edra/tiptap/index.js";
 import { IconPicker, IconsRenderer } from "@nota/ui/icons/index.js";
@@ -11,6 +11,7 @@ import { onDestroy, onMount } from "svelte";
 import type { Doc } from "yjs";
 import { getAuthSession } from "#lib/auth-session.svelte.js";
 import { Topbar } from "#lib/components/custom/index.ts";
+import { ShareNote } from "#lib/components/dialogs/index.ts";
 import { realtimeProvider } from "#lib/data/cloud/realtime.js";
 import { onFileUpload } from "#lib/data/cloud/storage.js";
 import { callAI, getUserModels } from "#lib/data/local/ai/ai.js";
@@ -89,7 +90,7 @@ const loadNote = async (id: string) => {
 	isContentReady = false;
 	isNotFound = false;
 	try {
-		note = noteCtx.list.find((n) => n.id === data.id) as NoteMeta;
+		note = noteCtx.list.find((n) => n.id === data.id) ?? null;
 		if (!note) note = await noteCtx.cloud.fetchById(id);
 		if (!note) {
 			isNotFound = true;
@@ -129,11 +130,29 @@ const { data } = $props();
     {/if}
   {/snippet}
   {#snippet right()}
-    <div class="flex items-center mr-4">
-      <div class="text-xs uppercase px-2 py-1 bg-muted rounded font-medium flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full {connectionStatus === 'connected' ? 'bg-green-500' : connectionStatus === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}"></div>
-        {connectionStatus}
-      </div>
+    <div class="flex items-center gap-2 mr-4">
+      <SimpleToolTip
+        content={connectionStatus === "connected"
+          ? "Connected"
+          : connectionStatus === "connecting"
+            ? "Connecting"
+            : "Disconnected"}
+      >
+        <div
+          class="flex items-center justify-center size-6 rounded-md hover:bg-muted/50 transition-colors"
+        >
+          <div
+            class="size-2 rounded-full {connectionStatus === 'connected'
+              ? 'bg-green-500'
+              : connectionStatus === 'connecting'
+                ? 'bg-yellow-500 animate-pulse'
+                : 'bg-red-500'}"
+          ></div>
+        </div>
+      </SimpleToolTip>
+      {#if note !== null}
+        <ShareNote noteId={note.id} />
+      {/if}
     </div>
   {/snippet}
 </Topbar>

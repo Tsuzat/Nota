@@ -23,6 +23,11 @@ class Notes {
 		return isCloud ? this.cloud.notes(ws.id) : this.local.notes(ws.id);
 	});
 
+	collaborated = $derived.by(() => {
+		if (!isSignedIn()) return [];
+		return this.cloud.collaborated;
+	});
+
 	constructor() {
 		$effect(() => {
 			const ws = this.#workspaceCtx.current;
