@@ -8,6 +8,7 @@ import type {
 	LocalWorkspace,
 	UpdateLocalNote,
 } from "@nota/db-local/types";
+import type { MoveUpdate } from "./move-notes";
 
 export type Workspace = LocalWorkspace | CloudWorkspace;
 
@@ -34,4 +35,5 @@ export interface ILocalNotes {
 		content: unknown,
 		contentText?: string | null,
 	): Promise<void>;
+	applyMoves(updates: MoveUpdate[]): Promise<void>;
 }

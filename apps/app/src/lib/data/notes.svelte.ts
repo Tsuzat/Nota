@@ -4,6 +4,7 @@ import { getContext, setContext } from "svelte";
 import { isSignedIn } from "#lib/auth-session.svelte.ts";
 import { CloudNotes } from "./cloud/notes.svelte";
 import { LocalNotes } from "./local/notes.svelte.ts";
+import { resolveMove } from "./move-notes";
 import type { NoteMeta } from "./types";
 import { getWorkspaceContext } from "./workspace.svelte.ts";
 
@@ -107,6 +108,44 @@ class Notes {
 			await this.cloud.delete(id);
 		} else {
 			await this.local.delete(id);
+		}
+	}
+
+	/**
+	 * Move a note to another workspace and/or parent.
+	 * Cloud notes are moved authoritatively by the server;
+	 * local moves are resolved client-side then persisted in a batch.
+	 */
+	async move(input: {
+		note: NoteMeta;
+		targetWorkspaceId: string;
+		targetParentId: string | null;
+		moveChildren: boolean;
+	}) {
+		const isCloudNote = "ownerId" in input.note && isSignedIn();
+		if (isCloudNote) {
+			await this.cloud.move({
+				noteId: input.note.id,
+				targetWorkspaceId: input.targetWorkspaceId,
+				targetParentId: input.targetParentId,
+				moveChildren: input.moveChildren,
+			});
+			return;
+		}
+
+		const plan = resolveMove({
+			notes: this.list,
+			noteId: input.note.id,
+			targetWorkspaceId: input.targetWorkspaceId,
+			targetParentId: input.targetParentId,
+			moveChildren: input.moveChildren,
+		});
+		await this.local.applyMoves(plan.updates);
+
+		// Resync the visible (current workspace) list.
+		const ws = this.#workspaceCtx.current;
+		if (ws && !("ownerId" in ws)) {
+			await this.local.fetchByWorkspace(ws.id);
 		}
 	}
 

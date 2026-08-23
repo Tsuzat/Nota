@@ -130,3 +130,30 @@ export const getFileTypeFromExtension = (fileName: string): string | null => {
 
 	return mimeTypes[extension] ?? null;
 };
+
+/**
+ * Format a timestamp as a human friendly relative date,
+ * e.g. "Today at 4:20 PM", "Yesterday at 9:05 AM", "Aug 12 at 3:00 PM"
+ */
+export function formatDate(val: number | Date | string | null | undefined) {
+	if (!val) return "";
+	const date = typeof val === "number" ? new Date(val * 1000) : new Date(val);
+	if (Number.isNaN(date.getTime())) return "";
+
+	const now = new Date();
+	const diffTime = Math.abs(now.getTime() - date.getTime());
+	const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+	const timeStr = date.toLocaleTimeString(undefined, {
+		hour: "numeric",
+		minute: "2-digit",
+	});
+
+	if (date.toDateString() === now.toDateString()) {
+		return `Today at ${timeStr}`;
+	}
+	if (diffDays === 1) {
+		return `Yesterday at ${timeStr}`;
+	}
+	return `${date.toLocaleDateString(undefined, { month: "short", day: "numeric" })} at ${timeStr}`;
+}

@@ -23,4 +23,8 @@ export class LocalNotes implements ILocalNotes {
 	async saveContent(): Promise<never> {
 		throw new Error("Local notes are unavailable on web");
 	}
+
+	async applyMoves(): Promise<never> {
+		throw new Error("Local notes are unavailable on web");
+	}
 }

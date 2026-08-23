@@ -78,6 +78,19 @@ export class CloudNotes {
 		orpc.notes.updateContent.mutationOptions(),
 	);
 
+	#moveMutation = createMutation(() =>
+		orpc.notes.move.mutationOptions({
+			onSuccess: () => {
+				void queryClient.invalidateQueries({
+					queryKey: orpc.notes.listByWorkspace.key(),
+				});
+				void queryClient.invalidateQueries({
+					queryKey: orpc.notes.getMeta.key(),
+				});
+			},
+		}),
+	);
+
 	notes(_workspaceId?: string): NoteMeta[] {
 		return this.#listQuery.data ?? [];
 	}
@@ -118,6 +131,15 @@ export class CloudNotes {
 
 	async delete(id: string) {
 		return this.#deleteMutation.mutate({ id });
+	}
+
+	async move(input: {
+		noteId: string;
+		targetWorkspaceId: string;
+		targetParentId: string | null;
+		moveChildren: boolean;
+	}) {
+		return this.#moveMutation.mutateAsync(input);
 	}
 
 	async updateContent(id: string, content: unknown, contextText: string) {

@@ -15,6 +15,8 @@ import CreateNotes from "#lib/components/dialogs/create-notes.svelte";
 import {
 	CreateWorkspace,
 	GlobalSettings,
+	NoteMove,
+	NoteRename,
 	SigninDevice,
 	setGlobalSettings,
 	Trashed,
@@ -64,6 +66,8 @@ onMount(async () => {
       <TooltipProvider delayDuration={300}>
         <CreateWorkspace />
         <CreateNotes />
+        <NoteRename />
+        <NoteMove />
         <ConfirmDelete />
         <Trashed />
         <GlobalSettings />

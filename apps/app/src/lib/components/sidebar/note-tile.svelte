@@ -20,16 +20,13 @@ import * as DropdownMenu from "@nota/ui/shadcn/dropdown-menu/index.ts";
 import * as Sidebar from "@nota/ui/shadcn/sidebar/index.ts";
 import { cn } from "@nota/ui/utils";
 import { invoke } from "@tauri-apps/api/core";
-import { ask } from "@tauri-apps/plugin-dialog";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
 import type { NoteMeta } from "#lib/data/types.ts";
-import { ISDESKTOP } from "#lib/utils.ts";
+import { formatDate, ISDESKTOP } from "#lib/utils.ts";
 import { PUBLIC_NOTA_URL } from "$app/env/public";
-import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
-import { openCreateNotes } from "../dialogs";
-// import { openMoveNote, openRenameNote } from "../dialogs";
+import { openCreateNotes, openNoteMove, openNoteRename } from "../dialogs";
 import NoteTile from "./note-tile.svelte";
 
 interface Props {
@@ -123,35 +120,6 @@ async function deleteNote() {
 		},
 	});
 }
-
-function formatDate(val: number | Date | null | undefined) {
-	if (!val) return "";
-	const date = typeof val === "number" ? new Date(val * 1000) : new Date(val);
-	const now = new Date();
-	const diffTime = Math.abs(now.getTime() - date.getTime());
-	const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-	const timeStr = date.toLocaleTimeString(undefined, {
-		hour: "numeric",
-		minute: "2-digit",
-	});
-
-	if (date.toDateString() === now.toDateString()) {
-		return `Today at ${timeStr}`;
-	}
-	if (diffDays === 1) {
-		return `Yesterday at ${timeStr}`;
-	}
-	return `${date.toLocaleDateString(undefined, { month: "short", day: "numeric" })} at ${timeStr}`;
-}
-
-function openRenameNote(note: NoteMeta): any {
-	throw new Error("Function not implemented.");
-}
-
-function openMoveNote(note: NoteMeta): any {
-	throw new Error("Function not implemented.");
-}
 </script>
 
 <Collapsible.Root>
@@ -235,13 +203,13 @@ function openMoveNote(note: NoteMeta): any {
           <span>Duplicate</span>
         </DropdownMenu.Item>
 
-        <DropdownMenu.Item onclick={() => openRenameNote(note)}>
+        <DropdownMenu.Item onclick={() => openNoteRename(note)}>
           <Pencil />
           <span>Rename</span>
           <DropdownMenu.Shortcut>⌘⇧R</DropdownMenu.Shortcut>
         </DropdownMenu.Item>
 
-        <DropdownMenu.Item onclick={() => openMoveNote(note)}>
+        <DropdownMenu.Item onclick={() => openNoteMove(note)}>
           <FolderInput />
           <span>Move to</span>
           <DropdownMenu.Shortcut>⌘⇧P</DropdownMenu.Shortcut>
