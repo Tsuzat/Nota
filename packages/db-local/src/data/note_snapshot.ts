@@ -1,25 +1,40 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, lt, ne, sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
-import type z from "zod";
+import { z } from "zod";
 import { db } from "../db";
-import { notesSnapshot } from "../schema/index.js";
+import { notes, notesSnapshot } from "../schema/index.js";
 
-export const selectSnapshotSchema = createSelectSchema(notesSnapshot);
+export const selectSnapshotSchema = createSelectSchema(notesSnapshot, {
+	contentCompressed: z.union([z.instanceof(Uint8Array), z.any()]),
+});
 export const selectSnapshotMetaSchema = selectSnapshotSchema.omit({
 	contentCompressed: true,
 });
-export const insertSnapshotSchema = createInsertSchema(notesSnapshot);
+export const insertSnapshotSchema = createInsertSchema(notesSnapshot, {
+	contentCompressed: z.union([z.instanceof(Uint8Array), z.any()]),
+});
 
 export type NoteSnapshotMeta = z.infer<typeof selectSnapshotMetaSchema>;
 export type InsertNoteSnapshot = z.infer<typeof insertSnapshotSchema>;
 
+export interface LocalWorkspaceSnapshotItem extends NoteSnapshotMeta {
+	noteName: string;
+	noteIcon: string | null;
+}
+
+export interface GetLocalWorkspaceSnapshotsOptions {
+	noteId?: string;
+	kind?: "auto" | "manual" | "pinned";
+	search?: string;
+	limit?: number;
+	offset?: number;
+	sortBy?: "createdAt" | "name" | "size";
+	sortOrder?: "asc" | "desc";
+}
+
 /**
  * Gets a paginated list of all snapshot metadata for a specific note.
  * Returns snapshots ordered by newest first.
- *
- * @param noteId The ID of the note
- * @param limit Maximum number of snapshots to return (default: 20)
- * @param offset Number of snapshots to skip (default: 0)
  */
 export async function getSnapshots(
 	noteId: string,
@@ -51,9 +66,92 @@ export async function getSnapshots(
 }
 
 /**
+ * Gets snapshots for all notes in a local workspace with joined note details.
+ */
+export async function getWorkspaceSnapshots(
+	workspaceId: string,
+	options: GetLocalWorkspaceSnapshotsOptions = {},
+): Promise<{ items: LocalWorkspaceSnapshotItem[]; total: number }> {
+	try {
+		const {
+			noteId,
+			kind,
+			search,
+			limit = 20,
+			offset = 0,
+			sortBy = "createdAt",
+			sortOrder = "desc",
+		} = options;
+
+		const conditions = [
+			eq(notes.workspaceId, workspaceId),
+			noteId ? eq(notesSnapshot.noteId, noteId) : undefined,
+			kind ? eq(notesSnapshot.kind, kind) : undefined,
+			search
+				? sql`(${notes.name} LIKE ${`%${search}%`} OR ${notesSnapshot.label} LIKE ${`%${search}%`})`
+				: undefined,
+		].filter((c): c is NonNullable<typeof c> => c !== undefined);
+
+		const whereClause = and(...conditions);
+
+		const [countResult] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(notesSnapshot)
+			.innerJoin(notes, eq(notesSnapshot.noteId, notes.id))
+			.where(whereClause);
+
+		const total = countResult?.count ?? 0;
+
+		let orderClause = desc(notesSnapshot.createdAt);
+		if (sortBy === "name") {
+			orderClause = sortOrder === "asc" ? asc(notes.name) : desc(notes.name);
+		} else if (sortBy === "size") {
+			orderClause =
+				sortOrder === "asc"
+					? asc(notesSnapshot.size)
+					: desc(notesSnapshot.size);
+		} else {
+			orderClause =
+				sortOrder === "asc"
+					? asc(notesSnapshot.createdAt)
+					: desc(notesSnapshot.createdAt);
+		}
+
+		const rows = await db
+			.select({
+				id: notesSnapshot.id,
+				noteId: notesSnapshot.noteId,
+				label: notesSnapshot.label,
+				kind: notesSnapshot.kind,
+				contentHash: notesSnapshot.contentHash,
+				size: notesSnapshot.size,
+				createdAt: notesSnapshot.createdAt,
+				noteName: notes.name,
+				noteIcon: notes.icon,
+			})
+			.from(notesSnapshot)
+			.innerJoin(notes, eq(notesSnapshot.noteId, notes.id))
+			.where(whereClause)
+			.orderBy(orderClause)
+			.limit(limit)
+			.offset(offset);
+
+		return {
+			items: rows.map((r) => ({
+				...selectSnapshotMetaSchema.parse(r),
+				noteName: r.noteName,
+				noteIcon: r.noteIcon,
+			})),
+			total,
+		};
+	} catch (error) {
+		console.error("Failed to get workspace snapshots:", error);
+		throw new Error("Failed to get workspace snapshots");
+	}
+}
+
+/**
  * Creates a new snapshot for a note.
- *
- * @param input The snapshot data to insert
  */
 export async function createSnapshot(
 	input: Omit<InsertNoteSnapshot, "createdAt"> & { createdAt?: Date },
@@ -81,14 +179,11 @@ export async function createSnapshot(
 }
 
 /**
- * Conditionally creates an 'auto' snapshot based on time and count thresholds.
- *
- * 1. Skips creation if the last 'auto' snapshot was taken within the last 10 minutes.
- * 2. If created, ensures that there are at most 100 'auto' snapshots for the note,
- *    deleting any older ones beyond that limit.
- *
- * @param input The snapshot data to insert (kind should be 'auto')
- * @returns The created snapshot metadata, or null if creation was skipped.
+ * Conditionally creates an 'auto' snapshot based on time and count thresholds:
+ * 1. Skips creation if the content hash matches the last auto snapshot.
+ * 2. Skips creation if the last auto snapshot was taken within the last 10 minutes.
+ * 3. Cleans up non-manual snapshots older than 90 days.
+ * 4. Ensures at most 50 non-manual snapshots per note (retaining newest 49 before insert).
  */
 export async function mayCreateSnapshot(
 	input: Omit<InsertNoteSnapshot, "kind" | "createdAt"> & {
@@ -100,9 +195,12 @@ export async function mayCreateSnapshot(
 		const noteId = input.noteId;
 		const now = input.createdAt ?? new Date();
 
-		// 1. Check time threshold (10 minutes = 600,000 ms)
+		// 1. Check previous auto snapshot
 		const latestAuto = await db
-			.select({ createdAt: notesSnapshot.createdAt })
+			.select({
+				createdAt: notesSnapshot.createdAt,
+				contentHash: notesSnapshot.contentHash,
+			})
 			.from(notesSnapshot)
 			.where(
 				and(eq(notesSnapshot.noteId, noteId), eq(notesSnapshot.kind, "auto")),
@@ -113,42 +211,61 @@ export async function mayCreateSnapshot(
 		if (latestAuto.length > 0) {
 			const last = latestAuto[0];
 			if (!last) return null;
+
+			// Skip if content has not changed
+			if (last.contentHash === input.contentHash) {
+				return null;
+			}
+
+			// Skip if less than 10 minutes (600,000 ms)
 			const timeSinceLast = now.getTime() - last.createdAt.getTime();
 			if (timeSinceLast < 10 * 60 * 1000) {
-				return null; // Skip if less than 10 minutes
+				return null;
 			}
 		}
 
-		// 2. Create the snapshot
+		// 2. Clean up non-manual snapshots older than 90 days
+		const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+		await db
+			.delete(notesSnapshot)
+			.where(
+				and(
+					eq(notesSnapshot.noteId, noteId),
+					ne(notesSnapshot.kind, "manual"),
+					ne(notesSnapshot.kind, "pinned"),
+					lt(notesSnapshot.createdAt, ninetyDaysAgo),
+				),
+			);
+
+		// 3. Enforce max limit of 50 non-manual snapshots (clean up excess beyond 49)
+		const MAX_AUTO_RETAIN = 49;
+		const excessSnapshots = await db
+			.select({ id: notesSnapshot.id })
+			.from(notesSnapshot)
+			.where(
+				and(
+					eq(notesSnapshot.noteId, noteId),
+					ne(notesSnapshot.kind, "manual"),
+					ne(notesSnapshot.kind, "pinned"),
+				),
+			)
+			.orderBy(desc(notesSnapshot.createdAt))
+			.limit(1000)
+			.offset(MAX_AUTO_RETAIN);
+
+		if (excessSnapshots.length > 0) {
+			const idsToDelete = excessSnapshots.map((s) => s.id);
+			await db
+				.delete(notesSnapshot)
+				.where(inArray(notesSnapshot.id, idsToDelete));
+		}
+
+		// 4. Create the snapshot
 		const created = await createSnapshot({
 			...input,
 			kind: "auto",
 			createdAt: now,
 		});
-
-		// 3. Enforce max limit of 100 auto snapshots
-		const MAX_AUTO_SNAPSHOTS = 100;
-
-		// Find the IDs of snapshots beyond the limit
-		const excessSnapshots = await db
-			.select({ id: notesSnapshot.id })
-			.from(notesSnapshot)
-			.where(
-				and(eq(notesSnapshot.noteId, noteId), eq(notesSnapshot.kind, "auto")),
-			)
-			.orderBy(desc(notesSnapshot.createdAt))
-			.limit(1000) // SQLite requires LIMIT when using OFFSET
-			.offset(MAX_AUTO_SNAPSHOTS);
-
-		if (excessSnapshots.length > 0) {
-			const idsToDelete = excessSnapshots.map((s) => s.id);
-
-			// In SQLite, limits on IN clauses depend on build, but
-			// usually 100s is safe. If many, chunk them. Here it's typical 1.
-			await db
-				.delete(notesSnapshot)
-				.where(inArray(notesSnapshot.id, idsToDelete));
-		}
 
 		return created;
 	} catch (error) {
@@ -159,13 +276,8 @@ export async function mayCreateSnapshot(
 
 /**
  * Gets the raw compressed content of a specific snapshot.
- *
- * @param id The ID of the snapshot
- * @returns The compressed content buffer
  */
-export async function getSnapshotContent(
-	id: string,
-): Promise<Buffer | Uint8Array> {
+export async function getSnapshotContent(id: string): Promise<Uint8Array> {
 	try {
 		const result = await db
 			.select({ contentCompressed: notesSnapshot.contentCompressed })
@@ -178,9 +290,26 @@ export async function getSnapshotContent(
 			throw new Error(`Snapshot with id ${id} not found`);
 		}
 
-		return row.contentCompressed as Buffer | Uint8Array;
+		return row.contentCompressed as unknown as Uint8Array;
 	} catch (error) {
 		console.error("Failed to get snapshot content:", error);
 		throw new Error("Failed to get snapshot content");
+	}
+}
+
+/**
+ * Deletes a local snapshot.
+ */
+export async function deleteSnapshot(id: string): Promise<boolean> {
+	try {
+		const result = await db
+			.delete(notesSnapshot)
+			.where(eq(notesSnapshot.id, id))
+			.returning({ id: notesSnapshot.id });
+
+		return result.length > 0;
+	} catch (error) {
+		console.error("Failed to delete snapshot:", error);
+		throw new Error("Failed to delete snapshot");
 	}
 }

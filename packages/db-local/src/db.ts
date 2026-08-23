@@ -17,23 +17,36 @@ async function getDb() {
 	return await Database.load("sqlite:test.db");
 }
 
+function sanitizeParams(params: unknown[]): unknown[] {
+	return params.map((p) => {
+		if (p instanceof Uint8Array || p instanceof Uint8ClampedArray) {
+			return Array.from(p);
+		}
+		if (p instanceof ArrayBuffer) {
+			return Array.from(new Uint8Array(p));
+		}
+		return p;
+	});
+}
+
 /**
  * The drizzle database instance.
  */
 export let db = drizzle(
 	async (sql, params, method) => {
 		const sqlite = await getDb();
+		const cleanParams = sanitizeParams(params);
 		let rows: Record<string, unknown>[] = [];
 		let results = [];
 		// If the query is a SELECT, use the select method
 		if (isSelectQuery(sql)) {
-			rows = await sqlite.select(sql, params).catch((e) => {
+			rows = await sqlite.select(sql, cleanParams).catch((e) => {
 				console.error("SQL Error:", e);
 				return [];
 			});
 		} else {
 			// Otherwise, use the execute method
-			rows = await sqlite.execute(sql, params).catch((e) => {
+			rows = await sqlite.execute(sql, cleanParams).catch((e) => {
 				console.error("SQL Error:", e);
 				return [];
 			});

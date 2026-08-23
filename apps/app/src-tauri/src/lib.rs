@@ -14,6 +14,13 @@ fn decompress_data(data: Vec<u8>) -> Result<String, String> {
 }
 
 #[tauri::command]
+fn hash_data(data: String) -> Result<String, String> {
+    let mut hasher = Sha256::new();
+    hasher.update(data.as_bytes());
+    Ok(format!("{:x}", hasher.finalize()))
+}
+
+#[tauri::command]
 fn get_or_create_stronghold_password(app: tauri::AppHandle) -> Result<String, String> {
     use std::fs;
     use tauri::Manager;
@@ -71,7 +78,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_or_create_stronghold_password,
             compress_data,
-            decompress_data
+            decompress_data,
+            hash_data
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

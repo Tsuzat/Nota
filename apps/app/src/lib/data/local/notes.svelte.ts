@@ -1,3 +1,4 @@
+import { mayCreateSnapshot } from "@nota/db-local/data/note_snapshot";
 import {
 	createNotes,
 	deleteNotes,
@@ -14,6 +15,7 @@ import type {
 	UpdateLocalNote,
 } from "@nota/db-local/types";
 import type { Content } from "@nota/ui/edra/tiptap/index.js";
+import { invoke } from "@tauri-apps/api/core";
 import type { MoveUpdate } from "../move-notes";
 import type { ILocalNotes } from "../types";
 
@@ -52,6 +54,29 @@ export class LocalNotes implements ILocalNotes {
 		contentText?: string | null,
 	): Promise<void> {
 		await saveNotesContent(id, content, contentText ?? null);
+
+		if (content) {
+			void (async () => {
+				try {
+					const jsonStr =
+						typeof content === "string" ? content : JSON.stringify(content);
+					const [contentHash, compressed] = await Promise.all([
+						invoke<string>("hash_data", { data: jsonStr }),
+						invoke<number[]>("compress_data", { data: jsonStr }),
+					]);
+					const buffer = new Uint8Array(compressed);
+					await mayCreateSnapshot({
+						noteId: id,
+						label: "Auto Snapshot",
+						contentCompressed: buffer,
+						contentHash,
+						size: buffer.byteLength,
+					});
+				} catch (err) {
+					console.warn("[LocalNotes] Auto snapshot error:", err);
+				}
+			})();
+		}
 	}
 
 	async fetchById(id: string): Promise<LocalNoteMeta | null> {
