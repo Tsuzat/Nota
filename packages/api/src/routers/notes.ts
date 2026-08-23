@@ -1,4 +1,6 @@
 import {
+	deleteCachedNoteMeta,
+	deleteCachedNotesByWorkspace,
 	getCachedCollabNotes,
 	getCachedNotesByWorkspace,
 	invalidateNoteMetaCache,
@@ -15,9 +17,11 @@ import {
 	deleteNotes,
 	getCollabNotes,
 	getContent,
+	getNotesAncestorIds,
 	getNotesByWorkspace,
 	getNotesMeta,
 	insertNoteSchema,
+	moveNotesSubtree,
 	updateContent,
 	updateNoteSchema,
 	updateNotesMeta,
@@ -113,6 +117,73 @@ export const notesRouter = {
 				console.error,
 			);
 			return updated;
+		}),
+
+	move: protectedProcedure
+		.input(
+			z.object({
+				noteId: z.string(),
+				targetWorkspaceId: z.string(),
+				targetParentId: z.string().nullable(),
+				moveChildren: z.boolean(),
+			}),
+		)
+		.handler(async ({ context, input }) => {
+			const userId = context.session.user.id;
+
+			const perm = await resolvePermission(input.noteId, userId);
+			if (!perm) {
+				throw new ORPCError("NOT_FOUND", { message: "Note not found" });
+			}
+			if (!perm.isOwner) {
+				throw new ORPCError("UNAUTHORIZED", {
+					message: "Only the note owner can move it",
+				});
+			}
+
+			const source = await getNotesMeta(input.noteId);
+			if (!source) throw new ORPCError("NOT_FOUND");
+
+			if (!(await isWorkspaceOwner(input.targetWorkspaceId, userId))) {
+				throw new ORPCError("UNAUTHORIZED", {
+					message: "You are not authorized to move notes into this workspace",
+				});
+			}
+
+			if (input.targetParentId) {
+				const parent = await getNotesMeta(input.targetParentId);
+				if (!parent || parent.workspaceId !== input.targetWorkspaceId) {
+					throw new ORPCError("NOT_FOUND", {
+						message: "Target parent note not found",
+					});
+				}
+				if (parent.id === input.noteId) {
+					throw new ORPCError("BAD_REQUEST", {
+						message: "Cannot move a note into itself",
+					});
+				}
+				const ancestors = await getNotesAncestorIds(parent.id);
+				if (ancestors.includes(input.noteId)) {
+					throw new ORPCError("BAD_REQUEST", {
+						message: "Cannot move a note into its own sub-note",
+					});
+				}
+			}
+
+			const result = await moveNotesSubtree(input);
+
+			// Invalidate caches for both workspaces + every touched note.
+			void deleteCachedNotesByWorkspace(result.sourceWorkspaceId, userId).catch(
+				console.error,
+			);
+			void deleteCachedNotesByWorkspace(input.targetWorkspaceId, userId).catch(
+				console.error,
+			);
+			for (const id of result.movedIds) {
+				void deleteCachedNoteMeta(id).catch(console.error);
+			}
+
+			return result;
 		}),
 
 	updateContent: protectedProcedure

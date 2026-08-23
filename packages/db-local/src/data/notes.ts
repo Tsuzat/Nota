@@ -136,9 +136,28 @@ export async function updateNotesMeta(
 }
 
 /**
+ * Applies a batch of move updates (workspace / parent changes) sequentially.
+ * @param updates Array of { id, workspaceId?, parentNoteId? } moves.
+ * @returns The updated metadata for every touched note.
+ */
+export async function moveNotes(
+	updates: {
+		id: string;
+		workspaceId?: string;
+		parentNoteId?: string | null;
+	}[],
+): Promise<LocalNoteMeta[]> {
+	const updated: LocalNoteMeta[] = [];
+	for (const update of updates) {
+		updated.push(await updateNotesMeta(update));
+	}
+	return updated;
+}
+
+/**
  * Deletes a note from the database by ID.
- * @param id The ID of the note to delete.
- * @returns A promise that resolves to true if deleted, false otherwise.
+ * @param id The ID of the note.
+ * @returns A promise that resolves to true if deleted, false if not found.
  */
 export async function deleteNotes(id: string): Promise<boolean> {
 	try {

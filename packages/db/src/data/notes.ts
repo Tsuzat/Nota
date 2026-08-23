@@ -1,4 +1,4 @@
-import { and, eq, getColumns } from "drizzle-orm";
+import { and, eq, getColumns, inArray } from "drizzle-orm";
 import {
 	createInsertSchema,
 	createSelectSchema,
@@ -114,6 +114,105 @@ export const deleteNotes = async (id: string): Promise<boolean> => {
 		.where(eq(notes.id, id))
 		.returning({ id: notes.id });
 	return result.length > 0;
+};
+
+/**
+ * Get all strict descendants of a note (excluding the note itself).
+ */
+export const getNotesDescendants = async (
+	noteId: string,
+): Promise<NoteMeta[]> => {
+	const all: NoteMeta[] = [];
+	let frontier: string[] = [noteId];
+	while (frontier.length > 0) {
+		const children = await db
+			.select(noteMetaColumns)
+			.from(notes)
+			.where(inArray(notes.parentNoteId, frontier));
+		all.push(...children.map((c) => selectNoteMetaSchema.parse(c)));
+		frontier = children.map((c) => c.id);
+	}
+	return all;
+};
+
+/**
+ * Walk up the ancestor chain of a note and return the ancestor ids
+ * (nearest parent first, excluding the note itself).
+ */
+export const getNotesAncestorIds = async (
+	noteId: string,
+): Promise<string[]> => {
+	const ids: string[] = [];
+	const seen = new Set([noteId]);
+	let cursor = noteId;
+	for (;;) {
+		const meta = await getNotesMeta(cursor);
+		const parentId = meta?.parentNoteId ?? null;
+		if (!parentId || seen.has(parentId)) break;
+		ids.push(parentId);
+		seen.add(parentId);
+		cursor = parentId;
+	}
+	return ids;
+};
+
+export interface MoveNotesSubtreeInput {
+	noteId: string;
+	targetWorkspaceId: string;
+	targetParentId: string | null;
+	moveChildren: boolean;
+}
+
+/**
+ * Authoritatively move a note (optionally with its whole subtree) to another
+ * workspace / parent. Children left behind are promoted to the moved note's
+ * previous parent.
+ */
+export const moveNotesSubtree = async (input: MoveNotesSubtreeInput) => {
+	const source = await getNotesMeta(input.noteId);
+	if (!source) throw new Error("Source note not found");
+
+	const now = new Date();
+	const movedIds: string[] = [input.noteId];
+
+	if (input.moveChildren) {
+		const subtree = await getNotesDescendants(input.noteId);
+		await updateNotesMeta({
+			id: input.noteId,
+			workspaceId: input.targetWorkspaceId,
+			parentNoteId: input.targetParentId,
+		});
+		movedIds.push(...subtree.map((n) => n.id));
+		if (input.targetWorkspaceId !== source.workspaceId) {
+			for (const node of subtree) {
+				await updateNotesMeta({
+					id: node.id,
+					workspaceId: input.targetWorkspaceId,
+				});
+			}
+		}
+	} else {
+		// Promote direct children to the source note's previous parent.
+		const children = await db
+			.select(noteMetaColumns)
+			.from(notes)
+			.where(eq(notes.parentNoteId, input.noteId));
+		for (const child of children) {
+			if (child.parentNoteId !== source.parentNoteId) {
+				await db
+					.update(notes)
+					.set({ parentNoteId: source.parentNoteId, updatedAt: now })
+					.where(eq(notes.id, child.id));
+			}
+		}
+		await updateNotesMeta({
+			id: input.noteId,
+			workspaceId: input.targetWorkspaceId,
+			parentNoteId: input.targetParentId,
+		});
+	}
+
+	return { movedIds, sourceWorkspaceId: source.workspaceId };
 };
 
 /**
