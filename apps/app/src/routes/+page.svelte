@@ -132,11 +132,17 @@ const confirmDeleteNote = (note: NoteMeta) => {
 		},
 	});
 };
+
+const toggleStar = (note: NoteMeta) => {
+	noteCtx
+		.updateMeta(note.id, { starred: !note.starred })
+		.catch(() => toast.error("Failed to update favorite status"));
+};
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col">
   <Topbar class="shrink-0" />
-  <div class="min-h-0 max-h-[calc(100vh-4rem)] flex-1 overflow-y-auto scrollbar-thin">
+  <div class="min-h-0 max-h-[calc(100vh-4rem)] flex-1 overflow-y-auto ">
     <div class="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 sm:px-6">
 	<!-- Greeting & Header -->
 	<header class="flex flex-col gap-4 border-b border-border/40 pb-6">
@@ -305,13 +311,10 @@ const confirmDeleteNote = (note: NoteMeta) => {
 					<div class="group/card relative">
 						<a href={noteHref(note)} class="block rounded-xl">
 							<Card.Root class="border-border/60 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
-								<Card.Header class="pb-1">
+								<Card.Header class="pb-1 pr-16">
 									<Card.Title class="flex w-full items-center gap-2 text-sm font-medium">
 										<IconsRenderer icon={note.icon ?? "lucide:FileText"} class="size-4 shrink-0 text-muted-foreground transition-colors group-hover/card:text-foreground" />
 										<span class="min-w-0 flex-1 truncate">{note.name}</span>
-										{#if note.starred}
-											<Star class="size-3.5 shrink-0 fill-amber-400 text-amber-400" />
-										{/if}
 									</Card.Title>
 									<Card.Description class="text-xs text-muted-foreground">
 										Last updated {formatDate(note.updatedAt)}
@@ -319,15 +322,45 @@ const confirmDeleteNote = (note: NoteMeta) => {
 								</Card.Header>
 							</Card.Root>
 						</a>
-						<Button
-							variant="ghost"
-							size="icon-xs"
-							class="absolute top-2.5 right-2.5 opacity-0 transition-opacity group-focus-within/card:opacity-100 group-hover/card:opacity-100"
-							onclick={() => confirmDeleteNote(note)}
-						>
-							<Trash2 />
-							<span class="sr-only">Delete note</span>
-						</Button>
+						<div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-0.5">
+							<Button
+								variant="ghost"
+								size="icon-xs"
+								class={cn(
+									"transition-opacity",
+									note.starred
+										? "opacity-100"
+										: "opacity-0 group-focus-within/card:opacity-100 group-hover/card:opacity-100",
+								)}
+								onclick={(e) => {
+									e.stopPropagation();
+									e.preventDefault();
+									toggleStar(note);
+								}}
+								title={note.starred ? "Unstar note" : "Star note"}
+							>
+								<Star
+									class={cn(
+										"size-3.5",
+										note.starred && "fill-amber-400 text-amber-400",
+									)}
+								/>
+								<span class="sr-only">{note.starred ? "Unstar note" : "Star note"}</span>
+							</Button>
+							<Button
+								variant="ghost"
+								size="icon-xs"
+								class="opacity-0 transition-opacity group-focus-within/card:opacity-100 group-hover/card:opacity-100 text-muted-foreground hover:text-destructive"
+								onclick={(e) => {
+									e.stopPropagation();
+									e.preventDefault();
+									confirmDeleteNote(note);
+								}}
+							>
+								<Trash2 class="size-3.5" />
+								<span class="sr-only">Delete note</span>
+							</Button>
+						</div>
 					</div>
 				{/each}
 			</div>

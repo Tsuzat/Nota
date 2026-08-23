@@ -159,7 +159,7 @@ const { data } = $props();
 
 <div
   id="editor-scroll-container"
-  class="flex-1 scrollbar-thin w-full max-h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden"
+  class="flex-1  w-full max-h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden"
 >
   {#if isNotFound}
     <div class="flex flex-col items-center justify-center pt-24 space-y-4">

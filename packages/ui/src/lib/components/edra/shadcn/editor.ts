@@ -49,6 +49,7 @@ export interface EdraEditorProps {
 	 * @returns A promise resolving to the uploaded file's URL.
 	 */
 	onFileUpload?: (fileType: FileType) => Promise<string | null>;
+	editable?: boolean;
 	callAI?: (
 		prompt: string,
 		onChunk: (chunk: string) => void,
@@ -95,4 +96,5 @@ export const createEditor = (props?: EdraEditorProps) =>
 			}),
 		],
 		onUpdate: props?.onUpdate || (() => {}),
+		editable: props?.editable ?? true,
 	});

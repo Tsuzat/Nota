@@ -74,7 +74,7 @@ const handleSave = async () => {
       class="flex flex-col gap-5 pt-1"
     >
       <div class="flex items-center gap-3">
-        <IconPicker bind:icon>
+        <IconPicker onSelect={(i) => icon = i} side="right" onClose={() => handleSave()}>
           <SimpleToolTip content="Pick icon" side="right">
             <span
               class={buttonVariants({

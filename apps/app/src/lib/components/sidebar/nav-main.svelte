@@ -83,7 +83,7 @@ const isVersionsActive = $derived(
         isVersionsActive &&
           "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
       )}
-      onclick={() => goto(resolve("/versions"))}
+      href={resolve("/versions")}
       onmouseenter={() => (isVersionsHovered = true)}
       onmouseleave={() => (isVersionsHovered = false)}
     >

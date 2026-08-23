@@ -30,6 +30,9 @@ onMount(() => {
 	const interval = setInterval(saveNote, 1000);
 	return () => {
 		clearInterval(interval);
+		if (isDirty) {
+			void saveNote();
+		}
 	};
 });
 
@@ -107,7 +110,7 @@ const { data } = $props();
   {/snippet}
 </Topbar>
 
-<div id="editor-scroll-container" class="flex-1 scrollbar-thin w-full max-h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden">
+<div id="editor-scroll-container" class="flex-1  w-full max-h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden">
   {#if isNotFound}
     <div class="flex flex-col items-center justify-center pt-24 space-y-4">
       <h2 class="text-2xl font-semibold">Note not found</h2>

@@ -285,7 +285,7 @@ const getInitials = (name?: string | null) => {
             People with access
           </div>
 
-          <div class="max-h-56 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
+          <div class="max-h-56 overflow-y-auto space-y-2 pr-1 ">
             {#if guestsStore.isLoading && !guestsStore.owner && guestsStore.guests.length === 0}
               <div class="flex items-center justify-center py-6">
                 <BarSpinner class="size-5 text-muted-foreground" />

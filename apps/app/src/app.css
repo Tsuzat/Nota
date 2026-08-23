@@ -23,3 +23,15 @@ body {
 	app-region: no-drag;
 	-webkit-app-region: no-drag;
 }
+
+html {
+	-webkit-text-size-adjust: 100%;
+	-ms-overflow-style: -ms-autohiding-scrollbar;
+	scroll-behavior: smooth;
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--muted-foreground) 25%, transparent)
+		transparent;
+}

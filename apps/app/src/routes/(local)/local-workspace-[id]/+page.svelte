@@ -6,7 +6,7 @@ const { data }: { data: { id: string } } = $props();
 
 <div class="flex min-h-0 flex-1 flex-col">
   <Topbar class="shrink-0" />
-  <div class="min-h-0 max-h-[calc(100vh-4rem)] flex-1 overflow-y-auto scrollbar-thin">
+  <div class="min-h-0 max-h-[calc(100vh-4rem)] flex-1 overflow-y-auto ">
     <WorkspaceNotes id={data.id} />
   </div>
 </div>
