@@ -68,3 +68,19 @@ export const incrementUserStorage = async (userId: string, size: number) => {
 		})
 		.where(eq(userQuota.userId, userId));
 };
+
+/**
+ * Decrement the user's used storage by a given size in bytes.
+ * Ensures used storage never goes below 0.
+ * @param userId user id
+ * @param size bytes to subtract
+ */
+export const decrementUserStorage = async (userId: string, size: number) => {
+	await db
+		.update(userQuota)
+		.set({
+			usedStorageBytes: sql`GREATEST(0, ${userQuota.usedStorageBytes} - ${size})`,
+			updatedAt: new Date(),
+		})
+		.where(eq(userQuota.userId, userId));
+};
