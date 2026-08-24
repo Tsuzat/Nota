@@ -44,7 +44,7 @@
 		"check:ci": "turbo run check:ci",
 		"check-types": "turbo run check-types",
 		"dev:web": "turbo run dev -F web",
-		"dev:server": "turbo run dev -F server",
+		"dev:server": "turbo run dev -F @nota/server",
 		"dev:app": "turbo run dev -F app",
 		"auth:generate": "turbo run auth:generate -F @nota/auth",
 		"db:push": "turbo run db:push -F @nota/db",

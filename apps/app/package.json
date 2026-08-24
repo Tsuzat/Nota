@@ -1,5 +1,5 @@
 {
-	"name": "app",
+	"name": "@nota/app",
 	"version": "0.9.91-beta",
 	"private": true,
 	"type": "module",
