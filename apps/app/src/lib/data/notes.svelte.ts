@@ -61,6 +61,7 @@ class Notes {
 		parentNoteId?: string | null;
 		content?: unknown;
 		contextText?: string | null;
+		starred?: boolean;
 	}) {
 		const ws = this.#workspaceCtx.current;
 		if (!ws) throw new Error("No active workspace");
@@ -74,6 +75,7 @@ class Notes {
 				parentNoteId: input.parentNoteId ?? null,
 				content: (input.content ?? new Uint8Array([0, 0])) as never,
 				contextText: input.contextText ?? null,
+				starred: input.starred ?? false,
 			});
 		} else {
 			await this.local.create({
@@ -84,6 +86,7 @@ class Notes {
 				parentNoteId: input.parentNoteId ?? null,
 				content: (input.content ?? {}) as never,
 				contentText: input.contextText ?? null,
+				starred: input.starred ?? false,
 			});
 		}
 	}

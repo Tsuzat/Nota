@@ -7,10 +7,11 @@ import type { Editor } from "@nota/ui/edra/tiptap/index.js";
 import { IconPicker, IconsRenderer } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { Skeleton } from "@nota/ui/shadcn/skeleton/index.js";
+import { cn } from "@nota/ui/utils";
 import { onDestroy, onMount } from "svelte";
 import type { Doc } from "yjs";
 import { getAuthSession } from "#lib/auth-session.svelte.js";
-import { Topbar } from "#lib/components/custom/index.ts";
+import { NoteTopbarActions, Topbar } from "#lib/components/custom/index.ts";
 import { ShareNote } from "#lib/components/dialogs/index.ts";
 import { realtimeProvider } from "#lib/data/cloud/realtime.js";
 import { onFileUpload } from "#lib/data/cloud/storage.js";
@@ -33,6 +34,11 @@ let connectionStatus = $state("disconnected");
 
 let isContentReady = $state(false);
 let isNotFound = $state(false);
+let isLocked = $state(false);
+let isFullWidth = $state(
+	typeof localStorage !== "undefined" &&
+		localStorage.getItem("nota-full-width") === "true",
+);
 
 onMount(() => {
 	getUserModels().then((models) => (availableModels = models));
@@ -107,6 +113,11 @@ const loadNote = async (id: string) => {
 const { data } = $props();
 </script>
 
+<svelte:head>
+  <title>{note?.name ?? "Loading..."} - Nota</title>
+</svelte:head>
+
+
 <Topbar class="top-0 sticky">
   {#snippet left()}
     {#if note !== null}
@@ -130,7 +141,7 @@ const { data } = $props();
     {/if}
   {/snippet}
   {#snippet right()}
-    <div class="flex items-center gap-2 mr-4">
+    <div class="flex items-center gap-1.5 mr-2">
       <SimpleToolTip
         content={connectionStatus === "connected"
           ? "Connected"
@@ -150,8 +161,15 @@ const { data } = $props();
           ></div>
         </div>
       </SimpleToolTip>
-      {#if note !== null}
-        <ShareNote noteId={note.id} />
+      {#if note !== null && editor}
+        <ShareNote noteId={note.id} {note} {editor} />
+        <NoteTopbarActions
+          {note}
+          {editor}
+          isCloud={true}
+          bind:isLocked
+          bind:isFullWidth
+        />
       {/if}
     </div>
   {/snippet}
@@ -170,7 +188,12 @@ const { data } = $props();
       <Button href="/">Go back to Home</Button>
     </div>
   {:else if !isContentReady}
-    <div class="max-w-3xl mx-auto w-full px-4 pt-12 space-y-4">
+    <div
+      class={cn(
+        "mx-auto w-full px-4 pt-12 space-y-4 transition-all duration-150",
+        isFullWidth ? "max-w-none px-8" : "max-w-3xl",
+      )}
+    >
       <Skeleton class="h-10 w-3/4" />
       <Skeleton class="h-6 w-full" />
       <Skeleton class="h-6 w-5/6" />
@@ -185,7 +208,10 @@ const { data } = $props();
       <Edra.ToC />
       <Edra.UseAI {availableModels} />
       <Edra.Content
-        class="max-w-3xl mx-auto w-full px-4 pb-32 min-h-[calc(100dvh-10rem)] *:outline-none"
+        class={cn(
+          "mx-auto w-full px-4 pb-32 min-h-[calc(100dvh-10rem)] *:outline-none transition-all duration-150",
+          isFullWidth ? "max-w-none px-8" : "max-w-3xl",
+        )}
       />
     </Edra>
   {/if}

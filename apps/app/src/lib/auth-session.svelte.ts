@@ -4,12 +4,20 @@ import { get } from "svelte/store";
 import { authClient } from "./auth-client";
 import { orpc } from "./orpc";
 
+import { secureStorage } from "./platform/securestorage";
+import { ISDESKTOP } from "./utils";
+
 const sessionStore = authClient.useSession();
 
 let session = $state(get(sessionStore));
 
 sessionStore.subscribe((value) => {
 	session = value;
+	if (ISDESKTOP && value?.data?.session?.token) {
+		void secureStorage
+			.setItem("access_token", value.data.session.token)
+			.catch(console.error);
+	}
 });
 
 const signedIn = $derived(!!session.data?.user);

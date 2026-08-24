@@ -6,8 +6,9 @@ import { createEditor, Edra } from "@nota/ui/edra/shadcn/index.js";
 import { IconPicker, IconsRenderer } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { Skeleton } from "@nota/ui/shadcn/skeleton/index.js";
-import { onMount } from "svelte";
-import { Topbar } from "#lib/components/custom/index.ts";
+import { cn } from "@nota/ui/utils";
+import { onMount, untrack } from "svelte";
+import { NoteTopbarActions, Topbar } from "#lib/components/custom/index.ts";
 import { callAI, getUserModels } from "#lib/data/local/ai/ai.js";
 import { onFileUpload } from "#lib/data/local/storage.js";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
@@ -24,6 +25,11 @@ let isDirty = false;
 let isSaving = false;
 let pendingContent: any = null;
 let pendingText: string = "";
+let isLocked = $state(false);
+let isFullWidth = $state(
+	typeof localStorage !== "undefined" &&
+		localStorage.getItem("nota-full-width") === "true",
+);
 
 onMount(() => {
 	getUserModels().then((models) => (availableModels = models));
@@ -94,6 +100,10 @@ const loadNote = async (id: string) => {
 const { data } = $props();
 </script>
 
+<svelte:head>
+  <title>{note?.name ?? "Loading..."} - Nota</title>
+</svelte:head>
+
 <Topbar class="top-0 sticky">
   {#snippet left()}
     {#if note !== null}
@@ -108,9 +118,22 @@ const { data } = $props();
 		<Skeleton class="h-8 w-24" />
     {/if}
   {/snippet}
+  {#snippet right()}
+    {#if note !== null && editor !== undefined}
+      <div class="flex items-center gap-1.5 mr-2">
+        <NoteTopbarActions
+          {note}
+          {editor}
+          isCloud={false}
+          bind:isLocked
+          bind:isFullWidth
+        />
+      </div>
+    {/if}
+  {/snippet}
 </Topbar>
 
-<div id="editor-scroll-container" class="flex-1  w-full max-h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden">
+<div id="editor-scroll-container" class="flex-1 w-full max-h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden">
   {#if isNotFound}
     <div class="flex flex-col items-center justify-center pt-24 space-y-4">
       <h2 class="text-2xl font-semibold">Note not found</h2>
@@ -118,7 +141,12 @@ const { data } = $props();
       <Button href="/">Go back to Home</Button>
     </div>
   {:else if !isContentReady}
-    <div class="max-w-3xl mx-auto w-full px-4 pt-12 space-y-4">
+    <div
+      class={cn(
+        "mx-auto w-full px-4 pt-12 space-y-4 transition-all duration-150",
+        isFullWidth ? "max-w-7xl px-16!" : "max-w-3xl",
+      )}
+    >
       <Skeleton class="h-10 w-3/4" />
       <Skeleton class="h-6 w-full" />
       <Skeleton class="h-6 w-5/6" />
@@ -132,7 +160,12 @@ const { data } = $props();
       <Edra.BubbleMenu />
       <Edra.ToC />
       <Edra.UseAI {availableModels} />
-      <Edra.Content class="max-w-3xl mx-auto w-full px-4 pb-32 min-h-[calc(100dvh-10rem)] *:outline-none" />
+      <Edra.Content
+        class={cn(
+          "mx-auto w-full px-4 pb-32 min-h-[calc(100dvh-10rem)] *:outline-none transition-all duration-150",
+          isFullWidth ? "max-w-none px-8" : "max-w-3xl",
+        )}
+      />
     </Edra>
   {/if}
 </div>

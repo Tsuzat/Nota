@@ -33,6 +33,7 @@ import {
 } from "#lib/data/snapshots.svelte.ts";
 import { getWorkspaceContext } from "#lib/data/workspace.svelte.ts";
 import { formatBytes, formatDate } from "#lib/utils.ts";
+import { page } from "$app/state";
 
 const workspaceCtx = getWorkspaceContext();
 const noteCtx = getNotesContext();
@@ -55,7 +56,16 @@ const sortOptions = [
 
 // Filter & pagination state
 let searchQuery = $state("");
-let selectedNoteId = $state<string>("all");
+let selectedNoteId = $state<string>(
+	page.url.searchParams.get("noteId") ?? "all",
+);
+
+$effect(() => {
+	const paramNoteId = page.url.searchParams.get("noteId");
+	if (paramNoteId && paramNoteId !== selectedNoteId) {
+		selectedNoteId = paramNoteId;
+	}
+});
 let selectedKind = $state<"all" | "auto" | "manual">("all");
 let selectedSort = $state<"createdAt" | "name" | "size">("createdAt");
 let sortOrder = $state<"asc" | "desc">("desc");

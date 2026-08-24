@@ -2,6 +2,8 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCaret from "@tiptap/extension-collaboration-caret";
 import { Doc } from "yjs";
+import { authClient } from "#lib/auth-client.ts";
+import { getAuthSession } from "#lib/auth-session.svelte.ts";
 import { secureStorage } from "#lib/platform/securestorage.ts";
 import { ISDESKTOP } from "#lib/utils.ts";
 import { PUBLIC_REALTIME_URL } from "$app/env/public";
@@ -33,6 +35,30 @@ export const realtimeProvider = async (
 	if (ISDESKTOP) {
 		token = await secureStorage.getItem("access_token");
 	}
+
+	if (!token) {
+		const currentSession = getAuthSession();
+		token = currentSession.data?.session?.token;
+
+		if (!token) {
+			try {
+				const sessionRes = await authClient.getSession();
+				token = sessionRes.data?.session?.token;
+				if (token && ISDESKTOP) {
+					void secureStorage
+						.setItem("access_token", token)
+						.catch(console.error);
+				}
+			} catch (e) {
+				console.error(
+					"Failed to retrieve auth token for realtime provider:",
+					e,
+				);
+			}
+		}
+	}
+
+	console.log("Token = ", token);
 	const ydoc = new Doc();
 	const provider = new HocuspocusProvider({
 		url: PUBLIC_REALTIME_URL,
