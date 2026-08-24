@@ -20,14 +20,14 @@ RUN turbo prune @nota/server --docker
 FROM base AS deps
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-RUN bun install --frozen-lockfile
+RUN NODE_ENV=development bun install --frozen-lockfile
 
 # ---------------------------------------------------------
 # Stage 3: Build application bundle
 # ---------------------------------------------------------
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app .
 COPY --from=pruner /app/out/full/ .
 
 ENV NODE_ENV=production
@@ -52,9 +52,8 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 # Copy production node_modules and built dist
-COPY --from=prod-deps --chown=bun:bun /app/node_modules ./node_modules
+COPY --from=prod-deps --chown=bun:bun /app .
 COPY --from=builder --chown=bun:bun /app/apps/server/dist ./apps/server/dist
-COPY --from=pruner --chown=bun:bun /app/out/json/apps/server/package.json ./apps/server/package.json
 
 # Security: run as non-root user
 USER bun
