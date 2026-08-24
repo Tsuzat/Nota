@@ -206,10 +206,9 @@ export const publish = p.pgTable(
 			.text("id")
 			.primaryKey()
 			.references(() => notes.id, { onDelete: "cascade" }), // shared w/ notes.id
-		slug: p.text("slug").notNull(),
+		slug: p.text("slug").notNull().unique(),
 		title: p.text("title").notNull(),
 		contentHtml: p.text("content_html").notNull(),
-		contentHash: p.text("content_hash").notNull(),
 		status: publishStatus("status").notNull().default("published"),
 		shouldIndex: p.boolean("should_index").notNull().default(true),
 		publishedBy: p

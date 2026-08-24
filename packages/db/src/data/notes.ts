@@ -1,4 +1,4 @@
-import { and, eq, getColumns, inArray } from "drizzle-orm";
+import { and, eq, getColumns, inArray, isNull } from "drizzle-orm";
 import {
 	createInsertSchema,
 	createSelectSchema,
@@ -67,6 +67,17 @@ export const getNotesMeta = async (id: string): Promise<NoteMeta | null> => {
 		.limit(1);
 
 	return data ? selectNoteMetaSchema.parse(data) : null;
+};
+
+/**
+ * Count the number of active (non-trashed) notes owned by a user across all workspaces.
+ */
+export const getUserNoteCount = async (ownerId: string): Promise<number> => {
+	const count = await db.$count(
+		notes,
+		and(eq(notes.ownerId, ownerId), isNull(notes.trashedAt)),
+	);
+	return count;
 };
 
 /**
