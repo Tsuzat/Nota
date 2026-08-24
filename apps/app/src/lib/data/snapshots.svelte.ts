@@ -39,13 +39,13 @@ export class SnapshotsManager {
 	 * Fetch snapshots for a given workspace.
 	 */
 	async fetchWorkspaceSnapshots(
-		workspaceId: string,
+		workspaceId: string | undefined,
 		isCloud: boolean,
 		options: SnapshotFilterOptions = {},
 	): Promise<{ items: UnifiedSnapshotItem[]; total: number }> {
 		if (isCloud) {
 			const res = await client.snapshots.list({
-				workspaceId,
+				workspaceId: workspaceId || undefined,
 				...options,
 			});
 			return {
@@ -62,7 +62,10 @@ export class SnapshotsManager {
 			return { items: [], total: 0 };
 		}
 
-		const res = await getLocalWorkspaceSnapshotsDb(workspaceId, options);
+		const res = await getLocalWorkspaceSnapshotsDb(
+			workspaceId || undefined,
+			options,
+		);
 		return {
 			items: res.items.map((item) => ({
 				...item,

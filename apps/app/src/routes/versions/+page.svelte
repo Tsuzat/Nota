@@ -32,7 +32,7 @@ import {
 	type UnifiedSnapshotItem,
 } from "#lib/data/snapshots.svelte.ts";
 import { getWorkspaceContext } from "#lib/data/workspace.svelte.ts";
-import { formatDate } from "#lib/utils.ts";
+import { formatBytes, formatDate } from "#lib/utils.ts";
 
 const workspaceCtx = getWorkspaceContext();
 const noteCtx = getNotesContext();
@@ -104,13 +104,6 @@ let restoreTarget = $state<UnifiedSnapshotItem | null>(null);
 let isRestoring = $state(false);
 
 const totalPages = $derived(Math.max(1, Math.ceil(totalCount / limit)));
-
-// Format file size
-function formatBytes(bytes: number): string {
-	if (bytes < 1024) return `${bytes} B`;
-	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-	return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
 
 // Load snapshots
 async function loadSnapshots() {
