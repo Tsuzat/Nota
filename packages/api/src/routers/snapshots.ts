@@ -18,7 +18,7 @@ export const snapshotsRouter = {
 	list: protectedProcedure
 		.input(
 			z.object({
-				workspaceId: z.string(),
+				workspaceId: z.string().optional(),
 				noteId: z.string().optional(),
 				kind: z.enum(["auto", "manual", "pinned"]).optional(),
 				search: z.string().optional(),
@@ -31,15 +31,20 @@ export const snapshotsRouter = {
 		.handler(async ({ context, input }) => {
 			const userId = context.session.user.id;
 
-			const isOwner = await isWorkspaceOwner(input.workspaceId, userId);
-			if (!isOwner) {
-				throw new ORPCError("UNAUTHORIZED", {
-					message:
-						"You are not authorized to view snapshots for this workspace",
-				});
+			if (input.workspaceId) {
+				const isOwner = await isWorkspaceOwner(input.workspaceId, userId);
+				if (!isOwner) {
+					throw new ORPCError("UNAUTHORIZED", {
+						message:
+							"You are not authorized to view snapshots for this workspace",
+					});
+				}
 			}
 
-			return await getSnapshotsForWorkspace(input.workspaceId, input);
+			return await getSnapshotsForWorkspace(input.workspaceId, {
+				...input,
+				userId,
+			});
 		}),
 
 	getContent: protectedProcedure
