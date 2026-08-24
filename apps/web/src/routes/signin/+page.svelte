@@ -12,15 +12,15 @@ import { page } from "$app/state";
 
 const sessionQuery = authClient.useSession();
 
-$effect(() => {
-	if ($sessionQuery.data?.user) {
-		window.location.href = "/";
-	}
-});
-
 const callbackURL = $derived(
 	page.url.searchParams.get("redirectTo") || page.url.origin,
 );
+
+$effect(() => {
+	if ($sessionQuery.data?.user) {
+		window.location.href = callbackURL;
+	}
+});
 
 let loadingProvider = $state<"google" | "github" | null>(null);
 

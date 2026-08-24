@@ -86,9 +86,9 @@ const selectedSortLabel = $derived(
 const isCloudContext = $derived.by(() => {
 	if (filterWorkspaceId === "all-cloud") return true;
 	if (filterWorkspaceId === "all-local") return false;
-	const isLocal = localWorkspaces.some((w) => w.id === filterWorkspaceId);
+	const isLocal = localWorkspaces.some((w: any) => w.id === filterWorkspaceId);
 	if (isLocal) return false;
-	const isCloud = cloudWorkspaces.some((w) => w.id === filterWorkspaceId);
+	const isCloud = cloudWorkspaces.some((w: any) => w.id === filterWorkspaceId);
 	if (isCloud) return true;
 	return true;
 });

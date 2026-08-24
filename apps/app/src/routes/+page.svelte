@@ -220,7 +220,19 @@ const toggleStar = (note: NoteMeta) => {
 			</div>
 		</div>
 
-		{#if workspaces.length === 0}
+		{#if (!ISDESKTOP && workspaceCtx.cloud.isLoading && workspaces.length === 0)}
+			<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+				{#each Array(3) as _}
+					<div class="h-28 rounded-xl border border-border/50 bg-muted/20 animate-pulse p-4 flex flex-col justify-between">
+						<div class="flex items-center gap-2">
+							<div class="size-6 rounded-md bg-muted/60"></div>
+							<div class="h-4 w-28 rounded bg-muted/60"></div>
+						</div>
+						<div class="h-3 w-16 rounded bg-muted/40 self-end"></div>
+					</div>
+				{/each}
+			</div>
+		{:else if workspaces.length === 0}
 			<Card.Root class="mx-auto w-full max-w-md border-dashed">
 				<Card.Header class="text-center">
 					<div class="mx-auto mb-2 flex size-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
@@ -301,7 +313,16 @@ const toggleStar = (note: NoteMeta) => {
 			</h2>
 		</div>
 
-		{#if recentNotes.length === 0}
+		{#if (!ISDESKTOP && noteCtx.cloud.isLoading && recentNotes.length === 0)}
+			<div class="grid gap-3 sm:grid-cols-2">
+				{#each Array(2) as _}
+					<div class="h-16 rounded-xl border border-border/50 bg-muted/20 animate-pulse p-3 flex flex-col justify-center gap-2">
+						<div class="h-4 w-36 rounded bg-muted/60"></div>
+						<div class="h-3 w-24 rounded bg-muted/40"></div>
+					</div>
+				{/each}
+			</div>
+		{:else if recentNotes.length === 0}
 			<p class="text-xs text-muted-foreground">
 				No notes in this workspace yet.
 			</p>

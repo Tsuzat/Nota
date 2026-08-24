@@ -12,15 +12,20 @@ sessionStore.subscribe((value) => {
 	session = value;
 });
 
-const signedIn = $derived(
-	!!session.data?.user && !session.isPending && !session.isRefetching,
-);
+const signedIn = $derived(!!session.data?.user);
 
 /**
  * True if the user is signed in.
  */
 export function isSignedIn() {
 	return signedIn;
+}
+
+/**
+ * True if the initial session check is still loading.
+ */
+export function isAuthPending() {
+	return session.isPending;
 }
 
 export function getUserQuota() {

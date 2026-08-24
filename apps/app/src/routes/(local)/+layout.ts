@@ -1,6 +1,8 @@
+import { redirect } from "@sveltejs/kit";
 import { ISDESKTOP } from "#lib/utils.ts";
-import { goto } from "$app/navigation";
 
 export const load = () => {
-	if (!ISDESKTOP) return goto("/home");
+	if (!ISDESKTOP) {
+		throw redirect(307, "/");
+	}
 };

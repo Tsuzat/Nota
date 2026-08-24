@@ -2,7 +2,7 @@
 import { QueryClientProvider } from "@tanstack/svelte-query";
 import { SvelteQueryDevtools } from "@tanstack/svelte-query-devtools";
 import "../app.css";
-import { ModeWatcher, toast } from "@nota/ui";
+import { ModeWatcher } from "@nota/ui";
 import ConfirmDelete from "@nota/ui/custom/dialogs/confirm-delete.svelte";
 import { BarSpinner } from "@nota/ui/icons/index.js";
 import * as Sidebar from "@nota/ui/shadcn/sidebar/index.ts";
@@ -11,8 +11,8 @@ import { TooltipProvider } from "@nota/ui/shadcn/tooltip/index.ts";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
 import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.ts";
-import CreateNotes from "#lib/components/dialogs/create-notes.svelte";
 import {
+	CreateNotes,
 	CreateWorkspace,
 	GlobalSettings,
 	NoteMove,
@@ -37,14 +37,20 @@ const session = getAuthSession();
 
 let wasSignedIn = $state(false);
 $effect(() => {
-	// if (!ISDESKTOP && !isSignedIn()) {
-	// 	window.location.href = `${PUBLIC_NOTA_URL}/signin`;
-	// }
-	if (wasSignedIn && !isSignedIn()) {
+	if (!ISDESKTOP && !session.isPending && !isSignedIn()) {
+		const returnUrl = typeof window !== "undefined" ? window.location.href : "";
+		const signinUrl = returnUrl
+			? `${PUBLIC_NOTA_URL}/signin?redirectTo=${encodeURIComponent(returnUrl)}`
+			: `${PUBLIC_NOTA_URL}/signin`;
+		window.location.href = signinUrl;
+	}
+	if (wasSignedIn && !isSignedIn() && !session.isPending) {
 		queryClient.removeQueries({ queryKey: orpc.workspace.key() });
 		queryClient.removeQueries({ queryKey: orpc.notes.key() });
 	}
-	wasSignedIn = isSignedIn();
+	if (!session.isPending) {
+		wasSignedIn = isSignedIn();
+	}
 });
 
 onMount(async () => {
