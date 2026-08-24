@@ -29,6 +29,10 @@
 		"@tanstack/svelte-query": "catalog:",
 		"better-auth": "catalog:",
 		"dotenv": "catalog:",
+		"highlight.js": "^11.11.1",
+		"katex": "^0.17.0",
+		"mermaid": "^11.16.1",
+		"mode-watcher": "^1.1.0",
 		"motion-sv": "^0.1.13",
 		"zod": "catalog:"
 	},
