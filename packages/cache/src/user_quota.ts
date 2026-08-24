@@ -1,6 +1,4 @@
-/// This file holds all the cache utilities for user quota
-
-import { selectUserQuotaSchema } from "@nota/db/data/user_quota";
+import { getUserQuota, selectUserQuotaSchema } from "@nota/db/data/user_quota";
 import type { UserQuota } from "@nota/db/types";
 import { cache } from ".";
 
@@ -60,4 +58,31 @@ export const setCachedUserQuota = async (
 export const deleteCachedUserQuota = async (userId: string): Promise<void> => {
 	const key = getUserQuotaCacheKey(userId);
 	await cache.del(key);
+};
+
+/**
+ * Get user quota using cache-aside strategy:
+ * 1. Checks Redis cache
+ * 2. On miss, queries DB and populates cache asynchronously
+ */
+export const getUserQuotaWithCache = async (
+	userId: string,
+): Promise<UserQuota | null> => {
+	const cached = await getCachedUserQuota(userId);
+	if (cached) return cached;
+
+	const quota = await getUserQuota(userId);
+	if (quota) {
+		void setCachedUserQuota(userId, quota).catch(console.error);
+		return quota;
+	}
+	return null;
+};
+
+/**
+ * Check if a user has a Pro plan using cache-aside optimization (Redis first, then DB).
+ */
+export const isUserPro = async (userId: string): Promise<boolean> => {
+	const quota = await getUserQuotaWithCache(userId);
+	return quota?.planTier === "pro";
 };

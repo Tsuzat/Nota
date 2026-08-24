@@ -1,9 +1,9 @@
+import { isUserPro } from "@nota/cache/user_quota";
 import {
 	deleteCachedUserWorkspaces,
 	getCachedUserWorkspaces,
 	setCachedUserWorkspaces,
 } from "@nota/cache/workspace";
-import { isUserPro } from "@nota/db/data/user_quota";
 import {
 	createWorkspace,
 	deleteWorkspace,
@@ -17,6 +17,7 @@ import {
 import { ORPCError } from "@orpc/server";
 import z from "zod";
 import { protectedProcedure } from "../index";
+import { cleanupWorkspaceStorage } from "../utils/storage-cleanup";
 
 export const workspaceRouter = {
 	fetchForUser: protectedProcedure.handler(async ({ context }) => {
@@ -79,6 +80,10 @@ export const workspaceRouter = {
 		.input(z.object({ id: z.string() }))
 		.handler(async ({ context, input }) => {
 			const userId = context.session.user.id;
+
+			// Free all assets and snapshots quota for all notes in this workspace
+			await cleanupWorkspaceStorage(input.id, userId);
+
 			const deleted = await deleteWorkspace(input.id, userId);
 			if (!deleted) {
 				throw new ORPCError("NOT_FOUND", { message: "Workspace not found" });

@@ -3,6 +3,7 @@ import type { RouterClient } from "@orpc/server";
 import { protectedProcedure, publicProcedure } from "../index";
 import { guestsRouter } from "./guests";
 import { notesRouter } from "./notes";
+import { publishRouter } from "./publish";
 import { snapshotsRouter } from "./snapshots";
 import { storageRouter } from "./storage";
 import { quotaRouter } from "./userquota";
@@ -20,6 +21,7 @@ export const appRouter = {
 	}),
 	workspace: workspaceRouter,
 	notes: notesRouter,
+	publish: publishRouter,
 	snapshots: snapshotsRouter,
 	guests: guestsRouter,
 	storage: storageRouter,

@@ -12,6 +12,7 @@ import {
 	invalidateNoteUserPermission,
 	setCachedNoteUserPermission,
 } from "@nota/cache/permissions";
+import { isUserPro } from "@nota/cache/user_quota";
 import {
 	createNotes,
 	deleteNotes,
@@ -20,6 +21,7 @@ import {
 	getNotesAncestorIds,
 	getNotesByWorkspace,
 	getNotesMeta,
+	getUserNoteCount,
 	insertNoteSchema,
 	moveNotesSubtree,
 	updateContent,
@@ -31,6 +33,7 @@ import { isWorkspaceOwner } from "@nota/db/data/workspace";
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { protectedProcedure } from "../index";
+import { cleanupNoteStorage } from "../utils/storage-cleanup";
 
 const resolvePermission = async (noteId: string, userId: string) => {
 	let perm = await getCachedNoteUserPermission(noteId, userId);
@@ -78,6 +81,17 @@ export const notesRouter = {
 				throw new ORPCError("UNAUTHORIZED", {
 					message: "You are not authorized to create notes in this workspace",
 				});
+			}
+
+			const isPro = await isUserPro(userId);
+			if (!isPro) {
+				const count = await getUserNoteCount(userId);
+				if (count >= 10) {
+					throw new ORPCError("LIMIT_EXCEEDED", {
+						message:
+							"Free plan allows a maximum of 10 cloud notes. Please upgrade to Pro for unlimited notes.",
+					});
+				}
 			}
 
 			const note = await createNotes({
@@ -239,11 +253,16 @@ export const notesRouter = {
 			}
 
 			const meta = await getNotesMeta(input.id);
+			if (!meta) throw new ORPCError("NOT_FOUND");
+
+			// Free all assets and snapshots quota from R2 and decrement user storage quota
+			await cleanupNoteStorage(input.id, meta.ownerId);
+
 			const success = await deleteNotes(input.id);
 			if (!success) throw new ORPCError("NOT_FOUND");
 
 			void invalidateNoteUserPermission(input.id, userId).catch(console.error);
-			void invalidateNoteMetaCache(input.id, meta?.workspaceId).catch(
+			void invalidateNoteMetaCache(input.id, meta.workspaceId).catch(
 				console.error,
 			);
 

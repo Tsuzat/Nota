@@ -12,23 +12,10 @@ import { incrementUserStorage } from "@nota/db/data/user_quota";
 import { isWorkspaceOwner } from "@nota/db/data/workspace";
 import { env } from "@nota/env/server";
 import { ORPCError } from "@orpc/server";
-import { S3Client } from "bun";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { protectedProcedure } from "../index";
-
-let s3Client: S3Client | null = null;
-const getS3Client = () => {
-	if (!s3Client) {
-		s3Client = new S3Client({
-			accessKeyId: env.R2_ACCESS_KEY_ID,
-			secretAccessKey: env.R2_SECRET_ACCESS_KEY,
-			endpoint: env.R2_ENDPOINT_URL,
-			bucket: env.R2_BUCKET_NAME,
-		});
-	}
-	return s3Client;
-};
+import { getS3Client } from "../utils/storage-cleanup";
 
 export const storageRouter = {
 	uploadFile: protectedProcedure
