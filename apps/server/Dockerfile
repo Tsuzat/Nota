@@ -12,16 +12,15 @@ WORKDIR /app
 FROM base AS pruner
 RUN bun add --global turbo@^2
 COPY . .
-RUN turbo prune server --docker
+RUN turbo prune @nota/server --docker
 
 # ---------------------------------------------------------
-# Stage 2: Install dependencies (leveraging BuildKit cache)
+# Stage 2: Install dependencies (leveraging layer cache)
 # ---------------------------------------------------------
 FROM base AS deps
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-RUN --mount=type=cache,id=bun-cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 # ---------------------------------------------------------
 # Stage 3: Build application bundle
@@ -41,8 +40,7 @@ RUN cd apps/server && bun run build
 FROM base AS prod-deps
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
-RUN --mount=type=cache,id=bun-cache,target=/root/.bun/install/cache \
-    bun install --production --frozen-lockfile
+RUN bun install --production --frozen-lockfile
 
 # ---------------------------------------------------------
 # Stage 5: Production runner (minimal footprint & non-root)
