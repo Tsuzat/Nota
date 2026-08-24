@@ -4,7 +4,7 @@ import { and, asc, desc, eq, inArray, lt, ne, sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 import type z from "zod";
 import { db } from "..";
-import { noteSnapshots, notes } from "../schema/app";
+import { noteSnapshots, notes, workspace } from "../schema/app";
 import { getNotesMeta, updateContentState } from "./notes";
 import { decrementUserStorage, incrementUserStorage } from "./user_quota";
 
@@ -21,9 +21,12 @@ export type InsertNoteSnapshot = z.infer<typeof insertNoteSnapshotSchema>;
 export interface WorkspaceSnapshotItem extends NoteSnapshotMeta {
 	noteName: string;
 	noteIcon: string | null;
+	workspaceId?: string;
+	workspaceName?: string;
 }
 
 export interface GetWorkspaceSnapshotsOptions {
+	userId?: string;
 	noteId?: string;
 	kind?: "auto" | "manual" | "pinned";
 	search?: string;
@@ -34,13 +37,14 @@ export interface GetWorkspaceSnapshotsOptions {
 }
 
 /**
- * Get snapshots for a workspace with joined note details, sorting, filtering, and pagination.
+ * Get snapshots for a workspace (or user) with joined note and workspace details, sorting, filtering, and pagination.
  */
 export const getSnapshotsForWorkspace = async (
-	workspaceId: string,
+	workspaceId?: string,
 	options: GetWorkspaceSnapshotsOptions = {},
 ): Promise<{ items: WorkspaceSnapshotItem[]; total: number }> => {
 	const {
+		userId,
 		noteId,
 		kind,
 		search,
@@ -51,7 +55,11 @@ export const getSnapshotsForWorkspace = async (
 	} = options;
 
 	const conditions = [
-		eq(notes.workspaceId, workspaceId),
+		workspaceId
+			? eq(notes.workspaceId, workspaceId)
+			: userId
+				? eq(workspace.ownerId, userId)
+				: undefined,
 		noteId ? eq(noteSnapshots.noteId, noteId) : undefined,
 		kind ? eq(noteSnapshots.kind, kind) : undefined,
 		search
@@ -65,6 +73,7 @@ export const getSnapshotsForWorkspace = async (
 		.select({ count: sql<number>`count(*)::int` })
 		.from(noteSnapshots)
 		.innerJoin(notes, eq(noteSnapshots.noteId, notes.id))
+		.innerJoin(workspace, eq(notes.workspaceId, workspace.id))
 		.where(whereClause);
 
 	const total = countResult?.count ?? 0;
@@ -94,9 +103,12 @@ export const getSnapshotsForWorkspace = async (
 			createdAt: noteSnapshots.createdAt,
 			noteName: notes.name,
 			noteIcon: notes.icon,
+			workspaceId: notes.workspaceId,
+			workspaceName: workspace.name,
 		})
 		.from(noteSnapshots)
 		.innerJoin(notes, eq(noteSnapshots.noteId, notes.id))
+		.innerJoin(workspace, eq(notes.workspaceId, workspace.id))
 		.where(whereClause)
 		.orderBy(orderClause)
 		.limit(limit)
@@ -107,6 +119,8 @@ export const getSnapshotsForWorkspace = async (
 			...selectNoteSnapshotMetaSchema.parse(r),
 			noteName: r.noteName,
 			noteIcon: r.noteIcon,
+			workspaceId: r.workspaceId,
+			workspaceName: r.workspaceName,
 		})),
 		total,
 	};

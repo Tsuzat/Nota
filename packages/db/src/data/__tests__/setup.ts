@@ -1,6 +1,13 @@
 import { sql } from "drizzle-orm";
 import { db } from "../../index";
-import { noteGuests, notes, workspace } from "../../schema/app";
+import {
+	assets,
+	noteGuests,
+	noteSnapshots,
+	notes,
+	userQuota,
+	workspace,
+} from "../../schema/app";
 import { user } from "../../schema/auth";
 
 export const createTestUser = async (id: string, name = "Test User") => {
@@ -13,6 +20,17 @@ export const createTestUser = async (id: string, name = "Test User") => {
 			emailVerified: true,
 			createdAt: new Date(),
 			updatedAt: new Date(),
+		})
+		.onConflictDoNothing();
+
+	await db
+		.insert(userQuota)
+		.values({
+			userId: id,
+			planTier: "free",
+			aiCreditBalanceCents: 0,
+			assignedStorageBytes: 524_288_000,
+			usedStorageBytes: 0,
 		})
 		.onConflictDoNothing();
 };
@@ -33,8 +51,18 @@ export const createTestWorkspace = async (
 };
 
 export const cleanupTestData = async () => {
-	// Explicitly delete in reverse order to avoid foreign key violations,
-	// as ON DELETE CASCADE might not be configured for all relationships (e.g. invitedBy)
+	// Explicitly delete in reverse order to avoid foreign key violations
+	await db
+		.delete(assets)
+		.where(
+			sql`uploaded_by IN (SELECT id FROM "user" WHERE email LIKE '%@test.com')`,
+		);
+
+	await db
+		.delete(noteSnapshots)
+		.where(
+			sql`created_by IN (SELECT id FROM "user" WHERE email LIKE '%@test.com')`,
+		);
 
 	await db
 		.delete(noteGuests)
@@ -52,6 +80,12 @@ export const cleanupTestData = async () => {
 		.delete(workspace)
 		.where(
 			sql`owner_id IN (SELECT id FROM "user" WHERE email LIKE '%@test.com')`,
+		);
+
+	await db
+		.delete(userQuota)
+		.where(
+			sql`user_id IN (SELECT id FROM "user" WHERE email LIKE '%@test.com')`,
 		);
 
 	await db.delete(user).where(sql`email LIKE '%@test.com'`);

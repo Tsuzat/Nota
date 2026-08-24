@@ -21,6 +21,7 @@ export const env = createEnv({
 		R2_SECRET_ACCESS_KEY: z.string().min(1),
 		R2_ENDPOINT_URL: z.url(),
 		R2_BUCKET_NAME: z.string().min(1),
+		R2_PUBLIC_URL: z.url(),
 		NODE_ENV: z
 			.enum(["development", "production", "test"])
 			.default("development"),

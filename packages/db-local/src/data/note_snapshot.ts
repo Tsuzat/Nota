@@ -69,9 +69,13 @@ export async function getSnapshots(
  * Gets snapshots for all notes in a local workspace with joined note details.
  */
 export async function getWorkspaceSnapshots(
-	workspaceId: string,
+	workspaceId?: string,
 	options: GetLocalWorkspaceSnapshotsOptions = {},
-): Promise<{ items: LocalWorkspaceSnapshotItem[]; total: number }> {
+): Promise<{
+	items: LocalWorkspaceSnapshotItem[];
+	total: number;
+	totalSizeBytes: number;
+}> {
 	try {
 		const {
 			noteId,
@@ -84,7 +88,7 @@ export async function getWorkspaceSnapshots(
 		} = options;
 
 		const conditions = [
-			eq(notes.workspaceId, workspaceId),
+			workspaceId ? eq(notes.workspaceId, workspaceId) : undefined,
 			noteId ? eq(notesSnapshot.noteId, noteId) : undefined,
 			kind ? eq(notesSnapshot.kind, kind) : undefined,
 			search
@@ -95,12 +99,16 @@ export async function getWorkspaceSnapshots(
 		const whereClause = and(...conditions);
 
 		const [countResult] = await db
-			.select({ count: sql<number>`count(*)` })
+			.select({
+				count: sql<number>`count(*)`,
+				totalSize: sql<number>`COALESCE(sum(${notesSnapshot.size}), 0)`,
+			})
 			.from(notesSnapshot)
 			.innerJoin(notes, eq(notesSnapshot.noteId, notes.id))
 			.where(whereClause);
 
-		const total = countResult?.count ?? 0;
+		const total = Number(countResult?.count ?? 0);
+		const totalSizeBytes = Number(countResult?.totalSize ?? 0);
 
 		let orderClause = desc(notesSnapshot.createdAt);
 		if (sortBy === "name") {
@@ -143,6 +151,7 @@ export async function getWorkspaceSnapshots(
 				noteIcon: r.noteIcon,
 			})),
 			total,
+			totalSizeBytes,
 		};
 	} catch (error) {
 		console.error("Failed to get workspace snapshots:", error);
