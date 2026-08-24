@@ -20,9 +20,9 @@ import HardDrive from "@lucide/svelte/icons/hard-drive";
 import Search from "@lucide/svelte/icons/search";
 import { toast } from "@nota/ui";
 import { BarSpinner, IconsRenderer } from "@nota/ui/icons/index.js";
-import { Badge } from "@nota/ui/shadcn/badge/index.ts";
+import { Badge } from "@nota/ui/shadcn/badge/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
-import * as Card from "@nota/ui/shadcn/card/index.ts";
+import * as Card from "@nota/ui/shadcn/card/index.js";
 import {
 	Dialog,
 	DialogContent,
@@ -31,20 +31,20 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@nota/ui/shadcn/dialog/index.ts";
+} from "@nota/ui/shadcn/dialog/index.js";
 import { Input } from "@nota/ui/shadcn/input/index.js";
 import { cn } from "@nota/ui/utils";
 import { fetchNotesByWorkspace } from "@nota/db-local/data/notes";
 import { SvelteSet } from "svelte/reactivity";
 import { fly, slide } from "svelte/transition";
 import { orpc, queryClient } from "#lib/orpc.js";
-import { getNotesContext } from "#lib/data/notes.svelte.ts";
+import { getNotesContext } from "#lib/data/notes.svelte.js";
 import {
 	buildAncestorChain,
 	buildChildrenMap,
 	getDescendants,
-} from "#lib/data/move-notes.ts";
-import { getWorkspaceContext } from "#lib/data/workspace.svelte.ts";
+} from "#lib/data/move-notes.js";
+import { getWorkspaceContext } from "#lib/data/workspace.svelte.js";
 
 const notesCtx = getNotesContext();
 const workspaceCtx = getWorkspaceContext();
@@ -243,7 +243,7 @@ async function handleMove() {
           <span
             class="flex min-w-0 items-center gap-1.5 rounded-md bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground"
           >
-            <IconsRenderer icon={note.icon ?? "lucide:FileText"} />
+            <IconsRenderer icon={note.icon ?? "lucide:file-text"} />
             <span class="max-w-40 truncate">{note.name}</span>
           </span>
         {/if}
@@ -290,6 +290,7 @@ async function handleMove() {
                 </p>
               {/if}
               {#each candidateWorkspaces as ws, i (ws.id)}
+                {@const isCurrent = ws.id === (note?.workspaceId ?? workspaceCtx.current?.id)}
                 <button
                   type="button"
                   class="flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50"
@@ -297,28 +298,34 @@ async function handleMove() {
                   onclick={() => pickWorkspace(ws.id)}
                 >
                   <IconsRenderer
-                    icon={ws.icon ?? "lucide:Folder"}
-                    class="text-lg"
+                    icon={ws.icon ?? "lucide:folder"}
                   />
                   <div class="min-w-0 flex-1">
                     <div class="truncate text-sm font-medium">
                       {ws.name}
                     </div>
                     <div class="text-muted-foreground text-xs">
-                      {workspaceCtx.current?.id === ws.id
+                      {isCurrent
                         ? "Current workspace"
                         : "Workspace"}
                     </div>
                   </div>
-                  <Badge variant="secondary">
-                    {#if "ownerId" in ws}
-                      <Cloud />
-                      Cloud
-                    {:else}
-                      <HardDrive />
-                      Local
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    {#if isCurrent}
+                      <Badge variant="outline">
+                        Current
+                      </Badge>
                     {/if}
-                  </Badge>
+                    <Badge variant="secondary">
+                      {#if "ownerId" in ws}
+                        <Cloud />
+                        Cloud
+                      {:else}
+                        <HardDrive />
+                        Local
+                      {/if}
+                    </Badge>
+                  </div>
                 </button>
               {/each}
             </div>
@@ -335,7 +342,7 @@ async function handleMove() {
                 </Button>
                 <div class="flex min-w-0 items-center gap-1.5 text-sm">
                   <IconsRenderer
-                    icon={targetWorkspace?.icon ?? "lucide:Folder"}
+                    icon={targetWorkspace?.icon ?? "lucide:folder"}
                   />
                   <span class="truncate font-medium">
                     {targetWorkspace?.name ?? ""}
@@ -381,7 +388,8 @@ async function handleMove() {
                       onclick={() => (selectedParentId = node.id)}
                     >
                       <IconsRenderer
-                        icon={node.icon ?? "lucide:FileText"}
+                        icon={node.icon ?? "lucide:file-text"}
+                        class="size-3.5! text-sm!"
                       />
                       <span class="min-w-0 flex-1 truncate">
                         {node.name}
@@ -590,7 +598,7 @@ async function handleMove() {
         )}
         onclick={() => (selectedParentId = node.id)}
       >
-        <IconsRenderer icon={node.icon ?? "lucide:FileText"} />
+        <IconsRenderer icon={node.icon ?? "lucide:file-text"} class="size-3.5! text-sm!" />
         <span class="min-w-0 flex-1 truncate">{node.name}</span>
         {#if selectedParentId === node.id}
           <Check class="text-primary size-4" />

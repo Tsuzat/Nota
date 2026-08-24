@@ -124,7 +124,7 @@ const shouldShow = (props: {
 	options={{
 		shift: true,
 		autoPlacement: {
-			allowedPlacements: ['top', 'top-end', 'top-start']
+			allowedPlacements: ['top', 'bottom']
 		},
 		strategy: 'absolute',
 		scrollTarget: editor.view.dom.parentElement ?? window

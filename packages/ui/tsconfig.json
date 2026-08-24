@@ -1,5 +1,5 @@
 {
-	"extends": "@nota/config/tsconfig.base.json",
+	"extends": "$app/tsconfig",
 	"compilerOptions": {
 		"rewriteRelativeImportExtensions": true,
 		"sourceMap": true,
