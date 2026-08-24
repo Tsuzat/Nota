@@ -1,5 +1,5 @@
 {
-	"extends": "$app/tsconfig",
+	"extends": "@nota/config/tsconfig.base.json",
 	"compilerOptions": {
 		"sourceMap": true,
 		"strict": true,
