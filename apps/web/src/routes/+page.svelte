@@ -516,12 +516,12 @@ onMount(() => {
         class="from-transparent via-purple-500 to-transparent"
       />
       <img
-        src="/preview/light.png"
+        src="/preview/light.jpeg"
         alt="Nota Light Preview"
         class="block h-full w-full rounded-xl border object-cover dark:hidden"
       />
       <img
-        src="/preview/dark.png"
+        src="/preview/dark.jpeg"
         alt="Nota Dark Preview"
         class="hidden h-full w-full rounded-xl border object-cover dark:block"
       />

@@ -9,20 +9,18 @@ import MoonStar from "@lucide/svelte/icons/moon-star";
 import Share2 from "@lucide/svelte/icons/share-2";
 import Sparkles from "@lucide/svelte/icons/sparkles";
 import Sun from "@lucide/svelte/icons/sun";
-import { toast } from "@nota/ui";
-import * as Avatar from "@nota/ui/shadcn/avatar/index.ts";
-import { Button } from "@nota/ui/shadcn/button/index.ts";
-import { mode, toggleMode } from "mode-watcher";
+import { mode, toast, toggleMode } from "@nota/ui";
+import * as Avatar from "@nota/ui/shadcn/avatar/index.js";
+import { Button } from "@nota/ui/shadcn/button/index.js";
 import { onDestroy, onMount } from "svelte";
 import { PUBLIC_NOTA_APP_URL } from "$app/env/public";
-import type { PageData } from "./$types";
 
 // Import styles (including KaTeX & blog typography)
 import "./page.css";
 
 const isBrowser = typeof window !== "undefined";
 
-let { data }: { data: PageData } = $props();
+let { data } = $props();
 
 const note = $derived(data.note);
 
@@ -259,15 +257,18 @@ async function setupArticleEnhancements() {
 		const katex = katexModule.default;
 
 		const mathNodes = articleElement.querySelectorAll<HTMLElement>(
-			'span[data-type="inline-math"], div[data-type="block-math"]'
+			'span[data-type="inline-math"], div[data-type="block-math"]',
 		);
 
 		for (let i = 0; i < mathNodes.length; i++) {
 			const node = mathNodes[i];
-			const latex = node.getAttribute("data-latex") || node.textContent?.trim() || "";
+			const latex =
+				node.getAttribute("data-latex") || node.textContent?.trim() || "";
 			if (!latex) continue;
 
-			const isBlock = node.tagName.toLowerCase() === "div" || node.getAttribute("data-type") === "block-math";
+			const isBlock =
+				node.tagName.toLowerCase() === "div" ||
+				node.getAttribute("data-type") === "block-math";
 
 			try {
 				katex.render(latex, node, {
