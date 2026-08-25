@@ -1,10 +1,10 @@
+import { toggleMode } from "@nota/ui";
 import {
 	Menu,
 	MenuItem,
 	PredefinedMenuItem,
 	Submenu,
 } from "@tauri-apps/api/menu";
-import { toggleMode } from "mode-watcher";
 import {
 	openCreateNotes,
 	openCreateWorkspace,
