@@ -119,10 +119,10 @@ async function handleDeny() {
 
 				{#if $sessionQuery.data?.user}
 					<div class="flex items-center justify-center gap-2 rounded-lg bg-secondary/50 py-3 px-4 border border-secondary">
-						<div class="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
-						<p class="text-sm text-muted-foreground">
+						<div class="size-2 rounded-full bg-green-500 animate-ping shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+						<span class="text-sm text-muted-foreground">
 							Signed in as <span class="font-medium text-foreground">{$sessionQuery.data.user.email}</span>
-						</p>
+						</span>
 					</div>
 				{/if}
 
