@@ -9,13 +9,20 @@ import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { upgradeWebSocket, websocket } from "hono/bun";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { rateLimitMiddleware } from "./middleware/rate-limiter";
+import { banMiddleware, pathBlacklistMiddleware } from "./middleware/security";
 
 const app = new Hono();
 
 app.use(logger());
+app.use(bodyLimit({ maxSize: 5 * 1024 * 1024 })); // 5MB limit
+app.use("/*", banMiddleware);
+app.use("/*", pathBlacklistMiddleware);
+app.use("/*", rateLimitMiddleware);
 app.use(
 	"/*",
 	cors({
@@ -42,6 +49,7 @@ app.get(
 		let clientConnection: ReturnType<
 			typeof hocuspocus.handleConnection
 		> | null = null;
+		let msgTimestamps: number[] = [];
 
 		return {
 			onOpen(_event, ws) {
@@ -74,6 +82,23 @@ app.get(
 			},
 			onMessage(event) {
 				if (!clientConnection) return;
+
+				// WebSocket Message Rate Limiting
+				const now = Date.now();
+				msgTimestamps.push(now);
+				msgTimestamps = msgTimestamps.filter((t) => now - t < 1000);
+				if (msgTimestamps.length > 50) {
+					console.warn(
+						"[WebSocket] Message rate limit exceeded for connection",
+					);
+					// @ts-expect-error - The standard WebSocket type might lack this signature, but hono/bun handles it.
+					// We'll close gracefully by not parsing further, which will trigger client-side disconnects.
+					if ("close" in event.target) {
+						(event.target as any).close(1008, "Rate Limit Exceeded");
+					}
+					return;
+				}
+
 				let data: Uint8Array;
 				if (event.data instanceof Uint8Array) {
 					data = event.data;

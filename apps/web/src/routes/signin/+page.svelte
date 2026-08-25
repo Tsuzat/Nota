@@ -4,9 +4,9 @@ import { toast } from "@nota/ui";
 import { BarSpinner, Github, Google } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { cn } from "@nota/ui/utils";
-import { AppLogo, TiltCard } from "#components/custom/index.ts";
+import { AppLogo, TiltCard } from "#components/custom/index.js";
 import Particles from "#components/custom/landing/particles.svelte";
-import { authClient } from "#lib/auth-client.ts";
+import { authClient } from "#lib/auth-client.js";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
 

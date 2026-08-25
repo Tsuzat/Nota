@@ -16,6 +16,7 @@
 	"dependencies": {
 		"@nota/api": "workspace:*",
 		"@nota/auth": "workspace:*",
+		"@nota/cache": "workspace:*",
 		"@nota/db": "workspace:*",
 		"@nota/env": "workspace:*",
 		"@nota/realtime": "workspace:*",
