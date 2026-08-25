@@ -7,14 +7,49 @@ import { cn } from "@nota/ui/utils";
 import { AppLogo, TiltCard } from "#components/custom/index.js";
 import Particles from "#components/custom/landing/particles.svelte";
 import { authClient } from "#lib/auth-client.js";
+import { PUBLIC_NOTA_APP_URL, PUBLIC_NOTA_URL } from "$app/env/public";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
 
 const sessionQuery = authClient.useSession();
 
-const callbackURL = $derived(
-	page.url.searchParams.get("redirectTo") || page.url.origin,
-);
+const callbackURL = $derived.by(() => {
+	const callBack = page.url.searchParams.get("redirectTo");
+	const baseUrl = (PUBLIC_NOTA_URL || page.url.origin).replace(/\/+$/, "");
+	const appUrl = (PUBLIC_NOTA_APP_URL || "").replace(/\/+$/, "");
+
+	if (!callBack) {
+		return baseUrl;
+	}
+
+	// If it's a path like "/device?user_code=abcf", prefix with PUBLIC_NOTA_URL
+	if (callBack.startsWith("/")) {
+		return `${baseUrl}${callBack}`;
+	}
+
+	// If it's a URL matching PUBLIC_NOTA_APP_URL
+	if (
+		appUrl &&
+		(callBack === appUrl ||
+			callBack.startsWith(`${appUrl}/`) ||
+			callBack.startsWith(`${appUrl}?`))
+	) {
+		return callBack;
+	}
+
+	// If it's already a full URL matching PUBLIC_NOTA_URL
+	if (
+		baseUrl &&
+		(callBack === baseUrl ||
+			callBack.startsWith(`${baseUrl}/`) ||
+			callBack.startsWith(`${baseUrl}?`))
+	) {
+		return callBack;
+	}
+
+	// Default to PUBLIC_NOTA_URL in all other cases
+	return baseUrl;
+});
 
 $effect(() => {
 	if ($sessionQuery.data?.user) {

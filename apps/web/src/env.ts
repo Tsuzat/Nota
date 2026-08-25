@@ -10,4 +10,8 @@ export const variables = defineEnvVars({
 		public: true,
 		static: true,
 	},
+	PUBLIC_NOTA_URL: {
+		public: true,
+		static: true,
+	},
 });
