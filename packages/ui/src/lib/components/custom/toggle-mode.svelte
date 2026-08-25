@@ -7,8 +7,8 @@ import SimpleTooltip from "./simple-tooltip.svelte";
 
 let { onclick }: { onclick?: () => void } = $props();
 function handleClick() {
-	onclick?.();
 	toggleMode();
+	onclick?.();
 }
 </script>
 
