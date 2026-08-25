@@ -39,6 +39,7 @@ export function createAuth() {
 			},
 		},
 		trustedOrigins: [
+			env.CORS_ORIGIN.replace("www", "*"),
 			env.CORS_ORIGIN,
 			"tauri://localhost",
 			"https://tauri.localhost",
