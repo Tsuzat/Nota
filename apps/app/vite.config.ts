@@ -1,3 +1,4 @@
+import adapterCF from "@sveltejs/adapter-cloudflare";
 import adapter from "@sveltejs/adapter-static";
 import { sveltekit } from "@sveltejs/kit/vite";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
@@ -15,11 +16,13 @@ export default defineConfig({
 			preprocess: vitePreprocess(),
 
 			// adapter-static emits files Electrobun and Tauri can bundle directly.
-			adapter: adapter({
-				pages: "build",
-				assets: "build",
-				fallback: "index.html",
-			}),
+			adapter: isDesktop
+				? adapter({
+						pages: "build",
+						assets: "build",
+						fallback: "index.html",
+					})
+				: adapterCF(),
 		}),
 	],
 	resolve: {

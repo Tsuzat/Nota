@@ -6,11 +6,13 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"build:web": "wrangler types && vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "bunx @biomejs/biome check --write .",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"tauri": "tauri",
+		"gen": "wrangler types",
 		"desktop:dev": "tauri dev",
 		"desktop:build": "tauri build",
 		"lint": "bunx @biomejs/biome lint . && eslint .",
@@ -55,6 +57,7 @@
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@nota/config": "workspace:*",
+		"@sveltejs/adapter-cloudflare": "^8.0.0-next.6",
 		"@sveltejs/adapter-static": "next",
 		"@sveltejs/kit": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
@@ -70,7 +73,8 @@
 		"tailwindcss": "catalog:",
 		"typescript": "catalog:",
 		"typescript-eslint": "^8.60.1",
-		"vite": "catalog:"
+		"vite": "catalog:",
+		"wrangler": "^4.125.0"
 	},
 	"imports": {
 		"#lib": "./src/lib/index.js",
