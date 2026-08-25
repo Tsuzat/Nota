@@ -4,6 +4,9 @@ import Paintbrush from "@lucide/svelte/icons/paintbrush";
 import Palette from "@lucide/svelte/icons/palette";
 import SunMoon from "@lucide/svelte/icons/sun-moon";
 import { ToggleMode } from "@nota/ui/custom/index.js";
+import { setTheme, themes } from "#lib/theme.ts";
+import { ISDESKTOP } from "#lib/utils.ts";
+import { setCorrectWindowMode } from "#lib/window.ts";
 import { getGlobalSettings } from "../constants.svelte";
 
 const globalSettings = getGlobalSettings();
@@ -12,11 +15,6 @@ function handleThemeChange(themeName: string) {
 	globalSettings.themeColor = themeName;
 	setTheme(themeName);
 }
-
-function setTheme(themeName: string) {
-	throw new Error("Function not implemented.");
-}
-const themes: any = [];
 </script>
 
 <div class="w-full max-w-xl mx-auto space-y-5 pb-8">
@@ -41,7 +39,9 @@ const themes: any = [];
 					<p class="text-xs text-muted-foreground mt-0.5 leading-snug">Switch between light mode and dark mode interface style.</p>
 				</div>
 			</div>
-			<ToggleMode />
+			<ToggleMode onclick={() => {
+				if (ISDESKTOP) setCorrectWindowMode()
+			}} />
 		</div>
 
 		<!-- Theme Color Swatches -->

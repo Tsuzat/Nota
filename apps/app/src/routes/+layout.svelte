@@ -5,12 +5,12 @@ import "../app.css";
 import { ModeWatcher } from "@nota/ui";
 import ConfirmDelete from "@nota/ui/custom/dialogs/confirm-delete.svelte";
 import { BarSpinner } from "@nota/ui/icons/index.js";
-import * as Sidebar from "@nota/ui/shadcn/sidebar/index.ts";
-import { Toaster } from "@nota/ui/shadcn/sonner/index.ts";
-import { TooltipProvider } from "@nota/ui/shadcn/tooltip/index.ts";
+import * as Sidebar from "@nota/ui/shadcn/sidebar/index.js";
+import { Toaster } from "@nota/ui/shadcn/sonner/index.js";
+import { TooltipProvider } from "@nota/ui/shadcn/tooltip/index.js";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
-import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.ts";
+import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.js";
 import {
 	CreateNotes,
 	CreateWorkspace,
@@ -20,17 +20,20 @@ import {
 	SigninDevice,
 	setGlobalSettings,
 	Trashed,
-} from "#lib/components/dialogs/index.ts";
-import { AppSideBar } from "#lib/components/index.ts";
+} from "#lib/components/dialogs/index.js";
+import { AppSideBar } from "#lib/components/index.js";
+import { setupAppMenu } from "#lib/menu.ts";
 import { orpc, queryClient } from "#lib/orpc.js";
-import { secureStorage } from "#lib/platform/securestorage.ts";
-import { DataProviders } from "#lib/providers/index.ts";
-import { ISDESKTOP } from "#lib/utils.ts";
+import { secureStorage } from "#lib/platform/securestorage.js";
+import { DataProviders } from "#lib/providers/index.js";
+import { setTheme } from "#lib/theme.ts";
+import { ISDESKTOP } from "#lib/utils.js";
+import { setCorrectWindowMode } from "#lib/window.ts";
 import { PUBLIC_NOTA_URL } from "$app/env/public";
 
 const { children } = $props();
 let open = $state(true);
-setGlobalSettings();
+const settings = setGlobalSettings();
 
 const shouldRenderContent = $derived(ISDESKTOP || isSignedIn());
 const session = getAuthSession();
@@ -60,6 +63,9 @@ onMount(async () => {
 		secureStorage.init().then(() => {
 			if (!isSignedIn()) session.refetch();
 		});
+		await setCorrectWindowMode();
+		await setupAppMenu();
+		setTheme(settings.themeColor);
 	}
 });
 </script>
