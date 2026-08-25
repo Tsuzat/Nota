@@ -1,0 +1,24 @@
+{
+	"name": "@nota/email",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"@nota/env": "workspace:*",
+		"resend": "^6.22.1"
+	},
+	"devDependencies": {
+		"@nota/config": "workspace:*",
+		"@types/bun": "catalog:",
+		"typescript": "catalog:"
+	},
+	"scripts": {
+		"lint": "bunx @biomejs/biome lint .",
+		"format": "bunx @biomejs/biome format --write .",
+		"check": "bunx @biomejs/biome check --write .",
+		"check:ci": "bunx @biomejs/biome check ."
+	}
+}
