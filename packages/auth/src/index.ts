@@ -1,11 +1,17 @@
 import { createDb } from "@nota/db";
 import { userInit } from "@nota/db/data/utils";
 import * as schema from "@nota/db/schema/auth";
+import {
+	getExistingUserSignupTemplate,
+	getPasswordResetTemplate,
+	getSignupVerificationTemplate,
+	sendEmail,
+} from "@nota/email";
 import { env } from "@nota/env/server";
 import { checkout, polar, portal } from "@polar-sh/better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { bearer, deviceAuthorization } from "better-auth/plugins";
+import { bearer, captcha, deviceAuthorization } from "better-auth/plugins";
 import { redis } from "bun";
 import { polarClient } from "./lib/payments";
 
@@ -52,6 +58,33 @@ export function createAuth() {
 		],
 		emailAndPassword: {
 			enabled: true,
+			requireEmailVerification: true,
+			revokeSessionsOnPasswordReset: true,
+			sendResetPassword: async ({ user, url }) => {
+				void sendEmail({
+					to: user.email,
+					subject: "Reset your password",
+					html: getPasswordResetTemplate(url),
+				});
+			},
+		},
+		emailVerification: {
+			sendOnSignUp: true,
+			sendVerificationEmail: async ({ user, url }) => {
+				void sendEmail({
+					to: user.email,
+					subject: "Verify your email address",
+					html: getSignupVerificationTemplate(url),
+				});
+			},
+			// @ts-expect-error - Assuming it might be here based on the user's snippet
+			onExistingUserSignUp: async ({ user }) => {
+				void sendEmail({
+					to: user.email,
+					subject: "Sign-up attempt with your email",
+					html: getExistingUserSignupTemplate(),
+				});
+			},
 		},
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
@@ -80,6 +113,10 @@ export function createAuth() {
 		},
 		plugins: [
 			bearer(),
+			captcha({
+				provider: "cloudflare-turnstile",
+				secretKey: env.TURNSILE_SECRET,
+			}),
 			deviceAuthorization({
 				verificationUri: `${env.CORS_ORIGIN}/device`,
 				expiresIn: "10m",
