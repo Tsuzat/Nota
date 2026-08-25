@@ -35,8 +35,15 @@ app.use(
 				return origin;
 			return env.CORS_ORIGIN;
 		},
-		allowMethods: ["GET", "POST", "OPTIONS"],
-		allowHeaders: ["Content-Type", "Authorization"],
+		allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
+		allowHeaders: [
+			"Content-Type",
+			"Authorization",
+			"x-captcha-response",
+			"x-requested-with",
+			"x-retry-after",
+		],
+		exposeHeaders: ["X-Retry-After"],
 		credentials: true,
 	}),
 );

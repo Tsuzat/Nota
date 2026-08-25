@@ -39,6 +39,16 @@ export function createAuth() {
 			delete: async (key) => {
 				await redis.del(key);
 			},
+			getAndDelete: async (key) => {
+				return await redis.getdel(key);
+			},
+			increment: async (key, ttl) => {
+				const count = await redis.incr(key);
+				if (count === 1 && ttl) {
+					await redis.expire(key, ttl);
+				}
+				return count;
+			},
 		},
 		socialProviders: {
 			github: {

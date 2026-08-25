@@ -34,6 +34,7 @@ import Spotlight from "#components/custom/landing/spotlight.svelte";
 import Tiltcard from "#components/custom/tilt-card.svelte";
 import { authClient } from "#lib/auth-client.ts";
 import { handleSignout } from "#lib/utils.ts";
+import { PUBLIC_NOTA_APP_URL } from "$app/env/public";
 import { resolve } from "$app/paths";
 import { getArtefacts } from "./data.remote";
 
@@ -355,22 +356,18 @@ onMount(() => {
       {@const user = $sessionQuery.data.user}
       <Dropdown.Root>
         <Dropdown.Trigger>
-          <UserAvatar image={user.image ?? ""} name={user.name ?? "Unknown"}
-          />
+          <UserAvatar image={user.image ?? ""} name={user.name ?? "Unknown"} />
         </Dropdown.Trigger>
         <Dropdown.Content class="w-fit">
           <Dropdown.Group>
             <Dropdown.Label>{user.name}</Dropdown.Label>
-              <Dropdown.Item>
-                Go to App
-              </Dropdown.Item>
-              <Dropdown.Item>
-                Home
-              </Dropdown.Item>
-            <Dropdown.Item
-              variant="destructive"
-              onclick={handleSignout}
-            >
+            <a href={PUBLIC_NOTA_APP_URL} target="_blank">
+              <Dropdown.Item>Open App</Dropdown.Item>
+            </a>
+            <a href={resolve("/account")}>
+              <Dropdown.Item>Account</Dropdown.Item>
+            </a> 
+            <Dropdown.Item variant="destructive" onclick={handleSignout}>
               Sign Out
             </Dropdown.Item>
           </Dropdown.Group>
@@ -433,16 +430,16 @@ onMount(() => {
         rel="noopener noreferrer"
         class="z-100"
       >
-         <img
-            class="hidden dark:block size-4"
-            src="https://svgl.app/library/github_light.svg"
-            alt="Github"
-          />
-          <img
-            class="block dark:hidden size-4"
-            src="https://svgl.app/library/github_dark.svg"
-            alt="Github"
-          />
+        <img
+          class="hidden dark:block size-4"
+          src="https://svgl.app/library/github_light.svg"
+          alt="Github"
+        />
+        <img
+          class="block dark:hidden size-4"
+          src="https://svgl.app/library/github_dark.svg"
+          alt="Github"
+        />
         <span>GitHub Repo</span>
       </Button>
 

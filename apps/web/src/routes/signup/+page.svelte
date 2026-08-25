@@ -82,14 +82,10 @@ const handleSignUp = async (provider: "google" | "github" | "email") => {
 				email,
 				password,
 				name,
+				callbackURL: PUBLIC_NOTA_URL,
 				fetchOptions: {
 					headers: {
 						"x-captcha-response": captchaToken,
-					},
-					onError: (ctx) => {
-						const msg =
-							ctx.error?.message || "Failed to sign up. Please try again.";
-						toast.error(msg);
 					},
 				},
 			});
@@ -165,18 +161,38 @@ const handleSignUp = async (provider: "google" | "github" | "email") => {
         </p>
       </div>
       <div class="space-y-4">
-        <div class="space-y-4">
+        <form onsubmit={() => handleSignUp("email")} class="space-y-4">
           <div class="space-y-2">
             <Label for="name">Name</Label>
-            <Input id="name" type="text" placeholder="John Doe" bind:value={name} />
+            <Input
+              id="name"
+              type="text"
+              placeholder="John Doe"
+              bind:value={name}
+              required
+            />
           </div>
           <div class="space-y-2">
             <Label for="email">Email</Label>
-            <Input id="email" type="email" placeholder="m@example.com" bind:value={email} />
+            <Input
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+              bind:value={email}
+              required
+            />
           </div>
           <div class="space-y-2">
             <Label for="password">Password</Label>
-            <Input id="password" type="password" bind:value={password} />
+            <Input
+              minlength={8}
+              maxlength={64}
+              placeholder="********"
+              id="password"
+              type="password"
+              bind:value={password}
+              required
+            />
           </div>
           <div class="flex justify-center">
             <Turnstile
@@ -188,8 +204,9 @@ const handleSignUp = async (provider: "google" | "github" | "email") => {
           </div>
           <Button
             class="w-full"
+            type="submit"
             disabled={loadingProvider !== null || !captchaToken}
-            onclick={() => handleSignUp("email")}
+            onclick={() => {}}
           >
             {#if loadingProvider === "email"}
               <BarSpinner size={16} />
@@ -197,14 +214,16 @@ const handleSignUp = async (provider: "google" | "github" | "email") => {
               Sign Up
             {/if}
           </Button>
-        </div>
+        </form>
 
         <div class="relative">
           <div class="absolute inset-0 flex items-center">
             <Separator class="w-full" />
           </div>
           <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-card/50 px-2 text-muted-foreground">Or continue with</span>
+            <span class="bg-card/50 px-2 text-muted-foreground"
+              >Or continue with</span
+            >
           </div>
         </div>
 
@@ -230,7 +249,7 @@ const handleSignUp = async (provider: "google" | "github" | "email") => {
           {#if loadingProvider === "github"}
             <BarSpinner size={16} />
           {:else}
-            <Github  /> 
+            <Github />
           {/if}
           GitHub
         </Button>
@@ -241,12 +260,16 @@ const handleSignUp = async (provider: "google" | "github" | "email") => {
       </div>
       <span class="mt-8 block text-center text-sm text-muted-foreground">
         By clicking continue, you agree to our
-        <Button class="underline px-1 py-0 h-auto" variant="link" href={resolve("/(tnc)/terms")}
-          >Terms of Service</Button
+        <Button
+          class="underline px-1 py-0 h-auto"
+          variant="link"
+          href={resolve("/(tnc)/terms")}>Terms of Service</Button
         >
         and
-        <Button class="underline px-1 py-0 h-auto" variant="link" href={resolve("/(tnc)/privacy")}
-          >Privacy Policy</Button
+        <Button
+          class="underline px-1 py-0 h-auto"
+          variant="link"
+          href={resolve("/(tnc)/privacy")}>Privacy Policy</Button
         >.
       </span>
     </TiltCard>

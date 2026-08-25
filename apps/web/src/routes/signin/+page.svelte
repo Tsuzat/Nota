@@ -176,17 +176,17 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
         </p>
       </div>
       <div class="space-y-2">
-        <div class="space-y-4">
+        <form onsubmit={() => handleSignIn("email")} class="space-y-4">
           <div class="space-y-2">
             <Label for="email">Email</Label>
-            <Input id="email" type="email" placeholder="m@example.com" bind:value={email} />
+            <Input id="email" type="email" placeholder="m@example.com" bind:value={email} required />
           </div>
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <Label for="password">Password</Label>
               <a href="/password-reset" class="text-sm font-medium underline-offset-4 hover:underline">Forgot password?</a>
             </div>
-            <Input id="password" type="password" bind:value={password} />
+            <Input id="password" type="password" minlength={8} maxlength={64} placeholder="********" bind:value={password} required />
           </div>
           <div class="flex justify-center">
             <Turnstile
@@ -198,8 +198,8 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
           </div>
           <Button
             class="w-full"
+            type="submit"
             disabled={loadingProvider !== null || !captchaToken}
-            onclick={() => handleSignIn("email")}
           >
             {#if loadingProvider === "email"}
               <BarSpinner size={16} />
@@ -207,7 +207,7 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
               Sign In
             {/if}
           </Button>
-        </div>
+        </form>
 
         <div class="relative">
           <div class="absolute inset-0 flex items-center">

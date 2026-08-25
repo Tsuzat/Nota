@@ -10,7 +10,7 @@ import { Turnstile } from "svelte-turnstile";
 import { AppLogo, TiltCard } from "#components/custom/index.js";
 import Particles from "#components/custom/landing/particles.svelte";
 import { authClient } from "#lib/auth-client.js";
-import { PUBLIC_TURNSILE_SITE_KEY } from "$app/env/public";
+import { PUBLIC_NOTA_URL, PUBLIC_TURNSILE_SITE_KEY } from "$app/env/public";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
 
@@ -21,9 +21,24 @@ let loading = $state(false);
 let isSuccess = $state(false);
 
 const token = $derived(page.url.searchParams.get("token"));
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const handleSubmit = async () => {
+const handleSubmit = async (e?: SubmitEvent) => {
+	e?.preventDefault();
 	if (loading) return;
+
+	if (!token) {
+		const trimmedEmail = email.trim();
+		if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+			toast.error("Please enter a valid email address.");
+			return;
+		}
+	} else {
+		if (!password || password.length < 8) {
+			toast.error("Password must be at least 8 characters long.");
+			return;
+		}
+	}
 
 	if (!captchaToken) {
 		toast.error("Please complete the captcha.");
@@ -52,9 +67,9 @@ const handleSubmit = async () => {
 			}
 		} else {
 			// Requesting a reset link
-			// @ts-ignore - forgetPassword exists in better-auth emailAndPassword plugin
-			const { error } = await authClient.forgetPassword({
-				email,
+			const { error } = await authClient.requestPasswordReset({
+				email: email.trim().toLowerCase(),
+				redirectTo: `${PUBLIC_NOTA_URL || window.location.origin}/password-reset`,
 				fetchOptions: {
 					headers: {
 						"x-captcha-response": captchaToken,
@@ -63,6 +78,7 @@ const handleSubmit = async () => {
 			});
 
 			if (error) {
+				console.error("Failed to send reset link:", error);
 				toast.error(error.message || "Failed to send reset link.");
 			} else {
 				isSuccess = true;
@@ -109,21 +125,40 @@ const handleSubmit = async () => {
       </div>
 
       {#if isSuccess && !token}
-        <div class="text-sm text-center bg-green-500/10 text-green-600 dark:text-green-400 p-4 rounded-md">
-          Check your email for a link to reset your password. If it doesn't appear within a few minutes, check your spam folder.
+        <div class="space-y-4">
+          <div class="text-sm text-center bg-green-500/10 text-green-600 dark:text-green-400 p-4 rounded-md">
+            Check your email for a link to reset your password. If it doesn't appear within a few minutes, check your spam folder.
+          </div>
+          <Button class="w-full" variant="outline" href={resolve("/signin")}>
+            Back to Sign In
+          </Button>
         </div>
       {:else}
         <div class="space-y-4">
-          <div class="space-y-4">
+          <form onsubmit={handleSubmit} class="space-y-4">
             {#if token}
               <div class="space-y-2">
                 <Label for="password">New Password</Label>
-                <Input id="password" type="password" bind:value={password} />
+                <Input
+                  id="password"
+                  type="password"
+                  minlength={8}
+                  maxlength={64}
+                  placeholder="********"
+                  bind:value={password}
+                  required
+                />
               </div>
             {:else}
               <div class="space-y-2">
                 <Label for="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" bind:value={email} />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  bind:value={email}
+                  required
+                />
               </div>
             {/if}
 
@@ -138,8 +173,8 @@ const handleSubmit = async () => {
             
             <Button
               class="w-full"
+              type="submit"
               disabled={loading || !captchaToken}
-              onclick={handleSubmit}
             >
               {#if loading}
                 <BarSpinner size={16} />
@@ -147,12 +182,12 @@ const handleSubmit = async () => {
                 {token ? "Reset Password" : "Send Reset Link"}
               {/if}
             </Button>
-          </div>
+          </form>
 
           {#if !token}
             <div class="mt-4 text-center text-sm">
               Remember your password?
-              <a href="/signin" class="underline underline-offset-4">Sign in</a>
+              <a href={resolve("/signin")} class="underline underline-offset-4">Sign in</a>
             </div>
           {/if}
         </div>
