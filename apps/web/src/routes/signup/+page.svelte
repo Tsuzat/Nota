@@ -30,12 +30,10 @@ const callbackURL = $derived.by(() => {
 		return baseUrl;
 	}
 
-	// If it's a path like "/device?user_code=abcf", prefix with PUBLIC_NOTA_URL
 	if (callBack.startsWith("/")) {
 		return `${baseUrl}${callBack}`;
 	}
 
-	// If it's a URL matching PUBLIC_NOTA_APP_URL
 	if (
 		appUrl &&
 		(callBack === appUrl ||
@@ -45,7 +43,6 @@ const callbackURL = $derived.by(() => {
 		return callBack;
 	}
 
-	// If it's already a full URL matching PUBLIC_NOTA_URL
 	if (
 		baseUrl &&
 		(callBack === baseUrl ||
@@ -55,7 +52,6 @@ const callbackURL = $derived.by(() => {
 		return callBack;
 	}
 
-	// Default to PUBLIC_NOTA_URL in all other cases
 	return baseUrl;
 });
 
@@ -68,20 +64,10 @@ $effect(() => {
 let loadingProvider = $state<"google" | "github" | "email" | null>(null);
 let email = $state("");
 let password = $state("");
+let name = $state("");
 let captchaToken = $state("");
 
-$effect(() => {
-	const error =
-		page.url.searchParams.get("error_description") ||
-		page.url.searchParams.get("error");
-	if (error) {
-		const message =
-			error === "access_denied" ? "Sign-in request was cancelled." : error;
-		toast.error(message);
-	}
-});
-
-const handleSignIn = async (provider: "google" | "github" | "email") => {
+const handleSignUp = async (provider: "google" | "github" | "email") => {
 	if (loadingProvider) return;
 
 	loadingProvider = provider;
@@ -92,25 +78,28 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
 				loadingProvider = null;
 				return;
 			}
-			const { error } = await authClient.signIn.email({
+			const { error } = await authClient.signUp.email({
 				email,
 				password,
+				name,
 				fetchOptions: {
 					headers: {
 						"x-captcha-response": captchaToken,
 					},
 					onError: (ctx) => {
 						const msg =
-							ctx.error?.message || "Failed to sign in. Please try again.";
+							ctx.error?.message || "Failed to sign up. Please try again.";
 						toast.error(msg);
 					},
 				},
 			});
 
 			if (error) {
-				toast.error(error.message || "Failed to sign in. Please try again.");
+				toast.error(error.message || "Failed to sign up. Please try again.");
 			} else {
-				window.location.href = callbackURL;
+				toast.success(
+					"Account created successfully. Please check your email to verify your account.",
+				);
 			}
 			return;
 		}
@@ -135,10 +124,10 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
 			);
 		}
 	} catch (err: any) {
-		console.error(`Sign in with ${provider} failed:`, err);
+		console.error(`Sign up with ${provider} failed:`, err);
 		toast.error(
 			err?.message ||
-				`An unexpected error occurred while signing in with ${provider === "google" ? "Google" : "GitHub"}.`,
+				`An unexpected error occurred while signing up with ${provider === "google" ? "Google" : "GitHub"}.`,
 		);
 	} finally {
 		loadingProvider = null;
@@ -147,8 +136,8 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
 </script>
 
 <svelte:head>
-  <title>Sign In | Nota</title>
-  <meta name="description" content="Sign in or create your Nota account." />
+  <title>Sign Up | Nota</title>
+  <meta name="description" content="Create your Nota account." />
 </svelte:head>
 
 <Particles class="fixed top-0 size-full" />
@@ -156,7 +145,7 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
 <div class={cn("relative w-full md:h-screen md:overflow-hidden")}>
   <Particles class="absolute inset-0" ease={20} quantity={120} />
   <div
-    class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-8"
+    class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-8 py-10"
   >
     <Button class="absolute top-4 left-4" href={resolve("/")} variant="ghost">
       <ChevronLeft data-icon="inline-start" />
@@ -170,22 +159,23 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
     >
       <AppLogo />
       <div class="flex flex-col space-y-1">
-        <h1 class="text-2xl font-bold tracking-wide">Sign In or Join Now!</h1>
+        <h1 class="text-2xl font-bold tracking-wide">Create an Account</h1>
         <p class="text-base text-muted-foreground">
-          login or create your nota account.
+          Sign up to get started with Nota.
         </p>
       </div>
-      <div class="space-y-2">
+      <div class="space-y-4">
         <div class="space-y-4">
+          <div class="space-y-2">
+            <Label for="name">Name</Label>
+            <Input id="name" type="text" placeholder="John Doe" bind:value={name} />
+          </div>
           <div class="space-y-2">
             <Label for="email">Email</Label>
             <Input id="email" type="email" placeholder="m@example.com" bind:value={email} />
           </div>
           <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <Label for="password">Password</Label>
-              <a href="/password-reset" class="text-sm font-medium underline-offset-4 hover:underline">Forgot password?</a>
-            </div>
+            <Label for="password">Password</Label>
             <Input id="password" type="password" bind:value={password} />
           </div>
           <div class="flex justify-center">
@@ -199,12 +189,12 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
           <Button
             class="w-full"
             disabled={loadingProvider !== null || !captchaToken}
-            onclick={() => handleSignIn("email")}
+            onclick={() => handleSignUp("email")}
           >
             {#if loadingProvider === "email"}
               <BarSpinner size={16} />
             {:else}
-              Sign In
+              Sign Up
             {/if}
           </Button>
         </div>
@@ -222,7 +212,7 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
           class="w-full"
           variant="outline"
           disabled={loadingProvider !== null}
-          onclick={() => handleSignIn("google")}
+          onclick={() => handleSignUp("google")}
         >
           {#if loadingProvider === "google"}
             <BarSpinner size={16} />
@@ -235,7 +225,7 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
           class="w-full"
           variant="outline"
           disabled={loadingProvider !== null}
-          onclick={() => handleSignIn("github")}
+          onclick={() => handleSignUp("github")}
         >
           {#if loadingProvider === "github"}
             <BarSpinner size={16} />
@@ -246,16 +236,16 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
         </Button>
       </div>
       <div class="mt-4 text-center text-sm">
-        Don't have an account?
-        <a href="/signup" class="underline underline-offset-4">Sign up</a>
+        Already have an account?
+        <a href="/signin" class="underline underline-offset-4">Sign in</a>
       </div>
-      <span class="mt-8 text-sm text-muted-foreground">
+      <span class="mt-8 block text-center text-sm text-muted-foreground">
         By clicking continue, you agree to our
-        <Button class="underline" variant="link" href={resolve("/(tnc)/terms")}
+        <Button class="underline px-1 py-0 h-auto" variant="link" href={resolve("/(tnc)/terms")}
           >Terms of Service</Button
         >
         and
-        <Button class="underline" variant="link" href={resolve("/(tnc)/privacy")}
+        <Button class="underline px-1 py-0 h-auto" variant="link" href={resolve("/(tnc)/privacy")}
           >Privacy Policy</Button
         >.
       </span>

@@ -14,4 +14,8 @@ export const variables = defineEnvVars({
 		public: true,
 		static: true,
 	},
+	PUBLIC_TURNSILE_SITE_KEY: {
+		public: true,
+		static: true,
+	},
 });
