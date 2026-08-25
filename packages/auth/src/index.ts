@@ -16,6 +16,12 @@ export function createAuth() {
 			provider: "pg",
 			schema: schema,
 		}),
+		rateLimit: {
+			window: 60,
+			max: 100,
+			enabled: true,
+			storage: "secondary-storage",
+		},
 		secondaryStorage: {
 			get: async (key) => {
 				return await redis.get(key);
@@ -68,6 +74,9 @@ export function createAuth() {
 				httpOnly: true,
 			},
 			cookiePrefix: "nota_ink",
+			ipAddress: {
+				ipAddressHeaders: ["cf-connecting-ip"],
+			},
 		},
 		plugins: [
 			bearer(),
