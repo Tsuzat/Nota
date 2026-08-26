@@ -86,3 +86,31 @@ export const isUserPro = async (userId: string): Promise<boolean> => {
 	const quota = await getUserQuotaWithCache(userId);
 	return quota?.planTier === "pro";
 };
+
+const WEBHOOK_EVENT_CACHE_PREFIX = "polar:event";
+const WEBHOOK_EVENT_TTL_SECONDS = 60 * 60 * 24; // 24 hours
+
+/**
+ * Acquire an atomic lock for a webhook event to ensure idempotency.
+ * Returns true if this is the first time the event is being processed.
+ * Returns false if the event has already been processed or is currently being processed.
+ * @param eventId Unique identifier for the event (e.g. order.id or subscription.id + action)
+ * @param ttlSeconds TTL in seconds (default: 24 hours)
+ */
+export const acquireWebhookEventLock = async (
+	eventId: string,
+	ttlSeconds: number = WEBHOOK_EVENT_TTL_SECONDS,
+): Promise<boolean> => {
+	try {
+		const key = `${WEBHOOK_EVENT_CACHE_PREFIX}:${eventId}`;
+		const { redis } = await import("bun");
+		const nxRes = await redis.set(key, "1", "EX", ttlSeconds.toString(), "NX");
+		return nxRes === "OK";
+	} catch (error) {
+		console.error(
+			`Failed to acquire webhook lock for event ${eventId}:`,
+			error,
+		);
+		return true;
+	}
+};
