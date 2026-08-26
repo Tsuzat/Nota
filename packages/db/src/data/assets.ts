@@ -11,13 +11,7 @@ import {
 	sql,
 } from "drizzle-orm";
 import { db } from "..";
-import {
-	assets,
-	noteSnapshots,
-	notes,
-	userQuota,
-	workspace,
-} from "../schema/app";
+import { assets, noteSnapshots, notes, workspace } from "../schema/app";
 
 export interface CreateAssetInput {
 	noteId: string;
@@ -265,11 +259,9 @@ export const getAssetsByWorkspace = async (filters: {
  */
 export const getStorageStats = async (userId: string, workspaceId?: string) => {
 	// 1. User Quota
-	const [quota] = await db
-		.select()
-		.from(userQuota)
-		.where(eq(userQuota.userId, userId))
-		.limit(1);
+	const quota = await db.query.userQuota.findFirst({
+		where: { userId },
+	});
 
 	// 2. Media aggregation
 	const mediaConditions = workspaceId

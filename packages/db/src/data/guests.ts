@@ -126,16 +126,15 @@ export const addNoteGuest = async (input: {
 
 	const normalizedEmail = input.email.toLowerCase().trim();
 
-	const [targetUser] = await db
-		.select({
-			id: user.id,
-			name: user.name,
-			email: user.email,
-			image: user.image,
-		})
-		.from(user)
-		.where(eq(user.email, normalizedEmail))
-		.limit(1);
+	const targetUser = await db.query.user.findFirst({
+		where: { email: normalizedEmail },
+		columns: {
+			id: true,
+			name: true,
+			email: true,
+			image: true,
+		},
+	});
 
 	if (!targetUser) {
 		throw new Error("User with this email not found");
@@ -230,16 +229,15 @@ export const updateNoteGuest = async (input: {
 		throw new Error("Cannot modify note owner role");
 	}
 
-	const [targetUser] = await db
-		.select({
-			id: user.id,
-			name: user.name,
-			email: user.email,
-			image: user.image,
-		})
-		.from(user)
-		.where(eq(user.id, input.userId))
-		.limit(1);
+	const targetUser = await db.query.user.findFirst({
+		where: { id: input.userId },
+		columns: {
+			id: true,
+			name: true,
+			email: true,
+			image: true,
+		},
+	});
 
 	if (!targetUser) {
 		throw new Error("User not found");

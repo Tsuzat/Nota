@@ -28,10 +28,9 @@ export type UpdateWorkspaceInput = Partial<
 export const fetchUserWorkspaces = async (
 	userId: string,
 ): Promise<Workspace[]> => {
-	const data = await db
-		.select()
-		.from(workspace)
-		.where(eq(workspace.ownerId, userId));
+	const data = await db.query.workspace.findMany({
+		where: { ownerId: userId },
+	});
 	return selectWorkspaceSchema.array().parse(data);
 };
 
@@ -122,10 +121,9 @@ export const isWorkspaceOwner = async (
 export const getWorkspaceOwnerId = async (
 	id: string,
 ): Promise<string | null> => {
-	const [data] = await db
-		.select({ ownerId: workspace.ownerId })
-		.from(workspace)
-		.where(eq(workspace.id, id))
-		.limit(1);
+	const data = await db.query.workspace.findFirst({
+		where: { id },
+		columns: { ownerId: true },
+	});
 	return data?.ownerId ?? null;
 };

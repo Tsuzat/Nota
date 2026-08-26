@@ -1,17 +1,18 @@
 import type {
 	account,
 	assets,
+	deviceCode,
 	guestRole,
 	noteGuests,
 	noteSnapshots,
 	notes,
+	passkey,
 	planTier,
 	publish,
 	publishStatus,
 	snapshotKind,
 	user,
 	userQuota,
-	verification,
 	workspace,
 } from "./schema/index";
 
@@ -28,8 +29,11 @@ export type InsertUser = typeof user.$inferInsert;
 export type Account = typeof account.$inferSelect;
 export type InsertAccount = typeof account.$inferInsert;
 
-export type Verification = typeof verification.$inferSelect;
-export type InsertVerification = typeof verification.$inferInsert;
+export type Passkey = typeof passkey.$inferSelect;
+export type InsertPasskey = typeof passkey.$inferInsert;
+
+export type DeviceCode = typeof deviceCode.$inferSelect;
+export type InsertDeviceCode = typeof deviceCode.$inferInsert;
 
 // ── App Types ───────────────────────────────────────────────
 export type UserQuota = typeof userQuota.$inferSelect;

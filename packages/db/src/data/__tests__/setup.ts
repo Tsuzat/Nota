@@ -9,6 +9,7 @@ import {
 	workspace,
 } from "../../schema/app";
 import { user } from "../../schema/auth";
+import { DEFAULT_FREE_STORAGE_BYTES } from "../user_quota";
 
 export const createTestUser = async (id: string, name = "Test User") => {
 	await db
@@ -29,7 +30,7 @@ export const createTestUser = async (id: string, name = "Test User") => {
 			userId: id,
 			planTier: "free",
 			aiCreditBalanceCents: 0,
-			assignedStorageBytes: 524_288_000,
+			assignedStorageBytes: DEFAULT_FREE_STORAGE_BYTES,
 			usedStorageBytes: 0,
 		})
 		.onConflictDoNothing();
