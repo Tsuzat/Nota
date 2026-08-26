@@ -14,6 +14,7 @@
 		"check:ci": "bunx @biomejs/biome check ."
 	},
 	"dependencies": {
+		"@nota/ai": "workspace:*",
 		"@nota/api": "workspace:*",
 		"@nota/auth": "workspace:*",
 		"@nota/cache": "workspace:*",

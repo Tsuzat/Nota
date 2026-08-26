@@ -15,6 +15,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { rateLimitMiddleware } from "./middleware/rate-limiter";
 import { banMiddleware, pathBlacklistMiddleware } from "./middleware/security";
+import { createAiSseRoute } from "./routes/ai-sse";
 
 const app = new Hono();
 
@@ -49,6 +50,9 @@ app.use(
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+// SSE AI streaming route (Hono-native, true streaming). Mount before ORPC catch-all.
+app.route("/", createAiSseRoute());
 
 app.get(
 	"/collaboration",

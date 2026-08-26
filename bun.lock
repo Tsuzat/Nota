@@ -81,6 +81,7 @@
     "apps/server": {
       "name": "@nota/server",
       "dependencies": {
+        "@nota/ai": "workspace:*",
         "@nota/api": "workspace:*",
         "@nota/auth": "workspace:*",
         "@nota/cache": "workspace:*",
