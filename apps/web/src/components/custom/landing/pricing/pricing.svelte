@@ -6,6 +6,7 @@ import { Button } from "@nota/ui/components/ui/button/index.ts";
 import { cn } from "@nota/ui/utils";
 import { AnimatePresence, createLayoutMotion } from "motion-sv";
 import { onMount } from "svelte";
+import { authClient } from "#lib/auth-client.ts";
 import FrequencyToggle, { type FREQUENCY } from "./frequency-toggle.svelte";
 
 let NumberFlow: typeof import("@number-flow/svelte").default | undefined =
@@ -91,7 +92,11 @@ const plans = $derived<Plan[]>([
 		],
 		btn: {
 			text: "Start Pro Plan",
-			onclick: async () => {},
+			onclick: async () => {
+				await authClient.checkout({
+					slug: `pro-${frequency}`,
+				});
+			},
 		},
 	},
 ]);
@@ -315,6 +320,11 @@ function getBadges(plan: Plan, activeFrequency: FREQUENCY): PlanBadge[] {
       <Button
         variant="secondary"
         class="w-full sm:w-auto shadow-md hover:shadow-lg transition-all duration-300"
+        onclick={async () => {
+          await authClient.checkout({
+            slug: "ai-credits",
+          });
+        }}
       >
         Buy AI Credits
       </Button>

@@ -319,7 +319,7 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
           </div>
         </div>
 
-        <div class="relative overflow-hidden min-h-[3.75rem]">
+        <div class="relative overflow-hidden min-h-15">
           <div
             class={cn(
               "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",

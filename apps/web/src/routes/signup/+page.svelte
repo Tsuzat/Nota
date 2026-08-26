@@ -8,6 +8,7 @@ import { Badge } from "@nota/ui/shadcn/badge/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { Input } from "@nota/ui/shadcn/input/index.js";
 import { Label } from "@nota/ui/shadcn/label/index.js";
+import { Toaster } from "@nota/ui/shadcn/sonner/index.js";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
 import { Turnstile } from "svelte-turnstile";
@@ -144,6 +145,10 @@ const handleSignUp = async (provider: "google" | "github" | "email") => {
 			if (error) {
 				toast.error(error.message || "Failed to sign up. Please try again.");
 			} else {
+				name = "";
+				email = "";
+				password = "";
+				confirmPassword = "";
 				toast.success(
 					"Account created successfully. Please check your email to verify your account.",
 				);
@@ -239,7 +244,7 @@ const handleSignUp = async (provider: "google" | "github" | "email") => {
           </div>
         </div>
 
-        <div class="relative overflow-hidden min-h-[3.75rem]">
+        <div class="relative overflow-hidden min-h-15">
           <div
             class={cn(
               "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
