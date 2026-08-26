@@ -16,6 +16,7 @@
 		"check:ci": "bunx @biomejs/biome check ."
 	},
 	"dependencies": {
+		"@better-auth/passkey": "catalog:",
 		"@lucide/svelte": "catalog:",
 		"@nota/api": "workspace:*",
 		"@nota/env": "workspace:*",

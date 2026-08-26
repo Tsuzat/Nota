@@ -1,12 +1,17 @@
 <script lang="ts">
+import ChevronDown from "@lucide/svelte/icons/chevron-down";
 import ChevronLeft from "@lucide/svelte/icons/chevron-left";
+import Fingerprint from "@lucide/svelte/icons/fingerprint";
+import Mail from "@lucide/svelte/icons/mail";
 import { toast } from "@nota/ui";
 import { BarSpinner, Github, Google } from "@nota/ui/icons/index.js";
+import { Badge } from "@nota/ui/shadcn/badge/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { Input } from "@nota/ui/shadcn/input/index.js";
 import { Label } from "@nota/ui/shadcn/label/index.js";
-import { Separator } from "@nota/ui/shadcn/separator/index.js";
 import { cn } from "@nota/ui/utils";
+import { onMount } from "svelte";
+import { slide } from "svelte/transition";
 import { Turnstile } from "svelte-turnstile";
 import { AppLogo, TiltCard } from "#components/custom/index.js";
 import Particles from "#components/custom/landing/particles.svelte";
@@ -66,9 +71,53 @@ $effect(() => {
 });
 
 let loadingProvider = $state<"google" | "github" | "email" | null>(null);
+let passkeyLoading = $state(false);
+let lastLoginMethod = $state<string | null>(null);
+let showEmailForm = $state(false);
 let email = $state("");
 let password = $state("");
 let captchaToken = $state("");
+
+onMount(async () => {
+	// Retrieve last used login method
+	if (typeof authClient.getLastUsedLoginMethod === "function") {
+		const method = authClient.getLastUsedLoginMethod();
+		if (method) {
+			lastLoginMethod = method;
+			if (method === "email") {
+				showEmailForm = true;
+			}
+		}
+	}
+
+	// Conditional UI (WebAuthn / Passkey autofill)
+	if (
+		typeof window !== "undefined" &&
+		window.PublicKeyCredential &&
+		typeof PublicKeyCredential.isConditionalMediationAvailable === "function"
+	) {
+		try {
+			const isAvailable =
+				await PublicKeyCredential.isConditionalMediationAvailable();
+			if (isAvailable) {
+				void authClient.signIn.passkey({
+					autoFill: true,
+					fetchOptions: {
+						onSuccess: () => {
+							window.location.href = callbackURL;
+						},
+						onError: (ctx) => {
+							// Passive conditional UI errors or aborts are silent
+							console.debug("Passkey autofill:", ctx.error?.message);
+						},
+					},
+				});
+			}
+		} catch (err) {
+			console.debug("Conditional mediation check failed:", err);
+		}
+	}
+});
 
 $effect(() => {
 	const error =
@@ -80,6 +129,65 @@ $effect(() => {
 		toast.error(message);
 	}
 });
+
+const handlePasskeySignIn = async () => {
+	if (loadingProvider || passkeyLoading) return;
+	passkeyLoading = true;
+	try {
+		const res = await authClient.signIn.passkey({
+			fetchOptions: {
+				onSuccess: () => {
+					window.location.href = callbackURL;
+				},
+				onError: (ctx) => {
+					const errName = ctx.error?.name || "";
+					const errMsg = ctx.error?.message || "";
+					if (
+						errName === "NotAllowedError" ||
+						errName === "AbortError" ||
+						errMsg.toLowerCase().includes("cancel") ||
+						errMsg.toLowerCase().includes("abort")
+					) {
+						return;
+					}
+					toast.error(
+						errMsg || "Failed to sign in with Passkey. Please try again.",
+					);
+				},
+			},
+		});
+
+		if (res?.error) {
+			const errMsg = res.error.message || "";
+			if (
+				!errMsg.toLowerCase().includes("cancel") &&
+				!errMsg.toLowerCase().includes("abort")
+			) {
+				toast.error(
+					errMsg || "Failed to sign in with Passkey. Please try again.",
+				);
+			}
+		} else if (res?.data) {
+			window.location.href = callbackURL;
+		}
+	} catch (err: any) {
+		const errName = err?.name || "";
+		const errMsg = err?.message || "";
+		if (
+			errName !== "NotAllowedError" &&
+			errName !== "AbortError" &&
+			!errMsg.toLowerCase().includes("cancel") &&
+			!errMsg.toLowerCase().includes("abort")
+		) {
+			console.error("Sign in with Passkey failed:", err);
+			toast.error(
+				errMsg || "An unexpected error occurred while signing in with Passkey.",
+			);
+		}
+	} finally {
+		passkeyLoading = false;
+	}
+};
 
 const handleSignIn = async (provider: "google" | "github" | "email") => {
 	if (loadingProvider) return;
@@ -166,60 +274,20 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
       scale={1.0125}
       tiltLimit={5}
       spotlight={false}
-      class="bg-card/50 mx-auto w-full max-w-md space-y-4 rounded-xl p-8"
+      class="bg-card/50 mx-auto w-full max-w-md space-y-5 rounded-xl p-8"
     >
       <AppLogo />
       <div class="flex flex-col space-y-1">
         <h1 class="text-2xl font-bold tracking-wide">Sign In or Join Now!</h1>
         <p class="text-base text-muted-foreground">
-          login or create your nota account.
+          Log in or create your Nota account.
         </p>
       </div>
-      <div class="space-y-2">
-        <form onsubmit={() => handleSignIn("email")} class="space-y-4">
-          <div class="space-y-2">
-            <Label for="email">Email</Label>
-            <Input id="email" type="email" placeholder="m@example.com" bind:value={email} required />
-          </div>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <Label for="password">Password</Label>
-              <a href="/password-reset" class="text-sm font-medium underline-offset-4 hover:underline">Forgot password?</a>
-            </div>
-            <Input id="password" type="password" minlength={8} maxlength={64} placeholder="********" bind:value={password} required />
-          </div>
-          <div class="flex justify-center">
-            <Turnstile
-              siteKey={PUBLIC_TURNSILE_SITE_KEY}
-              on:turnstile-callback={(e) => {
-                captchaToken = e.detail.token;
-              }}
-            />
-          </div>
-          <Button
-            class="w-full"
-            type="submit"
-            disabled={loadingProvider !== null || !captchaToken}
-          >
-            {#if loadingProvider === "email"}
-              <BarSpinner size={16} />
-            {:else}
-              Sign In
-            {/if}
-          </Button>
-        </form>
 
-        <div class="relative">
-          <div class="absolute inset-0 flex items-center">
-            <Separator class="w-full" />
-          </div>
-          <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-card/50 px-2 text-muted-foreground">Or continue with</span>
-          </div>
-        </div>
-
+      <div class="space-y-3">
+        <!-- 1. Google Option -->
         <Button
-          class="w-full"
+          class={cn("w-full relative justify-center", lastLoginMethod === "google" && "border-primary/50 bg-primary/5")}
           variant="outline"
           disabled={loadingProvider !== null}
           onclick={() => handleSignIn("google")}
@@ -229,10 +297,17 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
           {:else}
             <Google />
           {/if}
-          Google
+          <span>Sign In With Google</span>
+          {#if lastLoginMethod === "google"}
+            <Badge variant="secondary" class="absolute right-2.5 text-[10px] h-4 px-1.5 font-normal">
+              Last used
+            </Badge>
+          {/if}
         </Button>
+
+        <!-- 2. GitHub Option -->
         <Button
-          class="w-full"
+          class={cn("w-full relative justify-center", lastLoginMethod === "github" && "border-primary/50 bg-primary/5")}
           variant="outline"
           disabled={loadingProvider !== null}
           onclick={() => handleSignIn("github")}
@@ -240,25 +315,148 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
           {#if loadingProvider === "github"}
             <BarSpinner size={16} />
           {:else}
-            <Github  /> 
+            <Github />
           {/if}
-          GitHub
+          <span>Sign In With GitHub</span>
+          {#if lastLoginMethod === "github"}
+            <Badge variant="secondary" class="absolute right-2.5 text-[10px] h-4 px-1.5 font-normal">
+              Last used
+            </Badge>
+          {/if}
         </Button>
-      </div>
-      <div class="mt-4 text-center text-sm">
-        Don't have an account?
-        <a href="/signup" class="underline underline-offset-4">Sign up</a>
-      </div>
-      <span class="mt-8 text-sm text-muted-foreground">
-        By clicking continue, you agree to our
-        <Button class="underline" variant="link" href={resolve("/(tnc)/terms")}
-          >Terms of Service</Button
+
+        <!-- 3. Passkey Option -->
+        <Button
+          class={cn("w-full relative justify-center", lastLoginMethod === "passkey" && "border-primary/50 bg-primary/5")}
+          variant="outline"
+          disabled={loadingProvider !== null || passkeyLoading}
+          onclick={() => handlePasskeySignIn()}
         >
+          {#if passkeyLoading}
+            <BarSpinner size={16} />
+          {:else}
+            <Fingerprint class="size-4" />
+          {/if}
+          <span>Sign In With Passkey</span>
+          {#if lastLoginMethod === "passkey"}
+            <Badge variant="secondary" class="absolute right-2.5 text-[10px] h-4 px-1.5 font-normal">
+              Last used
+            </Badge>
+          {/if}
+        </Button>
+
+        <!-- 4. Email Option (Expandable) -->
+        <div class="space-y-3">
+          <Button
+            class={cn(
+              "w-full relative justify-center",
+              (lastLoginMethod === "email" || showEmailForm) && "border-primary/50 bg-primary/5"
+            )}
+            variant="outline"
+            disabled={loadingProvider !== null}
+            onclick={() => {
+              showEmailForm = !showEmailForm;
+            }}
+            aria-expanded={showEmailForm}
+          >
+            <Mail class="size-4" />
+            <span>Sign In With Email</span>
+            <div class="absolute right-2.5 flex items-center gap-1.5">
+              {#if lastLoginMethod === "email"}
+                <Badge variant="secondary" class="text-[10px] h-4 px-1.5 font-normal">
+                  Last used
+                </Badge>
+              {/if}
+              <ChevronDown
+                class={cn(
+                  "size-4 text-muted-foreground transition-transform duration-200",
+                  showEmailForm && "rotate-180"
+                )}
+              />
+            </div>
+          </Button>
+
+          {#if showEmailForm}
+            <div transition:slide={{ duration: 250 }} class="overflow-hidden">
+              <form
+                onsubmit={(e) => {
+                  e.preventDefault();
+                  handleSignIn("email");
+                }}
+                class="space-y-3 rounded-lg border border-border/50 bg-card/60 p-4 shadow-inner"
+              >
+                <div class="space-y-1.5">
+                  <Label for="email" class="text-xs">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    autocomplete="username webauthn"
+                    bind:value={email}
+                    required
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <Label for="password" class="text-xs">Password</Label>
+                    <a
+                      href="/password-reset"
+                      class="text-xs text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
+                    >
+                      Forgot password?
+                    </a>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    minlength={8}
+                    maxlength={64}
+                    placeholder="••••••••"
+                    autocomplete="current-password webauthn"
+                    bind:value={password}
+                    required
+                  />
+                </div>
+                <div class="flex justify-center pt-1">
+                  <Turnstile
+                    siteKey={PUBLIC_TURNSILE_SITE_KEY}
+                    on:turnstile-callback={(e) => {
+                      captchaToken = e.detail.token;
+                    }}
+                  />
+                </div>
+                <Button
+                  class="w-full"
+                  type="submit"
+                  disabled={loadingProvider !== null || !captchaToken}
+                >
+                  {#if loadingProvider === "email"}
+                    <BarSpinner size={16} />
+                  {:else}
+                    Sign In
+                  {/if}
+                </Button>
+              </form>
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      <div class="text-center text-sm">
+        Don't have an account?
+        <a href="/signup" class="underline underline-offset-4 hover:text-primary">Sign up</a>
+      </div>
+
+      <p class="text-center text-xs text-muted-foreground">
+        By clicking continue, you agree to our
+        <Button class="h-auto p-0 text-xs underline" variant="link" href={resolve("/(tnc)/terms")}>
+          Terms of Service
+        </Button>
         and
-        <Button class="underline" variant="link" href={resolve("/(tnc)/privacy")}
-          >Privacy Policy</Button
-        >.
-      </span>
+        <Button class="h-auto p-0 text-xs underline" variant="link" href={resolve("/(tnc)/privacy")}>
+          Privacy Policy
+        </Button>.
+      </p>
     </TiltCard>
   </div>
 </div>
