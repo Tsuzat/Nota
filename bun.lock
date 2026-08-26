@@ -106,6 +106,7 @@
       "name": "@nota/web",
       "version": "1.0.0",
       "dependencies": {
+        "@better-auth/passkey": "catalog:",
         "@lucide/svelte": "catalog:",
         "@nota/api": "workspace:*",
         "@nota/env": "workspace:*",

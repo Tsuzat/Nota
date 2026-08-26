@@ -77,7 +77,7 @@ function resolveModel(providerConfig: AIProvider): LanguageModel {
  * Supports streaming text, graceful cancellation via AbortSignal, and token usage reporting.
  *
  * @example
- * \`\`\`ts
+ * ```ts
  * const controller = new AbortController();
  *
  * const result = callAI({
@@ -92,7 +92,7 @@ function resolveModel(providerConfig: AIProvider): LanguageModel {
  *
  * const usage = await result.usage;
  * console.log(\`Input tokens: \${usage.inputTokens}, Output tokens: \${usage.outputTokens}\`);
- * \`\`\`
+ * ```
  */
 export function callAI(options: CallAIOptions): CallAIResult {
 	const model = resolveModel(options.provider);

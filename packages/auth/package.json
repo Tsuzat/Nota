@@ -10,7 +10,7 @@
 		}
 	},
 	"scripts": {
-		"auth:generate": "SKIP_ENV_VALIDATION=1 bun --bun better-auth generate --config ./src/index.ts --output ../db/src/schema/auth.ts -y",
+		"auth:generate": "SKIP_ENV_VALIDATION=1 bunx --bun auth generate --config ./src/index.ts --output ../db/src/schema/auth.ts -y",
 		"lint": "bunx @biomejs/biome lint .",
 		"format": "bunx @biomejs/biome format --write .",
 		"check": "bunx @biomejs/biome check --write .",
