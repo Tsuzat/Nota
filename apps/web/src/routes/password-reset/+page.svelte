@@ -16,6 +16,7 @@ import { page } from "$app/state";
 
 let email = $state("");
 let password = $state("");
+let confirmPassword = $state("");
 let captchaToken = $state("");
 let loading = $state(false);
 let isSuccess = $state(false);
@@ -36,6 +37,10 @@ const handleSubmit = async (e?: SubmitEvent) => {
 	} else {
 		if (!password || password.length < 8) {
 			toast.error("Password must be at least 8 characters long.");
+			return;
+		}
+		if (password !== confirmPassword) {
+			toast.error("Passwords do not match.");
 			return;
 		}
 	}
@@ -144,8 +149,22 @@ const handleSubmit = async (e?: SubmitEvent) => {
                   type="password"
                   minlength={8}
                   maxlength={64}
-                  placeholder="********"
+                  placeholder="••••••••"
+                  autocomplete="new-password"
                   bind:value={password}
+                  required
+                />
+              </div>
+              <div class="space-y-2">
+                <Label for="confirm-password">Confirm New Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  minlength={8}
+                  maxlength={64}
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                  bind:value={confirmPassword}
                   required
                 />
               </div>

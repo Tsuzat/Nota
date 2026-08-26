@@ -1,5 +1,5 @@
 <script lang="ts">
-import ChevronDown from "@lucide/svelte/icons/chevron-down";
+import ArrowLeft from "@lucide/svelte/icons/arrow-left";
 import ChevronLeft from "@lucide/svelte/icons/chevron-left";
 import Fingerprint from "@lucide/svelte/icons/fingerprint";
 import Mail from "@lucide/svelte/icons/mail";
@@ -7,11 +7,11 @@ import { toast } from "@nota/ui";
 import { BarSpinner, Github, Google } from "@nota/ui/icons/index.js";
 import { Badge } from "@nota/ui/shadcn/badge/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
+import { Checkbox } from "@nota/ui/shadcn/checkbox/index.js";
 import { Input } from "@nota/ui/shadcn/input/index.js";
 import { Label } from "@nota/ui/shadcn/label/index.js";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
-import { slide } from "svelte/transition";
 import { Turnstile } from "svelte-turnstile";
 import { AppLogo, TiltCard } from "#components/custom/index.js";
 import Particles from "#components/custom/landing/particles.svelte";
@@ -73,10 +73,20 @@ $effect(() => {
 let loadingProvider = $state<"google" | "github" | "email" | null>(null);
 let passkeyLoading = $state(false);
 let lastLoginMethod = $state<string | null>(null);
-let showEmailForm = $state(false);
+let view = $state<"options" | "email">("options");
 let email = $state("");
 let password = $state("");
+let rememberMe = $state(false);
 let captchaToken = $state("");
+
+let optionsHeight = $state(0);
+let emailHeight = $state(0);
+const currentHeight = $derived.by(() => {
+	if (view === "email") {
+		return emailHeight > 0 ? `${emailHeight}px` : "auto";
+	}
+	return optionsHeight > 0 ? `${optionsHeight}px` : "auto";
+});
 
 onMount(async () => {
 	// Retrieve last used login method
@@ -84,9 +94,6 @@ onMount(async () => {
 		const method = authClient.getLastUsedLoginMethod();
 		if (method) {
 			lastLoginMethod = method;
-			if (method === "email") {
-				showEmailForm = true;
-			}
 		}
 	}
 
@@ -203,6 +210,7 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
 			const { error } = await authClient.signIn.email({
 				email,
 				password,
+				rememberMe,
 				fetchOptions: {
 					headers: {
 						"x-captcha-response": captchaToken,
@@ -270,175 +278,273 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
       <ChevronLeft data-icon="inline-start" />
       Home
     </Button>
+
     <TiltCard
       scale={1.0125}
       tiltLimit={5}
       spotlight={false}
-      class="bg-card/50 mx-auto w-full max-w-md space-y-5 rounded-xl p-8"
+      class="bg-card/50 mx-auto w-full max-w-md space-y-5 rounded-xl p-8 overflow-hidden"
     >
-      <AppLogo />
-      <div class="flex flex-col space-y-1">
-        <h1 class="text-2xl font-bold tracking-wide">Sign In or Join Now!</h1>
-        <p class="text-base text-muted-foreground">
-          Log in or create your Nota account.
-        </p>
+      <!-- Header with fluid back button, logo glide, and cross-sliding titles -->
+      <div class="space-y-4">
+        <div class="relative flex items-center min-h-8">
+          <div
+            class={cn(
+              "absolute left-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              view === "email"
+                ? "opacity-100 translate-x-0 pointer-events-auto"
+                : "opacity-0 -translate-x-3 pointer-events-none"
+            )}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              class="-ml-2 h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
+              onclick={() => {
+                view = "options";
+              }}
+              aria-label="Back to sign in options"
+            >
+              <ArrowLeft class="size-4" />
+            </Button>
+          </div>
+
+          <div
+            class={cn(
+              "transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              view === "email" ? "translate-x-7" : "translate-x-0"
+            )}
+          >
+            <AppLogo />
+          </div>
+        </div>
+
+        <div class="relative overflow-hidden min-h-[3.75rem]">
+          <div
+            class={cn(
+              "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              view === "options"
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 -translate-y-3 absolute inset-0 pointer-events-none"
+            )}
+          >
+            <h1 class="text-2xl font-bold tracking-wide">Sign In to your Nota account</h1>
+            <p class="text-sm text-muted-foreground mt-1">
+              Choose your preferred sign-in method.
+            </p>
+          </div>
+
+          <div
+            class={cn(
+              "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              view === "email"
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-3 absolute inset-0 pointer-events-none"
+            )}
+          >
+            <h1 class="text-2xl font-bold tracking-wide">Sign in with Email</h1>
+            <p class="text-sm text-muted-foreground mt-1">
+              Enter your credentials to access your account.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div class="space-y-3">
-        <!-- 1. Google Option -->
-        <Button
-          class={cn("w-full relative justify-center", lastLoginMethod === "google" && "border-primary/50 bg-primary/5")}
-          variant="outline"
-          disabled={loadingProvider !== null}
-          onclick={() => handleSignIn("google")}
+      <!-- Fluid Horizontal Sliding Panels with Animated Dynamic Height -->
+      <div
+        class="relative overflow-hidden w-full transition-[height] duration-350 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style:height={currentHeight}
+      >
+        <div
+          class={cn(
+            "flex items-start w-[200%] transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            view === "email" ? "-translate-x-1/2" : "translate-x-0"
+          )}
         >
-          {#if loadingProvider === "google"}
-            <BarSpinner size={16} />
-          {:else}
-            <Google />
-          {/if}
-          <span>Sign In With Google</span>
-          {#if lastLoginMethod === "google"}
-            <Badge variant="secondary" class="absolute right-2.5 text-[10px] h-4 px-1.5 font-normal">
-              Last used
-            </Badge>
-          {/if}
-        </Button>
-
-        <!-- 2. GitHub Option -->
-        <Button
-          class={cn("w-full relative justify-center", lastLoginMethod === "github" && "border-primary/50 bg-primary/5")}
-          variant="outline"
-          disabled={loadingProvider !== null}
-          onclick={() => handleSignIn("github")}
-        >
-          {#if loadingProvider === "github"}
-            <BarSpinner size={16} />
-          {:else}
-            <Github />
-          {/if}
-          <span>Sign In With GitHub</span>
-          {#if lastLoginMethod === "github"}
-            <Badge variant="secondary" class="absolute right-2.5 text-[10px] h-4 px-1.5 font-normal">
-              Last used
-            </Badge>
-          {/if}
-        </Button>
-
-        <!-- 3. Passkey Option -->
-        <Button
-          class={cn("w-full relative justify-center", lastLoginMethod === "passkey" && "border-primary/50 bg-primary/5")}
-          variant="outline"
-          disabled={loadingProvider !== null || passkeyLoading}
-          onclick={() => handlePasskeySignIn()}
-        >
-          {#if passkeyLoading}
-            <BarSpinner size={16} />
-          {:else}
-            <Fingerprint class="size-4" />
-          {/if}
-          <span>Sign In With Passkey</span>
-          {#if lastLoginMethod === "passkey"}
-            <Badge variant="secondary" class="absolute right-2.5 text-[10px] h-4 px-1.5 font-normal">
-              Last used
-            </Badge>
-          {/if}
-        </Button>
-
-        <!-- 4. Email Option (Expandable) -->
-        <div class="space-y-3">
-          <Button
+          <!-- 1. Options Panel -->
+          <div
+            bind:clientHeight={optionsHeight}
             class={cn(
-              "w-full relative justify-center",
-              (lastLoginMethod === "email" || showEmailForm) && "border-primary/50 bg-primary/5"
+              "w-1/2 shrink-0 space-y-3 pr-2 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              view === "options"
+                ? "opacity-100 scale-100 pointer-events-auto"
+                : "opacity-0 scale-95 pointer-events-none"
             )}
-            variant="outline"
-            disabled={loadingProvider !== null}
-            onclick={() => {
-              showEmailForm = !showEmailForm;
-            }}
-            aria-expanded={showEmailForm}
           >
-            <Mail class="size-4" />
-            <span>Sign In With Email</span>
-            <div class="absolute right-2.5 flex items-center gap-1.5">
+            <!-- Google Option -->
+            <Button
+              class={cn(
+                "w-full relative justify-center",
+                lastLoginMethod === "google" && "border-primary/50 bg-primary/5"
+              )}
+              variant="outline"
+              disabled={loadingProvider !== null}
+              onclick={() => handleSignIn("google")}
+            >
+              {#if loadingProvider === "google"}
+                <BarSpinner size={16} />
+              {:else}
+                <Google />
+              {/if}
+              <span>Sign In With Google</span>
+              {#if lastLoginMethod === "google"}
+                <Badge variant="secondary" class="absolute right-2.5 text-[10px] h-4 px-1.5 font-normal">
+                  Last used
+                </Badge>
+              {/if}
+            </Button>
+
+            <!-- GitHub Option -->
+            <Button
+              class={cn(
+                "w-full relative justify-center",
+                lastLoginMethod === "github" && "border-primary/50 bg-primary/5"
+              )}
+              variant="outline"
+              disabled={loadingProvider !== null}
+              onclick={() => handleSignIn("github")}
+            >
+              {#if loadingProvider === "github"}
+                <BarSpinner size={16} />
+              {:else}
+                <Github />
+              {/if}
+              <span>Sign In With GitHub</span>
+              {#if lastLoginMethod === "github"}
+                <Badge variant="secondary" class="absolute right-2.5 text-[10px] h-4 px-1.5 font-normal">
+                  Last used
+                </Badge>
+              {/if}
+            </Button>
+
+            <!-- Passkey Option -->
+            <Button
+              class={cn(
+                "w-full relative justify-center",
+                lastLoginMethod === "passkey" && "border-primary/50 bg-primary/5"
+              )}
+              variant="outline"
+              disabled={loadingProvider !== null || passkeyLoading}
+              onclick={() => handlePasskeySignIn()}
+            >
+              {#if passkeyLoading}
+                <BarSpinner size={16} />
+              {:else}
+                <Fingerprint class="size-4" />
+              {/if}
+              <span>Sign In With Passkey</span>
+              {#if lastLoginMethod === "passkey"}
+                <Badge variant="secondary" class="absolute right-2.5 text-[10px] h-4 px-1.5 font-normal">
+                  Last used
+                </Badge>
+              {/if}
+            </Button>
+
+            <!-- Email Option -->
+            <Button
+              class={cn(
+                "w-full relative justify-center",
+                lastLoginMethod === "email" && "border-primary/50 bg-primary/5"
+              )}
+              variant="outline"
+              disabled={loadingProvider !== null}
+              onclick={() => {
+                view = "email";
+              }}
+            >
+              <Mail class="size-4" />
+              <span>Sign In With Email</span>
               {#if lastLoginMethod === "email"}
                 <Badge variant="secondary" class="text-[10px] h-4 px-1.5 font-normal">
                   Last used
                 </Badge>
               {/if}
-              <ChevronDown
-                class={cn(
-                  "size-4 text-muted-foreground transition-transform duration-200",
-                  showEmailForm && "rotate-180"
-                )}
-              />
-            </div>
-          </Button>
+            </Button>
+          </div>
 
-          {#if showEmailForm}
-            <div transition:slide={{ duration: 250 }} class="overflow-hidden">
-              <form
-                onsubmit={(e) => {
-                  e.preventDefault();
-                  handleSignIn("email");
-                }}
-                class="space-y-3 rounded-lg border border-border/50 bg-card/60 p-4 shadow-inner"
-              >
-                <div class="space-y-1.5">
-                  <Label for="email" class="text-xs">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    autocomplete="username webauthn"
-                    bind:value={email}
-                    required
-                  />
+          <!-- 2. Email Form Panel -->
+          <div
+            bind:clientHeight={emailHeight}
+            class={cn(
+              "w-1/2 shrink-0 space-y-4 pl-2 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              view === "email"
+                ? "opacity-100 scale-100 pointer-events-auto"
+                : "opacity-0 scale-95 pointer-events-none"
+            )}
+          >
+            <form
+              onsubmit={(e) => {
+                e.preventDefault();
+                handleSignIn("email");
+              }}
+              class="space-y-4"
+            >
+              <div class="space-y-1.5">
+                <Label for="email" class="text-xs">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  autocomplete="username webauthn"
+                  bind:value={email}
+                  required
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <Label for="password" class="text-xs">Password</Label>
+                  <a
+                    href="/password-reset"
+                    class="text-xs text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
+                  >
+                    Forgot password?
+                  </a>
                 </div>
-                <div class="space-y-1.5">
-                  <div class="flex items-center justify-between">
-                    <Label for="password" class="text-xs">Password</Label>
-                    <a
-                      href="/password-reset"
-                      class="text-xs text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
-                    >
-                      Forgot password?
-                    </a>
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    minlength={8}
-                    maxlength={64}
-                    placeholder="••••••••"
-                    autocomplete="current-password webauthn"
-                    bind:value={password}
-                    required
-                  />
-                </div>
-                <div class="flex justify-center pt-1">
-                  <Turnstile
-                    siteKey={PUBLIC_TURNSILE_SITE_KEY}
-                    on:turnstile-callback={(e) => {
-                      captchaToken = e.detail.token;
-                    }}
-                  />
-                </div>
-                <Button
-                  class="w-full"
-                  type="submit"
-                  disabled={loadingProvider !== null || !captchaToken}
+                <Input
+                  id="password"
+                  type="password"
+                  minlength={8}
+                  maxlength={64}
+                  placeholder="••••••••"
+                  autocomplete="current-password webauthn"
+                  bind:value={password}
+                  required
+                />
+              </div>
+
+              <div class="flex items-center space-x-2 pt-0.5">
+                <Checkbox id="remember-me" bind:checked={rememberMe} />
+                <Label
+                  for="remember-me"
+                  class="text-xs font-normal text-muted-foreground cursor-pointer select-none"
                 >
-                  {#if loadingProvider === "email"}
-                    <BarSpinner size={16} />
-                  {:else}
-                    Sign In
-                  {/if}
-                </Button>
-              </form>
-            </div>
-          {/if}
+                  Remember me
+                </Label>
+              </div>
+
+              <div class="flex justify-center pt-1">
+                <Turnstile
+                  siteKey={PUBLIC_TURNSILE_SITE_KEY}
+                  on:turnstile-callback={(e) => {
+                    captchaToken = e.detail.token;
+                  }}
+                />
+              </div>
+
+              <Button
+                class="w-full"
+                type="submit"
+                disabled={loadingProvider !== null || !captchaToken}
+              >
+                {#if loadingProvider === "email"}
+                  <BarSpinner size={16} />
+                {:else}
+                  Sign In
+                {/if}
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -460,3 +566,4 @@ const handleSignIn = async (provider: "google" | "github" | "email") => {
     </TiltCard>
   </div>
 </div>
+
