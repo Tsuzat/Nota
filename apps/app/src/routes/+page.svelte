@@ -248,7 +248,7 @@ const toggleStar = (note: NoteMeta) => {
 
                 {#if !ISDESKTOP && workspaceCtx.cloud.isLoading && workspaces.length === 0}
                     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {#each Array(3) as idx (idx)}
+                        {#each Array(3) as _,idx (idx)}
                             <div
                                 class="h-28 rounded-xl border border-border/50 bg-muted/20 animate-pulse p-4 flex flex-col justify-between"
                             >
@@ -377,7 +377,7 @@ const toggleStar = (note: NoteMeta) => {
 
                 {#if !ISDESKTOP && noteCtx.cloud.isLoading && recentNotes.length === 0}
                     <div class="grid gap-3 sm:grid-cols-2">
-                        {#each Array(2) as idx (idx)}
+                        {#each Array(2) as _,idx (idx)}
                             <div
                                 class="h-16 rounded-xl border border-border/50 bg-muted/20 animate-pulse p-3 flex flex-col justify-center gap-2"
                             >
