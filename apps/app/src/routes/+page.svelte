@@ -1,151 +1,146 @@
 <script lang="ts">
-    import Cloud from "@lucide/svelte/icons/cloud";
-    import FilePlus from "@lucide/svelte/icons/file-plus";
-    import FolderPlus from "@lucide/svelte/icons/folder-plus";
-    import HardDrive from "@lucide/svelte/icons/hard-drive";
-    import Settings from "@lucide/svelte/icons/settings";
-    import Star from "@lucide/svelte/icons/star";
-    import Trash2 from "@lucide/svelte/icons/trash-2";
-    import { toast } from "@nota/ui";
-    import { openDeleteConfirmation } from "@nota/ui/custom/dialogs/confirm-delete.svelte";
-    import { IconsRenderer } from "@nota/ui/icons/index.js";
-    import { Badge } from "@nota/ui/shadcn/badge/index.ts";
-    import { Button } from "@nota/ui/shadcn/button/index.js";
-    import * as Card from "@nota/ui/shadcn/card/index.ts";
-    import * as Tooltip from "@nota/ui/shadcn/tooltip/index.ts";
-    import { cn } from "@nota/ui/utils";
-    import { getAuthSession } from "#lib/auth-session.svelte.ts";
-    import { Topbar } from "#lib/components/custom/index.ts";
-    import {
-        getGlobalSettings,
-        openCreateNotes,
-        openCreateWorkspace,
-    } from "#lib/components/dialogs/index.ts";
-    import { getNotesContext } from "#lib/data/notes.svelte.ts";
-    import type { NoteMeta, Workspace } from "#lib/data/types.ts";
-    import { getWorkspaceContext } from "#lib/data/workspace.svelte.ts";
-    import { formatDate, ISDESKTOP } from "#lib/utils.ts";
-    import { goto } from "$app/navigation";
-    import { resolve } from "$app/paths";
+import Cloud from "@lucide/svelte/icons/cloud";
+import FilePlus from "@lucide/svelte/icons/file-plus";
+import FolderPlus from "@lucide/svelte/icons/folder-plus";
+import HardDrive from "@lucide/svelte/icons/hard-drive";
+import Settings from "@lucide/svelte/icons/settings";
+import Star from "@lucide/svelte/icons/star";
+import Trash2 from "@lucide/svelte/icons/trash-2";
+import { toast } from "@nota/ui";
+import { openDeleteConfirmation } from "@nota/ui/custom/dialogs/confirm-delete.svelte";
+import { IconsRenderer } from "@nota/ui/icons/index.js";
+import { Badge } from "@nota/ui/shadcn/badge/index.ts";
+import { Button } from "@nota/ui/shadcn/button/index.js";
+import * as Card from "@nota/ui/shadcn/card/index.ts";
+import * as Tooltip from "@nota/ui/shadcn/tooltip/index.ts";
+import { cn } from "@nota/ui/utils";
+import { getAuthSession } from "#lib/auth-session.svelte.ts";
+import { Topbar } from "#lib/components/custom/index.ts";
+import {
+	getGlobalSettings,
+	openCreateNotes,
+	openCreateWorkspace,
+} from "#lib/components/dialogs/index.ts";
+import { getNotesContext } from "#lib/data/notes.svelte.ts";
+import type { NoteMeta, Workspace } from "#lib/data/types.ts";
+import { getWorkspaceContext } from "#lib/data/workspace.svelte.ts";
+import { formatDate, ISDESKTOP } from "#lib/utils.ts";
+import { goto } from "$app/navigation";
+import { resolve } from "$app/paths";
 
-    const workspaceCtx = getWorkspaceContext();
-    const noteCtx = getNotesContext();
-    const session = getAuthSession();
-    const useSettings = getGlobalSettings();
+const workspaceCtx = getWorkspaceContext();
+const noteCtx = getNotesContext();
+const session = getAuthSession();
+const useSettings = getGlobalSettings();
 
-    const user = $derived(session.user);
-    const displayName = $derived(
-        user?.name || user?.email?.split("@")[0] || "there",
-    );
+const user = $derived(session.user);
+const displayName = $derived(
+	user?.name || user?.email?.split("@")[0] || "there",
+);
 
-    const greeting = $derived.by(() => {
-        const hour = new Date().getHours();
-        if (hour < 12) return "Good morning";
-        if (hour < 17) return "Good afternoon";
-        return "Good evening";
-    });
+const greeting = $derived.by(() => {
+	const hour = new Date().getHours();
+	if (hour < 12) return "Good morning";
+	if (hour < 17) return "Good afternoon";
+	return "Good evening";
+});
 
-    const today = new Date().toLocaleDateString(undefined, {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
+const today = new Date().toLocaleDateString(undefined, {
+	weekday: "long",
+	year: "numeric",
+	month: "long",
+	day: "numeric",
+});
 
-    // Desktop shows local + cloud workspaces; web only has cloud ones.
-    const workspaces = $derived(
-        ISDESKTOP ? workspaceCtx.all : workspaceCtx.cloud.workspaces,
-    );
+// Desktop shows local + cloud workspaces; web only has cloud ones.
+const workspaces = $derived(
+	ISDESKTOP ? workspaceCtx.all : workspaceCtx.cloud.workspaces,
+);
 
-    const noteUpdatedAt = (value: unknown) =>
-        typeof value === "number"
-            ? value * 1000
-            : new Date(value as string).getTime();
+const noteUpdatedAt = (value: unknown) =>
+	typeof value === "number"
+		? value * 1000
+		: new Date(value as string).getTime();
 
-    // Recent notes of the current workspace.
-    const recentNotes = $derived(
-        [...noteCtx.list]
-            .filter((n) => !n.trashedAt)
-            .sort(
-                (a, b) =>
-                    noteUpdatedAt(b.updatedAt) - noteUpdatedAt(a.updatedAt),
-            )
-            .slice(0, 8),
-    );
+// Recent notes of the current workspace.
+const recentNotes = $derived(
+	[...noteCtx.list]
+		.filter((n) => !n.trashedAt)
+		.sort((a, b) => noteUpdatedAt(b.updatedAt) - noteUpdatedAt(a.updatedAt))
+		.slice(0, 8),
+);
 
-    const noteHref = (note: NoteMeta) =>
-        "ownerId" in note
-            ? resolve("/(cloud)/note-[id]", { id: note.id })
-            : resolve("/(local)/local-note-[id]", { id: note.id });
+const noteHref = (note: NoteMeta) =>
+	"ownerId" in note
+		? resolve("/(cloud)/note-[id]", { id: note.id })
+		: resolve("/(local)/local-note-[id]", { id: note.id });
 
-    const openWorkspace = (workspace: Workspace) => {
-        workspaceCtx.current = workspace;
-        goto(
-            resolve(
-                "ownerId" in workspace
-                    ? "/(cloud)/space-[id]"
-                    : "/(local)/local-workspace-[id]",
-                { id: workspace.id },
-            ),
-        );
-    };
+const openWorkspace = (workspace: Workspace) => {
+	workspaceCtx.current = workspace;
+	goto(
+		resolve(
+			"ownerId" in workspace
+				? "/(cloud)/space-[id]"
+				: "/(local)/local-workspace-[id]",
+			{ id: workspace.id },
+		),
+	);
+};
 
-    /**
-     * Returns why a workspace can't be deleted (rule 2 & 3), or null if it can.
-     */
-    const workspaceDeleteBlockReason = (
-        workspace: Workspace,
-    ): string | null => {
-        if (workspace.id === workspaceCtx.current?.id) {
-            return "Switch to another workspace before deleting this one";
-        }
-        const isCloud = "ownerId" in workspace;
-        const list = isCloud
-            ? workspaceCtx.cloud.workspaces
-            : workspaceCtx.local.workspaces;
-        return list.length <= 1
-            ? `You need at least one ${isCloud ? "cloud" : "local"} workspace. Create another one to delete this.`
-            : null;
-    };
+/**
+ * Returns why a workspace can't be deleted (rule 2 & 3), or null if it can.
+ */
+const workspaceDeleteBlockReason = (workspace: Workspace): string | null => {
+	if (workspace.id === workspaceCtx.current?.id) {
+		return "Switch to another workspace before deleting this one";
+	}
+	const isCloud = "ownerId" in workspace;
+	const list = isCloud
+		? workspaceCtx.cloud.workspaces
+		: workspaceCtx.local.workspaces;
+	return list.length <= 1
+		? `You need at least one ${isCloud ? "cloud" : "local"} workspace. Create another one to delete this.`
+		: null;
+};
 
-    const confirmDeleteWorkspace = (workspace: Workspace) => {
-        openDeleteConfirmation({
-            title: `Delete "${workspace.name}"?`,
-            description:
-                "This will permanently delete the workspace and all of its notes.",
-            confirmation: { text: workspace.name },
-            warning: {
-                allowDelete: true,
-                text: "This action cannot be undone.",
-            },
-            onClick: async () => {
-                if ("ownerId" in workspace) {
-                    await workspaceCtx.cloud.delete(workspace.id);
-                } else {
-                    await workspaceCtx.local.delete(workspace.id);
-                }
-                toast.success(`Workspace "${workspace.name}" deleted`);
-            },
-        });
-    };
+const confirmDeleteWorkspace = (workspace: Workspace) => {
+	openDeleteConfirmation({
+		title: `Delete "${workspace.name}"?`,
+		description:
+			"This will permanently delete the workspace and all of its notes.",
+		confirmation: { text: workspace.name },
+		warning: {
+			allowDelete: true,
+			text: "This action cannot be undone.",
+		},
+		onClick: async () => {
+			if ("ownerId" in workspace) {
+				await workspaceCtx.cloud.delete(workspace.id);
+			} else {
+				await workspaceCtx.local.delete(workspace.id);
+			}
+			toast.success(`Workspace "${workspace.name}" deleted`);
+		},
+	});
+};
 
-    const confirmDeleteNote = (note: NoteMeta) => {
-        openDeleteConfirmation({
-            title: `Delete "${note.name}"?`,
-            description: "This note will be deleted permanently.",
-            confirmation: { text: note.name },
-            warning: { allowDelete: true, text: "This cannot be undone." },
-            onClick: async () => {
-                await noteCtx.delete(note.id);
-            },
-        });
-    };
+const confirmDeleteNote = (note: NoteMeta) => {
+	openDeleteConfirmation({
+		title: `Delete "${note.name}"?`,
+		description: "This note will be deleted permanently.",
+		confirmation: { text: note.name },
+		warning: { allowDelete: true, text: "This cannot be undone." },
+		onClick: async () => {
+			await noteCtx.delete(note.id);
+		},
+	});
+};
 
-    const toggleStar = (note: NoteMeta) => {
-        noteCtx
-            .updateMeta(note.id, { starred: !note.starred })
-            .catch(() => toast.error("Failed to update favorite status"));
-    };
+const toggleStar = (note: NoteMeta) => {
+	noteCtx
+		.updateMeta(note.id, { starred: !note.starred })
+		.catch(() => toast.error("Failed to update favorite status"));
+};
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col">
