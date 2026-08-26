@@ -7,7 +7,7 @@ import { IconPicker, IconsRenderer } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { Skeleton } from "@nota/ui/shadcn/skeleton/index.js";
 import { cn } from "@nota/ui/utils";
-import { onMount, untrack } from "svelte";
+import { onMount } from "svelte";
 import { NoteTopbarActions, Topbar } from "#lib/components/custom/index.ts";
 import { callAI, getUserModels } from "#lib/data/local/ai/ai.js";
 import { onFileUpload } from "#lib/data/local/storage.js";
@@ -75,7 +75,8 @@ const onUpdate = () => {
 const editor = createEditor({
 	onUpdate,
 	onFileUpload: (fileType) => onFileUpload(fileType, data.id),
-	callAI,
+	callAI: (prompt, onChunk, onError) =>
+		callAI(prompt, onChunk, onError, data.id),
 });
 
 const loadNote = async (id: string) => {

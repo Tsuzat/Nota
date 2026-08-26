@@ -1,7 +1,9 @@
 <script lang="ts">
 import CircleUser from "@lucide/svelte/icons/circle-user";
 import LogOut from "@lucide/svelte/icons/log-out";
-import { SimpleToolTip } from "@nota/ui";
+import Moon from "@lucide/svelte/icons/moon-star";
+import Sun from "@lucide/svelte/icons/sun";
+import { SimpleToolTip, toggleMode } from "@nota/ui";
 import {
 	MovingLogin,
 	MovingSettings,
@@ -17,6 +19,7 @@ import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.ts";
 import { openTrash } from "#lib/components/dialogs/transhed.svelte";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
 import { getKeyboardShortcut } from "#lib/utils.ts";
+import { setCorrectWindowMode } from "#lib/window.ts";
 import { PUBLIC_NOTA_URL } from "$app/env/public";
 import { getGlobalSettings, openSigninDevice } from "../dialogs";
 
@@ -29,7 +32,6 @@ const trashedNotes = $derived.by(() => {
 	return notesCtx.list.filter((note) => note.trashedAt).length;
 });
 
-let open = $state(false);
 const sidebar = Sidebar.useSidebar();
 
 const session = getAuthSession();
@@ -54,6 +56,20 @@ function getUserIntials(name?: string) {
     <Sidebar.Menu>
       <Sidebar.MenuItem>
         <div class="flex items-center justify-around w-full">
+          <SimpleToolTip content="Toggle Theme">
+            <Button
+              variant="outline"
+              size="icon-lg"
+              class="relative"
+              onclick={() => {
+                toggleMode();
+                setCorrectWindowMode();
+              }}
+            >
+              <Sun class="dark:hidden" />
+              <Moon class="hidden dark:block" />
+            </Button>
+          </SimpleToolTip>
           <SimpleToolTip
             content="Settings"
             keyboard={getKeyboardShortcut(",", true)}
@@ -71,7 +87,7 @@ function getUserIntials(name?: string) {
               <MovingSettings size={18} isHovered={isSettingsHovered} />
             </Button>
           </SimpleToolTip>
-          <SimpleToolTip content="Trash" side="bottom">
+          <SimpleToolTip content="Trash">
             <Button
               variant="outline"
               size="icon-lg"
@@ -91,7 +107,7 @@ function getUserIntials(name?: string) {
           </SimpleToolTip>
 
           {#if !isSignedIn()}
-            <SimpleToolTip content="Sign In" side="bottom">
+            <SimpleToolTip content="Sign In">
               <Button
                 variant="outline"
                 size="icon-lg"

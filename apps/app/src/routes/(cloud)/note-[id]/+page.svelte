@@ -80,7 +80,8 @@ const setupEditor = async (id: string) => {
 	editor = createEditor({
 		collaborative: true,
 		onFileUpload: (fileType) => onFileUpload(fileType, data.id),
-		callAI,
+		callAI: (prompt, onChunk, onError) =>
+			callAI(prompt, onChunk, onError, data.id),
 		extensions: [...extensions],
 	});
 };
