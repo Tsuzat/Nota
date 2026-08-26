@@ -1,5 +1,6 @@
 import type {
 	account,
+	aiLedger,
 	assets,
 	deviceCode,
 	guestRole,
@@ -68,3 +69,6 @@ export type CloudPublish = typeof publish.$inferSelect;
 export type InsertCloudPublish = typeof publish.$inferInsert;
 export type Publish = CloudPublish;
 export type InsertPublish = InsertCloudPublish;
+
+export type AiLedger = typeof aiLedger.$inferSelect;
+export type InsertAiLedger = typeof aiLedger.$inferInsert;

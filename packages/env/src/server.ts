@@ -28,6 +28,25 @@ export const env = createEnv({
 		R2_PUBLIC_URL: z.url(),
 		TURNSILE_SECRET: z.string().min(1),
 		RESEND_FROM_EMAIL: z.email(),
+		NOTA_AI_API_KEY: z.string().min(1),
+		NOTA_AI_PROVIDER: z.preprocess(
+			(v) => (v === "others" ? "other" : v),
+			z
+				.enum([
+					"openai",
+					"google",
+					"anthropic",
+					"deepseek",
+					"grok",
+					"kimi",
+					"other",
+				])
+				.default("other"),
+		),
+		NOTA_AI_MODEL_ID: z.string().min(1),
+		NOTA_AI_INPUT_COST: z.coerce.number().min(0),
+		NOTA_AI_OUTPUT_COST: z.coerce.number().min(0),
+		NOTA_AI_ENDPOINT: z.string().optional().nullable(),
 		NODE_ENV: z
 			.enum(["development", "production", "test"])
 			.default("development"),

@@ -83,6 +83,14 @@ export const cleanupTestData = async () => {
 			sql`owner_id IN (SELECT id FROM "user" WHERE email LIKE '%@test.com')`,
 		);
 
+	// Needs to be imported from schema/app
+	const { aiLedger } = await import("../../schema/app");
+	await db
+		.delete(aiLedger)
+		.where(
+			sql`user_id IN (SELECT id FROM "user" WHERE email LIKE '%@test.com')`,
+		);
+
 	await db
 		.delete(userQuota)
 		.where(

@@ -31,10 +31,12 @@ export const userQuota = p.pgTable("user_quota", {
 		.primaryKey()
 		.references(() => user.id, { onDelete: "cascade" }),
 	planTier: planTier("plan_tier").notNull().default("free"),
+	// numeric(14,6) stores fractional cents precisely (e.g. 0.02 cents = 0.020000).
+	// 14 precision = up to ~99M cents with 6 decimal places. drizzle returns string.
 	aiCreditBalanceCents: p
-		.bigint("ai_credit_balance_cents", { mode: "number" })
+		.numeric("ai_credit_balance_cents", { precision: 14, scale: 6 })
 		.notNull()
-		.default(0),
+		.default("0"),
 	assignedStorageBytes: p
 		.bigint("assigned_storage_bytes", { mode: "number" })
 		.notNull()
@@ -196,6 +198,44 @@ export const assets = p.pgTable(
 		createdAt: p.timestamp("created_at").notNull().defaultNow(),
 	},
 	(t) => [p.index("assets_note_idx").on(t.noteId)],
+);
+
+// ── ai_ledger ──────────────────────────────────────────────
+export const aiLedger = p.pgTable(
+	"ai_ledger",
+	{
+		id: p
+			.text("id")
+			.primaryKey()
+			.$defaultFn(() => nanoid()),
+		userId: p
+			.text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		noteId: p
+			.text("note_id")
+			.references(() => notes.id, { onDelete: "set null" }),
+		// raw token counts for audit
+		inputTokens: p.integer("input_tokens").notNull().default(0),
+		outputTokens: p.integer("output_tokens").notNull().default(0),
+		// costs stored as fractional cents with 6 decimal precision
+		usedInputCost: p
+			.numeric("used_input_cost", { precision: 14, scale: 6 })
+			.notNull(),
+		usedOutputCost: p
+			.numeric("used_output_cost", { precision: 14, scale: 6 })
+			.notNull(),
+		totalCostCents: p
+			.numeric("total_cost_cents", { precision: 14, scale: 6 })
+			.notNull(),
+		description: p.text("description"),
+		createdAt: p.timestamp("created_at").notNull().defaultNow(),
+	},
+	(t) => [
+		p.index("ai_ledger_user_idx").on(t.userId),
+		p.index("ai_ledger_user_created_idx").on(t.userId, t.createdAt),
+		p.index("ai_ledger_note_idx").on(t.noteId),
+	],
 );
 
 // ── publish ────────────────────────────────────────────────

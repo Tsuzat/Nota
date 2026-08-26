@@ -4,6 +4,7 @@ import * as schema from "./index";
 export const relations = defineRelations(schema, (r) => ({
 	user: {
 		accounts: r.many.account(),
+		aiLedger: r.many.aiLedger(),
 	},
 	account: {
 		user: r.one.user({
@@ -91,6 +92,16 @@ export const relations = defineRelations(schema, (r) => ({
 		publisher: r.one.user({
 			from: r.publish.publishedBy,
 			to: r.user.id,
+		}),
+	},
+	aiLedger: {
+		user: r.one.user({
+			from: r.aiLedger.userId,
+			to: r.user.id,
+		}),
+		note: r.one.notes({
+			from: r.aiLedger.noteId,
+			to: r.notes.id,
 		}),
 	},
 }));
