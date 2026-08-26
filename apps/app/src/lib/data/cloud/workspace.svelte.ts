@@ -41,6 +41,7 @@ export class CloudWorkspaces {
 	);
 
 	get workspaces(): CloudWorkspace[] {
+		if (!isSignedIn()) return [];
 		return this.#query.data ?? [];
 	}
 

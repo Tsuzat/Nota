@@ -47,10 +47,18 @@ $effect(() => {
 			: `${PUBLIC_NOTA_URL}/signin`;
 		window.location.href = signinUrl;
 	}
+});
+
+$effect(() => {
 	if (wasSignedIn && !isSignedIn() && !session.isPending) {
 		queryClient.removeQueries({ queryKey: orpc.workspace.key() });
 		queryClient.removeQueries({ queryKey: orpc.notes.key() });
+		queryClient.removeQueries({ queryKey: orpc.storage.key() });
+		queryClient.removeQueries({ queryKey: orpc.snapshots.key() });
 	}
+});
+
+$effect(() => {
 	if (!session.isPending) {
 		wasSignedIn = isSignedIn();
 	}

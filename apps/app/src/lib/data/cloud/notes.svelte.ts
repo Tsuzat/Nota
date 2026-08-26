@@ -92,10 +92,12 @@ export class CloudNotes {
 	);
 
 	notes(_workspaceId?: string): NoteMeta[] {
+		if (!isSignedIn()) return [];
 		return this.#listQuery.data ?? [];
 	}
 
 	get collaborated(): (NoteMeta & { role: string })[] {
+		if (!isSignedIn()) return [];
 		return this.#collabQuery.data ?? [];
 	}
 

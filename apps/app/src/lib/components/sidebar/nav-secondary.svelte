@@ -1,6 +1,5 @@
 <script lang="ts">
 import CircleUser from "@lucide/svelte/icons/circle-user";
-import CreditCard from "@lucide/svelte/icons/credit-card";
 import LogOut from "@lucide/svelte/icons/log-out";
 import { SimpleToolTip } from "@nota/ui";
 import {
@@ -63,7 +62,9 @@ function getUserIntials(name?: string) {
             <Button
               variant="outline"
               size="icon-lg"
-              onclick={() => { useSettings.open = true; }}
+              onclick={() => {
+                useSettings.open = true;
+              }}
               onmouseenter={() => (isSettingsHovered = true)}
               onmouseleave={() => (isSettingsHovered = false)}
             >
@@ -151,23 +152,16 @@ function getUserIntials(name?: string) {
                 <DropdownMenu.Group>
                   <DropdownMenu.Item
                     onclick={async () => {
-                      await openUrl(PUBLIC_NOTA_URL + "/profile");
+                      await openUrl(PUBLIC_NOTA_URL + "/account");
                     }}
                   >
                     <CircleUser />
                     Account
                   </DropdownMenu.Item>
-                  <DropdownMenu.Item
-                    onclick={async () => {
-                      await openUrl(PUBLIC_NOTA_URL + "/profile");
-                    }}
-                  >
-                    <CreditCard />
-                    Billing
-                  </DropdownMenu.Item>
                 </DropdownMenu.Group>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item
+                  variant="destructive"
                   onclick={() => {
                     authClient.signOut();
                   }}
