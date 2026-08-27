@@ -98,7 +98,12 @@ export const recordAiUsageAndDeduct = async (opts: {
 			.returning();
 		if (!ledger) throw new Error("Failed to record AI usage");
 
-		// Deduct atomically – never let balance go logic be handled elsewhere
+		// Deduct atomically. We allow the balance to go slightly negative
+		// (micro-overshoot) because the AI tokens have already been streamed
+		// to the client — rolling back the ledger row would give the user
+		// free output with no audit trail. The route-level pre-check already
+		// blocks users with zero or negative balance from starting a new
+		// generation.
 		await tx
 			.update(userQuota)
 			.set({

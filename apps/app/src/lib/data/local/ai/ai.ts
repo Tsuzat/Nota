@@ -201,25 +201,34 @@ async function fetchNotaServerAI(
 			if (done) break;
 
 			buffer += decoder.decode(value, { stream: true });
-			const lines = buffer.split("\n\n");
+			// Normalize CRLF to LF for consistent block splitting
+			const normalized = buffer.replace(/\r\n/g, "\n");
+			const blocks = normalized.split("\n\n");
 
 			// The last element is either an empty string (if it ended with \n\n)
 			// or an incomplete chunk. Pop it and keep it in the buffer.
-			buffer = lines.pop() || "";
+			buffer = blocks.pop() || "";
 
-			for (const block of lines) {
-				if (!block.trim()) continue;
+			for (const block of blocks) {
+				if (!block) continue;
 				const blockLines = block.split("\n");
 				let event = "message";
-				let data = "";
+				const dataLines: string[] = [];
 				for (const line of blockLines) {
 					if (line.startsWith("event:")) {
-						event = line.substring(6).trim();
+						event = line.startsWith("event: ")
+							? line.substring(7).trim()
+							: line.substring(6).trim();
 					} else if (line.startsWith("data:")) {
-						data = line.substring(5).trim();
+						// Per SSE standard: if line starts with 'data: ', strip only the single leading space
+						const dataVal = line.startsWith("data: ")
+							? line.substring(6)
+							: line.substring(5);
+						dataLines.push(dataVal);
 					}
 				}
 
+				const data = dataLines.join("\n");
 				if (event === "delta") {
 					onChunk(data);
 				} else if (event === "error") {

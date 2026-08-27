@@ -23,6 +23,11 @@ const computeCosts = (
 	};
 };
 
+// Hard cap per generation so a hung upstream never burns tokens forever.
+const AI_TIMEOUT_MS = 180_000;
+// Keep the SSE connection alive through Cloudflare/Railway proxies.
+const HEARTBEAT_MS = 15_000;
+
 const buildProvider = () => {
 	const p = env.NOTA_AI_PROVIDER;
 	const baseURL = env.NOTA_AI_ENDPOINT || undefined;
@@ -77,22 +82,51 @@ export const createAiSseRoute = () => {
 		}
 
 		const provider = buildProvider();
-		const result = callAI({ provider, prompt });
 
 		return streamSSE(c, async (stream) => {
-			let hadError = false;
+			// Abort the upstream AI request the moment the client disconnects
+			// so we don't keep burning tokens on a dead connection (Hono's
+			// writeSSE swallows errors, so without this the loop would run
+			// to completion).
+			const controller = new AbortController();
+			stream.onAbort(() => controller.abort());
+			// Safety net: never let a single generation hang forever.
+			const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+			// Keep the SSE connection alive through Cloudflare/Railway proxies.
+			const heartbeat = setInterval(() => {
+				void stream.writeSSE({ event: "ping", data: "" });
+			}, HEARTBEAT_MS);
+
 			try {
-				for await (const chunk of result.textStream) {
-					await stream.writeSSE({ data: chunk, event: "delta" });
+				let result: ReturnType<typeof callAI> | null = null;
+				try {
+					result = callAI({ provider, prompt, abortSignal: controller.signal });
+				} catch (e) {
+					console.error("[ai-sse] failed to start AI call:", e);
+					await stream.writeSSE({
+						data: "AI request failed to start",
+						event: "error",
+					});
+					return;
 				}
-			} catch (e) {
-				hadError = true;
-				await stream.writeSSE({
-					data: e instanceof Error ? e.message : "AI failed",
-					event: "error",
-				});
-			}
-			if (!hadError) {
+
+				let hadError = false;
+				let errorMessage = "AI request interrupted";
+				try {
+					for await (const chunk of result.textStream) {
+						if (stream.aborted) {
+							hadError = true;
+							break;
+						}
+						await stream.writeSSE({ data: chunk, event: "delta" });
+					}
+				} catch (e) {
+					hadError = true;
+					errorMessage = e instanceof Error ? e.message : "AI failed";
+					console.error("[ai-sse] stream error:", e);
+				}
+
+				// Resolve usage even on abort — callAI accumulates partial usage.
 				const usage = await result.usage.catch(
 					() =>
 						({ inputTokens: 0, outputTokens: 0 }) as {
@@ -102,42 +136,68 @@ export const createAiSseRoute = () => {
 				);
 				const it = usage.inputTokens ?? 0;
 				const ot = usage.outputTokens ?? 0;
-				const { usedInputCost, usedOutputCost, totalCostCents } = computeCosts(
-					it,
-					ot,
-					env.NOTA_AI_INPUT_COST,
-					env.NOTA_AI_OUTPUT_COST,
-				);
-				try {
-					const ledger = await recordAiUsageAndDeduct({
-						userId: session.user.id,
-						noteId: body.noteId ?? null,
-						inputTokens: it,
-						outputTokens: ot,
-						usedInputCost,
-						usedOutputCost,
-						totalCostCents,
-						description: body.description ?? null,
-					});
-					void deleteCachedUserQuota(session.user.id).catch(() => {});
-					void invalidateAiLedgerCache(session.user.id).catch(() => {});
-					await stream.writeSSE({
-						data: JSON.stringify({
+
+				if (it > 0 || ot > 0) {
+					const { usedInputCost, usedOutputCost, totalCostCents } =
+						computeCosts(
+							it,
+							ot,
+							env.NOTA_AI_INPUT_COST,
+							env.NOTA_AI_OUTPUT_COST,
+						);
+					try {
+						const ledger = await recordAiUsageAndDeduct({
+							userId: session.user.id,
+							noteId: body.noteId ?? null,
 							inputTokens: it,
 							outputTokens: ot,
 							usedInputCost,
 							usedOutputCost,
 							totalCostCents,
-							ledgerId: ledger.id,
-						}),
-						event: "done",
-					});
-				} catch {
+							description: body.description ?? null,
+						});
+						void deleteCachedUserQuota(session.user.id).catch(() => {});
+						void invalidateAiLedgerCache(session.user.id).catch(() => {});
+						if (!hadError) {
+							await stream.writeSSE({
+								data: JSON.stringify({
+									inputTokens: it,
+									outputTokens: ot,
+									usedInputCost,
+									usedOutputCost,
+									totalCostCents,
+									ledgerId: ledger.id,
+									ok: true,
+								}),
+								event: "done",
+							});
+						}
+					} catch (e) {
+						console.error("[ai-sse] recordAiUsageAndDeduct failed:", e);
+						if (!hadError) {
+							await stream.writeSSE({
+								data: JSON.stringify({
+									ok: false,
+									error:
+										e instanceof Error ? e.message : "Failed to record usage",
+								}),
+								event: "done",
+							});
+						}
+					}
+				} else if (!hadError) {
 					await stream.writeSSE({
-						data: JSON.stringify({ inputTokens: it, outputTokens: ot }),
+						data: JSON.stringify({ ok: false, error: "No usage reported" }),
 						event: "done",
 					});
 				}
+
+				if (hadError) {
+					await stream.writeSSE({ data: errorMessage, event: "error" });
+				}
+			} finally {
+				clearInterval(heartbeat);
+				clearTimeout(timeout);
 			}
 		});
 	});

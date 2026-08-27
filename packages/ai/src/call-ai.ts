@@ -60,7 +60,7 @@ function resolveModel(providerConfig: AIProvider): LanguageModel {
 		case "deepseek": {
 			const deepseek = createOpenAICompatible({
 				name: "deepseek",
-				baseURL: "https://api.deepseek.com/v1",
+				baseURL: "https://api.deepseek.com",
 				apiKey: providerConfig.apiKey,
 			});
 			return deepseek(providerConfig.modelId);
