@@ -103,6 +103,15 @@ export function callAI(options: CallAIOptions): CallAIResult {
 		totalTokens: undefined,
 	};
 
+	console.log(
+		"Calling AI with provider:",
+		options.provider.provider,
+		"model:",
+		options.provider.modelId,
+		"prompt:",
+		options.prompt,
+	);
+
 	const result = streamText({
 		model,
 		system: systemInstruction,

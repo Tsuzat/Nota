@@ -91,7 +91,7 @@ app.get(
 					console.error("[Hocuspocus] Error in handleConnection:", e);
 				}
 			},
-			onMessage(event) {
+			onMessage(event, ws) {
 				if (!clientConnection) return;
 
 				// WebSocket Message Rate Limiting
@@ -102,11 +102,7 @@ app.get(
 					console.warn(
 						"[WebSocket] Message rate limit exceeded for connection",
 					);
-					// @ts-expect-error - The standard WebSocket type might lack this signature, but hono/bun handles it.
-					// We'll close gracefully by not parsing further, which will trigger client-side disconnects.
-					if ("close" in event.target) {
-						(event.target as any).close(1008, "Rate Limit Exceeded");
-					}
+					ws.close(1008, "Rate Limit Exceeded");
 					return;
 				}
 

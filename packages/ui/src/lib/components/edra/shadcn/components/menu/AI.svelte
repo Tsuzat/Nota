@@ -55,9 +55,11 @@ export interface AIModel {
 
 interface Props {
 	availableModels?: AIModel[];
+	useServer?: boolean;
 }
 
-let { availableModels: propAvailableModels = [] }: Props = $props();
+let { availableModels: propAvailableModels = [], useServer = false }: Props =
+	$props();
 
 let inputTag = $state<HTMLTextAreaElement | null>(null);
 const editor = getEditor();
@@ -575,7 +577,7 @@ function handleKeydown(event: KeyboardEvent) {
 			}
 			if (event.key === "Enter") {
 				event.preventDefault();
-				quickActions[activeOptionIndex].handler();
+				quickActions[activeOptionIndex]?.handler();
 				return;
 			}
 		} else {
@@ -597,269 +599,336 @@ function handleInput(e: Event) {
 <svelte:document onkeydown={handleKeydown} />
 
 {#snippet MenuButton(action: (typeof quickActions)[0], idx: number)}
-	{@const Icon = action.icon}
-	<button
-		onclick={action.handler}
-		class="group/dropdown-menu-item relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden transition-colors select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:*:[svg]:text-destructive {activeOptionIndex ===
-		idx
-			? 'quick-action-active bg-accent text-accent-foreground'
-			: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}"
-	>
-		<Icon />
-		<span class="ml-2 flex-1 text-start font-medium">{action.label}</span>
-		{#if activeOptionIndex === idx}
-			<span class="rounded-sm bg-muted/75 px-1 text-muted-foreground">Enter</span>
-		{/if}
-	</button>
+  {@const Icon = action.icon}
+  <button
+    onclick={action.handler}
+    class="group/dropdown-menu-item relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden transition-colors select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:*:[svg]:text-destructive {activeOptionIndex ===
+    idx
+      ? 'quick-action-active bg-accent text-accent-foreground'
+      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}"
+  >
+    <Icon />
+    <span class="ml-2 flex-1 text-start font-medium">{action.label}</span>
+    {#if activeOptionIndex === idx}
+      <span class="rounded-sm bg-muted/75 px-1 text-muted-foreground"
+        >Enter</span
+      >
+    {/if}
+  </button>
 {/snippet}
 
 <BubbleMenu
-	{editor}
-	pluginKey="ai-bubble-menu"
-	shouldShow={(props) => {
-		const { editor: propsEditor, view } = props;
-		if (!propsEditor || !propsEditor.isEditable || propsEditor.isDestroyed) return false;
-		if (!view || propsEditor.view.dragging) return false;
+  {editor}
+  pluginKey="ai-bubble-menu"
+  shouldShow={(props) => {
+    const { editor: propsEditor, view } = props;
+    if (!propsEditor || !propsEditor.isEditable || propsEditor.isDestroyed)
+      return false;
+    if (!view || propsEditor.view.dragging) return false;
 
-		// Always show during AI confirmation (streaming or action bar)
-		if (aiState === AIState.Confirmation) return true;
+    // Always show during AI confirmation (streaming or action bar)
+    if (aiState === AIState.Confirmation) return true;
 
-		if (propsEditor.isActive('ai-highlight')) return true;
+    if (propsEditor.isActive("ai-highlight")) return true;
 
-		removeAIHighlight(propsEditor);
-		aiState = AIState.Idle;
-		aiResponse = '';
-		return false;
-	}}
-	class="absolute z-100 flex max-h-120 max-w-3xl flex-col rounded-lg bg-popover/75 p-0 backdrop-blur-2xl transition-[height] duration-500"
-	options={{
-		strategy: 'absolute',
-		autoPlacement: {
-			allowedPlacements: ['bottom-start', 'top-start']
-		},
-		scrollTarget: editor.view.dom.parentElement ?? window,
-		onShow() {
-			activeOptionIndex = 0;
-			inputTag?.focus({ preventScroll: true });
-		},
-		onHide() {
-			inputTag?.blur();
-			modelSelectorOpen = false;
-		}
-	}}
+    removeAIHighlight(propsEditor);
+    aiState = AIState.Idle;
+    aiResponse = "";
+    return false;
+  }}
+  class="absolute z-100 flex max-h-120 max-w-3xl flex-col rounded-lg bg-popover/75 p-0 backdrop-blur-2xl transition-[height] duration-500"
+  options={{
+    strategy: "absolute",
+    autoPlacement: {
+      allowedPlacements: ["bottom-start", "top-start"],
+    },
+    scrollTarget: editor.view.dom.parentElement ?? window,
+    onShow() {
+      activeOptionIndex = 0;
+      inputTag?.focus({ preventScroll: true });
+    },
+    onHide() {
+      inputTag?.blur();
+      modelSelectorOpen = false;
+    },
+  }}
 >
-	{#if aiState === AIState.Idle}
-		<div class="flex w-xl flex-col overflow-hidden rounded-xl border shadow-2xl backdrop-blur-2xl">
-			<!-- Input Area -->
-			<form class="flex items-start px-3 py-3" onsubmit={handleSubmit}>
-				<textarea
-					bind:value={inputValue}
-					bind:this={inputTag}
-					oninput={handleInput}
-					rows={1}
-					placeholder="Ask AI anything..."
-					class="h-auto max-h-40 w-full resize-none border-0 outline-hidden"></textarea>
-				<Button type="submit" size="icon-lg" class="rounded-full"><Send /></Button>
-			</form>
+  {#if aiState === AIState.Idle}
+    <div
+      class="flex w-xl flex-col overflow-hidden rounded-xl border shadow-2xl backdrop-blur-2xl"
+    >
+      <!-- Input Area -->
+      <form class="flex items-start px-3 py-3" onsubmit={handleSubmit}>
+        <textarea
+          bind:value={inputValue}
+          bind:this={inputTag}
+          oninput={handleInput}
+          rows={1}
+          placeholder="Ask AI anything..."
+          class="h-auto max-h-40 w-full resize-none border-0 outline-hidden"
+        ></textarea>
+        <Button type="submit" size="icon-lg" class="rounded-full"
+          ><Send /></Button
+        >
+      </form>
 
-			<!-- Toolbar: Model selector on left, Include Entire Note on right -->
-			<div class="flex items-center justify-between border-t border-border/50 bg-muted/20 px-2 py-1.5">
-				<!-- Model Selector (Combobox) -->
-				<Popover.Root bind:open={modelSelectorOpen}>
-					<Popover.Trigger
-						class={buttonVariants({
-							variant: 'ghost',
-							size: 'sm',
-							class: 'h-7 gap-1.5 px-2 text-xs font-normal text-muted-foreground hover:text-foreground'
-						})}
-					>
-						{#if selectedModel}
-							{#if typeof selectedModel.providerIcon === 'object' && selectedModel.providerIcon !== null}
-								<img src={selectedModel.providerIcon.dark} alt="" class="size-3.5 shrink-0 rounded-xs hidden dark:block" />
-								<img src={selectedModel.providerIcon.light} alt="" class="size-3.5 shrink-0 rounded-xs block dark:hidden" />
-							{:else if typeof selectedModel.providerIcon === 'string'}
-								<img src={selectedModel.providerIcon} alt="" class="size-3.5 shrink-0 rounded-xs" />
-							{:else}
-								<Sparkles class="size-3.5 shrink-0 text-muted-foreground" />
-							{/if}
-							<span class="max-w-36 truncate font-medium">{selectedModel.displayName}</span>
-						{:else}
-							<Sparkles class="size-3.5 shrink-0 text-muted-foreground" />
-							<span class="max-w-36 truncate font-medium">{selectedModelId}</span>
-						{/if}
-						<ChevronsUpDown class="size-3 shrink-0 opacity-50" />
-					</Popover.Trigger>
-					<Popover.Content
-						align="start"
-						side="bottom"
-						sideOffset={4}
-						class="z-110 max-h-80 w-72 p-0! text-primary! shadow-2xl bg-popover/95 backdrop-blur-2xl border border-border"
-						onCloseAutoFocus={(e) => {
-							e.preventDefault();
-							e.stopPropagation();
-						}}
-						onEscapeKeydown={(e) => {
-							e.preventDefault();
-							e.stopPropagation();
-						}}
-					>
-						<Command.Root class="p-0!">
-							<Command.Input placeholder="Search models..." />
-							<Command.List class="max-h-60 overflow-y-auto p-1">
-								<Command.Empty class="py-4 text-center text-xs text-muted-foreground">No models available.</Command.Empty>
-								<Command.Group value="models">
-									<Tooltip.Provider delayDuration={150}>
-										{#each displayModels as model (model.id)}
-											<Command.Item
-												value={`${model.displayName} ${model.id} ${model.provider ?? ''} ${model.notes ?? ''}`}
-												onSelect={() => selectModel(model.id)}
-												onclick={() => selectModel(model.id)}
-												class="group/model-item flex cursor-pointer items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs"
-											>
-												<div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
-													<Check class={cn('size-3.5 shrink-0', model.id !== selectedModelId && 'invisible')} />
-													{#if typeof model.providerIcon === 'object' && model.providerIcon !== null}
-														<img src={model.providerIcon.dark} alt="" class="size-3.5 shrink-0 rounded-xs hidden dark:block" />
-														<img src={model.providerIcon.light} alt="" class="size-3.5 shrink-0 rounded-xs block dark:hidden" />
-													{:else if typeof model.providerIcon === 'string'}
-														<img src={model.providerIcon} alt="" class="size-3.5 shrink-0 rounded-xs" />
-													{:else}
-														<Sparkles class="size-3.5 shrink-0 text-muted-foreground" />
-													{/if}
-													<span class="font-medium text-foreground truncate">{model.displayName}</span>
-												</div>
+      <!-- Toolbar: Model selector on left, Include Entire Note on right -->
+      <div
+        class="flex items-center justify-between border-t border-border/50 bg-muted/20 px-2 py-1.5"
+      >
+        <!-- Model Selector (Combobox) -->
+        {#if useServer}
+          <small class="text-xs text-muted-foreground">Using Nota Server</small>
+        {:else}
+          <Popover.Root bind:open={modelSelectorOpen}>
+            <Popover.Trigger
+              class={buttonVariants({
+                variant: "ghost",
+                size: "sm",
+                class:
+                  "h-7 gap-1.5 px-2 text-xs font-normal text-muted-foreground hover:text-foreground",
+              })}
+            >
+              {#if selectedModel}
+                {#if typeof selectedModel.providerIcon === "object" && selectedModel.providerIcon !== null}
+                  <img
+                    src={selectedModel.providerIcon.dark}
+                    alt=""
+                    class="size-3.5 shrink-0 rounded-xs hidden dark:block"
+                  />
+                  <img
+                    src={selectedModel.providerIcon.light}
+                    alt=""
+                    class="size-3.5 shrink-0 rounded-xs block dark:hidden"
+                  />
+                {:else if typeof selectedModel.providerIcon === "string"}
+                  <img
+                    src={selectedModel.providerIcon}
+                    alt=""
+                    class="size-3.5 shrink-0 rounded-xs"
+                  />
+                {:else}
+                  <Sparkles class="size-3.5 shrink-0 text-muted-foreground" />
+                {/if}
+                <span class="max-w-36 truncate font-medium"
+                  >{selectedModel.displayName}</span
+                >
+              {:else}
+                <Sparkles class="size-3.5 shrink-0 text-muted-foreground" />
+                <span class="max-w-36 truncate font-medium"
+                  >{selectedModelId}</span
+                >
+              {/if}
+              <ChevronsUpDown class="size-3 shrink-0 opacity-50" />
+            </Popover.Trigger>
+            <Popover.Content
+              align="start"
+              side="bottom"
+              sideOffset={4}
+              class="z-110 max-h-80 w-72 p-0! text-primary! shadow-2xl bg-popover/95 backdrop-blur-2xl border border-border"
+              onCloseAutoFocus={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onEscapeKeydown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <Command.Root class="p-0!">
+                <Command.Input placeholder="Search models..." />
+                <Command.List class="max-h-60 overflow-y-auto p-1">
+                  <Command.Empty
+                    class="py-4 text-center text-xs text-muted-foreground"
+                    >No models available.</Command.Empty
+                  >
+                  <Command.Group value="models">
+                    <Tooltip.Provider delayDuration={150}>
+                      {#each displayModels as model (model.id)}
+                        <Command.Item
+                          value={`${model.displayName} ${model.id} ${model.provider ?? ""} ${model.notes ?? ""}`}
+                          onSelect={() => selectModel(model.id)}
+                          onclick={() => selectModel(model.id)}
+                          class="group/model-item flex cursor-pointer items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs"
+                        >
+                          <div
+                            class="flex items-center gap-2 overflow-hidden flex-1 min-w-0"
+                          >
+                            <Check
+                              class={cn(
+                                "size-3.5 shrink-0",
+                                model.id !== selectedModelId && "invisible",
+                              )}
+                            />
+                            {#if typeof model.providerIcon === "object" && model.providerIcon !== null}
+                              <img
+                                src={model.providerIcon.dark}
+                                alt=""
+                                class="size-3.5 shrink-0 rounded-xs hidden dark:block"
+                              />
+                              <img
+                                src={model.providerIcon.light}
+                                alt=""
+                                class="size-3.5 shrink-0 rounded-xs block dark:hidden"
+                              />
+                            {:else if typeof model.providerIcon === "string"}
+                              <img
+                                src={model.providerIcon}
+                                alt=""
+                                class="size-3.5 shrink-0 rounded-xs"
+                              />
+                            {:else}
+                              <Sparkles
+                                class="size-3.5 shrink-0 text-muted-foreground"
+                              />
+                            {/if}
+                            <span class="font-medium text-foreground truncate"
+                              >{model.displayName}</span
+                            >
+                          </div>
 
-												{#if model.notes}
-													<Tooltip.Root>
-														<Tooltip.Trigger
-															onclick={(e: MouseEvent) => e.stopPropagation()}
-															class="text-muted-foreground ml-auto! hover:text-foreground shrink-0 rounded p-0.5 transition-colors focus:outline-hidden"
-														>
-															<Info class="size-3.5" />
-														</Tooltip.Trigger>
-														<Tooltip.Content side="right" sideOffset={8} class="max-w-xs z-150 text-xs shadow-lg leading-relaxed">
-															<span>{model.notes}</span>
-														</Tooltip.Content>
-													</Tooltip.Root>
-												{/if}
-											</Command.Item>
-										{/each}
-									</Tooltip.Provider>
-								</Command.Group>
-							</Command.List>
-						</Command.Root>
-					</Popover.Content>
-				</Popover.Root>
+                          {#if model.notes}
+                            <Tooltip.Root>
+                              <Tooltip.Trigger
+                                onclick={(e: MouseEvent) => e.stopPropagation()}
+                                class="text-muted-foreground ml-auto! hover:text-foreground shrink-0 rounded p-0.5 transition-colors focus:outline-hidden"
+                              >
+                                <Info class="size-3.5" />
+                              </Tooltip.Trigger>
+                              <Tooltip.Content
+                                side="right"
+                                sideOffset={8}
+                                class="max-w-xs z-150 text-xs shadow-lg leading-relaxed"
+                              >
+                                <span>{model.notes}</span>
+                              </Tooltip.Content>
+                            </Tooltip.Root>
+                          {/if}
+                        </Command.Item>
+                      {/each}
+                    </Tooltip.Provider>
+                  </Command.Group>
+                </Command.List>
+              </Command.Root>
+            </Popover.Content>
+          </Popover.Root>
+        {/if}
 
-				<!-- Include Entire Note -->
-				<Button
-					type="button"
-					variant={includeEntireNote ? 'default' : 'ghost'}
-					size="sm"
-					class="h-7 gap-1.5 px-2 text-xs transition-colors"
-					onclick={() => {
-						includeEntireNote = !includeEntireNote;
-					}}
-				>
-					<FileText class="size-3.5" />
-					<span>Include Entire Note</span>
-				</Button>
-			</div>
+        <!-- Include Entire Note -->
+        <Button
+          type="button"
+          variant={includeEntireNote ? "default" : "ghost"}
+          size="sm"
+          class="h-7 gap-1.5 px-2 text-xs transition-colors"
+          onclick={() => {
+            includeEntireNote = !includeEntireNote;
+          }}
+        >
+          <FileText class="size-3.5" />
+          <span>Include Entire Note</span>
+        </Button>
+      </div>
 
-			{#if isAIActive() && inputValue.trim()?.length === 0}
-				<!-- Quick Actions List -->
-				<div
-					transition:slide={{ axis: 'y', duration: 250 }}
-					class="flex max-h-72 flex-col overflow-y-auto p-1.5 border-t border-border/50"
-				>
-					{#each quickActions as action, idx (action.id)}
-						{@render MenuButton(action, idx)}
-					{/each}
-				</div>
-			{/if}
-		</div>
-	{:else if aiState === AIState.Confirmation}
-		{#if generating}
-			<!-- AI is writing — content streams directly into editor -->
-			<div transition:fade class="animated-gradient-border rounded p-0.5">
-				<div class="flex items-center gap-2 rounded-md bg-popover p-1">
-					<Sparkle class="size-4!" />
-					<span
-						class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-semibold text-transparent"
-					>
-						AI is writing</span
-					>
-					<div class="flex h-5 items-center space-x-0.5">
-						{#each Array(3) as id, i (i)}
-							<div
-								data-ball-number={id}
-								class="dot h-1.25 w-1.25 rounded-full bg-primary"
-								style:animation-delay="{i * 160}ms"
-							></div>
-						{/each}
-						<span class="sr-only">Loading</span>
-					</div>
-				</div>
-			</div>
-		{:else}
-			<!-- Action bar — AI has finished streaming into editor -->
-			<div
-				transition:fade
-				class="flex items-center justify-between gap-2 rounded-lg border p-2 shadow-2xl"
-			>
-				<Button size="sm" onclick={replaceSelection}>
-					<Check />
-					Replace
-				</Button>
-				<Button variant="outline" size="sm" onclick={insertNext}>
-					<CornerDownLeft />
-					Insert
-				</Button>
-				<Button variant="outline" size="sm" onclick={copyToClipboard}>
-					<Copy />
-					Copy
-				</Button>
-				<Button variant="outline" size="sm" onclick={retry}>
-					<RotateCcw />
-					Retry
-				</Button>
-				<Button variant="destructive" size="sm" onclick={discardChanges}>
-					<Trash2 />
-					Discard
-				</Button>
-			</div>
-		{/if}
-	{/if}
+      {#if isAIActive() && inputValue.trim()?.length === 0}
+        <!-- Quick Actions List -->
+        <div
+          transition:slide={{ axis: "y", duration: 250 }}
+          class="flex max-h-72 flex-col overflow-y-auto p-1.5 border-t border-border/50"
+        >
+          {#each quickActions as action, idx (action.id)}
+            {@render MenuButton(action, idx)}
+          {/each}
+        </div>
+      {/if}
+    </div>
+  {:else if aiState === AIState.Confirmation}
+    {#if generating}
+      <!-- AI is writing — content streams directly into editor -->
+      <div transition:fade class="animated-gradient-border rounded p-0.5">
+        <div class="flex items-center gap-2 rounded-md bg-popover p-1">
+          <Sparkle class="size-4!" />
+          <span
+            class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text font-semibold text-transparent"
+          >
+            AI is writing</span
+          >
+          <div class="flex h-5 items-center space-x-0.5">
+            {#each Array(3) as id, i (i)}
+              <div
+                data-ball-number={id}
+                class="dot h-1.25 w-1.25 rounded-full bg-primary"
+                style:animation-delay="{i * 160}ms"
+              ></div>
+            {/each}
+            <span class="sr-only">Loading</span>
+          </div>
+        </div>
+      </div>
+    {:else}
+      <!-- Action bar — AI has finished streaming into editor -->
+      <div
+        transition:fade
+        class="flex items-center justify-between gap-2 rounded-lg border p-2 shadow-2xl"
+      >
+        <Button size="sm" onclick={replaceSelection}>
+          <Check />
+          Replace
+        </Button>
+        <Button variant="outline" size="sm" onclick={insertNext}>
+          <CornerDownLeft />
+          Insert
+        </Button>
+        <Button variant="outline" size="sm" onclick={copyToClipboard}>
+          <Copy />
+          Copy
+        </Button>
+        <Button variant="outline" size="sm" onclick={retry}>
+          <RotateCcw />
+          Retry
+        </Button>
+        <Button variant="destructive" size="sm" onclick={discardChanges}>
+          <Trash2 />
+          Discard
+        </Button>
+      </div>
+    {/if}
+  {/if}
 </BubbleMenu>
 
 <style>
-	@property --angle {
-		syntax: '<angle>';
-		inherits: false;
-		initial-value: 0deg;
-	}
-	@keyframes rotate {
-		to {
-			--angle: 360deg;
-		}
-	}
-	.animated-gradient-border {
-		background: conic-gradient(from var(--angle), #e50909, #c8b207, #e608e6, #6eec07);
-		animation: rotate 3s linear infinite;
-		border-radius: 12px !important;
-	}
-	.dot {
-		animation: bounce-dots 1.4s ease-in-out infinite;
-	}
-	@keyframes bounce-dots {
-		0%,
-		100% {
-			transform: translateY(0);
-			opacity: 0.35;
-		}
-		50% {
-			transform: translateY(-4px);
-			opacity: 1;
-		}
-	}
+  @property --angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
+  @keyframes rotate {
+    to {
+      --angle: 360deg;
+    }
+  }
+  .animated-gradient-border {
+    background: conic-gradient(
+      from var(--angle),
+      #e50909,
+      #c8b207,
+      #e608e6,
+      #6eec07
+    );
+    animation: rotate 3s linear infinite;
+    border-radius: 12px !important;
+  }
+  .dot {
+    animation: bounce-dots 1.4s ease-in-out infinite;
+  }
+  @keyframes bounce-dots {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.35;
+    }
+    50% {
+      transform: translateY(-4px);
+      opacity: 1;
+    }
+  }
 </style>

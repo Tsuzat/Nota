@@ -99,9 +99,5 @@ export const relations = defineRelations(schema, (r) => ({
 			from: r.aiLedger.userId,
 			to: r.user.id,
 		}),
-		note: r.one.notes({
-			from: r.aiLedger.noteId,
-			to: r.notes.id,
-		}),
 	},
 }));

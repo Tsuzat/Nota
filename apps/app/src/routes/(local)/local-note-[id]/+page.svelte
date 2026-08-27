@@ -2,19 +2,26 @@
 import type { SelectableModel } from "@nota/ai";
 import type { LocalNoteMeta } from "@nota/db-local/types";
 import { toast } from "@nota/ui";
-import { createEditor, Edra } from "@nota/ui/edra/shadcn/index.js";
+import {
+	type Content,
+	createEditor,
+	Edra,
+} from "@nota/ui/edra/shadcn/index.js";
 import { IconPicker, IconsRenderer } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { Skeleton } from "@nota/ui/shadcn/skeleton/index.js";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
 import { NoteTopbarActions, Topbar } from "#lib/components/custom/index.ts";
+import { getGlobalSettings } from "#lib/components/dialogs/index.js";
 import { callAI, getUserModels } from "#lib/data/local/ai/ai.js";
 import { onFileUpload } from "#lib/data/local/storage.js";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
+import { ISDESKTOP } from "#lib/utils.js";
 import { afterNavigate, beforeNavigate } from "$app/navigation";
 
 const noteCtx = getNotesContext();
+const settings = getGlobalSettings();
 
 let note = $state<LocalNoteMeta | null>(null);
 let availableModels = $state<SelectableModel[]>([]);
@@ -23,7 +30,7 @@ let isContentReady = $state(false);
 let isNotFound = $state(false);
 let isDirty = false;
 let isSaving = false;
-let pendingContent: any = null;
+let pendingContent: Content = null;
 let pendingText: string = "";
 let isLocked = $state(false);
 let isFullWidth = $state(
@@ -67,8 +74,9 @@ const saveNote = async () => {
 };
 
 const onUpdate = () => {
-	pendingContent = editor?.getJSON();
-	pendingText = editor?.getText() || "";
+	if (!editor) return;
+	pendingContent = editor.getJSON();
+	pendingText = editor.getText() || "";
 	isDirty = true;
 };
 
@@ -160,7 +168,7 @@ const { data } = $props();
       <Edra.DragHandle class="transition-all duration-300" />
       <Edra.BubbleMenu />
       <Edra.ToC />
-      <Edra.UseAI {availableModels} />
+      <Edra.UseAI {availableModels} useServer={!ISDESKTOP || !settings.useOwnKeys} />
       <Edra.Content
         class={cn(
           "mx-auto w-full px-4 pb-32 min-h-[calc(100dvh-10rem)] *:outline-none transition-all duration-150",

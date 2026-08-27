@@ -12,7 +12,7 @@ import { onDestroy, onMount } from "svelte";
 import type { Doc } from "yjs";
 import { getAuthSession } from "#lib/auth-session.svelte.js";
 import { NoteTopbarActions, Topbar } from "#lib/components/custom/index.ts";
-import { ShareNote } from "#lib/components/dialogs/index.ts";
+import { getGlobalSettings, ShareNote } from "#lib/components/dialogs/index.ts";
 import { realtimeProvider } from "#lib/data/cloud/realtime.js";
 import { onFileUpload } from "#lib/data/cloud/storage.js";
 import { callAI, getUserModels } from "#lib/data/local/ai/ai.js";
@@ -20,10 +20,12 @@ import { getNotesContext } from "#lib/data/notes.svelte.ts";
 import type { NoteMeta } from "#lib/data/types.js";
 import "./page.css";
 
+import { ISDESKTOP } from "#lib/utils.js";
 import { afterNavigate, beforeNavigate } from "$app/navigation";
 
 const noteCtx = getNotesContext();
 const user = $derived(getAuthSession().data?.user);
+const settings = getGlobalSettings();
 
 let note = $state<NoteMeta | null>(null);
 let availableModels = $state<SelectableModel[]>([]);
@@ -207,7 +209,7 @@ const { data } = $props();
       <Edra.DragHandle class="transition-all duration-300" />
       <Edra.BubbleMenu />
       <Edra.ToC />
-      <Edra.UseAI {availableModels} />
+      <Edra.UseAI {availableModels} useServer={!ISDESKTOP || !settings.useOwnKeys} />
       <Edra.Content
         class={cn(
           "mx-auto w-full px-4 pb-32 min-h-[calc(100dvh-10rem)] *:outline-none transition-all duration-150",

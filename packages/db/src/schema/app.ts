@@ -212,9 +212,9 @@ export const aiLedger = p.pgTable(
 			.text("user_id")
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
-		noteId: p
-			.text("note_id")
-			.references(() => notes.id, { onDelete: "set null" }),
+		// note_id is a plain nullable text column (no FK) so it can hold both
+		// cloud note IDs and local (desktop SQLite) note IDs for audit purposes.
+		noteId: p.text("note_id"),
 		// raw token counts for audit
 		inputTokens: p.integer("input_tokens").notNull().default(0),
 		outputTokens: p.integer("output_tokens").notNull().default(0),

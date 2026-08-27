@@ -68,8 +68,8 @@ describe("Database - AI Ledger", () => {
 		expect(result.limit).toBe(10);
 		expect(result.offset).toBe(0);
 		// With desc order, the newest (Second insertion) should be first
-		expect(result.items[0].description).toBe("Second insertion");
-		expect(result.items[1].description).toBe("Test insertion");
+		expect(result.items[0]?.description).toBe("Second insertion");
+		expect(result.items[1]?.description).toBe("Test insertion");
 	});
 
 	test("recordAiUsageAndDeduct should atomically insert and deduct credits", async () => {

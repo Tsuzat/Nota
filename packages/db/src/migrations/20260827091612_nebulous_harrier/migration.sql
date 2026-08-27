@@ -1,0 +1,1 @@
+ALTER TABLE "ai_ledger" DROP CONSTRAINT "ai_ledger_note_id_notes_id_fkey";

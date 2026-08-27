@@ -278,12 +278,12 @@ onMount(async () => {
             disabled={isOpeningPortal}
           >
             <span>{isOpeningPortal ? "Opening portal..." : "Manage Billing"}</span>
-            <ExternalLink class="h-4 w-4" />
+            <ExternalLink  />
           </Button>
 
-          <Button href="/dashboard" >
-            <span>Go to Dashboard</span>
-            <ArrowRight class="h-4 w-4" />
+          <Button href="/" >
+            <span>Go to Home</span>
+            <ArrowRight  />
           </Button>
         </div>
       </div>
