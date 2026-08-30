@@ -2,6 +2,7 @@
 import CircleCheck from "@lucide/svelte/icons/circle-check";
 import Sparkles from "@lucide/svelte/icons/sparkles";
 import Star from "@lucide/svelte/icons/star";
+import { toast } from "@nota/ui";
 import { Button } from "@nota/ui/components/ui/button/index.ts";
 import { cn } from "@nota/ui/utils";
 import { AnimatePresence, createLayoutMotion } from "motion-sv";
@@ -93,9 +94,16 @@ const plans = $derived<Plan[]>([
 		btn: {
 			text: "Start Pro Plan",
 			onclick: async () => {
-				await authClient.checkout({
-					slug: `pro-${frequency}`,
-				});
+				toast.promise(
+					authClient.checkout({
+						slug: `pro-${frequency}`,
+					}),
+					{
+						loading: "Redirecting to checkout...",
+						success: "Redirected to checkout!",
+						error: "Failed to redirect to checkout.",
+					},
+				);
 			},
 		},
 	},
@@ -321,9 +329,16 @@ function getBadges(plan: Plan, activeFrequency: FREQUENCY): PlanBadge[] {
         variant="secondary"
         class="w-full sm:w-auto shadow-md hover:shadow-lg transition-all duration-300"
         onclick={async () => {
-          await authClient.checkout({
-            slug: "ai-credits",
-          });
+          toast.promise(
+            authClient.checkout({
+              slug: "ai-credit",
+            }),
+            {
+              loading: "Redirecting to checkout...",
+              success: "Redirected to checkout!",
+              error: "Failed to redirect to checkout.",
+            },
+          ); 
         }}
       >
         Buy AI Credits
