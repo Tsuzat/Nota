@@ -14,10 +14,7 @@ export const createPdfExportRoute = () => {
 		// 2. Pro-only gating
 		const isPro = await isUserPro(session.user.id);
 		if (!isPro) {
-			return c.json(
-				{ error: "PDF export requires a Pro plan" },
-				403,
-			);
+			return c.json({ error: "PDF export requires a Pro plan" }, 403);
 		}
 
 		// 3. Parse request body
@@ -65,7 +62,9 @@ export const createPdfExportRoute = () => {
 			});
 
 			if (!gotenbergResponse.ok) {
-				const errorText = await gotenbergResponse.text().catch(() => "Unknown error");
+				const errorText = await gotenbergResponse
+					.text()
+					.catch(() => "Unknown error");
 				console.error(
 					`[pdf-export] Gotenberg error ${gotenbergResponse.status}: ${errorText}`,
 				);
@@ -77,10 +76,7 @@ export const createPdfExportRoute = () => {
 
 			// 6. Stream the PDF response directly to the client
 			c.header("Content-Type", "application/pdf");
-			c.header(
-				"Content-Disposition",
-				"attachment; filename=\"note.pdf\"",
-			);
+			c.header("Content-Disposition", 'attachment; filename="note.pdf"');
 
 			// Forward content-length if Gotenberg provides it
 			const contentLength = gotenbergResponse.headers.get("content-length");
