@@ -27,6 +27,8 @@ import * as DropdownMenu from "@nota/ui/shadcn/dropdown-menu/index.js";
 import { Switch } from "@nota/ui/shadcn/switch/index.js";
 import { cn } from "@nota/ui/utils";
 import { fade } from "svelte/transition";
+import { exportFile, exportPDF } from "#lib/data/exports.ts";
+import { importFile } from "#lib/data/imports.ts";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
 import { snapshotsManager } from "#lib/data/snapshots.svelte.ts";
 import type { NoteMeta } from "#lib/data/types.js";
@@ -59,7 +61,7 @@ let isStarred = $derived(Boolean(note.starred));
 const sanitizeFilename = (name: string) => {
 	return (name || "note")
 		.toLowerCase()
-		.replace(/[^a-z0-9_\-\.]/gi, "_")
+		.replace(/[^a-z0-9_\-\\.]/gi, "_")
 		.replace(/_+/g, "_");
 };
 
@@ -94,18 +96,6 @@ const toggleFullWidth = (e?: Event) => {
 	toast.success(isFullWidth ? "Full width enabled" : "Default width restored");
 };
 
-const downloadFile = (content: string, filename: string, mimeType: string) => {
-	const blob = new Blob([content], { type: mimeType });
-	const url = URL.createObjectURL(blob);
-	const a = document.createElement("a");
-	a.href = url;
-	a.download = filename;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-	URL.revokeObjectURL(url);
-};
-
 // Toggle note star
 const handleToggleStar = async () => {
 	const newStarred = !isStarred;
@@ -117,35 +107,37 @@ const handleToggleStar = async () => {
 			await noteCtx.local.update(note.id, { starred: newStarred });
 		}
 		toast.success(newStarred ? "Note starred" : "Note unstarred");
-	} catch (e) {
+	} catch {
 		note.starred = !newStarred;
 		toast.error("Failed to update star");
 	}
 };
 
 // Export handlers
-const handleExportHTML = () => {
+const handleExportHTML = async () => {
 	if (!editor) return;
 	const htmlContent = editor.getHTML();
 
-	downloadFile(htmlContent, `${sanitizeFilename(note.name)}.html`, "text/html");
+	const blob = new Blob([htmlContent], { type: "text/html" });
+	await exportFile(`${sanitizeFilename(note.name)}.html`, blob);
 	toast.success("Exported as HTML");
 };
 
-const handleExportMarkdown = () => {
+const handleExportMarkdown = async () => {
 	if (!editor) return;
-	let md = "";
+	let md;
 	try {
-		md = (editor.storage as any)?.markdown?.getMarkdown?.() || editor.getText();
+		md = editor.getMarkdown() || editor.getText();
 	} catch {
 		md = editor.getText();
 	}
 	const finalMd = `# ${note.name || "Untitled Note"}\n\n${md}`;
-	downloadFile(finalMd, `${sanitizeFilename(note.name)}.md`, "text/markdown");
+	const blob = new Blob([finalMd], { type: "text/markdown" });
+	await exportFile(`${sanitizeFilename(note.name)}.md`, blob);
 	toast.success("Exported as Markdown");
 };
 
-const handleExportJSON = () => {
+const handleExportJSON = async () => {
 	if (!editor) return;
 	const json = JSON.stringify(
 		{
@@ -158,25 +150,31 @@ const handleExportJSON = () => {
 		null,
 		2,
 	);
-	downloadFile(json, `${sanitizeFilename(note.name)}.json`, "application/json");
+	const blob = new Blob([json], { type: "application/json" });
+	await exportFile(`${sanitizeFilename(note.name)}.json`, blob);
 	toast.success("Exported as JSON");
 };
 
-const handleExportPDF = () => {
-	toast.info(
-		"PDF export is coming soon. You can use Print to PDF in your browser for now.",
-	);
+const handleExportPDF = async () => {
+	if (!editor) return;
+	const toastId = toast.loading("Generating PDF...");
+	try {
+		const htmlContent = editor.getHTML();
+		await exportPDF(note.name, htmlContent);
+		toast.dismiss(toastId);
+		toast.success("PDF exported successfully");
+	} catch (e) {
+		toast.dismiss(toastId);
+		toast.error(e instanceof Error ? e.message : "PDF export failed");
+	}
 };
 
 // Import handler
-const handleImportClick = () => {
-	fileInput?.click();
-};
+const handleImportClick = async () => {
+	if (!editor) return;
 
-const handleFileImport = async (e: Event) => {
-	const target = e.target as HTMLInputElement;
-	const file = target.files?.[0];
-	if (!file || !editor) return;
+	const imported = await importFile([".md", ".json", ".txt"]);
+	if (!imported) return;
 
 	try {
 		// 1. Take snapshot before importing
@@ -184,18 +182,18 @@ const handleFileImport = async (e: Event) => {
 			await snapshotsManager.createManualSnapshot(
 				note.id,
 				isCloud,
-				`Before importing ${file.name}`,
+				`Before importing ${imported.name}`,
 			);
 		} catch (err) {
 			console.warn("Failed to create snapshot before import:", err);
 		}
 
 		// 2. Read and parse file
-		const text = await file.text();
-		if (file.name.endsWith(".json")) {
-			const parsed = JSON.parse(text);
-			const content = parsed.content || parsed;
-			editor.commands.setContent(content, { contentType: "json" });
+		const { name, content } = imported;
+		if (name.endsWith(".json")) {
+			const parsed = JSON.parse(content);
+			const editorContent = parsed.content || parsed;
+			editor.commands.setContent(editorContent, { contentType: "json" });
 			if (!isCloud) {
 				await noteCtx.local.saveContent(
 					note.id,
@@ -206,9 +204,9 @@ const handleFileImport = async (e: Event) => {
 		} else {
 			// Markdown or plain text
 			try {
-				editor.commands.setContent(text, { contentType: "markdown" });
+				editor.commands.setContent(content, { contentType: "markdown" });
 			} catch {
-				editor.commands.setContent(text);
+				editor.commands.setContent(content);
 			}
 			if (!isCloud) {
 				await noteCtx.local.saveContent(
@@ -219,12 +217,10 @@ const handleFileImport = async (e: Event) => {
 			}
 		}
 
-		toast.success(`Imported ${file.name} successfully`);
+		toast.success(`Imported ${name} successfully`);
 	} catch (err) {
 		console.error("Import error:", err);
 		toast.error("Failed to import file: Invalid format");
-	} finally {
-		target.value = "";
 	}
 };
 
@@ -261,7 +257,7 @@ const handleMoveToTrash = () => {
 		onClick: async () => {
 			if (isCloud) {
 				await noteCtx.cloud.update(note.id, {
-					trashedAt: new Date().toISOString() as any,
+					trashedAt: new Date(),
 				});
 			} else {
 				await noteCtx.local.update(note.id, { trashedAt: new Date() });
@@ -295,14 +291,6 @@ const handleDeletePermanently = () => {
 };
 </script>
 
-<!-- Hidden file input for note import -->
-<input
-  bind:this={fileInput}
-  type="file"
-  accept=".md,.markdown,.json,text/markdown,application/json,text/plain"
-  class="hidden"
-  onchange={handleFileImport}
-/>
 
 <div class="flex items-center gap-1">
   <!-- Star Toggle Button -->
@@ -339,7 +327,7 @@ const handleDeletePermanently = () => {
     >
       <Ellipsis class="size-4" />
     </DropdownMenu.Trigger>
-    <DropdownMenu.Content align="end" class="w-60 p-1.5 shadow-xl rounded-xl">
+    <DropdownMenu.Content align="end" class="w-fit p-1.5 shadow-xl rounded-xl">
       <!-- 1. Lock Page Switch -->
       <DropdownMenu.Item
         closeOnSelect={false}
@@ -395,7 +383,7 @@ const handleDeletePermanently = () => {
           </DropdownMenu.Item>
           <DropdownMenu.Item
             onclick={handleExportPDF}
-            class="gap-2 cursor-pointer text-muted-foreground"
+            class="gap-2 cursor-pointer"
           >
             <File class="size-4" />
             <span>PDF (.pdf)</span>

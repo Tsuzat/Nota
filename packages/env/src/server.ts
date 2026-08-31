@@ -47,6 +47,7 @@ export const env = createEnv({
 		NOTA_AI_INPUT_COST: z.coerce.number().min(0),
 		NOTA_AI_OUTPUT_COST: z.coerce.number().min(0),
 		NOTA_AI_ENDPOINT: z.string().optional().nullable(),
+		PDF_RENDERER_URL: z.url(),
 		NODE_ENV: z
 			.enum(["development", "production", "test"])
 			.default("development"),

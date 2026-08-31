@@ -112,7 +112,11 @@ export class StorageManager {
 			return {
 				...res,
 				quota: res.quota
-					? { ...res.quota, updatedAt: new Date(res.quota.updatedAt) }
+					? {
+							...res.quota,
+							aiCreditBalanceCents: Number(res.quota.aiCreditBalanceCents),
+							updatedAt: new Date(res.quota.updatedAt),
+						}
 					: undefined,
 			};
 		}

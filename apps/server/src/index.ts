@@ -16,6 +16,7 @@ import { logger } from "hono/logger";
 import { rateLimitMiddleware } from "./middleware/rate-limiter";
 import { banMiddleware, pathBlacklistMiddleware } from "./middleware/security";
 import { createAiSseRoute } from "./routes/ai-sse";
+import { createPdfExportRoute } from "./routes/pdf-export";
 
 const app = new Hono();
 
@@ -53,6 +54,8 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 // SSE AI streaming route (Hono-native, true streaming). Mount before ORPC catch-all.
 app.route("/", createAiSseRoute());
+// PDF export route (Hono-native, binary stream proxy). Mount before ORPC catch-all.
+app.route("/", createPdfExportRoute());
 
 app.get(
 	"/collaboration",
