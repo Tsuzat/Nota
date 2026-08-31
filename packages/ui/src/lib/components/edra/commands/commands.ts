@@ -1,4 +1,4 @@
-import { FileCode, type Icon } from "@lucide/svelte";
+import type { Icon } from "@lucide/svelte";
 import AlignCenter from "@lucide/svelte/icons/align-center";
 import AlighJustify from "@lucide/svelte/icons/align-justify";
 import AlignLeft from "@lucide/svelte/icons/align-left";
@@ -7,6 +7,7 @@ import Audio from "@lucide/svelte/icons/audio-lines";
 import Bold from "@lucide/svelte/icons/bold";
 import Code from "@lucide/svelte/icons/code";
 import IFrame from "@lucide/svelte/icons/code-xml";
+import FileCode from "@lucide/svelte/icons/file-code";
 import Heading1 from "@lucide/svelte/icons/heading-1";
 import Heading2 from "@lucide/svelte/icons/heading-2";
 import Heading3 from "@lucide/svelte/icons/heading-3";

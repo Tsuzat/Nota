@@ -1,6 +1,6 @@
 <script lang="ts">
 import { autoPlacement } from "@floating-ui/dom";
-import { Braces, Sparkles, TextAlignCenter } from "@lucide/svelte";
+import Braces from "@lucide/svelte/icons/braces";
 import Clipboard from "@lucide/svelte/icons/clipboard";
 import Duplicate from "@lucide/svelte/icons/copy";
 import GripVertical from "@lucide/svelte/icons/grip-vertical";
@@ -8,6 +8,8 @@ import Palette from "@lucide/svelte/icons/palette";
 import Plus from "@lucide/svelte/icons/plus";
 import RemoveFormatting from "@lucide/svelte/icons/remove-formatting";
 import Repeat2 from "@lucide/svelte/icons/repeat-2";
+import Sparkles from "@lucide/svelte/icons/sparkles";
+import TextAlignCenter from "@lucide/svelte/icons/text-align-center";
 import Delete from "@lucide/svelte/icons/trash-2";
 import type { Editor } from "@tiptap/core";
 import { DragHandlePlugin } from "@tiptap/extension-drag-handle";

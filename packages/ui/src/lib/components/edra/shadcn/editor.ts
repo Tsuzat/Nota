@@ -3,7 +3,7 @@ import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import TableOfContents, {
 	getHierarchicalIndexes,
 } from "@tiptap/extension-table-of-contents";
-import { all, createLowlight } from "lowlight";
+import { common, createLowlight } from "lowlight";
 import { getDefaultExtensions } from "../extensions.ts";
 import { MediaPlaceholder } from "../tiptap/extensions/MediaPlaceHolder.ts";
 import {
@@ -28,7 +28,7 @@ import SlashCommandComp from "./components/SlashCommand.svelte";
 import VideoExtendedComp from "./components/VideoExtended.svelte";
 import { setTocItems } from "./toc.svelte";
 
-const lowlight = createLowlight(all);
+const lowlight = createLowlight(common);
 
 export interface EdraEditorProps {
 	extensions?: Extensions;

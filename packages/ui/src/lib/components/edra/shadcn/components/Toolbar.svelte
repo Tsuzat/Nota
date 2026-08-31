@@ -1,5 +1,5 @@
 <script lang="ts">
-import { WandSparkles } from "@lucide/svelte";
+import WandSparkles from "@lucide/svelte/icons/wand-sparkles";
 import { Button } from "#lib/components/ui/button/index.js";
 import { Separator } from "#lib/components/ui/separator/index.js";
 import { cn } from "#lib/utils.js";

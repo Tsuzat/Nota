@@ -9,9 +9,9 @@ import {
 const { editor, node, updateAttributes, extension, getPos }: NodeViewProps =
 	$props();
 
-import { Sparkle } from "@lucide/svelte";
 import Check from "@lucide/svelte/icons/check";
 import Copy from "@lucide/svelte/icons/copy";
+import Sparkle from "@lucide/svelte/icons/sparkle";
 import * as Command from "#lib/components/ui/command/index.js";
 import * as Popover from "#lib/components/ui/popover/index.js";
 import { cn } from "#lib/utils.js";

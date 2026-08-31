@@ -1,5 +1,8 @@
 <script lang="ts">
-import { AudioLines, CodeXml, Image, Video } from "@lucide/svelte";
+import AudioLines from "@lucide/svelte/icons/audio-lines";
+import CodeXml from "@lucide/svelte/icons/code-xml";
+import Image from "@lucide/svelte/icons/image";
+import Video from "@lucide/svelte/icons/video";
 import { type NodeViewProps } from "@tiptap/core";
 import { BarSpinner } from "#lib/components/icons/index.js";
 import { Button } from "#lib/components/ui/button/index.js";

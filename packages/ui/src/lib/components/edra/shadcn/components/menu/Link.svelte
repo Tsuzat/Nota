@@ -1,7 +1,7 @@
 <script lang="ts">
-import { Link } from "@lucide/svelte";
 import Check from "@lucide/svelte/icons/check";
 import Copy from "@lucide/svelte/icons/copy";
+import Link from "@lucide/svelte/icons/link";
 import Edit from "@lucide/svelte/icons/pen";
 import Trash2 from "@lucide/svelte/icons/trash-2";
 import { slide } from "svelte/transition";

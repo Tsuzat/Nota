@@ -1,15 +1,14 @@
 <script lang="ts">
-import { Download } from "@lucide/svelte";
 import Check from "@lucide/svelte/icons/check";
 import Code from "@lucide/svelte/icons/code";
 import Columns2 from "@lucide/svelte/icons/columns-2";
 import Copy from "@lucide/svelte/icons/copy";
+import Download from "@lucide/svelte/icons/download";
 import Eye from "@lucide/svelte/icons/eye";
 import Pencil from "@lucide/svelte/icons/pencil";
 import TriangleAlert from "@lucide/svelte/icons/triangle-alert";
 import Workflow from "@lucide/svelte/icons/workflow";
 import type { NodeViewProps } from "@tiptap/core";
-import mermaid from "mermaid";
 import { onDestroy, onMount, tick } from "svelte";
 import { Button } from "#lib/components/ui/button/index.js";
 import * as Tabs from "#lib/components/ui/tabs/index.js";
@@ -38,6 +37,25 @@ let isRendering = $state(false);
 let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 let renderCounter = 0;
 
+let mermaidInstance: typeof import("mermaid").default | null = null;
+
+async function getMermaid() {
+	if (!mermaidInstance) {
+		const mod = await import("mermaid");
+		mermaidInstance = mod.default;
+	}
+	const isDark =
+		typeof document !== "undefined" &&
+		document.documentElement.classList.contains("dark");
+	mermaidInstance.initialize({
+		startOnLoad: false,
+		theme: isDark ? "dark" : "default",
+		securityLevel: "loose",
+		fontFamily: "inherit",
+	});
+	return mermaidInstance;
+}
+
 async function renderMermaid(target: HTMLDivElement | null, source: string) {
 	if (!target || !source.trim()) {
 		if (target) target.innerHTML = "";
@@ -50,6 +68,7 @@ async function renderMermaid(target: HTMLDivElement | null, source: string) {
 
 	const id = `mermaid-${crypto.randomUUID().slice(0, 8)}`;
 	try {
+		const mermaid = await getMermaid();
 		const { svg, bindFunctions } = await mermaid.render(id, source);
 		// Stale check — discard if a newer render was triggered
 		if (thisRender !== renderCounter) return;

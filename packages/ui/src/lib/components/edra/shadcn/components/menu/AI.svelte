@@ -1,24 +1,22 @@
 <script lang="ts">
-import {
-	ArrowDownWideNarrow,
-	Brain,
-	Check,
-	CheckCheck,
-	ChevronsUpDown,
-	Copy,
-	CornerDownLeft,
-	Feather,
-	FileText,
-	Info,
-	PenLine,
-	RefreshCcwDot,
-	RotateCcw,
-	Send,
-	Sparkle,
-	Sparkles,
-	TextWrap,
-	Trash2,
-} from "@lucide/svelte";
+import ArrowDownWideNarrow from "@lucide/svelte/icons/arrow-down-wide-narrow";
+import Brain from "@lucide/svelte/icons/brain";
+import Check from "@lucide/svelte/icons/check";
+import CheckCheck from "@lucide/svelte/icons/check-check";
+import ChevronsUpDown from "@lucide/svelte/icons/chevrons-up-down";
+import Copy from "@lucide/svelte/icons/copy";
+import CornerDownLeft from "@lucide/svelte/icons/corner-down-left";
+import Feather from "@lucide/svelte/icons/feather";
+import FileText from "@lucide/svelte/icons/file-text";
+import Info from "@lucide/svelte/icons/info";
+import PenLine from "@lucide/svelte/icons/pen-line";
+import RefreshCcwDot from "@lucide/svelte/icons/refresh-ccw-dot";
+import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
+import Send from "@lucide/svelte/icons/send";
+import Sparkle from "@lucide/svelte/icons/sparkle";
+import Sparkles from "@lucide/svelte/icons/sparkles";
+import TextWrap from "@lucide/svelte/icons/text-wrap";
+import Trash2 from "@lucide/svelte/icons/trash-2";
 import { fade, slide } from "svelte/transition";
 import { toast } from "svelte-sonner";
 import { Button, buttonVariants } from "#lib/components/ui/button/index.js";
