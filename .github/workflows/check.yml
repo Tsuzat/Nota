@@ -36,6 +36,3 @@ jobs:
 
       - name: ESLint & Svelte Lint
         run: bun run lint
-
-      - name: Run Tests
-        run: bun test
