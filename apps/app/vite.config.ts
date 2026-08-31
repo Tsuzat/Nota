@@ -3,6 +3,7 @@ import adapter from "@sveltejs/adapter-static";
 import { sveltekit } from "@sveltejs/kit/vite";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import tailwindcss from "@tailwindcss/vite";
+import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 
 const isDesktop = !!process.env.TAURI_ENV_PLATFORM;
@@ -23,6 +24,12 @@ export default defineConfig({
 						fallback: "index.html",
 					})
 				: adapterCF(),
+		}),
+		visualizer({
+			emitFile: true,
+			filename: "stats.html",
+			gzipSize: true,
+			brotliSize: true,
 		}),
 	],
 	resolve: {

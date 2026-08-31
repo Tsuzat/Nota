@@ -1,5 +1,5 @@
 <script lang="ts">
-import { ChevronRight } from "@lucide/svelte";
+import ChevronRight from "@lucide/svelte/icons/chevron-right";
 import * as Collapsible from "@nota/ui/shadcn/collapsible/index.ts";
 import * as Sidebar from "@nota/ui/shadcn/sidebar/index.ts";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";

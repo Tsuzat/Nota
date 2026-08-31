@@ -1,16 +1,14 @@
 <script lang="ts">
-import {
-	ArrowUpRight,
-	ChevronRight,
-	Copy,
-	Ellipsis,
-	FolderInput,
-	Link,
-	Pencil,
-	Plus,
-	Star,
-	Trash2,
-} from "@lucide/svelte";
+import ArrowUpRight from "@lucide/svelte/icons/arrow-up-right";
+import ChevronRight from "@lucide/svelte/icons/chevron-right";
+import Copy from "@lucide/svelte/icons/copy";
+import Ellipsis from "@lucide/svelte/icons/ellipsis";
+import FolderInput from "@lucide/svelte/icons/folder-input";
+import Link from "@lucide/svelte/icons/link";
+import Pencil from "@lucide/svelte/icons/pencil";
+import Plus from "@lucide/svelte/icons/plus";
+import Star from "@lucide/svelte/icons/star";
+import Trash2 from "@lucide/svelte/icons/trash-2";
 import { user } from "@nota/db/schema/auth";
 import { toast } from "@nota/ui";
 import { openDeleteConfirmation } from "@nota/ui/custom/dialogs/confirm-delete.svelte";

@@ -1,6 +1,5 @@
 <script lang="ts">
 import { QueryClientProvider } from "@tanstack/svelte-query";
-import { SvelteQueryDevtools } from "@tanstack/svelte-query-devtools";
 import "../app.css";
 import { ModeWatcher } from "@nota/ui";
 import ConfirmDelete from "@nota/ui/custom/dialogs/confirm-delete.svelte";
@@ -34,6 +33,13 @@ import { PUBLIC_NOTA_URL } from "$app/env/public";
 const { children } = $props();
 let open = $state(true);
 const settings = setGlobalSettings();
+
+let Devtools = $state<any>(null);
+if (import.meta.env.DEV) {
+	import("@tanstack/svelte-query-devtools").then((mod) => {
+		Devtools = mod.SvelteQueryDevtools;
+	});
+}
 
 const shouldRenderContent = $derived(ISDESKTOP || isSignedIn());
 const session = getAuthSession();
@@ -118,5 +124,7 @@ onMount(async () => {
       </div>
     </div>
   {/if}
-  <SvelteQueryDevtools />
+  {#if Devtools}
+    <Devtools />
+  {/if}
 </QueryClientProvider>
