@@ -1,6 +1,6 @@
 {
 	"name": "@nota/app",
-	"version": "0.9.91-beta",
+	"version": "0.9.92-beta",
 	"private": true,
 	"type": "module",
 	"scripts": {
