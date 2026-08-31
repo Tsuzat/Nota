@@ -19,7 +19,7 @@
     },
     "apps/app": {
       "name": "@nota/app",
-      "version": "0.9.91-beta",
+      "version": "0.9.92-beta",
       "dependencies": {
         "@hocuspocus/provider": "^4.6.0",
         "@lucide/svelte": "catalog:",
