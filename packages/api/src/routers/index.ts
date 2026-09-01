@@ -2,6 +2,7 @@ import type { RouterClient } from "@orpc/server";
 
 import { protectedProcedure, publicProcedure } from "../index";
 import { aiRouter } from "./ai";
+import { authRouter } from "./auth";
 import { guestsRouter } from "./guests";
 import { notesRouter } from "./notes";
 import { publishRouter } from "./publish";
@@ -28,6 +29,7 @@ export const appRouter = {
 	storage: storageRouter,
 	userquota: quotaRouter,
 	ai: aiRouter,
+	auth: authRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;
