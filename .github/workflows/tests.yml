@@ -1,0 +1,66 @@
+name: "Unit Tests"
+
+on:
+    push:
+        branches: ["**"]
+    pull_request:
+        branches: ["**"]
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    check:
+        name: Run Unit Tests
+        runs-on: ubuntu-latest
+        env:
+            NODE_ENV: test
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+            BETTER_AUTH_SECRET: "sample_better_auth_secret_key_32chars_min"
+            BETTER_AUTH_URL: "http://localhost:3000"
+            POLAR_ACCESS_TOKEN: "polar_oat_sample_token"
+            POLAR_WEBHOOK_SECRET: "whsec_sample_webhook_secret"
+            POLAR_PRO_MONTHLY_PLAN_ID: "sample-polar-pro-monthly-plan-id"
+            POLAR_PRO_YEARLY_PLAN_ID: "sample-polar-pro-yearly-plan-id"
+            POLAR_AI_CREDIT_ID: "sample-polar-ai-credit-id"
+            POLAR_SUCCESS_URL: "http://localhost:5173/success"
+            CORS_ORIGIN: "http://localhost:5173"
+            VALKEY_URL: "redis://localhost:6379"
+            GITHUB_CLIENT_ID: "sample_github_client_id"
+            GITHUB_CLIENT_SECRET: "sample_github_client_secret"
+            GOOGLE_CLIENT_ID: "sample_google_client_id"
+            GOOGLE_CLIENT_SECRET: "sample_google_client_secret"
+            RESEND_API_KEY: "re_sample_resend_api_key"
+            RESEND_FROM_EMAIL: "no-reply@nota.ink"
+            R2_REGION: "auto"
+            R2_ACCESS_KEY_ID: "sample_r2_access_key_id"
+            R2_SECRET_ACCESS_KEY: "sample_r2_secret_access_key"
+            R2_ENDPOINT_URL: "https://sample.r2.cloudflarestorage.com"
+            R2_BUCKET_NAME: "nota-test-bucket"
+            R2_PUBLIC_URL: "https://storage.nota.ink"
+            TURNSILE_SECRET: "0x4AAAAAAAsampleTurnstileSecret"
+            NOTA_AI_API_KEY: "sample_nota_ai_api_key"
+            NOTA_AI_PROVIDER: "google"
+            NOTA_AI_MODEL_ID: "gemini-2.5-flash"
+            NOTA_AI_INPUT_COST: "1.0"
+            NOTA_AI_OUTPUT_COST: "5.0"
+            NOTA_AI_ENDPOINT: ""
+            PDF_RENDERER_URL: "https://gotenberg.example.com"
+            PUBLIC_SERVER_URL: "http://localhost:3000"
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: 1.3.14
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Run Unit Tests
+              run: bun test

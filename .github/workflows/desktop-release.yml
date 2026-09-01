@@ -1,12 +1,12 @@
-name: 'Build and Publish'
+name: "Build and Publish"
 on:
   workflow_dispatch:
   push:
     tags:
-      - 'release-v*'
+      - "release-v*"
     paths:
-      - '.github/workflows/desktop-release.yml'
-      - 'package.json'
+      - ".github/workflows/desktop-release.yml"
+      - "package.json"
 
 jobs:
   publish-tauri:
@@ -16,10 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-26'
-            args: '--target aarch64-apple-darwin'
-          - platform: 'macos-26'
-            args: '--target x86_64-apple-darwin'
+          - platform: "macos-26"
+            args: "--target aarch64-apple-darwin"
+          - platform: "macos-26"
+            args: "--target x86_64-apple-darwin"
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v5
@@ -47,15 +47,15 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: './src-tauri -> target'
+          workspaces: "./src-tauri -> target"
 
       - name: install frontend dependencies
         run: bun install --frozen-lockfile
-      
+
       - name: Build and release
         uses: tauri-apps/tauri-action@v0
         env:
-          NODE_OPTIONS: '--max-old-space-size=8096'
+          NODE_OPTIONS: "--max-old-space-size=8096"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
@@ -65,12 +65,11 @@ jobs:
           PUBLIC_REALTIME_URL: ${{ vars.PUBLIC_REALTIME_URL }}
 
         with:
-          projectPath: './apps/app'
+          projectPath: "./apps/app"
           tagName: release-v__VERSION__
-          releaseName: 'Nota v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          releaseName: "Nota v__VERSION__"
+          releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
           includeUpdaterJson: true
-
