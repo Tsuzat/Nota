@@ -1,8 +1,4 @@
-import {
-	deleteCachedNoteGuests,
-	getCachedNoteGuests,
-	setCachedNoteGuests,
-} from "@nota/cache/guests";
+import { deleteCachedNoteGuests } from "@nota/cache/guests";
 import { deleteCachedCollabNotes } from "@nota/cache/notes";
 import {
 	getCachedNoteUserPermission,
@@ -37,7 +33,13 @@ const resolvePermission = async (noteId: string, userId: string) => {
 
 export const guestsRouter = {
 	list: protectedProcedure
-		.input(z.object({ noteId: z.string() }))
+		.input(
+			z.object({
+				noteId: z.string(),
+				limit: z.number().int().min(1).max(100).default(20),
+				offset: z.number().int().min(0).default(0),
+			}),
+		)
 		.handler(async ({ context, input }) => {
 			const userId = context.session.user.id;
 			const perm = await resolvePermission(input.noteId, userId);
@@ -52,13 +54,10 @@ export const guestsRouter = {
 				});
 			}
 
-			const cached = await getCachedNoteGuests(input.noteId);
-			if (cached?.owner) return cached;
-
-			const result = await getNoteGuests(input.noteId);
-			if (result.owner) {
-				void setCachedNoteGuests(input.noteId, result).catch(console.error);
-			}
+			const result = await getNoteGuests(input.noteId, {
+				limit: input.limit,
+				offset: input.offset,
+			});
 			return result;
 		}),
 

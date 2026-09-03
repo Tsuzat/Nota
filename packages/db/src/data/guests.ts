@@ -38,6 +38,8 @@ export interface NoteOwnerUser {
 export interface NoteGuestsResponse {
 	owner: NoteOwnerUser | null;
 	guests: NoteGuestUser[];
+	totalGuests?: number;
+	hasMore?: boolean;
 }
 
 /**
@@ -53,11 +55,15 @@ export const canManageGuests = async (
 };
 
 /**
- * Retrieves the owner and all guests associated with a note.
+ * Retrieves the owner and guests associated with a note with pagination support.
  */
 export const getNoteGuests = async (
 	noteId: string,
+	options?: { limit?: number; offset?: number },
 ): Promise<NoteGuestsResponse> => {
+	const limit = options?.limit ?? 20;
+	const offset = options?.offset ?? 0;
+
 	const [noteData] = await db
 		.select({
 			ownerId: sql<string>`COALESCE(${notes.ownerId}, ${workspace.ownerId})`,
@@ -83,6 +89,13 @@ export const getNoteGuests = async (
 			}
 		: null;
 
+	const [countResult] = await db
+		.select({ count: sql<number>`count(*)::int` })
+		.from(noteGuests)
+		.where(eq(noteGuests.noteId, noteId));
+
+	const totalGuests = Number(countResult?.count ?? 0);
+
 	const guestRows = await db
 		.select({
 			id: noteGuests.id,
@@ -101,11 +114,15 @@ export const getNoteGuests = async (
 		.from(noteGuests)
 		.innerJoin(user, eq(user.id, noteGuests.userId))
 		.where(eq(noteGuests.noteId, noteId))
-		.orderBy(noteGuests.createdAt);
+		.orderBy(noteGuests.createdAt)
+		.limit(limit)
+		.offset(offset);
 
 	return {
 		owner,
 		guests: guestRows,
+		totalGuests,
+		hasMore: offset + guestRows.length < totalGuests,
 	};
 };
 
