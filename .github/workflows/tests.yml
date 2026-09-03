@@ -27,6 +27,7 @@ jobs:
             POLAR_AI_CREDIT_ID: "sample-polar-ai-credit-id"
             POLAR_SUCCESS_URL: "http://localhost:5173/success"
             CORS_ORIGIN: "http://localhost:5173"
+            PASSKEY_RP_ID: "localhost"
             VALKEY_URL: "redis://localhost:6379"
             GITHUB_CLIENT_ID: "sample_github_client_id"
             GITHUB_CLIENT_SECRET: "sample_github_client_secret"

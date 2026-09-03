@@ -215,10 +215,9 @@ async function handleAddPasskey(e?: SubmitEvent) {
 		const name = newPasskeyName.trim() || undefined;
 		const res = await authClient.passkey.addPasskey({
 			name,
-			context: "signed-registration-token",
-			authenticatorAttachment: "cross-platform",
 		});
 		if (res.error) {
+			console.error("Failed to add passkey:", res.error);
 			toast.error(res.error.message || "Failed to add passkey");
 			return;
 		}

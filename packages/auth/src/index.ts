@@ -189,7 +189,18 @@ export function createAuth() {
 			},
 		},
 		plugins: [
-			passkey(),
+			passkey({
+				rpID:
+					env.PASSKEY_RP_ID ||
+					(() => {
+						try {
+							return new URL(env.CORS_ORIGIN).hostname;
+						} catch {
+							return "localhost";
+						}
+					})(),
+				rpName: "Nota",
+			}),
 			bearer(),
 			lastLoginMethod(),
 			captcha({

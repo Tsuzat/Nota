@@ -14,6 +14,7 @@ export const env = createEnv({
 		POLAR_AI_CREDIT_ID: z.string().min(1),
 		POLAR_SUCCESS_URL: z.url(),
 		CORS_ORIGIN: z.url(),
+		PASSKEY_RP_ID: z.string().optional(),
 		VALKEY_URL: z.string().min(1),
 		GITHUB_CLIENT_ID: z.string().min(1),
 		GITHUB_CLIENT_SECRET: z.string().min(1),
