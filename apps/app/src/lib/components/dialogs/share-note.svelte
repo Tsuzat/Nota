@@ -359,13 +359,13 @@ const getInitials = (name?: string | null) => {
   <div class="rounded-lg border bg-linear-to-b from-primary/5 via-card to-card p-4 space-y-3.5">
     <div class="flex items-center gap-2.5">
       <div class="p-2 rounded-lg bg-primary/10 text-primary">
-        <Sparkles class="size-4" />
+        <Sparkles class="size-6" />
       </div>
       <div>
         <h4 class="text-xs font-semibold">Collaboration & Publishing is a Pro Feature</h4>
-        <p class="text-[11px] text-muted-foreground">
+        <span class="text-[11px] text-muted-foreground">
           Upgrade to share notes with collaborators and publish to the web
-        </p>
+        </span>
       </div>
     </div>
 
