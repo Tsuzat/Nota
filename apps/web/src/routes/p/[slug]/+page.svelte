@@ -9,7 +9,7 @@ import MoonStar from "@lucide/svelte/icons/moon-star";
 import Share2 from "@lucide/svelte/icons/share-2";
 import Sparkles from "@lucide/svelte/icons/sparkles";
 import Sun from "@lucide/svelte/icons/sun";
-import { mode, toast, toggleMode } from "@nota/ui";
+import { getHTMLBody, mode, toast, toggleMode } from "@nota/ui";
 import * as Avatar from "@nota/ui/shadcn/avatar/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { onDestroy, onMount } from "svelte";
@@ -139,154 +139,64 @@ async function setupArticleEnhancements() {
 	});
 	toc = newToc;
 
-	// 1. Highlight.js client-side syntax highlighting
-	try {
-		const hljsModule = await import("highlight.js");
-		const hljs = hljsModule.default;
+	// 1. Process any unrendered legacy content with centralized utility
+	const hasUnrendered = articleElement.querySelector(
+		'span[data-type="inline-math"]:not(.katex-rendered), div[data-type="block-math"]:not(.katex-rendered), div[data-type="mermaid"]:not(.mermaid-container), div.callout:not([data-type="callout"])',
+	);
+	if (hasUnrendered) {
+		try {
+			articleElement.innerHTML = await getHTMLBody(articleElement.innerHTML);
+		} catch (e) {
+			console.error("Failed to process article content:", e);
+		}
+	}
 
-		const codeBlocks = articleElement.querySelectorAll<HTMLElement>("pre code");
-		codeBlocks.forEach((block) => {
-			// Skip mermaid code blocks
-			if (
-				block.classList.contains("language-mermaid") ||
-				block.parentElement?.getAttribute("data-type") === "mermaid"
-			) {
-				return;
-			}
+	// 2. Attach code header and copy button to code blocks
+	const codeBlocks = articleElement.querySelectorAll<HTMLElement>("pre code");
+	codeBlocks.forEach((block) => {
+		if (
+			block.classList.contains("language-mermaid") ||
+			block.parentElement?.getAttribute("data-type") === "mermaid"
+		) {
+			return;
+		}
 
-			hljs.highlightElement(block);
-
-			const pre = block.parentElement;
-			if (pre && !pre.querySelector(".code-header")) {
-				// Detect language
+		const pre = block.parentElement;
+		if (pre && !pre.querySelector(".copy-btn")) {
+			let header = pre.querySelector(".code-header");
+			if (!header) {
 				const langClass = Array.from(block.classList).find((c) =>
 					c.startsWith("language-"),
 				);
 				const lang = langClass ? langClass.replace("language-", "") : "code";
 
-				// Create custom code header bar
-				const header = document.createElement("div");
+				header = document.createElement("div");
 				header.className =
 					"code-header flex items-center justify-between px-4 py-1.5 text-xs text-muted-foreground bg-muted/80 border-b border-border font-mono select-none rounded-t-lg";
 
 				const langBadge = document.createElement("span");
 				langBadge.textContent = lang.toUpperCase();
 				langBadge.className = "font-medium text-[11px] tracking-wider";
-
-				const copyBtn = document.createElement("button");
-				copyBtn.className =
-					"copy-btn inline-flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer text-[11px]";
-				copyBtn.innerHTML = `<span>Copy</span>`;
-
-				copyBtn.onclick = () => {
-					navigator.clipboard.writeText(block.innerText);
-					copyBtn.innerHTML = `<span class="text-emerald-500 font-semibold">Copied!</span>`;
-					setTimeout(() => {
-						copyBtn.innerHTML = `<span>Copy</span>`;
-					}, 2000);
-				};
-
 				header.appendChild(langBadge);
-				header.appendChild(copyBtn);
 				pre.insertBefore(header, block);
 			}
-		});
-	} catch (e) {
-		console.error("Failed to load highlight.js:", e);
-	}
 
-	// 2. Mermaid client-side rendering
-	try {
-		const mermaidModule = await import("mermaid");
-		const mermaid = mermaidModule.default;
+			const copyBtn = document.createElement("button");
+			copyBtn.className =
+				"copy-btn inline-flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer text-[11px]";
+			copyBtn.innerHTML = `<span>Copy</span>`;
 
-		mermaid.initialize({
-			startOnLoad: false,
-			theme: mode.current ? "dark" : "default",
-			securityLevel: "loose",
-			fontFamily: "Inter Variable, sans-serif",
-		});
+			copyBtn.onclick = () => {
+				navigator.clipboard.writeText(block.innerText);
+				copyBtn.innerHTML = `<span class="text-emerald-500 font-semibold">Copied!</span>`;
+				setTimeout(() => {
+					copyBtn.innerHTML = `<span>Copy</span>`;
+				}, 2000);
+			};
 
-		// Find mermaid divs (from Edra Tiptap) and mermaid code blocks
-		const mermaidNodes = articleElement.querySelectorAll<HTMLElement>(
-			'div[data-type="mermaid"], pre code.language-mermaid',
-		);
-
-		for (let i = 0; i < mermaidNodes.length; i++) {
-			const node = mermaidNodes[i];
-			const container =
-				node.tagName.toLowerCase() === "code"
-					? (node.parentElement as HTMLElement)
-					: node;
-
-			const rawCode =
-				container.getAttribute("data-raw-mermaid") ||
-				node.textContent?.trim() ||
-				"";
-
-			if (!rawCode) continue;
-			container.setAttribute("data-raw-mermaid", rawCode);
-
-			const id = `mermaid-svg-${Date.now()}-${i}`;
-			try {
-				const { svg } = await mermaid.render(id, rawCode);
-				container.innerHTML = svg;
-				container.classList.add(
-					"mermaid-rendered",
-					"flex",
-					"justify-center",
-					"my-6",
-					"p-4",
-					"overflow-x-auto",
-					"bg-muted/30",
-					"rounded-xl",
-					"border",
-					"border-border/60",
-				);
-			} catch (err) {
-				console.error("Mermaid rendering error:", err);
-			}
+			header.appendChild(copyBtn);
 		}
-	} catch (e) {
-		console.error("Failed to load mermaid:", e);
-	}
-
-	// 3. KaTeX client-side rendering
-	try {
-		const katexModule = await import("katex");
-		const katex = katexModule.default;
-
-		const mathNodes = articleElement.querySelectorAll<HTMLElement>(
-			'span[data-type="inline-math"], div[data-type="block-math"]',
-		);
-
-		for (let i = 0; i < mathNodes.length; i++) {
-			const node = mathNodes[i];
-			const latex =
-				node.getAttribute("data-latex") || node.textContent?.trim() || "";
-			if (!latex) continue;
-
-			const isBlock =
-				node.tagName.toLowerCase() === "div" ||
-				node.getAttribute("data-type") === "block-math";
-
-			try {
-				katex.render(latex, node, {
-					displayMode: isBlock,
-					throwOnError: false,
-					macros: {
-						"\\R": "\\mathbb{R}",
-						"\\N": "\\mathbb{N}",
-					},
-				});
-				node.classList.add("katex-rendered");
-			} catch (err) {
-				console.error("KaTeX rendering error:", err);
-			}
-		}
-	} catch (e) {
-		console.error("Failed to load katex:", e);
-	}
+	});
 }
 
 onMount(() => {

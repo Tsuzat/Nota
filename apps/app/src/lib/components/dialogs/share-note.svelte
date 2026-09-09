@@ -13,7 +13,7 @@ import UserPlus from "@lucide/svelte/icons/user-plus";
 import Users from "@lucide/svelte/icons/users";
 import type { PublishMeta } from "@nota/db/data/publish";
 import type { GuestRole } from "@nota/db/types";
-import { toast } from "@nota/ui";
+import { getHTMLBody, toast } from "@nota/ui";
 import type { Editor } from "@nota/ui/edra/tiptap/index.js";
 import { BarSpinner } from "@nota/ui/icons/index.js";
 import {
@@ -253,7 +253,7 @@ const handlePublish = async () => {
 	isSubmitting = true;
 	publishError = null;
 	try {
-		const html = editor.getHTML();
+		const html = await getHTMLBody(editor.getHTML());
 		const result = await client.publish.create({
 			noteId,
 			slug: customSlug.trim() || undefined,
@@ -280,7 +280,7 @@ const handleUpdateContent = async () => {
 	isSubmitting = true;
 	publishError = null;
 	try {
-		const html = editor.getHTML();
+		const html = await getHTMLBody(editor.getHTML());
 		const result = await client.publish.update({
 			noteId,
 			title: note?.name,

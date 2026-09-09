@@ -262,12 +262,59 @@
 	overflow-y: hidden;
 }
 
+/* Callouts */
+.article-content .callout,
+.article-content div[data-type="callout"] {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 0.75rem;
+	margin: 1.5rem 0;
+	padding: 1rem 1.25rem;
+	border-radius: 0.75rem;
+	background-color: color-mix(in oklch, var(--color-muted) 40%, transparent);
+	border: 1px solid var(--color-border);
+	border-left: 4px solid var(--color-primary);
+}
+
+.article-content .callout-emoji {
+	flex-shrink: 0;
+	font-size: 1.25rem;
+	line-height: 1.5;
+	user-select: none;
+}
+
+.article-content .edra-callout-content {
+	flex: 1 1 0%;
+	min-width: 0;
+}
+
+.article-content .edra-callout-content > *:first-child {
+	margin-top: 0;
+}
+
+.article-content .edra-callout-content > *:last-child {
+	margin-bottom: 0;
+}
+
 /* Mermaid Container */
 .article-content .mermaid-rendered {
+.article-content .mermaid-rendered,
+.article-content .mermaid-container {
 	transition: opacity 0.2s ease;
+	display: flex;
+	justify-content: center;
+	margin: 1.5rem 0;
+	padding: 1rem;
+	overflow-x: auto;
+	background-color: color-mix(in oklch, var(--color-muted) 30%, transparent);
+	border-radius: 0.75rem;
+	border: 1px solid var(--color-border);
 }
 
 .article-content .mermaid-rendered svg {
+.article-content .mermaid-rendered svg,
+.article-content .mermaid-container svg {
 	max-width: 100%;
 	height: auto;
 }

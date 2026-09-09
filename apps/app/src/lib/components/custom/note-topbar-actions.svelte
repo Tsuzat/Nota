@@ -16,7 +16,7 @@ import Minimize2 from "@lucide/svelte/icons/minimize-2";
 import Star from "@lucide/svelte/icons/star";
 import Trash2 from "@lucide/svelte/icons/trash-2";
 import Upload from "@lucide/svelte/icons/upload";
-import { SimpleToolTip, toast } from "@nota/ui";
+import { getFullHTML, SimpleToolTip, toast } from "@nota/ui";
 import { openDeleteConfirmation } from "@nota/ui/custom/dialogs/confirm-delete.svelte";
 import {
 	type Editor,
@@ -116,7 +116,7 @@ const handleToggleStar = async () => {
 // Export handlers
 const handleExportHTML = async () => {
 	if (!editor) return;
-	const htmlContent = editor.getHTML();
+	const htmlContent = await getFullHTML(note.name, editor.getHTML());
 
 	const blob = new Blob([htmlContent], { type: "text/html" });
 	await exportFile(`${sanitizeFilename(note.name)}.html`, blob);

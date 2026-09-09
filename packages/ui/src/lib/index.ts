@@ -2,3 +2,4 @@
 export { ModeWatcher, mode, toggleMode } from "mode-watcher";
 export { toast } from "svelte-sonner";
 export * from "../lib/components/custom/index.js";
+export * from "./html/index.js";
