@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "0.9.92-beta"
+version = "0.9.93-beta"
 description = "Nota"
 authors = ["Tsuzat"]
 license = "MIT"
