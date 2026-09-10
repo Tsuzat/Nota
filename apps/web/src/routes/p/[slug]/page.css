@@ -298,7 +298,6 @@
 }
 
 /* Mermaid Container */
-.article-content .mermaid-rendered {
 .article-content .mermaid-rendered,
 .article-content .mermaid-container {
 	transition: opacity 0.2s ease;
@@ -312,7 +311,6 @@
 	border: 1px solid var(--color-border);
 }
 
-.article-content .mermaid-rendered svg {
 .article-content .mermaid-rendered svg,
 .article-content .mermaid-container svg {
 	max-width: 100%;
