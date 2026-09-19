@@ -8,7 +8,7 @@ import * as Sidebar from "@nota/ui/shadcn/sidebar/index.js";
 import { Toaster } from "@nota/ui/shadcn/sonner/index.js";
 import { TooltipProvider } from "@nota/ui/shadcn/tooltip/index.js";
 import { cn } from "@nota/ui/utils";
-import { onMount } from "svelte";
+import { type Component, onMount } from "svelte";
 import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.js";
 import {
 	CreateNotes,
@@ -16,6 +16,7 @@ import {
 	GlobalSettings,
 	NoteMove,
 	NoteRename,
+	Search,
 	SigninDevice,
 	setGlobalSettings,
 	Trashed,
@@ -34,7 +35,7 @@ const { children } = $props();
 let open = $state(true);
 const settings = setGlobalSettings();
 
-let Devtools = $state<any>(null);
+let Devtools = $state<Component | null>(null);
 if (import.meta.env.DEV) {
 	import("@tanstack/svelte-query-devtools").then((mod) => {
 		Devtools = mod.SvelteQueryDevtools;
@@ -97,6 +98,7 @@ onMount(async () => {
         <ConfirmDelete />
         <Trashed />
         <GlobalSettings />
+        <Search />
         {#if ISDESKTOP}
           <SigninDevice />
         {/if}

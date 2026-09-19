@@ -8,6 +8,7 @@ import {
 } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { cn } from "@nota/ui/utils.ts";
+import { openSearch } from "#lib/components/dialogs/index.js";
 import { getKeyboardShortcut } from "#lib/utils.ts";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
@@ -36,6 +37,7 @@ const isVersionsActive = $derived(
     <Button
       variant="outline"
       size="icon-lg"
+      onclick={openSearch}
       onmouseenter={() => (isSearchHovered = true)}
       onmouseleave={() => (isSearchHovered = false)}
     >

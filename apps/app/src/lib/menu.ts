@@ -8,6 +8,7 @@ import {
 import {
 	openCreateNotes,
 	openCreateWorkspace,
+	openSearch,
 } from "#lib/components/dialogs/index.js";
 import { goto } from "$app/navigation";
 import { setCorrectWindowMode } from "./window";
@@ -125,7 +126,7 @@ export async function setupAppMenu() {
 		id: "view-search",
 		text: "Search",
 		accelerator: "CmdOrControl+K",
-		action: () => {},
+		action: () => openSearch(),
 	});
 
 	const toggleTheme = await MenuItem.new({
