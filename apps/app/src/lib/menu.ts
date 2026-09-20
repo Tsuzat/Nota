@@ -6,6 +6,7 @@ import {
 	Submenu,
 } from "@tauri-apps/api/menu";
 import {
+	openAbout,
 	openCreateNotes,
 	openCreateWorkspace,
 	openSearch,
@@ -35,7 +36,7 @@ export async function setupAppMenu() {
 		id: "app-about",
 		text: "About Nota",
 		enabled: true,
-		action: () => {},
+		action: () => openAbout(),
 	});
 
 	const settings = await MenuItem.new({

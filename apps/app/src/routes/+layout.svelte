@@ -11,6 +11,7 @@ import { cn } from "@nota/ui/utils";
 import { type Component, onMount } from "svelte";
 import { getAuthSession, isSignedIn } from "#lib/auth-session.svelte.js";
 import {
+	About,
 	CreateNotes,
 	CreateWorkspace,
 	GlobalSettings,
@@ -101,6 +102,7 @@ onMount(async () => {
         <Search />
         {#if ISDESKTOP}
           <SigninDevice />
+          <About />
         {/if}
         <Sidebar.Provider
           bind:open

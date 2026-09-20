@@ -1,4 +1,9 @@
 export {
+	closeAbout,
+	default as About,
+	openAbout,
+} from "./about.svelte";
+export {
 	default as CreateNotes,
 	openCreateNotes,
 } from "./create-notes.svelte";

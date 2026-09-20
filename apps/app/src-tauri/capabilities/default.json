@@ -39,6 +39,12 @@
       "allow": [
         {
           "url": "https://*.nota.ink*"
+        },
+        {
+          "url": "https://github.com/**"
+        },
+        {
+          "url": "https://*.github.com/**"
         }
       ]
     },

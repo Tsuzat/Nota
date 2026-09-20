@@ -18,7 +18,6 @@ export const toggleSearch = () => {
 import Check from "@lucide/svelte/icons/check";
 import Cloud from "@lucide/svelte/icons/cloud";
 import HardDrive from "@lucide/svelte/icons/hard-drive";
-import History from "@lucide/svelte/icons/history";
 import Star from "@lucide/svelte/icons/star";
 import { BarSpinner, IconsRenderer } from "@nota/ui/icons/index.js";
 import { Badge } from "@nota/ui/shadcn/badge/index.ts";
@@ -33,6 +32,7 @@ import { getWorkspaceContext } from "#lib/data/workspace.svelte.ts";
 import { formatBytes, formatDate } from "#lib/utils.ts";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
+  import { buttonVariants } from "@nota/ui/shadcn/button/index.js";
 
 const workspaceCtx = getWorkspaceContext();
 const notesCtx = getNotesContext();
@@ -109,6 +109,12 @@ const openSnapshot = (snapshot: UnifiedSnapshotItem) => {
 
 <svelte:document onkeydown={handleKeydown} />
 
+{#snippet itemIcon(icon?: string | null, fallback = "lucide:FileText" )}
+  <span class={buttonVariants({ variant: "ghost", size: "icon" })}>
+      <IconsRenderer icon={icon || fallback} class="size-4" />
+  </span>
+ {/snippet}
+
 <Command.Dialog
   bind:open
   title="Global Search"
@@ -116,6 +122,7 @@ const openSnapshot = (snapshot: UnifiedSnapshotItem) => {
   class="top-1/2! -translate-y-1/2! sm:max-w-2xl! max-w-2xl! w-full rounded-2xl! border border-border/50 bg-popover/95 backdrop-blur-2xl shadow-2xl ring-1 ring-white/10 dark:ring-white/10 overflow-hidden **:data-[slot=command]:p-0! **:data-[slot=command-input-wrapper]:p-2! **:data-[slot=command-input-wrapper]:border-b! **:data-[slot=command-input-wrapper]:border-border/40! **:data-[slot=input-group]:h-11! **:data-[slot=input-group]:bg-transparent! **:data-[slot=input-group]:border-transparent! **:data-[slot=input-group]:shadow-none! **:data-[slot=input-group]:rounded-none! [&_[data-slot=input-group]_svg]:size-5! [&_[data-slot=input-group]_svg]:opacity-60! **:data-[slot=command-input]:text-[15px]! **:data-[slot=command-input]:placeholder:text-muted-foreground/50!"
 >
   <Command.Input placeholder="Search workspaces, notes, snapshots..." />
+
   <Command.List class="max-h-95 p-2 scroll-py-2 no-scrollbar">
     <Command.Empty class="py-12 text-center text-sm text-muted-foreground">
       <div class="flex flex-col items-center justify-center gap-1.5">
@@ -138,9 +145,7 @@ const openSnapshot = (snapshot: UnifiedSnapshotItem) => {
             class="h-11 px-3 py-2 my-0.5 rounded-xl flex items-center justify-between cursor-pointer transition-colors"
           >
             <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="size-7 rounded-lg bg-muted/60 border border-border/40 flex items-center justify-center shrink-0">
-                <IconsRenderer icon={ws.icon || "lucide:Folder"} class="size-4" />
-              </div>
+              {@render itemIcon(ws.icon, "lucide:Folder")}
               <span class="truncate font-medium text-sm text-foreground">{ws.name}</span>
             </div>
             <div class="flex items-center gap-2 shrink-0">
@@ -164,9 +169,7 @@ const openSnapshot = (snapshot: UnifiedSnapshotItem) => {
             class="h-11 px-3 py-2 my-0.5 rounded-xl flex items-center justify-between cursor-pointer transition-colors"
           >
             <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="size-7 rounded-lg bg-muted/60 border border-border/40 flex items-center justify-center shrink-0">
-                <IconsRenderer icon={ws.icon || "lucide:Folder"} class="size-4" />
-              </div>
+              {@render itemIcon(ws.icon, "lucide:Folder")}
               <span class="truncate font-medium text-sm text-foreground">{ws.name}</span>
             </div>
             <div class="flex items-center gap-2 shrink-0">
@@ -198,9 +201,7 @@ const openSnapshot = (snapshot: UnifiedSnapshotItem) => {
             class="h-11 px-3 py-2 my-0.5 rounded-xl flex items-center justify-between cursor-pointer transition-colors"
           >
             <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="size-7 rounded-lg bg-muted/60 border border-border/40 flex items-center justify-center shrink-0">
-                <IconsRenderer icon={note.icon || "lucide:FileText"} class="size-4" />
-              </div>
+              {@render itemIcon(note.icon, "lucide:FileText")}
               <span class="truncate font-medium text-sm text-foreground">{note.name || "Untitled Note"}</span>
               {#if note.starred}
                 <Star class="size-3 text-amber-500 fill-amber-500 shrink-0 ml-0.5" />
@@ -236,9 +237,7 @@ const openSnapshot = (snapshot: UnifiedSnapshotItem) => {
             class="h-11 px-3 py-2 my-0.5 rounded-xl flex items-center justify-between cursor-pointer transition-colors"
           >
             <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="size-7 rounded-lg bg-muted/60 border border-border/40 flex items-center justify-center shrink-0">
-                <History class="size-4 text-muted-foreground" />
-              </div>
+              {@render itemIcon("lucide:rotate-ccw-clock")}
               <div class="flex flex-col min-w-0 flex-1 leading-tight">
                 <span class="truncate font-medium text-xs text-foreground">
                   {snap.label || "Snapshot"}
