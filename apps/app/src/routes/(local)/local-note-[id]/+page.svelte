@@ -169,6 +169,7 @@ const { data } = $props();
       <Edra.BubbleMenu />
       <Edra.ToC />
       <Edra.UseAI {availableModels} useServer={!ISDESKTOP || !settings.useOwnKeys} />
+      <Edra.UseAI {availableModels} useServer={!ISDESKTOP || settings.aiMode === "nota"} />
       <Edra.Content
         class={cn(
           "mx-auto w-full px-4 pb-32 min-h-[calc(100dvh-10rem)] *:outline-none transition-all duration-150",

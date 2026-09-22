@@ -33,6 +33,7 @@ sha2 = "0.10.9"
 td = "0.1.0"
 zstd = "0.13.3"
 tauri-plugin-fs = "2"
+tauri-apple-intelligence = "0.6"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"

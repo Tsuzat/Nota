@@ -3,6 +3,12 @@
 version = 3
 
 [[package]]
+name = "Inflector"
+version = "0.11.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe438c63458706e03479442743baae6c88256498e6431708f6dfc520a26515d3"
+
+[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -132,6 +138,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "tauri",
+ "tauri-apple-intelligence",
  "tauri-build",
  "tauri-plugin-deep-link",
  "tauri-plugin-dialog",
@@ -5151,6 +5158,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "specta"
+version = "2.0.0-rc.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38f9a30cbcbb7011f1da7d73483983bf838af123883e45f2b36ed76328df9c50"
+dependencies = [
+ "rustc_version",
+ "serde_json",
+ "specta-macros",
+]
+
+[[package]]
+name = "specta-macros"
+version = "2.0.0-rc.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ce14957ecc2897f1f848b8255b6531d13ddf49cbcf506b7c2c9fb1d005593bb"
+dependencies = [
+ "Inflector",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
 name = "spin"
 version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5710,6 +5740,19 @@ dependencies = [
  "webview2-com",
  "window-vibrancy",
  "windows 0.61.3",
+]
+
+[[package]]
+name = "tauri-apple-intelligence"
+version = "0.6.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "843f5dda33b492ac94b4afc50fc50b7ba529da7d828c91260d747c2f9a74b087"
+dependencies = [
+ "serde",
+ "serde_json",
+ "specta",
+ "tauri",
+ "uuid",
 ]
 
 [[package]]

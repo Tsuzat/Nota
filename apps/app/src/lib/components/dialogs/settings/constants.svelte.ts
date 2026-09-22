@@ -18,6 +18,10 @@ class GlobalSettings {
 	#themeColor = $state(localStorage.getItem("themeColor") || "default");
 	#aiProvider = $state(localStorage.getItem("ai_provider") || "gpt-5.6-luna");
 	#useOwnKeys = $state(getLocalStorageValue("useOwnKeys", false));
+	#aiMode = $state<"nota" | "apple" | "byok">(
+		(localStorage.getItem("ai_mode") as "nota" | "apple" | "byok") ||
+			(getLocalStorageValue("useOwnKeys", false) ? "byok" : "nota"),
+	);
 
 	constructor(open = false) {
 		this.#open = open;
@@ -27,6 +31,15 @@ class GlobalSettings {
 	}
 	set open(value) {
 		this.#open = value;
+	}
+	get aiMode(): "nota" | "apple" | "byok" {
+		return this.#aiMode;
+	}
+	set aiMode(value: "nota" | "apple" | "byok") {
+		this.#aiMode = value;
+		localStorage.setItem("ai_mode", value);
+		this.#useOwnKeys = value === "byok";
+		localStorage.setItem("useOwnKeys", String(value === "byok"));
 	}
 	get useAI() {
 		return this.#useAI;
@@ -41,6 +54,13 @@ class GlobalSettings {
 	set useOwnKeys(value) {
 		this.#useOwnKeys = value;
 		localStorage.setItem("useOwnKeys", String(value));
+		if (value && this.#aiMode !== "byok") {
+			this.#aiMode = "byok";
+			localStorage.setItem("ai_mode", "byok");
+		} else if (!value && this.#aiMode === "byok") {
+			this.#aiMode = "nota";
+			localStorage.setItem("ai_mode", "nota");
+		}
 	}
 	get useToolBar() {
 		return this.#useToolBar;

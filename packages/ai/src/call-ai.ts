@@ -78,6 +78,28 @@ async function resolveModel(
 			});
 			return deepseek(providerConfig.modelId);
 		}
+		case "meta": {
+			const { createOpenAICompatible } = await import(
+				"@ai-sdk/openai-compatible"
+			);
+			const meta = createOpenAICompatible({
+				name: "meta",
+				baseURL: "https://api.meta.ai/v1",
+				apiKey: providerConfig.apiKey,
+			});
+			return meta(providerConfig.modelId);
+		}
+		case "openrouter": {
+			const { createOpenAICompatible } = await import(
+				"@ai-sdk/openai-compatible"
+			);
+			const openrouter = createOpenAICompatible({
+				name: "openrouter",
+				baseURL: "https://openrouter.ai/api/v1",
+				apiKey: providerConfig.apiKey,
+			});
+			return openrouter(providerConfig.modelId);
+		}
 		default:
 			// @ts-expect-error fallback
 			throw new Error(`Unsupported provider: ${providerConfig.provider}`);

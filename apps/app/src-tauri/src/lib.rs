@@ -42,6 +42,58 @@ fn get_or_create_stronghold_password(app: tauri::AppHandle) -> Result<String, St
     }
 }
 
+#[tauri::command]
+fn apple_ai_check_availability() -> Result<tauri_apple_intelligence::AppleAIAvailability, String> {
+    tauri_apple_intelligence::apple_ai_check_availability().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn apple_ai_pcc_check_availability() -> Result<tauri_apple_intelligence::AppleAIAvailability, String> {
+    tauri_apple_intelligence::apple_ai_pcc_check_availability().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn apple_ai_generate(
+    request: tauri_apple_intelligence::AppleAIGenerateRequest,
+) -> Result<tauri_apple_intelligence::AppleAIGenerateResult, String> {
+    tauri_apple_intelligence::apple_ai_generate(request).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn apple_ai_stream(
+    app: tauri::AppHandle,
+    request: tauri_apple_intelligence::AppleAIGenerateRequest,
+) -> Result<tauri_apple_intelligence::AppleAIStreamStart, String> {
+    tauri_apple_intelligence::apple_ai_stream(app, request).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn apple_ai_cancel_stream(stream_id: String) -> Result<bool, String> {
+    tauri_apple_intelligence::apple_ai_cancel_stream(&stream_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn apple_ai_context_info(
+    model: Option<String>,
+) -> Result<tauri_apple_intelligence::AppleAIContextInfo, String> {
+    tauri_apple_intelligence::apple_ai_context_info(model).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn apple_ai_token_count(model: Option<String>, text: String) -> Result<i64, String> {
+    tauri_apple_intelligence::apple_ai_token_count(model, text).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn apple_ai_supported_languages() -> Result<Vec<String>, String> {
+    tauri_apple_intelligence::apple_ai_supported_languages().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn apple_ai_prewarm(model: Option<String>, prompt_prefix: Option<String>) -> Result<(), String> {
+    tauri_apple_intelligence::apple_ai_prewarm(model, prompt_prefix).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let migrations = vec![
@@ -79,7 +131,16 @@ pub fn run() {
             get_or_create_stronghold_password,
             compress_data,
             decompress_data,
-            hash_data
+            hash_data,
+            apple_ai_check_availability,
+            apple_ai_pcc_check_availability,
+            apple_ai_generate,
+            apple_ai_stream,
+            apple_ai_cancel_stream,
+            apple_ai_context_info,
+            apple_ai_token_count,
+            apple_ai_supported_languages,
+            apple_ai_prewarm
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
@@ -94,3 +155,13 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_apple_ai_status() {
+        let on_device = tauri_apple_intelligence::apple_ai_check_availability();
+        assert!(on_device.is_ok());
+    }
+}
+

@@ -7,12 +7,42 @@ export type PredefinedProviderName =
 	| "anthropic"
 	| "grok"
 	| "kimi"
-	| "deepseek";
+	| "deepseek"
+	| "meta"
+	| "openrouter";
 
 /**
  * All supported AI provider identifiers, including custom "other" OpenAI-compatible endpoints.
  */
 export type AIProviderName = PredefinedProviderName | "other";
+
+/**
+ * A model discovered or fetched from an AI provider's API.
+ */
+export interface FetchedModel {
+	id: string;
+	displayName: string;
+	description?: string;
+	contextWindow?: number;
+}
+
+/**
+ * Options for validating an API key and fetching models from a provider.
+ */
+export interface ValidateKeyOptions {
+	provider: PredefinedProviderName | "other";
+	apiKey: string;
+	baseURL?: string;
+}
+
+/**
+ * Result of validating an API key and fetching models.
+ */
+export interface ValidateKeyResult {
+	valid: boolean;
+	error?: string;
+	models: FetchedModel[];
+}
 
 /**
  * Configuration for a predefined AI provider.

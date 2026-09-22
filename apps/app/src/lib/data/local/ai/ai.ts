@@ -6,7 +6,9 @@ import {
 	type PredefinedProviderName,
 	type SelectableModel,
 } from "@nota/ai";
+import { mode } from "@nota/ui";
 import { fetch as fetchTauri } from "@tauri-apps/plugin-http";
+import { streamAppleIntelligence } from "#lib/platform/apple-intelligence.ts";
 import { secureStorage } from "#lib/platform/securestorage.ts";
 import { ISDESKTOP } from "#lib/utils.ts";
 import { PUBLIC_SERVER_URL } from "$app/env/public";
@@ -60,18 +62,75 @@ const PROVIDERS = Object.keys(LATEST_MODELS) as PredefinedProviderName[];
  * When `useOwnKeys` is enabled, only models whose provider has a stored API
  * key (plus any custom endpoints) are returned. Otherwise all predefined
  * models are returned (for future Nota-Server-based inference).
+ * When `aiMode === "apple"`, Apple Intelligence Foundation models are returned.
+ * When `aiMode === "byok"`, only models whose provider has a stored API
+ * key and is enabled via user checkboxes (plus custom endpoints) are returned.
+ * Otherwise all predefined models are returned for Nota-Server inference.
  */
 export async function getUserModels(): Promise<SelectableModel[]> {
-	const useOwnKeys = localStorage.getItem("useOwnKeys") === "true";
+	const aiMode =
+		localStorage.getItem("ai_mode") ||
+		(localStorage.getItem("useOwnKeys") === "true" ? "byok" : "nota");
 	const models: SelectableModel[] = [];
 
-	if (useOwnKeys && ISDESKTOP) {
+	if (aiMode === "apple" && ISDESKTOP) {
+		models.push(
+			{
+				id: "apple-on-device",
+				displayName: "Apple Intelligence (On-Device)",
+				provider: "apple",
+				providerIcon:
+					mode.current === "dark"
+						? "https://svgl.app/library/apple_dark.svg"
+						: "https://svgl.app/library/apple.svg",
+				modelString: "apple-on-device",
+				contextWindow: 4096,
+				notes:
+					"Native on-device Foundation Model. 100% private, free, no keys needed.",
+				isCustom: false,
+			},
+			{
+				id: "apple-private-cloud",
+				displayName: "Apple Intelligence (Private Cloud)",
+				provider: "apple",
+				providerIcon:
+					mode.current === "dark"
+						? "https://svgl.app/library/apple_dark.svg"
+						: "https://svgl.app/library/apple.svg",
+				modelString: "apple-private-cloud",
+				contextWindow: 32768,
+				notes:
+					"Apple Private Cloud Compute reasoning model for larger contexts.",
+				isCustom: false,
+			},
+		);
+		return models;
+	}
+
+	if (aiMode === "byok" && ISDESKTOP) {
 		for (const provider of PROVIDERS) {
 			const key = await secureStorage.getItem(`${provider}_api_key`);
 			if (!key?.trim()) continue;
 
+			// Read user-selected model IDs for this provider
+			let selectedIds: string[] | null = null;
+			try {
+				const raw = localStorage.getItem(`${provider}_selected_models`);
+				if (raw) selectedIds = JSON.parse(raw);
+			} catch {
+				selectedIds = null;
+			}
+
 			const { icon, models: providerModels } = LATEST_MODELS[provider];
 			for (const [id, pricing] of Object.entries(providerModels)) {
+				// If user has specific checkboxes selected, filter by them
+				if (
+					selectedIds &&
+					!selectedIds.includes(id) &&
+					!selectedIds.includes(pricing.modelString)
+				) {
+					continue;
+				}
 				models.push(toSelectableModel(provider, id, pricing, icon));
 			}
 		}
@@ -253,11 +312,29 @@ export async function callAI(
 	noteId?: string,
 ): Promise<void> {
 	try {
-		const useOwnKeys = localStorage.getItem("useOwnKeys") === "true";
+		const aiMode =
+			localStorage.getItem("ai_mode") ||
+			(localStorage.getItem("useOwnKeys") === "true" ? "byok" : "nota");
+		const selectedModelId =
+			localStorage.getItem("ai_provider") || "gpt-5.6-luna";
 
-		if (ISDESKTOP && useOwnKeys) {
-			const selectedModelId =
-				localStorage.getItem("ai_provider") || "gpt-5.6-luna";
+		if (
+			ISDESKTOP &&
+			(aiMode === "apple" || selectedModelId.startsWith("apple-"))
+		) {
+			await streamAppleIntelligence(prompt, onChunk, onError, {
+				model:
+					selectedModelId === "apple-private-cloud"
+						? "private-cloud"
+						: "on-device",
+			});
+			return;
+		}
+
+		if (
+			ISDESKTOP &&
+			(aiMode === "byok" || localStorage.getItem("useOwnKeys") === "true")
+		) {
 			const providerConfig = await resolveProviderConfig(selectedModelId);
 
 			const result = callAIClient({ provider: providerConfig, prompt });
@@ -266,10 +343,10 @@ export async function callAI(
 				onChunk(chunk);
 			}
 		} else {
-			// Web or (Desktop with useOwnKeys = false)
+			// Web or (Desktop in Nota Server mode)
 			await fetchNotaServerAI(prompt, noteId, onChunk, onError);
 		}
-	} catch (e) {
+	} catch (e: unknown) {
 		console.error(e);
 		onError(e instanceof Error ? e : new Error("Unknown error"));
 	}

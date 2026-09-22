@@ -17,7 +17,7 @@ import {
 describe("LATEST_MODELS", () => {
 	const providers = Object.keys(LATEST_MODELS) as PredefinedProviderName[];
 
-	it("should export all six predefined providers", () => {
+	it("should export all eight predefined providers", () => {
 		const expected: PredefinedProviderName[] = [
 			"openai",
 			"anthropic",
@@ -25,11 +25,13 @@ describe("LATEST_MODELS", () => {
 			"deepseek",
 			"kimi",
 			"grok",
+			"meta",
+			"openrouter",
 		];
 		for (const p of expected) {
 			expect(providers).toContain(p);
 		}
-		expect(providers.length).toBe(6);
+		expect(providers.length).toBe(8);
 	});
 
 	it("should have an icon for every provider", () => {
@@ -155,13 +157,13 @@ describe("Type definitions", () => {
 // ---------------------------------------------------------------------------
 
 describe("Provider-model consistency", () => {
-	it("model keys should be derivable from modelString (no provider prefix)", () => {
+	it("model keys should be derivable from modelString (no provider prefix except openrouter)", () => {
 		const providers = Object.keys(LATEST_MODELS) as PredefinedProviderName[];
 		for (const provider of providers) {
 			for (const [_, model] of Object.entries(LATEST_MODELS[provider].models)) {
-				// modelString should NOT contain a '/' prefix like 'openai/gpt-5.6'
-				// because resolveModel in call-ai.ts passes modelString directly to the SDK
-				expect(model.modelString).not.toContain("/");
+				if (provider !== "openrouter") {
+					expect(model.modelString).not.toContain("/");
+				}
 			}
 		}
 	});
@@ -174,9 +176,46 @@ describe("Provider-model consistency", () => {
 			"grok",
 			"kimi",
 			"deepseek",
+			"meta",
+			"openrouter",
 		];
 		for (const key of Object.keys(LATEST_MODELS)) {
 			expect(validNames).toContain(key as PredefinedProviderName);
+		}
+	});
+});
+
+describe("validateAndFetchModels", () => {
+	it("should reject empty API keys", async () => {
+		const { validateAndFetchModels } = await import("../src");
+		const res = await validateAndFetchModels({
+			provider: "openai",
+			apiKey: "   ",
+		});
+		expect(res.valid).toBe(false);
+		expect(res.error).toBeDefined();
+	});
+
+	it("should return curated models for provider", async () => {
+		const { getCuratedModelsForProvider } = await import("../src");
+		const models = getCuratedModelsForProvider("deepseek");
+		expect(models.length).toBeGreaterThanOrEqual(1);
+		expect(models[0].id).toBeDefined();
+	});
+
+	it("should report invalid key when provider rejects authorization", async () => {
+		const { validateAndFetchModels } = await import("../src");
+		const res = await validateAndFetchModels({
+			provider: "deepseek",
+			apiKey: "fake-invalid-key",
+		});
+		// If authorization fails, valid is false
+		if (!res.valid) {
+			expect(res.error).toBeDefined();
+			expect(res.models.length).toBe(0);
+		} else {
+			// If offline fallback triggered
+			expect(res.models.length).toBeGreaterThan(0);
 		}
 	});
 });

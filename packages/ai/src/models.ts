@@ -354,4 +354,74 @@ export const LATEST_MODELS: Record<PredefinedProviderName, ProviderConfig> = {
 			},
 		},
 	},
+
+	meta: {
+		icon: {
+			dark: "https://svgl.app/library/meta.svg",
+			light: "https://svgl.app/library/meta.svg",
+		},
+		models: {
+			"muse-spark-1.3": {
+				modelString: "muse-spark-1.3",
+				displayName: "Meta Muse Spark 1.3",
+				contextWindow: 128_000,
+				maxOutputTokens: 32_000,
+				inputCostPerMillion: 0.8,
+				outputCostPerMillion: 2.4,
+				notes:
+					"Meta's flagship Muse Spark agentic model for reasoning, planning, and tool use.",
+			},
+			"muse-spark-1.2": {
+				modelString: "muse-spark-1.2",
+				displayName: "Meta Muse Spark 1.2",
+				contextWindow: 128_000,
+				maxOutputTokens: 32_000,
+				inputCostPerMillion: 0.5,
+				outputCostPerMillion: 1.5,
+				notes: "Balanced Meta Muse model for fast autonomous tasks.",
+			},
+		},
+	},
+
+	openrouter: {
+		icon: "https://svgl.app/library/openrouter.svg",
+		models: {
+			"anthropic/claude-3.5-sonnet": {
+				modelString: "anthropic/claude-3.5-sonnet",
+				displayName: "Claude 3.5 Sonnet (OpenRouter)",
+				contextWindow: 200_000,
+				maxOutputTokens: 8_192,
+				inputCostPerMillion: 3.0,
+				outputCostPerMillion: 15.0,
+				notes: "Anthropic's frontier model routed via OpenRouter.",
+			},
+			"openai/gpt-4o": {
+				modelString: "openai/gpt-4o",
+				displayName: "GPT-4o (OpenRouter)",
+				contextWindow: 128_000,
+				maxOutputTokens: 16_384,
+				inputCostPerMillion: 2.5,
+				outputCostPerMillion: 10.0,
+				notes: "OpenAI's flagship multimodal model via OpenRouter.",
+			},
+			"deepseek/deepseek-chat": {
+				modelString: "deepseek/deepseek-chat",
+				displayName: "DeepSeek V3 (OpenRouter)",
+				contextWindow: 64_000,
+				maxOutputTokens: 8_000,
+				inputCostPerMillion: 0.14,
+				outputCostPerMillion: 0.28,
+				notes: "DeepSeek V3 routed through OpenRouter.",
+			},
+			"meta-llama/llama-3.3-70b-instruct": {
+				modelString: "meta-llama/llama-3.3-70b-instruct",
+				displayName: "Llama 3.3 70B Instruct (OpenRouter)",
+				contextWindow: 131_072,
+				maxOutputTokens: 8_192,
+				inputCostPerMillion: 0.4,
+				outputCostPerMillion: 0.4,
+				notes: "Meta's state-of-the-art open model via OpenRouter.",
+			},
+		},
+	},
 };
