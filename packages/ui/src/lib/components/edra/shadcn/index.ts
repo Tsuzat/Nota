@@ -6,7 +6,6 @@ import Editor from "./editor.svelte";
 export * from "@tiptap/core";
 export { createEditor } from "./editor.ts";
 
-import UseAI from "./components/menu/AI.svelte";
 import BubbleMenu from "./components/menu/BubbleMenu.svelte";
 import ToC from "./toc.svelte";
 
@@ -15,7 +14,6 @@ const Edra = Object.assign(Tiptap, {
 	Toolbar,
 	BubbleMenu,
 	DragHandle,
-	UseAI,
 	ToC,
 });
 

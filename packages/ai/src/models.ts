@@ -43,8 +43,8 @@ export type ProviderConfig = {
 export const LATEST_MODELS: Record<PredefinedProviderName, ProviderConfig> = {
 	openai: {
 		icon: {
-			dark: "https://svgl.app/library/openai_dark.svg",
-			light: "https://svgl.app/library/openai.svg",
+			light: "https://svgl.app/library/openai_dark.svg",
+			dark: "https://svgl.app/library/openai.svg",
 		},
 		models: {
 			"gpt-5.6": {

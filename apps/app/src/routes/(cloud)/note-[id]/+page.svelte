@@ -1,6 +1,5 @@
 <script lang="ts">
 import { HocuspocusProvider } from "@hocuspocus/provider";
-import type { SelectableModel } from "@nota/ai";
 import { SimpleToolTip, toast } from "@nota/ui";
 import { createEditor, Edra } from "@nota/ui/edra/shadcn/index.js";
 import type { Editor } from "@nota/ui/edra/tiptap/index.js";
@@ -8,27 +7,25 @@ import { IconPicker, IconsRenderer } from "@nota/ui/icons/index.js";
 import { Button } from "@nota/ui/shadcn/button/index.js";
 import { Skeleton } from "@nota/ui/shadcn/skeleton/index.js";
 import { cn } from "@nota/ui/utils";
-import { onDestroy, onMount } from "svelte";
+import { onDestroy } from "svelte";
 import type { Doc } from "yjs";
 import { getAuthSession } from "#lib/auth-session.svelte.js";
 import { NoteTopbarActions, Topbar } from "#lib/components/custom/index.ts";
-import { getGlobalSettings, ShareNote } from "#lib/components/dialogs/index.ts";
+import { ShareNote } from "#lib/components/dialogs/index.ts";
+import AI from "#lib/components/editor/AI.svelte";
 import { realtimeProvider } from "#lib/data/cloud/realtime.js";
 import { onFileUpload } from "#lib/data/cloud/storage.js";
-import { callAI, getUserModels } from "#lib/data/local/ai/ai.js";
+import { callAI } from "#lib/data/local/ai/ai.js";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
 import type { NoteMeta } from "#lib/data/types.js";
 import "./page.css";
 
-import { ISDESKTOP } from "#lib/utils.js";
 import { afterNavigate, beforeNavigate } from "$app/navigation";
 
 const noteCtx = getNotesContext();
 const user = $derived(getAuthSession().data?.user);
-const settings = getGlobalSettings();
 
 let note = $state<NoteMeta | null>(null);
-let availableModels = $state<SelectableModel[]>([]);
 let provider = $state.raw<HocuspocusProvider>();
 let editor = $state.raw<Editor>();
 let ydoc = $state.raw<Doc>();
@@ -41,10 +38,6 @@ let isFullWidth = $state(
 	typeof localStorage !== "undefined" &&
 		localStorage.getItem("nota-full-width") === "true",
 );
-
-onMount(() => {
-	getUserModels().then((models) => (availableModels = models));
-});
 
 onDestroy(() => {
 	teardownEditor();
@@ -209,8 +202,7 @@ const { data } = $props();
       <Edra.DragHandle class="transition-all duration-300" />
       <Edra.BubbleMenu />
       <Edra.ToC />
-      <Edra.UseAI {availableModels} useServer={!ISDESKTOP || !settings.useOwnKeys} />
-      <Edra.UseAI {availableModels} useServer={!ISDESKTOP || settings.aiMode === "nota"} />
+      <AI noteId={data.id} />
       <Edra.Content
         class={cn(
           "mx-auto w-full px-4 pb-32 min-h-[calc(100dvh-10rem)] *:outline-none transition-all duration-150",

@@ -1,5 +1,4 @@
 <script lang="ts">
-import type { SelectableModel } from "@nota/ai";
 import type { LocalNoteMeta } from "@nota/db-local/types";
 import { toast } from "@nota/ui";
 import {
@@ -13,18 +12,15 @@ import { Skeleton } from "@nota/ui/shadcn/skeleton/index.js";
 import { cn } from "@nota/ui/utils";
 import { onMount } from "svelte";
 import { NoteTopbarActions, Topbar } from "#lib/components/custom/index.ts";
-import { getGlobalSettings } from "#lib/components/dialogs/index.js";
-import { callAI, getUserModels } from "#lib/data/local/ai/ai.js";
+import AI from "#lib/components/editor/AI.svelte";
+import { callAI } from "#lib/data/local/ai/ai.js";
 import { onFileUpload } from "#lib/data/local/storage.js";
 import { getNotesContext } from "#lib/data/notes.svelte.ts";
-import { ISDESKTOP } from "#lib/utils.js";
 import { afterNavigate, beforeNavigate } from "$app/navigation";
 
 const noteCtx = getNotesContext();
-const settings = getGlobalSettings();
 
 let note = $state<LocalNoteMeta | null>(null);
-let availableModels = $state<SelectableModel[]>([]);
 
 let isContentReady = $state(false);
 let isNotFound = $state(false);
@@ -39,7 +35,6 @@ let isFullWidth = $state(
 );
 
 onMount(() => {
-	getUserModels().then((models) => (availableModels = models));
 	const interval = setInterval(saveNote, 1000);
 	return () => {
 		clearInterval(interval);
@@ -168,8 +163,7 @@ const { data } = $props();
       <Edra.DragHandle class="transition-all duration-300" />
       <Edra.BubbleMenu />
       <Edra.ToC />
-      <Edra.UseAI {availableModels} useServer={!ISDESKTOP || !settings.useOwnKeys} />
-      <Edra.UseAI {availableModels} useServer={!ISDESKTOP || settings.aiMode === "nota"} />
+      <AI noteId={data.id} />
       <Edra.Content
         class={cn(
           "mx-auto w-full px-4 pb-32 min-h-[calc(100dvh-10rem)] *:outline-none transition-all duration-150",

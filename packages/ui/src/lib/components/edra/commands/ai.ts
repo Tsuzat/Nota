@@ -2,6 +2,7 @@ import { generatePrompt } from "./prompts.js";
 
 export enum AIState {
 	Idle = "Idle",
+	Generating = "Generating",
 	Confirmation = "Confirmation",
 }
 
