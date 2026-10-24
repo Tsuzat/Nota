@@ -2,11 +2,11 @@ import type { LocalNoteMeta } from "@nota/db-local/types";
 import type { ILocalNotes } from "../types";
 
 export class LocalNotes implements ILocalNotes {
-	notes(_workspaceId: string): readonly LocalNoteMeta[] {
+	notes(): readonly LocalNoteMeta[] {
 		return [];
 	}
 
-	async fetchByWorkspace(_workspaceId: string): Promise<void> {}
+	async fetchByWorkspace(): Promise<void> {}
 
 	async create(): Promise<never> {
 		throw new Error("Local notes are unavailable on web");
@@ -17,6 +17,10 @@ export class LocalNotes implements ILocalNotes {
 	}
 
 	async delete(): Promise<never> {
+		throw new Error("Local notes are unavailable on web");
+	}
+
+	async duplicate(): Promise<never> {
 		throw new Error("Local notes are unavailable on web");
 	}
 

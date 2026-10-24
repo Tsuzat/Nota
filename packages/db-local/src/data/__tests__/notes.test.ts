@@ -12,6 +12,7 @@ const {
 	searchInNotes,
 	exportNotes,
 	createNotes,
+	duplicateNotes,
 } = await import("../notes");
 
 // ─── Tests ───────────────────────────────────────────────────
@@ -63,6 +64,70 @@ describe("createNotes", () => {
 
 	test("throws on invalid input (missing required fields)", async () => {
 		await expect(createNotes({} as never)).rejects.toThrow();
+	});
+});
+
+// ─── duplicateNotes ──────────────────────────────────────────
+
+describe("duplicateNotes", () => {
+	test("creates a new note with the provided name", async () => {
+		const source = seedNote(testDb.db, workspaceId, { name: "Original" });
+
+		const result = await duplicateNotes({
+			id: source.id,
+			name: "Original (copy)",
+		});
+
+		expect(result.id).not.toBe(source.id);
+		expect(result.name).toBe("Original (copy)");
+		expect(result.workspaceId).toBe(workspaceId);
+	});
+
+	test("copies the source content and contentText", async () => {
+		const content = { type: "doc", content: [{ type: "paragraph" }] };
+		const source = seedNote(testDb.db, workspaceId, {
+			content,
+			contentText: "duplicated body",
+		});
+
+		const result = await duplicateNotes({ id: source.id, name: "Copy" });
+
+		expect(result.content).toEqual(content);
+		expect(result.contentText).toBe("duplicated body");
+	});
+
+	test("copies metadata such as icon, description and parent", async () => {
+		const parent = seedNote(testDb.db, workspaceId, { name: "Parent" });
+		const source = seedNote(testDb.db, workspaceId, {
+			icon: "🚀",
+			description: "Source description",
+			parentNoteId: parent.id,
+			starred: true,
+		});
+
+		const result = await duplicateNotes({ id: source.id, name: "Copy" });
+
+		expect(result.icon).toBe("🚀");
+		expect(result.description).toBe("Source description");
+		expect(result.parentNoteId).toBe(parent.id);
+		// The duplicate starts as a normal, active note.
+		expect(result.starred).toBe(false);
+		expect(result.trashedAt).toBeNull();
+	});
+
+	test("does not modify the source note", async () => {
+		const source = seedNote(testDb.db, workspaceId, { name: "Original" });
+
+		await duplicateNotes({ id: source.id, name: "Copy" });
+
+		const original = await fetchNotesMeta(source.id);
+		expect(original?.name).toBe("Original");
+	});
+
+	test("throws when the source note does not exist", async () => {
+		await expect(
+			duplicateNotes({ id: "nonexistent-id", name: "Copy" }),
+		).rejects.toThrow("Failed to duplicate note");
 	});
 });
 

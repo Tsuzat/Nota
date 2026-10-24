@@ -11,6 +11,10 @@ export {
 	default as CreateWorkspace,
 	openCreateWorkspace,
 } from "./create-workspace.svelte";
+export {
+	default as NoteDuplicate,
+	openNoteDuplicate,
+} from "./note-duplicate.svelte";
 export { default as NoteMove, openNoteMove } from "./note-move.svelte";
 export { default as NoteRename, openNoteRename } from "./note-rename.svelte";
 export {

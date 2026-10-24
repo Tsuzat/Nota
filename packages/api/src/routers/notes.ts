@@ -16,6 +16,7 @@ import { isUserPro } from "@nota/cache/user_quota";
 import {
 	createNotes,
 	deleteNotes,
+	duplicateNotes,
 	getCollabNotes,
 	getContent,
 	getNotesAncestorIds,
@@ -100,6 +101,58 @@ export const notesRouter = {
 			});
 
 			// After creation, invalidate workspace list cache to reflect new note
+			void invalidateNoteMetaCache(note.id, note.workspaceId).catch(
+				console.error,
+			);
+
+			return note;
+		}),
+
+	duplicate: protectedProcedure
+		.input(z.object({ id: z.string(), name: z.string().trim().min(1) }))
+		.handler(async ({ context, input }) => {
+			const userId = context.session.user.id;
+			const perm = await resolvePermission(input.id, userId);
+
+			if (!perm) {
+				throw new ORPCError("NOT_FOUND", { message: "Note not found" });
+			}
+
+			// Duplicating creates a new note owned by the user, so only users
+			// with owner access to the source note/workspace may do it.
+			if (!perm.isOwner) {
+				throw new ORPCError("UNAUTHORIZED", {
+					message: "Only the note owner can duplicate it",
+				});
+			}
+
+			const source = await getNotesMeta(input.id);
+			if (!source) throw new ORPCError("NOT_FOUND");
+
+			if (!(await isWorkspaceOwner(source.workspaceId, userId))) {
+				throw new ORPCError("UNAUTHORIZED", {
+					message:
+						"You are not authorized to duplicate notes in this workspace",
+				});
+			}
+
+			const isPro = await isUserPro(userId);
+			if (!isPro) {
+				const count = await getUserNoteCount(userId);
+				if (count >= 10) {
+					throw new ORPCError("LIMIT_EXCEEDED", {
+						message:
+							"Free plan allows a maximum of 10 cloud notes. Please upgrade to Pro for unlimited notes.",
+					});
+				}
+			}
+
+			const note = await duplicateNotes({
+				id: input.id,
+				name: input.name,
+				ownerId: userId,
+			});
+
 			void invalidateNoteMetaCache(note.id, note.workspaceId).catch(
 				console.error,
 			);

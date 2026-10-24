@@ -30,6 +30,7 @@ export interface ILocalNotes {
 	): Promise<void>;
 	update(id: string, input: UpdateLocalNote): Promise<void>;
 	delete(id: string): Promise<void>;
+	duplicate(id: string, name: string): Promise<void>;
 	saveContent(
 		id: string,
 		content: unknown,

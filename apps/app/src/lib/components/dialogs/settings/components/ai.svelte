@@ -46,7 +46,7 @@ function getAICredits() {
 	if (!user || !userQuota.data?.aiCreditBalanceCents) return "0";
 	const cents = Number(userQuota.data.aiCreditBalanceCents);
 	if (Number.isNaN(cents)) return "0";
-  return `${(cents/100).toFixed(2)}`
+	return `${(cents / 100).toFixed(2)}`;
 }
 
 const PRESET_PROVIDERS: {

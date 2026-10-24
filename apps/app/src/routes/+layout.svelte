@@ -15,6 +15,7 @@ import {
 	CreateNotes,
 	CreateWorkspace,
 	GlobalSettings,
+	NoteDuplicate,
 	NoteMove,
 	NoteRename,
 	Search,
@@ -95,6 +96,7 @@ onMount(async () => {
         <CreateWorkspace />
         <CreateNotes />
         <NoteRename />
+        <NoteDuplicate />
         <NoteMove />
         <ConfirmDelete />
         <Trashed />

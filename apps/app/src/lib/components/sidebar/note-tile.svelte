@@ -9,7 +9,6 @@ import Pencil from "@lucide/svelte/icons/pencil";
 import Plus from "@lucide/svelte/icons/plus";
 import Star from "@lucide/svelte/icons/star";
 import Trash2 from "@lucide/svelte/icons/trash-2";
-import { user } from "@nota/db/schema/auth";
 import { toast } from "@nota/ui";
 import { openDeleteConfirmation } from "@nota/ui/custom/dialogs/confirm-delete.svelte";
 import { IconsRenderer } from "@nota/ui/icons/index.ts";
@@ -24,7 +23,12 @@ import { formatDate, ISDESKTOP } from "#lib/utils.ts";
 import { PUBLIC_NOTA_URL } from "$app/env/public";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
-import { openCreateNotes, openNoteMove, openNoteRename } from "../dialogs";
+import {
+	openCreateNotes,
+	openNoteDuplicate,
+	openNoteMove,
+	openNoteRename,
+} from "../dialogs";
 import NoteTile from "./note-tile.svelte";
 
 interface Props {
@@ -35,6 +39,9 @@ const { note, depth = 0 }: Props = $props();
 
 const notesCtx = getNotesContext();
 const isCloud = $derived("ownerId" in note);
+// Shared notes (from "Shared With Me") are only owned by their creator, so
+// duplicating them would not produce a note the current user can access.
+const isShared = $derived("role" in note);
 
 const href = $derived(
 	isCloud
@@ -71,20 +78,6 @@ async function copyLink() {
 		console.error(err);
 		toast.error("Failed to copy link");
 	}
-}
-
-async function duplicateNote() {
-	// try {
-	// 	if (isCloud) {
-	// 		await cloudNotes.duplicate(note.id);
-	// 	} else {
-	// 		await localNotes.duplicateNote(note.id);
-	// 	}
-	// 	toast.success("Note duplicated successfully");
-	// } catch (err) {
-	// 	console.error(err);
-	// 	toast.error("Failed to duplicate note");
-	// }
 }
 
 async function trashNote() {
@@ -196,10 +189,12 @@ async function deleteNote() {
           </DropdownMenu.Item>
         {/if}
 
-        <DropdownMenu.Item onclick={duplicateNote}>
-          <Copy />
-          <span>Duplicate</span>
-        </DropdownMenu.Item>
+        {#if !isShared}
+          <DropdownMenu.Item onclick={() => openNoteDuplicate(note)}>
+            <Copy />
+            <span>Duplicate</span>
+          </DropdownMenu.Item>
+        {/if}
 
         <DropdownMenu.Item onclick={() => openNoteRename(note)}>
           <Pencil />
@@ -231,12 +226,12 @@ async function deleteNote() {
         <div
           class="px-2 py-1.5 text-[10px] text-muted-foreground select-none leading-normal"
         >
-          <div>
+          <!-- <div>
             Last edited {isCloud
-              ? "by " + (user?.name || user?.email || "User")
+              ? "by " + (note.lastEditedBy?.name || note.lastEditedBy?.email || "User")
               : "locally"}
-          </div>
-          <div>{formatDate(note.updatedAt)}</div>
+          </div> -->
+          <div>Last edited: {formatDate(note.updatedAt)}</div>
         </div>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

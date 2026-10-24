@@ -3,7 +3,9 @@ import { addNoteGuest } from "../guests";
 import {
 	createNotes,
 	deleteNotes,
+	duplicateNotes,
 	getCollabNotes,
+	getContent,
 	getNotesByWorkspace,
 	getNotesMeta,
 	updateContent,
@@ -79,6 +81,38 @@ describe("Database - Notes", () => {
 			"updated text",
 		);
 		expect(success).toBeTrue();
+	});
+
+	test("duplicateNotes should copy metadata and content", async () => {
+		const duplicate = await duplicateNotes({
+			id: noteId,
+			name: "Duplicated Note",
+			ownerId: userId,
+		});
+
+		expect(duplicate.id).not.toBe(noteId);
+		expect(duplicate.name).toBe("Duplicated Note");
+		expect(duplicate.workspaceId).toBe(workspaceId);
+		expect(duplicate.ownerId).toBe(userId);
+		// Metadata results never include heavy fields.
+		expect((duplicate as Record<string, unknown>).content).toBeUndefined();
+
+		const content = await getContent(duplicate.id);
+		expect(content).not.toBeNull();
+		expect(Buffer.from(content as Buffer).toString()).toBe("updated binary");
+
+		const source = await getContent(noteId);
+		expect(Buffer.from(source as Buffer).toString()).toBe("updated binary");
+	});
+
+	test("duplicateNotes should throw when the source note does not exist", async () => {
+		await expect(
+			duplicateNotes({
+				id: "nonexistent-note",
+				name: "Ghost",
+				ownerId: userId,
+			}),
+		).rejects.toThrow();
 	});
 
 	test("getSharedNotes and getSharedNoted should return notes user is a guest of", async () => {

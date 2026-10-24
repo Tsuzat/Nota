@@ -21,7 +21,7 @@ class Notes {
 		const ws = this.#workspaceCtx.current;
 		if (!ws) return [];
 		const isCloud = "ownerId" in ws;
-		return isCloud ? this.cloud.notes(ws.id) : this.local.notes(ws.id);
+		return isCloud ? this.cloud.notes() : this.local.notes();
 	});
 
 	collaborated = $derived.by(() => {
@@ -111,6 +111,18 @@ class Notes {
 			await this.cloud.delete(id);
 		} else {
 			await this.local.delete(id);
+		}
+	}
+
+	/**
+	 * Duplicate a note (metadata + content) under a new name.
+	 * The destination backend is inferred from the source note itself.
+	 */
+	async duplicate(note: NoteMeta, name: string) {
+		if ("ownerId" in note && isSignedIn()) {
+			await this.cloud.duplicate(note.id, name);
+		} else {
+			await this.local.duplicate(note.id, name);
 		}
 	}
 

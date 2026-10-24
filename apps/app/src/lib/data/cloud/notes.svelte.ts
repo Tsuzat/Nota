@@ -74,6 +74,19 @@ export class CloudNotes {
 		}),
 	);
 
+	#duplicateMutation = createMutation(() =>
+		orpc.notes.duplicate.mutationOptions({
+			onSuccess: () => {
+				void queryClient.invalidateQueries({
+					queryKey: orpc.notes.listByWorkspace.key(),
+				});
+				void queryClient.invalidateQueries({
+					queryKey: orpc.notes.getMeta.key(),
+				});
+			},
+		}),
+	);
+
 	#updateContentMutation = createMutation(() =>
 		orpc.notes.updateContent.mutationOptions(),
 	);
@@ -91,7 +104,7 @@ export class CloudNotes {
 		}),
 	);
 
-	notes(_workspaceId?: string): NoteMeta[] {
+	notes(): NoteMeta[] {
 		if (!isSignedIn()) return [];
 		return this.#listQuery.data ?? [];
 	}
@@ -133,6 +146,10 @@ export class CloudNotes {
 
 	async delete(id: string) {
 		return this.#deleteMutation.mutate({ id });
+	}
+
+	async duplicate(id: string, name: string) {
+		return this.#duplicateMutation.mutateAsync({ id, name });
 	}
 
 	async move(input: {

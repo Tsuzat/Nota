@@ -278,6 +278,45 @@ export async function createNotes(
 	}
 }
 
+/**
+ * Duplicates an existing note, copying its workspace, parent, icon,
+ * description and content into a new note with the provided name.
+ * The duplicate is created as a normal active (non-starred, non-trashed) note.
+ * @param input The source note id and the new note name.
+ * @returns A promise that resolves to the created LocalNote.
+ */
+export async function duplicateNotes(input: {
+	id: string;
+	name: string;
+}): Promise<LocalNote> {
+	try {
+		const [source] = await db
+			.select()
+			.from(notes)
+			.where(eq(notes.id, input.id))
+			.limit(1);
+
+		if (!source) {
+			throw new Error(`Note with id ${input.id} not found`);
+		}
+
+		const noteInsert: z.infer<typeof insertNotesSchema> = {
+			workspaceId: source.workspaceId,
+			parentNoteId: source.parentNoteId,
+			icon: source.icon,
+			name: input.name,
+			description: source.description,
+			content: source.content as never,
+			contentText: source.contentText,
+		};
+
+		return await createNotes(noteInsert);
+	} catch (error) {
+		console.log(error);
+		throw new Error("Failed to duplicate note");
+	}
+}
+
 export async function getNotesContent(id: string): Promise<unknown | null> {
 	try {
 		const result = await db

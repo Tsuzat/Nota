@@ -2,6 +2,7 @@ import { mayCreateSnapshot } from "@nota/db-local/data/note_snapshot";
 import {
 	createNotes,
 	deleteNotes,
+	duplicateNotes,
 	fetchNotesByWorkspace,
 	fetchNotesMeta,
 	getNotesContent,
@@ -22,7 +23,7 @@ import type { ILocalNotes } from "../types";
 export class LocalNotes implements ILocalNotes {
 	#notes = $state<LocalNoteMeta[]>([]);
 
-	notes(_workspaceId: string): LocalNoteMeta[] {
+	notes(): LocalNoteMeta[] {
 		return this.#notes;
 	}
 
@@ -46,6 +47,11 @@ export class LocalNotes implements ILocalNotes {
 	async delete(id: string): Promise<void> {
 		await deleteNotes(id);
 		this.#notes = this.#notes.filter((n) => n.id !== id);
+	}
+
+	async duplicate(id: string, name: string): Promise<void> {
+		const note = await duplicateNotes({ id, name });
+		this.#notes = [...this.#notes, note];
 	}
 
 	async saveContent(

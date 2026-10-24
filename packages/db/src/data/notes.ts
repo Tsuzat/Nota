@@ -94,6 +94,45 @@ export const createNotes = async (
 	return selectNoteMetaSchema.parse(data);
 };
 
+export interface DuplicateNoteInput {
+	/** The id of the note to copy. */
+	id: string;
+	/** The name of the new note. */
+	name: string;
+	/** The owner of the new note (the user performing the duplication). */
+	ownerId: string;
+}
+
+/**
+ * Duplicate a note, copying its workspace, parent, icon, description and
+ * content (including the extracted plain text) into a new note.
+ * The duplicate is created as a normal active (non-starred, non-trashed) note.
+ */
+export const duplicateNotes = async (
+	input: DuplicateNoteInput,
+): Promise<NoteMeta> => {
+	const [source] = await db
+		.select({
+			workspaceId: notes.workspaceId,
+			parentNoteId: notes.parentNoteId,
+			icon: notes.icon,
+			description: notes.description,
+			content: notes.content,
+			contextText: notes.contextText,
+		})
+		.from(notes)
+		.where(eq(notes.id, input.id))
+		.limit(1);
+
+	if (!source) throw new Error("Source note not found");
+
+	return createNotes({
+		...source,
+		name: input.name,
+		ownerId: input.ownerId,
+	});
+};
+
 /**
  * Update note metadata
  */
