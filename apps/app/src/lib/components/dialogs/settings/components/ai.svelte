@@ -46,11 +46,7 @@ function getAICredits() {
 	if (!user || !userQuota.data?.aiCreditBalanceCents) return "0";
 	const cents = Number(userQuota.data.aiCreditBalanceCents);
 	if (Number.isNaN(cents)) return "0";
-	return cents >= 1_000_000
-		? `${(cents / 1_000_000).toFixed(1)}M`
-		: cents >= 1_000
-			? `${(cents / 1_000).toFixed(1)}K`
-			: `${cents}`;
+  return `${(cents/100).toFixed(2)}`
 }
 
 const PRESET_PROVIDERS: {
@@ -466,7 +462,7 @@ async function handleDeleteCustomModel(id: string, name: string) {
           <div class="flex items-center gap-2">
             <span class="font-medium text-sm text-foreground">Nota AI Credits</span>
             <span class="font-mono text-xs font-semibold text-foreground bg-background px-2 py-0.5 rounded border border-border/50 tabular-nums">
-              {getAICredits()} Credits
+              ${getAICredits()}
             </span>
           </div>
           <span class="text-xs text-muted-foreground mt-0.5 leading-snug">
