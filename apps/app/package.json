@@ -57,8 +57,8 @@
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@nota/config": "workspace:*",
-		"@sveltejs/adapter-cloudflare": "^8.0.0-next.6",
-		"@sveltejs/adapter-static": "next",
+		"@sveltejs/adapter-cloudflare": "8.0.0-next.7",
+		"@sveltejs/adapter-static": "4.0.0-next.4",
 		"@sveltejs/kit": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@tailwindcss/vite": "catalog:",

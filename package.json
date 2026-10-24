@@ -20,7 +20,7 @@
 			"@orpc/client": "^1.15.0",
 			"@polar-sh/better-auth": "^1.8.4",
 			"@orpc/tanstack-query": "^1.15.0",
-			"@sveltejs/kit": "next",
+			"@sveltejs/kit": "3.0.0-next.27",
 			"@sveltejs/vite-plugin-svelte": "^7.3.0",
 			"@tailwindcss/vite": "^4.3.3",
 			"@tanstack/svelte-form": "^1.33.5",
