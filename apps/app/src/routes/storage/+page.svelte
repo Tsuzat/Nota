@@ -12,6 +12,7 @@ import Image from "@lucide/svelte/icons/image";
 import RefreshCw from "@lucide/svelte/icons/refresh-cw";
 import Search from "@lucide/svelte/icons/search";
 import Trash2 from "@lucide/svelte/icons/trash-2";
+import type { LocalWorkspace } from "@nota/db-local/types";
 import { toast } from "@nota/ui";
 import { openDeleteConfirmation } from "@nota/ui/custom/dialogs/confirm-delete.svelte";
 import { IconsRenderer } from "@nota/ui/icons/index.js";
@@ -86,9 +87,11 @@ const selectedSortLabel = $derived(
 const isCloudContext = $derived.by(() => {
 	if (filterWorkspaceId === "all-cloud") return true;
 	if (filterWorkspaceId === "all-local") return false;
-	const isLocal = localWorkspaces.some((w: any) => w.id === filterWorkspaceId);
+	const isLocal = localWorkspaces.some(
+		(w: LocalWorkspace) => w.id === filterWorkspaceId,
+	);
 	if (isLocal) return false;
-	const isCloud = cloudWorkspaces.some((w: any) => w.id === filterWorkspaceId);
+	const isCloud = cloudWorkspaces.some((w) => w.id === filterWorkspaceId);
 	if (isCloud) return true;
 	return true;
 });
@@ -433,7 +436,7 @@ function getFileIcon(mimeType: string) {
   <Topbar class="shrink-0" />
 
   <div class="min-h-0 max-h-[calc(100vh-4rem)] flex-1 overflow-y-auto">
-    <div class="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6">
+    <div class="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
       <!-- Header -->
       <header class="flex flex-col gap-4 border-b border-border/40 pb-6">
         <div class="flex flex-wrap items-start justify-between gap-4">

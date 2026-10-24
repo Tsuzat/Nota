@@ -92,7 +92,7 @@ const PRESET_PROVIDERS: {
 	{
 		id: "meta",
 		label: "Meta Muse",
-		docsUrl: "https://api.meta.ai",
+		docsUrl: "https://dev.meta.ai/api-keys",
 		docName: "Meta AI",
 	},
 	{
